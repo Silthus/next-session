@@ -8,6 +8,12 @@ This repo is the standalone port of `apps/nextsession` from the `Omni-GM/lonir` 
 
 Bun, TypeScript, React, Vite, TanStack Router, Tailwind, Convex, and Convex Auth. Use `bun`. Never use npm or yarn.
 
+## Where things are decided
+
+- `docs/spec.md`: architecture, schema, auth, routes, test seams, CI, cutover, and the build plan.
+- `DESIGN.md`: the UI direction. The spec overrides it where they differ.
+- `docs/legal/`: draft Terms, Privacy Policy, and Imprint.
+
 ## Agent skills
 
 ### Issue tracker
