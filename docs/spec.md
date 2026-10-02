@@ -160,7 +160,7 @@ The one seam where authorization happens. Public functions never read `groups` b
 | | `remove` | mutation | `{groupId}` → `null` | Deletes the Group row, then schedules `internal.groups.deleteChildren` (batches of 200). Ends an Anonymous GM that owned only this Group |
 | | `rotateShareToken` | mutation | `{groupId}` → `null` | Keeps `previousShareToken` and `shareTokenRotatedAt` |
 | | `undoRotateShareToken` | mutation | `{groupId}` → `null` | Within 30 s of the rotation, else `UNDO_EXPIRED` |
-| `schedule` | `month` | query | `{groupId, month: "YYYY-MM"}` → `{players, answers, sessions}` | Raw rows for one month plus all upcoming Sessions. All derivation happens in `shared/monthSummary.ts` on the client |
+| `schedule` | `month` | query | `{groupId, month: "YYYY-MM"}` → `{players, answers, sessions}` | The Roster, the month's Answers, and every Session of the Group (a few dozen at most), as raw rows. All derivation happens in `shared/monthSummary.ts` on the client |
 | `roster` | `addPlayer` | mutation | `{groupId, name}` → `Id<"players">` | Name rules, `NAME_TAKEN`, `ROSTER_FULL` |
 | | `renamePlayer` | mutation | `{playerId, name}` → `null` | Owner check through the Player's Group |
 | | `removePlayer` | mutation | `{playerId}` → `null` | Deletes the Player's Answers too |
