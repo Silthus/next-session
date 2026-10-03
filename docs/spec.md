@@ -136,7 +136,7 @@ Invariants (each one has a backend test):
 
 Every public function declares `args` and `returns` validators. Failures throw `ConvexError<{ code: ErrorCode }>`, and the UI maps codes to copy in one place (`src/lib/errors.ts`).
 
-`ErrorCode` = `NOT_FOUND | INVALID_NAME | NAME_TAKEN | ROSTER_FULL | TOO_MANY_GROUPS | OUT_OF_WINDOW | SESSION_EXISTS | UNDO_EXPIRED | CLAIM_INVALID | RATE_LIMITED | UNAUTHENTICATED`.
+`ErrorCode` = `NOT_FOUND | INVALID_NAME | NAME_TAKEN | ROSTER_FULL | TOO_MANY_GROUPS | OUT_OF_WINDOW | SESSION_EXISTS | UNDO_EXPIRED | CLAIM_INVALID | RATE_LIMITED | UNAUTHENTICATED | EMAIL_TAKEN | INVALID_CREDENTIALS | WEAK_PASSWORD`.
 
 ### Access (`convex/model/access.ts`)
 
@@ -144,9 +144,16 @@ The one seam where authorization happens. Public functions never read `groups` b
 
 - `requireGm(ctx) → Doc<"users">`: the signed-in user, or `UNAUTHENTICATED`.
 - `ownedGroup(ctx, groupId) → { gm, group }`: the Group if the caller owns it. A missing Group and a foreign Group both throw `NOT_FOUND`, so ids cannot be probed.
+- `ownedPlayer(ctx, playerId) → { gm, group, player }` and `ownedSession(ctx, sessionId) → { gm, group, session }`: the same check through the row's Group, reading the GM once. Another GM's Player or Session looks missing too.
+- `findOwnedGroup(ctx, rawGroupId) → Doc<"groups"> | null`: the `null`-returning version for queries, which also takes a malformed id.
 - `groupByShareToken(ctx, shareToken) → Doc<"groups"> | null`.
 - `playerOnShareLink(ctx, shareToken, playerId) → { group, player }`: throws `NOT_FOUND` unless the Player belongs to the Group behind that token.
+- `findPlayerOnShareLink(ctx, shareToken, rawPlayerId) → Doc<"players"> | null`: the `null`-returning version for queries.
 - `touchGroup(ctx, group)`: pushes `expiresAt` to now + 30 days for an Unsaved Group, writing at most once a day so answer taps do not churn the Group row.
+
+An Unsaved Group past `expiresAt` that the daily sweep (§5.5) has not reached yet stays reachable, and the next write through `touchGroup` revives it.
+
+The name and Roster checks that `roster` and `player` share (`validName`, `ensureNameIsFree`, `ensureRosterHasRoom`) live in `convex/model/players.ts`.
 
 ### Public functions
 
@@ -165,8 +172,8 @@ The one seam where authorization happens. Public functions never read `groups` b
 | | `removePlayer` | mutation | `{playerId}` → `null` | Deletes the Player's Answers too |
 | `sessions` | `schedule` | mutation | `{groupId, date}` → `Id<"sessions">` | `OUT_OF_WINDOW` for past or outside dates, `SESSION_EXISTS` |
 | | `unschedule` | mutation | `{sessionId}` → `null` | Hard delete |
-| `player` | `group` | query | `{shareToken}` → `PlayerGroupView \| null` | groupId, name, Players (id, name), Session dates in the Booking Window. `null` renders the not-found page |
-| | `answers` | query | `{shareToken, playerId, month}` → `Record<date, Answer>` | |
+| `player` | `group` | query | `{shareToken}` → `PlayerGroupView \| null` | groupId, name, Players (id, name), and every Session date of the Group; the client filters them by the Booking Window. `null` renders the not-found page |
+| | `answers` | query | `{shareToken, playerId, month}` → `Record<date, Answer> \| null` | `null` for an unknown token, a foreign or removed Player, or a malformed id or month |
 | | `join` | mutation | `{shareToken, name}` → `Id<"players">` | `NAME_TAKEN` carries the existing `playerId` so the UI can highlight the chip. Rate limit `joinGroup` |
 | | `answer` | mutation | `{shareToken, playerId, date, answer: Answer \| null}` → `null` | Upsert, or delete on `null`. Rate limit `answer`. Touches the Group |
 | | `fillRest` | mutation | `{shareToken, playerId, month}` → `null` | Writes `busy` to every unanswered bookable date of the month in one mutation |
@@ -235,8 +242,13 @@ Convex functions do not see the client IP, so limits key on what the server can 
 | `createGroup` | GM id | token bucket, 10 per hour, capacity 5 |
 | `joinGroup` | Group id | fixed window, 30 per hour |
 | `answer` | Player id | token bucket, 120 per minute, capacity 60 (covers fast tapping) |
-| `answerPerGroup` | Group id | token bucket, 600 per minute, capacity 300 |
+| `answerPerGroup` | Group id | token bucket, 600 per minute, capacity 300, in 10 shards |
 | `startSave` | GM id | fixed window, 10 per hour |
+| `gmEdit` | GM id | token bucket, 120 per minute, capacity 60 |
+
+`gmEdit` covers every GM mutation without a limit of its own: `groups.rename`, `remove`, `rotateShareToken` and `undoRotateShareToken`, all of `roster` and `sessions`, and `account.finishSave`. It is sized so that no real GM reaches it.
+
+`answerPerGroup` spreads a Group's taps over 10 limiter rows, so Players tapping at once do not conflict on one row. Each tap draws from the fuller of two random shards, so a burst can be refused a little before all 300 tokens are spent.
 
 A hit throws `RATE_LIMITED` with `retryAfter`; the UI shows "Slow down a moment" and reverts the optimistic change.
 
@@ -246,9 +258,9 @@ A hit throws `RATE_LIMITED` with `retryAfter`; the UI shows "Slow down a moment"
 
 ### 5.6 Session lifetime
 
-A session lasts at most 1 year from sign-in (`session.totalDurationMs`) and ends after 30 days without a token refresh (`session.inactiveDurationMs`). Every visit by the GM refreshes the token, so a GM who comes back within every 30 days stays signed in for the year. After the year, an Account logs in again; an Anonymous GM loses access to its Groups, which is the reason to Save.
+A session lasts 1 year from sign-in (`session.totalDurationMs`), and `session.inactiveDurationMs` is the same year, so a GM who stays away keeps the session until the year is up. After the year, an Account logs in again; an Anonymous GM loses access to its Groups, which is the reason to Save.
 
-The 30 days match the quiet days of Expiry (§5.5), but the two clocks differ: Player answers keep an Unsaved Group alive without refreshing the GM's session. An Anonymous GM who stays away more than 30 days while the Players keep answering loses access to a Group that lives on until it goes quiet and expires. We accept that: the GM surface asks to Save, and a GM who is gone for a month has stopped using the link. Raising `inactiveDurationMs` to the full year would close the gap at no storage cost, because Expiry still deletes the anonymous user with its last Group.
+Player answers keep an Unsaved Group alive without refreshing the GM's session. A shorter inactivity limit would lock an Anonymous GM who stays away out of a Group that lives on while the Players keep answering. The year costs no storage, because Expiry still deletes the anonymous user with its last Group (§5.5).
 
 Convex Auth's default is 30 days in total, which would lock out an active Anonymous GM after a month, Groups and all.
 
