@@ -9,6 +9,7 @@ import {
   canUndoRotate,
   deleteChildBatch,
   deleteGroup,
+  forgetUndoRotate as forgetUndo,
   ensureRoomForAnotherGroup,
   groupsOwnedBy,
   insertGroup,
@@ -129,6 +130,15 @@ export const deleteChildren = internalMutation({
     if (await deleteChildBatch(ctx, groupId)) {
       await ctx.scheduler.runAfter(0, internal.groups.deleteChildren, { groupId });
     }
+    return null;
+  },
+});
+
+export const forgetUndoRotate = internalMutation({
+  args: { groupId: v.id("groups"), rotatedAt: v.number() },
+  returns: v.null(),
+  handler: async (ctx, { groupId, rotatedAt }) => {
+    await forgetUndo(ctx, groupId, rotatedAt);
     return null;
   },
 });

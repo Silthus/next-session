@@ -1,11 +1,12 @@
-import type { Id } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 
-export async function deleteAnonymousGm(ctx: MutationCtx, userId: Id<"users">) {
-  await deleteAuthAccounts(ctx, userId);
-  await deleteAuthSessions(ctx, userId);
-  await deleteSaveClaims(ctx, userId);
-  await ctx.db.delete("users", userId);
+export async function deleteAnonymousGm(ctx: MutationCtx, gm: Doc<"users">) {
+  if (gm.isAnonymous !== true) return;
+  await deleteAuthAccounts(ctx, gm._id);
+  await deleteAuthSessions(ctx, gm._id);
+  await deleteSaveClaims(ctx, gm._id);
+  await ctx.db.delete("users", gm._id);
 }
 
 async function deleteAuthAccounts(ctx: MutationCtx, userId: Id<"users">) {

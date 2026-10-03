@@ -2,9 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SHARE_TOKEN_LENGTH } from "../shared/shareToken";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
+import { groupByShareToken } from "./model/access";
 import { insertGroup } from "./model/groups";
 import {
   expectErrorCode,
+  type GmClient,
   newBackend,
   signInAccount,
   signInAnonymousGm,
@@ -202,18 +204,43 @@ describe("groups.rename", () => {
       "UNAUTHENTICATED",
     );
   });
+});
 
-  it("pushes the Expiry of an Unsaved Group out to 30 days from now", async () => {
+describe("the Expiry of an Unsaved Group", () => {
+  it.each([
+    [
+      "renaming it",
+      (as: GmClient, groupId: Id<"groups">) =>
+        as.mutation(api.groups.rename, { groupId, name: "Renamed" }),
+    ],
+    [
+      "rotating its Share Link",
+      (as: GmClient, groupId: Id<"groups">) =>
+        as.mutation(api.groups.rotateShareToken, { groupId }),
+    ],
+  ])("is pushed out to 30 days from now by %s", async (_, write) => {
     const { as } = await signInAnonymousGm(t);
     const groupId = await as.mutation(api.groups.create, {});
     vi.advanceTimersByTime(2 * DAY);
 
-    await as.mutation(api.groups.rename, { groupId, name: "Renamed" });
+    await write(as, groupId);
 
     expect((await readGroup(groupId))?.expiresAt).toBe(NOW + 32 * DAY);
   });
 
-  it("pushes the Expiry at most once a day", async () => {
+  it("is pushed out by an Undo of the rotation", async () => {
+    const { as } = await signInAnonymousGm(t);
+    const groupId = await as.mutation(api.groups.create, {});
+    vi.advanceTimersByTime(DAY - 10_000);
+    await as.mutation(api.groups.rotateShareToken, { groupId });
+    vi.advanceTimersByTime(20_000);
+
+    await as.mutation(api.groups.undoRotateShareToken, { groupId });
+
+    expect((await readGroup(groupId))?.expiresAt).toBe(NOW + 31 * DAY + 10_000);
+  });
+
+  it("is pushed at most once a day", async () => {
     const { as } = await signInAnonymousGm(t);
     const groupId = await as.mutation(api.groups.create, {});
     vi.advanceTimersByTime(DAY - 1);
@@ -280,9 +307,7 @@ describe("groups.remove", () => {
     expect(await countChildren(kept)).toBe(5);
   });
 
-  it("ends an Anonymous GM with its last Group, auth rows included", async () => {
-    const { as, userId, sessionId } = await signInAnonymousGm(t);
-    const groupId = await as.mutation(api.groups.create, {});
+  async function seedAuthRows(userId: Id<"users">, sessionId: Id<"authSessions">) {
     await t.run(async (ctx) => {
       const accountId = await ctx.db.insert("authAccounts", {
         userId,
@@ -292,27 +317,84 @@ describe("groups.remove", () => {
       await ctx.db.insert("authVerificationCodes", {
         accountId,
         provider: "anonymous",
-        code: "code",
+        code: `code-${userId}`,
         expirationTime: NOW + DAY,
       });
       await ctx.db.insert("authRefreshTokens", { sessionId, expirationTime: NOW + DAY });
+      await ctx.db.insert("saveClaims", {
+        anonymousUserId: userId,
+        codeHash: `hash-${userId}`,
+        expiresAt: NOW + DAY,
+      });
     });
+  }
 
-    await as.mutation(api.groups.remove, { groupId });
+  async function authRowsOf(userId: Id<"users">) {
+    return await t.run(async (ctx) => {
+      const accounts = await ctx.db
+        .query("authAccounts")
+        .withIndex("userIdAndProvider", (q) => q.eq("userId", userId))
+        .collect();
+      const sessions = await ctx.db
+        .query("authSessions")
+        .withIndex("userId", (q) => q.eq("userId", userId))
+        .collect();
+      const codes = await Promise.all(
+        accounts.map((account) =>
+          ctx.db
+            .query("authVerificationCodes")
+            .withIndex("accountId", (q) => q.eq("accountId", account._id))
+            .collect(),
+        ),
+      );
+      const refreshTokens = await Promise.all(
+        sessions.map((session) =>
+          ctx.db
+            .query("authRefreshTokens")
+            .withIndex("sessionId", (q) => q.eq("sessionId", session._id))
+            .collect(),
+        ),
+      );
+      const saveClaims = await ctx.db
+        .query("saveClaims")
+        .withIndex("by_anonymousUserId", (q) => q.eq("anonymousUserId", userId))
+        .collect();
+      return {
+        user: (await ctx.db.get("users", userId)) !== null,
+        accounts: accounts.length,
+        codes: codes.flat().length,
+        sessions: sessions.length,
+        refreshTokens: refreshTokens.flat().length,
+        saveClaims: saveClaims.length,
+      };
+    });
+  }
 
-    const leftovers = await t.run(async (ctx) => ({
-      user: await ctx.db.get("users", userId),
-      accounts: await ctx.db.query("authAccounts").collect(),
-      codes: await ctx.db.query("authVerificationCodes").collect(),
-      sessions: await ctx.db.query("authSessions").collect(),
-      refreshTokens: await ctx.db.query("authRefreshTokens").collect(),
-    }));
-    expect(leftovers).toEqual({
-      user: null,
-      accounts: [],
-      codes: [],
-      sessions: [],
-      refreshTokens: [],
+  it("ends an Anonymous GM with its last Group, auth rows and Save Claims included", async () => {
+    const gm = await signInAnonymousGm(t);
+    const bystander = await signInAnonymousGm(t);
+    const groupId = await gm.as.mutation(api.groups.create, {});
+    await bystander.as.mutation(api.groups.create, {});
+    await seedAuthRows(gm.userId, gm.sessionId);
+    await seedAuthRows(bystander.userId, bystander.sessionId);
+
+    await gm.as.mutation(api.groups.remove, { groupId });
+
+    expect(await authRowsOf(gm.userId)).toEqual({
+      user: false,
+      accounts: 0,
+      codes: 0,
+      sessions: 0,
+      refreshTokens: 0,
+      saveClaims: 0,
+    });
+    expect(await authRowsOf(bystander.userId)).toEqual({
+      user: true,
+      accounts: 1,
+      codes: 1,
+      sessions: 1,
+      refreshTokens: 1,
+      saveClaims: 1,
     });
   });
 
@@ -394,6 +476,45 @@ describe("rotating the Share Link", () => {
       as.mutation(api.groups.undoRotateShareToken, { groupId }),
       "UNDO_EXPIRED",
     );
+  });
+
+  it("stops the old Share Link, and Undo brings it back", async () => {
+    const { as, groupId, shareToken } = await createGroup();
+    const resolve = (token: string) =>
+      t.run(async (ctx) => (await groupByShareToken(ctx, token))?._id ?? null);
+
+    await as.mutation(api.groups.rotateShareToken, { groupId });
+    const rotated = (await readGroup(groupId))!.shareToken;
+    expect(await resolve(shareToken)).toBeNull();
+    expect(await resolve(rotated)).toBe(groupId);
+
+    await as.mutation(api.groups.undoRotateShareToken, { groupId });
+    expect(await resolve(shareToken)).toBe(groupId);
+    expect(await resolve(rotated)).toBeNull();
+  });
+
+  it("forgets the Undo once its 30 seconds pass, so an open view stops offering it", async () => {
+    const { as, groupId } = await createGroup();
+    await as.mutation(api.groups.rotateShareToken, { groupId });
+
+    vi.advanceTimersByTime(30_001);
+    await t.finishInProgressScheduledFunctions();
+
+    const group = await readGroup(groupId);
+    expect(group?.previousShareToken).toBeUndefined();
+    expect(group?.shareTokenRotatedAt).toBeUndefined();
+  });
+
+  it("keeps the Undo of a newer rotation when an older one's 30 seconds pass", async () => {
+    const { as, groupId } = await createGroup();
+    await as.mutation(api.groups.rotateShareToken, { groupId });
+    vi.advanceTimersByTime(20_000);
+    await as.mutation(api.groups.rotateShareToken, { groupId });
+
+    vi.advanceTimersByTime(10_001);
+    await t.finishInProgressScheduledFunctions();
+
+    expect((await as.query(api.groups.get, { groupId }))?.canUndoRotate).toBe(true);
   });
 
   it("refuses Undo when nothing was rotated", async () => {

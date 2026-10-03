@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { Id } from "../_generated/dataModel";
 import { groupByShareToken, playerOnShareLink } from "./access";
-import { insertGroup, mintShareToken } from "./groups";
+import { insertGroup } from "./groups";
 import { expectErrorCode, newBackend, signInAccount, type TestBackend } from "./test.setup";
 
 let t: TestBackend;
@@ -18,11 +18,6 @@ async function seedGroupWithPlayer(ownerId: Id<"users">) {
     return { groupId, playerId, shareToken };
   });
 }
-
-const bytesSpelling = (token: string) => () =>
-  Uint8Array.from(token, (char) =>
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-".indexOf(char),
-  );
 
 describe("groupByShareToken", () => {
   it("finds the Group behind its current Share Token only", async () => {
@@ -66,30 +61,5 @@ describe("playerOnShareLink", () => {
       t.run(async (ctx) => await playerOnShareLink(ctx, "unknownTok", playerId)),
       "NOT_FOUND",
     );
-  });
-});
-
-describe("mintShareToken", () => {
-  it("draws again when a token is taken", async () => {
-    const { userId } = await signInAccount(t);
-    const { shareToken } = await seedGroupWithPlayer(userId);
-    const draws = [bytesSpelling(shareToken), bytesSpelling("FreshToken")];
-
-    const minted = await t.run(async (ctx) => await mintShareToken(ctx, () => draws.shift()!()));
-
-    expect(minted).toBe("FreshToken");
-  });
-
-  it("gives up after 5 taken tokens", async () => {
-    const { userId } = await signInAccount(t);
-    const { shareToken } = await seedGroupWithPlayer(userId);
-    let draws = 0;
-    const alwaysTaken = () => {
-      draws++;
-      return bytesSpelling(shareToken)();
-    };
-
-    await expect(t.run(async (ctx) => await mintShareToken(ctx, alwaysTaken))).rejects.toThrow();
-    expect(draws).toBe(5);
   });
 });

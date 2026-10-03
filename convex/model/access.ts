@@ -18,16 +18,18 @@ export async function requireGm(ctx: QueryCtx): Promise<Doc<"users">> {
 
 export async function findOwnedGroup(ctx: QueryCtx, groupId: Id<"groups">) {
   const gm = await currentGm(ctx);
-  if (gm === null) return null;
-  const group = await ctx.db.get("groups", groupId);
-  return group?.ownerId === gm._id ? group : null;
+  return gm === null ? null : await groupOwnedBy(ctx, gm, groupId);
 }
 
 export async function ownedGroup(ctx: QueryCtx, groupId: Id<"groups">) {
   const gm = await requireGm(ctx);
-  const group = await ctx.db.get("groups", groupId);
-  if (group === null || group.ownerId !== gm._id) fail({ code: "NOT_FOUND" });
+  const group = (await groupOwnedBy(ctx, gm, groupId)) ?? fail({ code: "NOT_FOUND" });
   return { gm, group };
+}
+
+async function groupOwnedBy(ctx: QueryCtx, gm: Doc<"users">, groupId: Id<"groups">) {
+  const group = await ctx.db.get("groups", groupId);
+  return group?.ownerId === gm._id ? group : null;
 }
 
 export async function groupByShareToken(ctx: QueryCtx, shareToken: string) {

@@ -31,6 +31,8 @@ export async function signIn(t: TestBackend, user: UserFields) {
   return { userId, sessionId, as: t.withIdentity({ subject: `${userId}|${sessionId}` }) };
 }
 
+export type GmClient = Awaited<ReturnType<typeof signIn>>["as"];
+
 export const signInAnonymousGm = (t: TestBackend) => signIn(t, { isAnonymous: true });
 
 export const signInAccount = (t: TestBackend) => signIn(t, { email: "gm@example.com" });

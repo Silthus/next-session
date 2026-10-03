@@ -55,10 +55,24 @@ export function canUndoRotate(group: Doc<"groups">) {
 }
 
 export async function rotateShareToken(ctx: MutationCtx, group: Doc<"groups">) {
+  const rotatedAt = Date.now();
   await ctx.db.patch("groups", group._id, {
     shareToken: await mintShareToken(ctx),
     previousShareToken: group.shareToken,
-    shareTokenRotatedAt: Date.now(),
+    shareTokenRotatedAt: rotatedAt,
+  });
+  await ctx.scheduler.runAfter(UNDO_ROTATE_WINDOW_MS + 1, internal.groups.forgetUndoRotate, {
+    groupId: group._id,
+    rotatedAt,
+  });
+}
+
+export async function forgetUndoRotate(ctx: MutationCtx, groupId: Id<"groups">, rotatedAt: number) {
+  const group = await ctx.db.get("groups", groupId);
+  if (group?.shareTokenRotatedAt !== rotatedAt) return;
+  await ctx.db.patch("groups", groupId, {
+    previousShareToken: undefined,
+    shareTokenRotatedAt: undefined,
   });
 }
 
@@ -80,13 +94,12 @@ export async function deleteGroup(ctx: MutationCtx, group: Doc<"groups">) {
 }
 
 async function endAnonymousGmWithoutGroups(ctx: MutationCtx, ownerId: Id<"users">) {
-  const owner = await ctx.db.get("users", ownerId);
-  if (owner?.isAnonymous !== true) return;
   const anyGroup = await ctx.db
     .query("groups")
     .withIndex("by_ownerId", (q) => q.eq("ownerId", ownerId))
     .first();
-  if (anyGroup === null) await deleteAnonymousGm(ctx, ownerId);
+  const owner = await ctx.db.get("users", ownerId);
+  if (anyGroup === null && owner !== null) await deleteAnonymousGm(ctx, owner);
 }
 
 export async function deleteChildBatch(ctx: MutationCtx, groupId: Id<"groups">) {
