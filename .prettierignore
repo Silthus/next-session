@@ -1,0 +1,4 @@
+bun.lock
+convex/_generated/
+src/routeTree.gen.ts
+*.md

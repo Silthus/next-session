@@ -4,3 +4,7 @@ dist/
 .env*.local
 *.log
 .DS_Store
+playwright-report/
+test-results/
+.convex/
+.tanstack/
