@@ -24,12 +24,7 @@ const FLOWS = { create: "signUp", logIn: "signIn" } as const;
 export async function saveGroups({ email, password, mode }: SaveInput, deps: SaveDeps) {
   const { code } = await deps.startSave();
   deps.storage.setItem(PENDING_SAVE_KEY, code);
-  try {
-    await deps.signIn("password", { email, password, flow: FLOWS[mode] });
-  } catch (error) {
-    deps.storage.removeItem(PENDING_SAVE_KEY);
-    throw error;
-  }
+  await deps.signIn("password", { email, password, flow: FLOWS[mode] });
   return await redeem(code, deps);
 }
 
@@ -54,12 +49,16 @@ async function redeemOnce(
 ) {
   try {
     const result = await finishSave({ code });
-    storage.removeItem(PENDING_SAVE_KEY);
+    forgetClaim(storage, code);
     return result;
   } catch (error) {
-    if (isClaimInvalid(error)) storage.removeItem(PENDING_SAVE_KEY);
+    if (isClaimInvalid(error)) forgetClaim(storage, code);
     throw error;
   }
+}
+
+function forgetClaim(storage: SaveDeps["storage"], code: string) {
+  if (storage.getItem(PENDING_SAVE_KEY) === code) storage.removeItem(PENDING_SAVE_KEY);
 }
 
 function isClaimInvalid(error: unknown) {

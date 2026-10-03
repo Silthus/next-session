@@ -93,6 +93,7 @@ describe("the anonymous sign-up limit", () => {
 describe("Accounts", () => {
   it("creates an Account with no Groups and the Legal Acceptance of its sheet", async () => {
     const credentials = newCredentials();
+    const before = Date.now();
     const { as, userId } = await signUpAccount(t, credentials);
 
     expect(await as.query(api.account.me, {})).toEqual({
@@ -100,10 +101,12 @@ describe("Accounts", () => {
       email: credentials.email,
     });
     expect(await as.query(api.groups.mine, {})).toEqual([]);
-    expect(await legalAcceptanceOf(userId)).toMatchObject({
+    const acceptance = await legalAcceptanceOf(userId);
+    expect(acceptance).toMatchObject({
       terms: LEGAL_VERSIONS.terms,
       privacy: LEGAL_VERSIONS.privacy,
     });
+    expect(acceptance.at).toBeGreaterThanOrEqual(before);
   });
 
   it("logs in to the same Account however the email is cased or padded", async () => {

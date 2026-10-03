@@ -63,15 +63,15 @@ describe("saveGroups", () => {
     expect(calls).toContain("signIn password signIn ada@example.com");
   });
 
-  it("forgets the claim and moves nothing when the sign-in fails", async () => {
+  it("keeps the claim when the sign-in fails, since it may have gone through", async () => {
     const { deps, calls, storage } = fakeDeps({
-      signIn: () => Promise.reject(new Error("InvalidSecret")),
+      signIn: () => Promise.reject(new Error("Connection lost while action was in flight")),
     });
 
-    await expect(saveGroups({ ...input, mode: "logIn" }, deps)).rejects.toThrow("InvalidSecret");
+    await expect(saveGroups({ ...input, mode: "logIn" }, deps)).rejects.toThrow("Connection lost");
 
     expect(calls).not.toContain("finishSave claim-code");
-    expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
+    expect(storage.getItem(PENDING_SAVE_KEY)).toBe("claim-code");
   });
 
   it("keeps the claim for the next start when the connection drops after the sign-in", async () => {
@@ -109,6 +109,20 @@ describe("a Save and the resume racing on one claim", () => {
     expect(saved).toEqual({ groupIds: [groupId] });
     expect(await resumed).toEqual({ groupIds: [groupId] });
     expect(redemptions).toBe(1);
+  });
+});
+
+describe("overlapping Saves", () => {
+  it("leave a newer pending claim alone when an older one is refused", async () => {
+    const { deps, storage } = fakeDeps({ finishSave: claimInvalid });
+    deps.signIn = () => {
+      storage.setItem(PENDING_SAVE_KEY, "newer-claim");
+      return Promise.resolve();
+    };
+
+    await expect(saveGroups({ ...input, mode: "create" }, deps)).rejects.toThrow();
+
+    expect(storage.getItem(PENDING_SAVE_KEY)).toBe("newer-claim");
   });
 });
 
