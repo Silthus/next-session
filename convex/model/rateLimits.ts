@@ -5,6 +5,7 @@ import { fail } from "./errors";
 
 const limits = {
   anonymousSignUp: { kind: "token bucket", rate: 30, period: MINUTE, capacity: 60 },
+  accountSignUp: { kind: "token bucket", rate: 5, period: MINUTE, capacity: 20 },
   createGroup: { kind: "token bucket", rate: 10, period: HOUR, capacity: 5 },
   joinGroup: { kind: "fixed window", rate: 30, period: HOUR },
   answer: { kind: "token bucket", rate: 120, period: MINUTE, capacity: 60 },
@@ -14,7 +15,7 @@ const limits = {
 
 export const rateLimiter = new RateLimiter(components.rateLimiter, limits);
 
-type GlobalRateLimit = "anonymousSignUp";
+type GlobalRateLimit = "anonymousSignUp" | "accountSignUp";
 type KeyedRateLimit = Exclude<keyof typeof limits, GlobalRateLimit>;
 
 export async function enforceRateLimit(
