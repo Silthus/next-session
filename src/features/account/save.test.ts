@@ -1,0 +1,126 @@
+import { ConvexError } from "convex/values";
+import { describe, expect, it } from "vitest";
+import type { Id } from "../../../convex/_generated/dataModel";
+import { PENDING_SAVE_KEY, resumePendingSave, saveGroups, type SaveDeps } from "./save";
+
+const groupId = "group-1" as Id<"groups">;
+
+class MemoryStorage {
+  private readonly items = new Map<string, string>();
+  getItem = (key: string) => this.items.get(key) ?? null;
+  setItem = (key: string, value: string) => void this.items.set(key, value);
+  removeItem = (key: string) => void this.items.delete(key);
+}
+
+function fakeDeps(overrides: Partial<SaveDeps> = {}) {
+  const calls: string[] = [];
+  const storage = new MemoryStorage();
+  const deps: SaveDeps = {
+    startSave: () => {
+      calls.push("startSave");
+      return Promise.resolve({ code: "claim-code" });
+    },
+    signIn: (provider, params) => {
+      calls.push(`signIn ${provider} ${params.flow} ${params.email}`);
+      calls.push(`pending ${storage.getItem(PENDING_SAVE_KEY)}`);
+      return Promise.resolve();
+    },
+    finishSave: ({ code }) => {
+      calls.push(`finishSave ${code}`);
+      return Promise.resolve({ groupIds: [groupId] });
+    },
+    storage,
+    ...overrides,
+  };
+  return { deps, calls, storage };
+}
+
+const claimInvalid = () => Promise.reject(new ConvexError({ code: "CLAIM_INVALID" }));
+const offline = () => Promise.reject(new Error("connection lost"));
+const input = { email: "ada@example.com", password: "correct horse battery" };
+
+describe("saveGroups", () => {
+  it("claims, creates the Account, then moves the Groups onto it", async () => {
+    const { deps, calls, storage } = fakeDeps();
+
+    const result = await saveGroups({ ...input, mode: "create" }, deps);
+
+    expect(result).toEqual({ groupIds: [groupId] });
+    expect(calls).toEqual([
+      "startSave",
+      "signIn password signUp ada@example.com",
+      "pending claim-code",
+      "finishSave claim-code",
+    ]);
+    expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
+  });
+
+  it("logs in to an existing Account when the GM already has one", async () => {
+    const { deps, calls } = fakeDeps();
+
+    await saveGroups({ ...input, mode: "logIn" }, deps);
+
+    expect(calls).toContain("signIn password signIn ada@example.com");
+  });
+
+  it("forgets the claim and moves nothing when the sign-in fails", async () => {
+    const { deps, calls, storage } = fakeDeps({
+      signIn: () => Promise.reject(new Error("InvalidSecret")),
+    });
+
+    await expect(saveGroups({ ...input, mode: "logIn" }, deps)).rejects.toThrow("InvalidSecret");
+
+    expect(calls).not.toContain("finishSave claim-code");
+    expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
+  });
+
+  it("keeps the claim for the next start when the connection drops after the sign-in", async () => {
+    const { deps, storage } = fakeDeps({ finishSave: offline });
+
+    await expect(saveGroups({ ...input, mode: "create" }, deps)).rejects.toThrow("connection lost");
+
+    expect(storage.getItem(PENDING_SAVE_KEY)).toBe("claim-code");
+  });
+
+  it("forgets a claim the server refuses", async () => {
+    const { deps, storage } = fakeDeps({ finishSave: claimInvalid });
+
+    await expect(saveGroups({ ...input, mode: "create" }, deps)).rejects.toThrow();
+
+    expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
+  });
+});
+
+describe("resumePendingSave", () => {
+  it("finishes a Save the last session left pending", async () => {
+    const { deps, calls, storage } = fakeDeps();
+    storage.setItem(PENDING_SAVE_KEY, "left-over");
+
+    expect(await resumePendingSave(deps)).toEqual({ groupIds: [groupId] });
+    expect(calls).toEqual(["finishSave left-over"]);
+    expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
+  });
+
+  it("does nothing without a pending Save", async () => {
+    const { deps, calls } = fakeDeps();
+
+    expect(await resumePendingSave(deps)).toBeNull();
+    expect(calls).toEqual([]);
+  });
+
+  it("drops a pending claim that was already used or expired", async () => {
+    const { deps, storage } = fakeDeps({ finishSave: claimInvalid });
+    storage.setItem(PENDING_SAVE_KEY, "used");
+
+    expect(await resumePendingSave(deps)).toBeNull();
+    expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
+  });
+
+  it("keeps the pending claim for another try while offline", async () => {
+    const { deps, storage } = fakeDeps({ finishSave: offline });
+    storage.setItem(PENDING_SAVE_KEY, "left-over");
+
+    expect(await resumePendingSave(deps)).toBeNull();
+    expect(storage.getItem(PENDING_SAVE_KEY)).toBe("left-over");
+  });
+});

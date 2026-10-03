@@ -1,5 +1,6 @@
+import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { ConvexReactClient } from "convex/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
@@ -17,8 +18,8 @@ declare module "@tanstack/react-router" {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ConvexProvider client={convex}>
+    <ConvexAuthProvider client={convex}>
       <RouterProvider router={router} />
-    </ConvexProvider>
+    </ConvexAuthProvider>
   </StrictMode>,
 );

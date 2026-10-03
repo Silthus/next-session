@@ -23,7 +23,7 @@ const server = spawn(
     "--local-site-port",
     String(localBackendPort + 1),
     "--start",
-    "bunx vite --port 5173 --strictPort",
+    "bun scripts/auth-env.ts local && bunx vite --port 5173 --strictPort",
   ],
   {
     stdio: "inherit",
