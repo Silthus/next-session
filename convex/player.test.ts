@@ -530,6 +530,22 @@ describe("player.fillRest", () => {
     expect(Object.keys(await answersOf(ada))).toEqual(datesFrom(1, 31, "2026-12"));
   });
 
+  it("follows the Booking Window across New Year", async () => {
+    vi.setSystemTime(Date.UTC(2026, 10, 20, 12));
+    const { groupId, shareToken } = await sharedGroup();
+    const ada = await seedPlayer(groupId, "Ada");
+
+    await t.mutation(api.player.fillRest, { shareToken, playerId: ada, month: "2027-01" });
+
+    expect(Object.keys(await answersOf(ada))).toEqual(datesFrom(1, 31, "2027-01"));
+    for (const month of ["2026-10", "2027-02"]) {
+      await expectErrorCode(
+        t.mutation(api.player.fillRest, { shareToken, playerId: ada, month }),
+        "OUT_OF_WINDOW",
+      );
+    }
+  });
+
   it("writes nothing more when called again", async () => {
     const { groupId, shareToken } = await sharedGroup();
     const ada = await seedPlayer(groupId, "Ada");
