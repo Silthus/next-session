@@ -84,7 +84,7 @@ jobs:
           LEGAL_CONTACT_EMAIL: ${{ vars.LEGAL_CONTACT_EMAIL }}
       - name: Deploy the Worker
         if: steps.head.outputs.current == 'true'
-        run: bunx wrangler@4.147.0 deploy
+        run: bunx wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -1,55 +1,78 @@
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { version as convexCliVersion } from "convex/package.json";
+import { LOCAL_BACKEND_ENV } from "./localBackendEnv";
 
-const localBackendPort = 3210;
-const cloudDeploymentCredentials = {
-  CONVEX_DEPLOY_KEY: "",
-  CONVEX_DEPLOYMENT_TOKEN: "",
-  CONVEX_SELF_HOSTED_URL: "",
-  CONVEX_SELF_HOSTED_ADMIN_KEY: "",
-};
-const developerEnvFile = ".env.local";
-const developerEnv = existsSync(developerEnvFile) ? readFileSync(developerEnvFile, "utf8") : null;
-
-const server = spawn(
-  "bunx",
-  [
-    "convex",
-    "dev",
-    "--tail-logs",
-    "disable",
-    "--local-cloud-port",
-    String(localBackendPort),
-    "--local-site-port",
-    String(localBackendPort + 1),
-    "--start",
-    "bun scripts/auth-env.ts local && bunx vite --port 5173 --strictPort",
-  ],
-  {
-    stdio: "inherit",
-    env: {
-      ...process.env,
-      ...cloudDeploymentCredentials,
-      CONVEX_AGENT_MODE: "anonymous",
-      CONVEX_DEPLOYMENT: "anonymous:anonymous-agent",
-      VITE_CONVEX_URL: `http://127.0.0.1:${localBackendPort}`,
-    },
-  },
-);
-
-for (const signal of ["SIGINT", "SIGTERM"] as const) {
-  process.on(signal, () => server.kill(signal));
+interface SignalSource {
+  on(signal: NodeJS.Signals, listener: () => void): unknown;
 }
 
-server.on("exit", (code) => {
-  restoreDeveloperEnv();
-  process.exit(code ?? 0);
-});
+const localBackendPort = 3210;
+const localBackendVersionByCli: Record<string, string> = {
+  "1.46.0": "precompiled-2026-09-28-5c7cb5b",
+};
+const developerEnvFile = ".env.local";
 
-function restoreDeveloperEnv() {
+export function localBackendVersionFor(cliVersion: string) {
+  const backendVersion = localBackendVersionByCli[cliVersion];
+  if (!backendVersion) {
+    throw new Error(
+      `No local backend pinned for Convex CLI ${cliVersion}. Pin the version https://version.convex.dev/v1/local_backend_version serves it.`,
+    );
+  }
+  return backendVersion;
+}
+
+export function forwardShutdownSignals(child: ChildProcess, source: SignalSource = process) {
+  for (const signal of ["SIGINT", "SIGTERM"] as const) {
+    source.on(signal, () => child.kill("SIGINT"));
+  }
+}
+
+function startLocalBackendWithVite() {
+  return spawn(
+    "bunx",
+    [
+      "convex",
+      "dev",
+      "--tail-logs",
+      "disable",
+      "--local-cloud-port",
+      String(localBackendPort),
+      "--local-site-port",
+      String(localBackendPort + 1),
+      "--local-backend-version",
+      localBackendVersionFor(convexCliVersion),
+      "--start",
+      "bun scripts/auth-env.ts local && bunx vite --port 5173 --strictPort",
+    ],
+    {
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        ...LOCAL_BACKEND_ENV,
+        VITE_CONVEX_URL: `http://127.0.0.1:${localBackendPort}`,
+      },
+    },
+  );
+}
+
+function main() {
+  const developerEnv = existsSync(developerEnvFile) ? readFileSync(developerEnvFile, "utf8") : null;
+  const server = startLocalBackendWithVite();
+  forwardShutdownSignals(server);
+  server.on("exit", (code) => {
+    restoreDeveloperEnv(developerEnv);
+    process.exit(code ?? 0);
+  });
+}
+
+function restoreDeveloperEnv(developerEnv: string | null) {
   if (developerEnv === null) {
     rmSync(developerEnvFile, { force: true });
   } else {
     writeFileSync(developerEnvFile, developerEnv);
   }
 }
+
+if (import.meta.main) main();
