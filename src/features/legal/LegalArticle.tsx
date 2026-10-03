@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Fragment } from "react";
 import { Eyebrow } from "../../ui/Eyebrow";
 import type { Block, Inline, LegalDocument } from "./legalDocument";
@@ -71,6 +72,8 @@ function renderBlock(block: Block, index: number) {
   }
 }
 
+const linkClassName = "text-accent underline underline-offset-2 hover:text-accent-strong";
+
 function renderInlines(inlines: Inline[]) {
   return inlines.map((inline, index) => {
     switch (inline.kind) {
@@ -89,12 +92,17 @@ function renderInlines(inlines: Inline[]) {
           </code>
         );
       case "link":
-        return (
+        return inline.href.startsWith("/") ? (
+          <Link key={index} to={inline.href} className={linkClassName}>
+            {inline.text}
+          </Link>
+        ) : (
           <a
             key={index}
             href={inline.href}
-            className="text-accent underline-offset-2 hover:underline"
-            {...(inline.href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}
+            target="_blank"
+            rel="noreferrer"
+            className={linkClassName}
           >
             {inline.text}
           </a>

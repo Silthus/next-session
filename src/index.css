@@ -11,7 +11,7 @@
   --line-strong: #cfc9bd;
   --ink: #17161a;
   --ink-2: #5b5862;
-  --ink-3: #8e8a95;
+  --ink-3: #716d7a;
   --accent: #6d5df6;
   --accent-strong: #5646e6;
   --accent-ink: #ffffff;
@@ -35,7 +35,7 @@
     --line-strong: #3b3947;
     --ink: #f4f2f7;
     --ink-2: #b3afbd;
-    --ink-3: #7e7a89;
+    --ink-3: #8a8695;
     --accent: #8b7dff;
     --accent-strong: #a398ff;
     --accent-ink: #0f0e13;
@@ -129,9 +129,11 @@ body {
   font-feature-settings: "cv11", "ss01";
 }
 
-.font-display {
-  font-variation-settings: "opsz" 96;
-  letter-spacing: -0.02em;
+@layer base {
+  .font-display {
+    font-variation-settings: "opsz" 96;
+    letter-spacing: -0.02em;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

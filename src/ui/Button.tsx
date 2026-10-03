@@ -9,7 +9,7 @@ const variants: Record<ButtonVariant, string> = {
   secondary: "bg-surface text-ink border border-line hover:border-line-strong",
   ghost: "text-ink-2 hover:bg-surface-2 hover:text-ink",
   soft: "bg-accent-soft text-accent hover:brightness-95 dark:hover:brightness-110",
-  free: "bg-free text-white hover:brightness-105",
+  free: "bg-free text-white hover:brightness-105 dark:text-paper",
   danger: "bg-busy-soft text-busy hover:brightness-95",
 };
 
@@ -25,6 +25,19 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   busy?: string | false;
 };
 
+export function buttonClassName(
+  variant: ButtonVariant = "primary",
+  size: ButtonSize = "md",
+  className?: string,
+) {
+  return cn(
+    "inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50",
+    variants[variant],
+    sizes[size],
+    className,
+  );
+}
+
 export function Button({
   variant = "primary",
   size = "md",
@@ -39,12 +52,7 @@ export function Button({
       type="button"
       disabled={disabled || busy !== false}
       aria-busy={busy !== false || undefined}
-      className={cn(
-        "inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50",
-        variants[variant],
-        sizes[size],
-        className,
-      )}
+      className={buttonClassName(variant, size, className)}
       {...props}
     >
       {busy === false ? children : busy}

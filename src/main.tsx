@@ -3,10 +3,10 @@ import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { appEnv } from "./lib/env";
+import { convexUrl } from "./lib/env";
 import { routeTree } from "./routeTree.gen";
 
-const convex = new ConvexReactClient(appEnv().convexUrl);
+const convex = new ConvexReactClient(convexUrl());
 const router = createRouter({ routeTree });
 
 declare module "@tanstack/react-router" {

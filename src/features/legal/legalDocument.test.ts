@@ -101,6 +101,30 @@ describe("parseLegalDocument", () => {
     ]);
   });
 
+  it("keeps body text that follows a heading without a blank line", () => {
+    const doc = parseLegalDocument("# T\n## 1. One\nBody line.\n", placeholders);
+    expect(doc.sections).toEqual([
+      {
+        heading: "1. One",
+        blocks: [{ kind: "paragraph", lines: [[{ kind: "text", text: "Body line." }]] }],
+      },
+    ]);
+  });
+
+  it("reads tables without boundary pipes", () => {
+    const doc = parseLegalDocument(
+      "# T\n\nData | Retention\n--- | ---\nA group | 30 days\n",
+      placeholders,
+    );
+    expect(doc.intro).toEqual([
+      {
+        kind: "table",
+        header: [[{ kind: "text", text: "Data" }], [{ kind: "text", text: "Retention" }]],
+        rows: [[[{ kind: "text", text: "A group" }], [{ kind: "text", text: "30 days" }]]],
+      },
+    ]);
+  });
+
   it("has no effective date when the document carries no version line", () => {
     const imprint = parseLegalDocument(
       "# Imprint\n\nInformation according to § 5 DDG.\n\n## Provider\n\nMichael Reichenbach\n{{CONTROLLER_ADDRESS}}\n",

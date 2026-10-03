@@ -1,5 +1,5 @@
-import { useNavigate } from "@tanstack/react-router";
-import { Button } from "./Button";
+import { Link } from "@tanstack/react-router";
+import { buttonClassName } from "./Button";
 import { Logo } from "./Logo";
 import { PageShell } from "./PageShell";
 
@@ -16,10 +16,9 @@ const copy = {
 
 export function NotFoundScreen({ kind = "page" }: { kind?: keyof typeof copy }) {
   const { title, body } = copy[kind];
-  const navigate = useNavigate();
   return (
     <PageShell
-      width="narrow"
+      maxWidth="md"
       centerFooter
       className="flex flex-col items-center justify-center gap-5 text-center"
     >
@@ -27,9 +26,9 @@ export function NotFoundScreen({ kind = "page" }: { kind?: keyof typeof copy }) 
       <h1 className="font-display text-3xl font-extrabold">{title}</h1>
       <p className="text-ink-2">{body}</p>
       <div className="mt-2 flex flex-col items-center gap-2">
-        <Button variant="secondary" onClick={() => void navigate({ to: "/" })}>
+        <Link to="/" className={buttonClassName("secondary")}>
           Plan your own game
-        </Button>
+        </Link>
         <span className="text-xs text-ink-3">One click, no sign-up.</span>
       </div>
     </PageShell>

@@ -1,7 +1,7 @@
 import imprint from "../../../docs/legal/imprint.md?raw";
 import privacy from "../../../docs/legal/privacy.md?raw";
 import terms from "../../../docs/legal/terms.md?raw";
-import { appEnv } from "../../lib/env";
+import { legalContact } from "../../lib/env";
 import { PageShell } from "../../ui/PageShell";
 import { LegalArticle } from "./LegalArticle";
 import { parseLegalDocument } from "./legalDocument";
@@ -12,7 +12,7 @@ const sources = { terms, privacy, imprint };
 export type LegalPageKey = keyof typeof sources;
 
 export function LegalPage({ page }: { page: LegalPageKey }) {
-  const { legal } = appEnv();
+  const legal = legalContact();
   const document = parseLegalDocument(sources[page], {
     EFFECTIVE_DATE: LEGAL_VERSIONS.effective,
     CONTROLLER_ADDRESS: legal.controllerAddress,

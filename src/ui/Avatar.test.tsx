@@ -24,6 +24,16 @@ describe("Avatar", () => {
   });
 });
 
+describe("Avatar hues", () => {
+  it("never borrow the answer colors", () => {
+    const names = ["Ana", "Ben", "Cleo", "Dan", "Eve", "Finn", "Gus", "Hal"];
+    const hues = names.map((name) => render(<Avatar name={name} />).container.firstElementChild);
+    for (const hue of hues) {
+      expect([...(hue?.classList ?? [])].join(" ")).not.toMatch(/free|maybe|busy/);
+    }
+  });
+});
+
 function hueOf(element: Element | null) {
   return [...(element?.classList ?? [])].find((name) => name.startsWith("bg-"));
 }

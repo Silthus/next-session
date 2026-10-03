@@ -7,10 +7,10 @@ export function playerInitials(name: string) {
 }
 
 const hues = [
-  "bg-accent-soft text-accent",
-  "bg-free-soft text-free",
-  "bg-maybe-soft text-maybe",
-  "bg-busy-soft text-busy",
+  "bg-accent-soft text-accent-strong",
+  "bg-accent text-accent-ink",
+  "bg-surface-2 text-ink",
+  "bg-ink text-paper",
 ];
 
 type Size = "xs" | "sm" | "md";

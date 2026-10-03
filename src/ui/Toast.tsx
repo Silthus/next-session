@@ -19,7 +19,7 @@ export function Toast({
         <button
           type="button"
           onClick={onAction}
-          className="font-semibold text-accent-strong underline-offset-2 hover:underline dark:text-accent"
+          className="font-semibold text-paper underline underline-offset-2"
         >
           {action}
         </button>

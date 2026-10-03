@@ -32,6 +32,7 @@ export function parseLegalDocument(
 ): LegalDocument {
   const chunks = fillPlaceholders(markdown, placeholders)
     .split(/\n\s*\n/)
+    .flatMap(splitLeadingHeading)
     .map((chunk) => chunk.trim())
     .filter((chunk) => chunk.length > 0 && !chunk.startsWith(">"));
 
@@ -50,6 +51,12 @@ export function parseLegalDocument(
   }
 
   return document;
+}
+
+function splitLeadingHeading(chunk: string): string[] {
+  const [first = "", ...rest] = chunk.trim().split("\n");
+  if (!first.startsWith("#") || rest.length === 0) return [chunk];
+  return [first, ...splitLeadingHeading(rest.join("\n"))];
 }
 
 function fillPlaceholders(markdown: string, placeholders: LegalPlaceholders): string {
@@ -74,7 +81,7 @@ function parseBlock(chunk: string): Block {
   if (lines.every((line) => line.startsWith("- "))) {
     return { kind: "list", items: lines.map((line) => parseInline(line.slice(2))) };
   }
-  if (lines.every((line) => line.startsWith("|"))) {
+  if (lines.length > 1 && isTableDivider(lines[1] ?? "")) {
     return parseTable(lines);
   }
   return { kind: "paragraph", lines: lines.map(parseInline) };
@@ -89,9 +96,14 @@ function parseTable(lines: string[]): Block {
   };
 }
 
+function isTableDivider(line: string) {
+  return /^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?$/.test(line);
+}
+
 function parseRow(line: string): Inline[][] {
   return line
-    .slice(1, -1)
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
     .split("|")
     .map((cell) => parseInline(cell.trim()));
 }
