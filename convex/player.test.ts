@@ -64,8 +64,8 @@ async function seedAnswer(
   await t.run(async (ctx) => await ctx.db.insert("answers", { groupId, playerId, date, answer }));
 }
 
-async function seedSession(groupId: Id<"groups">, scheduledBy: Id<"users">, date: string) {
-  await t.run(async (ctx) => await ctx.db.insert("sessions", { groupId, date, scheduledBy }));
+async function seedSession(groupId: Id<"groups">, date: string) {
+  await t.run(async (ctx) => await ctx.db.insert("sessions", { groupId, date }));
 }
 
 async function answersOf(playerId: Id<"players">) {
@@ -123,7 +123,7 @@ describe("player.group", () => {
     const bo = await seedPlayer(groupId, "Bo");
     const ada = await seedPlayer(groupId, "Ada");
     for (const date of ["2026-10-02", TODAY, "2026-10-17", LAST_BOOKABLE_DATE, "2027-01-01"]) {
-      await seedSession(groupId, userId, date);
+      await seedSession(groupId, date);
     }
 
     expect(await t.query(api.player.group, { shareToken })).toEqual({
@@ -141,7 +141,7 @@ describe("player.group", () => {
     const mine = await sharedGroup();
     const other = await sharedGroup();
     await seedPlayer(other.groupId, "Stranger");
-    await seedSession(other.groupId, other.userId, "2026-10-17");
+    await seedSession(other.groupId, "2026-10-17");
 
     expect(await t.query(api.player.group, { shareToken: mine.shareToken })).toMatchObject({
       groupId: mine.groupId,

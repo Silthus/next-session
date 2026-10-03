@@ -9,14 +9,10 @@ export const schedule = mutation({
   args: { groupId: v.id("groups"), date: v.string() },
   returns: v.id("sessions"),
   handler: async (ctx, { groupId, date }) => {
-    const { gm, group } = await ownedGroup(ctx, groupId);
+    const { group } = await ownedGroup(ctx, groupId);
     ensureBookable(date);
     if ((await sessionOn(ctx, group._id, date)) !== null) fail({ code: "SESSION_EXISTS" });
-    const sessionId = await ctx.db.insert("sessions", {
-      groupId: group._id,
-      date,
-      scheduledBy: gm._id,
-    });
+    const sessionId = await ctx.db.insert("sessions", { groupId: group._id, date });
     await touchGroup(ctx, group);
     return sessionId;
   },

@@ -39,10 +39,8 @@ async function seedAnswers(
   });
 }
 
-async function seedSession(groupId: Id<"groups">, scheduledBy: Id<"users">, date: string) {
-  return await t.run(
-    async (ctx) => await ctx.db.insert("sessions", { groupId, date, scheduledBy }),
-  );
+async function seedSession(groupId: Id<"groups">, date: string) {
+  return await t.run(async (ctx) => await ctx.db.insert("sessions", { groupId, date }));
 }
 
 describe("schedule.month", () => {
@@ -57,9 +55,9 @@ describe("schedule.month", () => {
       "2026-11-01": "busy",
     });
     await seedAnswers(groupId, grace, { "2026-10-17": "busy" });
-    const september = await seedSession(groupId, userId, "2026-09-12");
-    const october = await seedSession(groupId, userId, "2026-10-17");
-    const december = await seedSession(groupId, userId, "2026-12-05");
+    const september = await seedSession(groupId, "2026-09-12");
+    const october = await seedSession(groupId, "2026-10-17");
+    const december = await seedSession(groupId, "2026-12-05");
 
     const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
 
@@ -89,7 +87,7 @@ describe("schedule.month", () => {
       name: "Mallory",
     });
     await seedAnswers(stranger.groupId, mallory, { "2026-10-17": "free" });
-    await seedSession(stranger.groupId, stranger.userId, "2026-10-17");
+    await seedSession(stranger.groupId, "2026-10-17");
 
     const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
 
@@ -106,7 +104,7 @@ describe("schedule.month", () => {
       "2026-10-16": "maybe",
     });
     await seedAnswers(groupId, grace, { "2026-10-09": "busy", "2026-10-10": "free" });
-    const sessionId = await seedSession(groupId, userId, "2026-10-10");
+    const sessionId = await seedSession(groupId, "2026-10-10");
 
     const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
     const summary = summarizeMonth({ month: "2026-10", today: TODAY, ...schedule! });

@@ -43,10 +43,8 @@ async function sessionDatesOf(groupId: Id<"groups">) {
   );
 }
 
-async function seedSession(groupId: Id<"groups">, scheduledBy: Id<"users">, date: string) {
-  return await t.run(
-    async (ctx) => await ctx.db.insert("sessions", { groupId, date, scheduledBy }),
-  );
+async function seedSession(groupId: Id<"groups">, date: string) {
+  return await t.run(async (ctx) => await ctx.db.insert("sessions", { groupId, date }));
 }
 
 async function expiryOf(groupId: Id<"groups">) {
@@ -54,13 +52,18 @@ async function expiryOf(groupId: Id<"groups">) {
 }
 
 describe("sessions.schedule", () => {
-  it("records the Session and who scheduled it", async () => {
-    const { as, groupId, userId } = await signedInGmWithGroup();
+  it("records the Session as a date of the Group and nothing more", async () => {
+    const { as, groupId } = await signedInGmWithGroup();
 
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
 
     const session = await t.run(async (ctx) => await ctx.db.get("sessions", sessionId));
-    expect(session).toMatchObject({ groupId, date: "2026-10-17", scheduledBy: userId });
+    expect(session).toEqual({
+      _id: sessionId,
+      _creationTime: expect.any(Number),
+      groupId,
+      date: "2026-10-17",
+    });
   });
 
   it.each([TODAY, LAST_BOOKABLE_DATE])(
@@ -167,7 +170,7 @@ describe("sessions.unschedule", () => {
 
   it("keeps a past Session, because past dates are read-only", async () => {
     const { as, groupId, userId } = await signedInGmWithGroup();
-    const sessionId = await seedSession(groupId, userId, "2026-10-02");
+    const sessionId = await seedSession(groupId, "2026-10-02");
 
     await expectErrorCode(as.mutation(api.sessions.unschedule, { sessionId }), "OUT_OF_WINDOW");
     expect(await sessionDatesOf(groupId)).toEqual(["2026-10-02"]);

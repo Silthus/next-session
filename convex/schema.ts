@@ -51,7 +51,6 @@ export default defineSchema({
   sessions: defineTable({
     groupId: v.id("groups"),
     date: v.string(),
-    scheduledBy: v.id("users"),
   }).index("by_groupId_and_date", ["groupId", "date"]),
 
   saveClaims: defineTable({

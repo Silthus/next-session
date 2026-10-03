@@ -267,14 +267,14 @@ describe("the Expiry of an Unsaved Group", () => {
 });
 
 describe("groups.remove", () => {
-  async function seedChildren(groupId: Id<"groups">, scheduledBy: Id<"users">, answers: number) {
+  async function seedChildren(groupId: Id<"groups">, answers: number) {
     await t.run(async (ctx) => {
       const playerId = await ctx.db.insert("players", { groupId, name: "Ada", nameKey: "ada" });
       for (let day = 0; day < answers; day++) {
         const date = new Date(NOW + day * DAY).toISOString().slice(0, 10);
         await ctx.db.insert("answers", { groupId, playerId, date, answer: "free" });
       }
-      await ctx.db.insert("sessions", { groupId, date: "2026-10-09", scheduledBy });
+      await ctx.db.insert("sessions", { groupId, date: "2026-10-09" });
     });
   }
 
@@ -299,7 +299,7 @@ describe("groups.remove", () => {
   it("deletes the Group with its Roster, Answers, and Sessions", async () => {
     const { as, userId } = await signInAccount(t);
     const groupId = await as.mutation(api.groups.create, {});
-    await seedChildren(groupId, userId, 450);
+    await seedChildren(groupId, 450);
 
     await as.mutation(api.groups.remove, { groupId });
     await t.finishAllScheduledFunctions(vi.runAllTimers);
@@ -312,8 +312,8 @@ describe("groups.remove", () => {
     const { as, userId } = await signInAccount(t);
     const removed = await as.mutation(api.groups.create, {});
     const kept = await as.mutation(api.groups.create, {});
-    await seedChildren(removed, userId, 3);
-    await seedChildren(kept, userId, 3);
+    await seedChildren(removed, 3);
+    await seedChildren(kept, 3);
 
     await as.mutation(api.groups.remove, { groupId: removed });
     await t.finishAllScheduledFunctions(vi.runAllTimers);
