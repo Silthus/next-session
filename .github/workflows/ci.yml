@@ -103,4 +103,5 @@ jobs:
           }
           expect_response / "200 "
           expect_response "/g/smoke-deep-link?month=2026-01" "200 "
+          expect_response /s/AAAAAAAAAA "200 "
           expect_response /s/AAAAAAAA "302 $LONIR_URL/s/AAAAAAAA"
