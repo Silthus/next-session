@@ -200,10 +200,14 @@ describe("the Account sign-up limit", () => {
     expect(await countAccounts()).toBe(BURST);
   });
 
-  it("admits one more sign-up every 12 seconds after the burst", async () => {
+  it("admits one more sign-up every 12 seconds after the burst, and not a moment sooner", async () => {
     await signUps(BURST);
+    const burstEnd = Date.now();
 
-    vi.setSystemTime(Date.now() + REFILL_MS);
+    vi.setSystemTime(burstEnd + REFILL_MS - 1);
+    await expectErrorCode(signUpAccount(t), "RATE_LIMITED");
+
+    vi.setSystemTime(burstEnd + REFILL_MS);
     await signUpAccount(t);
 
     await expectErrorCode(signUpAccount(t), "RATE_LIMITED");

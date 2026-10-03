@@ -9,4 +9,4 @@ Convex functions do not see the client IP, so per-IP limits are impossible witho
 
 ## Consequences
 
-- A flood of anonymous sign-ups or Account sign-ups can lock real visitors out for a few minutes. The buckets are sized well above organic traffic, and hitting it is the signal to add Turnstile.
+- A flood of anonymous sign-ups or Account sign-ups can lock real visitors out for a few minutes. The buckets are sized well above organic traffic, and hitting either is the signal to add Turnstile.
