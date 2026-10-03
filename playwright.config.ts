@@ -1,7 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const port = Number(process.env.E2E_PORT ?? 5173);
-const baseURL = `http://localhost:${port}`;
+const baseURL = "http://localhost:5173";
 
 export default defineConfig({
   testDir: "e2e",

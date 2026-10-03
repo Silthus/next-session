@@ -1,7 +1,6 @@
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 
-const port = process.env.E2E_PORT ?? "5173";
 const localBackendPort = 3210;
 const cloudDeploymentCredentials = {
   CONVEX_DEPLOY_KEY: "",
@@ -24,7 +23,7 @@ const server = spawn(
     "--local-site-port",
     String(localBackendPort + 1),
     "--start",
-    `bunx vite --port ${port} --strictPort`,
+    "bunx vite --port 5173 --strictPort",
   ],
   {
     stdio: "inherit",
