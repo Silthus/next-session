@@ -177,23 +177,60 @@ describe("Accounts", () => {
 
 describe("the Account sign-up limit", () => {
   const BURST = 20;
+  const REFILL_MS = 12_000;
 
   async function countAccounts() {
     return (await t.run(async (ctx) => await ctx.db.query("authAccounts").collect())).length;
   }
 
-  it("refuses a sign-up after a burst of 20 and creates no Account for it", async () => {
+  async function signUps(count: number) {
+    for (let signUp = 0; signUp < count; signUp++) await signUpAccount(t);
+  }
+
+  beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
-    for (let signUp = 0; signUp < BURST; signUp++) await signUpAccount(t);
+  });
+
+  it("refuses a sign-up after a burst of 20 and creates no Account for it", async () => {
+    await signUps(BURST);
 
     const data = await expectErrorCode(signUpAccount(t), "RATE_LIMITED");
 
     expect(data.retryAfter).toBeGreaterThan(0);
     expect(await countAccounts()).toBe(BURST);
   });
+
+  it("admits one more sign-up every 12 seconds after the burst", async () => {
+    await signUps(BURST);
+
+    vi.setSystemTime(Date.now() + REFILL_MS);
+    await signUpAccount(t);
+
+    await expectErrorCode(signUpAccount(t), "RATE_LIMITED");
+  });
+
+  it("spends nothing on sign-ups refused for a weak password or a taken email", async () => {
+    const taken = newCredentials();
+    await signUpAccount(t, taken);
+    for (let refused = 0; refused < BURST; refused++) {
+      await expectErrorCode(
+        signUpAccount(t, { ...newCredentials(), password: "short" }),
+        "WEAK_PASSWORD",
+      );
+      await expectErrorCode(signUpAccount(t, taken), "EMAIL_TAKEN");
+    }
+
+    await signUps(BURST - 1);
+
+    await expectErrorCode(signUpAccount(t), "RATE_LIMITED");
+  });
 });
 
 describe("the session lifetime", () => {
+  const MINUTE = 60_000;
+  const QUIET_LIMIT = UNSAVED_GROUP_QUIET_DAYS * DAY;
+  const YEAR = 365 * DAY;
+
   async function createYourLinkTokens() {
     const { tokens } = await t.action(api.auth.signIn, { provider: "anonymous" });
     return tokens!.refreshToken;
@@ -204,41 +241,54 @@ describe("the session lifetime", () => {
     return tokens?.refreshToken ?? null;
   }
 
-  function travel(days: number) {
-    vi.setSystemTime(Date.now() + days * DAY);
-  }
-
-  async function returnEvery29DaysForAYear(refreshToken: string) {
-    for (let visit = 0; visit < 12; visit++) {
-      travel(29);
+  async function returnJustInsideEveryQuietLimitUntil(refreshToken: string, until: number) {
+    while (Date.now() + QUIET_LIMIT - MINUTE < until) {
+      vi.setSystemTime(Date.now() + QUIET_LIMIT - MINUTE);
       const next = await refresh(refreshToken);
-      expect(next, `visit on day ${(visit + 1) * 29}`).toBeTypeOf("string");
+      expect(next, `visit on ${new Date().toISOString()}`).toBeTypeOf("string");
       refreshToken = next!;
     }
     return refreshToken;
+  }
+
+  async function stayActiveForAYear() {
+    const signedInAt = Date.now();
+    const refreshToken = await returnJustInsideEveryQuietLimitUntil(
+      await createYourLinkTokens(),
+      signedInAt + YEAR,
+    );
+    return { signedInAt, refreshToken };
   }
 
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
   });
 
-  it("keeps a GM who returns within every 30 days signed in for a year", async () => {
-    await returnEvery29DaysForAYear(await createYourLinkTokens());
+  it("keeps a GM who returns within every 30 days signed in until a minute before the year is up", async () => {
+    const { signedInAt, refreshToken } = await stayActiveForAYear();
+
+    vi.setSystemTime(signedInAt + YEAR - MINUTE);
+
+    expect(await refresh(refreshToken)).toBeTypeOf("string");
   });
 
-  it("ends the session a year after sign-in, however active the GM is", async () => {
-    const refreshToken = await returnEvery29DaysForAYear(await createYourLinkTokens());
+  it("ends the session a minute after the year is up, however active the GM is", async () => {
+    const { signedInAt, refreshToken } = await stayActiveForAYear();
 
-    travel(365 - 12 * 29 + 1);
+    vi.setSystemTime(signedInAt + YEAR + MINUTE);
 
     expect(await refresh(refreshToken)).toBeNull();
   });
 
-  it("ends the session after 30 quiet days", async () => {
-    const refreshToken = await createYourLinkTokens();
+  it("ends the session after 30 quiet days, and not a minute before", async () => {
+    const signedInAt = Date.now();
+    const returning = await createYourLinkTokens();
+    const quiet = await createYourLinkTokens();
 
-    travel(UNSAVED_GROUP_QUIET_DAYS + 1);
+    vi.setSystemTime(signedInAt + QUIET_LIMIT - MINUTE);
+    expect(await refresh(returning)).toBeTypeOf("string");
 
-    expect(await refresh(refreshToken)).toBeNull();
+    vi.setSystemTime(signedInAt + QUIET_LIMIT + MINUTE);
+    expect(await refresh(quiet)).toBeNull();
   });
 });

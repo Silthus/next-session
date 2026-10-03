@@ -210,7 +210,7 @@ Convex Auth replaces the session on every sign-in and does not link an anonymous
 2. The client calls `account.startSave` and keeps the code in `sessionStorage` (`next-session.pendingSave`). The claim expires on the server after 10 minutes.
 3. The client calls `signIn("password", {email, password, flow: "signUp" | "signIn"})`. On failure nothing changed: the anonymous session still holds the Group.
 4. The client calls `account.finishSave({code})`. The server finds the claim by hash, checks it is unexpired, then for every Group of the anonymous user: sets `ownerId` to the caller and clears `expiresAt`. It copies the Legal Acceptance onto the Account if the Account has none, deletes the claim, and deletes the anonymous user with its `authAccounts`, `authSessions`, and `authRefreshTokens`.
-5. On app start, a leftover `pendingSave` with a signed-in Account retries step 4, so a dropped connection between steps 3 and 4 loses nothing. The recovery holds only in the same tab and within the claim's 10 minutes: `sessionStorage` is per tab, and an expired claim throws `CLAIM_INVALID`. After that the Groups stay with the anonymous user and expire with it (§5.5). A second `finishSave` with a used code throws `CLAIM_INVALID`, and the client clears the pending code.
+5. On app start, a leftover `pendingSave` with a signed-in Account retries step 4, so a dropped connection between steps 3 and 4 loses nothing. The recovery holds only in the same tab and within the claim's 10 minutes: `sessionStorage` is per tab, and an expired claim throws `CLAIM_INVALID`. After that the Groups stay with the anonymous user until they expire (§5.5). A second `finishSave` with a used code throws `CLAIM_INVALID`, and the client clears the pending code.
 
 The Account's existing Groups are never read for deletion. A test pins it: an Account with two Groups saves an anonymous one and ends up with three.
 
@@ -247,7 +247,9 @@ A hit throws `RATE_LIMITED` with `retryAfter`; the UI shows "Slow down a moment"
 
 ### 5.6 Session lifetime
 
-A session lasts at most 1 year from sign-in (`session.totalDurationMs`) and ends after 30 days without a token refresh (`session.inactiveDurationMs`). Any visit refreshes the token, so a GM who comes back within every 30 days stays signed in for the year. The 30 quiet days match the Expiry of Unsaved Groups (§5.5): an Anonymous GM who stays away long enough to lose the session would lose the Group to Expiry anyway. After the year, an Account logs in again; an Anonymous GM loses access to its Groups, which is the reason to Save.
+A session lasts at most 1 year from sign-in (`session.totalDurationMs`) and ends after 30 days without a token refresh (`session.inactiveDurationMs`). Every visit by the GM refreshes the token, so a GM who comes back within every 30 days stays signed in for the year. After the year, an Account logs in again; an Anonymous GM loses access to its Groups, which is the reason to Save.
+
+The 30 days match the quiet days of Expiry (§5.5), but the two clocks differ: Player answers keep an Unsaved Group alive without refreshing the GM's session. An Anonymous GM who stays away more than 30 days while the Players keep answering loses access to a Group that lives on until it goes quiet and expires. We accept that: the GM surface asks to Save, and a GM who is gone for a month has stopped using the link. Raising `inactiveDurationMs` to the full year would close the gap at no storage cost, because Expiry still deletes the anonymous user with its last Group.
 
 Convex Auth's default is 30 days in total, which would lock out an active Anonymous GM after a month, Groups and all.
 

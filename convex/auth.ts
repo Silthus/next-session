@@ -50,7 +50,6 @@ const stockPassword = (
       email: normalizeEmail(params.email),
       ...(params.flow === "signUp" ? legalAcceptance() : {}),
     }),
-    validatePasswordRequirements: requireStrongPassword,
   }) as unknown as { options: ConvexCredentialsUserConfig<DataModel> }
 ).options;
 
