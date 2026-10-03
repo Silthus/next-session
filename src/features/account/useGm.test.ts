@@ -80,6 +80,21 @@ describe("signInSwitchingIdentity", () => {
     await expect(switched).rejects.toThrow();
   });
 
+  it("settles overlapping switches one after the other", async () => {
+    const { client, steps, confirm } = fakeClient();
+    const session = { client, fetchAccessToken: latestToken, isAuthenticated: true };
+
+    const first = signInSwitchingIdentity(() => Promise.resolve(), session);
+    const second = signInSwitchingIdentity(() => Promise.resolve(), session);
+    await vi.waitFor(() => expect(steps).toHaveLength(1));
+    confirm(true);
+    await first;
+    await vi.waitFor(() => expect(steps).toHaveLength(2));
+    confirm(true);
+
+    await second;
+  });
+
   it("leaves a first sign-in to the auth provider", async () => {
     const { client, steps } = fakeClient();
 

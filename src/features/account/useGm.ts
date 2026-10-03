@@ -33,10 +33,15 @@ type LiveSession = {
   isAuthenticated: boolean;
 };
 
-export async function signInSwitchingIdentity(
-  signIn: () => Promise<unknown>,
-  session: LiveSession,
-) {
+let pendingSwitch: Promise<unknown> = Promise.resolve();
+
+export function signInSwitchingIdentity(signIn: () => Promise<unknown>, session: LiveSession) {
+  const next = pendingSwitch.catch(() => undefined).then(() => switchIdentity(signIn, session));
+  pendingSwitch = next;
+  return next;
+}
+
+async function switchIdentity(signIn: () => Promise<unknown>, session: LiveSession) {
   await signIn();
   if (session.isAuthenticated) await confirmIdentity(session);
 }

@@ -70,12 +70,16 @@ describe("Save", () => {
     const account = await signUpAccount(t);
     await account.as.mutation(api.groups.create, {});
     await account.as.mutation(api.groups.create, {});
+    const existing = await groupsOf(account.as);
     const anonymous = await createYourLink(t);
     const { code } = await anonymous.as.mutation(api.account.startSave, {});
 
-    await account.as.mutation(api.account.finishSave, { code });
+    const { groupIds } = await account.as.mutation(api.account.finishSave, { code });
 
-    expect(await account.as.query(api.groups.mine, {})).toHaveLength(3);
+    const after = await groupsOf(account.as);
+    expect(after).toHaveLength(3);
+    expect(after).toEqual(expect.arrayContaining(existing));
+    expect(after.map((group) => group?.id)).toEqual(expect.arrayContaining(groupIds));
   });
 
   it("moves every Group of the Anonymous GM", async () => {
