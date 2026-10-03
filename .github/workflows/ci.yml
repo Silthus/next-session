@@ -60,7 +60,8 @@ jobs:
       - name: Skip unless this commit is still the head of main
         id: head
         run: |
-          main_head="$(git ls-remote origin refs/heads/main | cut -f1)"
+          main_ref="$(git ls-remote --exit-code origin refs/heads/main)"
+          main_head="${main_ref%%[[:space:]]*}"
           if [ "$main_head" = "$GITHUB_SHA" ]; then
             echo "current=true" >> "$GITHUB_OUTPUT"
           else
@@ -74,7 +75,9 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Deploy Convex and build the SPA against it
         if: steps.head.outputs.current == 'true'
-        run: bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL
+        run: |
+          : "${LEGAL_CONTROLLER_ADDRESS:?is not set as a repo variable}" "${LEGAL_CONTACT_EMAIL:?is not set as a repo variable}"
+          bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
           LEGAL_CONTROLLER_ADDRESS: ${{ vars.LEGAL_CONTROLLER_ADDRESS }}
