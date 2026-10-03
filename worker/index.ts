@@ -4,7 +4,7 @@ interface Env {
 
 const lonirOrigin = "https://little-spaniel-709.convex.site";
 const legacyShareLink = /^\/s\/[A-Za-z0-9_-]{8}\/?$/;
-const legacyGroupsPage = /^\/groups(\/|$)/;
+const legacyGroupsPage = /^\/groups/;
 
 export function legacyRedirect(url: URL): string | null {
   const isLegacy = legacyShareLink.test(url.pathname) || legacyGroupsPage.test(url.pathname);

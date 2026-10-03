@@ -33,6 +33,7 @@ describe("legacy Lonir links", () => {
     "/groups",
     "/groups/",
     "/groups/k57abc123?tab=roster",
+    "/groupsearch?tab=roster",
   ])("redirects %s to the same path and query on Lonir", async (path) => {
     const { response, requested } = await visit(path);
 
@@ -49,7 +50,6 @@ describe("the new app", () => {
     "/s/AbC9_-x",
     "/s/AbC9_-xZ/extra",
     "/s/AbC9.-xZ",
-    "/groupsearch",
     "/g/k57abc123?month=2026-11",
     "/assets/index-abc123.js",
   ])("serves %s from static assets", async (path) => {
