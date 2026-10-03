@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { authEnv, convexEnvSet, generateAuthKeys, parseEnvFile } from "./auth-env";
+import { authEnv, convexEnvSet, parseEnvFile } from "./auth-env";
+import { generateAuthKeys } from "./authKeys";
 
 async function signWith(jwtPrivateKey: string, data: Uint8Array<ArrayBuffer>) {
   const der = Buffer.from(jwtPrivateKey.replace(/-----[A-Z ]+-----|\s/g, ""), "base64");

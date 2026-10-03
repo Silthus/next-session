@@ -8,7 +8,10 @@
  * @module
  */
 
+import type * as account from "../account.js";
+import type * as auth from "../auth.js";
 import type * as groups from "../groups.js";
+import type * as http from "../http.js";
 import type * as model_access from "../model/access.js";
 import type * as model_errors from "../model/errors.js";
 import type * as model_gms from "../model/gms.js";
@@ -22,7 +25,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  account: typeof account;
+  auth: typeof auth;
   groups: typeof groups;
+  http: typeof http;
   "model/access": typeof model_access;
   "model/errors": typeof model_errors;
   "model/gms": typeof model_gms;
