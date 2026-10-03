@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LEGAL_VERSIONS } from "../shared/legal";
 import { UNSAVED_GROUP_QUIET_DAYS } from "../shared/limits";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
   createYourLink,
@@ -25,6 +25,7 @@ afterEach(() => {
 });
 
 const DAY = 86_400_000;
+const TWELVE_PASSWORD_HASHES_MS = 30_000;
 
 async function legalAcceptanceOf(userId: Id<"users">) {
   const user = await t.run(async (ctx) => await ctx.db.get("users", userId));
@@ -171,18 +172,22 @@ describe("Accounts", () => {
     );
   });
 
-  it("locks an Account after 10 wrong passwords, even against the right one", async () => {
-    const credentials = newCredentials();
-    await signUpAccount(t, credentials);
-    const wrong = { ...credentials, password: "wrong horse battery" };
-    for (let attempt = 0; attempt < 10; attempt++) {
-      await expectErrorCode(logInAccount(t, wrong), "INVALID_CREDENTIALS");
-    }
+  it(
+    "locks an Account after 10 wrong passwords, even against the right one",
+    { timeout: TWELVE_PASSWORD_HASHES_MS },
+    async () => {
+      const credentials = newCredentials();
+      await signUpAccount(t, credentials);
+      const wrong = { ...credentials, password: "wrong horse battery" };
+      for (let attempt = 0; attempt < 10; attempt++) {
+        await expectErrorCode(logInAccount(t, wrong), "INVALID_CREDENTIALS");
+      }
 
-    const data = await expectErrorCode(logInAccount(t, credentials), "RATE_LIMITED");
+      const data = await expectErrorCode(logInAccount(t, credentials), "RATE_LIMITED");
 
-    expect(data.retryAfter).toBeGreaterThan(0);
-  });
+      expect(data.retryAfter).toBeGreaterThan(0);
+    },
+  );
 });
 
 describe("the Account sign-up limit", () => {
@@ -193,8 +198,10 @@ describe("the Account sign-up limit", () => {
     return (await t.run(async (ctx) => await ctx.db.query("authAccounts").collect())).length;
   }
 
-  async function signUps(count: number) {
-    for (let signUp = 0; signUp < count; signUp++) await signUpAccount(t);
+  async function admitSignUps(count: number) {
+    for (let signUp = 0; signUp < count; signUp++) {
+      await t.mutation(internal.auth.admitAccountSignUp, { email: newCredentials().email });
+    }
   }
 
   beforeEach(() => {
@@ -202,16 +209,16 @@ describe("the Account sign-up limit", () => {
   });
 
   it("refuses a sign-up after a burst of 20 and creates no Account for it", async () => {
-    await signUps(BURST);
+    await admitSignUps(BURST);
 
     const data = await expectErrorCode(signUpAccount(t), "RATE_LIMITED");
 
     expect(data.retryAfter).toBeGreaterThan(0);
-    expect(await countAccounts()).toBe(BURST);
+    expect(await countAccounts()).toBe(0);
   });
 
   it("admits one more sign-up every 12 seconds after the burst, and not a moment sooner", async () => {
-    await signUps(BURST);
+    await admitSignUps(BURST);
     const burstEnd = Date.now();
 
     vi.setSystemTime(burstEnd + REFILL_MS - 1);
@@ -234,7 +241,7 @@ describe("the Account sign-up limit", () => {
       await expectErrorCode(signUpAccount(t, taken), "EMAIL_TAKEN");
     }
 
-    await signUps(BURST - 1);
+    await admitSignUps(BURST - 1);
 
     await expectErrorCode(signUpAccount(t), "RATE_LIMITED");
   });
