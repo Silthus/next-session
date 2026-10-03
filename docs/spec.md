@@ -44,7 +44,7 @@ Browser ──HTTPS──▶ Cloudflare Worker "next-session" (next-session.link
 | Unit and integration tests | Vitest with three projects: `shared` (node), `convex` (`edge-runtime`, `convex-test`), `ui` (jsdom, Testing Library) |
 | End-to-end tests | Playwright (chromium) against `vite dev` and a local Convex backend |
 | Lint and format | ESLint (typescript-eslint, react-hooks, `@convex-dev/eslint-plugin`) and Prettier |
-| Gate | `bun run check` = `tsc` (app and convex projects) + `eslint .` + `prettier --check .` + `vitest run` |
+| Gate | `bun run check` = `tsc` (app, node, and convex projects) + `eslint .` + `prettier --check .` + `vitest run` + `vite build` + `wrangler deploy --dry-run` |
 | Hosting | `wrangler` 4.x deploys `dist/` and `worker/index.ts` |
 | Browser floor | Evergreen browsers with `color-mix(in oklab)`: Chrome/Edge 111, Safari 16.2, Firefox 113. Vite `build.target` `es2022`. |
 
