@@ -3,5 +3,5 @@ import { NotFoundScreen } from "../ui/NotFoundScreen";
 
 export const Route = createRootRoute({
   component: Outlet,
-  notFoundComponent: () => <NotFoundScreen kind="page" />,
+  notFoundComponent: NotFoundScreen,
 });

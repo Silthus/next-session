@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Sheet } from "./Sheet";
@@ -9,7 +9,7 @@ describe("Sheet", () => {
   });
   const close = vi.fn(function (this: HTMLDialogElement) {
     this.open = false;
-    this.dispatchEvent(new Event("close"));
+    setTimeout(() => this.dispatchEvent(new Event("close")), 0);
   });
   beforeEach(() => {
     HTMLDialogElement.prototype.showModal = showModal;
@@ -19,13 +19,14 @@ describe("Sheet", () => {
     vi.clearAllMocks();
   });
 
-  it("renders nothing while closed", () => {
+  it("shows no content while closed", () => {
     render(
       <Sheet open={false} title="Keep My group" onClose={() => {}}>
         body
       </Sheet>,
     );
-    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.queryByText("body")).toBeNull();
+    expect(showModal).not.toHaveBeenCalled();
   });
 
   it("is a dialog named by its title that closes on Escape and on the backdrop", async () => {
@@ -35,31 +36,31 @@ describe("Sheet", () => {
         <p>The player link stays exactly the same.</p>
       </Sheet>,
     );
-    expect(screen.getByRole("dialog", { name: "Keep My group" }).textContent).toContain(
-      "The player link stays exactly the same.",
-    );
     const dialog = screen.getByRole("dialog", { name: "Keep My group" });
+    expect(dialog.textContent).toContain("The player link stays exactly the same.");
+    expect(showModal).toHaveBeenCalledOnce();
     fireEvent(dialog, new Event("cancel", { cancelable: true }));
     await userEvent.click(dialog);
     await userEvent.click(screen.getByText("The player link stays exactly the same."));
     expect(onClose).toHaveBeenCalledTimes(2);
   });
 
-  it("opens as a modal and closes the native dialog when the parent closes it", () => {
+  it("closes the native dialog when the parent closes it, without echoing onClose", async () => {
     const onClose = vi.fn();
     const { rerender } = render(
       <Sheet open title="Keep My group" onClose={onClose}>
         body
       </Sheet>,
     );
-    expect(showModal).toHaveBeenCalledOnce();
     rerender(
       <Sheet open={false} title="Keep My group" onClose={onClose}>
         body
       </Sheet>,
     );
     expect(close).toHaveBeenCalledOnce();
+    await act(() => new Promise((resolve) => setTimeout(resolve, 1)));
     expect(onClose).not.toHaveBeenCalled();
+    expect(screen.queryByText("body")).toBeNull();
   });
 
   it("tells the parent when the browser closes the dialog on its own", () => {
@@ -69,7 +70,7 @@ describe("Sheet", () => {
         body
       </Sheet>,
     );
-    screen.getByRole("dialog").dispatchEvent(new Event("close"));
+    fireEvent(screen.getByRole("dialog"), new Event("close"));
     expect(onClose).toHaveBeenCalledOnce();
   });
 });

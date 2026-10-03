@@ -125,6 +125,13 @@ describe("parseLegalDocument", () => {
     ]);
   });
 
+  it("fills a placeholder written with spaces inside the braces", () => {
+    const doc = parseLegalDocument("# T\n\nWrite to {{ CONTACT_EMAIL }}.\n", placeholders);
+    expect(doc.intro).toEqual([
+      { kind: "paragraph", lines: [[{ kind: "text", text: "Write to hello@example.test." }]] },
+    ]);
+  });
+
   it("refuses a placeholder it cannot fill", () => {
     expect(() => parseLegalDocument("# T\n\nWrite to {{CONTACT_EMIAL}}.\n", placeholders)).toThrow(
       "Unknown legal placeholder CONTACT_EMIAL",

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Fragment } from "react";
 import { Eyebrow } from "../../ui/Eyebrow";
+import { humanDate } from "./humanDate";
 import type { Block, Inline, LegalDocument } from "./legalDocument";
 
 export function LegalArticle({ legalDocument }: { legalDocument: LegalDocument }) {
@@ -20,12 +21,6 @@ export function LegalArticle({ legalDocument }: { legalDocument: LegalDocument }
         ))}
       </div>
     </article>
-  );
-}
-
-function humanDate(isoDate: string) {
-  return new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" }).format(
-    new Date(isoDate),
   );
 }
 

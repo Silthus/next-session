@@ -60,7 +60,7 @@ function splitLeadingHeading(chunk: string): string[] {
 }
 
 function fillPlaceholders(markdown: string, placeholders: LegalPlaceholders): string {
-  return markdown.replace(/\{\{(\w+)\}\}/g, (_, key: string) => {
+  return markdown.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key: string) => {
     if (!isPlaceholderKey(key, placeholders)) throw new Error(`Unknown legal placeholder ${key}`);
     return placeholders[key];
   });
