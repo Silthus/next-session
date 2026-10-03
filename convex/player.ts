@@ -2,10 +2,9 @@ import { v } from "convex/values";
 import { fillRestDates } from "../shared/answers";
 import {
   addMonths,
-  bookingWindow,
   isBookable,
+  isBookableMonth,
   isValidMonth,
-  monthOf,
   todayUtc,
   type IsoDate,
   type IsoMonth,
@@ -94,7 +93,7 @@ export const fillRest = mutation({
   returns: v.null(),
   handler: async (ctx, { shareToken, playerId, month }) => {
     const { group, player } = await playerOnShareLink(ctx, shareToken, playerId);
-    if (!isBookableMonth(month)) fail({ code: "OUT_OF_WINDOW" });
+    if (!isBookableMonth(month, today())) fail({ code: "OUT_OF_WINDOW" });
     await enforceAnswerRateLimits(ctx, group, player);
     const answered = await answersOfPlayerIn(ctx, player._id, month);
     const unanswered = fillRestDates(month, today(), new Set(answered.map(({ date }) => date)));
@@ -169,11 +168,6 @@ async function enforceAnswerRateLimits(
 ) {
   await enforceRateLimit(ctx, "answer", player._id);
   await enforceRateLimit(ctx, "answerPerGroup", group._id);
-}
-
-function isBookableMonth(month: string) {
-  const { first, last } = bookingWindow(today());
-  return isValidMonth(month) && monthOf(first) <= month && month <= monthOf(last);
 }
 
 function today() {
