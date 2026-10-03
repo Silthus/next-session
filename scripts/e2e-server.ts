@@ -1,5 +1,6 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { version as convexCliVersion } from "convex/package.json";
 import { LOCAL_BACKEND_ENV } from "./localBackendEnv";
 
 interface SignalSource {
@@ -7,8 +8,20 @@ interface SignalSource {
 }
 
 const localBackendPort = 3210;
-const localBackendVersion = "precompiled-2026-09-28-5c7cb5b";
+const localBackendVersionByCli: Record<string, string> = {
+  "1.46.0": "precompiled-2026-09-28-5c7cb5b",
+};
 const developerEnvFile = ".env.local";
+
+export function localBackendVersionFor(cliVersion: string) {
+  const backendVersion = localBackendVersionByCli[cliVersion];
+  if (!backendVersion) {
+    throw new Error(
+      `No local backend pinned for Convex CLI ${cliVersion}. Pin the version https://version.convex.dev/v1/local_backend_version serves it.`,
+    );
+  }
+  return backendVersion;
+}
 
 export function forwardShutdownSignals(child: ChildProcess, source: SignalSource = process) {
   for (const signal of ["SIGINT", "SIGTERM"] as const) {
@@ -29,7 +42,7 @@ function startLocalBackendWithVite() {
       "--local-site-port",
       String(localBackendPort + 1),
       "--local-backend-version",
-      localBackendVersion,
+      localBackendVersionFor(convexCliVersion),
       "--start",
       "bun scripts/auth-env.ts local && bunx vite --port 5173 --strictPort",
     ],

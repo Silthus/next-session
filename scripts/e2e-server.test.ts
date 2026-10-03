@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { EventEmitter, once } from "node:events";
 import { describe, expect, it } from "vitest";
-import { forwardShutdownSignals } from "./e2e-server";
+import { forwardShutdownSignals, localBackendVersionFor } from "./e2e-server";
 
 const reportFirstSignal = `
 for (const signal of ["SIGINT", "SIGTERM"]) {
@@ -41,4 +41,16 @@ describe("forwardShutdownSignals", () => {
       expect(await signalTheChildReceives(signal)).toBe("SIGINT");
     },
   );
+});
+
+describe("localBackendVersionFor", () => {
+  it("runs Convex CLI 1.46.0 on the backend version.convex.dev serves it", () => {
+    expect(localBackendVersionFor("1.46.0")).toBe("precompiled-2026-09-28-5c7cb5b");
+  });
+
+  it("stops a CLI bump that left the backend pin behind", () => {
+    expect(() => localBackendVersionFor("1.47.0")).toThrow(
+      "No local backend pinned for Convex CLI 1.47.0",
+    );
+  });
 });
