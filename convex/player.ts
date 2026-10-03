@@ -11,7 +11,6 @@ import {
   type IsoMonth,
 } from "../shared/dates";
 import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
-import { normalizeName, type NormalizedName } from "../shared/names";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import {
@@ -21,6 +20,7 @@ import {
   touchGroup,
 } from "./model/access";
 import { fail } from "./model/errors";
+import { ensureNameIsFree, ensureRosterHasRoom, validName } from "./model/players";
 import { enforceRateLimit } from "./model/rateLimits";
 import { answerValue } from "./schema";
 
@@ -169,27 +169,6 @@ async function enforceAnswerRateLimits(
 ) {
   await enforceRateLimit(ctx, "answer", player._id);
   await enforceRateLimit(ctx, "answerPerGroup", group._id);
-}
-
-function validName(raw: string): NormalizedName {
-  const normalized = normalizeName(raw);
-  return normalized === "INVALID_NAME" ? fail({ code: "INVALID_NAME" }) : normalized;
-}
-
-async function ensureNameIsFree(ctx: QueryCtx, groupId: Id<"groups">, { nameKey }: NormalizedName) {
-  const holder = await ctx.db
-    .query("players")
-    .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", groupId).eq("nameKey", nameKey))
-    .first();
-  if (holder !== null) fail({ code: "NAME_TAKEN", playerId: holder._id });
-}
-
-async function ensureRosterHasRoom(ctx: QueryCtx, groupId: Id<"groups">) {
-  const roster = await ctx.db
-    .query("players")
-    .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", groupId))
-    .take(MAX_PLAYERS_PER_GROUP);
-  if (roster.length >= MAX_PLAYERS_PER_GROUP) fail({ code: "ROSTER_FULL" });
 }
 
 function isBookableMonth(month: string) {

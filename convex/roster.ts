@@ -1,10 +1,8 @@
 import { v } from "convex/values";
-import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
-import { normalizeName, type NormalizedName } from "../shared/names";
 import type { Id } from "./_generated/dataModel";
-import { mutation, type MutationCtx, type QueryCtx } from "./_generated/server";
+import { mutation, type MutationCtx } from "./_generated/server";
 import { ownedGroup, ownedPlayer, touchGroup } from "./model/access";
-import { fail } from "./model/errors";
+import { ensureNameIsFree, ensureRosterHasRoom, validName } from "./model/players";
 
 export const addPlayer = mutation({
   args: { groupId: v.id("groups"), name: v.string() },
@@ -44,34 +42,6 @@ export const removePlayer = mutation({
     return null;
   },
 });
-
-function validName(raw: string): NormalizedName {
-  const normalized = normalizeName(raw);
-  return normalized === "INVALID_NAME" ? fail({ code: "INVALID_NAME" }) : normalized;
-}
-
-async function ensureNameIsFree(
-  ctx: QueryCtx,
-  groupId: Id<"groups">,
-  { nameKey }: NormalizedName,
-  renamedPlayerId?: Id<"players">,
-) {
-  const holder = await ctx.db
-    .query("players")
-    .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", groupId).eq("nameKey", nameKey))
-    .first();
-  if (holder !== null && holder._id !== renamedPlayerId) {
-    fail({ code: "NAME_TAKEN", playerId: holder._id });
-  }
-}
-
-async function ensureRosterHasRoom(ctx: QueryCtx, groupId: Id<"groups">) {
-  const roster = await ctx.db
-    .query("players")
-    .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", groupId))
-    .take(MAX_PLAYERS_PER_GROUP);
-  if (roster.length >= MAX_PLAYERS_PER_GROUP) fail({ code: "ROSTER_FULL" });
-}
 
 async function deleteAnswersOf(ctx: MutationCtx, playerId: Id<"players">) {
   const answers = await ctx.db
