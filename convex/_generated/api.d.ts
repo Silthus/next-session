@@ -8,13 +8,27 @@
  * @module
  */
 
+import type * as groups from "../groups.js";
+import type * as model_access from "../model/access.js";
+import type * as model_errors from "../model/errors.js";
+import type * as model_gms from "../model/gms.js";
+import type * as model_groups from "../model/groups.js";
+import type * as model_rateLimits from "../model/rateLimits.js";
+
 import type {
   ApiFromModules,
   FilterApi,
   FunctionReference,
 } from "convex/server";
 
-declare const fullApi: ApiFromModules<{}>;
+declare const fullApi: ApiFromModules<{
+  groups: typeof groups;
+  "model/access": typeof model_access;
+  "model/errors": typeof model_errors;
+  "model/gms": typeof model_gms;
+  "model/groups": typeof model_groups;
+  "model/rateLimits": typeof model_rateLimits;
+}>;
 
 /**
  * A utility for referencing Convex functions in your app's public API.
@@ -42,4 +56,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  rateLimiter: import("@convex-dev/rate-limiter/_generated/component.js").ComponentApi<"rateLimiter">;
+};
