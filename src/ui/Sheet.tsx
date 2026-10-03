@@ -1,4 +1,11 @@
-import { useEffect, useId, useRef, type MouseEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  type MouseEvent,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
 
 export function Sheet({
   open,
@@ -13,6 +20,7 @@ export function Sheet({
 }) {
   const titleId = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const pressedBackdrop = useRef(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -21,8 +29,11 @@ export function Sheet({
     else closeModal(dialog);
   }, [open]);
 
+  const rememberPress = (event: PointerEvent<HTMLDialogElement>) => {
+    pressedBackdrop.current = event.target === event.currentTarget;
+  };
   const closeOnBackdrop = (event: MouseEvent<HTMLDialogElement>) => {
-    if (event.target === event.currentTarget) onClose();
+    if (pressedBackdrop.current && event.target === event.currentTarget) onClose();
   };
 
   return (
@@ -34,13 +45,14 @@ export function Sheet({
         onClose();
       }}
       onClose={() => {
-        if (open) onClose();
+        if (open && !dialogRef.current?.open) onClose();
       }}
+      onPointerDown={rememberPress}
       onClick={closeOnBackdrop}
-      className="animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center bg-transparent p-0 backdrop:bg-ink/40 open:flex sm:items-center"
+      className="animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-ink/40 open:flex sm:items-center"
     >
       {open && (
-        <div className="animate-rise max-h-dvh w-full overflow-y-auto rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl">
+        <div className="animate-rise max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl">
           <h2 id={titleId} className="font-display text-2xl font-bold">
             {title}
           </h2>

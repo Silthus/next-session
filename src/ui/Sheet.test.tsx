@@ -45,6 +45,22 @@ describe("Sheet", () => {
     expect(onClose).toHaveBeenCalledTimes(2);
   });
 
+  it("stays open when a drag that started inside the panel ends on the backdrop", () => {
+    const onClose = vi.fn();
+    render(
+      <Sheet open title="Keep My group" onClose={onClose}>
+        <p>Type your email.</p>
+      </Sheet>,
+    );
+    const dialog = screen.getByRole("dialog");
+    fireEvent.pointerDown(screen.getByText("Type your email."));
+    fireEvent.click(dialog);
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.pointerDown(dialog);
+    fireEvent.click(dialog);
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
   it("closes the native dialog when the parent closes it, without echoing onClose", async () => {
     const onClose = vi.fn();
     const { rerender } = render(
