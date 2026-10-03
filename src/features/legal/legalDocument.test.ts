@@ -71,7 +71,9 @@ describe("parseLegalDocument", () => {
             { kind: "text", text: "." },
           ],
           [
-            { kind: "text", text: "Write to hello@example.test or " },
+            { kind: "text", text: "Write to " },
+            { kind: "link", href: "mailto:hello@example.test", text: "hello@example.test" },
+            { kind: "text", text: " or " },
             { kind: "link", href: "https://www.lda.bayern.de", text: "https://www.lda.bayern.de" },
             { kind: "text", text: "." },
           ],
@@ -125,10 +127,65 @@ describe("parseLegalDocument", () => {
     ]);
   });
 
-  it("fills a placeholder written with spaces inside the braces", () => {
-    const doc = parseLegalDocument("# T\n\nWrite to {{ CONTACT_EMAIL }}.\n", placeholders);
+  it("turns a bare email address into a mailto link", () => {
+    const doc = parseLegalDocument("# T\n\nWrite to {{CONTACT_EMAIL}}; we answer.\n", placeholders);
     expect(doc.intro).toEqual([
-      { kind: "paragraph", lines: [[{ kind: "text", text: "Write to hello@example.test." }]] },
+      {
+        kind: "paragraph",
+        lines: [
+          [
+            { kind: "text", text: "Write to " },
+            { kind: "link", href: "mailto:hello@example.test", text: "hello@example.test" },
+            { kind: "text", text: "; we answer." },
+          ],
+        ],
+      },
+    ]);
+  });
+
+  it("links the whole address when the local part carries an apostrophe", () => {
+    const doc = parseLegalDocument("# T\n\nWrite to {{CONTACT_EMAIL}}.\n", {
+      ...placeholders,
+      CONTACT_EMAIL: "o'hara@example.test",
+    });
+    expect(doc.intro).toEqual([
+      {
+        kind: "paragraph",
+        lines: [
+          [
+            { kind: "text", text: "Write to " },
+            { kind: "link", href: "mailto:o'hara@example.test", text: "o'hara@example.test" },
+            { kind: "text", text: "." },
+          ],
+        ],
+      },
+    ]);
+  });
+
+  it("percent-encodes reserved characters of the local part in the mailto link", () => {
+    const doc = parseLegalDocument("# T\n\nWrite to {{CONTACT_EMAIL}}.\n", {
+      ...placeholders,
+      CONTACT_EMAIL: "first?last#tag@example.test",
+    });
+    expect(doc.intro[0]).toMatchObject({
+      lines: [
+        [
+          { kind: "text", text: "Write to " },
+          {
+            kind: "link",
+            href: "mailto:first%3Flast%23tag@example.test",
+            text: "first?last#tag@example.test",
+          },
+          { kind: "text", text: "." },
+        ],
+      ],
+    });
+  });
+
+  it("fills a placeholder written with spaces inside the braces", () => {
+    const doc = parseLegalDocument("# T\n\nAt {{ CONTROLLER_ADDRESS }}.\n", placeholders);
+    expect(doc.intro).toEqual([
+      { kind: "paragraph", lines: [[{ kind: "text", text: "At Somewhere 1, 12345 Town." }]] },
     ]);
   });
 

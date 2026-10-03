@@ -1,7 +1,20 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Outlet } from "@tanstack/react-router";
+import { pageTitle } from "../lib/pageTitle";
 import { NotFoundScreen } from "../ui/NotFoundScreen";
 
 export const Route = createRootRoute({
-  component: Outlet,
+  head: ({ match }) => ({
+    meta: [{ title: match._notFound ? pageTitle("Nothing here") : pageTitle() }],
+  }),
+  component: Root,
   notFoundComponent: NotFoundScreen,
 });
+
+function Root() {
+  return (
+    <>
+      <HeadContent />
+      <Outlet />
+    </>
+  );
+}
