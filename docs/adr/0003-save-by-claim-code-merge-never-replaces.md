@@ -12,5 +12,5 @@ The redeem only adds Groups to the Account. It never reads the Account's own Gro
 ## Consequences
 
 - A failed sign-in changes nothing: the anonymous session still owns the Group.
-- A dropped connection between sign-in and redeem is recovered on the next app start from the pending code.
+- A dropped connection between sign-in and redeem is recovered on the next app start from the pending code, but only in the same tab and within the claim's 10 minutes. `sessionStorage` is per tab, and the server refuses an expired claim with `CLAIM_INVALID`. Moving the code to `localStorage` with a longer TTL would widen the window; we have not needed it.
 - The same flow works unchanged when Google OAuth or email codes are added.
