@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { isBookable, todayUtc } from "../shared/dates";
 import type { Id } from "./_generated/dataModel";
 import { mutation, type QueryCtx } from "./_generated/server";
-import { ownedGroup, requireGm, touchGroup } from "./model/access";
+import { ownedGroup, ownedSession, touchGroup } from "./model/access";
 import { fail } from "./model/errors";
 
 export const schedule = mutation({
@@ -22,9 +22,7 @@ export const unschedule = mutation({
   args: { sessionId: v.id("sessions") },
   returns: v.null(),
   handler: async (ctx, { sessionId }) => {
-    await requireGm(ctx);
-    const session = (await ctx.db.get("sessions", sessionId)) ?? fail({ code: "NOT_FOUND" });
-    const { group } = await ownedGroup(ctx, session.groupId);
+    const { group, session } = await ownedSession(ctx, sessionId);
     ensureBookable(session.date);
     await ctx.db.delete("sessions", session._id);
     await touchGroup(ctx, group);

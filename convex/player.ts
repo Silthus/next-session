@@ -14,7 +14,12 @@ import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
 import { normalizeName, type NormalizedName } from "../shared/names";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
-import { groupByShareToken, playerOnShareLink, touchGroup } from "./model/access";
+import {
+  findPlayerOnShareLink,
+  groupByShareToken,
+  playerOnShareLink,
+  touchGroup,
+} from "./model/access";
 import { fail } from "./model/errors";
 import { enforceRateLimit } from "./model/rateLimits";
 import { answerValue } from "./schema";
@@ -105,14 +110,6 @@ export const fillRest = mutation({
     return null;
   },
 });
-
-async function findPlayerOnShareLink(ctx: QueryCtx, shareToken: string, rawPlayerId: string) {
-  const group = await groupByShareToken(ctx, shareToken);
-  const playerId = ctx.db.normalizeId("players", rawPlayerId);
-  if (group === null || playerId === null) return null;
-  const player = await ctx.db.get("players", playerId);
-  return player?.groupId === group._id ? player : null;
-}
 
 async function rosterOf(ctx: QueryCtx, groupId: Id<"groups">) {
   const players = await ctx.db

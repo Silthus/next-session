@@ -3,7 +3,7 @@ import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
 import { normalizeName, type NormalizedName } from "../shared/names";
 import type { Id } from "./_generated/dataModel";
 import { mutation, type MutationCtx, type QueryCtx } from "./_generated/server";
-import { ownedGroup, requireGm, touchGroup } from "./model/access";
+import { ownedGroup, ownedPlayer, touchGroup } from "./model/access";
 import { fail } from "./model/errors";
 
 export const addPlayer = mutation({
@@ -44,13 +44,6 @@ export const removePlayer = mutation({
     return null;
   },
 });
-
-async function ownedPlayer(ctx: QueryCtx, playerId: Id<"players">) {
-  await requireGm(ctx);
-  const player = (await ctx.db.get("players", playerId)) ?? fail({ code: "NOT_FOUND" });
-  const { group } = await ownedGroup(ctx, player.groupId);
-  return { group, player };
-}
 
 function validName(raw: string): NormalizedName {
   const normalized = normalizeName(raw);
