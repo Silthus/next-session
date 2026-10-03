@@ -100,10 +100,11 @@ async function rotatedAway(groupId: Id<"groups">, as: GmClient) {
   return oldShareToken;
 }
 
-async function exhaustGroupAnswerBucket(groupId: Id<"groups">, shareToken: string) {
-  for (let player = 0; player < 5; player++) {
-    const playerId = await seedPlayer(groupId, `Tapper ${player}`);
-    for (let tap = 0; tap < 60; tap++) {
+async function spendGroupAnswerTokens(groupId: Id<"groups">, shareToken: string, count: number) {
+  const tapsPerPlayer = 60;
+  for (let first = 0; first < count; first += tapsPerPlayer) {
+    const playerId = await seedPlayer(groupId, `Tapper ${first}`);
+    for (let tap = first; tap < Math.min(first + tapsPerPlayer, count); tap++) {
       await t.mutation(api.player.answer, { shareToken, playerId, date: TODAY, answer: "free" });
     }
   }
@@ -478,7 +479,7 @@ describe("player.answer", () => {
   it("rate limits a Group to a burst of 300 Answers across its Players", async () => {
     const busy = await sharedGroup();
     const quiet = await sharedGroup();
-    await exhaustGroupAnswerBucket(busy.groupId, busy.shareToken);
+    await spendGroupAnswerTokens(busy.groupId, busy.shareToken, 300);
     const latecomer = await seedPlayer(busy.groupId, "Ada");
     const outsider = await seedPlayer(quiet.groupId, "Ada");
     const tap = (shareToken: string, playerId: Id<"players">) =>
@@ -598,16 +599,18 @@ describe("player.fillRest", () => {
     expect(Object.keys(await answersOf(ada)).filter((date) => date >= "2026-12")).toEqual([]);
   });
 
-  it("counts against the Group's Answer rate limit", async () => {
+  it("spends one token of the Group's Answer rate limit", async () => {
     const { groupId, shareToken } = await sharedGroup();
-    await exhaustGroupAnswerBucket(groupId, shareToken);
+    await spendGroupAnswerTokens(groupId, shareToken, 299);
     const ada = await seedPlayer(groupId, "Ada");
+    const bo = await seedPlayer(groupId, "Bo");
+    await t.mutation(api.player.fillRest, { shareToken, playerId: ada, month: "2026-11" });
 
     await expectErrorCode(
-      t.mutation(api.player.fillRest, { shareToken, playerId: ada, month: "2026-11" }),
+      t.mutation(api.player.fillRest, { shareToken, playerId: bo, month: "2026-11" }),
       "RATE_LIMITED",
     );
-    expect(await answersOf(ada)).toEqual({});
+    expect(await answersOf(bo)).toEqual({});
   });
 
   it("pushes out the Expiry of an Unsaved Group", async () => {
