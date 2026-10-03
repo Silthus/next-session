@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
@@ -129,16 +128,16 @@ describe("roster.addPlayer", () => {
     expect(await rosterOf(otherGroupId)).toEqual([{ name: "Ada", nameKey: "ada" }]);
   });
 
-  it(`caps the Roster at ${MAX_PLAYERS_PER_GROUP} Players`, async () => {
+  it("caps the Roster at 100 Players", async () => {
     const { as, groupId } = await signedInGmWithGroup();
-    await seedPlayers(groupId, MAX_PLAYERS_PER_GROUP - 1);
+    await seedPlayers(groupId, 99);
     await as.mutation(api.roster.addPlayer, { groupId, name: "Last seat" });
 
     await expectErrorCode(
       as.mutation(api.roster.addPlayer, { groupId, name: "One too many" }),
       "ROSTER_FULL",
     );
-    expect(await rosterOf(groupId)).toHaveLength(MAX_PLAYERS_PER_GROUP);
+    expect(await rosterOf(groupId)).toHaveLength(100);
   });
 
   it("pushes out the Expiry of an Unsaved Group", async () => {
