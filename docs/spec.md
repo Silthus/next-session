@@ -186,7 +186,7 @@ Dropped from Lonir: workspace functions, `gmGetGroupRail` and `gmGetDateAvailabi
 
 | Caller | Can |
 | --- | --- |
-| Anyone | `player.group`, `player.answers`, `player.join`, `player.answer`, `player.fillRest` with a valid Share Token, within rate limits. `auth.signIn` with `anonymous` (rate limited) or `password` |
+| Anyone | `player.group`, `player.answers`, `player.join`, `player.answer`, `player.fillRest` with a valid Share Token, within rate limits. `auth.signIn` with `anonymous` or a `password` sign-up (both rate limited), or a `password` log in (Convex Auth's throttle) |
 | Anonymous GM or Account | Everything in `groups`, `schedule`, `roster`, `sessions` for Groups they own. Nothing on Groups they do not own: those look missing |
 | Anonymous GM only | `account.startSave` |
 | Account only | `account.finishSave`, `auth.signOut` from the UI (an Anonymous GM has no sign-out button, because signing out would lose the Group) |
@@ -222,7 +222,7 @@ Password rules: Convex Auth's `Password` provider, minimum 8 characters, no emai
 | --- | --- |
 | `WEAK_PASSWORD` | Sign-up with a password shorter than 8 characters |
 | `EMAIL_TAKEN` | Sign-up with an email that already has an Account. It never signs in, so password guesses always meet the sign-in throttle |
-| `INVALID_CREDENTIALS` | Log in with an unknown email or a wrong password, the same code for both |
+| `INVALID_CREDENTIALS` | Log in with an unknown email or a wrong password. One code for both, so the sheet says "Wrong email or password" and offers Create account either way |
 | `RATE_LIMITED` | Log in to a locked Account (`retryAfter` is 6 minutes), or a sign-up past `accountSignUp` |
 
 ### 5.4 Rate limits
