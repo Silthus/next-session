@@ -1,5 +1,5 @@
 import { monthProgress, type Answer } from "./answers";
-import { isBookable, monthDays, monthOf, type IsoDate, type IsoMonth } from "./dates";
+import { isBookable, monthDays, type IsoDate, type IsoMonth } from "./dates";
 
 export type PlayerRow = { _id: string; name: string };
 export type AnswerRow<PlayerId extends string> = {
@@ -48,7 +48,7 @@ export function summarizeMonth<Player extends PlayerRow, Session extends Session
   input: MonthSummaryInput<Player, Session>,
 ): MonthSummary<Player, Session> {
   const answerOf = answerLookup(input.answers);
-  const sessionOn = sessionLookup(input.month, input.sessions);
+  const sessionOn = sessionsByDate(input.sessions);
   const days = monthDays(input.month).map((date) =>
     summarizeDay(date, input, answerOf, sessionOn.get(date) ?? null),
   );
@@ -114,11 +114,8 @@ function answerLookup<PlayerId extends string>(
   return (playerId, date) => byKey.get(`${playerId}|${date}`) ?? null;
 }
 
-function sessionLookup<Session extends SessionRow>(
-  month: IsoMonth,
+function sessionsByDate<Session extends SessionRow>(
   sessions: readonly Session[],
 ): Map<IsoDate, Session> {
-  return new Map(
-    sessions.filter((session) => monthOf(session.date) === month).map((s) => [s.date, s]),
-  );
+  return new Map(sessions.map((session) => [session.date, session]));
 }
