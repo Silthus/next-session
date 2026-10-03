@@ -22,16 +22,30 @@ const NOW = Date.UTC(2026, 9, 3, 23, 30);
 const TODAY = "2026-10-03";
 const LAST_BOOKABLE_DATE = "2026-12-31";
 
+const LIMITER_SHARD_SEED = 34;
+
 let t: TestBackend;
+
+function seededRandom(seed: number) {
+  let state = seed;
+  return () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let mixed = Math.imul(state ^ (state >>> 15), 1 | state);
+    mixed = (mixed + Math.imul(mixed ^ (mixed >>> 7), 61 | mixed)) ^ mixed;
+    return ((mixed ^ (mixed >>> 14)) >>> 0) / 4_294_967_296;
+  };
+}
 
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(NOW);
+  vi.spyOn(Math, "random").mockImplementation(seededRandom(LIMITER_SHARD_SEED));
   t = newBackend();
 });
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 async function sharedGroup(signInGm = signInAccount) {
