@@ -2,20 +2,24 @@ import { v } from "convex/values";
 import { fillRestDates } from "../shared/answers";
 import {
   addMonths,
-  bookingWindow,
   isBookable,
+  isBookableMonth,
   isValidMonth,
-  monthOf,
   todayUtc,
   type IsoDate,
   type IsoMonth,
 } from "../shared/dates";
 import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
-import { normalizeName, type NormalizedName } from "../shared/names";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
-import { groupByShareToken, playerOnShareLink, touchGroup } from "./model/access";
+import {
+  findPlayerOnShareLink,
+  groupByShareToken,
+  playerOnShareLink,
+  touchGroup,
+} from "./model/access";
 import { fail } from "./model/errors";
+import { ensureNameIsFree, ensureRosterHasRoom, validName } from "./model/players";
 import { enforceRateLimit } from "./model/rateLimits";
 import { answerValue } from "./schema";
 
@@ -89,7 +93,7 @@ export const fillRest = mutation({
   returns: v.null(),
   handler: async (ctx, { shareToken, playerId, month }) => {
     const { group, player } = await playerOnShareLink(ctx, shareToken, playerId);
-    if (!isBookableMonth(month)) fail({ code: "OUT_OF_WINDOW" });
+    if (!isBookableMonth(month, today())) fail({ code: "OUT_OF_WINDOW" });
     await enforceAnswerRateLimits(ctx, group, player);
     const answered = await answersOfPlayerIn(ctx, player._id, month);
     const unanswered = fillRestDates(month, today(), new Set(answered.map(({ date }) => date)));
@@ -105,14 +109,6 @@ export const fillRest = mutation({
     return null;
   },
 });
-
-async function findPlayerOnShareLink(ctx: QueryCtx, shareToken: string, rawPlayerId: string) {
-  const group = await groupByShareToken(ctx, shareToken);
-  const playerId = ctx.db.normalizeId("players", rawPlayerId);
-  if (group === null || playerId === null) return null;
-  const player = await ctx.db.get("players", playerId);
-  return player?.groupId === group._id ? player : null;
-}
 
 async function rosterOf(ctx: QueryCtx, groupId: Id<"groups">) {
   const players = await ctx.db
@@ -172,32 +168,6 @@ async function enforceAnswerRateLimits(
 ) {
   await enforceRateLimit(ctx, "answer", player._id);
   await enforceRateLimit(ctx, "answerPerGroup", group._id);
-}
-
-function validName(raw: string): NormalizedName {
-  const normalized = normalizeName(raw);
-  return normalized === "INVALID_NAME" ? fail({ code: "INVALID_NAME" }) : normalized;
-}
-
-async function ensureNameIsFree(ctx: QueryCtx, groupId: Id<"groups">, { nameKey }: NormalizedName) {
-  const holder = await ctx.db
-    .query("players")
-    .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", groupId).eq("nameKey", nameKey))
-    .first();
-  if (holder !== null) fail({ code: "NAME_TAKEN", playerId: holder._id });
-}
-
-async function ensureRosterHasRoom(ctx: QueryCtx, groupId: Id<"groups">) {
-  const roster = await ctx.db
-    .query("players")
-    .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", groupId))
-    .take(MAX_PLAYERS_PER_GROUP);
-  if (roster.length >= MAX_PLAYERS_PER_GROUP) fail({ code: "ROSTER_FULL" });
-}
-
-function isBookableMonth(month: string) {
-  const { first, last } = bookingWindow(today());
-  return isValidMonth(month) && monthOf(first) <= month && month <= monthOf(last);
 }
 
 function today() {

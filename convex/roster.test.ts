@@ -3,9 +3,12 @@ import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
   expectErrorCode,
+  expiryOf,
   newBackend,
+  signedInGmWithGroup,
   signInAccount,
   signInAnonymousGm,
+  spendGmEdits,
   type TestBackend,
 } from "./model/test.setup";
 
@@ -23,12 +26,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers();
 });
-
-async function signedInGmWithGroup(signInGm = signInAccount) {
-  const gm = await signInGm(t);
-  const groupId = await gm.as.mutation(api.groups.create, {});
-  return { ...gm, groupId };
-}
 
 async function rosterOf(groupId: Id<"groups">) {
   return await t.run(async (ctx) =>
@@ -67,12 +64,8 @@ async function seedAnswers(groupId: Id<"groups">, playerId: Id<"players">, dates
   });
 }
 
-async function expiryOf(groupId: Id<"groups">) {
-  return await t.run(async (ctx) => (await ctx.db.get("groups", groupId))?.expiresAt);
-}
-
 async function aForeignGroup() {
-  const stranger = await signedInGmWithGroup();
+  const stranger = await signedInGmWithGroup(t);
   const playerId = await stranger.as.mutation(api.roster.addPlayer, {
     groupId: stranger.groupId,
     name: "Their player",
@@ -82,7 +75,7 @@ async function aForeignGroup() {
 
 describe("roster.addPlayer", () => {
   it("adds a Player with the normalized name", async () => {
-    const { as, groupId } = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
 
     await as.mutation(api.roster.addPlayer, { groupId, name: "  Ada   Lovelace " });
 
@@ -90,7 +83,7 @@ describe("roster.addPlayer", () => {
   });
 
   it("returns the new Player's id", async () => {
-    const { as, groupId } = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
 
     const playerId = await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
 
@@ -99,14 +92,14 @@ describe("roster.addPlayer", () => {
   });
 
   it.each(["", "   ", "x".repeat(61)])("rejects the invalid name %j", async (name) => {
-    const { as, groupId } = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
 
     await expectErrorCode(as.mutation(api.roster.addPlayer, { groupId, name }), "INVALID_NAME");
     expect(await rosterOf(groupId)).toEqual([]);
   });
 
   it("rejects a name already on the Roster, ignoring case, and names the existing Player", async () => {
-    const { as, groupId } = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
     const ada = await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
 
     const error = await expectErrorCode(
@@ -119,7 +112,7 @@ describe("roster.addPlayer", () => {
   });
 
   it("allows the same name in another Group", async () => {
-    const { as, groupId } = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
     const otherGroupId = await as.mutation(api.groups.create, {});
     await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
 
@@ -129,7 +122,7 @@ describe("roster.addPlayer", () => {
   });
 
   it("caps the Roster at 100 Players", async () => {
-    const { as, groupId } = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
     await seedPlayers(groupId, 99);
     await as.mutation(api.roster.addPlayer, { groupId, name: "Last seat" });
 
@@ -141,16 +134,16 @@ describe("roster.addPlayer", () => {
   });
 
   it("pushes out the Expiry of an Unsaved Group", async () => {
-    const { as, groupId } = await signedInGmWithGroup(signInAnonymousGm);
+    const { as, groupId } = await signedInGmWithGroup(t, signInAnonymousGm);
     vi.setSystemTime(NOW + 2 * DAY);
 
     await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
 
-    expect(await expiryOf(groupId)).toBe(NOW + 32 * DAY);
+    expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
   });
 
   it("treats a foreign Group as missing", async () => {
-    const { as } = await signedInGmWithGroup();
+    const { as } = await signedInGmWithGroup(t);
     const foreign = await aForeignGroup();
 
     await expectErrorCode(
@@ -163,7 +156,7 @@ describe("roster.addPlayer", () => {
   });
 
   it("rejects a signed-out caller", async () => {
-    const { groupId } = await signedInGmWithGroup();
+    const { groupId } = await signedInGmWithGroup(t);
 
     await expectErrorCode(
       t.mutation(api.roster.addPlayer, { groupId, name: "Ada" }),
@@ -174,7 +167,7 @@ describe("roster.addPlayer", () => {
 
 describe("roster.renamePlayer", () => {
   async function gmWithPlayer(signInGm = signInAccount) {
-    const gm = await signedInGmWithGroup(signInGm);
+    const gm = await signedInGmWithGroup(t, signInGm);
     const playerId = await gm.as.mutation(api.roster.addPlayer, {
       groupId: gm.groupId,
       name: "Ada",
@@ -237,7 +230,7 @@ describe("roster.renamePlayer", () => {
 
     await as.mutation(api.roster.renamePlayer, { playerId, name: "Ada King" });
 
-    expect(await expiryOf(groupId)).toBe(NOW + 32 * DAY);
+    expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
   });
 
   it("treats a Player of a foreign Group as missing", async () => {
@@ -275,7 +268,7 @@ describe("roster.renamePlayer", () => {
 
 describe("roster.removePlayer", () => {
   it("removes the Player and every Answer they gave", async () => {
-    const { as, groupId } = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
     const ada = await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
     const grace = await as.mutation(api.roster.addPlayer, { groupId, name: "Grace" });
     await seedAnswers(groupId, ada, ["2026-09-30", "2026-10-03", "2026-12-31"]);
@@ -289,7 +282,7 @@ describe("roster.removePlayer", () => {
   });
 
   it("frees the name for a new Player", async () => {
-    const { as, groupId } = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
     const ada = await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
     await as.mutation(api.roster.removePlayer, { playerId: ada });
 
@@ -299,17 +292,17 @@ describe("roster.removePlayer", () => {
   });
 
   it("pushes out the Expiry of an Unsaved Group", async () => {
-    const { as, groupId } = await signedInGmWithGroup(signInAnonymousGm);
+    const { as, groupId } = await signedInGmWithGroup(t, signInAnonymousGm);
     const ada = await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
     vi.setSystemTime(NOW + 2 * DAY);
 
     await as.mutation(api.roster.removePlayer, { playerId: ada });
 
-    expect(await expiryOf(groupId)).toBe(NOW + 32 * DAY);
+    expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
   });
 
   it("treats a Player of a foreign Group as missing", async () => {
-    const { as } = await signedInGmWithGroup();
+    const { as } = await signedInGmWithGroup(t);
     const foreign = await aForeignGroup();
 
     await expectErrorCode(
@@ -320,7 +313,7 @@ describe("roster.removePlayer", () => {
   });
 
   it("treats an already removed Player as missing", async () => {
-    const { as, groupId } = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
     const ada = await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
     await as.mutation(api.roster.removePlayer, { playerId: ada });
 
@@ -328,12 +321,31 @@ describe("roster.removePlayer", () => {
   });
 
   it("rejects a signed-out caller", async () => {
-    const { as, groupId } = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
     const ada = await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
 
     await expectErrorCode(
       t.mutation(api.roster.removePlayer, { playerId: ada }),
       "UNAUTHENTICATED",
     );
+  });
+});
+
+describe("the GM edit limit", () => {
+  it("refuses every Roster edit once the GM's edits are spent, and changes nothing", async () => {
+    const { as, groupId, userId } = await signedInGmWithGroup(t);
+    const playerId = await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
+    await spendGmEdits(t, userId);
+
+    await expectErrorCode(
+      as.mutation(api.roster.addPlayer, { groupId, name: "Bo" }),
+      "RATE_LIMITED",
+    );
+    await expectErrorCode(
+      as.mutation(api.roster.renamePlayer, { playerId, name: "Cy" }),
+      "RATE_LIMITED",
+    );
+    await expectErrorCode(as.mutation(api.roster.removePlayer, { playerId }), "RATE_LIMITED");
+    expect(await rosterOf(groupId)).toEqual([{ name: "Ada", nameKey: "ada" }]);
   });
 });

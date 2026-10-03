@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LEGAL_VERSIONS } from "../shared/legal";
 import { UNSAVED_GROUP_QUIET_DAYS } from "../shared/limits";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
   createYourLink,
@@ -25,6 +25,7 @@ afterEach(() => {
 });
 
 const DAY = 86_400_000;
+const TWELVE_PASSWORD_HASHES_MS = 30_000;
 
 async function legalAcceptanceOf(userId: Id<"users">) {
   const user = await t.run(async (ctx) => await ctx.db.get("users", userId));
@@ -137,6 +138,16 @@ describe("Accounts", () => {
     await expectErrorCode(logInAccount(t, newCredentials()), "INVALID_CREDENTIALS");
   });
 
+  it.each(["", "   "])(
+    "refuses a sign-up or a log in with the email %j as invalid credentials",
+    async (email) => {
+      const credentials = { email, password: "correct horse battery" };
+
+      await expectErrorCode(signUpAccount(t, credentials), "INVALID_CREDENTIALS");
+      await expectErrorCode(logInAccount(t, credentials), "INVALID_CREDENTIALS");
+    },
+  );
+
   it("refuses a password shorter than 8 characters as weak", async () => {
     await expectErrorCode(
       signUpAccount(t, { email: "short@example.com", password: "1234567" }),
@@ -161,18 +172,22 @@ describe("Accounts", () => {
     );
   });
 
-  it("locks an Account after 10 wrong passwords, even against the right one", async () => {
-    const credentials = newCredentials();
-    await signUpAccount(t, credentials);
-    const wrong = { ...credentials, password: "wrong horse battery" };
-    for (let attempt = 0; attempt < 10; attempt++) {
-      await expectErrorCode(logInAccount(t, wrong), "INVALID_CREDENTIALS");
-    }
+  it(
+    "locks an Account after 10 wrong passwords, even against the right one",
+    { timeout: TWELVE_PASSWORD_HASHES_MS },
+    async () => {
+      const credentials = newCredentials();
+      await signUpAccount(t, credentials);
+      const wrong = { ...credentials, password: "wrong horse battery" };
+      for (let attempt = 0; attempt < 10; attempt++) {
+        await expectErrorCode(logInAccount(t, wrong), "INVALID_CREDENTIALS");
+      }
 
-    const data = await expectErrorCode(logInAccount(t, credentials), "RATE_LIMITED");
+      const data = await expectErrorCode(logInAccount(t, credentials), "RATE_LIMITED");
 
-    expect(data.retryAfter).toBeGreaterThan(0);
-  });
+      expect(data.retryAfter).toBeGreaterThan(0);
+    },
+  );
 });
 
 describe("the Account sign-up limit", () => {
@@ -183,8 +198,10 @@ describe("the Account sign-up limit", () => {
     return (await t.run(async (ctx) => await ctx.db.query("authAccounts").collect())).length;
   }
 
-  async function signUps(count: number) {
-    for (let signUp = 0; signUp < count; signUp++) await signUpAccount(t);
+  async function admitSignUps(count: number) {
+    for (let signUp = 0; signUp < count; signUp++) {
+      await t.mutation(internal.auth.admitAccountSignUp, { email: newCredentials().email });
+    }
   }
 
   beforeEach(() => {
@@ -192,16 +209,16 @@ describe("the Account sign-up limit", () => {
   });
 
   it("refuses a sign-up after a burst of 20 and creates no Account for it", async () => {
-    await signUps(BURST);
+    await admitSignUps(BURST);
 
     const data = await expectErrorCode(signUpAccount(t), "RATE_LIMITED");
 
     expect(data.retryAfter).toBeGreaterThan(0);
-    expect(await countAccounts()).toBe(BURST);
+    expect(await countAccounts()).toBe(0);
   });
 
   it("admits one more sign-up every 12 seconds after the burst, and not a moment sooner", async () => {
-    await signUps(BURST);
+    await admitSignUps(BURST);
     const burstEnd = Date.now();
 
     vi.setSystemTime(burstEnd + REFILL_MS - 1);
@@ -224,7 +241,7 @@ describe("the Account sign-up limit", () => {
       await expectErrorCode(signUpAccount(t, taken), "EMAIL_TAKEN");
     }
 
-    await signUps(BURST - 1);
+    await admitSignUps(BURST - 1);
 
     await expectErrorCode(signUpAccount(t), "RATE_LIMITED");
   });
@@ -232,7 +249,7 @@ describe("the Account sign-up limit", () => {
 
 describe("the session lifetime", () => {
   const MINUTE = 60_000;
-  const QUIET_LIMIT = UNSAVED_GROUP_QUIET_DAYS * DAY;
+  const MONTH = 30 * DAY;
   const YEAR = 365 * DAY;
 
   async function createYourLinkTokens() {
@@ -245,9 +262,9 @@ describe("the session lifetime", () => {
     return tokens?.refreshToken ?? null;
   }
 
-  async function returnJustInsideEveryQuietLimitUntil(refreshToken: string, until: number) {
-    while (Date.now() + QUIET_LIMIT - MINUTE < until) {
-      vi.setSystemTime(Date.now() + QUIET_LIMIT - MINUTE);
+  async function returnEveryMonthUntil(refreshToken: string, until: number) {
+    while (Date.now() + MONTH < until) {
+      vi.setSystemTime(Date.now() + MONTH);
       const next = await refresh(refreshToken);
       expect(next, `visit on ${new Date().toISOString()}`).toBeTypeOf("string");
       refreshToken = next!;
@@ -255,21 +272,13 @@ describe("the session lifetime", () => {
     return refreshToken;
   }
 
-  async function stayActiveForAYear() {
-    const signedInAt = Date.now();
-    const refreshToken = await returnJustInsideEveryQuietLimitUntil(
-      await createYourLinkTokens(),
-      signedInAt + YEAR,
-    );
-    return { signedInAt, refreshToken };
-  }
-
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
   });
 
-  it("keeps a GM who returns within every 30 days signed in until a minute before the year is up", async () => {
-    const { signedInAt, refreshToken } = await stayActiveForAYear();
+  it("keeps a GM signed in until a minute before the year is up, even one who never returns", async () => {
+    const signedInAt = Date.now();
+    const refreshToken = await createYourLinkTokens();
 
     vi.setSystemTime(signedInAt + YEAR - MINUTE);
 
@@ -277,22 +286,14 @@ describe("the session lifetime", () => {
   });
 
   it("ends the session a minute after the year is up, however active the GM is", async () => {
-    const { signedInAt, refreshToken } = await stayActiveForAYear();
+    const signedInAt = Date.now();
+    const refreshToken = await returnEveryMonthUntil(
+      await createYourLinkTokens(),
+      signedInAt + YEAR,
+    );
 
     vi.setSystemTime(signedInAt + YEAR + MINUTE);
 
     expect(await refresh(refreshToken)).toBeNull();
-  });
-
-  it("ends the session after 30 quiet days, and not a minute before", async () => {
-    const signedInAt = Date.now();
-    const returning = await createYourLinkTokens();
-    const quiet = await createYourLinkTokens();
-
-    vi.setSystemTime(signedInAt + QUIET_LIMIT - MINUTE);
-    expect(await refresh(returning)).toBeTypeOf("string");
-
-    vi.setSystemTime(signedInAt + QUIET_LIMIT + MINUTE);
-    expect(await refresh(quiet)).toBeNull();
   });
 });

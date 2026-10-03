@@ -82,9 +82,10 @@ export const rename = mutation({
   args: { groupId: v.id("groups"), name: v.string() },
   returns: v.null(),
   handler: async (ctx, { groupId, name }) => {
-    const { group } = await ownedGroup(ctx, groupId);
+    const { gm, group } = await ownedGroup(ctx, groupId);
     const normalized = normalizeName(name);
     if (normalized === "INVALID_NAME") fail({ code: "INVALID_NAME" });
+    await enforceRateLimit(ctx, "gmEdit", gm._id);
     await ctx.db.patch("groups", group._id, { name: normalized.name });
     await touchGroup(ctx, group);
     return null;
@@ -95,7 +96,8 @@ export const remove = mutation({
   args: { groupId: v.id("groups") },
   returns: v.null(),
   handler: async (ctx, { groupId }) => {
-    const { group } = await ownedGroup(ctx, groupId);
+    const { gm, group } = await ownedGroup(ctx, groupId);
+    await enforceRateLimit(ctx, "gmEdit", gm._id);
     await deleteGroup(ctx, group);
     return null;
   },
@@ -105,7 +107,8 @@ export const rotateShareToken = mutation({
   args: { groupId: v.id("groups") },
   returns: v.null(),
   handler: async (ctx, { groupId }) => {
-    const { group } = await ownedGroup(ctx, groupId);
+    const { gm, group } = await ownedGroup(ctx, groupId);
+    await enforceRateLimit(ctx, "gmEdit", gm._id);
     await rotate(ctx, group);
     await touchGroup(ctx, group);
     return null;
@@ -116,7 +119,8 @@ export const undoRotateShareToken = mutation({
   args: { groupId: v.id("groups") },
   returns: v.null(),
   handler: async (ctx, { groupId }) => {
-    const { group } = await ownedGroup(ctx, groupId);
+    const { gm, group } = await ownedGroup(ctx, groupId);
+    await enforceRateLimit(ctx, "gmEdit", gm._id);
     await undoRotate(ctx, group);
     await touchGroup(ctx, group);
     return null;

@@ -28,6 +28,36 @@ export async function ownedGroup(ctx: QueryCtx, groupId: Id<"groups">) {
   return { gm, group };
 }
 
+export async function ownedPlayer(ctx: QueryCtx, playerId: Id<"players">) {
+  const gm = await requireGm(ctx);
+  const { group, child: player } = await inGroupOwnedBy(
+    ctx,
+    gm,
+    await ctx.db.get("players", playerId),
+  );
+  return { gm, group, player };
+}
+
+export async function ownedSession(ctx: QueryCtx, sessionId: Id<"sessions">) {
+  const gm = await requireGm(ctx);
+  const { group, child: session } = await inGroupOwnedBy(
+    ctx,
+    gm,
+    await ctx.db.get("sessions", sessionId),
+  );
+  return { gm, group, session };
+}
+
+async function inGroupOwnedBy<Child extends { groupId: Id<"groups"> }>(
+  ctx: QueryCtx,
+  gm: Doc<"users">,
+  child: Child | null,
+) {
+  const group = child === null ? null : await groupOwnedBy(ctx, gm, child.groupId);
+  if (child === null || group === null) fail({ code: "NOT_FOUND" });
+  return { group, child };
+}
+
 async function groupOwnedBy(ctx: QueryCtx, gm: Doc<"users">, groupId: Id<"groups">) {
   const group = await ctx.db.get("groups", groupId);
   return group?.ownerId === gm._id ? group : null;
@@ -51,6 +81,18 @@ export async function playerOnShareLink(
     fail({ code: "NOT_FOUND" });
   }
   return { group, player };
+}
+
+export async function findPlayerOnShareLink(
+  ctx: QueryCtx,
+  shareToken: string,
+  rawPlayerId: string,
+) {
+  const group = await groupByShareToken(ctx, shareToken);
+  const playerId = ctx.db.normalizeId("players", rawPlayerId);
+  if (group === null || playerId === null) return null;
+  const player = await ctx.db.get("players", playerId);
+  return player?.groupId === group._id ? player : null;
 }
 
 export function expiryFromNow() {
