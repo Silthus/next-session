@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { newShareToken } from "./shareToken";
 
 const bytes =
@@ -7,6 +7,10 @@ const bytes =
     Uint8Array.from(values);
 
 describe("newShareToken", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("spells ten random bytes in the URL-safe alphabet A-Z a-z 0-9 _ -", () => {
     expect(newShareToken(bytes(0, 25, 26, 51, 52, 61, 62, 63, 0, 0))).toBe("AZaz09_-AA");
   });
@@ -19,8 +23,14 @@ describe("newShareToken", () => {
     expect(newShareToken()).toMatch(/^[A-Za-z0-9_-]{10}$/);
   });
 
-  it("is unguessable: fresh tokens do not repeat", () => {
-    const tokens = new Set(Array.from({ length: 1000 }, () => newShareToken()));
-    expect(tokens.size).toBe(1000);
+  it("draws its ten bytes from the cryptographic random source", () => {
+    const getRandomValues = vi.spyOn(crypto, "getRandomValues").mockImplementation((array) => {
+      new Uint8Array(array.buffer, array.byteOffset, array.byteLength).set([
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+      ]);
+      return array;
+    });
+    expect(newShareToken()).toBe("BCDEFGHIJK");
+    expect(getRandomValues).toHaveBeenCalledOnce();
   });
 });

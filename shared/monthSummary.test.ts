@@ -143,6 +143,19 @@ describe("summarizeMonth Best Nights", () => {
     ]);
   });
 
+  it("ranks three Players on maybe above one Player free", () => {
+    const { bestNights } = summarizeMonth({
+      ...midOctober,
+      answers: [
+        answer(ana, "2026-10-21", "free"),
+        answer(ana, "2026-10-22", "maybe"),
+        answer(ben, "2026-10-22", "maybe"),
+        answer(cy, "2026-10-22", "maybe"),
+      ],
+    });
+    expect(bestNights.map((night) => night.date)).toEqual(["2026-10-22", "2026-10-21"]);
+  });
+
   it("leaves out any date a Player answered busy", () => {
     const { bestNights } = summarizeMonth({
       ...midOctober,
