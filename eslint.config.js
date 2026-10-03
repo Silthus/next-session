@@ -13,16 +13,18 @@ export default defineConfig(
     "src/routeTree.gen.ts",
     "playwright-report/",
     "test-results/",
+    ".wrangler/",
   ]),
   js.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
   {
     languageOptions: {
-      globals: { ...globals.browser, ...globals.node },
       parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
     },
   },
   { files: ["**/*.js"], extends: [tseslint.configs.disableTypeChecked] },
+  { files: ["src/**"], languageOptions: { globals: globals.browser } },
+  { files: ["scripts/**", "e2e/**", "*.{js,ts}"], languageOptions: { globals: globals.node } },
   { files: ["src/**/*.{ts,tsx}"], extends: [reactHooks.configs.flat.recommended] },
   { files: ["convex/**/*.ts"], extends: [convexPlugin.configs.recommended] },
 );
