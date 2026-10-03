@@ -56,7 +56,7 @@ describe("playerInitials", () => {
     });
 
     it("still loads and keeps a single code point whole", async () => {
-      vi.stubGlobal("Intl", { ...Intl, Segmenter: undefined });
+      vi.stubGlobal("Intl", Object.create(Intl, { Segmenter: { value: undefined } }));
       vi.resetModules();
       const names = await import("./names");
       expect(names.playerInitials("🎲 Lima")).toBe("🎲L");
