@@ -86,7 +86,9 @@ describe("Sheet", () => {
         body
       </Sheet>,
     );
-    fireEvent(screen.getByRole("dialog"), new Event("close"));
+    const dialog = screen.getByRole<HTMLDialogElement>("dialog");
+    dialog.open = false;
+    fireEvent(dialog, new Event("close"));
     expect(onClose).toHaveBeenCalledOnce();
   });
 });
