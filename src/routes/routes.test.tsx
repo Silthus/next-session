@@ -1,6 +1,6 @@
 import { createMemoryHistory, createRouter, RouterProvider } from "@tanstack/react-router";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { routeTree } from "../routeTree.gen";
 
 function renderAt(path: string) {
@@ -11,6 +11,11 @@ function renderAt(path: string) {
   render(<RouterProvider router={router} />);
   return router;
 }
+
+beforeEach(() => {
+  vi.stubEnv("LEGAL_CONTROLLER_ADDRESS", "Somewhere 1, 12345 Town");
+  vi.stubEnv("LEGAL_CONTACT_EMAIL", "hello@example.test");
+});
 
 describe("legal routes", () => {
   it.each([
@@ -24,7 +29,8 @@ describe("legal routes", () => {
       expect(await screen.findByRole("heading", { level: 1, name: title })).toBeTruthy();
       expect(screen.getByRole("heading", { level: 2, name: section })).toBeTruthy();
       expect(document.body.textContent).not.toContain("{{");
-      expect(document.body.textContent).toContain("address on request");
+      expect(document.body.textContent).toContain("Somewhere 1, 12345 Town");
+      expect(document.body.textContent).toContain("hello@example.test");
       expect(screen.getAllByRole("link", { name: "Imprint" }).at(-1)).toHaveProperty(
         "pathname",
         "/imprint",
@@ -36,7 +42,7 @@ describe("legal routes", () => {
 describe("/privacy", () => {
   it("renders the effective date, the processor table, the storage list and the authority link", async () => {
     renderAt("/privacy");
-    expect(await screen.findByText("Updated 2026-10-03")).toBeTruthy();
+    expect(await screen.findByText("Updated Oct 3, 2026")).toBeTruthy();
     expect(screen.getByRole("cell", { name: "Convex, Inc." })).toBeTruthy();
     expect(screen.getAllByRole("listitem").length).toBeGreaterThanOrEqual(3);
     expect(screen.getByRole("link", { name: "https://www.lda.bayern.de" })).toHaveProperty(

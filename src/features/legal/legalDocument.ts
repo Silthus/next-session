@@ -60,16 +60,17 @@ function splitLeadingHeading(chunk: string): string[] {
 }
 
 function fillPlaceholders(markdown: string, placeholders: LegalPlaceholders): string {
-  return markdown.replace(/\{\{(\w+)\}\}/g, (match, key: string) =>
-    isPlaceholderKey(key, placeholders) ? placeholders[key] : match,
-  );
+  return markdown.replace(/\{\{(\w+)\}\}/g, (_, key: string) => {
+    if (!isPlaceholderKey(key, placeholders)) throw new Error(`Unknown legal placeholder ${key}`);
+    return placeholders[key];
+  });
 }
 
 function isPlaceholderKey(
   key: string,
   placeholders: LegalPlaceholders,
 ): key is keyof LegalPlaceholders {
-  return key in placeholders;
+  return Object.hasOwn(placeholders, key);
 }
 
 function currentBlocks(document: LegalDocument): Block[] {
@@ -110,7 +111,7 @@ function parseRow(line: string): Inline[][] {
 
 const inlinePattern = /\*\*(.+?)\*\*|`(.+?)`|\[(.+?)\]\((.+?)\)|<(https?:\/\/[^>]+)>/g;
 
-export function parseInline(text: string): Inline[] {
+function parseInline(text: string): Inline[] {
   const inlines: Inline[] = [];
   let cursor = 0;
   for (const match of text.matchAll(inlinePattern)) {

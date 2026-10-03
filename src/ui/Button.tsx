@@ -8,9 +8,9 @@ const variants: Record<ButtonVariant, string> = {
   primary: "bg-accent text-accent-ink hover:bg-accent-strong shadow-card",
   secondary: "bg-surface text-ink border border-line hover:border-line-strong",
   ghost: "text-ink-2 hover:bg-surface-2 hover:text-ink",
-  soft: "bg-accent-soft text-accent hover:brightness-95 dark:hover:brightness-110",
+  soft: "bg-accent-soft text-accent-strong hover:brightness-95 dark:hover:brightness-110",
   free: "bg-free text-white hover:brightness-105 dark:text-paper",
-  danger: "bg-busy-soft text-busy hover:brightness-95",
+  danger: "bg-busy text-white hover:brightness-95 dark:text-paper",
 };
 
 const sizes: Record<ButtonSize, string> = {

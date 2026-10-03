@@ -13,14 +13,14 @@ export type LegalPageKey = keyof typeof sources;
 
 export function LegalPage({ page }: { page: LegalPageKey }) {
   const legal = legalContact();
-  const document = parseLegalDocument(sources[page], {
+  const legalDocument = parseLegalDocument(sources[page], {
     EFFECTIVE_DATE: LEGAL_VERSIONS.effective,
     CONTROLLER_ADDRESS: legal.controllerAddress,
     CONTACT_EMAIL: legal.contactEmail,
   });
   return (
     <PageShell>
-      <LegalArticle document={document} />
+      <LegalArticle legalDocument={legalDocument} />
     </PageShell>
   );
 }

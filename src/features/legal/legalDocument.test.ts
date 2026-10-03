@@ -125,6 +125,12 @@ describe("parseLegalDocument", () => {
     ]);
   });
 
+  it("refuses a placeholder it cannot fill", () => {
+    expect(() => parseLegalDocument("# T\n\nWrite to {{CONTACT_EMIAL}}.\n", placeholders)).toThrow(
+      "Unknown legal placeholder CONTACT_EMIAL",
+    );
+  });
+
   it("has no effective date when the document carries no version line", () => {
     const imprint = parseLegalDocument(
       "# Imprint\n\nInformation according to § 5 DDG.\n\n## Provider\n\nMichael Reichenbach\n{{CONTROLLER_ADDRESS}}\n",

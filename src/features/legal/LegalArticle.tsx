@@ -3,14 +3,16 @@ import { Fragment } from "react";
 import { Eyebrow } from "../../ui/Eyebrow";
 import type { Block, Inline, LegalDocument } from "./legalDocument";
 
-export function LegalArticle({ document }: { document: LegalDocument }) {
+export function LegalArticle({ legalDocument }: { legalDocument: LegalDocument }) {
   return (
     <article>
-      {document.effectiveDate && <Eyebrow>Updated {document.effectiveDate}</Eyebrow>}
-      <h1 className="mt-2 font-display text-4xl font-extrabold">{document.title}</h1>
-      <div className="mt-6 flex flex-col gap-4">{document.intro.map(renderBlock)}</div>
+      {legalDocument.effectiveDate && (
+        <Eyebrow>Updated {humanDate(legalDocument.effectiveDate)}</Eyebrow>
+      )}
+      <h1 className="mt-2 font-display text-4xl font-extrabold">{legalDocument.title}</h1>
+      <div className="mt-6 flex flex-col gap-4">{legalDocument.intro.map(renderBlock)}</div>
       <div className="mt-8 flex flex-col gap-8">
-        {document.sections.map((section) => (
+        {legalDocument.sections.map((section) => (
           <section key={section.heading} className="flex flex-col gap-3">
             <h2 className="font-display text-xl font-bold">{section.heading}</h2>
             {section.blocks.map(renderBlock)}
@@ -18,6 +20,12 @@ export function LegalArticle({ document }: { document: LegalDocument }) {
         ))}
       </div>
     </article>
+  );
+}
+
+function humanDate(isoDate: string) {
+  return new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" }).format(
+    new Date(isoDate),
   );
 }
 
