@@ -1,0 +1,62 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-29
+
+ ❯ |shared| shared/names.test.ts (10 tests | 1 failed) 8ms
+   ❯ playerInitials (4)
+     ❯ on a runtime without Intl.Segmenter (1)
+       × still loads and keeps a single code point whole 3ms
+ ❯ |ui| src/features/legal/legalDocument.test.ts (12 tests | 1 failed) 13ms
+   ❯ parseLegalDocument (12)
+     × percent-encodes reserved characters of the local part in the mailto link 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/names.test.ts > playerInitials > on a runtime without Intl.Segmenter > still loads and keeps a single code point whole
+TypeError: Intl.Segmenter is not a constructor
+ ❯ shared/names.ts:20:27
+     18| }
+     19|
+     20| const graphemeSegmenter = new Intl.Segmenter(undefined, { granularity:…
+       |                           ^
+     21|
+     22| function graphemes(text: string): string[] {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/features/legal/legalDocument.test.ts > parseLegalDocument > percent-encodes reserved characters of the local part in the mailto link
+AssertionError: expected { kind: 'paragraph', …(1) } to match object { lines: [ [ { …(2) }, …(2) ] ] }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+@@ -4,11 +4,11 @@
+        {
+          "kind": "text",
+          "text": "Write to ",
+        },
+        {
+-         "href": "mailto:first%3Flast%23tag@example.test",
++         "href": "mailto:first?last#tag@example.test",
+          "kind": "link",
+          "text": "first?last#tag@example.test",
+        },
+        {
+          "kind": "text",
+
+ ❯ src/features/legal/legalDocument.test.ts:170:26
+    168|       CONTACT_EMAIL: "first?last#tag@example.test",
+    169|     });
+    170|     expect(doc.intro[0]).toMatchObject({
+       |                          ^
+    171|       lines: [
+    172|         [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 20 passed (22)
+   Start at  11:30:00
+   Duration  619ms (environment 75%, setup 10%, transform 7%, import 4%, tests 4%, worker 1%)
+

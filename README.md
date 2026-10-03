@@ -8,3 +8,9 @@
 - `*-light.png` / `*-dark.png`: each route with its document title captioned at the top, Playwright with `colorScheme` emulation.
 - `cold-load-dark-os-before-without-meta.png`: a dark-OS cold load of `/terms` with the app's module delayed 4 s and the `color-scheme` meta stripped from the response: a white canvas.
 - `cold-load-dark-os-after-with-meta.png`: the same load with the meta tag in place: a dark canvas, no flash.
+
+## Review rounds
+
+- `red-round1-fixes.log` / `green-round1-fixes.log`: the apostrophe email and ZWJ emoji initials tests failing, then passing (round 1 fixes).
+- `red-round2-fixes.log` / `green-round2-fixes.log`: the mailto encoding and the Intl.Segmenter fallback tests failing (the import-time crash reproduced), then passing (round 2 fixes).
+- `gate-check.log`: `bun run check` on the final head `086eeb9` (93 tests).

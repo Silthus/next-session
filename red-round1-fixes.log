@@ -1,0 +1,77 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-29
+
+ ❯ |shared| shared/names.test.ts (9 tests | 1 failed) 9ms
+   ❯ playerInitials (3)
+     × keeps an emoji name whole instead of splitting its code units 4ms
+ ❯ |ui| src/features/legal/legalDocument.test.ts (11 tests | 1 failed) 12ms
+   ❯ parseLegalDocument (11)
+     × links the whole address when the local part carries an apostrophe 6ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/names.test.ts > playerInitials > keeps an emoji name whole instead of splitting its code units
+AssertionError: expected '👨L' to be '👨\u200d👩\u200d👧L' // Object.is equality
+
+Expected: "👨‍👩‍👧L"
+Received: "👨L"
+
+ ❯ shared/names.test.ts:48:45
+     46|   it("keeps an emoji name whole instead of splitting its code units", …
+     47|     expect(playerInitials("🎲")).toBe("🎲");
+     48|     expect(playerInitials("👨‍👩‍👧 Lima")).toBe("👨‍👩‍👧L");
+       |                                             ^
+     49|     expect(playerInitials("👨‍👩‍👧")).toBe("👨‍👩‍👧");
+     50|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/features/legal/legalDocument.test.ts > parseLegalDocument > links the whole address when the local part carries an apostrophe
+AssertionError: expected [ { kind: 'paragraph', …(1) } ] to deeply equal [ { kind: 'paragraph', …(1) } ]
+
+- Expected
++ Received
+
+@@ -3,16 +3,16 @@
+      "kind": "paragraph",
+      "lines": [
+        [
+          {
+            "kind": "text",
+-           "text": "Write to ",
++           "text": "Write to o'",
+          },
+          {
+-           "href": "mailto:o'hara@example.test",
++           "href": "mailto:hara@example.test",
+            "kind": "link",
+-           "text": "o'hara@example.test",
++           "text": "hara@example.test",
+          },
+          {
+            "kind": "text",
+            "text": ".",
+          },
+
+ ❯ src/features/legal/legalDocument.test.ts:151:23
+    149|       CONTACT_EMAIL: "o'hara@example.test",
+    150|     });
+    151|     expect(doc.intro).toEqual([
+       |                       ^
+    152|       {
+    153|         kind: "paragraph",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  2 failed | 24 passed (26)
+   Start at  11:13:42
+   Duration  1.03s (environment 57%, tests 23%, setup 8%, transform 7%, import 5%, worker 1%)
+
