@@ -5,6 +5,7 @@ import { LOCAL_BACKEND_ENV } from "./localBackendEnv";
 type SignalSource = Pick<NodeJS.Process, "on">;
 
 const localBackendPort = 3210;
+const localBackendVersion = "precompiled-2026-09-28-5c7cb5b";
 const developerEnvFile = ".env.local";
 
 export function forwardShutdownSignals(child: ChildProcess, source: SignalSource = process) {
@@ -25,6 +26,8 @@ function startLocalBackendWithVite() {
       String(localBackendPort),
       "--local-site-port",
       String(localBackendPort + 1),
+      "--local-backend-version",
+      localBackendVersion,
       "--start",
       "bun scripts/auth-env.ts local && bunx vite --port 5173 --strictPort",
     ],
