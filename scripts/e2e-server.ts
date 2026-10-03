@@ -2,7 +2,9 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { LOCAL_BACKEND_ENV } from "./localBackendEnv";
 
-type SignalSource = Pick<NodeJS.Process, "on">;
+interface SignalSource {
+  on(signal: NodeJS.Signals, listener: () => void): unknown;
+}
 
 const localBackendPort = 3210;
 const localBackendVersion = "precompiled-2026-09-28-5c7cb5b";
