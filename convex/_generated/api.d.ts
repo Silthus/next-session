@@ -10,6 +10,8 @@
 
 import type * as account from "../account.js";
 import type * as auth from "../auth.js";
+import type * as cleanup from "../cleanup.js";
+import type * as crons from "../crons.js";
 import type * as groups from "../groups.js";
 import type * as http from "../http.js";
 import type * as model_access from "../model/access.js";
@@ -27,6 +29,8 @@ import type {
 declare const fullApi: ApiFromModules<{
   account: typeof account;
   auth: typeof auth;
+  cleanup: typeof cleanup;
+  crons: typeof crons;
   groups: typeof groups;
   http: typeof http;
   "model/access": typeof model_access;

@@ -36,7 +36,9 @@ describe("Create your link", () => {
     const { as } = await createYourLink(t);
 
     const groups = await as.query(api.groups.mine, {});
-    expect(groups).toEqual([{ id: expect.any(String), name: "My group", playerCount: 0 }]);
+    expect(groups.map(({ name, playerCount }) => ({ name, playerCount }))).toEqual([
+      { name: "My group", playerCount: 0 },
+    ]);
     const group = await as.query(api.groups.get, { groupId: groups[0]!.id });
     expect(group?.shareToken).toMatch(/^[A-Za-z0-9_-]{10}$/);
     expect(group?.expiresAt).toBeGreaterThan(Date.now() + (UNSAVED_GROUP_QUIET_DAYS - 1) * DAY);

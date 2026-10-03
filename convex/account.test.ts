@@ -102,6 +102,7 @@ describe("Save", () => {
 
   it("copies the Legal Acceptance onto an Account that has none", async () => {
     const anonymous = await createYourLink(t);
+    const accepted = await t.run(async (ctx) => await ctx.db.get("users", anonymous.userId));
     const { code } = await anonymous.as.mutation(api.account.startSave, {});
     const account = await signInAccount(t);
 
@@ -111,7 +112,7 @@ describe("Save", () => {
     expect(user).toMatchObject({
       acceptedTermsVersion: LEGAL_VERSIONS.terms,
       acceptedPrivacyVersion: LEGAL_VERSIONS.privacy,
-      acceptedLegalAt: expect.any(Number),
+      acceptedLegalAt: accepted!.acceptedLegalAt!,
     });
   });
 
