@@ -9,7 +9,7 @@ export default defineConfig({
         test: {
           name: "shared",
           environment: "node",
-          include: ["shared/**/*.test.ts"],
+          include: ["{shared,worker}/**/*.test.ts"],
         },
       },
       {
@@ -26,7 +26,7 @@ export default defineConfig({
           name: "ui",
           environment: "jsdom",
           include: ["src/**/*.test.{ts,tsx}"],
-          globals: true,
+          setupFiles: ["vitest.ui-setup.ts"],
         },
       },
     ],

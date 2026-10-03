@@ -23,6 +23,6 @@ export default defineConfig(
     },
   },
   { files: ["**/*.js"], extends: [tseslint.configs.disableTypeChecked] },
-  { files: ["src/**/*.tsx"], extends: [reactHooks.configs.flat.recommended] },
+  { files: ["src/**/*.{ts,tsx}"], extends: [reactHooks.configs.flat.recommended] },
   { files: ["convex/**/*.ts"], extends: [convexPlugin.configs.recommended] },
 );

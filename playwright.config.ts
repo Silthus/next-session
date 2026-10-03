@@ -2,8 +2,6 @@ import { defineConfig, devices } from "@playwright/test";
 
 const port = Number(process.env.E2E_PORT ?? 5173);
 const baseURL = `http://localhost:${port}`;
-const localConvexBackend =
-  "CONVEX_DEPLOYMENT=anonymous:anonymous-agent CONVEX_AGENT_MODE=anonymous";
 
 export default defineConfig({
   testDir: "e2e",
@@ -16,7 +14,7 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: `${localConvexBackend} bunx convex dev --tail-logs disable --start "bunx vite --port ${port} --strictPort"`,
+    command: "bun scripts/e2e-server.ts",
     url: baseURL,
     timeout: 180_000,
     stdout: "pipe",

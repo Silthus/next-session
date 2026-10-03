@@ -13,5 +13,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src", "shared", "e2e", "*.ts"]
+  "include": ["src", "shared", "worker", "e2e", "scripts", "*.ts"]
 }
