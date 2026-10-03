@@ -12,7 +12,10 @@ export type ErrorCode =
   | "UNDO_EXPIRED"
   | "CLAIM_INVALID"
   | "RATE_LIMITED"
-  | "UNAUTHENTICATED";
+  | "UNAUTHENTICATED"
+  | "EMAIL_TAKEN"
+  | "INVALID_CREDENTIALS"
+  | "WEAK_PASSWORD";
 
 export type AppErrorData =
   | { code: "RATE_LIMITED"; retryAfter: number }

@@ -207,14 +207,23 @@ A signed-in GM who creates another Group calls `groups.create` directly.
 Convex Auth replaces the session on every sign-in and does not link an anonymous user to the account it signs in to (verified in `@convex-dev/auth@0.0.96` `server/implementation/users.ts`: `createOrUpdateUser` receives no prior session, and the Password sign-in flow never reaches the callback). So Save uses a claim code ([ADR-0003](adr/0003-save-by-claim-code-merge-never-replaces.md)):
 
 1. The Anonymous GM opens the Save sheet and enters an email and a password, choosing "Create account" (default) or "I already have one".
-2. The client calls `account.startSave` and keeps the code in `sessionStorage` (`next-session.pendingSave`).
+2. The client calls `account.startSave` and keeps the code in `sessionStorage` (`next-session.pendingSave`). The claim expires on the server after 10 minutes.
 3. The client calls `signIn("password", {email, password, flow: "signUp" | "signIn"})`. On failure nothing changed: the anonymous session still holds the Group.
 4. The client calls `account.finishSave({code})`. The server finds the claim by hash, checks it is unexpired, then for every Group of the anonymous user: sets `ownerId` to the caller and clears `expiresAt`. It copies the Legal Acceptance onto the Account if the Account has none, deletes the claim, and deletes the anonymous user with its `authAccounts`, `authSessions`, and `authRefreshTokens`.
-5. On app start, a leftover `pendingSave` with a signed-in Account retries step 4, so a dropped connection between steps 3 and 4 loses nothing. A second `finishSave` with a used code throws `CLAIM_INVALID`, and the client clears the pending code.
+5. On app start, a leftover `pendingSave` with a signed-in Account retries step 4, so a dropped connection between steps 3 and 4 loses nothing. The recovery holds only in the same tab and within the claim's 10 minutes: `sessionStorage` is per tab, and an expired claim throws `CLAIM_INVALID`. After that the Groups stay with the anonymous user and expire with it (§5.5). A second `finishSave` with a used code throws `CLAIM_INVALID`, and the client clears the pending code.
 
 The Account's existing Groups are never read for deletion. A test pins it: an Account with two Groups saves an anonymous one and ends up with three.
 
-Password rules: Convex Auth's `Password` provider, minimum 8 characters, no email verification and no reset in v1 (Convex Auth's built-in throttling covers failed sign-ins). Creating an Account stamps the Legal Acceptance, because the sheet carries the same legal line as the landing. **Log in** on the landing opens the same sheet with sign-in only.
+Password rules: Convex Auth's `Password` provider, minimum 8 characters, no email verification and no reset in v1. Convex Auth's built-in throttle covers failed sign-ins: 10 wrong passwords lock an Account, and one more attempt comes back every 6 minutes. Creating an Account consumes the global `accountSignUp` limit (§5.4) and stamps the Legal Acceptance, because the sheet carries the same legal line as the landing. **Log in** on the landing opens the same sheet with sign-in only.
+
+`convex/auth.ts` turns the provider's plain errors into codes, so the sheet can tell them apart after production redacts plain errors to "Server Error":
+
+| Code | When |
+| --- | --- |
+| `WEAK_PASSWORD` | Sign-up with a password shorter than 8 characters |
+| `EMAIL_TAKEN` | Sign-up with an email that already has an Account. It never signs in, so password guesses always meet the sign-in throttle |
+| `INVALID_CREDENTIALS` | Log in with an unknown email or a wrong password, the same code for both |
+| `RATE_LIMITED` | Log in to a locked Account (`retryAfter` is 6 minutes), or a sign-up past `accountSignUp` |
 
 ### 5.4 Rate limits
 
@@ -223,6 +232,7 @@ Convex functions do not see the client IP, so limits key on what the server can 
 | Name | Key | Shape |
 | --- | --- | --- |
 | `anonymousSignUp` | global | token bucket, 30 per minute, capacity 60 |
+| `accountSignUp` | global | token bucket, 5 per minute, capacity 20 |
 | `createGroup` | GM id | token bucket, 10 per hour, capacity 5 |
 | `joinGroup` | Group id | fixed window, 30 per hour |
 | `answer` | Player id | token bucket, 120 per minute, capacity 60 (covers fast tapping) |
@@ -234,6 +244,12 @@ A hit throws `RATE_LIMITED` with `retryAfter`; the UI shows "Slow down a moment"
 ### 5.5 Expiry of Unsaved Groups
 
 `crons.ts` runs `cleanup.sweepExpiredGroups` daily at 03:17 UTC. It reads `by_expiresAt` for `0 ≤ expiresAt < now` in pages of 50, deletes each Group the same way `groups.remove` does, and reschedules itself while pages remain. The GM surface shows the date ("Saved for 30 quiet days, until Nov 1"), and the Terms and the Privacy Policy say it ([ADR-0006](adr/0006-unsaved-groups-expire-after-30-quiet-days.md)).
+
+### 5.6 Session lifetime
+
+A session lasts at most 1 year from sign-in (`session.totalDurationMs`) and ends after 30 days without a token refresh (`session.inactiveDurationMs`). Any visit refreshes the token, so a GM who comes back within every 30 days stays signed in for the year. The 30 quiet days match the Expiry of Unsaved Groups (§5.5): an Anonymous GM who stays away long enough to lose the session would lose the Group to Expiry anyway. After the year, an Account logs in again; an Anonymous GM loses access to its Groups, which is the reason to Save.
+
+Convex Auth's default is 30 days in total, which would lock out an active Anonymous GM after a month, Groups and all.
 
 ## 6. Frontend
 
