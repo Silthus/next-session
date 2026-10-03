@@ -137,6 +137,16 @@ describe("Accounts", () => {
     await expectErrorCode(logInAccount(t, newCredentials()), "INVALID_CREDENTIALS");
   });
 
+  it.each(["", "   "])(
+    "refuses a sign-up or a log in with the email %j as invalid credentials",
+    async (email) => {
+      const credentials = { email, password: "correct horse battery" };
+
+      await expectErrorCode(signUpAccount(t, credentials), "INVALID_CREDENTIALS");
+      await expectErrorCode(logInAccount(t, credentials), "INVALID_CREDENTIALS");
+    },
+  );
+
   it("refuses a password shorter than 8 characters as weak", async () => {
     await expectErrorCode(
       signUpAccount(t, { email: "short@example.com", password: "1234567" }),
@@ -232,7 +242,7 @@ describe("the Account sign-up limit", () => {
 
 describe("the session lifetime", () => {
   const MINUTE = 60_000;
-  const QUIET_LIMIT = UNSAVED_GROUP_QUIET_DAYS * DAY;
+  const MONTH = 30 * DAY;
   const YEAR = 365 * DAY;
 
   async function createYourLinkTokens() {
@@ -245,9 +255,9 @@ describe("the session lifetime", () => {
     return tokens?.refreshToken ?? null;
   }
 
-  async function returnJustInsideEveryQuietLimitUntil(refreshToken: string, until: number) {
-    while (Date.now() + QUIET_LIMIT - MINUTE < until) {
-      vi.setSystemTime(Date.now() + QUIET_LIMIT - MINUTE);
+  async function returnEveryMonthUntil(refreshToken: string, until: number) {
+    while (Date.now() + MONTH < until) {
+      vi.setSystemTime(Date.now() + MONTH);
       const next = await refresh(refreshToken);
       expect(next, `visit on ${new Date().toISOString()}`).toBeTypeOf("string");
       refreshToken = next!;
@@ -255,21 +265,13 @@ describe("the session lifetime", () => {
     return refreshToken;
   }
 
-  async function stayActiveForAYear() {
-    const signedInAt = Date.now();
-    const refreshToken = await returnJustInsideEveryQuietLimitUntil(
-      await createYourLinkTokens(),
-      signedInAt + YEAR,
-    );
-    return { signedInAt, refreshToken };
-  }
-
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
   });
 
-  it("keeps a GM who returns within every 30 days signed in until a minute before the year is up", async () => {
-    const { signedInAt, refreshToken } = await stayActiveForAYear();
+  it("keeps a GM signed in until a minute before the year is up, even one who never returns", async () => {
+    const signedInAt = Date.now();
+    const refreshToken = await createYourLinkTokens();
 
     vi.setSystemTime(signedInAt + YEAR - MINUTE);
 
@@ -277,22 +279,14 @@ describe("the session lifetime", () => {
   });
 
   it("ends the session a minute after the year is up, however active the GM is", async () => {
-    const { signedInAt, refreshToken } = await stayActiveForAYear();
+    const signedInAt = Date.now();
+    const refreshToken = await returnEveryMonthUntil(
+      await createYourLinkTokens(),
+      signedInAt + YEAR,
+    );
 
     vi.setSystemTime(signedInAt + YEAR + MINUTE);
 
     expect(await refresh(refreshToken)).toBeNull();
-  });
-
-  it("ends the session after 30 quiet days, and not a minute before", async () => {
-    const signedInAt = Date.now();
-    const returning = await createYourLinkTokens();
-    const quiet = await createYourLinkTokens();
-
-    vi.setSystemTime(signedInAt + QUIET_LIMIT - MINUTE);
-    expect(await refresh(returning)).toBeTypeOf("string");
-
-    vi.setSystemTime(signedInAt + QUIET_LIMIT + MINUTE);
-    expect(await refresh(quiet)).toBeNull();
   });
 });
