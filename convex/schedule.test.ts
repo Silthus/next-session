@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { summarizeMonth } from "../shared/monthSummary";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { newBackend, signInAccount, type TestBackend } from "./model/test.setup";
+import { newBackend, signInAccount, signInAnonymousGm, type TestBackend } from "./model/test.setup";
 
 const NOW = Date.UTC(2026, 9, 3, 12);
 const TODAY = "2026-10-03";
@@ -19,8 +19,8 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-async function signedInGmWithGroup() {
-  const gm = await signInAccount(t);
+async function signedInGmWithGroup(signInGm = signInAccount) {
+  const gm = await signInGm(t);
   const groupId = await gm.as.mutation(api.groups.create, {});
   return { ...gm, groupId };
 }
@@ -117,6 +117,15 @@ describe("schedule.month", () => {
       ["Grace", 2],
     ]);
     expect(summary.days.find((day) => day.date === "2026-10-10")?.session?._id).toBe(sessionId);
+  });
+
+  it("serves an Anonymous GM their own Group", async () => {
+    const { as, groupId } = await signedInGmWithGroup(signInAnonymousGm);
+    const ada = await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
+
+    const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
+
+    expect(schedule).toEqual({ players: [{ _id: ada, name: "Ada" }], answers: [], sessions: [] });
   });
 
   it("returns null for a foreign Group, so it looks missing", async () => {

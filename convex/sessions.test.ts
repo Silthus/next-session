@@ -74,7 +74,7 @@ describe("sessions.schedule", () => {
     },
   );
 
-  it.each(["2026-10-02", "2027-01-01", "2026-02-30", "2026-10-3", "tomorrow"])(
+  it.each(["2026-10-02", "2027-01-01", "2026-11-31", "2026-10-3", "tomorrow"])(
     "rejects %s outside the Booking Window",
     async (date) => {
       const { as, groupId } = await signedInGmWithGroup();

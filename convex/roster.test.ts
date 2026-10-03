@@ -191,6 +191,17 @@ describe("roster.renamePlayer", () => {
     expect(await rosterOf(groupId)).toEqual([{ name: "Ada King", nameKey: "ada king" }]);
   });
 
+  it("keeps the Player's id and Answers", async () => {
+    const { as, groupId, playerId } = await gmWithPlayer();
+    await seedAnswers(groupId, playerId, ["2026-10-03", "2026-10-17"]);
+
+    await as.mutation(api.roster.renamePlayer, { playerId, name: "Ada King" });
+
+    const player = await t.run(async (ctx) => await ctx.db.get("players", playerId));
+    expect(player?.name).toBe("Ada King");
+    expect(await answersOf(playerId)).toHaveLength(2);
+  });
+
   it("lets a Player change only the case of their own name", async () => {
     const { as, groupId, playerId } = await gmWithPlayer();
 
