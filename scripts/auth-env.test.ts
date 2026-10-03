@@ -136,4 +136,11 @@ describe("parseEnvFile", () => {
       CONVEX_DEV_DEPLOY_KEY: "dev:x=y",
     });
   });
+
+  it("unquotes quoted values", () => {
+    expect(parseEnvFile(`A="dev:quoted|key"\nB='single'\n`)).toEqual({
+      A: "dev:quoted|key",
+      B: "single",
+    });
+  });
 });

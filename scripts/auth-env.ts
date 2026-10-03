@@ -62,9 +62,13 @@ export function parseEnvFile(text: string): Env {
     .filter((line) => line !== "" && !line.startsWith("#"))
     .map((line) => {
       const separator = line.indexOf("=");
-      return [line.slice(0, separator), line.slice(separator + 1)] as const;
+      return [line.slice(0, separator), unquote(line.slice(separator + 1))] as const;
     });
   return Object.fromEntries(entries);
+}
+
+function unquote(value: string) {
+  return /^(["']).*\1$/.test(value) ? value.slice(1, -1) : value;
 }
 
 function parseTarget(arg: string | undefined): Target {
