@@ -21,8 +21,8 @@ export function readEnv(source: EnvSource): AppEnv {
   return {
     convexUrl: required(source, "VITE_CONVEX_URL"),
     legal: {
-      controllerAddress: source.VITE_LEGAL_CONTROLLER_ADDRESS || "address on request",
-      contactEmail: source.VITE_LEGAL_CONTACT_EMAIL || "email on request",
+      controllerAddress: source.LEGAL_CONTROLLER_ADDRESS || "address on request",
+      contactEmail: source.LEGAL_CONTACT_EMAIL || "email on request",
     },
   };
 }

@@ -34,20 +34,30 @@ describe("ShareLinkCard", () => {
     expect(await screen.findByText("Long-press the link to copy it.")).toBeTruthy();
   });
 
+  it("shows the long-press hint when the browser has no clipboard API at all", async () => {
+    vi.stubGlobal("navigator", { ...navigator, clipboard: undefined });
+    render(<ShareLinkCard url={url} />);
+    await userEvent.click(screen.getByRole("button", { name: "Copy" }));
+    expect(await screen.findByText("Long-press the link to copy it.")).toBeTruthy();
+  });
+
   it("prefills the share message for WhatsApp, Telegram and Mail", () => {
     render(<ShareLinkCard url={url} />);
+    expect(screen.getByText("Anyone with the link can answer. Keep it in the group.")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Share via WhatsApp" })).toHaveProperty(
       "href",
       `https://wa.me/?text=${encodeURIComponent(message)}`,
     );
     expect(screen.getByRole("link", { name: "Share via Telegram" })).toHaveProperty(
       "href",
-      `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(message.replace(` ${url}`, ""))}`,
+      `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent("Help me find our next game night. Tap the days you can play, it takes 30 seconds.")}`,
     );
-    expect(screen.getByRole("link", { name: "Share via Mail" })).toHaveProperty(
+    const mail = screen.getByRole("link", { name: "Share via Mail" });
+    expect(mail).toHaveProperty(
       "href",
       `mailto:?subject=${encodeURIComponent("Our next game night")}&body=${encodeURIComponent(message)}`,
     );
+    expect(mail).toHaveProperty("target", "");
     expect(screen.queryByRole("button", { name: "Share" })).toBeNull();
   });
 
@@ -63,6 +73,7 @@ describe("ShareLinkCard", () => {
     const onRotate = vi.fn();
     render(<ShareLinkCard url={url} compact onRotate={onRotate} />);
     expect(screen.queryByRole("link", { name: "Share via WhatsApp" })).toBeNull();
+    expect(screen.queryByText("Anyone with the link can answer. Keep it in the group.")).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "Rotate" }));
     expect(onRotate).toHaveBeenCalledOnce();
   });

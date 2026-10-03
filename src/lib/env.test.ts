@@ -17,8 +17,8 @@ describe("readEnv", () => {
   it("fills the legal controller details from the build environment", () => {
     const env = readEnv({
       VITE_CONVEX_URL: "https://x.convex.cloud",
-      VITE_LEGAL_CONTROLLER_ADDRESS: "Somewhere 1, 12345 Town",
-      VITE_LEGAL_CONTACT_EMAIL: "hello@example.test",
+      LEGAL_CONTROLLER_ADDRESS: "Somewhere 1, 12345 Town",
+      LEGAL_CONTACT_EMAIL: "hello@example.test",
     });
     expect(env.legal).toEqual({
       controllerAddress: "Somewhere 1, 12345 Town",

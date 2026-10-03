@@ -1,4 +1,4 @@
-import { useEffect, useId, type ReactNode } from "react";
+import { useEffect, useId, useRef, type MouseEvent, type ReactNode } from "react";
 
 export function Sheet({
   open,
@@ -12,37 +12,36 @@ export function Sheet({
   children: ReactNode;
 }) {
   const titleId = useId();
-  useEscape(open, onClose);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog || dialog.open) return;
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else dialog.open = true;
+  }, [open]);
   if (!open) return null;
+
+  const closeOnBackdrop = (event: MouseEvent<HTMLDialogElement>) => {
+    if (event.target === event.currentTarget) onClose();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
-      <div
-        data-testid="sheet-backdrop"
-        className="animate-fade absolute inset-0 bg-ink/40"
-        onClick={onClose}
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="animate-rise relative w-full rounded-t-xl border border-line bg-surface p-6 shadow-card sm:max-w-md sm:rounded-xl"
-      >
+    <dialog
+      ref={dialogRef}
+      aria-labelledby={titleId}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onClick={closeOnBackdrop}
+      className="animate-fade fixed inset-0 m-0 flex h-dvh w-full max-w-none max-h-none items-end justify-center bg-transparent p-0 backdrop:bg-ink/40 sm:items-center"
+    >
+      <div className="animate-rise w-full rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl">
         <h2 id={titleId} className="font-display text-2xl font-bold">
           {title}
         </h2>
         <div className="mt-4">{children}</div>
       </div>
-    </div>
+    </dialog>
   );
-}
-
-function useEscape(active: boolean, onEscape: () => void) {
-  useEffect(() => {
-    if (!active) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onEscape();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [active, onEscape]);
 }

@@ -5,9 +5,11 @@ import { Eyebrow } from "./Eyebrow";
 import { IconCheck, IconCopy } from "./icons";
 
 const copiedFor = 1600;
+const invitation =
+  "Help me find our next game night. Tap the days you can play, it takes 30 seconds";
 
 export function shareMessage(url: string) {
-  return `Help me find our next game night. Tap the days you can play, it takes 30 seconds: ${url}`;
+  return `${invitation}: ${url}`;
 }
 
 type CopyState = "idle" | "copied" | "blocked";
@@ -22,11 +24,14 @@ export function ShareLinkCard({
   onRotate?: () => void;
 }) {
   const [copyState, setCopyState] = useState<CopyState>("idle");
-  useResetAfter(copyState === "copied", copiedFor, () => setCopyState("idle"));
+  useEffect(() => {
+    if (copyState !== "copied") return;
+    const timer = setTimeout(() => setCopyState("idle"), copiedFor);
+    return () => clearTimeout(timer);
+  }, [copyState]);
 
   const copy = () => {
-    void navigator.clipboard
-      .writeText(url)
+    void writeToClipboard(url)
       .then(() => setCopyState("copied"))
       .catch(() => setCopyState("blocked"));
   };
@@ -39,7 +44,7 @@ export function ShareLinkCard({
       )}
     >
       <div className="flex items-center justify-between gap-3">
-        <Eyebrow className="text-accent">Player link</Eyebrow>
+        <Eyebrow className="text-accent-strong">Player link</Eyebrow>
         {onRotate && (
           <button
             type="button"
@@ -67,9 +72,9 @@ export function ShareLinkCard({
         <p className="mt-2 text-xs text-ink-2">Long-press the link to copy it.</p>
       )}
       {!compact && (
-        <div className="mt-3 flex items-center justify-between gap-3">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <ShareTargets url={url} />
-          <p className="hidden text-xs text-ink-3 sm:block">
+          <p className="text-xs text-ink-3">
             Anyone with the link can answer. Keep it in the group.
           </p>
         </div>
@@ -78,40 +83,60 @@ export function ShareLinkCard({
   );
 }
 
+function writeToClipboard(text: string): Promise<void> {
+  try {
+    return navigator.clipboard?.writeText(text) ?? Promise.reject(new Error("No clipboard"));
+  } catch (error) {
+    return Promise.reject(error instanceof Error ? error : new Error("Clipboard blocked"));
+  }
+}
+
+function shareNatively(text: string) {
+  try {
+    void navigator.share({ text }).catch(() => undefined);
+  } catch {
+    return;
+  }
+}
+
+const roundTarget =
+  "inline-flex size-10 items-center justify-center rounded-full text-sm font-bold transition-transform hover:scale-105 active:scale-95";
+
 function ShareTargets({ url }: { url: string }) {
   const message = shareMessage(url);
+  const encoded = encodeURIComponent(message);
   const targets = [
     {
       label: "WhatsApp",
       glyph: "W",
       tone: "bg-[#25D366] text-white",
-      href: `https://wa.me/?text=${encodeURIComponent(message)}`,
+      href: `https://wa.me/?text=${encoded}`,
+      newTab: true,
     },
     {
       label: "Telegram",
       glyph: "T",
       tone: "bg-[#2AABEE] text-white",
-      href: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(message.replace(` ${url}`, ""))}`,
+      href: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(`${invitation}.`)}`,
+      newTab: true,
     },
     {
       label: "Mail",
       glyph: "@",
       tone: "bg-surface-2 text-ink",
-      href: `mailto:?subject=${encodeURIComponent("Our next game night")}&body=${encodeURIComponent(message)}`,
+      href: `mailto:?subject=${encodeURIComponent("Our next game night")}&body=${encoded}`,
+      newTab: false,
     },
   ];
-  const round =
-    "inline-flex size-10 items-center justify-center rounded-full text-sm font-bold transition-transform hover:scale-105 active:scale-95";
   return (
     <div className="flex items-center gap-2">
       {targets.map((target) => (
         <a
           key={target.label}
           href={target.href}
-          target="_blank"
-          rel="noreferrer"
+          {...(target.newTab ? { target: "_blank", rel: "noreferrer" } : {})}
           aria-label={`Share via ${target.label}`}
-          className={cn(round, target.tone)}
+          className={cn(roundTarget, target.tone)}
         >
           {target.glyph}
         </a>
@@ -120,8 +145,8 @@ function ShareTargets({ url }: { url: string }) {
         <button
           type="button"
           aria-label="Share"
-          onClick={() => void navigator.share({ text: message }).catch(() => undefined)}
-          className={cn(round, "bg-surface-2 text-ink")}
+          onClick={() => shareNatively(message)}
+          className={cn(roundTarget, "bg-surface-2 text-ink")}
         >
           ↗
         </button>
@@ -132,12 +157,4 @@ function ShareTargets({ url }: { url: string }) {
 
 function canShareNatively() {
   return typeof navigator !== "undefined" && typeof navigator.share === "function";
-}
-
-function useResetAfter(active: boolean, delay: number, reset: () => void) {
-  useEffect(() => {
-    if (!active) return;
-    const timer = setTimeout(reset, delay);
-    return () => clearTimeout(timer);
-  }, [active, delay, reset]);
 }
