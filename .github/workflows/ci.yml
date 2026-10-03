@@ -77,6 +77,8 @@ jobs:
         run: bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+          LEGAL_CONTROLLER_ADDRESS: ${{ vars.LEGAL_CONTROLLER_ADDRESS }}
+          LEGAL_CONTACT_EMAIL: ${{ vars.LEGAL_CONTACT_EMAIL }}
       - name: Deploy the Worker
         if: steps.head.outputs.current == 'true'
         run: bunx wrangler@4.147.0 deploy
