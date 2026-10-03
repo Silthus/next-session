@@ -162,6 +162,26 @@ describe("parseLegalDocument", () => {
     ]);
   });
 
+  it("percent-encodes reserved characters of the local part in the mailto link", () => {
+    const doc = parseLegalDocument("# T\n\nWrite to {{CONTACT_EMAIL}}.\n", {
+      ...placeholders,
+      CONTACT_EMAIL: "first?last#tag@example.test",
+    });
+    expect(doc.intro[0]).toMatchObject({
+      lines: [
+        [
+          { kind: "text", text: "Write to " },
+          {
+            kind: "link",
+            href: "mailto:first%3Flast%23tag@example.test",
+            text: "first?last#tag@example.test",
+          },
+          { kind: "text", text: "." },
+        ],
+      ],
+    });
+  });
+
   it("fills a placeholder written with spaces inside the braces", () => {
     const doc = parseLegalDocument("# T\n\nAt {{ CONTROLLER_ADDRESS }}.\n", placeholders);
     expect(doc.intro).toEqual([

@@ -17,8 +17,14 @@ export function playerInitials(name: string): string {
   return letters.join("").toUpperCase();
 }
 
-const graphemeSegmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+const graphemes: (text: string) => string[] =
+  typeof Intl.Segmenter === "function" ? segmenterGraphemes : codePointGraphemes;
 
-function graphemes(text: string): string[] {
-  return [...graphemeSegmenter.segment(text)].map((segment) => segment.segment);
+function segmenterGraphemes(text: string): string[] {
+  const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+  return [...segmenter.segment(text)].map((segment) => segment.segment);
+}
+
+function codePointGraphemes(text: string): string[] {
+  return [...text];
 }

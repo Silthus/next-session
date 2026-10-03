@@ -109,6 +109,11 @@ function parseRow(line: string): Inline[][] {
     .map((cell) => parseInline(cell.trim()));
 }
 
+function mailtoHref(email: string): string {
+  const at = email.lastIndexOf("@");
+  return `mailto:${encodeURIComponent(email.slice(0, at))}${email.slice(at)}`;
+}
+
 const inlinePattern =
   /\*\*(.+?)\*\*|`(.+?)`|\[(.+?)\]\((.+?)\)|<(https?:\/\/[^>]+)>|([\w.!#$%&'*+/=?^{|}~-]+@[\w-]+(?:\.[\w-]+)+)/g;
 
@@ -128,6 +133,6 @@ function toInline([, strong, code, linkText, href, autolink, email]: RegExpExecA
   if (strong !== undefined) return { kind: "strong", text: strong };
   if (code !== undefined) return { kind: "code", text: code };
   if (autolink !== undefined) return { kind: "link", href: autolink, text: autolink };
-  if (email !== undefined) return { kind: "link", href: `mailto:${email}`, text: email };
+  if (email !== undefined) return { kind: "link", href: mailtoHref(email), text: email };
   return { kind: "link", href: href ?? "", text: linkText ?? "" };
 }

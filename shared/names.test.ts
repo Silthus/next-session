@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { normalizeName, playerInitials } from "./names";
 
 describe("normalizeName", () => {
@@ -47,5 +47,19 @@ describe("playerInitials", () => {
     expect(playerInitials("🎲")).toBe("🎲");
     expect(playerInitials("👨‍👩‍👧 Lima")).toBe("👨‍👩‍👧L");
     expect(playerInitials("👨‍👩‍👧")).toBe("👨‍👩‍👧");
+  });
+
+  describe("on a runtime without Intl.Segmenter", () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.resetModules();
+    });
+
+    it("still loads and keeps a single code point whole", async () => {
+      vi.stubGlobal("Intl", { ...Intl, Segmenter: undefined });
+      vi.resetModules();
+      const names = await import("./names");
+      expect(names.playerInitials("🎲 Lima")).toBe("🎲L");
+    });
   });
 });
