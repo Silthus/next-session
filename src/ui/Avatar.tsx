@@ -1,10 +1,5 @@
+import { playerInitials } from "../../shared/names";
 import { cn } from "./cn";
-
-export function playerInitials(name: string) {
-  const [first = "", second] = name.trim().split(/\s+/);
-  const letters = second ? first.charAt(0) + second.charAt(0) : first.slice(0, 2);
-  return letters.toUpperCase();
-}
 
 const hues = [
   "bg-accent-soft text-accent-strong",

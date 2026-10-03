@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { normalizeName } from "./names";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { normalizeName, playerInitials } from "./names";
 
 describe("normalizeName", () => {
   it("trims the name and collapses inner whitespace", () => {
@@ -29,5 +29,37 @@ describe("normalizeName", () => {
 
   it("counts an emoji as one character", () => {
     expect(normalizeName("🎲".repeat(60))).toMatchObject({ name: "🎲".repeat(60) });
+  });
+});
+
+describe("playerInitials", () => {
+  it("takes the first letters of the first two words", () => {
+    expect(playerInitials("Ana Lima")).toBe("AL");
+    expect(playerInitials("  thu  nguyen tran ")).toBe("TN");
+  });
+
+  it("takes two letters of a single name", () => {
+    expect(playerInitials("ana")).toBe("AN");
+    expect(playerInitials("X")).toBe("X");
+  });
+
+  it("keeps an emoji name whole instead of splitting its code units", () => {
+    expect(playerInitials("🎲")).toBe("🎲");
+    expect(playerInitials("👨‍👩‍👧 Lima")).toBe("👨‍👩‍👧L");
+    expect(playerInitials("👨‍👩‍👧")).toBe("👨‍👩‍👧");
+  });
+
+  describe("on a runtime without Intl.Segmenter", () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.resetModules();
+    });
+
+    it("still loads and keeps a single code point whole", async () => {
+      vi.stubGlobal("Intl", Object.create(Intl, { Segmenter: { value: undefined } }));
+      vi.resetModules();
+      const names = await import("./names");
+      expect(names.playerInitials("🎲 Lima")).toBe("🎲L");
+    });
   });
 });

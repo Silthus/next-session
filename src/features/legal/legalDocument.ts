@@ -109,7 +109,13 @@ function parseRow(line: string): Inline[][] {
     .map((cell) => parseInline(cell.trim()));
 }
 
-const inlinePattern = /\*\*(.+?)\*\*|`(.+?)`|\[(.+?)\]\((.+?)\)|<(https?:\/\/[^>]+)>/g;
+function mailtoHref(email: string): string {
+  const at = email.lastIndexOf("@");
+  return `mailto:${encodeURIComponent(email.slice(0, at))}${email.slice(at)}`;
+}
+
+const inlinePattern =
+  /\*\*(.+?)\*\*|`(.+?)`|\[(.+?)\]\((.+?)\)|<(https?:\/\/[^>]+)>|([\w.!#$%&'*+/=?^{|}~-]+@[\w-]+(?:\.[\w-]+)+)/g;
 
 function parseInline(text: string): Inline[] {
   const inlines: Inline[] = [];
@@ -123,9 +129,10 @@ function parseInline(text: string): Inline[] {
   return inlines;
 }
 
-function toInline([, strong, code, linkText, href, autolink]: RegExpExecArray): Inline {
+function toInline([, strong, code, linkText, href, autolink, email]: RegExpExecArray): Inline {
   if (strong !== undefined) return { kind: "strong", text: strong };
   if (code !== undefined) return { kind: "code", text: code };
   if (autolink !== undefined) return { kind: "link", href: autolink, text: autolink };
+  if (email !== undefined) return { kind: "link", href: mailtoHref(email), text: email };
   return { kind: "link", href: href ?? "", text: linkText ?? "" };
 }

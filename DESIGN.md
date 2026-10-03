@@ -32,7 +32,7 @@ Alternatives considered: a chevron-in-a-tile ("next") read as a media player but
 
 ## 2. Tokens
 
-Tokens are CSS custom properties switched by a `.dark` class on `<html>`; Tailwind v4 maps them through `@theme inline` so classes like `bg-paper`, `text-ink-2`, `bg-free-soft` exist in both themes. Source of truth: [`prototype/src/index.css`](https://github.com/Silthus/next-session/tree/prototype/ui-direction/prototype/src/index.css).
+Tokens are CSS custom properties switched by `prefers-color-scheme` (D7: the theme follows the OS); Tailwind v4 maps them through `@theme inline` so classes like `bg-paper`, `text-ink-2`, `bg-free-soft` exist in both themes. Source of truth: `src/index.css`.
 
 ### Color
 
@@ -42,7 +42,7 @@ Tokens are CSS custom properties switched by a `.dark` class on `<html>`; Tailwi
 | `surface` | `#FFFFFF` | `#17161D` | cards, calendar cells |
 | `surface-2` | `#F3F1EC` | `#1F1E27` | sunken areas, segmented controls, skeletons |
 | `line` / `line-strong` | `#E6E2D9` / `#CFC9BD` | `#2B2A35` / `#3B3947` | borders, unanswered bars |
-| `ink` / `ink-2` / `ink-3` | `#17161A` / `#5B5862` / `#8E8A95` | `#F4F2F7` / `#B3AFBD` / `#7E7A89` | text: primary, secondary, muted |
+| `ink` / `ink-2` / `ink-3` | `#17161A` / `#5B5862` / `#716D7A` | `#F4F2F7` / `#B3AFBD` / `#8A8695` | text: primary, secondary, muted |
 | `accent` / `accent-strong` | `#6D5DF6` / `#5646E6` | `#8B7DFF` / `#A398FF` | primary actions, scheduled session, today |
 | `accent-ink` | `#FFFFFF` | `#0F0E13` | text on accent |
 | `accent-soft` | `#ECE9FE` | `#2A2650` | share-link card, soft buttons, scheduled cell fill |
@@ -53,6 +53,7 @@ Tokens are CSS custom properties switched by a `.dark` class on `<html>`; Tailwi
 Rules:
 
 - The three answer colors are never used for anything else, and nothing else uses green, amber or rose. Violet is the only other hue.
+- One exception: the WhatsApp and Telegram share icons in `ShareLinkCard` keep their brand colors (`#25D366` green, `#2AABEE` blue) so people recognize them. The brand colors appear nowhere else.
 - Answer tiles always carry a glyph (✓ ? ✕) in addition to color, for color-blind players.
 - Heat-map intensity on the GM grid is `color-mix(in oklab, var(--free) <0–55>%, var(--surface))` driven by the share of players who are free; a day where everyone is free is solid `free` with white text; a day with any busy answer gets no tint (the busy bar or ✕ count carries the conflict). No day is ever painted red.
 - Contrast: `ink` on `paper` ≥ 14:1 both themes; `ink-3` on `surface` ≥ 4.5:1; white on `free`/`busy` ≥ 3:1 at ≥ 14 px bold (large-text rule), the glyph adds redundancy.

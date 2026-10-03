@@ -95,21 +95,29 @@ function renderInlines(inlines: Inline[]) {
           </code>
         );
       case "link":
-        return inline.href.startsWith("/") ? (
-          <Link key={index} to={inline.href} className={linkClassName}>
-            {inline.text}
-          </Link>
-        ) : (
-          <a
-            key={index}
-            href={inline.href}
-            target="_blank"
-            rel="noreferrer"
-            className={linkClassName}
-          >
-            {inline.text}
-          </a>
-        );
+        return renderLink(inline, index);
     }
   });
+}
+
+function renderLink(inline: Extract<Inline, { kind: "link" }>, key: number) {
+  if (inline.href.startsWith("/")) {
+    return (
+      <Link key={key} to={inline.href} className={linkClassName}>
+        {inline.text}
+      </Link>
+    );
+  }
+  if (inline.href.startsWith("mailto:")) {
+    return (
+      <a key={key} href={inline.href} className={linkClassName}>
+        {inline.text}
+      </a>
+    );
+  }
+  return (
+    <a key={key} href={inline.href} target="_blank" rel="noreferrer" className={linkClassName}>
+      {inline.text}
+    </a>
+  );
 }

@@ -5,7 +5,7 @@ import { legalContact } from "../../lib/env";
 import { PageShell } from "../../ui/PageShell";
 import { LegalArticle } from "./LegalArticle";
 import { parseLegalDocument } from "./legalDocument";
-import { LEGAL_VERSIONS } from "./legalVersions";
+import { LEGAL_VERSIONS } from "../../../shared/legal";
 
 const sources = { terms, privacy, imprint };
 
