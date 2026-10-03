@@ -8,6 +8,7 @@ import {
   signedInGmWithGroup,
   signInAccount,
   signInAnonymousGm,
+  spendGmEdits,
   type TestBackend,
 } from "./model/test.setup";
 
@@ -327,5 +328,24 @@ describe("roster.removePlayer", () => {
       t.mutation(api.roster.removePlayer, { playerId: ada }),
       "UNAUTHENTICATED",
     );
+  });
+});
+
+describe("the GM edit limit", () => {
+  it("refuses every Roster edit once the GM's edits are spent, and changes nothing", async () => {
+    const { as, groupId, userId } = await signedInGmWithGroup(t);
+    const playerId = await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
+    await spendGmEdits(t, userId);
+
+    await expectErrorCode(
+      as.mutation(api.roster.addPlayer, { groupId, name: "Bo" }),
+      "RATE_LIMITED",
+    );
+    await expectErrorCode(
+      as.mutation(api.roster.renamePlayer, { playerId, name: "Cy" }),
+      "RATE_LIMITED",
+    );
+    await expectErrorCode(as.mutation(api.roster.removePlayer, { playerId }), "RATE_LIMITED");
+    expect(await rosterOf(groupId)).toEqual([{ name: "Ada", nameKey: "ada" }]);
   });
 });

@@ -7,6 +7,7 @@ import { api } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import schema from "../schema";
 import type { AppErrorData, ErrorCode } from "./errors";
+import { rateLimiter } from "./rateLimits";
 
 const modules = import.meta.glob("../**/*.*s");
 
@@ -53,6 +54,17 @@ export async function seedSession(t: TestBackend, groupId: Id<"groups">, date: s
 
 export async function expiryOf(t: TestBackend, groupId: Id<"groups">) {
   return await t.run(async (ctx) => (await ctx.db.get("groups", groupId))?.expiresAt);
+}
+
+const MOST_EDITS_TO_SPEND = 1_000;
+
+export async function spendGmEdits(t: TestBackend, gmId: Id<"users">) {
+  await t.run(async (ctx) => {
+    for (let edit = 0; edit < MOST_EDITS_TO_SPEND; edit++) {
+      if (!(await rateLimiter.limit(ctx, "gmEdit", { key: gmId })).ok) return;
+    }
+    throw new Error("The GM edit limit never refused an edit");
+  });
 }
 
 export async function expectErrorCode<Code extends ErrorCode>(

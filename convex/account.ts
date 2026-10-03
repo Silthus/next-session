@@ -45,6 +45,7 @@ export const finishSave = mutation({
     const account = await requireGm(ctx);
     if (account.isAnonymous === true) fail({ code: "UNAUTHENTICATED" });
     const anonymousGm = await redeemClaim(ctx, code);
+    await enforceRateLimit(ctx, "gmEdit", account._id);
     const groupIds = await moveGroups(ctx, anonymousGm, account);
     await copyLegalAcceptance(ctx, anonymousGm, account);
     await deleteAnonymousGm(ctx, anonymousGm);

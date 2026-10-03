@@ -8,6 +8,7 @@ import {
   seedSession,
   signedInGmWithGroup,
   signInAnonymousGm,
+  spendGmEdits,
   type TestBackend,
 } from "./model/test.setup";
 
@@ -199,5 +200,20 @@ describe("sessions.unschedule", () => {
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
 
     await expectErrorCode(t.mutation(api.sessions.unschedule, { sessionId }), "UNAUTHENTICATED");
+  });
+});
+
+describe("the GM edit limit", () => {
+  it("refuses scheduling and unscheduling once the GM's edits are spent, and changes nothing", async () => {
+    const { as, groupId, userId } = await signedInGmWithGroup(t);
+    const sessionId = await seedSession(t, groupId, "2026-10-17");
+    await spendGmEdits(t, userId);
+
+    await expectErrorCode(
+      as.mutation(api.sessions.schedule, { groupId, date: "2026-10-24" }),
+      "RATE_LIMITED",
+    );
+    await expectErrorCode(as.mutation(api.sessions.unschedule, { sessionId }), "RATE_LIMITED");
+    expect(await sessionDatesOf(groupId)).toEqual(["2026-10-17"]);
   });
 });

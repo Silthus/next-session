@@ -9,6 +9,7 @@ import {
   type GmClient,
   newBackend,
   signInAccount,
+  spendGmEdits,
   type TestBackend,
 } from "./model/test.setup";
 
@@ -233,5 +234,15 @@ describe("who may Save", () => {
     }
 
     await expectErrorCode(anonymous.as.mutation(api.account.startSave, {}), "RATE_LIMITED");
+  });
+
+  it("refuses to finish a Save once the Account's GM edits are spent, and moves nothing", async () => {
+    const anonymous = await createYourLink(t);
+    const { code } = await anonymous.as.mutation(api.account.startSave, {});
+    const account = await signUpAccount(t);
+    await spendGmEdits(t, account.userId);
+
+    await expectErrorCode(account.as.mutation(api.account.finishSave, { code }), "RATE_LIMITED");
+    expect(await account.as.query(api.groups.mine, {})).toEqual([]);
   });
 });

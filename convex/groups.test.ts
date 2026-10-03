@@ -10,6 +10,7 @@ import {
   newBackend,
   signInAccount,
   signInAnonymousGm,
+  spendGmEdits,
   type TestBackend,
 } from "./model/test.setup";
 
@@ -561,5 +562,53 @@ describe("rotating the Share Link", () => {
       t.mutation(api.groups.undoRotateShareToken, { groupId }),
       "UNAUTHENTICATED",
     );
+  });
+});
+
+describe("the GM edit limit", () => {
+  it("allows a GM a burst of 60 edits, then one more every half second", async () => {
+    const { as } = await signInAccount(t);
+    const groupId = await as.mutation(api.groups.create, {});
+    const rename = () => as.mutation(api.groups.rename, { groupId, name: "Renamed" });
+    for (let edit = 0; edit < 60; edit++) await rename();
+
+    const error = await expectErrorCode(rename(), "RATE_LIMITED");
+    expect(error.retryAfter).toBe(500);
+
+    vi.advanceTimersByTime(499);
+    await expectErrorCode(rename(), "RATE_LIMITED");
+    vi.advanceTimersByTime(1);
+    await expect(rename()).resolves.toBeNull();
+  });
+
+  it("limits each GM separately", async () => {
+    const busy = await signInAccount(t);
+    const quiet = await signInAccount(t);
+    const groupId = await quiet.as.mutation(api.groups.create, {});
+    await spendGmEdits(t, busy.userId);
+
+    await expect(
+      quiet.as.mutation(api.groups.rename, { groupId, name: "Ours" }),
+    ).resolves.toBeNull();
+  });
+
+  it("refuses every Group edit once the GM's edits are spent, and changes nothing", async () => {
+    const { as, userId } = await signInAccount(t);
+    const groupId = await as.mutation(api.groups.create, {});
+    await as.mutation(api.groups.rotateShareToken, { groupId });
+    const before = await readGroup(groupId);
+    await spendGmEdits(t, userId);
+
+    await expectErrorCode(
+      as.mutation(api.groups.rename, { groupId, name: "Renamed" }),
+      "RATE_LIMITED",
+    );
+    await expectErrorCode(as.mutation(api.groups.rotateShareToken, { groupId }), "RATE_LIMITED");
+    await expectErrorCode(
+      as.mutation(api.groups.undoRotateShareToken, { groupId }),
+      "RATE_LIMITED",
+    );
+    await expectErrorCode(as.mutation(api.groups.remove, { groupId }), "RATE_LIMITED");
+    expect(await readGroup(groupId)).toEqual(before);
   });
 });
