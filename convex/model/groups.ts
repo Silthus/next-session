@@ -7,7 +7,7 @@ import { expiryFromNow, groupByShareToken } from "./access";
 import { fail } from "./errors";
 import { deleteAnonymousGm } from "./gms";
 
-export const DEFAULT_GROUP_NAME = "My group";
+const DEFAULT_GROUP_NAME = "My group";
 
 const MINT_ATTEMPTS = 5;
 const UNDO_ROTATE_WINDOW_MS = 30_000;
