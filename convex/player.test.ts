@@ -530,6 +530,23 @@ describe("player.fillRest", () => {
     expect(Object.keys(await answersOf(ada))).toEqual(datesFrom(1, 31, "2026-12"));
   });
 
+  it("writes nothing more when called again", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const ada = await seedPlayer(groupId, "Ada");
+    await t.mutation(api.player.fillRest, { shareToken, playerId: ada, month: "2026-11" });
+
+    await t.mutation(api.player.fillRest, { shareToken, playerId: ada, month: "2026-11" });
+
+    const rows = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query("answers")
+          .withIndex("by_playerId_and_date", (q) => q.eq("playerId", ada))
+          .collect(),
+    );
+    expect(rows).toHaveLength(30);
+  });
+
   it("leaves other Players untouched", async () => {
     const { groupId, shareToken } = await sharedGroup();
     const ada = await seedPlayer(groupId, "Ada");
