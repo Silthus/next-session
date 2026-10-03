@@ -8,3 +8,11 @@ export function normalizeName(raw: string): NormalizedName | "INVALID_NAME" {
   if (length < 1 || length > NAME_MAX_LENGTH) return "INVALID_NAME";
   return { name, nameKey: name.toLowerCase() };
 }
+
+export function playerInitials(name: string): string {
+  const [first = "", second] = name.trim().split(/\s+/);
+  const letters = second
+    ? [...first].slice(0, 1).concat([...second].slice(0, 1))
+    : [...first].slice(0, 2);
+  return letters.join("").toUpperCase();
+}

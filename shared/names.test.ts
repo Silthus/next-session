@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeName } from "./names";
+import { normalizeName, playerInitials } from "./names";
 
 describe("normalizeName", () => {
   it("trims the name and collapses inner whitespace", () => {
@@ -29,5 +29,21 @@ describe("normalizeName", () => {
 
   it("counts an emoji as one character", () => {
     expect(normalizeName("🎲".repeat(60))).toMatchObject({ name: "🎲".repeat(60) });
+  });
+});
+
+describe("playerInitials", () => {
+  it("takes the first letters of the first two words", () => {
+    expect(playerInitials("Ana Lima")).toBe("AL");
+    expect(playerInitials("  thu  nguyen tran ")).toBe("TN");
+  });
+
+  it("takes two letters of a single name", () => {
+    expect(playerInitials("ana")).toBe("AN");
+    expect(playerInitials("X")).toBe("X");
+  });
+
+  it("keeps an emoji name whole instead of splitting its code units", () => {
+    expect(playerInitials("🎲")).toBe("🎲");
   });
 });

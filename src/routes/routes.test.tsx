@@ -47,8 +47,27 @@ describe("legal routes", () => {
         "pathname",
         "/",
       );
+      expect(document.title).toBe(`${title} · Next Session`);
+      expect(screen.getAllByRole("link", { name: "hello@example.test" })[0]).toHaveProperty(
+        "href",
+        "mailto:hello@example.test",
+      );
     },
   );
+});
+
+describe("document titles", () => {
+  it("names the landing page after the product", async () => {
+    renderAt("/");
+    expect(await screen.findByRole("heading", { level: 1, name: "Next Session" })).toBeTruthy();
+    expect(document.title).toBe("Next Session");
+  });
+
+  it("names the not-found page", async () => {
+    renderAt("/nothing-here");
+    expect(await screen.findByRole("heading", { level: 1, name: "Nothing here" })).toBeTruthy();
+    expect(document.title).toBe("Nothing here · Next Session");
+  });
 });
 
 describe("/privacy", () => {

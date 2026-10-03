@@ -265,7 +265,7 @@ src/
     player/             PlayerScreen, Join, PlayerCalendar, Progress, playerIdentity.ts
     legal/              LegalPage, rendered from docs/legal/*.md
   lib/                  env.ts, storage.ts (all localStorage keys, prefixed "next-session."), errors.ts
-shared/                 dates.ts, answers.ts, monthSummary.ts, names.ts, legal.ts, limits.ts
+shared/                 dates.ts, answers.ts, monthSummary.ts, names.ts, shareToken.ts, legal.ts, limits.ts
 convex/                 schema.ts, model/, groups.ts, schedule.ts, roster.ts, sessions.ts, player.ts,
                         account.ts, auth.ts, auth.config.ts, http.ts, crons.ts, cleanup.ts, convex.config.ts
 worker/index.ts         legacy-link redirect, then static assets
