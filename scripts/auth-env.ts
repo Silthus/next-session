@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { generateAuthKeys, type AuthKeys } from "./authKeys";
+import { LOCAL_BACKEND_ENV } from "./localBackendEnv";
 
 export type Target = "dev" | "prod" | "local";
 
@@ -17,15 +18,6 @@ const SITE_URLS: Record<Target, string> = {
 const DEPLOY_KEY_NAMES: Record<Exclude<Target, "local">, string> = {
   dev: "CONVEX_DEV_DEPLOY_KEY",
   prod: "CONVEX_PROD_DEPLOY_KEY",
-};
-
-const LOCAL_BACKEND_ENV = {
-  CONVEX_AGENT_MODE: "anonymous",
-  CONVEX_DEPLOYMENT: "anonymous:anonymous-agent",
-  CONVEX_DEPLOY_KEY: "",
-  CONVEX_DEPLOYMENT_TOKEN: "",
-  CONVEX_SELF_HOSTED_URL: "",
-  CONVEX_SELF_HOSTED_ADMIN_KEY: "",
 };
 
 const DEPLOY_KEYS_FILE = join(homedir(), ".config", "next-session", "deploy-keys.env");

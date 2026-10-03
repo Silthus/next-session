@@ -1,0 +1,8 @@
+export const LOCAL_BACKEND_ENV = {
+  CONVEX_AGENT_MODE: "anonymous",
+  CONVEX_DEPLOYMENT: "anonymous:anonymous-agent",
+  CONVEX_DEPLOY_KEY: "",
+  CONVEX_DEPLOYMENT_TOKEN: "",
+  CONVEX_SELF_HOSTED_URL: "",
+  CONVEX_SELF_HOSTED_ADMIN_KEY: "",
+};
