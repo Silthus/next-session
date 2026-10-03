@@ -157,6 +157,23 @@ describe("Save", () => {
   });
 });
 
+describe("claim upkeep", () => {
+  it("clears the Anonymous GM's expired claims when it starts another Save", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const anonymous = await createYourLink(t);
+    await anonymous.as.mutation(api.account.startSave, {});
+    await anonymous.as.mutation(api.account.startSave, {});
+    vi.setSystemTime(Date.now() + 10 * MINUTE + 1);
+
+    const { code } = await anonymous.as.mutation(api.account.startSave, {});
+
+    const claims = await t.run(async (ctx) => await ctx.db.query("saveClaims").collect());
+    expect(claims).toHaveLength(1);
+    const account = await signUpAccount(t);
+    await account.as.mutation(api.account.finishSave, { code });
+  });
+});
+
 describe("a claim code that cannot be redeemed", () => {
   it("is refused the second time", async () => {
     const anonymous = await createYourLink(t);

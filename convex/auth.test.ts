@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LEGAL_VERSIONS } from "../shared/legal";
 import { UNSAVED_GROUP_QUIET_DAYS } from "../shared/limits";
 import { api } from "./_generated/api";
@@ -18,6 +18,10 @@ let t: TestBackend;
 
 beforeEach(() => {
   t = newBackend();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 const DAY = 86_400_000;
@@ -76,6 +80,7 @@ describe("the anonymous sign-up limit", () => {
   }
 
   it("refuses the click after a burst of 60 and creates nothing for it", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
     for (let click = 0; click < BURST; click++) await createYourLink(t);
 
     const data = await expectErrorCode(createYourLink(t), "RATE_LIMITED");
@@ -128,6 +133,13 @@ describe("Accounts", () => {
     await expect(
       signUpAccount(t, { email: "short@example.com", password: "1234567" }),
     ).rejects.toThrow("Invalid password");
+  });
+
+  it("never signs in through a sign-up for a taken email, so guesses meet the sign-in throttle", async () => {
+    const credentials = newCredentials();
+    await signUpAccount(t, credentials);
+
+    await expect(signUpAccount(t, credentials)).rejects.toThrow("already exists");
   });
 
   it("refuses a second Account for the same email", async () => {

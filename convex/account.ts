@@ -27,6 +27,7 @@ export const startSave = mutation({
     const gm = await requireGm(ctx);
     if (gm.isAnonymous !== true) fail({ code: "UNAUTHENTICATED" });
     await enforceRateLimit(ctx, "startSave", gm._id);
+    await deleteExpiredClaims(ctx, gm);
     const code = base64url(crypto.getRandomValues(new Uint8Array(CLAIM_CODE_BYTES)));
     await ctx.db.insert("saveClaims", {
       anonymousUserId: gm._id,
@@ -50,6 +51,16 @@ export const finishSave = mutation({
     return { groupIds };
   },
 });
+
+async function deleteExpiredClaims(ctx: MutationCtx, gm: Doc<"users">) {
+  const claims = await ctx.db
+    .query("saveClaims")
+    .withIndex("by_anonymousUserId", (q) => q.eq("anonymousUserId", gm._id))
+    .collect();
+  for (const claim of claims.filter(({ expiresAt }) => expiresAt <= Date.now())) {
+    await ctx.db.delete("saveClaims", claim._id);
+  }
+}
 
 async function redeemClaim(ctx: MutationCtx, code: string) {
   const codeHash = await hashClaimCode(code);

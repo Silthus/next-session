@@ -92,6 +92,32 @@ describe("the Expiry sweep", () => {
     expect(await groupExists(group!.id)).toBe(true);
   });
 
+  it("keeps an Unsaved Group until the moment after its expiry", async () => {
+    const anonymous = await createYourLink(t);
+    const [listed] = await anonymous.as.query(api.groups.mine, {});
+    const group = await anonymous.as.query(api.groups.get, { groupId: listed!.id });
+    vi.setSystemTime(group!.expiresAt!);
+
+    await sweep();
+    expect(await groupExists(listed!.id)).toBe(true);
+
+    vi.setSystemTime(group!.expiresAt! + 1);
+    await sweep();
+    expect(await groupExists(listed!.id)).toBe(false);
+  });
+
+  it("spares a Group that activity revived after the sweep found it", async () => {
+    const anonymous = await createYourLink(t);
+    const [group] = await anonymous.as.query(api.groups.mine, {});
+    vi.advanceTimersByTime(QUIET + 1);
+    await t.mutation(internal.cleanup.sweepExpiredGroups, {});
+
+    await anonymous.as.mutation(api.groups.rename, { groupId: group!.id, name: "Back again" });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    expect(await groupExists(group!.id)).toBe(true);
+  });
+
   it("never deletes an Account's Groups", async () => {
     const account = await signUpAccount(t);
     const groupId = await account.as.mutation(api.groups.create, {});

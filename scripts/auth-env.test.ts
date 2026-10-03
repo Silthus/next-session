@@ -108,7 +108,20 @@ describe("convexEnvSet", () => {
     const { command, env: childEnv } = convexEnvSet("local", env, {});
 
     expect(command).toEqual(["bunx", "convex", "env", "set", "--force"]);
-    expect(childEnv).toEqual({});
+    expect(childEnv).toMatchObject({ CONVEX_DEPLOYMENT: "anonymous:anonymous-agent" });
+  });
+
+  it("keeps the local target off every cloud deployment the shell points at", () => {
+    const { env: childEnv } = convexEnvSet("local", env, { CONVEX_PROD_DEPLOY_KEY: "prod-key" });
+
+    expect(childEnv).toEqual({
+      CONVEX_AGENT_MODE: "anonymous",
+      CONVEX_DEPLOYMENT: "anonymous:anonymous-agent",
+      CONVEX_DEPLOY_KEY: "",
+      CONVEX_DEPLOYMENT_TOKEN: "",
+      CONVEX_SELF_HOSTED_URL: "",
+      CONVEX_SELF_HOSTED_ADMIN_KEY: "",
+    });
   });
 });
 

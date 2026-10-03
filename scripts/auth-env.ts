@@ -19,6 +19,15 @@ const DEPLOY_KEY_NAMES: Record<Exclude<Target, "local">, string> = {
   prod: "CONVEX_PROD_DEPLOY_KEY",
 };
 
+const LOCAL_BACKEND_ENV = {
+  CONVEX_AGENT_MODE: "anonymous",
+  CONVEX_DEPLOYMENT: "anonymous:anonymous-agent",
+  CONVEX_DEPLOY_KEY: "",
+  CONVEX_DEPLOYMENT_TOKEN: "",
+  CONVEX_SELF_HOSTED_URL: "",
+  CONVEX_SELF_HOSTED_ADMIN_KEY: "",
+};
+
 const DEPLOY_KEYS_FILE = join(homedir(), ".config", "next-session", "deploy-keys.env");
 
 export function authEnv(target: Target, { jwtPrivateKey, jwks }: AuthKeys): Env {
@@ -30,7 +39,7 @@ export function convexEnvSet(target: Target, values: Env, deployKeys: Env) {
     .map(([name, value]) => `${name}='${value}'\n`)
     .join("");
   if (target === "local") {
-    return { command: ["bunx", "convex", "env", "set", "--force"], stdin, env: {} };
+    return { command: ["bunx", "convex", "env", "set", "--force"], stdin, env: LOCAL_BACKEND_ENV };
   }
   return {
     command: ["bunx", "convex", "env", "set"],

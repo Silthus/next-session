@@ -1,11 +1,14 @@
-import { ConvexCredentials } from "@convex-dev/auth/providers/ConvexCredentials";
+import {
+  ConvexCredentials,
+  type ConvexCredentialsUserConfig,
+} from "@convex-dev/auth/providers/ConvexCredentials";
 import { Password } from "@convex-dev/auth/providers/Password";
 import { convexAuth, createAccount } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { LEGAL_VERSIONS } from "../shared/legal";
 import { internal } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
-import { internalMutation, type MutationCtx } from "./_generated/server";
+import { internalMutation, internalQuery, type MutationCtx } from "./_generated/server";
 import { insertGroup } from "./model/groups";
 import { enforceRateLimit } from "./model/rateLimits";
 
@@ -32,11 +35,25 @@ const Anonymous = ConvexCredentials<DataModel>({
   },
 });
 
-const AccountPassword = Password<DataModel>({
-  profile: (params) => ({
-    email: normalizeEmail(params.email),
-    ...(params.flow === "signUp" ? legalAcceptance() : {}),
-  }),
+const PASSWORD = "password";
+
+const stockPassword = (
+  Password<DataModel>({
+    profile: (params) => ({
+      email: normalizeEmail(params.email),
+      ...(params.flow === "signUp" ? legalAcceptance() : {}),
+    }),
+  }) as unknown as { options: ConvexCredentialsUserConfig<DataModel> }
+).options;
+
+const AccountPassword = ConvexCredentials<DataModel>({
+  ...stockPassword,
+  authorize: async (params, ctx) => {
+    if (params.flow === "signUp") {
+      await ctx.runQuery(internal.auth.refuseTakenEmail, { email: normalizeEmail(params.email) });
+    }
+    return await stockPassword.authorize(params, ctx);
+  },
 });
 
 function normalizeEmail(email: unknown) {
@@ -61,6 +78,21 @@ export const admitAnonymousSignUp = internalMutation({
   returns: v.null(),
   handler: async (ctx) => {
     await enforceRateLimit(ctx, "anonymousSignUp");
+    return null;
+  },
+});
+
+export const refuseTakenEmail = internalQuery({
+  args: { email: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { email }) => {
+    const account = await ctx.db
+      .query("authAccounts")
+      .withIndex("providerAndAccountId", (q) =>
+        q.eq("provider", PASSWORD).eq("providerAccountId", email),
+      )
+      .unique();
+    if (account !== null) throw new Error(`Account ${email} already exists`);
     return null;
   },
 });
