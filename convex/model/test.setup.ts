@@ -3,7 +3,8 @@ import rateLimiterTest from "@convex-dev/rate-limiter/test";
 import { convexTest } from "convex-test";
 import { ConvexError } from "convex/values";
 import { expect } from "vitest";
-import type { Doc } from "../_generated/dataModel";
+import { api } from "../_generated/api";
+import type { Doc, Id } from "../_generated/dataModel";
 import schema from "../schema";
 import type { AppErrorData, ErrorCode } from "./errors";
 
@@ -39,6 +40,20 @@ let accountCount = 0;
 
 export const signInAccount = (t: TestBackend) =>
   signIn(t, { email: `gm-${++accountCount}@example.com` });
+
+export async function signedInGmWithGroup(t: TestBackend, signInGm = signInAccount) {
+  const gm = await signInGm(t);
+  const groupId = await gm.as.mutation(api.groups.create, {});
+  return { ...gm, groupId };
+}
+
+export async function seedSession(t: TestBackend, groupId: Id<"groups">, date: string) {
+  return await t.run(async (ctx) => await ctx.db.insert("sessions", { groupId, date }));
+}
+
+export async function expiryOf(t: TestBackend, groupId: Id<"groups">) {
+  return await t.run(async (ctx) => (await ctx.db.get("groups", groupId))?.expiresAt);
+}
 
 export async function expectErrorCode<Code extends ErrorCode>(
   promise: Promise<unknown>,

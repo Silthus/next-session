@@ -297,7 +297,7 @@ describe("groups.remove", () => {
   }
 
   it("deletes the Group with its Roster, Answers, and Sessions", async () => {
-    const { as, userId } = await signInAccount(t);
+    const { as } = await signInAccount(t);
     const groupId = await as.mutation(api.groups.create, {});
     await seedChildren(groupId, 450);
 
@@ -309,7 +309,7 @@ describe("groups.remove", () => {
   });
 
   it("keeps the other Groups and their rows", async () => {
-    const { as, userId } = await signInAccount(t);
+    const { as } = await signInAccount(t);
     const removed = await as.mutation(api.groups.create, {});
     const kept = await as.mutation(api.groups.create, {});
     await seedChildren(removed, 3);

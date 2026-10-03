@@ -3,8 +3,11 @@ import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
   expectErrorCode,
+  expiryOf,
   type GmClient,
   newBackend,
+  seedSession,
+  signedInGmWithGroup,
   signInAccount,
   signInAnonymousGm,
   type TestBackend,
@@ -30,9 +33,8 @@ afterEach(() => {
 });
 
 async function sharedGroup(signInGm = signInAccount) {
-  const gm = await signInGm(t);
-  const groupId = await gm.as.mutation(api.groups.create, {});
-  return { ...gm, groupId, shareToken: await shareTokenOf(groupId) };
+  const gm = await signedInGmWithGroup(t, signInGm);
+  return { ...gm, shareToken: await shareTokenOf(gm.groupId) };
 }
 
 async function shareTokenOf(groupId: Id<"groups">) {
@@ -64,10 +66,6 @@ async function seedAnswer(
   await t.run(async (ctx) => await ctx.db.insert("answers", { groupId, playerId, date, answer }));
 }
 
-async function seedSession(groupId: Id<"groups">, date: string) {
-  await t.run(async (ctx) => await ctx.db.insert("sessions", { groupId, date }));
-}
-
 async function answersOf(playerId: Id<"players">) {
   const rows = await t.run(
     async (ctx) =>
@@ -88,10 +86,6 @@ async function rosterNamesOf(groupId: Id<"groups">) {
         .collect(),
   );
   return players.map((player) => player.name);
-}
-
-async function expiryOf(groupId: Id<"groups">) {
-  return await t.run(async (ctx) => (await ctx.db.get("groups", groupId))?.expiresAt);
 }
 
 async function rotatedAway(groupId: Id<"groups">, as: GmClient) {
@@ -119,11 +113,11 @@ function datesFrom(first: number, last: number, month = "2026-10") {
 
 describe("player.group", () => {
   it("shows the Group's name, its Roster, and every Session date", async () => {
-    const { groupId, shareToken, userId } = await sharedGroup();
+    const { groupId, shareToken } = await sharedGroup();
     const bo = await seedPlayer(groupId, "Bo");
     const ada = await seedPlayer(groupId, "Ada");
     for (const date of ["2026-10-02", TODAY, "2026-10-17", LAST_BOOKABLE_DATE, "2027-01-01"]) {
-      await seedSession(groupId, date);
+      await seedSession(t, groupId, date);
     }
 
     expect(await t.query(api.player.group, { shareToken })).toEqual({
@@ -141,7 +135,7 @@ describe("player.group", () => {
     const mine = await sharedGroup();
     const other = await sharedGroup();
     await seedPlayer(other.groupId, "Stranger");
-    await seedSession(other.groupId, "2026-10-17");
+    await seedSession(t, other.groupId, "2026-10-17");
 
     expect(await t.query(api.player.group, { shareToken: mine.shareToken })).toMatchObject({
       groupId: mine.groupId,
@@ -342,7 +336,7 @@ describe("player.join", () => {
 
     await t.mutation(api.player.join, { shareToken, name: "Ada" });
 
-    expect(await expiryOf(groupId)).toBe(NOW + 32 * DAY);
+    expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
   });
 });
 
@@ -501,7 +495,7 @@ describe("player.answer", () => {
       answer: "free",
     });
 
-    expect(await expiryOf(groupId)).toBe(NOW + 32 * DAY);
+    expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
   });
 });
 
@@ -653,6 +647,6 @@ describe("player.fillRest", () => {
 
     await t.mutation(api.player.fillRest, { shareToken, playerId: ada, month: "2026-11" });
 
-    expect(await expiryOf(groupId)).toBe(NOW + 32 * DAY);
+    expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
   });
 });

@@ -2,7 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { summarizeMonth } from "../shared/monthSummary";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { newBackend, signInAccount, signInAnonymousGm, type TestBackend } from "./model/test.setup";
+import {
+  newBackend,
+  seedSession,
+  signedInGmWithGroup,
+  signInAnonymousGm,
+  type TestBackend,
+} from "./model/test.setup";
 
 const NOW = Date.UTC(2026, 9, 3, 12);
 const TODAY = "2026-10-03";
@@ -19,12 +25,6 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-async function signedInGmWithGroup(signInGm = signInAccount) {
-  const gm = await signInGm(t);
-  const groupId = await gm.as.mutation(api.groups.create, {});
-  return { ...gm, groupId };
-}
-
 type Answer = "free" | "maybe" | "busy";
 
 async function seedAnswers(
@@ -39,13 +39,9 @@ async function seedAnswers(
   });
 }
 
-async function seedSession(groupId: Id<"groups">, date: string) {
-  return await t.run(async (ctx) => await ctx.db.insert("sessions", { groupId, date }));
-}
-
 describe("schedule.month", () => {
   it("returns the Roster, the month's Answers, and every Session of the Group", async () => {
-    const { as, groupId, userId } = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
     const ada = await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
     const grace = await as.mutation(api.roster.addPlayer, { groupId, name: "Grace" });
     await seedAnswers(groupId, ada, {
@@ -55,9 +51,9 @@ describe("schedule.month", () => {
       "2026-11-01": "busy",
     });
     await seedAnswers(groupId, grace, { "2026-10-17": "busy" });
-    const september = await seedSession(groupId, "2026-09-12");
-    const october = await seedSession(groupId, "2026-10-17");
-    const december = await seedSession(groupId, "2026-12-05");
+    const september = await seedSession(t, groupId, "2026-09-12");
+    const october = await seedSession(t, groupId, "2026-10-17");
+    const december = await seedSession(t, groupId, "2026-12-05");
 
     const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
 
@@ -80,14 +76,14 @@ describe("schedule.month", () => {
   });
 
   it("leaves out the Players, Answers, and Sessions of other Groups", async () => {
-    const { as, groupId } = await signedInGmWithGroup();
-    const stranger = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
+    const stranger = await signedInGmWithGroup(t);
     const mallory = await stranger.as.mutation(api.roster.addPlayer, {
       groupId: stranger.groupId,
       name: "Mallory",
     });
     await seedAnswers(stranger.groupId, mallory, { "2026-10-17": "free" });
-    await seedSession(stranger.groupId, "2026-10-17");
+    await seedSession(t, stranger.groupId, "2026-10-17");
 
     const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
 
@@ -95,7 +91,7 @@ describe("schedule.month", () => {
   });
 
   it("feeds summarizeMonth for the per-player progress, Best Nights, and Sessions", async () => {
-    const { as, groupId, userId } = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
     const ada = await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
     const grace = await as.mutation(api.roster.addPlayer, { groupId, name: "Grace" });
     await seedAnswers(groupId, ada, {
@@ -104,7 +100,7 @@ describe("schedule.month", () => {
       "2026-10-16": "maybe",
     });
     await seedAnswers(groupId, grace, { "2026-10-09": "busy", "2026-10-10": "free" });
-    const sessionId = await seedSession(groupId, "2026-10-10");
+    const sessionId = await seedSession(t, groupId, "2026-10-10");
 
     const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
     const summary = summarizeMonth({ month: "2026-10", today: TODAY, ...schedule! });
@@ -118,7 +114,7 @@ describe("schedule.month", () => {
   });
 
   it("serves an Anonymous GM their own Group", async () => {
-    const { as, groupId } = await signedInGmWithGroup(signInAnonymousGm);
+    const { as, groupId } = await signedInGmWithGroup(t, signInAnonymousGm);
     const ada = await as.mutation(api.roster.addPlayer, { groupId, name: "Ada" });
 
     const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
@@ -127,8 +123,8 @@ describe("schedule.month", () => {
   });
 
   it("returns null for a foreign Group, so it looks missing", async () => {
-    const { as } = await signedInGmWithGroup();
-    const stranger = await signedInGmWithGroup();
+    const { as } = await signedInGmWithGroup(t);
+    const stranger = await signedInGmWithGroup(t);
 
     expect(
       await as.query(api.schedule.month, { groupId: stranger.groupId, month: "2026-10" }),
@@ -136,14 +132,14 @@ describe("schedule.month", () => {
   });
 
   it("returns null for a removed Group", async () => {
-    const { as, groupId } = await signedInGmWithGroup();
+    const { as, groupId } = await signedInGmWithGroup(t);
     await as.mutation(api.groups.remove, { groupId });
 
     expect(await as.query(api.schedule.month, { groupId, month: "2026-10" })).toBe(null);
   });
 
   it("returns null for a malformed Group id", async () => {
-    const { as } = await signedInGmWithGroup();
+    const { as } = await signedInGmWithGroup(t);
 
     expect(await as.query(api.schedule.month, { groupId: "not-an-id", month: "2026-10" })).toBe(
       null,
@@ -153,14 +149,14 @@ describe("schedule.month", () => {
   it.each(["2026-13", "2026-1", "October"])(
     "returns null for the malformed month %j",
     async (month) => {
-      const { as, groupId } = await signedInGmWithGroup();
+      const { as, groupId } = await signedInGmWithGroup(t);
 
       expect(await as.query(api.schedule.month, { groupId, month })).toBe(null);
     },
   );
 
   it("returns null for a signed-out caller", async () => {
-    const { groupId } = await signedInGmWithGroup();
+    const { groupId } = await signedInGmWithGroup(t);
 
     expect(await t.query(api.schedule.month, { groupId, month: "2026-10" })).toBe(null);
   });
