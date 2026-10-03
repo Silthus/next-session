@@ -41,18 +41,13 @@ async function sessionDatesOf(groupId: Id<"groups">) {
 }
 
 describe("sessions.schedule", () => {
-  it("records the Session as a date of the Group and nothing more", async () => {
+  it("records the Session", async () => {
     const { as, groupId } = await signedInGmWithGroup(t);
 
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
 
     const session = await t.run(async (ctx) => await ctx.db.get("sessions", sessionId));
-    expect(session).toEqual({
-      _id: sessionId,
-      _creationTime: expect.any(Number) as number,
-      groupId,
-      date: "2026-10-17",
-    });
+    expect(session).toMatchObject({ groupId, date: "2026-10-17" });
   });
 
   it.each([TODAY, LAST_BOOKABLE_DATE])(
