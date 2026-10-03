@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
   expectErrorCode,
+  type GmClient,
   newBackend,
   signInAccount,
   signInAnonymousGm,
@@ -94,13 +94,19 @@ async function expiryOf(groupId: Id<"groups">) {
   return await t.run(async (ctx) => (await ctx.db.get("groups", groupId))?.expiresAt);
 }
 
-async function rotatedAway(
-  groupId: Id<"groups">,
-  as: Awaited<ReturnType<typeof sharedGroup>>["as"],
-) {
+async function rotatedAway(groupId: Id<"groups">, as: GmClient) {
   const oldShareToken = await shareTokenOf(groupId);
   await as.mutation(api.groups.rotateShareToken, { groupId });
   return oldShareToken;
+}
+
+async function exhaustGroupAnswerBucket(groupId: Id<"groups">, shareToken: string) {
+  for (let player = 0; player < 5; player++) {
+    const playerId = await seedPlayer(groupId, `Tapper ${player}`);
+    for (let tap = 0; tap < 60; tap++) {
+      await t.mutation(api.player.answer, { shareToken, playerId, date: TODAY, answer: "free" });
+    }
+  }
 }
 
 function datesFrom(first: number, last: number, month = "2026-10") {
@@ -111,7 +117,7 @@ function datesFrom(first: number, last: number, month = "2026-10") {
 }
 
 describe("player.group", () => {
-  it("shows the Group's name, its Roster, and its Sessions in the Booking Window", async () => {
+  it("shows the Group's name, its Roster, and every Session date", async () => {
     const { groupId, shareToken, userId } = await sharedGroup();
     const bo = await seedPlayer(groupId, "Bo");
     const ada = await seedPlayer(groupId, "Ada");
@@ -126,7 +132,7 @@ describe("player.group", () => {
         { _id: ada, name: "Ada" },
         { _id: bo, name: "Bo" },
       ],
-      sessionDates: [TODAY, "2026-10-17", LAST_BOOKABLE_DATE],
+      sessionDates: ["2026-10-02", TODAY, "2026-10-17", LAST_BOOKABLE_DATE, "2027-01-01"],
     });
   });
 
@@ -281,7 +287,7 @@ describe("player.join", () => {
     expect(await rosterNamesOf(mine.groupId)).toEqual(["Ada"]);
   });
 
-  it(`refuses a Player beyond ${MAX_PLAYERS_PER_GROUP}`, async () => {
+  it("refuses a Player beyond 100", async () => {
     const { groupId, shareToken } = await sharedGroup();
     await seedPlayers(groupId, 100);
 
@@ -472,22 +478,13 @@ describe("player.answer", () => {
   it("rate limits a Group to a burst of 300 Answers across its Players", async () => {
     const busy = await sharedGroup();
     const quiet = await sharedGroup();
-    await seedPlayers(busy.groupId, 6);
-    const players = await t.run(
-      async (ctx) =>
-        await ctx.db
-          .query("players")
-          .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", busy.groupId))
-          .collect(),
-    );
+    await exhaustGroupAnswerBucket(busy.groupId, busy.shareToken);
+    const latecomer = await seedPlayer(busy.groupId, "Ada");
+    const outsider = await seedPlayer(quiet.groupId, "Ada");
     const tap = (shareToken: string, playerId: Id<"players">) =>
       t.mutation(api.player.answer, { shareToken, playerId, date: TODAY, answer: "free" });
-    for (const player of players.slice(0, 5)) {
-      for (let index = 0; index < 60; index++) await tap(busy.shareToken, player._id);
-    }
 
-    await expectErrorCode(tap(busy.shareToken, players[5]!._id), "RATE_LIMITED");
-    const outsider = await seedPlayer(quiet.groupId, "Ada");
+    await expectErrorCode(tap(busy.shareToken, latecomer), "RATE_LIMITED");
     await expect(tap(quiet.shareToken, outsider)).resolves.toBeNull();
   });
 
@@ -586,12 +583,25 @@ describe("player.fillRest", () => {
     expect(await answersOf(ada)).toEqual({});
   });
 
-  it("counts against the Player's Answer rate limit", async () => {
+  it("spends one token of the Player's Answer rate limit", async () => {
     const { groupId, shareToken } = await sharedGroup();
     const ada = await seedPlayer(groupId, "Ada");
-    for (let index = 0; index < 60; index++) {
+    for (let index = 0; index < 59; index++) {
       await t.mutation(api.player.answer, { shareToken, playerId: ada, date: TODAY, answer: null });
     }
+    await t.mutation(api.player.fillRest, { shareToken, playerId: ada, month: "2026-11" });
+
+    await expectErrorCode(
+      t.mutation(api.player.fillRest, { shareToken, playerId: ada, month: "2026-12" }),
+      "RATE_LIMITED",
+    );
+    expect(Object.keys(await answersOf(ada)).filter((date) => date >= "2026-12")).toEqual([]);
+  });
+
+  it("counts against the Group's Answer rate limit", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    await exhaustGroupAnswerBucket(groupId, shareToken);
+    const ada = await seedPlayer(groupId, "Ada");
 
     await expectErrorCode(
       t.mutation(api.player.fillRest, { shareToken, playerId: ada, month: "2026-11" }),

@@ -34,7 +34,7 @@ export const group = query({
     if (group === null) return null;
     const [players, sessionDates] = await Promise.all([
       rosterOf(ctx, group._id),
-      bookableSessionDatesOf(ctx, group._id),
+      sessionDatesOf(ctx, group._id),
     ]);
     return { groupId: group._id, name: group.name, players, sessionDates };
   },
@@ -122,13 +122,10 @@ async function rosterOf(ctx: QueryCtx, groupId: Id<"groups">) {
   return players.map(({ _id, name }) => ({ _id, name }));
 }
 
-async function bookableSessionDatesOf(ctx: QueryCtx, groupId: Id<"groups">) {
-  const { first, last } = bookingWindow(today());
+async function sessionDatesOf(ctx: QueryCtx, groupId: Id<"groups">) {
   const sessions = await ctx.db
     .query("sessions")
-    .withIndex("by_groupId_and_date", (q) =>
-      q.eq("groupId", groupId).gte("date", first).lte("date", last),
-    )
+    .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId))
     .collect();
   return sessions.map(({ date }) => date);
 }
