@@ -1,0 +1,19 @@
+$ tsc -p tsconfig.json && tsc -p convex/tsconfig.json && eslint . && prettier --check . && vitest run
+Checking formatting...
+All matched files use Prettier code style!
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-29
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+
+ Test Files  15 passed (15)
+      Tests  91 passed (91)
+   Start at  10:56:39
+   Duration  2.53s (environment 53%, tests 29%, setup 7%, transform 6%, import 3%, worker 1%)
+

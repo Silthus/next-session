@@ -1,0 +1,159 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-29
+
+ ❯ |ui| src/features/legal/legalDocument.test.ts (10 tests | 1 failed) 11ms
+   ❯ parseLegalDocument (10)
+     × turns a bare email address into a mailto link 6ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/routes/routes.test.tsx (7 tests | 5 failed) 312ms
+   ❯ legal routes (3)
+     × /terms renders the document from docs/legal with every placeholder filled 162ms
+     × /privacy renders the document from docs/legal with every placeholder filled 42ms
+     × /imprint renders the document from docs/legal with every placeholder filled 21ms
+   ❯ document titles (2)
+     × names the landing page after the product 10ms
+     × names the not-found page 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/routes/routes.test.tsx > legal routes > /terms renders the document from docs/legal with every placeholder filled
+AssertionError: expected '' to be 'Terms of Use · Next Session' // Object.is equality
+
+- Expected
++ Received
+
+- Terms of Use · Next Session
+
+ ❯ src/routes/routes.test.tsx:50:30
+     48|         "/",
+     49|       );
+     50|       expect(document.title).toBe(`${title} · Next Session`);
+       |                              ^
+     51|       expect(screen.getAllByRole("link", { name: "hello@example.test" …
+     52|         "href",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  |ui| src/routes/routes.test.tsx > legal routes > /privacy renders the document from docs/legal with every placeholder filled
+AssertionError: expected '' to be 'Privacy Policy · Next Session' // Object.is equality
+
+- Expected
++ Received
+
+- Privacy Policy · Next Session
+
+ ❯ src/routes/routes.test.tsx:50:30
+     48|         "/",
+     49|       );
+     50|       expect(document.title).toBe(`${title} · Next Session`);
+       |                              ^
+     51|       expect(screen.getAllByRole("link", { name: "hello@example.test" …
+     52|         "href",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  |ui| src/routes/routes.test.tsx > legal routes > /imprint renders the document from docs/legal with every placeholder filled
+AssertionError: expected '' to be 'Imprint · Next Session' // Object.is equality
+
+- Expected
++ Received
+
+- Imprint · Next Session
+
+ ❯ src/routes/routes.test.tsx:50:30
+     48|         "/",
+     49|       );
+     50|       expect(document.title).toBe(`${title} · Next Session`);
+       |                              ^
+     51|       expect(screen.getAllByRole("link", { name: "hello@example.test" …
+     52|         "href",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  |ui| src/routes/routes.test.tsx > document titles > names the landing page after the product
+AssertionError: expected '' to be 'Next Session' // Object.is equality
+
+- Expected
++ Received
+
+- Next Session
+
+ ❯ src/routes/routes.test.tsx:63:28
+     61|     renderAt("/");
+     62|     expect(await screen.findByRole("heading", { level: 1, name: "Next …
+     63|     expect(document.title).toBe("Next Session");
+       |                            ^
+     64|   });
+     65|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  |ui| src/routes/routes.test.tsx > document titles > names the not-found page
+AssertionError: expected '' to be 'Nothing here · Next Session' // Object.is equality
+
+- Expected
++ Received
+
+- Nothing here · Next Session
+
+ ❯ src/routes/routes.test.tsx:69:28
+     67|     renderAt("/nothing-here");
+     68|     expect(await screen.findByRole("heading", { level: 1, name: "Nothi…
+     69|     expect(document.title).toBe("Nothing here · Next Session");
+       |                            ^
+     70|   });
+     71| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  |ui| src/features/legal/legalDocument.test.ts > parseLegalDocument > turns a bare email address into a mailto link
+AssertionError: expected [ { kind: 'paragraph', …(1) } ] to deeply equal [ { kind: 'paragraph', …(1) } ]
+
+- Expected
++ Received
+
+@@ -3,20 +3,11 @@
+      "kind": "paragraph",
+      "lines": [
+        [
+          {
+            "kind": "text",
+-           "text": "Write to ",
+-         },
+-         {
+-           "href": "mailto:hello@example.test",
+-           "kind": "link",
+-           "text": "hello@example.test",
+-         },
+-         {
+-           "kind": "text",
+-           "text": "; we answer.",
++           "text": "Write to hello@example.test; we answer.",
+          },
+        ],
+      ],
+    },
+  ]
+
+ ❯ src/features/legal/legalDocument.test.ts:130:23
+    128|   it("turns a bare email address into a mailto link", () => {
+    129|     const doc = parseLegalDocument("# T\n\nWrite to {{CONTACT_EMAIL}};…
+    130|     expect(doc.intro).toEqual([
+       |                       ^
+    131|       {
+    132|         kind: "paragraph",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  6 failed | 13 passed (19)
+   Start at  10:53:29
+   Duration  1.04s (environment 64%, tests 16%, setup 9%, transform 7%, import 3%, worker 1%)
+
