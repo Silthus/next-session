@@ -20,7 +20,7 @@ async function seedGroupWithPlayer(ownerId: Id<"users">) {
 }
 
 describe("groupByShareToken", () => {
-  it("finds the Group behind its current Share Token only", async () => {
+  it("finds the Group behind its Share Token and nothing behind an unknown one", async () => {
     const { userId } = await signInAccount(t);
     const { groupId, shareToken } = await seedGroupWithPlayer(userId);
 

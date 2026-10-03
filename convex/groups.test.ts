@@ -88,10 +88,13 @@ describe("groups.create", () => {
     for (let index = 0; index < 5; index++) await as.mutation(api.groups.create, {});
 
     const error = await expectErrorCode(as.mutation(api.groups.create, {}), "RATE_LIMITED");
-    expect(error.retryAfter).toBeGreaterThan(0);
+    expect(error.retryAfter).toBe(6 * 60_000);
 
-    vi.advanceTimersByTime(6 * 60_000);
+    vi.advanceTimersByTime(6 * 60_000 - 1);
+    await expectErrorCode(as.mutation(api.groups.create, {}), "RATE_LIMITED");
+    vi.advanceTimersByTime(1);
     await expect(as.mutation(api.groups.create, {})).resolves.toBeDefined();
+    await expectErrorCode(as.mutation(api.groups.create, {}), "RATE_LIMITED");
   });
 
   it("rate limits each GM separately", async () => {
