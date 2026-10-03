@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { todayUtc } from "../shared/dates";
 import { LEGAL_VERSIONS } from "../shared/legal";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
@@ -87,6 +88,22 @@ describe("Save", () => {
 
     expect(groupIds).toHaveLength(2);
     expect(await account.as.query(api.groups.mine, {})).toHaveLength(2);
+  });
+
+  it("credits the Account with the Sessions the Anonymous GM scheduled", async () => {
+    const anonymous = await createYourLink(t);
+    const [group] = await anonymous.as.query(api.groups.mine, {});
+    const sessionId = await anonymous.as.mutation(api.sessions.schedule, {
+      groupId: group!.id,
+      date: todayUtc(Date.now()),
+    });
+    const { code } = await anonymous.as.mutation(api.account.startSave, {});
+    const account = await signUpAccount(t);
+
+    await account.as.mutation(api.account.finishSave, { code });
+
+    const session = await t.run(async (ctx) => await ctx.db.get("sessions", sessionId));
+    expect(session?.scheduledBy).toBe(account.userId);
   });
 
   it("ends the Anonymous GM with its sign-in", async () => {

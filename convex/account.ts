@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import type { Doc } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx } from "./_generated/server";
 import { currentGm, requireGm } from "./model/access";
 import { fail } from "./model/errors";
@@ -68,8 +68,24 @@ async function moveGroups(ctx: MutationCtx, from: Doc<"users">, to: Doc<"users">
   const groups = await groupsOwnedBy(ctx, from._id);
   for (const group of groups) {
     await ctx.db.patch("groups", group._id, { ownerId: to._id, expiresAt: undefined });
+    await creditSessions(ctx, group._id, from, to);
   }
   return groups.map((group) => group._id);
+}
+
+async function creditSessions(
+  ctx: MutationCtx,
+  groupId: Id<"groups">,
+  from: Doc<"users">,
+  to: Doc<"users">,
+) {
+  const sessions = await ctx.db
+    .query("sessions")
+    .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId))
+    .collect();
+  for (const session of sessions.filter(({ scheduledBy }) => scheduledBy === from._id)) {
+    await ctx.db.patch("sessions", session._id, { scheduledBy: to._id });
+  }
 }
 
 async function copyLegalAcceptance(ctx: MutationCtx, from: Doc<"users">, to: Doc<"users">) {

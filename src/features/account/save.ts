@@ -39,7 +39,16 @@ export async function resumePendingSave(deps: Pick<SaveDeps, "finishSave" | "sto
   return await redeem(code, deps).catch(() => null);
 }
 
-async function redeem(
+const redemptions = new Map<string, Promise<SaveResult>>();
+
+function redeem(code: string, deps: Pick<SaveDeps, "finishSave" | "storage">) {
+  const inFlight =
+    redemptions.get(code) ?? redeemOnce(code, deps).finally(() => redemptions.delete(code));
+  redemptions.set(code, inFlight);
+  return inFlight;
+}
+
+async function redeemOnce(
   code: string,
   { finishSave, storage }: Pick<SaveDeps, "finishSave" | "storage">,
 ) {

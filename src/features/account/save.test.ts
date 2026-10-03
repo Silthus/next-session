@@ -91,6 +91,27 @@ describe("saveGroups", () => {
   });
 });
 
+describe("a Save and the resume racing on one claim", () => {
+  it("redeems the claim once and both see the moved Groups", async () => {
+    let redemptions = 0;
+    let resumed: Promise<unknown> = Promise.resolve();
+    const { deps } = fakeDeps({
+      finishSave: () =>
+        ++redemptions === 1 ? Promise.resolve({ groupIds: [groupId] }) : claimInvalid(),
+    });
+    deps.signIn = () => {
+      resumed = resumePendingSave(deps);
+      return Promise.resolve();
+    };
+
+    const saved = await saveGroups({ ...input, mode: "create" }, deps);
+
+    expect(saved).toEqual({ groupIds: [groupId] });
+    expect(await resumed).toEqual({ groupIds: [groupId] });
+    expect(redemptions).toBe(1);
+  });
+});
+
 describe("resumePendingSave", () => {
   it("finishes a Save the last session left pending", async () => {
     const { deps, calls, storage } = fakeDeps();
