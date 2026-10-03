@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   addMonths,
   bookingWindow,
@@ -11,6 +11,14 @@ import {
 } from "./dates";
 
 describe("todayUtc", () => {
+  beforeAll(() => {
+    vi.stubEnv("TZ", "Pacific/Kiritimati");
+  });
+
+  afterAll(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("is the UTC calendar date, whatever the local time zone says", () => {
     expect(todayUtc(Date.UTC(2026, 9, 3, 23, 59))).toBe("2026-10-03");
     expect(todayUtc(Date.UTC(2026, 9, 4, 0, 0))).toBe("2026-10-04");
