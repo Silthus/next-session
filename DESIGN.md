@@ -32,7 +32,7 @@ Alternatives considered: a chevron-in-a-tile ("next") read as a media player but
 
 ## 2. Tokens
 
-Tokens are CSS custom properties switched by a `.dark` class on `<html>`; Tailwind v4 maps them through `@theme inline` so classes like `bg-paper`, `text-ink-2`, `bg-free-soft` exist in both themes. Source of truth: [`prototype/src/index.css`](https://github.com/Silthus/next-session/tree/prototype/ui-direction/prototype/src/index.css).
+Tokens are CSS custom properties switched by `prefers-color-scheme` (D7: the theme follows the OS); Tailwind v4 maps them through `@theme inline` so classes like `bg-paper`, `text-ink-2`, `bg-free-soft` exist in both themes. Source of truth: `src/index.css`.
 
 ### Color
 

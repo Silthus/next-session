@@ -264,7 +264,7 @@ src/
                         BestNights, Players, Sessions, Nudge)
     player/             PlayerScreen, Join, PlayerCalendar, Progress, playerIdentity.ts
     legal/              LegalPage, rendered from docs/legal/*.md
-  lib/                  env.ts, storage.ts (all localStorage keys, prefixed "next-session."), errors.ts
+  lib/                  env.ts, pageTitle.ts, storage.ts (all localStorage keys, prefixed "next-session."), errors.ts
 shared/                 dates.ts, answers.ts, monthSummary.ts, names.ts, shareToken.ts, legal.ts, limits.ts
 convex/                 schema.ts, model/, groups.ts, schedule.ts, roster.ts, sessions.ts, player.ts,
                         account.ts, auth.ts, auth.config.ts, http.ts, crons.ts, cleanup.ts, convex.config.ts
@@ -297,7 +297,7 @@ Storage keys: `next-session.players` (Player identity), `next-session.lastGroup`
 | `shared/monthSummary.ts` | `summarizeMonth({month, today, players, answers, sessions}) → MonthSummary` (per day: past, bookable, free/maybe/busy/unanswered players, heat 0..1, perfect, session; Best Nights; per-player progress) | Vitest on plain data. The whole GM grid logic sits behind one call |
 | `shared/dates.ts` | `bookingWindow(today)`, `isBookable(date, today)`, `monthDays(month)`, `addMonths(month, n)`, `todayUtc(now)` | Vitest |
 | `shared/answers.ts` | `nextAnswer(answer)`, `fillRestDates(month, today, answered)` | Vitest |
-| `shared/names.ts` | `normalizeName(raw) → {name, nameKey} \| INVALID_NAME` | Vitest; used by backend and forms |
+| `shared/names.ts` | `normalizeName(raw) → {name, nameKey} \| INVALID_NAME`, `playerInitials(name) → string` | Vitest; used by backend, forms, and `Avatar` |
 | Backend public API | The functions in §4 | `convex-test` through `api.*`, with `t.withIdentity` for GMs. Every invariant in §3 and every row in §5.1 has a test |
 | `src/features/account/save.ts` | `saveGroups({email, password, mode}, deps)` and `resumePendingSave(deps)` | Vitest with a fake `deps` (`startSave`, `signIn`, `finishSave`, storage). The real adapter wraps Convex |
 | `src/features/player/playerIdentity.ts` | `rememberPlayer`, `recallPlayer`, `forgetPlayer` | Vitest over a fake `Storage` |

@@ -110,7 +110,7 @@ function parseRow(line: string): Inline[][] {
 }
 
 const inlinePattern =
-  /\*\*(.+?)\*\*|`(.+?)`|\[(.+?)\]\((.+?)\)|<(https?:\/\/[^>]+)>|([\w.+-]+@[\w-]+(?:\.[\w-]+)+)/g;
+  /\*\*(.+?)\*\*|`(.+?)`|\[(.+?)\]\((.+?)\)|<(https?:\/\/[^>]+)>|([\w.!#$%&'*+/=?^{|}~-]+@[\w-]+(?:\.[\w-]+)+)/g;
 
 function parseInline(text: string): Inline[] {
   const inlines: Inline[] = [];

@@ -62,12 +62,6 @@ describe("document titles", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "Next Session" })).toBeTruthy();
     expect(document.title).toBe("Next Session");
   });
-
-  it("names the not-found page", async () => {
-    renderAt("/nothing-here");
-    expect(await screen.findByRole("heading", { level: 1, name: "Nothing here" })).toBeTruthy();
-    expect(document.title).toBe("Nothing here · Next Session");
-  });
 });
 
 describe("/privacy", () => {
@@ -91,5 +85,6 @@ describe("unknown paths", () => {
       "pathname",
       "/",
     );
+    expect(document.title).toBe("Nothing here · Next Session");
   });
 });

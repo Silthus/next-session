@@ -143,6 +143,25 @@ describe("parseLegalDocument", () => {
     ]);
   });
 
+  it("links the whole address when the local part carries an apostrophe", () => {
+    const doc = parseLegalDocument("# T\n\nWrite to {{CONTACT_EMAIL}}.\n", {
+      ...placeholders,
+      CONTACT_EMAIL: "o'hara@example.test",
+    });
+    expect(doc.intro).toEqual([
+      {
+        kind: "paragraph",
+        lines: [
+          [
+            { kind: "text", text: "Write to " },
+            { kind: "link", href: "mailto:o'hara@example.test", text: "o'hara@example.test" },
+            { kind: "text", text: "." },
+          ],
+        ],
+      },
+    ]);
+  });
+
   it("fills a placeholder written with spaces inside the braces", () => {
     const doc = parseLegalDocument("# T\n\nAt {{ CONTROLLER_ADDRESS }}.\n", placeholders);
     expect(doc.intro).toEqual([

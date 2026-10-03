@@ -12,7 +12,13 @@ export function normalizeName(raw: string): NormalizedName | "INVALID_NAME" {
 export function playerInitials(name: string): string {
   const [first = "", second] = name.trim().split(/\s+/);
   const letters = second
-    ? [...first].slice(0, 1).concat([...second].slice(0, 1))
-    : [...first].slice(0, 2);
+    ? graphemes(first).slice(0, 1).concat(graphemes(second).slice(0, 1))
+    : graphemes(first).slice(0, 2);
   return letters.join("").toUpperCase();
+}
+
+const graphemeSegmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+
+function graphemes(text: string): string[] {
+  return [...graphemeSegmenter.segment(text)].map((segment) => segment.segment);
 }

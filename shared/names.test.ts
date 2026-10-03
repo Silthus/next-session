@@ -45,5 +45,7 @@ describe("playerInitials", () => {
 
   it("keeps an emoji name whole instead of splitting its code units", () => {
     expect(playerInitials("🎲")).toBe("🎲");
+    expect(playerInitials("👨‍👩‍👧 Lima")).toBe("👨‍👩‍👧L");
+    expect(playerInitials("👨‍👩‍👧")).toBe("👨‍👩‍👧");
   });
 });
