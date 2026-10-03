@@ -1,0 +1,13 @@
+$ tsc -p tsconfig.json && tsc -p convex/tsconfig.json && eslint . && prettier --check . && vitest run
+Checking formatting...
+All matched files use Prettier code style!
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-17
+
+
+ Test Files  9 passed (9)
+      Tests  23 passed (23)
+   Start at  09:28:26
+   Duration  19.50s (environment 83%, setup 11%, import 3%, tests 2%, transform 1%)
+
+CHECK EXIT 0
