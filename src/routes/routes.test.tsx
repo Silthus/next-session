@@ -35,6 +35,18 @@ describe("legal routes", () => {
         "pathname",
         "/imprint",
       );
+      expect(screen.getAllByRole("link", { name: "Terms" }).at(-1)).toHaveProperty(
+        "pathname",
+        "/terms",
+      );
+      expect(screen.getAllByRole("link", { name: "Privacy" }).at(-1)).toHaveProperty(
+        "pathname",
+        "/privacy",
+      );
+      expect(screen.getByRole("link", { name: "Next Session home" })).toHaveProperty(
+        "pathname",
+        "/",
+      );
     },
   );
 });
