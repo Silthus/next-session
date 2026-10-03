@@ -237,6 +237,7 @@ describe("who may Save", () => {
   });
 
   it("refuses to finish a Save once the Account's GM edits are spent, and moves nothing", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
     const anonymous = await createYourLink(t);
     const { code } = await anonymous.as.mutation(api.account.startSave, {});
     const account = await signUpAccount(t);

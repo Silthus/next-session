@@ -228,7 +228,7 @@ Password rules: Convex Auth's `Password` provider, minimum 8 characters, no emai
 | --- | --- |
 | `WEAK_PASSWORD` | Sign-up with a password shorter than 8 characters |
 | `EMAIL_TAKEN` | Sign-up with an email that already has an Account. It never signs in, so password guesses always meet the sign-in throttle |
-| `INVALID_CREDENTIALS` | Log in with an unknown email or a wrong password. One code for both, so the sheet says "Wrong email or password" and offers Create account either way |
+| `INVALID_CREDENTIALS` | Log in with an unknown email or a wrong password. One code for both, so the sheet says "Wrong email or password" and offers Create account either way. A sign-up or log in with a blank email gets it too |
 | `RATE_LIMITED` | Log in to a locked Account (`retryAfter` is 6 minutes), or a sign-up past `accountSignUp` |
 
 ### 5.4 Rate limits
