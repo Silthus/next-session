@@ -52,7 +52,7 @@ async function toListItem(ctx: QueryCtx, group: Doc<"groups">) {
 }
 
 export const get = query({
-  args: { groupId: v.id("groups") },
+  args: { groupId: v.string() },
   returns: v.union(groupView, v.null()),
   handler: async (ctx, { groupId }) => {
     const group = await findOwnedGroup(ctx, groupId);

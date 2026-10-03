@@ -14,9 +14,13 @@ const limits = {
 
 export const rateLimiter = new RateLimiter(components.rateLimiter, limits);
 
-export type RateLimitName = keyof typeof limits;
+type GlobalRateLimit = "anonymousSignUp";
+type KeyedRateLimit = Exclude<keyof typeof limits, GlobalRateLimit>;
 
-export async function enforceRateLimit(ctx: MutationCtx, name: RateLimitName, key?: string) {
+export async function enforceRateLimit(
+  ctx: MutationCtx,
+  ...[name, key]: [GlobalRateLimit] | [KeyedRateLimit, string]
+) {
   const status = await rateLimiter.limit(ctx, name, { key });
   if (!status.ok) fail({ code: "RATE_LIMITED", retryAfter: status.retryAfter });
 }

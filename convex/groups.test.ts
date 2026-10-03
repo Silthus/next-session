@@ -164,6 +164,18 @@ describe("groups.get", () => {
 
     expect(await t.query(api.groups.get, { groupId })).toBeNull();
   });
+
+  it.each(["not-an-id", "j57abc"])("returns null for the malformed id %j", async (groupId) => {
+    const { as } = await signInAccount(t);
+
+    expect(await as.query(api.groups.get, { groupId })).toBeNull();
+  });
+
+  it("returns null for the id of a row in another table", async () => {
+    const { as, userId } = await signInAccount(t);
+
+    expect(await as.query(api.groups.get, { groupId: userId })).toBeNull();
+  });
 });
 
 describe("groups.rename", () => {
@@ -308,66 +320,53 @@ describe("groups.remove", () => {
   });
 
   async function seedAuthRows(userId: Id<"users">, sessionId: Id<"authSessions">) {
-    await t.run(async (ctx) => {
+    return await t.run(async (ctx) => {
       const accountId = await ctx.db.insert("authAccounts", {
         userId,
         provider: "anonymous",
         providerAccountId: userId,
       });
-      await ctx.db.insert("authVerificationCodes", {
+      const codeId = await ctx.db.insert("authVerificationCodes", {
         accountId,
         provider: "anonymous",
         code: `code-${userId}`,
         expirationTime: NOW + DAY,
       });
-      await ctx.db.insert("authRefreshTokens", { sessionId, expirationTime: NOW + DAY });
-      await ctx.db.insert("saveClaims", {
+      const refreshTokenId = await ctx.db.insert("authRefreshTokens", {
+        sessionId,
+        expirationTime: NOW + DAY,
+      });
+      const saveClaimId = await ctx.db.insert("saveClaims", {
         anonymousUserId: userId,
         codeHash: `hash-${userId}`,
         expiresAt: NOW + DAY,
       });
+      return [userId, sessionId, accountId, codeId, refreshTokenId, saveClaimId] as const;
     });
   }
 
-  async function authRowsOf(userId: Id<"users">) {
-    return await t.run(async (ctx) => {
-      const accounts = await ctx.db
-        .query("authAccounts")
-        .withIndex("userIdAndProvider", (q) => q.eq("userId", userId))
-        .collect();
-      const sessions = await ctx.db
-        .query("authSessions")
-        .withIndex("userId", (q) => q.eq("userId", userId))
-        .collect();
-      const codes = await Promise.all(
-        accounts.map((account) =>
-          ctx.db
-            .query("authVerificationCodes")
-            .withIndex("accountId", (q) => q.eq("accountId", account._id))
-            .collect(),
-        ),
-      );
-      const refreshTokens = await Promise.all(
-        sessions.map((session) =>
-          ctx.db
-            .query("authRefreshTokens")
-            .withIndex("sessionId", (q) => q.eq("sessionId", session._id))
-            .collect(),
-        ),
-      );
-      const saveClaims = await ctx.db
-        .query("saveClaims")
-        .withIndex("by_anonymousUserId", (q) => q.eq("anonymousUserId", userId))
-        .collect();
-      return {
-        user: (await ctx.db.get("users", userId)) !== null,
-        accounts: accounts.length,
-        codes: codes.flat().length,
-        sessions: sessions.length,
-        refreshTokens: refreshTokens.flat().length,
-        saveClaims: saveClaims.length,
-      };
-    });
+  async function surviving(
+    ids: readonly [
+      Id<"users">,
+      Id<"authSessions">,
+      Id<"authAccounts">,
+      Id<"authVerificationCodes">,
+      Id<"authRefreshTokens">,
+      Id<"saveClaims">,
+    ],
+  ) {
+    const [userId, sessionId, accountId, codeId, refreshTokenId, saveClaimId] = ids;
+    return await t.run(
+      async (ctx) =>
+        [
+          await ctx.db.get("users", userId),
+          await ctx.db.get("authSessions", sessionId),
+          await ctx.db.get("authAccounts", accountId),
+          await ctx.db.get("authVerificationCodes", codeId),
+          await ctx.db.get("authRefreshTokens", refreshTokenId),
+          await ctx.db.get("saveClaims", saveClaimId),
+        ].filter((row) => row !== null).length,
+    );
   }
 
   it("ends an Anonymous GM with its last Group, auth rows and Save Claims included", async () => {
@@ -375,27 +374,13 @@ describe("groups.remove", () => {
     const bystander = await signInAnonymousGm(t);
     const groupId = await gm.as.mutation(api.groups.create, {});
     await bystander.as.mutation(api.groups.create, {});
-    await seedAuthRows(gm.userId, gm.sessionId);
-    await seedAuthRows(bystander.userId, bystander.sessionId);
+    const gmRows = await seedAuthRows(gm.userId, gm.sessionId);
+    const bystanderRows = await seedAuthRows(bystander.userId, bystander.sessionId);
 
     await gm.as.mutation(api.groups.remove, { groupId });
 
-    expect(await authRowsOf(gm.userId)).toEqual({
-      user: false,
-      accounts: 0,
-      codes: 0,
-      sessions: 0,
-      refreshTokens: 0,
-      saveClaims: 0,
-    });
-    expect(await authRowsOf(bystander.userId)).toEqual({
-      user: true,
-      accounts: 1,
-      codes: 1,
-      sessions: 1,
-      refreshTokens: 1,
-      saveClaims: 1,
-    });
+    expect(await surviving(gmRows)).toBe(0);
+    expect(await surviving(bystanderRows)).toBe(6);
   });
 
   it("keeps an Anonymous GM that still owns another Group", async () => {

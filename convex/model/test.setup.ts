@@ -35,7 +35,10 @@ export type GmClient = Awaited<ReturnType<typeof signIn>>["as"];
 
 export const signInAnonymousGm = (t: TestBackend) => signIn(t, { isAnonymous: true });
 
-export const signInAccount = (t: TestBackend) => signIn(t, { email: "gm@example.com" });
+let accountCount = 0;
+
+export const signInAccount = (t: TestBackend) =>
+  signIn(t, { email: `gm-${++accountCount}@example.com` });
 
 export async function expectErrorCode<Code extends ErrorCode>(
   promise: Promise<unknown>,

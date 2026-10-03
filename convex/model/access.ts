@@ -16,9 +16,10 @@ export async function requireGm(ctx: QueryCtx): Promise<Doc<"users">> {
   return (await currentGm(ctx)) ?? fail({ code: "UNAUTHENTICATED" });
 }
 
-export async function findOwnedGroup(ctx: QueryCtx, groupId: Id<"groups">) {
+export async function findOwnedGroup(ctx: QueryCtx, rawGroupId: string) {
   const gm = await currentGm(ctx);
-  return gm === null ? null : await groupOwnedBy(ctx, gm, groupId);
+  const groupId = ctx.db.normalizeId("groups", rawGroupId);
+  return gm === null || groupId === null ? null : await groupOwnedBy(ctx, gm, groupId);
 }
 
 export async function ownedGroup(ctx: QueryCtx, groupId: Id<"groups">) {
