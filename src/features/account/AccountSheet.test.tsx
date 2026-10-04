@@ -182,6 +182,16 @@ describe("AccountSheet logging in", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it("cannot be sent back while logging in", async () => {
+    const onClose = renderLogInSheet(vi.fn(() => new Promise(() => {})));
+
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Log in" }));
+
+    expect(screen.getByRole("button", { name: "Go back" })).toHaveProperty("disabled", true);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it.each([
     [new ConvexError({ code: "INVALID_CREDENTIALS" }), "Wrong email or password."],
     [

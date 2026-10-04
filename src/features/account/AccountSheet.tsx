@@ -140,7 +140,7 @@ function AccountForm({
       >
         {submitLabel(intent, mode)}
       </Button>
-      <SheetFooter intent={intent} mode={mode} onClose={onClose} />
+      <SheetFooter intent={intent} mode={mode} busy={busy} onClose={onClose} />
     </form>
   );
 }
@@ -148,10 +148,12 @@ function AccountForm({
 function SheetFooter({
   intent,
   mode,
+  busy,
   onClose,
 }: {
   intent: AccountIntent;
   mode: SaveMode;
+  busy: boolean;
   onClose: () => void;
 }) {
   if (intent === "logIn") {
@@ -161,7 +163,8 @@ function SheetFooter({
         <button
           type="button"
           onClick={onClose}
-          className="font-semibold text-ink-2 underline underline-offset-2 hover:text-ink"
+          disabled={busy}
+          className="font-semibold text-ink-2 underline underline-offset-2 hover:text-ink disabled:opacity-50"
         >
           Go back
         </button>{" "}
