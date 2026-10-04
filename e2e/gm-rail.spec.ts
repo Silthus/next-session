@@ -258,9 +258,14 @@ test("an Anonymous GM saves into an Account from the header and stays on the Gro
   await sheet.getByText("I already have one").click();
   await sheet.getByLabel("Email").fill(account.email);
   await sheet.getByLabel("Password").fill(password);
+  const toastRegion = page.locator('[role="status"][aria-live="polite"]');
+  await expect(toastRegion).toHaveCount(1);
+  await toastRegion.evaluate((region) => region.setAttribute("data-region-before-save", ""));
   await sheet.getByRole("button", { name: "Log in and save" }).click();
 
-  await expect(page.getByRole("status")).toHaveText("Saved. Open it anywhere with your account.");
+  await expect(page.locator("[data-region-before-save]")).toHaveText(
+    "Saved. Open it anywhere with your account.",
+  );
   await expect(page).toHaveURL(new RegExp(`/g/${gm.groupId}\\?`));
   await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
   await expect(page.locator("[data-month-heading]")).toBeFocused();
