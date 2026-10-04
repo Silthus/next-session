@@ -12,3 +12,17 @@ test("the landing page renders the app shell without errors", async ({ page }) =
   ).toBeVisible();
   expect(pageErrors).toEqual([]);
 });
+
+test("reduced motion stops pulsing animations after one run", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+
+  const iterationCount = await page.evaluate(() => {
+    const pulse = document.createElement("div");
+    pulse.className = "animate-pulse";
+    document.body.append(pulse);
+    return getComputedStyle(pulse).animationIterationCount;
+  });
+
+  expect(iterationCount).toBe("1");
+});
