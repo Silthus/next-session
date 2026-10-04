@@ -34,7 +34,7 @@ export function Landing() {
     newGroupId && !created ? { groupId: newGroupId } : "skip",
   );
   if (newGroup && !created) setCreated(newGroup);
-  if (claimExpired && sheet === null) startOver();
+  if (claimExpired && !saved && sheet === null) startOver();
 
   const returningTo =
     phase === "idle" || phase === "failed" ? returningGroupId(groups, lastGroupId()) : undefined;
@@ -109,7 +109,7 @@ export function Landing() {
           groupName={created.name}
           signedInAs={account ? gm.email : undefined}
           onSubmit={(input) => saveWith(() => gm.save(input))}
-          onFinish={() => saveWith(gm.finishSave)}
+          onFinish={() => (saved ? Promise.resolve() : saveWith(gm.finishSave))}
           onClose={() => setSheet(null)}
         />
       ) : (
