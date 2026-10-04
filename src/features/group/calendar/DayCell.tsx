@@ -5,7 +5,7 @@ import type { IsoDate } from "../../../../shared/dates";
 import type { DaySummary, PlayerRow } from "../../../../shared/monthSummary";
 import { cn } from "../../../ui/cn";
 import { longDayLabel } from "./calendarDates";
-import { IconStar } from "./icons";
+import { IconStar } from "../../../ui/icons";
 
 export type CalendarSession = { _id: Id<"sessions">; date: IsoDate };
 export type CalendarDay = DaySummary<PlayerRow, CalendarSession>;

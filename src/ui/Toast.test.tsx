@@ -15,4 +15,11 @@ describe("Toast", () => {
     await userEvent.click(screen.getByRole("button", { name: "Undo" }));
     expect(onAction).toHaveBeenCalledOnce();
   });
+
+  it("sits at the bottom unless asked to clear a bottom sheet", () => {
+    const { rerender } = render(<Toast>Saved.</Toast>);
+    expect(screen.getByRole("status").dataset.position).toBe("bottom");
+    rerender(<Toast position="top">Saved.</Toast>);
+    expect(screen.getByRole("status").dataset.position).toBe("top");
+  });
 });

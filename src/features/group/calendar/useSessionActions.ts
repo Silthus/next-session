@@ -6,7 +6,7 @@ import type { Id } from "../../../../convex/_generated/dataModel";
 import type { IsoDate } from "../../../../shared/dates";
 import { dayLabel } from "./calendarDates";
 import type { CalendarSession } from "./DayCell";
-import { sessionErrorMessage } from "./sessionErrors";
+import { errorMessage } from "../../../lib/errors";
 
 const TOAST_MS = 5000;
 
@@ -50,7 +50,7 @@ export function useSessionActions(groupId: Id<"groups">) {
     try {
       setToast(await change());
     } catch (error) {
-      setToast(toastFor(date, sessionErrorMessage(error)));
+      setToast(toastFor(date, errorMessage(error, "session")));
     } finally {
       inFlight.current.delete(date);
       setPendingDates(new Set(inFlight.current));
