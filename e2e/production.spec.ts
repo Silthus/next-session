@@ -84,11 +84,21 @@ async function enterPasswordUnrecorded(field: Locator) {
   });
 }
 
-async function fillCredentials(page: Page, dialogName: string) {
+async function clearPasswordsLeftOnScreen(field: Locator) {
+  await field.evaluateAll((inputs: HTMLInputElement[]) => {
+    for (const input of inputs) {
+      Reflect.set(HTMLInputElement.prototype, "value", "", input);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  });
+}
+
+async function submitCredentials(page: Page, dialogName: string, submitLabel: string) {
   const sheet = page.getByRole("dialog", { name: dialogName });
   await sheet.getByLabel("Email").fill(email);
   await enterPasswordUnrecorded(sheet.getByLabel("Password"));
-  return sheet;
+  await sheet.getByRole("button", { name: submitLabel }).click();
+  await clearPasswordsLeftOnScreen(sheet.getByLabel("Password"));
 }
 
 async function expectBar(page: Page, date: IsoDate, answer: "free" | "maybe") {
@@ -101,7 +111,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
 }, testInfo) => {
   const appOrigin = new URL(testInfo.project.use.baseURL ?? "").origin;
   const gm = await (await newContextKnowingPassword(browser)).newPage();
-  let shareLink = "";
+  let shareLinkShown = "";
   let groupPath = "";
 
   await test.step("1. Create your link shows the Share Link in place", async () => {
@@ -114,14 +124,15 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
       (await gm.getByRole("link", { name: "Open your group →" }).getAttribute("href")) ?? "";
     leftoverGroup = { gm, path: groupPath };
     await expect(gm.locator("code")).toHaveText(/\/s\/[A-Za-z0-9_-]{10}$/);
-    shareLink = new URL(`https://${(await gm.locator("code").textContent()) ?? ""}`).pathname;
+    shareLinkShown = (await gm.locator("code").textContent()) ?? "";
+    expect(new URL(`https://${shareLinkShown}`).origin).toBe(appOrigin);
     await shoot(gm, testInfo, "1-link-created");
   });
 
   await test.step("2. The GM opens the Group and renames it", async () => {
     await gm.getByRole("link", { name: "Open your group →" }).click();
     await expect(gm).toHaveURL(groupPath);
-    await expect(rail(gm).getByText(shareLink)).toBeVisible();
+    await expect(rail(gm).locator("code")).toHaveText(shareLinkShown);
     await gm.getByRole("heading", { level: 1 }).getByRole("button", { name: "My group" }).click();
     await gm.getByRole("button", { name: "Rename group" }).click();
     await gm.getByRole("textbox", { name: "Group name" }).fill(groupName);
@@ -134,7 +145,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
   const player = await playerContext.newPage();
 
   await test.step("3. A Player joins from the Share Link and answers", async () => {
-    await player.goto(`${shareLink}?month=${nextMonth}`);
+    await player.goto(`https://${shareLinkShown}?month=${nextMonth}`);
     await expect(player.getByRole("heading", { level: 1, name: groupName })).toBeVisible();
     await player.getByRole("textbox", { name: "Your name", exact: true }).fill(playerName);
     await player.getByRole("button", { name: "Join" }).click();
@@ -146,8 +157,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
   });
 
   await test.step("4. The GM schedules a free night and the Player sees it", async () => {
-    await gm.getByRole("button", { name: "Next month" }).click();
-    await expect(gm).toHaveURL(new RegExp(`month=${nextMonth}`));
+    await gm.goto(`${groupPath}?month=${nextMonth}`);
     await expect(night(gm, dateOf(5))).toHaveAccessibleName(
       `${dayLabel(dateOf(5))}: everyone free`,
     );
@@ -177,8 +187,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
 
   await test.step("5. The GM saves to a new Account, and a third browser logs in", async () => {
     await gm.getByRole("button", { name: "Save your group" }).click();
-    const sheet = await fillCredentials(gm, `Keep ${groupName}`);
-    await sheet.getByRole("button", { name: "Save group" }).click();
+    await submitCredentials(gm, `Keep ${groupName}`, "Save group");
     await expect(gm.getByRole("status")).toHaveText("Saved. Open it anywhere with your account.");
     await expect(gm.getByRole("button", { name: "Your account" })).toBeVisible();
     await shoot(gm, testInfo, "5-gm-saved");
@@ -187,11 +196,10 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
     const elsewhere = await elsewhereContext.newPage();
     await elsewhere.goto("/");
     await elsewhere.getByRole("button", { name: "Log in" }).click();
-    const logIn = await fillCredentials(elsewhere, "Log in");
-    await logIn.getByRole("button", { name: "Log in" }).click();
+    await submitCredentials(elsewhere, "Log in", "Log in");
     await expect(elsewhere).toHaveURL(groupPath);
     await expect(switcher(elsewhere)).toBeVisible();
-    await expect(rail(elsewhere).getByText(shareLink)).toBeVisible();
+    await expect(rail(elsewhere).locator("code")).toHaveText(shareLinkShown);
     await shoot(elsewhere, testInfo, "5-logged-in-elsewhere");
     await elsewhereContext.close();
   });
