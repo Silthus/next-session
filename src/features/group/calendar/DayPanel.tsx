@@ -9,7 +9,7 @@ import { cn } from "../../../ui/cn";
 import { Dot } from "../../../ui/Dot";
 import { longDayLabel, relativeDay } from "./calendarDates";
 import type { CalendarDay, CalendarSession } from "./DayCell";
-import { IconChevron, IconStar } from "./icons";
+import { IconChevron, IconStar } from "../../../ui/icons";
 
 const answerLabels: Record<Answer, string> = { free: "Free", maybe: "Maybe", busy: "Busy" };
 const answerTones: Record<Answer, string> = {

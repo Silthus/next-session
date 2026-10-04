@@ -5,7 +5,7 @@ import { Card } from "../../../ui/Card";
 import { cn } from "../../../ui/cn";
 import { lastVisibleMonth, leadingBlanks, monthLabel, WEEKDAYS } from "./calendarDates";
 import { DayCell, MAX_PLAYERS_WITH_BARS, type CalendarDay } from "./DayCell";
-import { IconChevron, IconStar } from "./icons";
+import { IconChevron, IconStar } from "../../../ui/icons";
 
 export function HeatCalendar({
   month,

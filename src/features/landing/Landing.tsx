@@ -6,6 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { AccountSheet, type AccountIntent } from "../account/AccountSheet";
 import type { SaveInput } from "../account/save";
 import { useGm } from "../account/useGm";
+import { lastGroupId, returningGroupId } from "../group/rail/railStorage";
 import { LandingView, type LandingState } from "./LandingView";
 
 type Phase = "idle" | "creating" | "created" | "failed";
@@ -32,7 +33,8 @@ export function Landing() {
   );
   if (newGroup && !created) setCreated(newGroup);
 
-  const returningTo = phase === "idle" || phase === "failed" ? groups?.[0]?.id : undefined;
+  const returningTo =
+    phase === "idle" || phase === "failed" ? returningGroupId(groups, lastGroupId()) : undefined;
 
   useEffect(() => {
     if (returningTo) router.history.replace(groupPath(returningTo));

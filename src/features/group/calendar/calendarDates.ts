@@ -24,6 +24,10 @@ export function dayLabel(date: IsoDate): string {
   return formatUtc(date, { weekday: "short", month: "short", day: "numeric" });
 }
 
+export function nightLabel(date: IsoDate): string {
+  return formatUtc(date, { weekday: "long", month: "short", day: "numeric" });
+}
+
 export function longDayLabel(date: IsoDate): string {
   return formatUtc(date, { weekday: "long", month: "long", day: "numeric" });
 }

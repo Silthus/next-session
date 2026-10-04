@@ -24,6 +24,19 @@ describe("ShareLinkCard", () => {
     expect(await screen.findByRole("button", { name: "Copy" }, { timeout: 2500 })).toBeTruthy();
   });
 
+  it("forgets Copied when the link changes, keeping focus on Rotate", async () => {
+    vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText: () => Promise.resolve() } });
+    const { rerender } = render(<ShareLinkCard url={url} onRotate={vi.fn()} />);
+    await userEvent.click(screen.getByRole("button", { name: "Copy" }));
+    await screen.findByRole("button", { name: "Copied" });
+    const rotate = screen.getByRole("button", { name: "Rotate" });
+    rotate.focus();
+
+    rerender(<ShareLinkCard url="https://next-session.link/s/Zz9yX8wV7u" onRotate={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Copy" })).toBeTruthy();
+    expect(document.activeElement).toBe(rotate);
+  });
+
   it("falls back to a long-press hint when the clipboard is blocked", async () => {
     vi.stubGlobal("navigator", {
       ...navigator,
