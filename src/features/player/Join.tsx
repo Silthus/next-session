@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useId, useState, type FormEvent } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { AppErrorData } from "../../../convex/model/errors";
+import { pageTitle } from "../../lib/pageTitle";
 import { Avatar } from "../../ui/Avatar";
 import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
@@ -46,6 +47,7 @@ export function Join({
 
   return (
     <PageShell maxWidth="md" centerFooter className="flex flex-col justify-center gap-6">
+      <title>{pageTitle(groupName)}</title>
       <div className="animate-rise">
         <Eyebrow>You're invited to</Eyebrow>
         <h1 className="mt-1 font-display text-4xl font-extrabold break-words">{groupName}</h1>
