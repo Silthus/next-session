@@ -1,0 +1,1 @@
+{"root":["./worker/index.test.ts","./worker/index.ts","./e2e/gm-calendar.spec.ts","./e2e/smoke.spec.ts","./scripts/auth-env.test.ts","./scripts/auth-env.ts","./scripts/authKeys.ts","./scripts/e2e-server.test.ts","./scripts/e2e-server.ts","./scripts/localBackendEnv.ts","./playwright.config.ts","./vite.config.ts","./vitest.config.ts","./vitest.ui-setup.ts"],"version":"6.0.3"}

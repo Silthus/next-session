@@ -13,9 +13,9 @@ import { IconChevron, IconStar } from "./icons";
 
 const answerLabels: Record<Answer, string> = { free: "Free", maybe: "Maybe", busy: "Busy" };
 const answerTones: Record<Answer, string> = {
-  free: "text-free",
-  maybe: "text-maybe",
-  busy: "text-busy",
+  free: "text-ink-2 dark:text-free",
+  maybe: "text-ink-2 dark:text-maybe",
+  busy: "text-ink-2 dark:text-busy",
 };
 
 export function DayPanel({
@@ -79,7 +79,7 @@ export function DayPanel({
 function Headline({ day }: { day: CalendarDay }) {
   return (
     <p className="mt-0.5 text-sm text-ink-2">
-      <span className="font-semibold text-free">{`${String(day.free.length)} free`}</span>
+      <span className="font-semibold text-ink dark:text-free">{`${String(day.free.length)} free`}</span>
       {` · ${String(day.maybe.length)} maybe · ${String(day.busy.length)} busy · ${String(day.unanswered.length)} silent`}
     </p>
   );

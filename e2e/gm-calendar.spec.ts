@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 import type { Id } from "../convex/_generated/dataModel";
@@ -59,7 +59,7 @@ test.beforeEach(() => {
 const night = (day: number) => `${nextMonth}-${String(day).padStart(2, "0")}`;
 const dayCell = (page: Page, name: RegExp) => page.getByRole("button", { name });
 
-async function seedThursdayCrew(gm: Gm) {
+async function seedThreePlayers(gm: Gm) {
   await seedPlayer(gm, "Ana", { [night(5)]: "free", [night(6)]: "free", [night(7)]: "busy" });
   await seedPlayer(gm, "Ben", { [night(5)]: "free", [night(6)]: "maybe" });
   await seedPlayer(gm, "Chiara", { [night(5)]: "free", [night(6)]: "busy" });
@@ -67,7 +67,7 @@ async function seedThursdayCrew(gm: Gm) {
 
 test("the GM reads the heat-map and sees who is free on a night", async ({ page }) => {
   const gm = await signInAnonymousGm();
-  await seedThursdayCrew(gm);
+  await seedThreePlayers(gm);
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
 
   await expect(page.getByRole("heading", { level: 1, name: "My group" })).toBeVisible();
@@ -89,7 +89,7 @@ test("the GM reads the heat-map and sees who is free on a night", async ({ page 
 test("on a phone the day sheet leaves the tapped night in view", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 });
   const gm = await signInAnonymousGm();
-  await seedThursdayCrew(gm);
+  await seedThreePlayers(gm);
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
 
   const lastNight = dayCell(page, new RegExp(`, \\w+ ${String(monthDays(nextMonth).length)}: `));
@@ -98,17 +98,26 @@ test("on a phone the day sheet leaves the tapped night in view", async ({ page }
     name: new RegExp(`${String(monthDays(nextMonth).length)}$`),
   });
   await expect(sheet).toBeVisible();
+  await expectAboveSheet(lastNight, sheet);
+
+  await page.setViewportSize({ width: 667, height: 375 });
+  await expectAboveSheet(lastNight, sheet);
+});
+
+async function expectAboveSheet(cell: Locator, sheet: Locator) {
   await expect
     .poll(async () => {
-      const [cell, panel] = await Promise.all([lastNight.boundingBox(), sheet.boundingBox()]);
-      return cell && panel ? cell.y + cell.height <= panel.y : false;
+      const [cellBox, sheetBox] = await Promise.all([cell.boundingBox(), sheet.boundingBox()]);
+      return cellBox && sheetBox
+        ? cellBox.y >= 0 && cellBox.y + cellBox.height <= sheetBox.y
+        : false;
     })
     .toBe(true);
-});
+}
 
 test("the GM schedules a Session, unschedules it, and undoes that", async ({ page }) => {
   const gm = await signInAnonymousGm();
-  await seedThursdayCrew(gm);
+  await seedThreePlayers(gm);
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
 
   const panel = page.getByRole("region", { name: /, \w+ 5$/ });
@@ -118,8 +127,10 @@ test("the GM schedules a Session, unschedules it, and undoes that", async ({ pag
   await expect(dayCell(page, /, \w+ 5: everyone free, Session scheduled$/)).toBeVisible();
   await expect.poll(() => sessionDates(gm)).toEqual([night(5)]);
 
-  await toast.getByRole("button", { name: "Undo" }).click();
+  await toast.getByRole("button", { name: "Undo" }).focus();
+  await page.keyboard.press("Enter");
   await expect(dayCell(page, /, \w+ 5: everyone free$/)).toBeVisible();
+  await expect(dayCell(page, /, \w+ 5: /)).toBeFocused();
   await expect.poll(() => sessionDates(gm)).toEqual([]);
 
   await panel.getByRole("button", { name: "Schedule session" }).click();

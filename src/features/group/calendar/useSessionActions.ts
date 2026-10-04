@@ -10,12 +10,13 @@ import { sessionErrorMessage } from "./sessionErrors";
 
 const TOAST_MS = 5000;
 
-export type SessionToast = { id: number; message: string; undo?: () => void };
+export type SessionToast = { id: number; date: IsoDate; message: string; undo?: () => void };
 
 export function useSessionActions(groupId: Id<"groups">) {
   const inFlight = useRef(new Set<IsoDate>());
   const [pendingDates, setPendingDates] = useState<ReadonlySet<IsoDate>>(new Set());
   const [toast, setToast] = useState<SessionToast | null>(null);
+  const [toastHeld, setToastHeld] = useState(false);
   const scheduleSession = useMutation(api.sessions.schedule).withOptimisticUpdate(
     (store, { date }) =>
       editCachedSessions(store, groupId, (sessions) => [
@@ -31,10 +32,10 @@ export function useSessionActions(groupId: Id<"groups">) {
   );
 
   useEffect(() => {
-    if (toast === null) return;
+    if (toast === null || toastHeld) return;
     const timer = setTimeout(() => setToast(null), TOAST_MS);
     return () => clearTimeout(timer);
-  }, [toast]);
+  }, [toast, toastHeld]);
 
   async function settle(date: IsoDate, change: () => Promise<SessionToast>) {
     if (inFlight.current.has(date)) return;
@@ -43,7 +44,7 @@ export function useSessionActions(groupId: Id<"groups">) {
     try {
       setToast(await change());
     } catch (error) {
-      setToast({ id: Date.now(), message: sessionErrorMessage(error) });
+      setToast({ id: Date.now(), date, message: sessionErrorMessage(error) });
     } finally {
       inFlight.current.delete(date);
       setPendingDates(new Set(inFlight.current));
@@ -55,6 +56,7 @@ export function useSessionActions(groupId: Id<"groups">) {
       const sessionId = await scheduleSession({ groupId, date });
       return {
         id: Date.now(),
+        date,
         message: `Session on ${dayLabel(date)}. Players see it on the link.`,
         undo: () => void unschedule({ _id: sessionId, date }),
       };
@@ -66,6 +68,7 @@ export function useSessionActions(groupId: Id<"groups">) {
       await unscheduleSession({ sessionId: session._id });
       return {
         id: Date.now(),
+        date: session.date,
         message: `Session on ${dayLabel(session.date)} removed.`,
         undo: () => void schedule(session.date),
       };
@@ -78,6 +81,8 @@ export function useSessionActions(groupId: Id<"groups">) {
     isPending: (date: IsoDate) => pendingDates.has(date),
     toast,
     dismissToast: () => setToast(null),
+    holdToast: () => setToastHeld(true),
+    releaseToast: () => setToastHeld(false),
   };
 }
 

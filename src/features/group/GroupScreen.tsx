@@ -15,7 +15,7 @@ import { gmStatus } from "../account/useGm";
 import { visibleDay, visibleMonth } from "./calendar/calendarDates";
 import { DayPanel } from "./calendar/DayPanel";
 import { HeatCalendar } from "./calendar/HeatCalendar";
-import { useSessionActions } from "./calendar/useSessionActions";
+import { useSessionActions, type SessionToast } from "./calendar/useSessionActions";
 import { useMonthSchedule } from "./calendar/useMonthSchedule";
 import { useToday } from "./calendar/useToday";
 
@@ -61,7 +61,7 @@ function GroupSurface({
   const selectedDay = loaded ? visibleDay(search.day, loaded.month) : null;
   const closeDay = () => {
     selectDay(null);
-    if (selectedDay) focusAfterClosing(selectedDay);
+    if (selectedDay) focusDay(selectedDay);
   };
 
   useEffect(() => {
@@ -72,6 +72,14 @@ function GroupSurface({
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   });
+
+  const undoFrom = (toast: SessionToast | null) => {
+    if (!toast?.undo) return;
+    toast.undo();
+    sessions.releaseToast();
+    sessions.dismissToast();
+    focusDay(toast.date);
+  };
 
   if (loaded === undefined) return <GroupLoading name={name} />;
   const { month, schedule } = loaded;
@@ -117,16 +125,20 @@ function GroupSurface({
         </MobileDaySheet>
       )}
       {sessions.toast && (
-        <Toast
-          key={sessions.toast.id}
-          action={sessions.toast.undo && "Undo"}
-          onAction={() => {
-            sessions.toast?.undo?.();
-            sessions.dismissToast();
-          }}
+        <div
+          onFocus={sessions.holdToast}
+          onBlur={sessions.releaseToast}
+          onMouseEnter={sessions.holdToast}
+          onMouseLeave={sessions.releaseToast}
         >
-          {sessions.toast.message}
-        </Toast>
+          <Toast
+            key={sessions.toast.id}
+            action={sessions.toast.undo && "Undo"}
+            onAction={() => undoFrom(sessions.toast)}
+          >
+            {sessions.toast.message}
+          </Toast>
+        </div>
       )}
     </GroupFrame>
   );
@@ -153,7 +165,7 @@ function MobileDaySheet({ date, children }: { date: IsoDate; children: ReactNode
     <>
       <div aria-hidden="true" style={{ height }} className="lg:hidden" />
       <div ref={sheet} className="fixed inset-x-0 bottom-0 z-30 lg:hidden">
-        <div className="mx-auto max-w-lg px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="mx-auto max-h-[55dvh] max-w-lg overflow-y-auto overscroll-contain px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           {children}
         </div>
       </div>
@@ -169,7 +181,7 @@ function revealAbove(element: HTMLElement, sheetHeight: number) {
   if (overlap > 0) window.scrollBy({ top: overlap });
 }
 
-function focusAfterClosing(date: IsoDate) {
+function focusDay(date: IsoDate) {
   const cell = dayCellOf(date);
   const target = cell && !cell.matches(":disabled") ? cell : monthHeading();
   target?.focus();

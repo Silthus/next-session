@@ -61,6 +61,28 @@ describe("useSessionActions", () => {
     expect(result.current.isPending("2026-11-05")).toBe(false);
   });
 
+  it("keeps the toast while the GM holds it, and lets it go five seconds later", async () => {
+    vi.useFakeTimers();
+    try {
+      const { result } = renderHook(() => useSessionActions(groupId));
+      act(() => void result.current.schedule("2026-11-05"));
+      await settle("sessions:schedule", 0, "s5");
+      act(() => result.current.holdToast());
+      act(() => {
+        vi.advanceTimersByTime(10_000);
+      });
+      expect(result.current.toast?.date).toBe("2026-11-05");
+
+      act(() => result.current.releaseToast());
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(result.current.toast).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("undoes a new Session with the id the server returned", async () => {
     const { result } = renderHook(() => useSessionActions(groupId));
     act(() => void result.current.schedule("2026-11-05"));
