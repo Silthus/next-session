@@ -35,10 +35,10 @@ export function DayCell({
       style={tintOf(day)}
       className={cn(
         "relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2",
-        "border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-        perfect && "border-free bg-free text-white dark:text-paper",
-        day.session && "border-accent bg-accent-soft ring-2 ring-accent ring-inset",
-        selected && "z-10 outline-2 outline-offset-2 outline-ink focus-visible:outline-ink",
+        cellTone(day),
+        selected
+          ? "z-10 outline-2 outline-offset-2 outline-ink"
+          : "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
         day.past ? "cursor-default opacity-40" : "active:scale-[0.97]",
       )}
     >
@@ -59,6 +59,12 @@ export function DayCell({
   );
 }
 
+function cellTone(day: CalendarDay) {
+  if (day.session) return "border-accent bg-accent-soft ring-2 ring-accent ring-inset";
+  if (day.perfect) return "border-free bg-free text-white dark:text-paper";
+  return "border-line bg-surface hover:border-line-strong";
+}
+
 function DayAnswers({
   day,
   players,
@@ -77,7 +83,10 @@ function DayAnswers({
           onSolidFree ? "text-current" : "text-ink-2",
         )}
       >
-        <span>{`${String(day.free.length)}/${String(players.length)}`}</span>
+        <span>
+          {day.free.length}
+          <span className="max-sm:hidden">{`/${String(players.length)}`}</span>
+        </span>
         {day.busy.length > 0 && (
           <span className="ml-1 text-busy">{`✕${String(day.busy.length)}`}</span>
         )}

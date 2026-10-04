@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { Answer } from "../../../../shared/answers";
@@ -140,8 +140,7 @@ describe("HeatCalendar", () => {
     });
     const day = screen.getByRole("button", { name: /^Friday, October 16:/ });
     expect(day.querySelectorAll("[data-bar]")).toHaveLength(0);
-    expect(within(day).getByText("7/12")).toBeTruthy();
-    expect(within(day).getByText("✕2")).toBeTruthy();
+    expect(day.textContent).toBe("167/12✕2");
     expect(screen.getByText("free of all · busy")).toBeTruthy();
   });
 
