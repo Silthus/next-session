@@ -13,6 +13,8 @@ import { useFocusOnMount } from "../../ui/useFocusOnMount";
 
 export type RosterPlayer = { _id: Id<"players">; name: string };
 
+const CHIPS_WITHOUT_FILTER = 12;
+
 export function Join({
   groupName,
   players,
@@ -27,12 +29,17 @@ export function Join({
   onJoin: (name: string) => Promise<unknown>;
 }) {
   const [name, setName] = useState("");
+  const [filter, setFilter] = useState("");
   const [joining, setJoining] = useState(false);
   const [refusal, setRefusal] = useState<AppErrorData | null | undefined>(undefined);
   const refusalId = useId();
   const heading = useFocusOnMount<HTMLHeadingElement>();
   const takenPlayerId = refusal?.code === "NAME_TAKEN" ? refusal.playerId : null;
   const fieldLabel = players.length > 0 ? "Not listed? Your name" : "Your name";
+  const filterable = players.length > CHIPS_WITHOUT_FILTER;
+  const shownPlayers = alphabetical(players).filter(
+    (player) => player._id === takenPlayerId || nameMatches(player.name, filter),
+  );
 
   async function join(event: FormEvent) {
     event.preventDefault();
@@ -68,9 +75,12 @@ export function Join({
             Your name is no longer on the list. Pick or add one.
           </p>
         )}
-        {players.length > 0 && (
+        {filterable && (
+          <NameFilter value={filter} noMatch={shownPlayers.length === 0} onChange={setFilter} />
+        )}
+        {shownPlayers.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">
-            {alphabetical(players).map((player) => (
+            {shownPlayers.map((player) => (
               <li key={player._id}>
                 <PlayerChip
                   player={player}
@@ -121,6 +131,34 @@ export function Join({
   );
 }
 
+function NameFilter({
+  value,
+  noMatch,
+  onChange,
+}: {
+  value: string;
+  noMatch: boolean;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <>
+      <input
+        type="search"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        aria-label="Find your name"
+        placeholder="Find your name"
+        autoComplete="off"
+        enterKeyHint="search"
+        className="mt-3 h-12 w-full rounded-md border border-line bg-paper px-3.5 text-base outline-none transition-colors placeholder:text-ink-3 focus:border-accent"
+      />
+      <p role="status" aria-live="polite" className="mt-3 text-sm text-ink-2 empty:mt-0">
+        {noMatch ? "No names match. Add yours below." : ""}
+      </p>
+    </>
+  );
+}
+
 function PlayerChip({
   player,
   highlighted,
@@ -151,6 +189,14 @@ function PlayerChip({
       <span className="min-w-0 wrap-anywhere">{player.name}</span>
     </button>
   );
+}
+
+function nameMatches(name: string, filter: string) {
+  return searchable(name).includes(searchable(filter.trim()));
+}
+
+function searchable(text: string) {
+  return text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
 }
 
 function alphabetical(players: RosterPlayer[]) {
