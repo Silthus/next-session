@@ -204,22 +204,42 @@ describe("Join", () => {
       expect(filter).toBe(document.activeElement);
     });
 
-    it("announces when no name matches and still lets the Player join", async () => {
+    it("announces when no name matches and carries the name into the join field", async () => {
       const { onJoin } = renderJoin({ players: longRoster() });
       const filter = await screen.findByRole("searchbox", { name: "Find your name" });
       const announcement = screen.getByRole("status");
       expect(announcement.textContent).toBe("");
 
-      await userEvent.type(filter, "Dev");
+      await userEvent.type(filter, "Dev ");
 
       expect(screen.queryAllByRole("listitem")).toHaveLength(0);
       expect(announcement.textContent).toBe("No names match. Add yours below.");
+      const field = screen.getByRole("textbox", { name: "Not listed? Your name" });
+      expect(field).toHaveProperty("value", "Dev");
 
-      await userEvent.type(
-        screen.getByRole("textbox", { name: "Not listed? Your name" }),
-        "Dev{Enter}",
-      );
+      await userEvent.click(screen.getByRole("button", { name: "Join" }));
       expect(onJoin).toHaveBeenCalledWith("Dev");
+    });
+
+    it("leaves the join field empty while the filter still finds a name", async () => {
+      renderJoin({ players: longRoster() });
+
+      await userEvent.type(await screen.findByRole("searchbox", { name: "Find your name" }), "Be");
+
+      expect(screen.getByRole("textbox", { name: "Not listed? Your name" })).toHaveProperty(
+        "value",
+        "",
+      );
+    });
+
+    it("keeps the name the Player typed into the join field over the filter", async () => {
+      renderJoin({ players: longRoster() });
+      const field = await screen.findByRole("textbox", { name: "Not listed? Your name" });
+
+      await userEvent.type(field, "Devi");
+      await userEvent.type(screen.getByRole("searchbox", { name: "Find your name" }), "Dev");
+
+      expect(field).toHaveProperty("value", "Devi");
     });
 
     it("keeps a taken name's chip in view while the filter hides it", async () => {

@@ -29,7 +29,7 @@ export function Join({
   onPick: (player: RosterPlayer) => void;
   onJoin: (name: string) => Promise<unknown>;
 }) {
-  const [name, setName] = useState("");
+  const [typedName, setTypedName] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
   const [joining, setJoining] = useState(false);
   const [refusal, setRefusal] = useState<AppErrorData | null | undefined>(undefined);
@@ -42,6 +42,8 @@ export function Join({
   const shownPlayers = alphabetical(players).filter(
     (player) => player._id === takenPlayerId || nameMatches(player.name, activeFilter),
   );
+  const unmatchedFilter = shownPlayers.length === 0 ? activeFilter.trim() : "";
+  const name = typedName ?? unmatchedFilter;
 
   async function join(event: FormEvent) {
     event.preventDefault();
@@ -102,7 +104,7 @@ export function Join({
         <form className="mt-4 flex gap-2" onSubmit={(event) => void join(event)}>
           <input
             value={name}
-            onChange={(event) => setName(event.target.value)}
+            onChange={(event) => setTypedName(event.target.value)}
             aria-label={fieldLabel}
             placeholder={fieldLabel}
             autoComplete="given-name"
@@ -157,8 +159,8 @@ function NameFilter({
         autoComplete="off"
         enterKeyHint="done"
         onKeyDown={(event) => {
-          if (event.key === "Enter" && !isImeComposing(event.nativeEvent))
-            event.currentTarget.blur();
+          if (event.key !== "Enter" || isImeComposing(event.nativeEvent)) return;
+          event.currentTarget.blur();
         }}
         className="mt-3 h-12 w-full rounded-md border border-line bg-paper px-3.5 text-base outline-none transition-colors placeholder:text-ink-3 focus:border-accent"
       />
