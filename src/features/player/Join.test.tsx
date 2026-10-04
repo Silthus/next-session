@@ -184,42 +184,85 @@ describe("Join", () => {
       expect(onPick).not.toHaveBeenCalled();
     });
 
-    it("keeps the filter focused on an Enter that confirms an IME composition", async () => {
+    it.each([
+      ["an IME composition", { isComposing: true }],
+      ["Safari's IME conversion", { keyCode: 229 }],
+    ])("keeps the filter focused on an Enter that confirms %s", async (_case, composition) => {
       renderJoin({ players: longRoster() });
       const filter = await screen.findByRole("searchbox", { name: "Find your name" });
       filter.focus();
 
-      fireEvent.keyDown(filter, { key: "Enter", isComposing: true });
+      fireEvent.keyDown(filter, { key: "Enter", ...composition });
 
       expect(filter).toBe(document.activeElement);
     });
 
-    it("keeps the filter focused when Safari confirms an IME conversion with Enter", async () => {
-      renderJoin({ players: longRoster() });
-      const filter = await screen.findByRole("searchbox", { name: "Find your name" });
-      filter.focus();
-
-      fireEvent.keyDown(filter, { key: "Enter", keyCode: 229 });
-
-      expect(filter).toBe(document.activeElement);
-    });
-
-    it("announces when no name matches and still lets the Player join", async () => {
+    it("announces when no name matches and carries the name into the join field", async () => {
       const { onJoin } = renderJoin({ players: longRoster() });
       const filter = await screen.findByRole("searchbox", { name: "Find your name" });
       const announcement = screen.getByRole("status");
       expect(announcement.textContent).toBe("");
 
-      await userEvent.type(filter, "Dev");
+      await userEvent.type(filter, "Dev ");
 
       expect(screen.queryAllByRole("listitem")).toHaveLength(0);
       expect(announcement.textContent).toBe("No names match. Add yours below.");
+      const field = screen.getByRole("textbox", { name: "Not listed? Your name" });
+      expect(field).toHaveProperty("value", "Dev");
+
+      await userEvent.click(screen.getByRole("button", { name: "Join" }));
+      expect(onJoin).toHaveBeenCalledWith("Dev");
+    });
+
+    it("keeps the carried name when the Group refuses it as taken", async () => {
+      renderJoin({
+        players: longRoster(),
+        onJoin: () => Promise.reject(new ConvexError({ code: "NAME_TAKEN", playerId: zoe._id })),
+      });
 
       await userEvent.type(
-        screen.getByRole("textbox", { name: "Not listed? Your name" }),
-        "Dev{Enter}",
+        await screen.findByRole("searchbox", { name: "Find your name" }),
+        "Zoë  Ölund",
       );
-      expect(onJoin).toHaveBeenCalledWith("Dev");
+      await userEvent.click(screen.getByRole("button", { name: "Join" }));
+
+      expect(await screen.findByRole("button", { name: "Zoë Ölund" })).toBeTruthy();
+      expect(screen.getByRole("textbox", { name: "Not listed? Your name" })).toHaveProperty(
+        "value",
+        "Zoë  Ölund",
+      );
+    });
+
+    it("leaves the join field empty while the filter still finds a name", async () => {
+      renderJoin({ players: longRoster() });
+
+      await userEvent.type(await screen.findByRole("searchbox", { name: "Find your name" }), "Be");
+
+      expect(screen.getByRole("textbox", { name: "Not listed? Your name" })).toHaveProperty(
+        "value",
+        "",
+      );
+    });
+
+    it("lets the Player clear a carried name", async () => {
+      renderJoin({ players: longRoster() });
+      await userEvent.type(await screen.findByRole("searchbox", { name: "Find your name" }), "Dev");
+      const field = screen.getByRole("textbox", { name: "Not listed? Your name" });
+
+      await userEvent.clear(field);
+
+      expect(field).toHaveProperty("value", "");
+      expect(screen.getByRole("button", { name: "Join" })).toHaveProperty("disabled", true);
+    });
+
+    it("keeps the name the Player typed into the join field over the filter", async () => {
+      renderJoin({ players: longRoster() });
+      const field = await screen.findByRole("textbox", { name: "Not listed? Your name" });
+
+      await userEvent.type(field, "Devi");
+      await userEvent.type(screen.getByRole("searchbox", { name: "Find your name" }), "Dev");
+
+      expect(field).toHaveProperty("value", "Devi");
     });
 
     it("keeps a taken name's chip in view while the filter hides it", async () => {

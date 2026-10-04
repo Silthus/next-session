@@ -15,30 +15,34 @@ const noStorage: KeyValueStorage = {
   removeItem: () => undefined,
 };
 
-export function browserStorage(): KeyValueStorage {
+function browserStorage(): KeyValueStorage {
   return attempt(() => window.localStorage, noStorage);
 }
 
-export function rememberPlayer(storage: KeyValueStorage, groupId: string, player: PlayerIdentity) {
+export function rememberPlayer(
+  groupId: string,
+  player: PlayerIdentity,
+  storage = browserStorage(),
+) {
   writePlayers(storage, { ...readPlayers(storage), [groupId]: player });
 }
 
-export function recallPlayer(storage: KeyValueStorage, groupId: string): PlayerIdentity | null {
+export function recallPlayer(groupId: string, storage = browserStorage()): PlayerIdentity | null {
   const player = readPlayers(storage)[groupId];
   return isPlayerIdentity(player) ? player : null;
 }
 
-export function forgetPlayer(storage: KeyValueStorage, groupId: string) {
+export function forgetPlayer(groupId: string, storage = browserStorage()) {
   const players = { ...readPlayers(storage) };
   delete players[groupId];
   writePlayers(storage, players);
 }
 
-export function hasSeenHint(storage: KeyValueStorage, groupId: string): boolean {
+export function hasSeenHint(groupId: string, storage = browserStorage()): boolean {
   return read(storage, HINT_KEY_PREFIX + groupId) !== null;
 }
 
-export function markHintSeen(storage: KeyValueStorage, groupId: string) {
+export function markHintSeen(groupId: string, storage = browserStorage()) {
   write(storage, HINT_KEY_PREFIX + groupId, String(Date.now()));
 }
 

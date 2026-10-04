@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "../../convex/_generated/dataModel";
 import {
-  browserStorage,
   dismissNudge,
   forgetPlayer,
   hasSeenHint,
@@ -46,11 +45,11 @@ beforeEach(() => {
 
 describe("player identity", () => {
   it("remembers one Player per Group under next-session.players", () => {
-    rememberPlayer(storage, "group-1", ana);
-    rememberPlayer(storage, "group-2", ben);
+    rememberPlayer("group-1", ana, storage);
+    rememberPlayer("group-2", ben, storage);
 
-    expect(recallPlayer(storage, "group-1")).toEqual(ana);
-    expect(recallPlayer(storage, "group-2")).toEqual(ben);
+    expect(recallPlayer("group-1", storage)).toEqual(ana);
+    expect(recallPlayer("group-2", storage)).toEqual(ben);
     expect(JSON.parse(storage.getItem("next-session.players")!)).toEqual({
       "group-1": ana,
       "group-2": ben,
@@ -58,17 +57,17 @@ describe("player identity", () => {
   });
 
   it("recalls nobody for a Group it never saw", () => {
-    expect(recallPlayer(storage, "group-1")).toBeNull();
+    expect(recallPlayer("group-1", storage)).toBeNull();
   });
 
   it("forgets the Player of one Group and keeps the others", () => {
-    rememberPlayer(storage, "group-1", ana);
-    rememberPlayer(storage, "group-2", ben);
+    rememberPlayer("group-1", ana, storage);
+    rememberPlayer("group-2", ben, storage);
 
-    forgetPlayer(storage, "group-1");
+    forgetPlayer("group-1", storage);
 
-    expect(recallPlayer(storage, "group-1")).toBeNull();
-    expect(recallPlayer(storage, "group-2")).toEqual(ben);
+    expect(recallPlayer("group-1", storage)).toBeNull();
+    expect(recallPlayer("group-2", storage)).toEqual(ben);
   });
 
   it.each([
@@ -78,26 +77,26 @@ describe("player identity", () => {
   ])("recalls nobody when the stored value is %s", (_case, stored) => {
     storage.setItem("next-session.players", stored);
 
-    expect(recallPlayer(storage, "group-1")).toBeNull();
+    expect(recallPlayer("group-1", storage)).toBeNull();
   });
 
   it("recalls nobody and remembers nothing when storage is blocked", () => {
     const blocked = blockedStorage();
 
-    expect(() => rememberPlayer(blocked, "group-1", ana)).not.toThrow();
-    expect(recallPlayer(blocked, "group-1")).toBeNull();
-    expect(() => forgetPlayer(blocked, "group-1")).not.toThrow();
+    expect(() => rememberPlayer("group-1", ana, blocked)).not.toThrow();
+    expect(recallPlayer("group-1", blocked)).toBeNull();
+    expect(() => forgetPlayer("group-1", blocked)).not.toThrow();
   });
 });
 
 describe("first-visit hint", () => {
   it("shows once per Group until dismissed", () => {
-    expect(hasSeenHint(storage, "group-1")).toBe(false);
+    expect(hasSeenHint("group-1", storage)).toBe(false);
 
-    markHintSeen(storage, "group-1");
+    markHintSeen("group-1", storage);
 
-    expect(hasSeenHint(storage, "group-1")).toBe(true);
-    expect(hasSeenHint(storage, "group-2")).toBe(false);
+    expect(hasSeenHint("group-1", storage)).toBe(true);
+    expect(hasSeenHint("group-2", storage)).toBe(false);
     expect(storage.getItem("next-session.playerHint.group-1")).not.toBeNull();
   });
 });
@@ -142,16 +141,16 @@ it("keeps the last Group and nudge working when the browser blocks storage", () 
   expect(nudgeDismissedAt(storage)).toBeNull();
 });
 
-describe("browserStorage", () => {
+describe("default storage", () => {
   afterEach(() => {
     vi.restoreAllMocks();
     localStorage.clear();
   });
 
-  it("is the page's localStorage when the browser allows it", () => {
-    rememberPlayer(browserStorage(), "group-1", ana);
+  it("is the page's localStorage by default", () => {
+    rememberPlayer("group-1", ana);
 
-    expect(recallPlayer(localStorage, "group-1")).toEqual(ana);
+    expect(recallPlayer("group-1", localStorage)).toEqual(ana);
   });
 
   it("remembers nobody instead of crashing when the browser blocks site data", () => {
@@ -159,10 +158,9 @@ describe("browserStorage", () => {
       throw new DOMException("The operation is insecure.", "SecurityError");
     });
 
-    const storage = browserStorage();
-    rememberPlayer(storage, "group-1", ana);
+    rememberPlayer("group-1", ana);
 
-    expect(recallPlayer(storage, "group-1")).toBeNull();
-    expect(hasSeenHint(storage, "group-1")).toBe(false);
+    expect(recallPlayer("group-1")).toBeNull();
+    expect(hasSeenHint("group-1")).toBe(false);
   });
 });

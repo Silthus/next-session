@@ -291,9 +291,10 @@ src/
     account/            AccountSheet (save / log in), save.ts (claim orchestration), useGm()
     group/              GroupScreen container; calendar/ (HeatCalendar, DayPanel); rail/ (GroupSwitcher,
                         BestNights, Players, Sessions, Nudge)
-    player/             PlayerScreen, Join, PlayerCalendar, Progress, playerIdentity.ts
+    player/             PlayerScreen, Join, PlayerCalendar, Progress, playerMonth.ts
     legal/              LegalPage, rendered from docs/legal/*.md
-  lib/                  env.ts, pageTitle.ts, storage.ts (all localStorage keys, prefixed "next-session."), errors.ts
+  lib/                  env.ts, pageTitle.ts, storage.ts (all localStorage keys, prefixed "next-session."), errors.ts,
+                        keyboard.ts
 shared/                 dates.ts, answers.ts, monthSummary.ts, names.ts, shareToken.ts, legal.ts, limits.ts
 convex/                 schema.ts, model/, groups.ts, schedule.ts, roster.ts, sessions.ts, player.ts,
                         account.ts, auth.ts, auth.config.ts, http.ts, crons.ts, cleanup.ts, convex.config.ts
@@ -329,7 +330,7 @@ Storage keys: `next-session.players` (Player identity), `next-session.lastGroup`
 | `shared/names.ts` | `normalizeName(raw) → {name, nameKey} \| INVALID_NAME`, `playerInitials(name) → string` | Vitest; used by backend, forms, and `Avatar` |
 | Backend public API | The functions in §4 | `convex-test` through `api.*`, with `t.withIdentity` for GMs. Every invariant in §3 and every row in §5.1 has a test |
 | `src/features/account/save.ts` | `saveGroups({email, password, mode}, deps)` and `resumePendingSave(deps)` | Vitest with a fake `deps` (`startSave`, `signIn`, `finishSave`, storage). The real adapter wraps Convex |
-| `src/features/player/playerIdentity.ts` | `rememberPlayer`, `recallPlayer`, `forgetPlayer` | Vitest over a fake `Storage` |
+| `src/lib/storage.ts` | `rememberPlayer`, `recallPlayer`, `forgetPlayer`, the hint, last Group and nudge keys; each takes the storage last, defaulting to the browser's | Vitest over a fake `Storage` |
 | `src/ui/*` and feature views | Props in, callbacks out | Testing Library (render, user events, accessible names) |
 | `worker/index.ts` | `legacyRedirect(url) → string \| null` | Vitest |
 | The whole product | URLs and clicks | Playwright against `vite dev` + a local Convex backend; the production spec against the deployed URL |

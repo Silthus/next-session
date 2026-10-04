@@ -113,11 +113,13 @@ test("the GM adds, renames, and removes Players", async ({ page }) => {
   await page.goto(`/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
   await players.getByRole("button", { name: "More for Ben" }).click();
   await players.getByRole("button", { name: "Rename" }).click();
-  await players
-    .getByRole("textbox", { name: "New name for Ben" })
-    .dispatchEvent("keydown", { key: "Escape", isComposing: true, bubbles: true });
-  await expect(players.getByRole("textbox", { name: "New name for Ben" })).toBeFocused();
-  await expect(page.getByRole("region", { name: /, \w+ 5$/ })).toBeVisible();
+  for (const composition of [{ isComposing: true }, { keyCode: 229 }]) {
+    await players
+      .getByRole("textbox", { name: "New name for Ben" })
+      .dispatchEvent("keydown", { key: "Escape", bubbles: true, ...composition });
+    await expect(players.getByRole("textbox", { name: "New name for Ben" })).toBeFocused();
+    await expect(page.getByRole("region", { name: /, \w+ 5$/ })).toBeVisible();
+  }
   await players.getByRole("textbox", { name: "New name for Ben" }).fill("Benedikt");
   await page.keyboard.press("Enter");
   await expect(players.getByRole("listitem")).toHaveText([/Ana/, /Benedikt/]);

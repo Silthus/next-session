@@ -337,6 +337,9 @@ test.describe("the player surface", () => {
     await filter.fill("nobody");
     await expect(chips).toHaveCount(0);
     await expect(page.getByRole("status")).toHaveText("No names match. Add yours below.");
+    await expect(page.getByRole("textbox", { name: "Not listed? Your name" })).toHaveValue(
+      "nobody",
+    );
 
     await filter.fill("zoe");
     await expect(chips).toHaveCount(1);
@@ -539,6 +542,12 @@ test.describe("player surface screenshots", () => {
       await filter.fill("an");
       await expect(page.getByRole("button", { name: "Ana", exact: true })).toBeVisible();
       await shot("join-long-roster-filtered");
+
+      await filter.fill("Ines");
+      await expect(page.getByRole("textbox", { name: "Not listed? Your name" })).toHaveValue(
+        "Ines",
+      );
+      await shot("join-long-roster-unmatched");
     });
   });
 });

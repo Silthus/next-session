@@ -3,6 +3,7 @@ import { useId, useState, type FormEvent } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { AppErrorData } from "../../../convex/model/errors";
 import { appErrorMessage, appErrorOf } from "../../lib/errors";
+import { isImeComposing } from "../../lib/keyboard";
 import { pageTitle } from "../../lib/pageTitle";
 import { Avatar } from "../../ui/Avatar";
 import { Button } from "../../ui/Button";
@@ -28,7 +29,7 @@ export function Join({
   onPick: (player: RosterPlayer) => void;
   onJoin: (name: string) => Promise<unknown>;
 }) {
-  const [name, setName] = useState("");
+  const [ownedName, setOwnedName] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
   const [joining, setJoining] = useState(false);
   const [refusal, setRefusal] = useState<AppErrorData | null | undefined>(undefined);
@@ -41,9 +42,12 @@ export function Join({
   const shownPlayers = alphabetical(players).filter(
     (player) => player._id === takenPlayerId || nameMatches(player.name, activeFilter),
   );
+  const unmatchedFilter = shownPlayers.length === 0 ? activeFilter.trim() : "";
+  const name = ownedName ?? unmatchedFilter;
 
   async function join(event: FormEvent) {
     event.preventDefault();
+    setOwnedName(name);
     setJoining(true);
     setRefusal(undefined);
     try {
@@ -101,7 +105,7 @@ export function Join({
         <form className="mt-4 flex gap-2" onSubmit={(event) => void join(event)}>
           <input
             value={name}
-            onChange={(event) => setName(event.target.value)}
+            onChange={(event) => setOwnedName(event.target.value)}
             aria-label={fieldLabel}
             placeholder={fieldLabel}
             autoComplete="given-name"
@@ -156,7 +160,8 @@ function NameFilter({
         autoComplete="off"
         enterKeyHint="done"
         onKeyDown={(event) => {
-          if (event.key === "Enter" && !isComposing(event.nativeEvent)) event.currentTarget.blur();
+          if (event.key !== "Enter" || isImeComposing(event.nativeEvent)) return;
+          event.currentTarget.blur();
         }}
         className="mt-3 h-12 w-full rounded-md border border-line bg-paper px-3.5 text-base outline-none transition-colors placeholder:text-ink-3 focus:border-accent"
       />
@@ -197,12 +202,6 @@ function PlayerChip({
       <span className="min-w-0 wrap-anywhere">{player.name}</span>
     </button>
   );
-}
-
-const IME_PROCESSING_KEY_CODE = 229;
-
-function isComposing(event: KeyboardEvent) {
-  return event.isComposing || event.keyCode === IME_PROCESSING_KEY_CODE;
 }
 
 function nameMatches(name: string, filter: string) {

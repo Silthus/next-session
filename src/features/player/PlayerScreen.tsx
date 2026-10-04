@@ -6,7 +6,6 @@ import { fillRestDates, type Answer } from "../../../shared/answers";
 import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
 import { errorMessage } from "../../lib/errors";
 import {
-  browserStorage,
   forgetPlayer,
   hasSeenHint,
   markHintSeen,
@@ -26,7 +25,6 @@ type PlayerGroupView = NonNullable<FunctionReturnType<typeof api.player.group>>;
 type MonthChange = (month: IsoMonth) => void;
 
 const TOAST_MS = 4000;
-const storage = browserStorage();
 
 export function PlayerScreen({
   shareToken,
@@ -62,18 +60,18 @@ function PlayerGroup({
   requestedMonth: string | undefined;
   onMonthChange: MonthChange;
 }) {
-  const [identity, setIdentity] = useState(() => recallPlayer(storage, group.groupId));
+  const [identity, setIdentity] = useState(() => recallPlayer(group.groupId));
   const join = useMutation(api.player.join);
   const player = group.players.find(({ _id }) => _id === identity?.playerId);
   const removed = identity !== null && player === undefined;
 
   useEffect(() => {
-    if (removed) forgetPlayer(storage, group.groupId);
+    if (removed) forgetPlayer(group.groupId);
   }, [removed, group.groupId]);
 
   function answerAs(next: PlayerIdentity | null) {
-    if (next) rememberPlayer(storage, group.groupId, next);
-    else forgetPlayer(storage, group.groupId);
+    if (next) rememberPlayer(group.groupId, next);
+    else forgetPlayer(group.groupId);
     setIdentity(next);
   }
 
@@ -135,7 +133,7 @@ function PlayerAnswers({
     if (current)
       store.setQuery(api.player.answers, query, withRestBusy(current, args.month, today));
   });
-  const [hintVisible, setHintVisible] = useState(() => !hasSeenHint(storage, group.groupId));
+  const [hintVisible, setHintVisible] = useState(() => !hasSeenHint(group.groupId));
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
   useEffect(() => {
@@ -145,7 +143,7 @@ function PlayerAnswers({
   }, [toast]);
 
   function dismissHint() {
-    markHintSeen(storage, group.groupId);
+    markHintSeen(group.groupId);
     setHintVisible(false);
   }
 

@@ -4,7 +4,7 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState, type ComponentProps, type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -70,7 +70,22 @@ function renderCalendar(overrides: Partial<Props> = {}) {
   return handlers;
 }
 
-function CalendarWithRefusingBackend() {
+function backendRefusal() {
+  let reject: (error: Error) => void = () => {};
+  const refusal = new Promise<never>((_resolve, rejectRefusal) => {
+    reject = rejectRefusal;
+  });
+  return {
+    refusal,
+    refuse: () =>
+      act(async () => {
+        reject(new Error("OUT_OF_WINDOW"));
+        await refusal.catch(() => undefined);
+      }),
+  };
+}
+
+function CalendarWithRefusingBackend({ refusal }: { refusal: Promise<never> }) {
   const [month, setMonth] = useState("2026-10");
   const [answers, setAnswers] = useState<Props["answers"]>({ "2026-10-04": "free" });
   return (
@@ -82,12 +97,10 @@ function CalendarWithRefusingBackend() {
         onFillRest: () => {
           const before = answers;
           setAnswers(everyDayFrom(4, 31));
-          return new Promise((_resolve, reject) =>
-            setTimeout(() => {
-              setAnswers(before);
-              reject(new Error("OUT_OF_WINDOW"));
-            }, 50),
-          );
+          return refusal.catch((error: unknown) => {
+            setAnswers(before);
+            throw error;
+          });
         },
       })}
     />
@@ -277,12 +290,14 @@ describe("PlayerCalendar", () => {
   });
 
   it("gives focus back to Fill Rest when the backend refuses it", async () => {
-    renderInRouter(() => <CalendarWithRefusingBackend />);
-
+    const { refusal, refuse } = backendRefusal();
+    renderInRouter(() => <CalendarWithRefusingBackend refusal={refusal} />);
     await userEvent.click(await screen.findByRole("button", { name: /^Mark the other/ }));
 
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: /^Mark the other/ })).toBe(document.activeElement),
+    await refuse();
+
+    expect(await screen.findByRole("button", { name: /^Mark the other/ })).toBe(
+      document.activeElement,
     );
   });
 
@@ -299,28 +314,29 @@ describe("PlayerCalendar", () => {
   });
 
   it("keeps focus on the night the player moved to while a refused Fill Rest rolls back", async () => {
-    renderInRouter(() => <CalendarWithRefusingBackend />);
+    const { refusal, refuse } = backendRefusal();
+    renderInRouter(() => <CalendarWithRefusingBackend refusal={refusal} />);
     await userEvent.click(await screen.findByRole("button", { name: /^Mark the other/ }));
-    const night = await tile("Monday, October 5: Busy");
+    act(() => screen.getByRole("button", { name: "Monday, October 5: Busy" }).focus());
 
-    act(() => night.focus());
+    await refuse();
 
-    await screen.findByRole("button", { name: /^Mark the other/ });
     expect(await tile("Monday, October 5: Not set")).toBe(document.activeElement);
   });
 
   it("ignores a refusal for a month the player swiped away from", async () => {
-    renderInRouter(() => <CalendarWithRefusingBackend />);
+    const { refusal, refuse } = backendRefusal();
+    renderInRouter(() => <CalendarWithRefusingBackend refusal={refusal} />);
     await userEvent.click(await screen.findByRole("button", { name: /^Mark the other/ }));
     (document.activeElement as HTMLElement).blur();
-
     swipe(
       screen.getByRole("group", { name: "October 2026" }),
       { x: 200, y: 100 },
       { x: 100, y: 100 },
     );
     await screen.findByRole("heading", { level: 2, name: "November 2026" });
-    await new Promise((settle) => setTimeout(settle, 100));
+
+    await refuse();
 
     expect(screen.getByRole("button", { name: /^Mark the other/ })).not.toBe(
       document.activeElement,
