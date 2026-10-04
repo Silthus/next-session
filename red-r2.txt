@@ -1,0 +1,8 @@
+     × offers to log in instead when the email already has an Account 129ms
+     × keeps the fields, and stays open, while saving 108ms
+     × sends a GM without an Account back to create their link 1003ms
+     × says why making the link failed and lets the GM try again 1006ms
+     × says why making the link failed and lets the GM try again 1005ms
+     × names the account once the Group is saved 1005ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  6 failed | 50 passed (56)

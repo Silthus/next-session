@@ -1,0 +1,6 @@
+[WebServer] Uncaught ConvexError: {"code":"INVALID_CREDENTIALS"}
+  ✘  1 [chromium] › e2e/landing.spec.ts:103:1 › a wrong password says so and keeps the sheet open (9.2s)
+    Error: expect(locator).toBeFocused() failed
+    Expected: focused
+    Received: inactive
+  1 failed

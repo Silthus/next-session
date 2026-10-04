@@ -1,0 +1,2 @@
+  4 skipped
+  6 passed (15.7s)

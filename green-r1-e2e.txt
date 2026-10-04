@@ -1,0 +1,9 @@
+  ✓   2 [chromium] › e2e/smoke.spec.ts:3:1 › the landing page renders the app shell without errors (450ms)
+  ✓   1 [chromium] › e2e/landing.spec.ts:48:1 › one click puts the link in hand and lands the GM on their Group (1.4s)
+  ✓   3 [chromium] › e2e/landing.spec.ts:63:1 › saving to a new Account keeps the Share Link, and logging in finds the Group (2.7s)
+  ✓   4 [chromium] › e2e/landing.spec.ts:83:1 › saving into an Account that has older Groups keeps showing the new Group (3.2s)
+[WebServer] Uncaught ConvexError: {"code":"INVALID_CREDENTIALS"}
+  ✓   5 [chromium] › e2e/landing.spec.ts:103:1 › a wrong password says so and keeps the sheet open (2.7s)
+  ✓   6 [chromium] › e2e/landing.spec.ts:118:3 › on a dark OS › a cold load paints a dark canvas (388ms)
+  4 skipped
+  6 passed (14.7s)
