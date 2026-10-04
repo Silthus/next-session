@@ -173,6 +173,17 @@ describe("Join", () => {
       expect(onPick).toHaveBeenCalledWith(ben);
     });
 
+    it("closes the keyboard on Enter in the filter without joining", async () => {
+      const { onJoin, onPick } = renderJoin({ players: longRoster() });
+      const filter = await screen.findByRole("searchbox", { name: "Find your name" });
+
+      await userEvent.type(filter, "Ben{Enter}");
+
+      expect(filter).not.toBe(document.activeElement);
+      expect(onJoin).not.toHaveBeenCalled();
+      expect(onPick).not.toHaveBeenCalled();
+    });
+
     it("announces when no name matches and still lets the Player join", async () => {
       const { onJoin } = renderJoin({ players: longRoster() });
       const filter = await screen.findByRole("searchbox", { name: "Find your name" });

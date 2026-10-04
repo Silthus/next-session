@@ -154,7 +154,10 @@ function NameFilter({
         aria-label="Find your name"
         placeholder="Find your name"
         autoComplete="off"
-        enterKeyHint="search"
+        enterKeyHint="done"
+        onKeyDown={(event) => {
+          if (event.key === "Enter") event.currentTarget.blur();
+        }}
         className="mt-3 h-12 w-full rounded-md border border-line bg-paper px-3.5 text-base outline-none transition-colors placeholder:text-ink-3 focus:border-accent"
       />
       <p role="status" aria-live="polite" className="mt-3 text-sm text-ink-2 empty:mt-0">
