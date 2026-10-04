@@ -30,6 +30,7 @@ function fakeDeps(overrides: Partial<SaveDeps> = {}) {
       return Promise.resolve({ groupIds: [groupId] });
     },
     storage,
+    isAccount: false,
     ...overrides,
   };
   return { deps, calls, storage };
@@ -88,6 +89,24 @@ describe("saveGroups", () => {
     await expect(saveGroups({ ...input, mode: "create" }, deps)).rejects.toThrow();
 
     expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
+  });
+});
+
+describe("retrying a Save after the sign-in went through", () => {
+  it("redeems the pending claim instead of starting a new Save", async () => {
+    const { deps, calls, storage } = fakeDeps({ isAccount: true });
+    storage.setItem(PENDING_SAVE_KEY, "left-over");
+
+    expect(await saveGroups({ ...input, mode: "create" }, deps)).toEqual({ groupIds: [groupId] });
+    expect(calls).toEqual(["finishSave left-over"]);
+    expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
+  });
+
+  it("succeeds without moving anything once the claim was already redeemed", async () => {
+    const { deps, calls } = fakeDeps({ isAccount: true });
+
+    expect(await saveGroups({ ...input, mode: "create" }, deps)).toEqual({ groupIds: [] });
+    expect(calls).toEqual([]);
   });
 });
 

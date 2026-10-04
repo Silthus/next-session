@@ -89,10 +89,11 @@ export function useGm() {
           signIn,
           finishSave,
           storage: sessionStorage,
+          isAccount: status === "account",
         }),
       signOut,
     }),
-    [signIn, signOut, startSave, finishSave],
+    [signIn, signOut, startSave, finishSave, status],
   );
 
   return { status, email: me?.email, ...actions };

@@ -17,11 +17,25 @@ export type SaveDeps = {
   ) => Promise<unknown>;
   finishSave: (args: { code: string }) => Promise<SaveResult>;
   storage: Pick<Storage, "getItem" | "setItem" | "removeItem">;
+  isAccount: boolean;
 };
 
 const FLOWS = { create: "signUp", logIn: "signIn" } as const;
 
-export async function saveGroups({ email, password, mode }: SaveInput, deps: SaveDeps) {
+const NOTHING_MOVED: SaveResult = { groupIds: [] };
+
+export async function saveGroups(input: SaveInput, deps: SaveDeps) {
+  if (deps.isAccount) return await finishSaveAsAccount(deps);
+  return await saveAnonymousGroups(input, deps);
+}
+
+async function finishSaveAsAccount(deps: SaveDeps) {
+  const code = deps.storage.getItem(PENDING_SAVE_KEY);
+  if (code === null) return NOTHING_MOVED;
+  return await redeem(code, deps);
+}
+
+async function saveAnonymousGroups({ email, password, mode }: SaveInput, deps: SaveDeps) {
   const { code } = await deps.startSave();
   deps.storage.setItem(PENDING_SAVE_KEY, code);
   await deps.signIn("password", { email, password, flow: FLOWS[mode] });
