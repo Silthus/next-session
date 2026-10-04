@@ -105,7 +105,7 @@ function MonthHeader({
           size="sm"
           aria-label="Next month"
           aria-disabled={atLastMonth || undefined}
-          className={cn(atLastMonth && "cursor-default opacity-50 hover:bg-transparent")}
+          className="aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2 aria-disabled:active:scale-100"
           onClick={() => {
             if (!atLastMonth) onMonthChange(addMonths(month, 1));
           }}

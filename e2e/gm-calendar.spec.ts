@@ -171,6 +171,7 @@ test("month navigation lives in the URL and stops at the end of the Booking Wind
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { level: 2, name: months[2] })).toBeVisible();
   await expect(next).toBeDisabled();
+  await expect(next).toBeFocused();
 
   await page.getByRole("button", { name: "Previous month" }).click();
   await page.getByRole("button", { name: "Previous month" }).click();
