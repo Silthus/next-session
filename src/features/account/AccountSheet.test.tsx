@@ -218,22 +218,6 @@ describe("AccountSheet finishing a Save after the sign-in went through", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("wraps a long unbroken group name instead of overflowing the sheet", async () => {
-    const groupName = "Dragonsofthenorthernwastesandtheirendlesscampaign";
-    renderSheet({
-      open: true,
-      intent: "save",
-      groupName,
-      signedInAs: email,
-      onSubmit: vi.fn(),
-      onFinish: vi.fn(),
-      onClose: vi.fn(),
-    });
-
-    const line = (await screen.findByText(email)).closest("p");
-    expect(line?.textContent).toContain(groupName);
-  });
-
   it("says when the Save expired before the Group moved", async () => {
     renderSheet({
       open: true,

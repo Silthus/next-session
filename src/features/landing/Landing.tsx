@@ -34,6 +34,7 @@ export function Landing() {
     newGroupId && !created ? { groupId: newGroupId } : "skip",
   );
   if (newGroup && !created) setCreated(newGroup);
+  if (claimExpired && sheet === null) startOver();
 
   const returningTo =
     phase === "idle" || phase === "failed" ? returningGroupId(groups, lastGroupId()) : undefined;
@@ -66,17 +67,12 @@ export function Landing() {
     setSaved(true);
   };
 
-  const closeSaveSheet = () => {
-    setSheet(null);
-    if (claimExpired) startOver();
-  };
-
-  const startOver = () => {
+  function startOver() {
     setClaimExpired(false);
     setPhase("idle");
     setCreated(null);
     setCreatedGroupId(null);
-  };
+  }
 
   const logIn = async (input: Omit<SaveInput, "mode">) => {
     await gm.logIn(input);
@@ -114,7 +110,7 @@ export function Landing() {
           signedInAs={account ? gm.email : undefined}
           onSubmit={(input) => saveWith(() => gm.save(input))}
           onFinish={() => saveWith(gm.finishSave)}
-          onClose={closeSaveSheet}
+          onClose={() => setSheet(null)}
         />
       ) : (
         <AccountSheet

@@ -38,9 +38,9 @@ async function fillSaveSheet(page: Page, email: string) {
   return sheet;
 }
 
-async function saveToNewAccount(page: Page, email: string) {
+async function saveToNewAccount(page: Page, email: string, typedEmail = email) {
   await page.getByRole("button", { name: "save it to an account" }).click();
-  await fillSaveSheet(page, email);
+  await fillSaveSheet(page, typedEmail);
   await expect(page.getByRole("status").filter({ hasText: `Saved to ${email}.` })).toBeFocused();
 }
 
@@ -93,20 +93,15 @@ function failMutation(client: WebSocketRoute, text: string, failure: object) {
   );
 }
 
-async function failFirstFinishSave(page: Page) {
-  let failed = false;
-  await interceptSync(page, (text, { client }) => {
-    if (failed || !isFinishSave(text)) return false;
-    failed = true;
-    failMutation(client, text, { result: "Server Error" });
-    return true;
-  });
-}
+const serverError = { result: "Server Error" };
+const claimInvalid = { result: "", errorData: { code: "CLAIM_INVALID" } };
 
-async function expireEveryFinishSave(page: Page) {
+async function failFinishSaves(page: Page, failures: object[]) {
+  const pending = [...failures];
   await interceptSync(page, (text, { client }) => {
-    if (!isFinishSave(text)) return false;
-    failMutation(client, text, { result: "", errorData: { code: "CLAIM_INVALID" } });
+    const failure = isFinishSave(text) ? pending.shift() : undefined;
+    if (!failure) return false;
+    failMutation(client, text, failure);
     return true;
   });
 }
@@ -185,7 +180,7 @@ test("saving to a new Account keeps the Share Link, and logging in finds the Gro
   const email = newEmail();
   const { shareLink, groupPath } = await createLink(page);
 
-  await saveToNewAccount(page, email);
+  await saveToNewAccount(page, email, email.replace(/^gm/, "GM"));
   await expect(page.locator("code")).toHaveText(shareLink);
 
   const otherDevice = await logInFromElsewhere(browser, email);
@@ -217,7 +212,7 @@ test("saving into an Account that has older Groups keeps showing the new Group",
 test.describe("a Save whose move fails after the sign-in", () => {
   test("goes through on retry from the landing", async ({ page, browser }) => {
     const email = newEmail();
-    await failFirstFinishSave(page);
+    await failFinishSaves(page, [serverError]);
     const { shareLink, groupPath } = await createLink(page);
 
     await page.getByRole("button", { name: "save it to an account" }).click();
@@ -235,7 +230,7 @@ test.describe("a Save whose move fails after the sign-in", () => {
 
   test("goes through on retry from the Group header", async ({ page }) => {
     const email = newEmail();
-    await failFirstFinishSave(page);
+    await failFinishSaves(page, [serverError]);
     const { shareLink, groupPath } = await createLink(page);
     await openGroupLink(page).click();
     await expect(page).toHaveURL(groupPath);
@@ -254,7 +249,7 @@ test.describe("a Save whose move fails after the sign-in", () => {
     page,
   }) => {
     const email = newEmail();
-    await failFirstFinishSave(page);
+    await failFinishSaves(page, [serverError]);
     const { shareLink, groupPath } = await createLink(page);
     await openGroupLink(page).click();
     await expect(page).toHaveURL(groupPath);
@@ -270,20 +265,38 @@ test.describe("a Save whose move fails after the sign-in", () => {
   });
 });
 
-test("closing a Save that expired starts the landing over", async ({ page }) => {
-  await expireEveryFinishSave(page);
-  await createLink(page);
+test.describe("a Save that expires", () => {
+  test("starts the landing over once its sheet is closed", async ({ page }) => {
+    await failFinishSaves(page, [claimInvalid]);
+    await createLink(page);
 
-  await page.getByRole("button", { name: "save it to an account" }).click();
-  const sheet = await fillSaveSheet(page, newEmail());
-  await expect(sheet.getByRole("alert")).toHaveText(
-    "This save expired before the group moved. Close this and create a new link.",
-  );
-  await sheet.getByRole("button", { name: "Close", exact: true }).last().click();
+    await page.getByRole("button", { name: "save it to an account" }).click();
+    const sheet = await fillSaveSheet(page, newEmail());
+    await expect(sheet.getByRole("alert")).toHaveText(
+      "This save expired before the group moved. Close this and create a new link.",
+    );
+    await sheet.getByRole("button", { name: "Close", exact: true }).first().click();
 
-  await expect(sheet).toBeHidden();
-  await expect(page.getByRole("button", { name: "Create your link" })).toBeVisible();
-  await expect(page.locator("code")).toBeHidden();
+    await expect(sheet).toBeHidden();
+    await expect(page.getByRole("button", { name: "Create your link" })).toBeVisible();
+    await expect(page.locator("code")).toBeHidden();
+  });
+
+  test("starts the landing over when it expires after the GM dismissed the retry", async ({
+    page,
+  }) => {
+    await failFinishSaves(page, [serverError, claimInvalid]);
+    await createLink(page);
+
+    await page.getByRole("button", { name: "save it to an account" }).click();
+    const sheet = await fillSaveSheet(page, newEmail());
+    await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
+    await page.keyboard.press("Escape");
+
+    await expect(sheet).toBeHidden();
+    await expect(page.getByRole("button", { name: "Create your link" })).toBeVisible();
+    await expect(page.locator("code")).toBeHidden();
+  });
 });
 
 test("pressing Escape again and again mid-Save keeps the sheet up until it is done", async ({
