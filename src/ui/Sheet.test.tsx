@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Sheet } from "./Sheet";
 
@@ -91,4 +92,44 @@ describe("Sheet", () => {
     fireEvent(dialog, new Event("close"));
     expect(onClose).toHaveBeenCalledOnce();
   });
+
+  it("shows the dialog again when the browser closes it while the parent keeps it open", () => {
+    const onClose = vi.fn();
+    render(
+      <Sheet open title="Keep My group" onClose={onClose}>
+        body
+      </Sheet>,
+    );
+    const dialog = screen.getByRole<HTMLDialogElement>("dialog");
+
+    closeNatively(dialog);
+
+    expect(onClose).toHaveBeenCalledOnce();
+    expect(showModal).toHaveBeenCalledTimes(2);
+    expect(dialog.open).toBe(true);
+  });
+
+  it("stays closed when the parent agrees to a close the browser started", () => {
+    function Parent() {
+      const [open, setOpen] = useState(true);
+      return (
+        <Sheet open={open} title="Keep My group" onClose={() => setOpen(false)}>
+          body
+        </Sheet>
+      );
+    }
+    render(<Parent />);
+    const dialog = screen.getByRole<HTMLDialogElement>("dialog");
+
+    closeNatively(dialog);
+
+    expect(showModal).toHaveBeenCalledOnce();
+    expect(dialog.open).toBe(false);
+    expect(screen.queryByText("body")).toBeNull();
+  });
 });
+
+function closeNatively(dialog: HTMLDialogElement) {
+  dialog.open = false;
+  fireEvent(dialog, new Event("close"));
+}

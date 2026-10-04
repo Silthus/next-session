@@ -1,6 +1,7 @@
 import {
   useEffect,
   useId,
+  useReducer,
   useRef,
   type MouseEvent,
   type PointerEvent,
@@ -21,13 +22,20 @@ export function Sheet({
   const titleId = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const pressedBackdrop = useRef(false);
+  const [reshowTick, reshow] = useReducer((tick: number) => tick + 1, 0);
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
     if (open) showModal(dialog);
     else closeModal(dialog);
-  }, [open]);
+  }, [open, reshowTick]);
+
+  const reportNativeClose = () => {
+    if (!open || dialogRef.current?.open) return;
+    onClose();
+    reshow();
+  };
 
   const rememberPress = (event: PointerEvent<HTMLDialogElement>) => {
     pressedBackdrop.current = event.target === event.currentTarget;
@@ -44,9 +52,7 @@ export function Sheet({
         event.preventDefault();
         onClose();
       }}
-      onClose={() => {
-        if (open && !dialogRef.current?.open) onClose();
-      }}
+      onClose={reportNativeClose}
       onPointerDown={rememberPress}
       onClick={closeOnBackdrop}
       className="animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-ink/40 open:flex sm:items-center"
