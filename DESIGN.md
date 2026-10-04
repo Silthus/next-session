@@ -97,7 +97,7 @@ All presentational; data arrives through props. Prototype equivalents in [`proto
 | `Eyebrow` | mono uppercase section label | — |
 | `Avatar` | two-letter initials (`playerInitials`), hue derived from the name so it is stable across surfaces | xs 20 / sm 28 / md 36 |
 | `Dot` | 8 px answer dot | yes / maybe / no / null |
-| `ShareLinkCard` | accent-soft card: eyebrow, mono URL, Copy (turns green "Copied" for 1.6 s), WhatsApp / Telegram / Mail / native share, hint line, optional Rotate | `compact` (mobile header version, no share row) |
+| `ShareLinkCard` | accent-soft card: eyebrow, mono URL, Copy (turns green "Copied" for 1.6 s), WhatsApp / Telegram / Mail / native share, hint line, optional Rotate | `compact` (mobile header version: tighter padding, share row without the hint line) |
 | `GroupSwitcher` | group name as a menu button: lists all groups with player counts, New group, Rename (inline input), Delete (two-step confirm inside the menu) | renaming, confirming delete |
 | `HeatCalendar` | GM month grid; `DayCell` shows day number, today dot, per-player `MiniBars` (≤ 8 players) or `n/N ✕k` counts (> 8), star for scheduled, tint by free share; month nav; legend adapts to density | past day (40 % opacity, disabled), selected (ink ring), scheduled, perfect, tinted, neutral |
 | `DayPanel` | per-date roster sorted free → maybe → busy → silent, headline counts, relative date, Schedule / Unschedule | past (button disabled), scheduled |
