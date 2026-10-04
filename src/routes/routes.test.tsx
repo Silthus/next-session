@@ -69,7 +69,7 @@ describe("document titles", () => {
 describe("/privacy", () => {
   it("renders the effective date, the processor table, the storage list and the authority link", async () => {
     renderAt("/privacy");
-    expect(await screen.findByText("Updated Oct 3, 2026")).toBeTruthy();
+    expect(await screen.findByText("Updated Oct 4, 2026")).toBeTruthy();
     expect(screen.getByRole("cell", { name: "Convex, Inc." })).toBeTruthy();
     expect(screen.getAllByRole("listitem").length).toBeGreaterThanOrEqual(3);
     expect(screen.getByRole("link", { name: "https://www.lda.bayern.de" })).toHaveProperty(
