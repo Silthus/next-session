@@ -1,0 +1,78 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/landing/LandingView.test.tsx (11 tests | 1 failed) 374ms
+   ❯ LandingView (11)
+     × names the account a GM just logged in to and nudges them to their first link 18ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/account/AccountSheet.test.tsx (16 tests | 1 failed) 1735ms
+   ❯ AccountSheet finishing a Save after the sign-in went through (2)
+     × asks only to finish, as the signed-in Account, once the move failed 110ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet finishing a Save after the sign-in went through > asks only to finish, as the signed-in Account, once the move failed
+AssertionError: expected 'You\'re signed in as gm@example.test.…' to be 'Signed in as gm@example.test. Finish …' // Object.is equality
+
+Expected: "Signed in as gm@example.test. Finish moving My group to your account."
+Received: "You're signed in as gm@example.test. Finish moving My group to your account."
+
+ ❯ src/features/account/AccountSheet.test.tsx:210:63
+    208|     expect(screen.queryByLabelText("Email")).toBeNull();
+    209|     expect(screen.queryByLabelText("Password")).toBeNull();
+    210|     expect(screen.getByText(email).closest("p")?.textContent).toBe(
+       |                                                               ^
+    211|       `Signed in as ${email}. Finish moving My group to your account.`,
+    212|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/features/landing/LandingView.test.tsx > LandingView > names the account a GM just logged in to and nudges them to their first link
+AssertionError: expected 'Logged in as gm@example.test. No grou…' to be 'Signed in as gm@example.test. No grou…' // Object.is equality
+
+Expected: "Signed in as gm@example.test. No groups here yet, so create your first link."
+Received: "Logged in as gm@example.test. No groups here yet, so create your first link."
+
+ ❯ src/features/landing/LandingView.test.tsx:73:30
+     71|
+     72|     const line = await screen.findByRole("status");
+     73|     expect(line.textContent).toBe(
+       |                              ^
+     74|       "Signed in as gm@example.test. No groups here yet, so create you…
+     75|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 25 passed (27)
+   Start at  08:28:21
+   Duration  2.47s (tests 61%, environment 25%, import 5%, transform 4%, setup 4%)
+

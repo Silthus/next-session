@@ -1,0 +1,66 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/landing/LandingView.test.tsx (10 tests | 1 failed) 368ms
+   ❯ LandingView (10)
+     × opens the Group from the link-created moment 38ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/landing/LandingView.test.tsx > LandingView > opens the Group from the link-created moment
+AssertionError: expected '/' to be '/g/group-1' // Object.is equality
+
+Expected: "/g/group-1"
+Received: "/"
+
+ ❯ src/features/landing/LandingView.test.tsx:108:44
+    106|
+    107|     await userEvent.click(open);
+    108|     expect(router.state.location.pathname).toBe("/g/group-1");
+       |                                            ^
+    109|   });
+    110|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+TypeError: onOpenGroup is not a function
+ ❯ openGroup src/features/landing/LandingView.tsx:139:5
+ ❯ executeDispatch node_modules/react-dom/cjs/react-dom-client.development.js:20804:9
+ ❯ runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:1048:13
+ ❯ processDispatchQueue node_modules/react-dom/cjs/react-dom-client.development.js:20854:19
+ ❯ node_modules/react-dom/cjs/react-dom-client.development.js:21423:9
+ ❯ batchedUpdates$1 node_modules/react-dom/cjs/react-dom-client.development.js:3437:40
+ ❯ dispatchEventForPluginEventSystem node_modules/react-dom/cjs/react-dom-client.development.js:21008:7
+ ❯ dispatchEvent node_modules/react-dom/cjs/react-dom-client.development.js:26142:11
+ ❯ dispatchDiscreteEvent node_modules/react-dom/cjs/react-dom-client.development.js:26110:11
+ ❯ HTMLDivElement.callTheUserObjectsOperation node_modules/jsdom/lib/generated/idl/EventListener.js:26:30
+
+This error originated in "src/features/landing/LandingView.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The last test to run before this error was "opens the Group from the link-created moment". This means either:
+- the error was thrown while Vitest was running this test, or
+- the error was thrown after the test completed, and this was the most recent test at that point.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+     Errors  1 error
+   Start at  07:53:43
+   Duration  1.10s (environment 43%, tests 36%, import 8%, transform 7%, setup 6%)
+

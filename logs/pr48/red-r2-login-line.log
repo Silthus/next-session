@@ -1,0 +1,95 @@
+[WebServer] CONVEX_AGENT_MODE=anonymous mode is in beta, functionality may change in the future.
+[WebServer] ✔ Configured a local deployment for http://127.0.0.1:3210 and saved its:
+[WebServer]     name as CONVEX_DEPLOYMENT
+[WebServer]     client URL as VITE_CONVEX_URL
+[WebServer]     HTTP actions URL as VITE_CONVEX_SITE_URL
+[WebServer]  to .env.local
+[WebServer] 
+[WebServer] Write your Convex functions in convex/
+[WebServer] Give us feedback at https://convex.dev/community or support@convex.dev
+[WebServer] View the Convex dashboard at http://127.0.0.1:6790/
+[WebServer] 
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 3210 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:3210
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ 08:30:01 Convex functions ready! (2.09s)
+[WebServer] ✔ Successfully set 2 environment variables from stdin (2 updated, 1 unchanged) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-45/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-45/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 402 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://localhost:5173/
+[WebServer]   ➜  Network: use --host to expose
+
+Running 2 tests using 1 worker
+
+  ✘  1 [chromium] › e2e/landing.spec.ts:156:1 › saving to a new Account keeps the Share Link, and logging in finds the Group (2.9s)
+  ✘  2 [chromium] › e2e/landing.spec.ts:251:1 › logging in to an Account without Groups names it and points to the first link (1.2s)
+
+
+  1) [chromium] › e2e/landing.spec.ts:156:1 › saving to a new Account keeps the Share Link, and logging in finds the Group 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      166 |   const otherDevice = await logInFromElsewhere(browser, email);
+      167 |   await expect(otherDevice.page).toHaveURL(groupPath);
+    > 168 |   expect(await otherDevice.noGroupsLines()).toBe(0);
+          |                                             ^
+      169 |   await otherDevice.close();
+      170 | });
+      171 |
+        at /home/coder/dev/ns-worktrees/ticket-45/e2e/landing.spec.ts:168:45
+
+    Error Context: test-results/landing-saving-to-a-new-Ac-f1809--logging-in-finds-the-Group-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/landing-saving-to-a-new-Ac-f1809--logging-in-finds-the-Group-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/landing-saving-to-a-new-Ac-f1809--logging-in-finds-the-Group-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › e2e/landing.spec.ts:251:1 › logging in to an Account without Groups names it and points to the first link 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 2
+
+      267 |   await expect(page.getByRole("status")).toBeFocused();
+      268 |   await expect(page.getByRole("button", { name: "Create your link" })).toBeVisible();
+    > 269 |   expect(await noGroupsLines()).toBe(1);
+          |                                 ^
+      270 | });
+      271 |
+      272 | test("a wrong password says so and keeps the sheet open", async ({ page, browser }) => {
+        at /home/coder/dev/ns-worktrees/ticket-45/e2e/landing.spec.ts:269:33
+
+    Error Context: test-results/landing-logging-in-to-an-A-f0226-nd-points-to-the-first-link-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/landing-logging-in-to-an-A-f0226-nd-points-to-the-first-link-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/landing-logging-in-to-an-A-f0226-nd-points-to-the-first-link-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [chromium] › e2e/landing.spec.ts:156:1 › saving to a new Account keeps the Share Link, and logging in finds the Group 
+    [chromium] › e2e/landing.spec.ts:251:1 › logging in to an Account without Groups names it and points to the first link 

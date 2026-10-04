@@ -1,0 +1,195 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/account/AccountSheet.test.tsx (16 tests | 2 failed) 2750ms
+   ❯ AccountSheet finishing a Save after the sign-in went through (2)
+     × asks only to finish, as the signed-in Account, once the move failed 120ms
+     × says when the Save expired before the Group moved 1019ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet finishing a Save after the sign-in went through > asks only to finish, as the signed-in Account, once the move failed
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/features/account/AccountSheet.test.tsx:216:22
+    214|     await userEvent.click(screen.getByRole("button", { name: "Finish s…
+    215|
+    216|     expect(onFinish).toHaveBeenCalledOnce();
+       |                      ^
+    217|     expect(onSubmit).toHaveBeenCalledOnce();
+    218|     expect(onClose).toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet finishing a Save after the sign-in went through > says when the Save expired before the Group moved
+TestingLibraryElementError: Unable to find role="alert"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<dialog[39m
+      [33maria-labelledby[39m=[32m"_r_10_"[39m
+      [33mclass[39m=[32m"animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-black/40 dark:backdrop:bg-black/70 open:flex sm:items-center"[39m
+      [33mopen[39m=[32m""[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"animate-rise relative max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"min-w-0 pr-10 font-display text-2xl font-bold break-words"[39m
+          [33mid[39m=[32m"_r_10_"[39m
+        [36m>[39m
+          [0mKeep My group[0m
+        [36m</h2>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-4"[39m
+        [36m>[39m
+          [36m<form[39m
+            [33mclass[39m=[32m"flex flex-col gap-4"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-ink-2"[39m
+            [36m>[39m
+              [0mYou're signed in as [0m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-semibold break-all text-ink"[39m
+              [36m>[39m
+                [0mgm@example.test[0m
+              [36m</span>[39m
+              [0m. Finish moving [0m
+              [0mMy group[0m
+              [0m to your account.[0m
+            [36m</p>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink hover:bg-accent-strong shadow-card h-14 px-6 text-base gap-2.5 rounded-lg w-full"[39m
+              [33mtype[39m=[32m"submit"[39m
+            [36m>[39m
+              [0mFinish saving[0m
+            [36m</button>[39m
+          [36m</form>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Close"[39m
+          [33mclass[39m=[32m"absolute top-4 right-3 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-4 size-5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 20 20"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M5 5l10 10M15 5L5 15"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</dialog>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<dialog[39m
+      [33maria-labelledby[39m=[32m"_r_10_"[39m
+      [33mclass[39m=[32m"animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-black/40 dark:backdrop:bg-black/70 open:flex sm:items-center"[39m
+      [33mopen[39m=[32m""[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"animate-rise relative max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"min-w-0 pr-10 font-display text-2xl font-bold break-words"[39m
+          [33mid[39m=[32m"_r_10_"[39m
+        [36m>[39m
+          [0mKeep My group[0m
+        [36m</h2>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-4"[39m
+        [36m>[39m
+          [36m<form[39m
+            [33mclass[39m=[32m"flex flex-col gap-4"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-ink-2"[39m
+            [36m>[39m
+              [0mYou're signed in as [0m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-semibold break-all text-ink"[39m
+              [36m>[39m
+                [0mgm@example.test[0m
+              [36m</span>[39m
+              [0m. Finish moving [0m
+              [0mMy group[0m
+              [0m to your account.[0m
+            [36m</p>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink hover:bg-accent-strong shadow-card h-14 px-6 text-base gap-2.5 rounded-lg w-full"[39m
+              [33mtype[39m=[32m"submit"[39m
+            [36m>[39m
+              [0mFinish saving[0m
+            [36m</button>[39m
+          [36m</form>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Close"[39m
+          [33mclass[39m=[32m"absolute top-4 right-3 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-4 size-5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 20 20"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M5 5l10 10M15 5L5 15"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</dialog>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ alertText src/features/account/AccountSheet.test.tsx:60:24
+     58|
+     59| async function alertText() {
+     60|   return (await screen.findByRole("alert")).textContent;
+       |                        ^
+     61| }
+     62|
+ ❯ src/features/account/AccountSheet.test.tsx:234:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 14 passed (16)
+   Start at  08:27:45
+   Duration  3.48s (tests 81%, environment 13%, import 2%, setup 2%, transform 2%)
+

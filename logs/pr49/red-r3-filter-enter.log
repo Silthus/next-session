@@ -1,0 +1,29 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45b
+
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/player/Join.test.tsx (19 tests | 1 failed | 18 skipped) 165ms
+   ❯ Join (19)
+     ❯ with a long Roster (8)
+       × closes the keyboard on Enter in the filter without joining 163ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/player/Join.test.tsx > Join > with a long Roster > closes the keyboard on Enter in the filter without joining
+AssertionError: expected <input …(7)></input> not to be <input …(7)></input> // Object.is equality
+ ❯ src/features/player/Join.test.tsx:182:26
+    180|       await userEvent.type(filter, "Ben{Enter}");
+    181|
+    182|       expect(filter).not.toBe(document.activeElement);
+       |                          ^
+    183|       expect(onJoin).not.toHaveBeenCalled();
+    184|       expect(onPick).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 18 skipped (19)
+   Start at  08:46:39
+   Duration  900ms (environment 53%, tests 20%, import 10%, transform 9%, setup 8%)
+

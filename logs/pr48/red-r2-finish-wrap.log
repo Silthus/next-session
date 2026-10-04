@@ -1,0 +1,48 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/account/AccountSheet.test.tsx (17 tests | 1 failed) 1734ms
+   ❯ AccountSheet finishing a Save after the sign-in went through (3)
+     × wraps a long unbroken group name instead of overflowing the sheet 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet finishing a Save after the sign-in went through > wraps a long unbroken group name instead of overflowing the sheet
+AssertionError: expected "text-ink-2" to contain "break-words"
+
+Expected: "text-ink-2 break-words"
+Received: "text-ink-2"
+
+ ❯ src/features/account/AccountSheet.test.tsx:235:29
+    233|     const line = (await screen.findByText(email)).closest("p");
+    234|     expect(line?.textContent).toContain(groupName);
+    235|     expect(line?.classList).toContain("break-words");
+       |                             ^
+    236|     expect(line?.classList).toContain("min-w-0");
+    237|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 passed (17)
+   Start at  08:28:39
+   Duration  2.45s (tests 73%, environment 18%, import 3%, setup 3%, transform 3%)
+

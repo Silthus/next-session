@@ -1,0 +1,11 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+
+ Test Files  1 passed (1)
+      Tests  2 passed | 17 skipped (19)
+   Start at  08:53:16
+   Duration  906ms (environment 54%, tests 23%, import 9%, setup 8%, transform 7%)
+

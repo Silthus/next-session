@@ -1,0 +1,27 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+ ❯ |ui| src/ui/Sheet.test.tsx (7 tests | 1 failed) 156ms
+   ❯ Sheet (7)
+     × shows the dialog again when the browser closes it while the parent keeps it open 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/ui/Sheet.test.tsx > Sheet > shows the dialog again when the browser closes it while the parent keeps it open
+AssertionError: expected "vi.fn()" to be called 2 times, but got 1 times
+ ❯ src/ui/Sheet.test.tsx:108:23
+    106|
+    107|     expect(onClose).toHaveBeenCalledOnce();
+    108|     expect(showModal).toHaveBeenCalledTimes(2);
+       |                       ^
+    109|     expect(dialog.open).toBe(true);
+    110|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  07:51:19
+   Duration  832ms (environment 61%, tests 21%, setup 9%, import 4%, transform 4%)
+

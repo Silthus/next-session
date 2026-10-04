@@ -1,0 +1,63 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+ ❯ |ui| src/features/account/save.test.ts (13 tests | 2 failed) 14ms
+   ❯ retrying a Save after the sign-in went through (2)
+     × redeems the pending claim instead of starting a new Save 5ms
+     × succeeds without moving anything once the claim was already redeemed 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/save.test.ts > retrying a Save after the sign-in went through > redeems the pending claim instead of starting a new Save
+AssertionError: expected [ 'startSave', …(3) ] to deeply equal [ 'finishSave left-over' ]
+
+- Expected
++ Received
+
+  [
+-   "finishSave left-over",
++   "startSave",
++   "signIn password signUp ada@example.com",
++   "pending claim-code",
++   "finishSave claim-code",
+  ]
+
+ ❯ src/features/account/save.test.ts:101:19
+     99|
+    100|     expect(await saveGroups({ ...input, mode: "create" }, deps)).toEqu…
+    101|     expect(calls).toEqual(["finishSave left-over"]);
+       |                   ^
+    102|     expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
+    103|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/features/account/save.test.ts > retrying a Save after the sign-in went through > succeeds without moving anything once the claim was already redeemed
+AssertionError: expected { groupIds: [ 'group-1' ] } to deeply equal { groupIds: [] }
+
+- Expected
++ Received
+
+  {
+-   "groupIds": [],
++   "groupIds": [
++     "group-1",
++   ],
+  }
+
+ ❯ src/features/account/save.test.ts:108:66
+    106|     const { deps, calls } = fakeDeps({ isAccount: true });
+    107|
+    108|     expect(await saveGroups({ ...input, mode: "create" }, deps)).toEqu…
+       |                                                                  ^
+    109|     expect(calls).toEqual([]);
+    110|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+   Start at  07:52:52
+   Duration  642ms (environment 79%, setup 11%, transform 6%, tests 2%, import 1%, worker 1%)
+

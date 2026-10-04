@@ -1,0 +1,1235 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45b
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/player/Join.test.tsx (16 tests | 4 failed) 4545ms
+   ❯ Join (16)
+     ❯ with a long Roster (5)
+       × narrows the chips as the Player types, ignoring case and accents 1006ms
+       × answers as the one name left after filtering 1004ms
+       × announces when no name matches and still lets the Player join 1004ms
+       × keeps a taken name's chip in view while the filter hides it 1004ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/player/Join.test.tsx > Join > with a long Roster > narrows the chips as the Player types, ignoring case and accents
+TestingLibraryElementError: Unable to find role="searchbox" and name "Find your name"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"page"[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink active"[39m
+          [33mdata-status[39m=[32m"active"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex-1 pb-16 flex flex-col justify-center gap-6"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"animate-rise"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"[39m
+          [36m>[39m
+            [0mYou're invited to[0m
+          [36m</p>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"mt-1 font-display text-4xl font-extrabold break-words outline-none"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m>[39m
+            [0mThursday Crew[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"mt-2 text-ink-2"[39m
+          [36m>[39m
+            [0mTap the nights you can play. No account, takes a minute.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"animate-rise rounded-xl border border-line bg-surface p-5 shadow-card"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"font-display text-lg font-bold"[39m
+          [36m>[39m
+            [0mWho are you?[0m
+          [36m</h2>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"mt-3 flex flex-wrap gap-2"[39m
+          [36m>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mAN[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mAna[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent text-accent-ink size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mBE[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mBen[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mCH[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mChiara[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                 ...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"page"[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink active"[39m
+          [33mdata-status[39m=[32m"active"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex-1 pb-16 flex flex-col justify-center gap-6"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"animate-rise"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"[39m
+          [36m>[39m
+            [0mYou're invited to[0m
+          [36m</p>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"mt-1 font-display text-4xl font-extrabold break-words outline-none"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m>[39m
+            [0mThursday Crew[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"mt-2 text-ink-2"[39m
+          [36m>[39m
+            [0mTap the nights you can play. No account, takes a minute.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"animate-rise rounded-xl border border-line bg-surface p-5 shadow-card"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"font-display text-lg font-bold"[39m
+          [36m>[39m
+            [0mWho are you?[0m
+          [36m</h2>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"mt-3 flex flex-wrap gap-2"[39m
+          [36m>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mAN[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mAna[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent text-accent-ink size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mBE[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mBen[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mCH[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mChiara[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                 ...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/player/Join.test.tsx:162:35
+    160|     it("narrows the chips as the Player types, ignoring case and accen…
+    161|       renderJoin({ players: longRoster() });
+    162|       const filter = await screen.findByRole("searchbox", { name: "Fin…
+       |                                   ^
+    163|       expect(screen.getAllByRole("listitem")).toHaveLength(14);
+    164|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |ui| src/features/player/Join.test.tsx > Join > with a long Roster > answers as the one name left after filtering
+TestingLibraryElementError: Unable to find role="searchbox" and name "Find your name"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"page"[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink active"[39m
+          [33mdata-status[39m=[32m"active"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex-1 pb-16 flex flex-col justify-center gap-6"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"animate-rise"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"[39m
+          [36m>[39m
+            [0mYou're invited to[0m
+          [36m</p>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"mt-1 font-display text-4xl font-extrabold break-words outline-none"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m>[39m
+            [0mThursday Crew[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"mt-2 text-ink-2"[39m
+          [36m>[39m
+            [0mTap the nights you can play. No account, takes a minute.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"animate-rise rounded-xl border border-line bg-surface p-5 shadow-card"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"font-display text-lg font-bold"[39m
+          [36m>[39m
+            [0mWho are you?[0m
+          [36m</h2>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"mt-3 flex flex-wrap gap-2"[39m
+          [36m>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mAN[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mAna[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent text-accent-ink size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mBE[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mBen[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mCH[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mChiara[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                 ...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"page"[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink active"[39m
+          [33mdata-status[39m=[32m"active"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex-1 pb-16 flex flex-col justify-center gap-6"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"animate-rise"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"[39m
+          [36m>[39m
+            [0mYou're invited to[0m
+          [36m</p>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"mt-1 font-display text-4xl font-extrabold break-words outline-none"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m>[39m
+            [0mThursday Crew[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"mt-2 text-ink-2"[39m
+          [36m>[39m
+            [0mTap the nights you can play. No account, takes a minute.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"animate-rise rounded-xl border border-line bg-surface p-5 shadow-card"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"font-display text-lg font-bold"[39m
+          [36m>[39m
+            [0mWho are you?[0m
+          [36m</h2>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"mt-3 flex flex-wrap gap-2"[39m
+          [36m>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mAN[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mAna[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent text-accent-ink size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mBE[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mBen[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mCH[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mChiara[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                 ...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/player/Join.test.tsx:174:41
+    172|       const { onPick } = renderJoin({ players: longRoster() });
+    173|
+    174|       await userEvent.type(await screen.findByRole("searchbox", { name…
+       |                                         ^
+    175|       await userEvent.click(screen.getByRole("button", { name: "Ben" }…
+    176|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |ui| src/features/player/Join.test.tsx > Join > with a long Roster > announces when no name matches and still lets the Player join
+TestingLibraryElementError: Unable to find role="searchbox" and name "Find your name"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"page"[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink active"[39m
+          [33mdata-status[39m=[32m"active"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex-1 pb-16 flex flex-col justify-center gap-6"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"animate-rise"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"[39m
+          [36m>[39m
+            [0mYou're invited to[0m
+          [36m</p>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"mt-1 font-display text-4xl font-extrabold break-words outline-none"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m>[39m
+            [0mThursday Crew[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"mt-2 text-ink-2"[39m
+          [36m>[39m
+            [0mTap the nights you can play. No account, takes a minute.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"animate-rise rounded-xl border border-line bg-surface p-5 shadow-card"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"font-display text-lg font-bold"[39m
+          [36m>[39m
+            [0mWho are you?[0m
+          [36m</h2>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"mt-3 flex flex-wrap gap-2"[39m
+          [36m>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mAN[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mAna[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent text-accent-ink size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mBE[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mBen[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mCH[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mChiara[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                 ...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"page"[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink active"[39m
+          [33mdata-status[39m=[32m"active"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex-1 pb-16 flex flex-col justify-center gap-6"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"animate-rise"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"[39m
+          [36m>[39m
+            [0mYou're invited to[0m
+          [36m</p>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"mt-1 font-display text-4xl font-extrabold break-words outline-none"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m>[39m
+            [0mThursday Crew[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"mt-2 text-ink-2"[39m
+          [36m>[39m
+            [0mTap the nights you can play. No account, takes a minute.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"animate-rise rounded-xl border border-line bg-surface p-5 shadow-card"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"font-display text-lg font-bold"[39m
+          [36m>[39m
+            [0mWho are you?[0m
+          [36m</h2>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"mt-3 flex flex-wrap gap-2"[39m
+          [36m>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mAN[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mAna[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent text-accent-ink size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mBE[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mBen[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mCH[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mChiara[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                 ...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/player/Join.test.tsx:182:35
+    180|     it("announces when no name matches and still lets the Player join"…
+    181|       const { onJoin } = renderJoin({ players: longRoster() });
+    182|       const filter = await screen.findByRole("searchbox", { name: "Fin…
+       |                                   ^
+    183|       const announcement = screen.getByRole("status");
+    184|       expect(announcement.textContent).toBe("");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |ui| src/features/player/Join.test.tsx > Join > with a long Roster > keeps a taken name's chip in view while the filter hides it
+TestingLibraryElementError: Unable to find role="searchbox" and name "Find your name"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"page"[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink active"[39m
+          [33mdata-status[39m=[32m"active"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex-1 pb-16 flex flex-col justify-center gap-6"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"animate-rise"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"[39m
+          [36m>[39m
+            [0mYou're invited to[0m
+          [36m</p>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"mt-1 font-display text-4xl font-extrabold break-words outline-none"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m>[39m
+            [0mThursday Crew[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"mt-2 text-ink-2"[39m
+          [36m>[39m
+            [0mTap the nights you can play. No account, takes a minute.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"animate-rise rounded-xl border border-line bg-surface p-5 shadow-card"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"font-display text-lg font-bold"[39m
+          [36m>[39m
+            [0mWho are you?[0m
+          [36m</h2>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"mt-3 flex flex-wrap gap-2"[39m
+          [36m>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mAN[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mAna[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent text-accent-ink size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mBE[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mBen[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mCH[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mChiara[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                 ...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"page"[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink active"[39m
+          [33mdata-status[39m=[32m"active"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex-1 pb-16 flex flex-col justify-center gap-6"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"animate-rise"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"[39m
+          [36m>[39m
+            [0mYou're invited to[0m
+          [36m</p>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"mt-1 font-display text-4xl font-extrabold break-words outline-none"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m>[39m
+            [0mThursday Crew[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"mt-2 text-ink-2"[39m
+          [36m>[39m
+            [0mTap the nights you can play. No account, takes a minute.[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"animate-rise rounded-xl border border-line bg-surface p-5 shadow-card"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"font-display text-lg font-bold"[39m
+          [36m>[39m
+            [0mWho are you?[0m
+          [36m</h2>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"mt-3 flex flex-wrap gap-2"[39m
+          [36m>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mAN[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mAna[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent text-accent-ink size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mBE[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mBen[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+                [36m>[39m
+                  [0mCH[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"min-w-0 wrap-anywhere"[39m
+                [36m>[39m
+                  [0mChiara[0m
+                [36m</span>[39m
+              [36m</button>[39m
+            [36m</li>[39m
+            [36m<li>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60 border-line bg-paper"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                 ...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/player/Join.test.tsx:204:41
+    202|       });
+    203|
+    204|       await userEvent.type(await screen.findByRole("searchbox", { name…
+       |                                         ^
+    205|       await userEvent.type(
+    206|         screen.getByRole("textbox", { name: "Not listed? Your name" }),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 12 passed (16)
+   Start at  07:56:05
+   Duration  5.29s (tests 87%, environment 8%, import 2%, transform 1%, setup 1%)
+

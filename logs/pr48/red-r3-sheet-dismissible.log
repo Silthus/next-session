@@ -1,0 +1,45 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+ ❯ |ui| src/ui/Sheet.test.tsx (11 tests | 1 failed | 8 skipped) 168ms
+   ❯ Sheet (11)
+     × ignores Escape, the backdrop, and a close the browser started while it is not dismissible 14ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/ui/Sheet.test.tsx > Sheet > ignores Escape, the backdrop, and a close the browser started while it is not dismissible
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 3 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array []
+
+  2nd vi.fn() call:
+
+    Array []
+
+  3rd vi.fn() call:
+
+    Array []
+
+
+Number of calls: 3
+
+ ❯ src/ui/Sheet.test.tsx:92:25
+     90|     closeNatively(dialog);
+     91|
+     92|     expect(onClose).not.toHaveBeenCalled();
+       |                         ^
+     93|     expect(showModal).toHaveBeenCalledTimes(2);
+     94|     expect(dialog.open).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed | 8 skipped (11)
+   Start at  08:44:43
+   Duration  844ms (environment 59%, tests 22%, setup 8%, transform 5%, import 4%)
+

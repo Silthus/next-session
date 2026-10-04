@@ -1,0 +1,40 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+ ❯ |ui| src/features/account/save.test.ts (13 tests | 2 failed) 11ms
+   ❯ finishPendingSave (2)
+     × redeems the pending claim instead of starting a new Save 3ms
+     × fails as an invalid claim once the server refused the pending one 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/save.test.ts > finishPendingSave > redeems the pending claim instead of starting a new Save
+TypeError: finishPendingSave is not a function
+ ❯ src/features/account/save.test.ts:105:18
+    103|     storage.setItem(PENDING_SAVE_KEY, "left-over");
+    104|
+    105|     expect(await finishPendingSave(deps)).toEqual({ groupIds: [groupId…
+       |                  ^
+    106|     expect(calls).toEqual(["finishSave left-over"]);
+    107|     expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/features/account/save.test.ts > finishPendingSave > fails as an invalid claim once the server refused the pending one
+TypeError: finishPendingSave is not a function
+ ❯ src/features/account/save.test.ts:113:18
+    111|     const { deps, calls, storage } = fakeDeps({ finishSave: claimInval…
+    112|     storage.setItem(PENDING_SAVE_KEY, "expired");
+    113|     await expect(finishPendingSave(deps)).rejects.toThrow();
+       |                  ^
+    114|
+    115|     await expect(finishPendingSave(deps)).rejects.toMatchObject({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+   Start at  08:27:24
+   Duration  657ms (environment 79%, setup 12%, transform 6%, tests 2%, import 1%, worker 1%)
+

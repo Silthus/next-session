@@ -1,0 +1,41 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/account/AccountSheet.test.tsx (19 tests | 1 failed | 17 skipped) 180ms
+   ❯ AccountSheet finishing a Save after the sign-in went through (5)
+     × offers only to close once the Save expired 33ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet finishing a Save after the sign-in went through > offers only to close once the Save expired
+AssertionError: expected <button type="submit" …(1)></button> to be null
+
+- Expected:
+null
+
++ Received:
+<button
+  class="inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink hover:bg-accent-strong shadow-card h-14 px-6 text-base gap-2.5 rounded-lg w-full"
+  type="submit"
+>
+  Finish saving
+</button>
+
+ ❯ src/features/account/AccountSheet.test.tsx:291:69
+    289|     await screen.findByRole("alert");
+    290|
+    291|     expect(screen.queryByRole("button", { name: "Finish saving" })).to…
+       |                                                                     ^
+    292|     const primaryClose = screen
+    293|       .getAllByRole<HTMLButtonElement>("button", { name: "Close" })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed | 17 skipped (19)
+   Start at  08:53:14
+   Duration  908ms (environment 53%, tests 22%, import 10%, transform 8%, setup 7%)
+

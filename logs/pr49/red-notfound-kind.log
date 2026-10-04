@@ -1,0 +1,287 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45b
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/ui/NotFoundScreen.test.tsx (2 tests | 1 failed) 1045ms
+   ❯ NotFoundScreen (2)
+     × says the link no longer works, takes focus, and points to a new link 1023ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/ui/NotFoundScreen.test.tsx > NotFoundScreen > says the link no longer works, takes focus, and points to a new link
+TestingLibraryElementError: Unable to find role="heading" and name "This link no longer works"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"page"[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink active"[39m
+          [33mdata-status[39m=[32m"active"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex-1 pb-16 flex flex-col items-center justify-center gap-5 text-center"[39m
+      [36m>[39m
+        [36m<svg[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"size-8 opacity-40 grayscale size-14"[39m
+          [33mviewBox[39m=[32m"0 0 32 32"[39m
+        [36m>[39m
+          [36m<rect[39m
+            [33mclass[39m=[32m"fill-accent"[39m
+            [33mheight[39m=[32m"28"[39m
+            [33mrx[39m=[32m"9"[39m
+            [33mwidth[39m=[32m"28"[39m
+            [33mx[39m=[32m"2"[39m
+            [33my[39m=[32m"2"[39m
+          [36m/>[39m
+          [36m<path[39m
+            [33mclass[39m=[32m"fill-accent-strong"[39m
+            [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+          [36m/>[39m
+          [36m<circle[39m
+            [33mclass[39m=[32m"fill-accent-ink"[39m
+            [33mcx[39m=[32m"16"[39m
+            [33mcy[39m=[32m"20"[39m
+            [33mr[39m=[32m"5"[39m
+          [36m/>[39m
+        [36m</svg>[39m
+        [36m<h1[39m
+          [33mclass[39m=[32m"font-display text-3xl font-extrabold"[39m
+        [36m>[39m
+          [0mNothing here[0m
+        [36m</h1>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"text-ink-2"[39m
+        [36m>[39m
+          [0mThe page you were looking for does not exist.[0m
+        [36m</p>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-2 flex flex-col items-center gap-2"[39m
+        [36m>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-surface text-ink border border-line hover:border-line-strong h-10 px-4 text-sm gap-2 rounded-md active"[39m
+            [33mdata-status[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/"[39m
+          [36m>[39m
+            [0mPlan your own game[0m
+          [36m</a>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-xs text-ink-3"[39m
+          [36m>[39m
+            [0mOne click, no sign-up.[0m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</main>[39m
+      [36m<footer[39m
+        [33mclass[39m=[32m"flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3 mx-auto w-full px-4 sm:px-6 max-w-md pb-6 justify-center"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"transition-colors hover:text-ink"[39m
+          [33mhref[39m=[32m"/terms"[39m
+        [36m>[39m
+          [0mTerms[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"transition-colors hover:text-ink"[39m
+          [33mhref[39m=[32m"/privacy"[39m
+        [36m>[39m
+          [0mPrivacy[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"transition-colors hover:text-ink"[39m
+          [33mhref[39m=[32m"/imprint"[39m
+        [36m>[39m
+          [0mImprint[0m
+        [36m</a>[39m
+      [36m</footer>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"page"[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink active"[39m
+          [33mdata-status[39m=[32m"active"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-md flex-1 pb-16 flex flex-col items-center justify-center gap-5 text-center"[39m
+      [36m>[39m
+        [36m<svg[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"size-8 opacity-40 grayscale size-14"[39m
+          [33mviewBox[39m=[32m"0 0 32 32"[39m
+        [36m>[39m
+          [36m<rect[39m
+            [33mclass[39m=[32m"fill-accent"[39m
+            [33mheight[39m=[32m"28"[39m
+            [33mrx[39m=[32m"9"[39m
+            [33mwidth[39m=[32m"28"[39m
+            [33mx[39m=[32m"2"[39m
+            [33my[39m=[32m"2"[39m
+          [36m/>[39m
+          [36m<path[39m
+            [33mclass[39m=[32m"fill-accent-strong"[39m
+            [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+          [36m/>[39m
+          [36m<circle[39m
+            [33mclass[39m=[32m"fill-accent-ink"[39m
+            [33mcx[39m=[32m"16"[39m
+            [33mcy[39m=[32m"20"[39m
+            [33mr[39m=[32m"5"[39m
+          [36m/>[39m
+        [36m</svg>[39m
+        [36m<h1[39m
+          [33mclass[39m=[32m"font-display text-3xl font-extrabold"[39m
+        [36m>[39m
+          [0mNothing here[0m
+        [36m</h1>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"text-ink-2"[39m
+        [36m>[39m
+          [0mThe page you were looking for does not exist.[0m
+        [36m</p>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-2 flex flex-col items-center gap-2"[39m
+        [36m>[39m
+          [36m<a[39m
+            [33maria-current[39m=[32m"page"[39m
+            [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-surface text-ink border border-line hover:border-line-strong h-10 px-4 text-sm gap-2 rounded-md active"[39m
+            [33mdata-status[39m=[32m"active"[39m
+            [33mhref[39m=[32m"/"[39m
+          [36m>[39m
+            [0mPlan your own game[0m
+          [36m</a>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-xs text-ink-3"[39m
+          [36m>[39m
+            [0mOne click, no sign-up.[0m
+          [36m</span>[39m
+        [36m</div>[39m
+      [36m</main>[39m
+      [36m<footer[39m
+        [33mclass[39m=[32m"flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3 mx-auto w-full px-4 sm:px-6 max-w-md pb-6 justify-center"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"transition-colors hover:text-ink"[39m
+          [33mhref[39m=[32m"/terms"[39m
+        [36m>[39m
+          [0mTerms[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"transition-colors hover:text-ink"[39m
+          [33mhref[39m=[32m"/privacy"[39m
+        [36m>[39m
+          [0mPrivacy[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"transition-colors hover:text-ink"[39m
+          [33mhref[39m=[32m"/imprint"[39m
+        [36m>[39m
+          [0mImprint[0m
+        [36m</a>[39m
+      [36m</footer>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/ui/NotFoundScreen.test.tsx:23:34
+     21|     renderScreen(<NotFoundScreen kind="link" />);
+     22|
+     23|     const heading = await screen.findByRole("heading", {
+       |                                  ^
+     24|       level: 1,
+     25|       name: "This link no longer works",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  07:52:40
+   Duration  1.73s (tests 64%, environment 26%, setup 4%, import 3%, transform 3%)
+

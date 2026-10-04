@@ -1,0 +1,80 @@
+[WebServer] CONVEX_AGENT_MODE=anonymous mode is in beta, functionality may change in the future.
+[WebServer] ✔ Configured a local deployment for http://127.0.0.1:3210 and saved its:
+[WebServer]     name as CONVEX_DEPLOYMENT
+[WebServer]     client URL as VITE_CONVEX_URL
+[WebServer]     HTTP actions URL as VITE_CONVEX_SITE_URL
+[WebServer]  to .env.local
+[WebServer] 
+[WebServer] Write your Convex functions in convex/
+[WebServer] Give us feedback at https://convex.dev/community or support@convex.dev
+[WebServer] View the Convex dashboard at http://127.0.0.1:6790/
+[WebServer] 
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 3210 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:3210
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ 09:16:10 Convex functions ready! (2.04s)
+[WebServer] ✔ Successfully set 2 environment variables from stdin (2 updated, 1 unchanged) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-45/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-45/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 409 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://localhost:5173/
+[WebServer]   ➜  Network: use --host to expose
+
+Running 3 tests using 1 worker
+
+  ✓  1 [chromium] › e2e/landing.spec.ts:176:1 › saving to a new Account keeps the Share Link, and logging in finds the Group (2.9s)
+[WebServer] 9:16:17 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] 
+  ✓  2 [chromium] › e2e/landing.spec.ts:269:3 › a Save that expires › starts the landing over once its sheet is closed (1.7s)
+[WebServer] 9:16:19 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 9:16:19 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] 
+  ✘  3 [chromium] › e2e/landing.spec.ts:285:3 › a Save that expires › starts the landing over when it expires after the GM dismissed the retry (6.6s)
+
+
+  1) [chromium] › e2e/landing.spec.ts:285:3 › a Save that expires › starts the landing over when it expires after the GM dismissed the retry 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: 'Create your link' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: 'Create your link' }) with timeout 5000ms
+      - waiting for getByRole('button', { name: 'Create your link' })
+
+
+      295 |
+      296 |     await expect(sheet).toBeHidden();
+    > 297 |     await expect(page.getByRole("button", { name: "Create your link" })).toBeVisible();
+          |                                                                          ^
+      298 |     await expect(page.locator("code")).toBeHidden();
+      299 |   });
+      300 | });
+        at /home/coder/dev/ns-worktrees/ticket-45/e2e/landing.spec.ts:297:74
+
+    Error Context: test-results/landing-a-Save-that-expire-51488--the-GM-dismissed-the-retry-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/landing-a-Save-that-expire-51488--the-GM-dismissed-the-retry-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/landing-a-Save-that-expire-51488--the-GM-dismissed-the-retry-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e/landing.spec.ts:285:3 › a Save that expires › starts the landing over when it expires after the GM dismissed the retry 
+  2 passed (16.9s)

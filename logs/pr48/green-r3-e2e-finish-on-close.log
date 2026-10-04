@@ -1,0 +1,2 @@
+  ✓   6 [chromium] › e2e/landing.spec.ts:228:3 › a Save whose move fails after the sign-in › still goes through when the GM closes the retry from the Group header (2.0s)
+  12 passed (25.2s)

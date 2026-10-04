@@ -1,0 +1,815 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/landing/LandingView.test.tsx (11 tests | 1 failed) 1364ms
+   ❯ LandingView (11)
+     × names the account a GM just logged in to and nudges them to their first link 1007ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/landing/LandingView.test.tsx > LandingView > names the account a GM just logged in to and nudges them to their first link
+TestingLibraryElementError: Unable to find role="status"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full max-w-5xl px-4 sm:px-6 flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"page"[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink active"[39m
+          [33mdata-status[39m=[32m"active"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full max-w-5xl px-4 sm:px-6 flex flex-1 flex-col justify-center gap-10 pt-6 pb-16 lg:flex-row lg:items-center lg:gap-16"[39m
+      [36m>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"flex max-w-xl flex-col gap-6"[39m
+        [36m>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"font-display text-5xl leading-[0.98] font-extrabold tracking-tight text-ink sm:text-6xl lg:text-7xl"[39m
+          [36m>[39m
+            [0mStop chasing [0m
+            [36m<br />[39m
+            [0mthe date.[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"max-w-md text-lg text-ink-2"[39m
+          [36m>[39m
+            [0mOne link for your group. Players tap the nights they can play, no accounts. The free nights fall out by themselves.[0m
+          [36m</p>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-col gap-3"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink hover:bg-accent-strong shadow-card h-14 px-6 text-base gap-2.5 rounded-lg w-full text-lg sm:w-auto sm:max-w-sm sm:min-w-64"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mCreate your link[0m
+            [36m</button>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"max-w-sm text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mNo sign-up. By creating a link you agree to the[0m
+              [0m [0m
+              [36m<a[39m
+                [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                [33mhref[39m=[32m"/terms"[39m
+              [36m>[39m
+                [0mTerms[0m
+              [36m</a>[39m
+              [0m [0m
+              [0mand[0m
+              [0m [0m
+              [36m<a[39m
+                [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                [33mhref[39m=[32m"/privacy"[39m
+              [36m>[39m
+                [0mPrivacy Policy[0m
+              [36m</a>[39m
+              [0m.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<ol[39m
+            [33mclass[39m=[32m"mt-2 flex flex-col gap-2 text-sm text-ink-2 sm:flex-row sm:gap-6"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-surface-2 font-mono text-[11px] font-semibold text-ink"[39m
+              [36m>[39m
+                [0m1[0m
+              [36m</span>[39m
+              [0mCreate your link[0m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-surface-2 font-mono text-[11px] font-semibold text-ink"[39m
+              [36m>[39m
+                [0m2[0m
+              [36m</span>[39m
+              [0mSend it to the group[0m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-surface-2 font-mono text-[11px] font-semibold text-ink"[39m
+              [36m>[39m
+                [0m3[0m
+              [36m</span>[39m
+              [0mPick the best night[0m
+            [36m</li>[39m
+          [36m</ol>[39m
+        [36m</section>[39m
+        [36m<aside[39m
+          [33mclass[39m=[32m"w-full max-w-md self-center lg:ml-auto"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"rounded-xl border border-line bg-surface p-4 shadow-card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mb-3 flex items-center justify-between"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-display text-base font-bold"[39m
+              [36m>[39m
+                [0mThursday Crew[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"rounded-full bg-free-soft px-2 py-0.5 text-xs font-semibold text-free"[39m
+              [36m>[39m
+                [0mThu is perfect[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"grid grid-cols-7 gap-1.5"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-line bg-surface"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mMo[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-maybe"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-line bg-surface"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mTu[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-maybe"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-line bg-surface"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mWe[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-maybe"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-free bg-free-soft"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mTh[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-line bg-surface"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mFr[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-maybe"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-line bg-surface"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mSa[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-maybe"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-line bg-surface"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mSu[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-maybe"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"mt-3 text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mFive players, one week. Each bar is a player's answer.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</aside>[39m
+      [36m</main>[39m
+      [36m<footer[39m
+        [33mclass[39m=[32m"flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3 mx-auto w-full max-w-5xl px-4 sm:px-6 pb-6"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"transition-colors hover:text-ink"[39m
+          [33mhref[39m=[32m"/terms"[39m
+        [36m>[39m
+          [0mTerms[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"transition-colors hover:text-ink"[39m
+          [33mhref[39m=[32m"/privacy"[39m
+        [36m>[39m
+          [0mPrivacy[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"transition-colors hover:text-ink"[39m
+          [33mhref[39m=[32m"/imprint"[39m
+        [36m>[39m
+          [0mImprint[0m
+        [36m</a>[39m
+      [36m</footer>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full max-w-5xl px-4 sm:px-6 flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-current[39m=[32m"page"[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink active"[39m
+          [33mdata-status[39m=[32m"active"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full max-w-5xl px-4 sm:px-6 flex flex-1 flex-col justify-center gap-10 pt-6 pb-16 lg:flex-row lg:items-center lg:gap-16"[39m
+      [36m>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"flex max-w-xl flex-col gap-6"[39m
+        [36m>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"font-display text-5xl leading-[0.98] font-extrabold tracking-tight text-ink sm:text-6xl lg:text-7xl"[39m
+          [36m>[39m
+            [0mStop chasing [0m
+            [36m<br />[39m
+            [0mthe date.[0m
+          [36m</h1>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"max-w-md text-lg text-ink-2"[39m
+          [36m>[39m
+            [0mOne link for your group. Players tap the nights they can play, no accounts. The free nights fall out by themselves.[0m
+          [36m</p>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-col gap-3"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink hover:bg-accent-strong shadow-card h-14 px-6 text-base gap-2.5 rounded-lg w-full text-lg sm:w-auto sm:max-w-sm sm:min-w-64"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mCreate your link[0m
+            [36m</button>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"max-w-sm text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mNo sign-up. By creating a link you agree to the[0m
+              [0m [0m
+              [36m<a[39m
+                [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                [33mhref[39m=[32m"/terms"[39m
+              [36m>[39m
+                [0mTerms[0m
+              [36m</a>[39m
+              [0m [0m
+              [0mand[0m
+              [0m [0m
+              [36m<a[39m
+                [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                [33mhref[39m=[32m"/privacy"[39m
+              [36m>[39m
+                [0mPrivacy Policy[0m
+              [36m</a>[39m
+              [0m.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<ol[39m
+            [33mclass[39m=[32m"mt-2 flex flex-col gap-2 text-sm text-ink-2 sm:flex-row sm:gap-6"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-surface-2 font-mono text-[11px] font-semibold text-ink"[39m
+              [36m>[39m
+                [0m1[0m
+              [36m</span>[39m
+              [0mCreate your link[0m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-surface-2 font-mono text-[11px] font-semibold text-ink"[39m
+              [36m>[39m
+                [0m2[0m
+              [36m</span>[39m
+              [0mSend it to the group[0m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"flex items-center gap-2"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-surface-2 font-mono text-[11px] font-semibold text-ink"[39m
+              [36m>[39m
+                [0m3[0m
+              [36m</span>[39m
+              [0mPick the best night[0m
+            [36m</li>[39m
+          [36m</ol>[39m
+        [36m</section>[39m
+        [36m<aside[39m
+          [33mclass[39m=[32m"w-full max-w-md self-center lg:ml-auto"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"rounded-xl border border-line bg-surface p-4 shadow-card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mb-3 flex items-center justify-between"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-display text-base font-bold"[39m
+              [36m>[39m
+                [0mThursday Crew[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"rounded-full bg-free-soft px-2 py-0.5 text-xs font-semibold text-free"[39m
+              [36m>[39m
+                [0mThu is perfect[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"grid grid-cols-7 gap-1.5"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-line bg-surface"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mMo[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-maybe"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-line bg-surface"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mTu[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-maybe"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-line bg-surface"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mWe[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-maybe"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-free bg-free-soft"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mTh[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-line bg-surface"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mFr[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-maybe"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-line bg-surface"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mSa[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-maybe"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col items-center gap-1 rounded-md border p-1.5 border-line bg-surface"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[10px] font-semibold text-ink-3"[39m
+                [36m>[39m
+                  [0mSu[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-0.5"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-maybe"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-free"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"h-3 w-1 rounded-full bg-busy"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"mt-3 text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mFive players, one week. Each bar is a player's answer.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</aside>[39m
+      [36m</main>[39m
+      [36m<footer[39m
+        [33mclass[39m=[32m"flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3 mx-auto w-full max-w-5xl px-4 sm:px-6 pb-6"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"transition-colors hover:text-ink"[39m
+          [33mhref[39m=[32m"/terms"[39m
+        [36m>[39m
+          [0mTerms[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"transition-colors hover:text-ink"[39m
+          [33mhref[39m=[32m"/privacy"[39m
+        [36m>[39m
+          [0mPrivacy[0m
+        [36m</a>[39m
+        [36m<a[39m
+          [33mclass[39m=[32m"transition-colors hover:text-ink"[39m
+          [33mhref[39m=[32m"/imprint"[39m
+        [36m>[39m
+          [0mImprint[0m
+        [36m</a>[39m
+      [36m</footer>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/landing/LandingView.test.tsx:72:31
+     70|     renderLanding({ showLogIn: false, loggedInAs: "gm@example.test" });
+     71|
+     72|     const line = await screen.findByRole("status");
+       |                               ^
+     73|     expect(line.textContent).toBe(
+     74|       "Logged in as gm@example.test. No groups here yet, so create you…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 10 passed (11)
+   Start at  07:54:10
+   Duration  2.10s (tests 68%, environment 22%, import 4%, transform 3%, setup 3%)
+

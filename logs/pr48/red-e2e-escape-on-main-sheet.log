@@ -1,0 +1,74 @@
+[WebServer] CONVEX_AGENT_MODE=anonymous mode is in beta, functionality may change in the future.
+[WebServer] ✔ Configured a local deployment for http://127.0.0.1:3210 and saved its:
+[WebServer]     name as CONVEX_DEPLOYMENT
+[WebServer]     client URL as VITE_CONVEX_URL
+[WebServer]     HTTP actions URL as VITE_CONVEX_SITE_URL
+[WebServer]  to .env.local
+[WebServer] 
+[WebServer] Write your Convex functions in convex/
+[WebServer] Give us feedback at https://convex.dev/community or support@convex.dev
+[WebServer] View the Convex dashboard at http://127.0.0.1:6790/
+[WebServer] 
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 3210 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:3210
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ 08:18:19 Convex functions ready! (2.04s)
+[WebServer] ✔ Successfully set 2 environment variables from stdin (2 updated, 1 unchanged) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-45/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-45/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 411 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://localhost:5173/
+[WebServer]   ➜  Network: use --host to expose
+
+Running 1 test using 1 worker
+
+  ✘  1 [chromium] › e2e/landing.spec.ts:211:1 › pressing Escape again and again mid-Save keeps the sheet up until it is done (6.7s)
+
+
+  1) [chromium] › e2e/landing.spec.ts:211:1 › pressing Escape again and again mid-Save keeps the sheet up until it is done 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('dialog', { name: /^Keep / }).getByRole('button', { name: 'Saving…' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('dialog', { name: /^Keep / }).getByRole('button', { name: 'Saving…' }) with timeout 5000ms
+      - waiting for getByRole('dialog', { name: /^Keep / }).getByRole('button', { name: 'Saving…' })
+
+
+      221 |   for (let press = 1; press <= 3; press++) {
+      222 |     await page.keyboard.press("Escape");
+    > 223 |     await expect(sheet.getByRole("button", { name: "Saving…" })).toBeVisible();
+          |                                                                  ^
+      224 |   }
+      225 |   expect(await sheet.evaluate((dialog) => (dialog as HTMLDialogElement).open)).toBe(true);
+      226 |   await expect(sheet.getByLabel("Email")).toHaveValue(email);
+        at /home/coder/dev/ns-worktrees/ticket-45/e2e/landing.spec.ts:223:66
+
+    Error Context: test-results/landing-pressing-Escape-ag-1bde6-e-sheet-up-until-it-is-done-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/landing-pressing-Escape-ag-1bde6-e-sheet-up-until-it-is-done-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/landing-pressing-Escape-ag-1bde6-e-sheet-up-until-it-is-done-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e/landing.spec.ts:211:1 › pressing Escape again and again mid-Save keeps the sheet up until it is done 

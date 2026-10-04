@@ -1,0 +1,48 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/account/AccountSheet.test.tsx (14 tests | 1 failed) 1610ms
+   ❯ AccountSheet saving a Group (7)
+     × keeps the fields, and stays open, while saving 114ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet saving a Group > keeps the fields, and stays open, while saving
+AssertionError: expected null to be 'true' // Object.is equality
+
+- Expected:
+"true"
+
++ Received:
+null
+
+ ❯ src/features/account/AccountSheet.test.tsx:132:55
+    130|
+    131|     expect(onClose).not.toHaveBeenCalled();
+    132|     expect(closeButton.getAttribute("aria-disabled")).toBe("true");
+       |                                                       ^
+    133|     expect(screen.getByRole("button", { name: "Saving…" })).toHaveProp…
+    134|     expect(screen.getByRole("radio", { name: "I already have one" }).m…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 13 passed (14)
+   Start at  07:52:00
+   Duration  2.33s (tests 71%, environment 20%, import 4%, setup 3%, transform 3%)
+

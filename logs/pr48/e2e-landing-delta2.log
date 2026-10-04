@@ -1,0 +1,71 @@
+[WebServer] CONVEX_AGENT_MODE=anonymous mode is in beta, functionality may change in the future.
+[WebServer] ✔ Configured a local deployment for http://127.0.0.1:3210 and saved its:
+[WebServer]     name as CONVEX_DEPLOYMENT
+[WebServer]     client URL as VITE_CONVEX_URL
+[WebServer]     HTTP actions URL as VITE_CONVEX_SITE_URL
+[WebServer]  to .env.local
+[WebServer] 
+[WebServer] Write your Convex functions in convex/
+[WebServer] Give us feedback at https://convex.dev/community or support@convex.dev
+[WebServer] View the Convex dashboard at http://127.0.0.1:6790/
+[WebServer] 
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 3210 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:3210
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ 09:21:29 Convex functions ready! (2.04s)
+[WebServer] ✔ Successfully set 2 environment variables from stdin (2 updated, 1 unchanged) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-45/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-45/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 409 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://localhost:5173/
+[WebServer]   ➜  Network: use --host to expose
+
+Running 18 tests using 1 worker
+
+  ✓   1 [chromium] › e2e/landing.spec.ts:161:1 › one click puts the link in hand and lands the GM on their Group (1.2s)
+  ✓   2 [chromium] › e2e/landing.spec.ts:176:1 › saving to a new Account keeps the Share Link, and logging in finds the Group (2.6s)
+  ✓   3 [chromium] › e2e/landing.spec.ts:192:1 › saving into an Account that has older Groups keeps showing the new Group (3.2s)
+[WebServer] 9:21:40 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓   4 [chromium] › e2e/landing.spec.ts:213:3 › a Save whose move fails after the sign-in › goes through on retry from the landing (2.8s)
+[WebServer] 9:21:43 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓   5 [chromium] › e2e/landing.spec.ts:231:3 › a Save whose move fails after the sign-in › goes through on retry from the Group header (2.0s)
+[WebServer] 9:21:45 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓   6 [chromium] › e2e/landing.spec.ts:248:3 › a Save whose move fails after the sign-in › still goes through when the GM closes the retry from the Group header (2.0s)
+[WebServer] 9:21:47 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] 
+  ✓   7 [chromium] › e2e/landing.spec.ts:269:3 › a Save that expires › starts the landing over once its sheet is closed (1.6s)
+[WebServer] 9:21:48 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 9:21:49 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] 
+  ✓   8 [chromium] › e2e/landing.spec.ts:285:3 › a Save that expires › starts the landing over when it expires after the GM dismissed the retry (1.6s)
+  ✓   9 [chromium] › e2e/landing.spec.ts:302:1 › pressing Escape again and again mid-Save keeps the sheet up until it is done (1.7s)
+  ✓  10 [chromium] › e2e/landing.spec.ts:324:1 › logging in to an Account without Groups names it and points to the first link (1.2s)
+[WebServer] 9:21:54 AM [vite] (client) [console.error] [CONVEX A(auth:signIn)] [Request ID: f30fdd960d9bea33] Server Error
+[WebServer] Uncaught ConvexError: {"code":"INVALID_CREDENTIALS"}
+[WebServer]     at fail (../../convex/model/errors.ts:26:0)
+[WebServer]     at refuseSignIn (../../convex/auth.ts:86:0)
+[WebServer]     at authorize [as authorize] (../../convex/auth.ts:67:4)
+[WebServer]     at async handleCredentials (../../node_modules/@convex-dev/auth/src/server/implementation/signIn.ts:191:6)
+[WebServer]     at async handler (../../node_modules/@convex-dev/auth/src/server/implementation/index.ts:416:26)
+[WebServer] 
+  ✓  11 [chromium] › e2e/landing.spec.ts:343:1 › a wrong password says so and keeps the sheet open (2.3s)
+  ✓  12 [chromium] › e2e/landing.spec.ts:359:3 › on a dark OS › a cold load paints a dark canvas (408ms)
+  ✓  13 [chromium] › e2e/landing.spec.ts:366:3 › on a dark OS › an open sheet dims the page behind it (437ms)
+  ✓  14 [chromium] › e2e/landing.spec.ts:371:1 › an open sheet dims the page behind it in light mode (439ms)
+  -  15 [chromium] › e2e/landing.spec.ts:382:7 › screenshots › 390px light
+  -  16 [chromium] › e2e/landing.spec.ts:382:7 › screenshots › 390px dark
+  -  17 [chromium] › e2e/landing.spec.ts:382:7 › screenshots › 1440px light
+  -  18 [chromium] › e2e/landing.spec.ts:382:7 › screenshots › 1440px dark
+
+  4 skipped
+  14 passed (29.1s)

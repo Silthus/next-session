@@ -1,0 +1,53 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45b
+
+ ❯ |ui| src/ui/Toast.test.tsx (3 tests | 2 failed) 97ms
+   ❯ Toast (3)
+     × keeps a polite live region mounted before its message arrives 85ms
+     × announces its message as a status with an optional action 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/ui/Toast.test.tsx > Toast > keeps a polite live region mounted before its message arrives
+AssertionError: expected null to be 'polite' // Object.is equality
+
+- Expected:
+"polite"
+
++ Received:
+null
+
+ ❯ src/ui/Toast.test.tsx:10:46
+      8|     const { rerender } = render(<Toast message={null} />);
+      9|     const region = screen.getByRole("status");
+     10|     expect(region.getAttribute("aria-live")).toBe("polite");
+       |                                              ^
+     11|     expect(region.textContent).toBe("");
+     12|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/ui/Toast.test.tsx > Toast > announces its message as a status with an optional action
+AssertionError: expected '' to contain 'Session on Fri, Oct 16.'
+
+- Expected
++ Received
+
+- Session on Fri, Oct 16.
+
+ ❯ src/ui/Toast.test.tsx:24:52
+     22|       <Toast message={{ id: 1, text: "Session on Fri, Oct 16.", action…
+     23|     );
+     24|     expect(screen.getByRole("status").textContent).toContain("Session …
+       |                                                    ^
+     25|     await userEvent.click(screen.getByRole("button", { name: "Undo" })…
+     26|     expect(onAction).toHaveBeenCalledOnce();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  07:54:31
+   Duration  743ms (environment 67%, tests 15%, setup 9%, transform 4%, import 4%, worker 1%)
+

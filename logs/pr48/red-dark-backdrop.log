@@ -1,0 +1,93 @@
+$ playwright test "e2e/landing.spec.ts" -g "dims the page"
+[WebServer] CONVEX_AGENT_MODE=anonymous mode is in beta, functionality may change in the future.
+[WebServer] Could not find project with name anonymous-agent!
+[WebServer] ✔ Configured a local deployment for http://127.0.0.1:3210 and saved its:
+[WebServer]     name as CONVEX_DEPLOYMENT
+[WebServer]     client URL as VITE_CONVEX_URL
+[WebServer]     HTTP actions URL as VITE_CONVEX_SITE_URL
+[WebServer]  to .env.local
+[WebServer] 
+[WebServer] Write your Convex functions in convex/
+[WebServer] Give us feedback at https://convex.dev/community or support@convex.dev
+[WebServer] View the Convex dashboard at null
+[WebServer] 
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 3210 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:3210
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ Added table indexes:
+[WebServer]   [+] answers.by_groupId_and_date   groupId, date, _creationTime
+[WebServer]   [+] answers.by_playerId_and_date   playerId, date, _creationTime
+[WebServer]   [+] authAccounts.providerAndAccountId   provider, providerAccountId, _creationTime
+[WebServer]   [+] authAccounts.userIdAndProvider   userId, provider, _creationTime
+[WebServer]   [+] authRateLimits.identifier   identifier, _creationTime
+[WebServer]   [+] authRefreshTokens.sessionId   sessionId, _creationTime
+[WebServer]   [+] authRefreshTokens.sessionIdAndParentRefreshTokenId   sessionId, parentRefreshTokenId, _creationTime
+[WebServer]   [+] authSessions.userId   userId, _creationTime
+[WebServer]   [+] authVerificationCodes.accountId   accountId, _creationTime
+[WebServer]   [+] authVerificationCodes.code   code, _creationTime
+[WebServer]   [+] authVerifiers.signature   signature, _creationTime
+[WebServer]   [+] groups.by_expiresAt   expiresAt, _creationTime
+[WebServer]   [+] groups.by_ownerId   ownerId, _creationTime
+[WebServer]   [+] groups.by_shareToken   shareToken, _creationTime
+[WebServer]   [+] players.by_groupId_and_nameKey   groupId, nameKey, _creationTime
+[WebServer]   [+] saveClaims.by_anonymousUserId   anonymousUserId, _creationTime
+[WebServer]   [+] saveClaims.by_codeHash   codeHash, _creationTime
+[WebServer]   [+] sessions.by_groupId_and_date   groupId, date, _creationTime
+[WebServer]   [+] users.email   email, _creationTime
+[WebServer]   [+] users.phone   phone, _creationTime
+[WebServer] ✔ Installed component rateLimiter.
+[WebServer] ✔ Installed component rateLimiter/batchWorker.
+[WebServer] ✔ 07:52:26 Convex functions ready! (2.15s)
+[WebServer] ✔ Successfully set 3 environment variables from stdin (3 new) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-45/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-45/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 530 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://localhost:5173/
+[WebServer]   ➜  Network: use --host to expose
+
+Running 1 test using 1 worker
+
+  ✘  1 [chromium] › e2e/landing.spec.ts:126:3 › on a dark OS › an open sheet dims the page behind it (547ms)
+
+
+  1) [chromium] › e2e/landing.spec.ts:126:3 › on a dark OS › an open sheet dims the page behind it ─
+
+    Error: expect(received).toMatch(expected)
+
+    Expected pattern: /^(rgba\(0, 0, 0, 0\.7\)|oklab\(0 0 0 \/ 0\.7\))$/
+    Received string:  "oklab(0.964097 0.0039525 -0.00572294 / 0.4)"
+
+      129 |       (dialog) => getComputedStyle(dialog, "::backdrop").backgroundColor,
+      130 |     );
+    > 131 |     expect(backdrop).toMatch(/^(rgba\(0, 0, 0, 0\.7\)|oklab\(0 0 0 \/ 0\.7\))$/);
+          |                      ^
+      132 |   });
+      133 | });
+      134 |
+        at /home/coder/dev/ns-worktrees/ticket-45/e2e/landing.spec.ts:131:22
+
+    Error Context: test-results/landing-on-a-dark-OS-an-open-sheet-dims-the-page-behind-it-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/landing-on-a-dark-OS-an-open-sheet-dims-the-page-behind-it-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/landing-on-a-dark-OS-an-open-sheet-dims-the-page-behind-it-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e/landing.spec.ts:126:3 › on a dark OS › an open sheet dims the page behind it ──
+error: script "e2e" exited with code 1

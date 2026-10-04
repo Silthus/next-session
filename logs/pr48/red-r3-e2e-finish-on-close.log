@@ -1,0 +1,77 @@
+[WebServer] CONVEX_AGENT_MODE=anonymous mode is in beta, functionality may change in the future.
+[WebServer] ✔ Configured a local deployment for http://127.0.0.1:3210 and saved its:
+[WebServer]     name as CONVEX_DEPLOYMENT
+[WebServer]     client URL as VITE_CONVEX_URL
+[WebServer]     HTTP actions URL as VITE_CONVEX_SITE_URL
+[WebServer]  to .env.local
+[WebServer] 
+[WebServer] Write your Convex functions in convex/
+[WebServer] Give us feedback at https://convex.dev/community or support@convex.dev
+[WebServer] View the Convex dashboard at http://127.0.0.1:6790/
+[WebServer] 
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 3210 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:3210
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ 08:44:57 Convex functions ready! (2.08s)
+[WebServer] ✔ Successfully set 2 environment variables from stdin (2 updated, 1 unchanged) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-45/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-45/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 404 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://localhost:5173/
+[WebServer]   ➜  Network: use --host to expose
+
+Running 1 test using 1 worker
+
+[WebServer] 8:45:01 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✘  1 [chromium] › e2e/landing.spec.ts:228:3 › a Save whose move fails after the sign-in › still goes through when the GM closes the retry from the Group header (7.1s)
+
+
+  1) [chromium] › e2e/landing.spec.ts:228:3 › a Save whose move fails after the sign-in › still goes through when the GM closes the retry from the Group header 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('status')
+    Expected: "Saved. Open it anywhere with your account."
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveText" getByRole('status') with timeout 5000ms
+      - waiting for getByRole('status')
+        2 × locator resolved to <div role="status" aria-busy="true" class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">…</div>
+          - unexpected value "Loading your group"
+
+
+      240 |     await sheet.getByRole("button", { name: "Close" }).click();
+      241 |
+    > 242 |     await expect(page.getByRole("status")).toHaveText("Saved. Open it anywhere with your account.");
+          |                                            ^
+      243 |     await expect(page).toHaveURL(new RegExp(`^[^?]*${groupPath}`));
+      244 |     await expect(page.getByText(shareLink.replace(/^localhost:5173/, ""))).toBeVisible();
+      245 |   });
+        at /home/coder/dev/ns-worktrees/ticket-45/e2e/landing.spec.ts:242:44
+
+    Error Context: test-results/landing-a-Save-whose-move--9bc55-retry-from-the-Group-header-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/landing-a-Save-whose-move--9bc55-retry-from-the-Group-header-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/landing-a-Save-whose-move--9bc55-retry-from-the-Group-header-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e/landing.spec.ts:228:3 › a Save whose move fails after the sign-in › still goes through when the GM closes the retry from the Group header 

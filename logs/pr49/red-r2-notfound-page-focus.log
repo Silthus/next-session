@@ -1,0 +1,306 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45b
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/ui/NotFoundScreen.test.tsx (2 tests | 2 failed) 149ms
+   ❯ NotFoundScreen (2)
+     × says the link no longer works, takes focus, and points to a new link 131ms
+     × says a page does not exist and takes focus 17ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/ui/NotFoundScreen.test.tsx > NotFoundScreen > says the link no longer works, takes focus, and points to a new link
+AssertionError: expected <h1 tabindex="-1" …(1)></h1> to be <body><div>…(1)</div></body> // Object.is equality
+
+- Expected
++ Received
+
+- <body>
+-   <div>
+-     <div
+-       class="flex min-h-dvh flex-col"
+-     >
+-       <header
+-         class="mx-auto w-full px-4 sm:px-6 max-w-md flex items-center justify-between py-5"
+-       >
+-         <a
+-           aria-current="page"
+-           aria-label="Next Session home"
+-           class="inline-flex items-center gap-2.5 text-ink active"
+-           data-status="active"
+-           href="/"
+-         >
+-           <svg
+-             aria-hidden="true"
+-             class="size-8 size-7"
+-             viewBox="0 0 32 32"
+-           >
+-             <rect
+-               class="fill-accent"
+-               height="28"
+-               rx="9"
+-               width="28"
+-               x="2"
+-               y="2"
+-             />
+-             <path
+-               class="fill-accent-strong"
+-               d="M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"
+-             />
+-             <circle
+-               class="fill-accent-ink"
+-               cx="16"
+-               cy="20"
+-               r="5"
+-             />
+-           </svg>
+-           <span
+-             class="font-display font-bold text-lg"
+-           >
+-             Next Session
+-           </span>
+-         </a>
+-       </header>
+-       <main
+-         class="mx-auto w-full px-4 sm:px-6 max-w-md flex-1 pb-16 flex flex-col items-center justify-center gap-5 text-center"
+-       >
+-         <svg
+-           aria-hidden="true"
+-           class="size-8 opacity-40 grayscale size-14"
+-           viewBox="0 0 32 32"
+-         >
+-           <rect
+-             class="fill-accent"
+-             height="28"
+-             rx="9"
+-             width="28"
+-             x="2"
+-             y="2"
+-           />
+-           <path
+-             class="fill-accent-strong"
+-             d="M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"
+-           />
+-           <circle
+-             class="fill-accent-ink"
+-             cx="16"
+-             cy="20"
+-             r="5"
+-           />
+-         </svg>
+  <h1
+    class="font-display text-3xl font-extrabold outline-none"
+    tabindex="-1"
+  >
+    This link no longer works
+  </h1>
+-         <p
+-           class="text-ink-2"
+-         >
+-           The GM may have rotated the link or deleted the group. Ask them for the current one.
+-         </p>
+-         <div
+-           class="mt-2 flex flex-col items-center gap-2"
+-         >
+-           <a
+-             aria-current="page"
+-             class="inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-surface text-ink border border-line hover:border-line-strong h-14 px-6 text-base gap-2.5 rounded-lg active"
+-             data-status="active"
+-             href="/"
+-           >
+-             Plan your own game
+-           </a>
+-           <span
+-             class="text-xs text-ink-3"
+-           >
+-             One click, no sign-up.
+-           </span>
+-         </div>
+-       </main>
+-       <footer
+-         class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3 mx-auto w-full px-4 sm:px-6 max-w-md pb-6 justify-center"
+-       >
+-         <a
+-           class="transition-colors hover:text-ink"
+-           href="/terms"
+-         >
+-           Terms
+-         </a>
+-         <a
+-           class="transition-colors hover:text-ink"
+-           href="/privacy"
+-         >
+-           Privacy
+-         </a>
+-         <a
+-           class="transition-colors hover:text-ink"
+-           href="/imprint"
+-         >
+-           Imprint
+-         </a>
+-       </footer>
+-     </div>
+-   </div>
+- </body>
+
+ ❯ src/ui/NotFoundScreen.test.tsx:27:21
+     25|       name: "This link no longer works",
+     26|     });
+     27|     expect(heading).toBe(document.activeElement);
+       |                     ^
+     28|     expect(screen.getByText(/rotated the link or deleted the group/)).…
+     29|     expect(screen.getByRole("link", { name: "Plan your own game" })).t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/ui/NotFoundScreen.test.tsx > NotFoundScreen > says a page does not exist and takes focus
+AssertionError: expected <h1 tabindex="-1" …(1)></h1> to be <body><div>…(1)</div></body> // Object.is equality
+
+- Expected
++ Received
+
+- <body>
+-   <div>
+-     <div
+-       class="flex min-h-dvh flex-col"
+-     >
+-       <header
+-         class="mx-auto w-full px-4 sm:px-6 max-w-md flex items-center justify-between py-5"
+-       >
+-         <a
+-           aria-current="page"
+-           aria-label="Next Session home"
+-           class="inline-flex items-center gap-2.5 text-ink active"
+-           data-status="active"
+-           href="/"
+-         >
+-           <svg
+-             aria-hidden="true"
+-             class="size-8 size-7"
+-             viewBox="0 0 32 32"
+-           >
+-             <rect
+-               class="fill-accent"
+-               height="28"
+-               rx="9"
+-               width="28"
+-               x="2"
+-               y="2"
+-             />
+-             <path
+-               class="fill-accent-strong"
+-               d="M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"
+-             />
+-             <circle
+-               class="fill-accent-ink"
+-               cx="16"
+-               cy="20"
+-               r="5"
+-             />
+-           </svg>
+-           <span
+-             class="font-display font-bold text-lg"
+-           >
+-             Next Session
+-           </span>
+-         </a>
+-       </header>
+-       <main
+-         class="mx-auto w-full px-4 sm:px-6 max-w-md flex-1 pb-16 flex flex-col items-center justify-center gap-5 text-center"
+-       >
+-         <svg
+-           aria-hidden="true"
+-           class="size-8 opacity-40 grayscale size-14"
+-           viewBox="0 0 32 32"
+-         >
+-           <rect
+-             class="fill-accent"
+-             height="28"
+-             rx="9"
+-             width="28"
+-             x="2"
+-             y="2"
+-           />
+-           <path
+-             class="fill-accent-strong"
+-             d="M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"
+-           />
+-           <circle
+-             class="fill-accent-ink"
+-             cx="16"
+-             cy="20"
+-             r="5"
+-           />
+-         </svg>
+  <h1
+    class="font-display text-3xl font-extrabold outline-none"
+    tabindex="-1"
+  >
+    Nothing here
+  </h1>
+-         <p
+-           class="text-ink-2"
+-         >
+-           The page you were looking for does not exist.
+-         </p>
+-         <div
+-           class="mt-2 flex flex-col items-center gap-2"
+-         >
+-           <a
+-             aria-current="page"
+-             class="inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-surface text-ink border border-line hover:border-line-strong h-10 px-4 text-sm gap-2 rounded-md active"
+-             data-status="active"
+-             href="/"
+-           >
+-             Plan your own game
+-           </a>
+-           <span
+-             class="text-xs text-ink-3"
+-           >
+-             One click, no sign-up.
+-           </span>
+-         </div>
+-       </main>
+-       <footer
+-         class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3 mx-auto w-full px-4 sm:px-6 max-w-md pb-6 justify-center"
+-       >
+-         <a
+-           class="transition-colors hover:text-ink"
+-           href="/terms"
+-         >
+-           Terms
+-         </a>
+-         <a
+-           class="transition-colors hover:text-ink"
+-           href="/privacy"
+-         >
+-           Privacy
+-         </a>
+-         <a
+-           class="transition-colors hover:text-ink"
+-           href="/imprint"
+-         >
+-           Imprint
+-         </a>
+-       </footer>
+-     </div>
+-   </div>
+- </body>
+
+ ❯ src/ui/NotFoundScreen.test.tsx:40:21
+     38|
+     39|     const heading = await screen.findByRole("heading", { level: 1, nam…
+     40|     expect(heading).toBe(document.activeElement);
+       |                     ^
+     41|     expect(screen.getByText("The page you were looking for does not ex…
+     42|     expect(screen.getByRole("link", { name: "Plan your own game" })).t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  08:28:19
+   Duration  824ms (environment 58%, tests 20%, setup 8%, import 7%, transform 6%)
+

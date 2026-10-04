@@ -1,0 +1,28 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/account/AccountSheet.test.tsx (19 tests | 1 failed | 18 skipped) 141ms
+   ❯ AccountSheet finishing a Save after the sign-in went through (5)
+     × finishes in the background when the GM closes it 140ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet finishing a Save after the sign-in went through > finishes in the background when the GM closes it
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/features/account/AccountSheet.test.tsx:272:22
+    270|     await userEvent.click(await screen.findByRole("button", { name: "C…
+    271|
+    272|     expect(onFinish).toHaveBeenCalledOnce();
+       |                      ^
+    273|     expect(onClose).toHaveBeenCalledOnce();
+    274|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 18 skipped (19)
+   Start at  08:44:49
+   Duration  848ms (environment 57%, tests 18%, import 9%, setup 8%, transform 7%)
+

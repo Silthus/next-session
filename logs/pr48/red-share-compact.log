@@ -1,0 +1,124 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+ ❯ |ui| src/ui/ShareLinkCard.test.tsx (7 tests | 1 failed) 1828ms
+   ❯ ShareLinkCard (7)
+     × keeps the share targets but drops the hint when compact, and offers Rotate when asked 13ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > keeps the share targets but drops the hint when compact, and offers Rotate when asked
+TestingLibraryElementError: Unable to find an accessible element with the role "link" and name "Share via WhatsApp"
+
+Here are the accessible roles:
+
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3 text-accent-strong"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Rotate":
+  [36m<button[39m
+    [33mclass[39m=[32m"text-xs font-medium text-ink-3 hover:text-ink"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Copy":
+  [36m<button[39m
+    [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink hover:bg-accent-strong shadow-card h-10 px-4 text-sm gap-2 rounded-md min-w-24"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  code:
+
+  Name "":
+  [36m<code[39m
+    [33mclass[39m=[32m"min-w-0 flex-1 truncate rounded-md bg-surface px-3 py-2.5 font-mono text-sm text-ink select-all"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"rounded-lg border border-accent/30 bg-accent-soft/60 dark:bg-accent-soft/40 p-3"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex items-center justify-between gap-3"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3 text-accent-strong"[39m
+        [36m>[39m
+          [0mPlayer link[0m
+        [36m</p>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"text-xs font-medium text-ink-3 hover:text-ink"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mRotate[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mt-2 flex items-center gap-2"[39m
+      [36m>[39m
+        [36m<code[39m
+          [33mclass[39m=[32m"min-w-0 flex-1 truncate rounded-md bg-surface px-3 py-2.5 font-mono text-sm text-ink select-all"[39m
+        [36m>[39m
+          [0mnext-session.link/s/k3Qx9Lm2aB[0m
+        [36m</code>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink hover:bg-accent-strong shadow-card h-10 px-4 text-sm gap-2 rounded-md min-w-24"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-4"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-width[39m=[32m"1.8"[39m
+            [33mviewBox[39m=[32m"0 0 20 20"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mheight[39m=[32m"10"[39m
+              [33mrx[39m=[32m"2"[39m
+              [33mwidth[39m=[32m"10"[39m
+              [33mx[39m=[32m"7"[39m
+              [33my[39m=[32m"7"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M13 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [0mCopy[0m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/ui/ShareLinkCard.test.tsx:89:19
+     87|     const onRotate = vi.fn();
+     88|     render(<ShareLinkCard url={url} compact onRotate={onRotate} />);
+     89|     expect(screen.getByRole("link", { name: "Share via WhatsApp" })).t…
+       |                   ^
+     90|     expect(screen.getByRole("link", { name: "Share via Telegram" })).t…
+     91|     expect(screen.getByRole("button", { name: "Share" })).toBeTruthy();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  07:55:33
+   Duration  2.49s (tests 76%, environment 18%, setup 3%, transform 2%, import 1%)
+

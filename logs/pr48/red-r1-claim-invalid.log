@@ -1,0 +1,37 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+ ❯ |ui| src/features/account/save.test.ts (13 tests | 1 failed) 13ms
+   ❯ retrying a Save after the sign-in went through (2)
+     × fails as an invalid claim once the server refused the pending one 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/save.test.ts > retrying a Save after the sign-in went through > fails as an invalid claim once the server refused the pending one
+AssertionError: promise resolved "{ groupIds: [] }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "groupIds": [],
+  }
+
+ ❯ src/features/account/save.test.ts:110:65
+    108|     await expect(saveGroups({ ...input, mode: "create" }, deps)).rejec…
+    109|
+    110|     await expect(saveGroups({ ...input, mode: "create" }, deps)).rejec…
+       |                                                                 ^
+    111|       data: { code: "CLAIM_INVALID" },
+    112|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  08:14:36
+   Duration  638ms (environment 79%, setup 11%, transform 6%, tests 2%, import 1%, worker 1%)
+

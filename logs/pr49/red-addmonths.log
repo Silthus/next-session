@@ -1,0 +1,52 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45b
+
+ ❯ |shared| shared/dates.test.ts (21 tests | 2 failed) 13ms
+   ❯ addMonths (3)
+     × keeps years below 100 in their own century 4ms
+   ❯ monthDays (3)
+     × knows leap years below 100 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/dates.test.ts > addMonths > keeps years below 100 in their own century
+AssertionError: expected '1950-02' to be '0050-02' // Object.is equality
+
+Expected: "0050-02"
+Received: "1950-02"
+
+ ❯ shared/dates.test.ts:45:37
+     43|
+     44|   it("keeps years below 100 in their own century", () => {
+     45|     expect(addMonths("0050-01", 1)).toBe("0050-02");
+       |                                     ^
+     46|     expect(addMonths("0001-01", -1)).toBe("0000-12");
+     47|     expect(addMonths("0099-12", 1)).toBe("0100-01");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |shared| shared/dates.test.ts > monthDays > knows leap years below 100
+AssertionError: expected [ '0000-02-01', '0000-02-02', …(26) ] to have a length of 29 but got 28
+
+- Expected
++ Received
+
+- 29
++ 28
+
+ ❯ shared/dates.test.ts:65:34
+     63|
+     64|   it("knows leap years below 100", () => {
+     65|     expect(monthDays("0000-02")).toHaveLength(29);
+       |                                  ^
+     66|     expect(monthDays("0004-02")).toHaveLength(29);
+     67|     expect(monthDays("0050-02")).toHaveLength(28);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 19 passed (21)
+   Start at  07:50:30
+   Duration  144ms (transform 47%, tests 28%, import 19%, worker 6%)
+

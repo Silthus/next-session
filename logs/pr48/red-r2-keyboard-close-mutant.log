@@ -1,0 +1,60 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-45
+
+ ❯ |ui| src/ui/Sheet.test.tsx (10 tests | 2 failed) 244ms
+   ❯ Sheet (10)
+     × holds the Close button, still focusable, while it is not dismissible 16ms
+     × holds the Close button on the keyboard while it is not dismissible 21ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/ui/Sheet.test.tsx > Sheet > holds the Close button, still focusable, while it is not dismissible
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array []
+
+
+Number of calls: 1
+
+ ❯ src/ui/Sheet.test.tsx:75:25
+     73|     expect(closeButton.getAttribute("aria-disabled")).toBe("true");
+     74|     expect(document.activeElement).toBe(closeButton);
+     75|     expect(onClose).not.toHaveBeenCalled();
+       |                         ^
+     76|   });
+     77|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/ui/Sheet.test.tsx > Sheet > holds the Close button on the keyboard while it is not dismissible
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array []
+
+
+Number of calls: 1
+
+ ❯ src/ui/Sheet.test.tsx:111:25
+    109|     const closeButton = await pressCloseFromKeyboard();
+    110|
+    111|     expect(onClose).not.toHaveBeenCalled();
+       |                         ^
+    112|     expect(document.activeElement).toBe(closeButton);
+    113|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 8 passed (10)
+   Start at  08:29:03
+   Duration  900ms (environment 53%, tests 30%, setup 8%, transform 5%, import 4%)
+
