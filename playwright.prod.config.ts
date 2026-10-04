@@ -22,7 +22,7 @@ export default defineConfig({
     baseURL,
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
-    trace: "on",
+    trace: { mode: "on", snapshots: false },
     screenshot: "on",
   },
   projects: [{ name: "production", use: { ...devices["Desktop Chrome"] } }],

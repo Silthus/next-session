@@ -1,5 +1,12 @@
 import { randomBytes } from "node:crypto";
-import { expect, test, type Page, type TestInfo } from "@playwright/test";
+import {
+  expect,
+  test,
+  type Browser,
+  type Locator,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
 import { addMonths, monthOf, todayUtc, type IsoDate } from "../shared/dates";
 
 const lonirUrl = "https://little-spaniel-709.convex.site";
@@ -29,6 +36,25 @@ const switcher = (page: Page) =>
   page.getByRole("heading", { level: 1 }).getByRole("button", { name: groupName });
 const rail = (page: Page) => page.getByRole("complementary", { name: "Group overview" });
 
+let leftoverGroup: { gm: Page; path: string } | undefined;
+
+test.afterEach(async () => {
+  if (leftoverGroup) await deleteGroup(leftoverGroup.gm, leftoverGroup.path);
+});
+
+async function deleteGroup(gm: Page, groupPath: string) {
+  await gm.goto(groupPath);
+  await expect(rail(gm).getByRole("button", { name: "Copy" })).toBeVisible();
+  await gm.getByRole("heading", { level: 1 }).getByRole("button").click();
+  await gm.getByRole("button", { name: "Delete group" }).click();
+  await gm
+    .getByRole("group", { name: /^Delete .*\?$/ })
+    .getByRole("button", { name: /^Delete / })
+    .click();
+  await expect(gm).toHaveURL(new URL("/", gm.url()).href);
+  leftoverGroup = undefined;
+}
+
 async function shoot(page: Page, testInfo: TestInfo, name: string) {
   const path = testInfo.outputPath(`${name}.png`);
   await page.screenshot({ path, fullPage: true, animations: "disabled" });
@@ -44,11 +70,29 @@ async function tapUntil(page: Page, date: IsoDate, answer: "Free" | "Maybe") {
   await expect(night(page, date)).toHaveAccessibleName(`${dayLabel(date)}: ${answer}`);
 }
 
-async function fillCredentials(page: Page, dialogName: string | RegExp) {
+async function newContextKnowingPassword(browser: Browser) {
+  const context = await browser.newContext();
+  await context.exposeFunction("proofPassword", () => password);
+  return context;
+}
+
+async function enterPasswordUnrecorded(field: Locator) {
+  await field.evaluate(async (input: HTMLInputElement) => {
+    const proof = window as unknown as { proofPassword: () => Promise<string> };
+    Reflect.set(HTMLInputElement.prototype, "value", await proof.proofPassword(), input);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+}
+
+async function fillCredentials(page: Page, dialogName: string) {
   const sheet = page.getByRole("dialog", { name: dialogName });
   await sheet.getByLabel("Email").fill(email);
-  await sheet.getByLabel("Password").fill(password);
+  await enterPasswordUnrecorded(sheet.getByLabel("Password"));
   return sheet;
+}
+
+async function expectBar(page: Page, date: IsoDate, answer: "free" | "maybe") {
+  await expect(night(page, date).locator("[data-bar]")).toHaveAttribute("data-bar", answer);
 }
 
 test("a GM and a Player schedule a Session on the deployed app", async ({
@@ -56,15 +100,19 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
   request,
 }, testInfo) => {
   const appOrigin = new URL(testInfo.project.use.baseURL ?? "").origin;
-  const gmContext = await browser.newContext();
-  const gm = await gmContext.newPage();
+  const gm = await (await newContextKnowingPassword(browser)).newPage();
   let shareLink = "";
+  let groupPath = "";
 
   await test.step("1. Create your link shows the Share Link in place", async () => {
+    expect((await request.get("/", { maxRedirects: 0 })).status()).toBe(200);
     await gm.goto("/");
     expect(new URL(gm.url()).origin).toBe(appOrigin);
     await gm.getByRole("button", { name: "Create your link" }).click();
     await expect(gm.getByText("Your link is ready. Send it to your players.")).toBeVisible();
+    groupPath =
+      (await gm.getByRole("link", { name: "Open your group →" }).getAttribute("href")) ?? "";
+    leftoverGroup = { gm, path: groupPath };
     await expect(gm.locator("code")).toHaveText(/\/s\/[A-Za-z0-9_-]{10}$/);
     shareLink = new URL(`https://${(await gm.locator("code").textContent()) ?? ""}`).pathname;
     await shoot(gm, testInfo, "1-link-created");
@@ -72,7 +120,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
 
   await test.step("2. The GM opens the Group and renames it", async () => {
     await gm.getByRole("link", { name: "Open your group →" }).click();
-    await expect(gm).toHaveURL(/\/g\/\w+$/);
+    await expect(gm).toHaveURL(groupPath);
     await expect(rail(gm).getByText(shareLink)).toBeVisible();
     await gm.getByRole("heading", { level: 1 }).getByRole("button", { name: "My group" }).click();
     await gm.getByRole("button", { name: "Rename group" }).click();
@@ -109,6 +157,9 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
     await expect(night(gm, dateOf(7))).toHaveAccessibleName(
       `${dayLabel(dateOf(7))}: 0 free, 1 maybe, 0 busy`,
     );
+    await expectBar(gm, dateOf(5), "free");
+    await expectBar(gm, dateOf(6), "free");
+    await expectBar(gm, dateOf(7), "maybe");
     await night(gm, dateOf(5)).click();
     const dayPanel = gm.getByRole("region", { name: dayLabel(dateOf(5)) });
     await expect(dayPanel.getByRole("listitem")).toHaveText([new RegExp(`${playerName}.*Free`)]);
@@ -125,7 +176,6 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
   });
 
   await test.step("5. The GM saves to a new Account, and a third browser logs in", async () => {
-    const groupPath = new URL(gm.url()).pathname;
     await gm.getByRole("button", { name: "Save your group" }).click();
     const sheet = await fillCredentials(gm, `Keep ${groupName}`);
     await sheet.getByRole("button", { name: "Save group" }).click();
@@ -133,7 +183,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
     await expect(gm.getByRole("button", { name: "Your account" })).toBeVisible();
     await shoot(gm, testInfo, "5-gm-saved");
 
-    const elsewhereContext = await browser.newContext();
+    const elsewhereContext = await newContextKnowingPassword(browser);
     const elsewhere = await elsewhereContext.newPage();
     await elsewhere.goto("/");
     await elsewhere.getByRole("button", { name: "Log in" }).click();
@@ -153,10 +203,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
   });
 
   await test.step("7. The GM deletes the Group", async () => {
-    await switcher(gm).click();
-    await gm.getByRole("button", { name: "Delete group" }).click();
-    await gm.getByRole("button", { name: `Delete ${groupName}` }).click();
-    await expect(gm).toHaveURL(`${appOrigin}/`);
+    await deleteGroup(gm, groupPath);
     await player.reload();
     await expect(player.getByRole("heading", { name: "This link no longer works" })).toBeVisible();
     await shoot(player, testInfo, "7-link-gone");
