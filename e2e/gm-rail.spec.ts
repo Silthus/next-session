@@ -261,9 +261,9 @@ test("an Anonymous GM saves into an Account from the header and stays on the Gro
   await sheet.getByText("I already have one").click();
   await sheet.getByLabel("Email").fill(account.email);
   await sheet.getByLabel("Password").fill(password);
-  const toastRegion = page.locator('[role="status"][aria-live="polite"]');
-  await expect(toastRegion).toHaveCount(1);
-  await toastRegion.evaluate((region) => region.setAttribute("data-region-before-save", ""));
+  const region = toastRegion(page);
+  await expect(region).toHaveCount(1);
+  await region.evaluate((element) => element.setAttribute("data-region-before-save", ""));
   await sheet.getByRole("button", { name: "Log in and save" }).click();
 
   await expect(page.locator("[data-region-before-save]")).toHaveText(
