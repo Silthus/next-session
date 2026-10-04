@@ -1,0 +1,12 @@
+  ✘   1 [chromium] › e2e/gm-rail.spec.ts:81:1 › the GM copies, rotates, and undoes the Share Link from the rail (5.7s)
+  ✘   2 [chromium] › e2e/gm-rail.spec.ts:110:1 › the GM adds, renames, and removes Players (5.7s)
+  ✘   3 [chromium] › e2e/gm-rail.spec.ts:142:1 › Best Nights and Sessions open their day (5.9s)
+  ✘   4 [chromium] › e2e/gm-rail.spec.ts:166:1 › the switcher opens, makes, renames and deletes Groups, and the landing returns to the last one (15.1s)
+  ✘   5 [chromium] › e2e/gm-rail.spec.ts:209:1 › an Anonymous GM is nudged to save once a Player joins, until Later (5.6s)
+  ✘   6 [chromium] › e2e/gm-rail.spec.ts:232:1 › on a phone the rail sits under the calendar behind a segmented control (5.9s)
+    Error: expect(locator).toBeVisible() failed
+    Error: expect(locator).toBeVisible() failed
+    Error: expect(locator).toHaveText(expected) failed
+    Error: expect(locator).toBeVisible() failed
+    Error: expect(locator).toBeVisible() failed
+  6 failed

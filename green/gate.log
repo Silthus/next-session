@@ -1,0 +1,15 @@
+dist/assets/LegalFooter-CF_k4Rjp.js                                     20.85 kB │ gzip:   8.41 kB
+dist/assets/GroupScreen-BcmwNarn.js                                     42.20 kB │ gzip:  13.01 kB
+dist/assets/index-DkjE2A7C.js                                          371.69 kB │ gzip: 115.35 kB
+
+✓ built in 244ms
+
+ ⛅️ wrangler 4.147.0
+────────────────────
+✨ Read 34 files from the assets directory /home/coder/dev/ns-worktrees/ticket-20/dist
+Total Upload: 0.81 KiB / gzip: 0.46 KiB
+Your Worker has access to the following bindings:
+Binding            Resource      
+env.ASSETS         Assets        
+
+--dry-run: exiting now.

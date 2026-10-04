@@ -1,0 +1,5 @@
+ FAIL  |ui| src/features/group/rail/GroupSwitcher.test.tsx [ src/features/group/rail/GroupSwitcher.test.tsx ]
+ FAIL  |ui| src/features/group/rail/HeaderAccount.test.tsx [ src/features/group/rail/HeaderAccount.test.tsx ]
+ FAIL  |ui| src/features/group/rail/Players.test.tsx [ src/features/group/rail/Players.test.tsx ]
+ Test Files  3 failed | 6 passed (9)
+      Tests  26 passed (26)

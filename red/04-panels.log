@@ -1,0 +1,6 @@
+ FAIL  |ui| src/features/group/rail/BestNights.test.tsx [ src/features/group/rail/BestNights.test.tsx ]
+ FAIL  |ui| src/features/group/rail/GroupRail.test.tsx [ src/features/group/rail/GroupRail.test.tsx ]
+ FAIL  |ui| src/features/group/rail/Nudge.test.tsx [ src/features/group/rail/Nudge.test.tsx ]
+ FAIL  |ui| src/features/group/rail/Sessions.test.tsx [ src/features/group/rail/Sessions.test.tsx ]
+ Test Files  4 failed | 2 passed (6)
+      Tests  11 passed (11)
