@@ -40,6 +40,12 @@ describe("addMonths", () => {
   it("moves backward across a year boundary", () => {
     expect(addMonths("2026-01", -1)).toBe("2025-12");
   });
+
+  it("keeps years below 100 in their own century", () => {
+    expect(addMonths("0050-01", 1)).toBe("0050-02");
+    expect(addMonths("0001-01", -1)).toBe("0000-12");
+    expect(addMonths("0099-12", 1)).toBe("0100-01");
+  });
 });
 
 describe("monthDays", () => {
@@ -53,6 +59,12 @@ describe("monthDays", () => {
   it("knows leap years", () => {
     expect(monthDays("2028-02")).toHaveLength(29);
     expect(monthDays("2026-02")).toHaveLength(28);
+  });
+
+  it("knows leap years below 100", () => {
+    expect(monthDays("0000-02")).toHaveLength(29);
+    expect(monthDays("0004-02")).toHaveLength(29);
+    expect(monthDays("0050-02")).toHaveLength(28);
   });
 });
 

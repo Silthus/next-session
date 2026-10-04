@@ -15,7 +15,7 @@ export function monthOf(date: IsoDate): IsoMonth {
 
 export function addMonths(month: IsoMonth, n: number): IsoMonth {
   const { year, monthIndex } = parseMonth(month);
-  return formatMonth(new Date(Date.UTC(year, monthIndex + n, 1)));
+  return formatMonth(utcDate(year, monthIndex + n, 1));
 }
 
 export function monthDays(month: IsoMonth): IsoDate[] {
@@ -52,7 +52,13 @@ export function isValidMonth(value: string): boolean {
 
 function daysInMonth(month: IsoMonth): number {
   const { year, monthIndex } = parseMonth(month);
-  return new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
+  return utcDate(year, monthIndex + 1, 0).getUTCDate();
+}
+
+function utcDate(year: number, monthIndex: number, day: number): Date {
+  const date = new Date(0);
+  date.setUTCFullYear(year, monthIndex, day);
+  return date;
 }
 
 function parseMonth(month: IsoMonth): { year: number; monthIndex: number } {
@@ -60,7 +66,7 @@ function parseMonth(month: IsoMonth): { year: number; monthIndex: number } {
 }
 
 function formatMonth(date: Date): IsoMonth {
-  return `${String(date.getUTCFullYear())}-${pad2(date.getUTCMonth() + 1)}`;
+  return `${String(date.getUTCFullYear()).padStart(4, "0")}-${pad2(date.getUTCMonth() + 1)}`;
 }
 
 function pad2(n: number): string {
