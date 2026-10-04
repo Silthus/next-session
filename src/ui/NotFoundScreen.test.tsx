@@ -33,10 +33,11 @@ describe("NotFoundScreen", () => {
     await waitFor(() => expect(document.title).toBe("This link no longer works · Next Session"));
   });
 
-  it("says a page does not exist", async () => {
+  it("says a page does not exist and takes focus", async () => {
     renderScreen(<NotFoundScreen kind="page" />);
 
-    expect(await screen.findByRole("heading", { level: 1, name: "Nothing here" })).toBeTruthy();
+    const heading = await screen.findByRole("heading", { level: 1, name: "Nothing here" });
+    expect(heading).toBe(document.activeElement);
     expect(screen.getByText("The page you were looking for does not exist.")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Plan your own game" })).toHaveProperty(
       "pathname",

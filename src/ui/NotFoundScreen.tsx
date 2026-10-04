@@ -7,9 +7,14 @@ import { useFocusOnMount } from "./useFocusOnMount";
 
 export type NotFoundKind = "page" | "link";
 
-type Screen = { headline: string; explanation: string; ownsTitle: boolean; ctaSize: ButtonSize };
+type NotFoundCopy = {
+  headline: string;
+  explanation: string;
+  ownsTitle: boolean;
+  ctaSize: ButtonSize;
+};
 
-const screens: Record<NotFoundKind, Screen> = {
+const copies: Record<NotFoundKind, NotFoundCopy> = {
   page: {
     headline: "Nothing here",
     explanation: "The page you were looking for does not exist.",
@@ -26,7 +31,7 @@ const screens: Record<NotFoundKind, Screen> = {
 };
 
 export function NotFoundScreen({ kind }: { kind: NotFoundKind }) {
-  const { headline, explanation, ownsTitle, ctaSize } = screens[kind];
+  const { headline, explanation, ownsTitle, ctaSize } = copies[kind];
   const heading = useFocusOnMount<HTMLHeadingElement>();
   return (
     <PageShell
