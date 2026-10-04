@@ -67,7 +67,7 @@ function NightRow({
     <button
       type="button"
       onClick={onSelect}
-      aria-label={`${label}: ${counts}. Free: ${freeNames}${scheduled}`}
+      aria-label={`${label}, ${counts}. Free: ${freeNames}${scheduled}`}
       className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-surface-2"
     >
       <span

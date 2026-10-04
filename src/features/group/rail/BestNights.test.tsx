@@ -56,7 +56,7 @@ describe("BestNights", () => {
       { playerCount: 6 },
     );
     const night = screen.getByRole("button", {
-      name: "Friday, Oct 16: Everyone is free. Free: Ana, Ben, Chiara, Dev, Eli, Fay",
+      name: "Friday, Oct 16, Everyone is free. Free: Ana, Ben, Chiara, Dev, Eli, Fay",
     });
     expect(within(night).getByText("+2")).toBeTruthy();
   });
