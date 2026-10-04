@@ -74,3 +74,7 @@ export async function openAsGm(page: Page, gm: Gm, path: string) {
   );
   await page.goto(path);
 }
+
+export function toastRegion(page: Page) {
+  return page.locator('[role="status"][aria-live="polite"]');
+}

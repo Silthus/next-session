@@ -8,6 +8,7 @@ import {
   shareTokenOf,
   signInAnonymousGm,
   signUpAccountWithGroup,
+  toastRegion,
   type Gm,
 } from "./helpers";
 
@@ -55,7 +56,7 @@ test("the GM copies, rotates, and undoes the Share Link from the rail", async ({
 
   await rail.getByRole("button", { name: "Rotate" }).focus();
   await page.keyboard.press("Enter");
-  const toast = page.getByRole("status");
+  const toast = toastRegion(page);
   await expect(toast).toContainText("Link rotated. Old links stopped working.");
   await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).not.toBe(gm.shareToken);
   const rotated = await shareTokenOf(gm.client, gm.groupId);
@@ -65,7 +66,7 @@ test("the GM copies, rotates, and undoes the Share Link from the rail", async ({
 
   await toast.getByRole("button", { name: "Undo" }).focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("status")).toContainText("The old link works again.");
+  await expect(toast).toContainText("The old link works again.");
   await expect(page.locator("[data-month-heading]")).toBeFocused();
   await expect(rail.getByText(`/s/${gm.shareToken}`)).toBeVisible();
   await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).toBe(gm.shareToken);
@@ -77,13 +78,15 @@ test("the newest action owns the only toast", async ({ page }) => {
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
   const rail = page.getByRole("complementary", { name: "Group overview" });
 
-  await rail.getByRole("button", { name: "Rotate" }).click();
-  await expect(page.getByRole("status")).toContainText("Link rotated.");
-  await rail.getByRole("button", { name: "Schedule session" }).click();
-  await expect(page.getByRole("status")).toHaveCount(1);
-  await expect(page.getByRole("status")).toContainText("Players see it on the link.");
+  const toast = toastRegion(page);
 
-  await page.getByRole("status").getByRole("button", { name: "Undo" }).click();
+  await rail.getByRole("button", { name: "Rotate" }).click();
+  await expect(toast).toContainText("Link rotated.");
+  await rail.getByRole("button", { name: "Schedule session" }).click();
+  await expect(toast).toContainText("Players see it on the link.");
+  await expect(toast).not.toContainText("Link rotated.");
+
+  await toast.getByRole("button", { name: "Undo" }).click();
   await expect(rail.getByRole("button", { name: "Schedule session" })).toBeVisible();
   await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).not.toBe(gm.shareToken);
 });
@@ -284,7 +287,7 @@ test("on a phone the toast clears the open day sheet", async ({ page }) => {
 
   const sheet = page.getByRole("region", { name: /, \w+ 5$/ });
   await sheet.getByRole("button", { name: "Schedule session" }).click();
-  const toast = page.getByRole("status");
+  const toast = toastRegion(page);
   await expect(toast).toContainText("Players see it on the link.");
   const [toastBox, sheetBox] = await Promise.all([toast.boundingBox(), sheet.boundingBox()]);
   expect(toastBox!.y + toastBox!.height).toBeLessThanOrEqual(sheetBox!.y);
@@ -343,7 +346,7 @@ test.describe("screenshots", () => {
         await shot("rail");
 
         await page.getByRole("button", { name: "Rotate" }).first().click();
-        await expect(page.getByRole("status")).toContainText("Link rotated.");
+        await expect(toastRegion(page)).toContainText("Link rotated.");
         await shot("rotate-undo", false);
 
         await switcher(page, "Thursday Crew").click();

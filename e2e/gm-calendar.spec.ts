@@ -1,7 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { api } from "../convex/_generated/api";
 import { addMonths, monthDays, monthOf, todayUtc } from "../shared/dates";
-import { openAsGm, seedPlayer, signInAnonymousGm, type Gm } from "./helpers";
+import { openAsGm, seedPlayer, signInAnonymousGm, toastRegion, type Gm } from "./helpers";
 
 let today = todayUtc(Date.now());
 let nextMonth = addMonths(monthOf(today), 1);
@@ -76,7 +76,7 @@ test("the GM schedules a Session, unschedules it, and undoes that", async ({ pag
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
 
   const panel = page.getByRole("region", { name: /, \w+ 5$/ });
-  const toast = page.getByRole("status");
+  const toast = toastRegion(page);
   await panel.getByRole("button", { name: "Schedule session" }).click();
   await expect(toast).toContainText("Players see it on the link.");
   await expect(dayCell(page, /, \w+ 5: everyone free, Session scheduled$/)).toBeVisible();

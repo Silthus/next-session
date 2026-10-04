@@ -4,7 +4,7 @@ import { api } from "../convex/_generated/api";
 import type { Id } from "../convex/_generated/dataModel";
 import { ANSWERS } from "../shared/answers";
 import { addMonths, monthDays, monthOf, todayUtc, type IsoDate } from "../shared/dates";
-import { convexUrl } from "./helpers";
+import { convexUrl, toastRegion } from "./helpers";
 
 const screenshotDir = "test-results/player-screenshots";
 
@@ -253,7 +253,7 @@ test.describe("the player surface", () => {
     await page.goto(group.link);
     await tile(page, yesterday).click();
 
-    await expect(page.getByRole("status")).toHaveText("That night is locked now.");
+    await expect(toastRegion(page)).toHaveText("That night is locked now.");
     await expect(tile(page, yesterday)).toHaveAccessibleName(`${dayLabel(yesterday)}: Not set`);
     expect(await savedAnswers(group, "Ana", monthOf(yesterday))).toEqual({});
   });
@@ -285,7 +285,7 @@ test.describe("the player surface", () => {
     await page.goto(group.link);
     await page.getByRole("button", { name: /^Mark the other/ }).click();
 
-    await expect(page.getByRole("status")).toHaveText("Those nights are locked now.");
+    await expect(toastRegion(page)).toHaveText("Those nights are locked now.");
     const nightsLeft = monthDays(beyondWindow).filter((date) => date >= `${beyondWindow}-15`);
     await expect(page.getByText(progressText(0, nightsLeft.length))).toBeVisible();
     await expect(
