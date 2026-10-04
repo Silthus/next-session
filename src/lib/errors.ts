@@ -37,7 +37,10 @@ const fallback = "That didn't work. Try again.";
 
 export function errorMessage(error: unknown, topic: ErrorTopic): string {
   const code = errorCode(error);
-  if (code === null) return fallback;
+  return code === null ? fallback : codeMessage(code, topic);
+}
+
+export function codeMessage(code: ErrorCode, topic: ErrorTopic): string {
   const copy: Copy = { ...shared, ...byTopic[topic] };
   return copy[code] ?? fallback;
 }
