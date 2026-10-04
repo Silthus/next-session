@@ -1,15 +1,17 @@
 import { Link } from "@tanstack/react-router";
+import { ConvexError } from "convex/values";
 import { useEffect, useRef, type MouseEvent } from "react";
 import { Button, buttonClassName } from "../../ui/Button";
 import { IconCheck } from "../../ui/icons";
 import { LegalFooter } from "../../ui/LegalFooter";
 import { ShareLinkCard } from "../../ui/ShareLinkCard";
 import { Wordmark } from "../../ui/Wordmark";
+import type { AppErrorData } from "../../../convex/model/errors";
 import { DemoStrip } from "./DemoStrip";
 
 export type LandingState =
   | { phase: "idle" | "creating" }
-  | { phase: "failed"; message: string }
+  | { phase: "failed"; error: unknown }
   | { phase: "created"; shareUrl: string; groupId: string; savedAs?: string };
 
 type LandingViewProps = {
@@ -59,7 +61,7 @@ export function LandingView({
           ) : (
             <CreateLink
               busy={state.phase === "creating"}
-              failure={state.phase === "failed" ? state.message : undefined}
+              failure={state.phase === "failed" ? createFailure(state.error) : undefined}
               onCreate={onCreate}
             />
           )}
@@ -158,26 +160,41 @@ function LinkInHand({
         >
           Open your group →
         </a>
-        <p className="min-w-0 text-xs break-all text-ink-3">
-          {savedAs ? (
-            `Saved to ${savedAs}.`
-          ) : (
-            <>
-              You can name it there, or{" "}
-              <button
-                type="button"
-                onClick={onSave}
-                className="font-semibold text-ink-2 underline underline-offset-2 hover:text-ink"
-              >
-                save it to an account
-              </button>{" "}
-              now.
-            </>
-          )}
-        </p>
+        {savedAs ? (
+          <SavedTo email={savedAs} />
+        ) : (
+          <p className="text-xs text-ink-3">
+            You can name it there, or{" "}
+            <button
+              type="button"
+              onClick={onSave}
+              className="font-semibold text-ink-2 underline underline-offset-2 hover:text-ink"
+            >
+              save it to an account
+            </button>{" "}
+            now.
+          </p>
+        )}
       </div>
     </div>
   );
+}
+
+function SavedTo({ email }: { email: string }) {
+  const line = useRef<HTMLParagraphElement>(null);
+  useEffect(() => line.current?.focus(), []);
+  return (
+    <p ref={line} role="status" tabIndex={-1} className="text-xs text-ink-3 outline-none">
+      Saved to <span className="break-all">{email}</span>.
+    </p>
+  );
+}
+
+function createFailure(error: unknown) {
+  const code = error instanceof ConvexError ? (error.data as Partial<AppErrorData>).code : null;
+  return code === "RATE_LIMITED"
+    ? "Slow down a moment, then try again."
+    : "That didn't work. Try again.";
 }
 
 function Steps() {

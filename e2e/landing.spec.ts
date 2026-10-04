@@ -26,7 +26,7 @@ async function saveToNewAccount(page: Page, email: string) {
   await sheet.getByLabel("Email").fill(email);
   await sheet.getByLabel("Password").fill(password);
   await sheet.getByRole("button", { name: "Save group" }).click();
-  await expect(page.getByText(`Saved to ${email}.`)).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: `Saved to ${email}.` })).toBeFocused();
 }
 
 async function seedAccount(browser: Browser) {

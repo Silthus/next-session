@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { ConvexError } from "convex/values";
 import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { LandingView } from "./LandingView";
@@ -74,13 +75,15 @@ describe("LandingView", () => {
     );
   });
 
-  it("says why making the link failed and lets the GM try again", async () => {
-    const props = renderLanding({
-      state: { phase: "failed", message: "Slow down a moment, then try again." },
-    });
-    expect((await screen.findByRole("alert")).textContent).toBe(
+  it.each([
+    [
+      new ConvexError({ code: "RATE_LIMITED", retryAfter: 2_000 }),
       "Slow down a moment, then try again.",
-    );
+    ],
+    [new Error("Server Error"), "That didn't work. Try again."],
+  ])("says why making the link failed and lets the GM try again", async (error, message) => {
+    const props = renderLanding({ state: { phase: "failed", error } });
+    expect((await screen.findByRole("alert")).textContent).toBe(message);
     await userEvent.click(screen.getByRole("button", { name: "Create your link" }));
     expect(props.onCreate).toHaveBeenCalledOnce();
   });
@@ -114,7 +117,7 @@ describe("LandingView", () => {
 
   it("names the account once the Group is saved", async () => {
     renderLanding({ state: { ...created, savedAs: "gm@example.test" } });
-    expect(await screen.findByText("Saved to gm@example.test.")).toBeTruthy();
+    expect((await screen.findByRole("status")).textContent).toBe("Saved to gm@example.test.");
     expect(screen.queryByRole("button", { name: "save it to an account" })).toBeNull();
   });
 });

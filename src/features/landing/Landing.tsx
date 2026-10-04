@@ -1,10 +1,8 @@
 import { useRouter } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
-import { ConvexError } from "convex/values";
 import { useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import type { AppErrorData } from "../../../convex/model/errors";
 import { AccountSheet, type AccountIntent } from "../account/AccountSheet";
 import type { SaveInput } from "../account/save";
 import { useGm } from "../account/useGm";
@@ -21,7 +19,7 @@ export function Landing() {
   const groups = useQuery(api.groups.mine, signedIn ? {} : "skip");
   const createGroup = useMutation(api.groups.create);
   const [phase, setPhase] = useState<Phase>("idle");
-  const [failure, setFailure] = useState("");
+  const [failure, setFailure] = useState<unknown>(null);
   const [createdGroupId, setCreatedGroupId] = useState<Id<"groups"> | null>(null);
   const [created, setCreated] = useState<CreatedGroup | null>(null);
   const [savedAs, setSavedAs] = useState<string | undefined>();
@@ -45,9 +43,10 @@ export function Landing() {
     try {
       if (signedIn) setCreatedGroupId(await createGroup({}));
       else await gm.createLink();
+      if (gm.status === "account") setSavedAs(gm.email);
       setPhase("created");
     } catch (error) {
-      setFailure(createFailure(error));
+      setFailure(error);
       setPhase("failed");
     }
   };
@@ -94,21 +93,14 @@ export function Landing() {
 
 function landingState(
   phase: Phase,
-  failure: string,
+  failure: unknown,
   created: CreatedGroup | null,
   savedAs: string | undefined,
 ): LandingState {
-  if (phase === "failed") return { phase, message: failure };
+  if (phase === "failed") return { phase, error: failure };
   if (phase !== "created") return { phase };
   if (!created) return { phase: "creating" };
   return { phase, groupId: created.id, shareUrl: shareUrl(created.shareToken), savedAs };
-}
-
-function createFailure(error: unknown) {
-  const code = error instanceof ConvexError ? (error.data as Partial<AppErrorData>).code : null;
-  return code === "RATE_LIMITED"
-    ? "Slow down a moment, then try again."
-    : "That didn't work. Try again.";
 }
 
 function groupPath(groupId: string) {

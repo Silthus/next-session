@@ -4,27 +4,44 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
-import type { ReactNode } from "react";
+import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { SaveInput } from "./save";
 import { AccountSheet } from "./AccountSheet";
 
-function renderInRouter(node: ReactNode) {
+type Submit = (input: SaveInput) => Promise<unknown>;
+
+function renderSheet(props: ComponentProps<typeof AccountSheet>) {
   const router = createRouter({
-    routeTree: createRootRoute({ component: () => node }),
+    routeTree: createRootRoute({ component: () => <AccountSheet {...props} /> }),
     history: createMemoryHistory({ initialEntries: ["/"] }),
   });
   render(<RouterProvider router={router} />);
 }
 
+function renderSaveSheet(onSubmit: Submit, onClose = vi.fn()) {
+  renderSheet({ open: true, intent: "save", groupName: "My group", onSubmit, onClose });
+  return onClose;
+}
+
+function renderLogInSheet(onSubmit: Submit, onClose = vi.fn()) {
+  renderSheet({ open: true, intent: "logIn", onSubmit, onClose });
+  return onClose;
+}
+
 const email = "gm@example.test";
 const password = "correct horse";
 
-async function fillIn() {
+async function fillIn(withPassword = password) {
   await userEvent.type(await screen.findByLabelText("Email"), email);
-  await userEvent.type(screen.getByLabelText("Password"), password);
+  await userEvent.type(screen.getByLabelText("Password"), withPassword);
+}
+
+async function alertText() {
+  return (await screen.findByRole("alert")).textContent;
 }
 
 beforeEach(() => {
@@ -39,16 +56,7 @@ beforeEach(() => {
 describe("AccountSheet saving a Group", () => {
   it("creates an Account by default and closes once the Group is saved", async () => {
     const onSubmit = vi.fn(() => Promise.resolve());
-    const onClose = vi.fn();
-    renderInRouter(
-      <AccountSheet
-        open
-        intent="save"
-        groupName="My group"
-        onSubmit={onSubmit}
-        onClose={onClose}
-      />,
-    );
+    const onClose = renderSaveSheet(onSubmit);
 
     expect(await screen.findByRole("heading", { name: "Keep My group" })).toBeTruthy();
     expect(screen.getByText(/The player link stays exactly the same/)).toBeTruthy();
@@ -63,15 +71,7 @@ describe("AccountSheet saving a Group", () => {
 
   it("logs in to an existing Account when the GM already has one", async () => {
     const onSubmit = vi.fn(() => Promise.resolve());
-    renderInRouter(
-      <AccountSheet
-        open
-        intent="save"
-        groupName="My group"
-        onSubmit={onSubmit}
-        onClose={() => {}}
-      />,
-    );
+    renderSaveSheet(onSubmit);
 
     await userEvent.click(await screen.findByRole("radio", { name: "I already have one" }));
     await fillIn();
@@ -86,82 +86,82 @@ describe("AccountSheet saving a Group", () => {
       .fn()
       .mockRejectedValueOnce(new ConvexError({ code: "EMAIL_TAKEN" }))
       .mockResolvedValueOnce(undefined);
-    renderInRouter(
-      <AccountSheet
-        open
-        intent="save"
-        groupName="My group"
-        onSubmit={onSubmit}
-        onClose={() => {}}
-      />,
-    );
+    renderSaveSheet(onSubmit);
 
     await fillIn();
     await userEvent.click(screen.getByRole("button", { name: "Save group" }));
-    expect(await screen.findByText("That email already has an account.")).toBeTruthy();
+    expect(await alertText()).toBe("That email already has an account.");
 
     await userEvent.click(screen.getByRole("button", { name: "Log in instead" }));
+    expect(document.activeElement).toBe(screen.getByLabelText("Password"));
     await userEvent.click(screen.getByRole("button", { name: "Log in and save" }));
 
     expect(onSubmit).toHaveBeenLastCalledWith({ email, password, mode: "logIn" });
   });
 
-  it("keeps the fields and disables the button while saving", async () => {
+  it("offers to create an Account when logging in to save fails", async () => {
+    const onSubmit = vi
+      .fn()
+      .mockRejectedValueOnce(new ConvexError({ code: "INVALID_CREDENTIALS" }))
+      .mockResolvedValueOnce(undefined);
+    renderSaveSheet(onSubmit);
+
+    await userEvent.click(await screen.findByRole("radio", { name: "I already have one" }));
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Log in and save" }));
+    expect(await alertText()).toBe("Wrong email or password.");
+
+    await userEvent.click(screen.getByRole("button", { name: "Create account instead" }));
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+
+    expect(onSubmit).toHaveBeenLastCalledWith({ email, password, mode: "create" });
+  });
+
+  it("keeps the fields, and stays open, while saving", async () => {
     let finish: () => void = () => {};
     const onSubmit = vi.fn(() => new Promise<void>((resolve) => (finish = resolve)));
-    renderInRouter(
-      <AccountSheet
-        open
-        intent="save"
-        groupName="My group"
-        onSubmit={onSubmit}
-        onClose={() => {}}
-      />,
-    );
+    const onClose = renderSaveSheet(onSubmit);
 
     await fillIn();
     await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+    fireEvent(screen.getByRole("dialog"), new Event("cancel", { cancelable: true }));
 
+    expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Saving…" })).toHaveProperty("disabled", true);
     expect(screen.getByLabelText("Email")).toHaveProperty("value", email);
     expect(screen.getByLabelText("Password")).toHaveProperty("value", password);
     finish();
   });
-});
 
-describe("AccountSheet checks before it asks the server", () => {
-  it("refuses a password under 8 characters when creating an Account", async () => {
+  it("refuses a password under 8 characters before asking the server", async () => {
     const onSubmit = vi.fn(() => Promise.resolve());
-    renderInRouter(
-      <AccountSheet
-        open
-        intent="save"
-        groupName="My group"
-        onSubmit={onSubmit}
-        onClose={() => {}}
-      />,
-    );
+    renderSaveSheet(onSubmit);
 
     const passwordField = await screen.findByLabelText("Password");
     const hint = document.getElementById(passwordField.getAttribute("aria-describedby") ?? "");
     expect(hint?.textContent).toBe("At least 8 characters.");
 
-    await userEvent.type(screen.getByLabelText("Email"), email);
-    await userEvent.type(passwordField, "short");
+    await fillIn("short");
     await userEvent.click(screen.getByRole("button", { name: "Save group" }));
 
-    expect((await screen.findByRole("alert")).textContent).toBe(
-      "Use at least 8 characters for the password.",
-    );
+    expect(await alertText()).toBe("Use at least 8 characters for the password.");
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("explains a password the server finds too short", async () => {
+    renderSaveSheet(vi.fn().mockRejectedValueOnce(new ConvexError({ code: "WEAK_PASSWORD" })));
+
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+
+    expect(await alertText()).toBe("Use at least 8 characters for the password.");
   });
 });
 
 describe("AccountSheet logging in", () => {
   it("asks only for the email and the password", async () => {
     const onSubmit = vi.fn(() => Promise.resolve());
-    const onClose = vi.fn();
-    renderInRouter(<AccountSheet open intent="logIn" onSubmit={onSubmit} onClose={onClose} />);
+    const onClose = renderLogInSheet(onSubmit);
 
     expect(await screen.findByRole("heading", { name: "Log in" })).toBeTruthy();
     expect(screen.queryByRole("radio")).toBeNull();
@@ -170,6 +170,15 @@ describe("AccountSheet logging in", () => {
     await userEvent.click(screen.getByRole("button", { name: "Log in" }));
 
     expect(onSubmit).toHaveBeenCalledWith({ email, password, mode: "logIn" });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("sends a GM without an Account back to create their link", async () => {
+    const onClose = renderLogInSheet(vi.fn());
+    await userEvent.click(await screen.findByRole("button", { name: "Go back" }));
+    expect(screen.getByText(/No account yet\?/).textContent).toBe(
+      "No account yet? Go back and create your link.",
+    );
     expect(onClose).toHaveBeenCalled();
   });
 
@@ -185,62 +194,15 @@ describe("AccountSheet logging in", () => {
     ],
     [new Error("Server Error"), "That didn't work. Try again."],
   ])("explains a failed log in and lets the GM retry", async (error, message) => {
-    const onSubmit = vi.fn().mockRejectedValueOnce(error);
-    const onClose = vi.fn();
-    renderInRouter(<AccountSheet open intent="logIn" onSubmit={onSubmit} onClose={onClose} />);
+    const onClose = renderLogInSheet(vi.fn().mockRejectedValueOnce(error));
 
     await fillIn();
     await userEvent.click(screen.getByRole("button", { name: "Log in" }));
 
-    expect((await screen.findByRole("alert")).textContent).toBe(message);
+    expect(await alertText()).toBe(message);
+    expect(screen.queryByRole("button", { name: "Create account instead" })).toBeNull();
     expect(screen.getByRole("button", { name: "Log in" })).toHaveProperty("disabled", false);
     expect(screen.getByLabelText("Email")).toHaveProperty("value", email);
     expect(onClose).not.toHaveBeenCalled();
-  });
-
-  it("offers to create an Account when logging in to save fails", async () => {
-    const onSubmit = vi
-      .fn()
-      .mockRejectedValueOnce(new ConvexError({ code: "INVALID_CREDENTIALS" }))
-      .mockResolvedValueOnce(undefined);
-    renderInRouter(
-      <AccountSheet
-        open
-        intent="save"
-        groupName="My group"
-        onSubmit={onSubmit}
-        onClose={() => {}}
-      />,
-    );
-
-    await userEvent.click(await screen.findByRole("radio", { name: "I already have one" }));
-    await fillIn();
-    await userEvent.click(screen.getByRole("button", { name: "Log in and save" }));
-    expect((await screen.findByRole("alert")).textContent).toBe("Wrong email or password.");
-
-    await userEvent.click(screen.getByRole("button", { name: "Create account instead" }));
-    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
-
-    expect(onSubmit).toHaveBeenLastCalledWith({ email, password, mode: "create" });
-  });
-
-  it("explains a password that is too short when creating an Account", async () => {
-    const onSubmit = vi.fn().mockRejectedValueOnce(new ConvexError({ code: "WEAK_PASSWORD" }));
-    renderInRouter(
-      <AccountSheet
-        open
-        intent="save"
-        groupName="My group"
-        onSubmit={onSubmit}
-        onClose={() => {}}
-      />,
-    );
-
-    await fillIn();
-    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
-
-    expect((await screen.findByRole("alert")).textContent).toBe(
-      "Use at least 8 characters for the password.",
-    );
   });
 });

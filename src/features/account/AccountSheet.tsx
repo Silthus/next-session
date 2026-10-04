@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ConvexError } from "convex/values";
-import { useId, useState, type FormEvent, type ReactNode } from "react";
+import { useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { AppErrorData } from "../../../convex/model/errors";
 import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
@@ -22,21 +22,32 @@ type AccountSheetProps = {
 
 export function AccountSheet(props: AccountSheetProps) {
   const { open, onClose } = props;
+  const [busy, setBusy] = useState(false);
   const title = props.intent === "save" ? `Keep ${props.groupName}` : "Log in";
   return (
-    <Sheet open={open} title={title} onClose={onClose}>
-      {open && <AccountForm {...props} />}
+    <Sheet
+      open={open}
+      title={title}
+      onClose={() => {
+        if (!busy) onClose();
+      }}
+    >
+      {open && <AccountForm {...props} busy={busy} setBusy={setBusy} />}
     </Sheet>
   );
 }
 
-function AccountForm(props: AccountSheetProps) {
+function AccountForm({
+  busy,
+  setBusy,
+  ...props
+}: AccountSheetProps & { busy: boolean; setBusy: (busy: boolean) => void }) {
   const { intent, onSubmit, onClose } = props;
   const [mode, setMode] = useState<SaveMode>(intent === "save" ? "create" : "logIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<Failure | null>(null);
+  const passwordField = useRef<HTMLInputElement>(null);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -48,6 +59,7 @@ function AccountForm(props: AccountSheetProps) {
     setFailure(null);
     try {
       await onSubmit({ email: email.trim(), password, mode });
+      setBusy(false);
       onClose();
     } catch (error) {
       setFailure(describeFailure(error, intent));
@@ -59,6 +71,13 @@ function AccountForm(props: AccountSheetProps) {
     setMode(next);
     setFailure(null);
   };
+
+  const takeOffer = (next: SaveMode) => {
+    switchMode(next);
+    passwordField.current?.focus();
+  };
+
+  const offer = failure?.offer;
 
   return (
     <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
@@ -85,6 +104,7 @@ function AccountForm(props: AccountSheetProps) {
       <Field label="Password" hint={mode === "create" ? "At least 8 characters." : undefined}>
         {({ id, hintId }) => (
           <input
+            ref={passwordField}
             id={id}
             aria-describedby={hintId}
             type="password"
@@ -101,13 +121,13 @@ function AccountForm(props: AccountSheetProps) {
           <p role="alert" className="font-medium text-busy">
             {failure.message}
           </p>
-          {failure.offer && (
+          {offer && (
             <button
               type="button"
-              onClick={() => switchMode(failure.offer!)}
+              onClick={() => takeOffer(offer)}
               className="font-semibold text-accent-strong underline underline-offset-2"
             >
-              {failure.offer === "logIn" ? "Log in instead" : "Create account instead"}
+              {offer === "logIn" ? "Log in instead" : "Create account instead"}
             </button>
           )}
         </div>
@@ -143,9 +163,9 @@ function SheetFooter({
           onClick={onClose}
           className="font-semibold text-ink-2 underline underline-offset-2 hover:text-ink"
         >
-          Create your link
+          Go back
         </button>{" "}
-        and save it later.
+        and create your link.
       </p>
     );
   }
