@@ -91,7 +91,6 @@ export function Join({
             placeholder={fieldLabel}
             autoComplete="given-name"
             enterKeyHint="go"
-            maxLength={120}
             className="h-14 min-w-0 flex-1 rounded-md border border-line bg-paper px-3.5 text-base outline-none transition-colors placeholder:text-ink-3 focus:border-accent"
           />
           <Button
@@ -111,7 +110,7 @@ export function Join({
       </section>
       <p className="text-center text-xs text-ink-3">
         Planning your own game?{" "}
-        <Link to="/" className="font-semibold text-accent hover:underline">
+        <Link to="/" className="-my-3 inline-block py-3 font-semibold text-accent hover:underline">
           Create your link
         </Link>
       </p>
@@ -139,14 +138,14 @@ function PlayerChip({
       disabled={disabled}
       aria-describedby={describedBy}
       className={cn(
-        "flex min-h-11 items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60",
+        "flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60",
         highlighted
           ? "animate-pop border-accent bg-accent-soft ring-2 ring-accent"
           : "border-line bg-paper",
       )}
     >
       <Avatar name={player.name} size="sm" />
-      {player.name}
+      <span className="min-w-0 wrap-anywhere">{player.name}</span>
     </button>
   );
 }

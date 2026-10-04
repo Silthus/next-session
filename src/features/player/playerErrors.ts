@@ -1,5 +1,6 @@
 import { ConvexError } from "convex/values";
 import type { AppErrorData } from "../../../convex/model/errors";
+import { NAME_MAX_LENGTH } from "../../../shared/names";
 
 export function appErrorOf(error: unknown): AppErrorData | null {
   if (!(error instanceof ConvexError)) return null;
@@ -18,7 +19,7 @@ export function joinErrorCopy(error: AppErrorData | null): string {
     case "ROSTER_FULL":
       return "This group is full. Ask your GM to make room.";
     case "INVALID_NAME":
-      return "Use a name of up to 60 characters.";
+      return `Use a name of up to ${String(NAME_MAX_LENGTH)} characters.`;
     default:
       return "That didn't work. Try again.";
   }

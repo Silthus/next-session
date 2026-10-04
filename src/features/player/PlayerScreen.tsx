@@ -3,7 +3,7 @@ import type { FunctionReturnType } from "convex/server";
 import { useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { fillRestDates, type Answer } from "../../../shared/answers";
-import { monthOf, todayUtc, type IsoDate, type IsoMonth } from "../../../shared/dates";
+import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
 import { Skeleton } from "../../ui/Skeleton";
 import { Toast } from "../../ui/Toast";
 import { Join } from "./Join";
@@ -132,7 +132,8 @@ function PlayerAnswers({
   const fillRest = useMutation(api.player.fillRest).withOptimisticUpdate((store, args) => {
     const query = { shareToken, playerId, month: args.month };
     const current = store.getQuery(api.player.answers, query);
-    if (current) store.setQuery(api.player.answers, query, withRestBusy(current, args.month));
+    if (current)
+      store.setQuery(api.player.answers, query, withRestBusy(current, args.month, today));
   });
   const [hintVisible, setHintVisible] = useState(() => !hasSeenHint(storage, group.groupId));
   const [toast, setToast] = useState<{ message: string; id: number } | null>(null);
@@ -185,6 +186,7 @@ function PlayerAnswers({
 function PlayerLoading() {
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-4 px-4 py-4 sm:px-5" aria-busy="true">
+      <span className="sr-only">Loading…</span>
       <div className="flex items-center gap-3">
         <Skeleton className="size-9 rounded-md" />
         <div className="flex flex-col gap-1.5">
@@ -205,7 +207,7 @@ function withAnswer(answers: Record<IsoDate, Answer>, date: IsoDate, answer: Ans
   return next;
 }
 
-function withRestBusy(answers: Record<IsoDate, Answer>, month: IsoMonth) {
-  const rest = fillRestDates(month, todayUtc(Date.now()), new Set(Object.keys(answers)));
+function withRestBusy(answers: Record<IsoDate, Answer>, month: IsoMonth, today: IsoDate) {
+  const rest = fillRestDates(month, today, new Set(Object.keys(answers)));
   return { ...answers, ...Object.fromEntries(rest.map((date) => [date, "busy" as const])) };
 }

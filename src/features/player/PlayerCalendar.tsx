@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useRef, useState, type TouchEvent } from "react";
+import { useEffect, useId, useRef, useState, type RefObject, type TouchEvent } from "react";
 import { nextAnswer, type Answer } from "../../../shared/answers";
 import type { IsoDate, IsoMonth } from "../../../shared/dates";
 import { pageTitle } from "../../lib/pageTitle";
@@ -62,6 +62,15 @@ export function PlayerCalendar({
   const [stagger, setStagger] = useState<ReadonlyMap<IsoDate, number>>(new Map());
   const loaded = answers !== undefined;
   const heading = useFocusOnMount<HTMLHeadingElement>();
+  const monthHeading = useRef<HTMLHeadingElement>(null);
+  const doneHeading = useRef<HTMLParagraphElement>(null);
+  const focusDoneCardWhenDone = useRef(false);
+
+  useEffect(() => {
+    if (!view.done || !focusDoneCardWhenDone.current) return;
+    focusDoneCardWhenDone.current = false;
+    doneHeading.current?.focus();
+  }, [view.done]);
 
   function answer(day: PlayerDay) {
     vibrate(8);
@@ -73,7 +82,13 @@ export function PlayerCalendar({
     vibrate([20, 10, 20]);
     setStagger(new Map(view.fillRest.map((date, index) => [date, index])));
     setTimeout(() => setStagger(new Map()), view.fillRest.length * FILL_STAGGER_MS + 300);
+    focusDoneCardWhenDone.current = true;
     onFillRest(month);
+  }
+
+  function fillNextMonth(next: IsoMonth) {
+    monthHeading.current?.focus();
+    onMonthChange(next);
   }
 
   return (
@@ -91,48 +106,64 @@ export function PlayerCalendar({
               {groupName}
             </h1>
             <p className="text-xs text-ink-3">
-              Answering as <span className="font-semibold text-ink">{playerName}</span> ·{" "}
+              Answering as{" "}
+              <span className="inline-block max-w-40 truncate align-bottom font-semibold text-ink">
+                {playerName}
+              </span>{" "}
+              ·{" "}
               <button
                 type="button"
                 onClick={onNotYou}
-                className="underline underline-offset-2 hover:text-ink"
+                className="-mx-1 -my-3 px-1 py-3 underline underline-offset-2 hover:text-ink"
               >
                 Not you?
               </button>
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          aria-label="How it works"
-          aria-expanded={hintVisible}
-          onClick={onHintToggle}
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"
-        >
-          ?
-        </button>
+        {!view.readOnly && (
+          <button
+            type="button"
+            aria-label="How it works"
+            aria-expanded={hintVisible}
+            onClick={onHintToggle}
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"
+          >
+            ?
+          </button>
+        )}
       </header>
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5">
-        {!view.readOnly && loaded && (
-          <div className="rounded-lg border border-line bg-surface p-3.5 shadow-card">
-            <Progress {...view.progress} />
-          </div>
-        )}
+        {!view.readOnly &&
+          (loaded ? (
+            <div className="rounded-lg border border-line bg-surface p-3.5 shadow-card">
+              <Progress {...view.progress} />
+            </div>
+          ) : (
+            <Skeleton className="h-15.5 rounded-lg" />
+          ))}
 
         <MonthCard
           view={view}
           loaded={loaded}
           hintVisible={hintVisible && !view.readOnly}
+          headingRef={monthHeading}
           stagger={stagger}
           onAnswer={answer}
           onMonthChange={onMonthChange}
         />
 
+        {!view.readOnly && !loaded && <Skeleton className="h-14 rounded-lg" />}
         {!view.readOnly &&
           loaded &&
           (view.done ? (
-            <DoneCard month={month} nextMonth={view.nextMonth} onMonthChange={onMonthChange} />
+            <DoneCard
+              month={month}
+              nextMonth={view.nextMonth}
+              headingRef={doneHeading}
+              onFillNextMonth={fillNextMonth}
+            />
           ) : (
             <Button
               variant={view.progress.answered > 0 ? "secondary" : "ghost"}
@@ -151,7 +182,10 @@ export function PlayerCalendar({
       </main>
 
       <footer className="mx-auto flex w-full max-w-xl flex-col items-center gap-2 px-4 pb-6 sm:px-5">
-        <Link to="/" className="text-xs font-semibold text-accent hover:underline">
+        <Link
+          to="/"
+          className="inline-flex min-h-11 items-center text-xs font-semibold text-accent hover:underline"
+        >
           Plan your own game →
         </Link>
         <LegalFooter className="justify-center" />
@@ -164,6 +198,7 @@ function MonthCard({
   view,
   loaded,
   hintVisible,
+  headingRef,
   stagger,
   onAnswer,
   onMonthChange,
@@ -171,12 +206,14 @@ function MonthCard({
   view: PlayerMonth;
   loaded: boolean;
   hintVisible: boolean;
+  headingRef: RefObject<HTMLHeadingElement | null>;
   stagger: ReadonlyMap<IsoDate, number>;
   onAnswer: (day: PlayerDay) => void;
   onMonthChange: (month: IsoMonth) => void;
 }) {
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
   const hintDate = view.days.find((day) => !day.locked)?.date;
+  const hintId = useId();
 
   function startSwipe(event: TouchEvent) {
     const touch = event.touches[0];
@@ -203,9 +240,15 @@ function MonthCard({
     >
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <h2 className="font-display text-2xl font-bold">{view.label}</h2>
+          <h2
+            ref={headingRef}
+            tabIndex={-1}
+            className="font-display text-2xl font-bold outline-none"
+          >
+            {view.label}
+          </h2>
           {view.readOnly && (
-            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs font-semibold whitespace-nowrap text-ink-3">
+            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs font-semibold whitespace-nowrap text-ink-2">
               Past · read only
             </span>
           )}
@@ -248,9 +291,17 @@ function MonthCard({
         {view.days.map((day) =>
           loaded ? (
             <div key={day.date} className="relative">
-              <DayTile day={day} staggerIndex={stagger.get(day.date)} onAnswer={onAnswer} />
+              <DayTile
+                day={day}
+                staggerIndex={stagger.get(day.date)}
+                describedBy={hintVisible && day.date === hintDate ? hintId : undefined}
+                onAnswer={onAnswer}
+              />
               {hintVisible && day.date === hintDate && (
-                <FirstVisitHint column={(view.leadingBlanks + day.dayOfMonth - 1) % 7} />
+                <FirstVisitHint
+                  id={hintId}
+                  column={(view.leadingBlanks + day.dayOfMonth - 1) % 7}
+                />
               )}
             </div>
           ) : (
@@ -265,10 +316,12 @@ function MonthCard({
 function DayTile({
   day,
   staggerIndex,
+  describedBy,
   onAnswer,
 }: {
   day: PlayerDay;
   staggerIndex: number | undefined;
+  describedBy: string | undefined;
   onAnswer: (day: PlayerDay) => void;
 }) {
   const [popping, setPopping] = useState(false);
@@ -278,6 +331,7 @@ function DayTile({
       type="button"
       disabled={day.locked}
       aria-label={tileLabel(day)}
+      aria-describedby={describedBy}
       onClick={() => {
         setPopping(true);
         onAnswer(day);
@@ -289,7 +343,7 @@ function DayTile({
           : { transitionDelay: `${String(staggerIndex * FILL_STAGGER_MS)}ms` }
       }
       className={cn(
-        "relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2",
+        "relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none motion-reduce:delay-0! sm:p-2",
         answerTiles[day.answer ?? "none"],
         popping && "animate-pop",
         day.locked ? "cursor-default opacity-45 saturate-50" : "active:scale-95",
@@ -298,7 +352,7 @@ function DayTile({
     >
       <span
         className={cn(
-          "text-sm leading-none font-semibold sm:text-base",
+          "text-sm leading-none font-bold sm:text-base",
           day.isToday && !day.answer && "text-accent",
         )}
       >
@@ -329,10 +383,11 @@ function hintAnchorFor(column: number) {
   return column === 3 ? hintAnchors.center : hintAnchors.end;
 }
 
-function FirstVisitHint({ column }: { column: number }) {
+function FirstVisitHint({ id, column }: { id: string; column: number }) {
   const anchor = hintAnchorFor(column);
   return (
     <div
+      id={id}
       role="tooltip"
       className={cn(
         "animate-rise pointer-events-none absolute top-full z-10 mt-2 w-52 max-w-[calc(100vw-2rem)] rounded-md bg-ink px-3 py-2 text-xs leading-snug font-medium text-paper shadow-card",
@@ -351,20 +406,34 @@ function FirstVisitHint({ column }: { column: number }) {
 function DoneCard({
   month,
   nextMonth,
-  onMonthChange,
+  headingRef,
+  onFillNextMonth,
 }: {
   month: IsoMonth;
   nextMonth: IsoMonth | null;
-  onMonthChange: (month: IsoMonth) => void;
+  headingRef: RefObject<HTMLParagraphElement | null>;
+  onFillNextMonth: (month: IsoMonth) => void;
 }) {
   return (
-    <div className="animate-rise flex flex-col gap-2 rounded-lg border border-free bg-free-soft p-4 text-center">
-      <p className="font-display text-lg font-bold text-ink dark:text-free">
+    <div
+      role="status"
+      className="animate-rise flex flex-col gap-2 rounded-lg border border-free bg-free-soft p-4 text-center"
+    >
+      <p
+        ref={headingRef}
+        tabIndex={-1}
+        className="font-display text-lg font-bold text-ink outline-none dark:text-free"
+      >
         {nextMonth ? `All set for ${monthName(month)} ✓` : "All set for now ✓"}
       </p>
       <p className="text-sm text-ink-2">Your GM sees it already.</p>
       {nextMonth && (
-        <Button variant="free" size="lg" className="mt-1" onClick={() => onMonthChange(nextMonth)}>
+        <Button
+          variant="free"
+          size="lg"
+          className="mt-1"
+          onClick={() => onFillNextMonth(nextMonth)}
+        >
           Fill {monthName(nextMonth)} →
         </Button>
       )}

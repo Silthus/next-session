@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
 import { todayUtc, type IsoDate } from "../../../shared/dates";
 
-const DAY = 86_400_000;
+const RECHECK_MS = 60_000;
 
 export function useTodayUtc(): IsoDate {
   const [today, setToday] = useState(() => todayUtc(Date.now()));
 
   useEffect(() => {
     const refresh = () => setToday(todayUtc(Date.now()));
-    const timer = setTimeout(refresh, DAY - (Date.now() % DAY) + 1000);
+    const timer = setInterval(refresh, RECHECK_MS);
     document.addEventListener("visibilitychange", refresh);
+    window.addEventListener("focus", refresh);
     return () => {
-      clearTimeout(timer);
+      clearInterval(timer);
       document.removeEventListener("visibilitychange", refresh);
+      window.removeEventListener("focus", refresh);
     };
-  }, [today]);
+  }, []);
 
   return today;
 }

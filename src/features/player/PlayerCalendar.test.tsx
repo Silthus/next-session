@@ -4,9 +4,9 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps, type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { PlayerCalendar } from "./PlayerCalendar";
 
@@ -23,35 +23,61 @@ function everyDayFrom(first: number, last: number, month = "2026-10") {
   );
 }
 
-function renderCalendar(props: Partial<Props> = {}) {
-  const handlers = {
+function renderInRouter(node: () => ReactNode) {
+  const router = createRouter({
+    routeTree: createRootRoute({ component: node }),
+    history: createMemoryHistory({ initialEntries: ["/"] }),
+  });
+  render(<RouterProvider router={router} />);
+}
+
+function calendarProps(props: Partial<Props> = {}): Props {
+  return {
+    groupName: "Thursday Crew",
+    playerName: "Ana",
+    month: "2026-10",
+    today,
+    answers: {},
+    sessionDates: [],
+    hintVisible: false,
     onAnswer: vi.fn(),
     onFillRest: vi.fn(),
     onMonthChange: vi.fn(),
     onNotYou: vi.fn(),
     onHintToggle: vi.fn(),
+    ...props,
   };
-  const rootRoute = createRootRoute({
-    component: () => (
-      <PlayerCalendar
-        groupName="Thursday Crew"
-        playerName="Ana"
-        month="2026-10"
-        today={today}
-        answers={{}}
-        sessionDates={[]}
-        hintVisible={false}
-        {...handlers}
-        {...props}
-      />
-    ),
-  });
-  const router = createRouter({
-    routeTree: rootRoute,
-    history: createMemoryHistory({ initialEntries: ["/"] }),
-  });
-  render(<RouterProvider router={router} />);
+}
+
+function renderCalendar(overrides: Partial<Props> = {}) {
+  const handlers = {
+    onAnswer: vi.fn<Props["onAnswer"]>(),
+    onFillRest: vi.fn<Props["onFillRest"]>(),
+    onMonthChange: vi.fn<Props["onMonthChange"]>(),
+    onNotYou: vi.fn<Props["onNotYou"]>(),
+    onHintToggle: vi.fn<Props["onHintToggle"]>(),
+  };
+  const props = calendarProps({ ...handlers, ...overrides });
+  renderInRouter(() => <PlayerCalendar {...props} />);
   return handlers;
+}
+
+function CalendarWithBackend() {
+  const [month, setMonth] = useState("2026-10");
+  const [answers, setAnswers] = useState<Props["answers"]>({ "2026-10-04": "free" });
+  return (
+    <PlayerCalendar
+      {...calendarProps({
+        month,
+        answers,
+        onFillRest: () => setAnswers(everyDayFrom(4, 31)),
+        onMonthChange: (next) => {
+          setMonth(next);
+          setAnswers({});
+        },
+      })}
+    />
+  );
 }
 
 async function tile(name: string | RegExp) {
@@ -198,4 +224,60 @@ describe("PlayerCalendar", () => {
     expect(await screen.findByRole("heading", { level: 2, name: "October 2026" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /October 4/ })).toBeNull();
   });
+
+  it("hands focus to the done card after Fill Rest and to the month after Fill next", async () => {
+    renderInRouter(() => <CalendarWithBackend />);
+
+    await userEvent.click(await screen.findByRole("button", { name: /^Mark the other/ }));
+    expect(screen.getByText("All set for October ✓")).toBe(document.activeElement);
+    expect(screen.getByRole("status").textContent).toContain("Your GM sees it already.");
+
+    await userEvent.click(screen.getByRole("button", { name: "Fill November →" }));
+    expect(screen.getByRole("heading", { level: 2, name: "November 2026" })).toBe(
+      document.activeElement,
+    );
+  });
+
+  it("ties the first-visit hint to the tile it points at", async () => {
+    renderCalendar({ hintVisible: true });
+
+    const hint = await screen.findByRole("tooltip");
+    expect((await tile(/October 4/)).getAttribute("aria-describedby")).toBe(hint.id);
+  });
+
+  it("offers no How it works on a read-only month", async () => {
+    renderCalendar({ month: "2026-09" });
+
+    expect(await screen.findByText("Past · read only")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "How it works" })).toBeNull();
+  });
+
+  it.each([
+    ["a left swipe", { x: 200, y: 100 }, { x: 100, y: 110 }, "2026-11"],
+    ["a right swipe", { x: 100, y: 100 }, { x: 200, y: 90 }, "2026-09"],
+  ])("changes the month on %s", async (_case, from, to, month) => {
+    const { onMonthChange } = renderCalendar();
+    const grid = await screen.findByRole("group", { name: "October 2026" });
+
+    swipe(grid, from, to);
+
+    expect(onMonthChange).toHaveBeenCalledWith(month);
+  });
+
+  it.each([
+    ["a mostly vertical drag", "2026-10", { x: 200, y: 100 }, { x: 140, y: 300 }],
+    ["a left swipe past the Booking Window", "2026-12", { x: 200, y: 100 }, { x: 100, y: 100 }],
+  ])("keeps the month on %s", async (_case, month, from, to) => {
+    const { onMonthChange } = renderCalendar({ month });
+    const grid = await screen.findByRole("group");
+
+    swipe(grid, from, to);
+
+    expect(onMonthChange).not.toHaveBeenCalled();
+  });
 });
+
+function swipe(target: Element, from: { x: number; y: number }, to: { x: number; y: number }) {
+  fireEvent.touchStart(target, { touches: [{ clientX: from.x, clientY: from.y }] });
+  fireEvent.touchEnd(target, { changedTouches: [{ clientX: to.x, clientY: to.y }] });
+}
