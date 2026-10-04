@@ -1,9 +1,9 @@
 import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useConvexAuth, useQuery } from "convex/react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { todayUtc, type IsoDate, type IsoMonth } from "../../../shared/dates";
+import type { IsoDate, IsoMonth } from "../../../shared/dates";
 import { summarizeMonth } from "../../../shared/monthSummary";
 import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
@@ -16,6 +16,7 @@ import { visibleDay, visibleMonth } from "./calendar/calendarDates";
 import { DayPanel } from "./calendar/DayPanel";
 import { HeatCalendar } from "./calendar/HeatCalendar";
 import { useSessionActions } from "./calendar/useSessionActions";
+import { useToday } from "./calendar/useToday";
 
 export type GroupSearch = { month?: string; day?: string };
 
@@ -48,7 +49,7 @@ function GroupSurface({
   name: string;
   search: GroupSearch;
 }) {
-  const [today] = useState(() => todayUtc(Date.now()));
+  const today = useToday();
   const month = visibleMonth(search.month, today);
   const selectedDay = visibleDay(search.day, month);
   const schedule = useQuery(api.schedule.month, { groupId, month });
