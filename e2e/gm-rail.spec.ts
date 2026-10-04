@@ -101,10 +101,29 @@ test("the GM copies, rotates, and undoes the Share Link from the rail", async ({
   const rotated = await shareTokenOf(gm.client, gm.groupId);
   await expect(rail.getByText(`/s/${rotated}`)).toBeVisible();
 
-  await toast.getByRole("button", { name: "Undo" }).click();
+  await toast.getByRole("button", { name: "Undo" }).focus();
+  await page.keyboard.press("Enter");
   await expect(page.getByRole("status")).toContainText("The old link works again.");
+  await expect(page.locator("[data-month-heading]")).toBeFocused();
   await expect(rail.getByText(`/s/${gm.shareToken}`)).toBeVisible();
   await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).toBe(gm.shareToken);
+});
+
+test("the newest action owns the only toast", async ({ page }) => {
+  const gm = await signInAnonymousGm();
+  await seedCrew(gm);
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
+  const rail = page.getByRole("complementary", { name: "Group overview" });
+
+  await rail.getByRole("button", { name: "Rotate" }).click();
+  await expect(page.getByRole("status")).toContainText("Link rotated.");
+  await rail.getByRole("button", { name: "Schedule session" }).click();
+  await expect(page.getByRole("status")).toHaveCount(1);
+  await expect(page.getByRole("status")).toContainText("Players see it on the link.");
+
+  await page.getByRole("status").getByRole("button", { name: "Undo" }).click();
+  await expect(rail.getByRole("button", { name: "Schedule session" })).toBeVisible();
+  await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).not.toBe(gm.shareToken);
 });
 
 test("the GM adds, renames, and removes Players", async ({ page }) => {
@@ -223,6 +242,7 @@ test("an Anonymous GM is nudged to save once a Player joins, until Later", async
 
   await nudge.getByRole("button", { name: "Later" }).click();
   await expect(nudge).toBeHidden();
+  await expect(page.locator("[data-month-heading]")).toBeFocused();
   await page.reload();
   await expect(switcher(page, "My group")).toBeVisible();
   await expect(nudge).toBeHidden();

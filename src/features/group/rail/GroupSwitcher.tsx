@@ -85,6 +85,18 @@ function SwitcherMenu({
   const [busy, setBusy] = useState<"creating" | "deleting" | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const deleteButton = useRef<HTMLButtonElement>(null);
+  const refocusDelete = useRef(false);
+  const keepGroup = () => {
+    refocusDelete.current = true;
+    setConfirmingDelete(false);
+  };
+
+  useEffect(() => {
+    if (confirmingDelete || !refocusDelete.current) return;
+    refocusDelete.current = false;
+    deleteButton.current?.focus();
+  }, [confirmingDelete]);
   const playerCount = groups?.find((candidate) => candidate.id === group.id)?.playerCount ?? 0;
 
   const run = async (kind: "creating" | "deleting", action: () => Promise<unknown>) => {
@@ -156,10 +168,11 @@ function SwitcherMenu({
           playerCount={playerCount}
           busy={busy === "deleting"}
           onDelete={() => void run("deleting", onDelete)}
-          onKeep={() => setConfirmingDelete(false)}
+          onKeep={keepGroup}
         />
       ) : (
         <button
+          ref={deleteButton}
           type="button"
           disabled={groups === undefined}
           onClick={() => setConfirmingDelete(true)}
@@ -197,7 +210,7 @@ function DeleteConfirm({
       aria-labelledby={questionId}
       className="rounded-md bg-busy-soft p-2.5 text-xs"
     >
-      <p id={questionId} className="font-semibold">{`Delete ${name}?`}</p>
+      <p id={questionId} className="font-semibold break-words">{`Delete ${name}?`}</p>
       <p className="mt-0.5 text-ink-2">{lossLine(playerCount)}</p>
       <div className="mt-2 flex flex-wrap gap-2">
         <Button size="sm" variant="danger" busy={busy && "Deleting…"} onClick={onDelete}>

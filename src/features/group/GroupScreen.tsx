@@ -16,7 +16,7 @@ import { AccountSheet } from "../account/AccountSheet";
 import type { SaveInput } from "../account/save";
 import { useGm } from "../account/useGm";
 import { visibleDay, visibleMonth } from "./calendar/calendarDates";
-import { focusDay } from "./calendar/dayFocus";
+import { focusDay, focusMonthHeading } from "./calendar/dayFocus";
 import { DayPanel } from "./calendar/DayPanel";
 import { HeatCalendar } from "./calendar/HeatCalendar";
 import { MobileDaySheet } from "./calendar/MobileDaySheet";
@@ -48,7 +48,7 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
   const group = useQuery(api.groups.get, signedIn ? { groupId } : "skip");
   const [saveSheetFor, setSaveSheetFor] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const toasts = useToast();
+  const toasts = useToast(groupId);
 
   const save = async (input: SaveInput) => {
     setSaving(true);
@@ -185,12 +185,14 @@ function GroupSurface({
     toasts.release();
     toasts.dismiss();
     toast.undo?.();
+    if (document.activeElement?.closest('[role="status"]')) focusMonthHeading();
   };
   const rotate = () => void rail.rotate();
   const laterNudge = () => {
     const now = Date.now();
     dismissNudge(now);
     setNudgeSnoozedAt(now);
+    focusMonthHeading();
   };
 
   const heading = <GroupSwitcherContainer group={group} />;
@@ -233,7 +235,7 @@ function GroupSurface({
           onLater={laterNudge}
         />
       )}
-      {!wide && <ShareLinkCard url={shareUrl} compact onRotate={rotate} />}
+      {!wide && <ShareLinkCard key={shareUrl} url={shareUrl} compact onRotate={rotate} />}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
         <HeatCalendar
           month={requestedMonth}
@@ -246,7 +248,7 @@ function GroupSurface({
         />
         <GroupRail
           wide={wide}
-          shareLink={<ShareLinkCard url={shareUrl} onRotate={rotate} />}
+          shareLink={<ShareLinkCard key={shareUrl} url={shareUrl} onRotate={rotate} />}
           dayPanel={dayPanel()}
           panels={{
             bestNights: (

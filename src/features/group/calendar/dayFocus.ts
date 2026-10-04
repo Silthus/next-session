@@ -2,12 +2,12 @@ import type { IsoDate } from "../../../../shared/dates";
 
 export function focusDay(date: IsoDate) {
   const cell = dayCellOf(date);
-  const target = cell && !cell.matches(":disabled") ? cell : monthHeading();
-  target?.focus();
+  if (cell && !cell.matches(":disabled")) cell.focus();
+  else focusMonthHeading();
 }
 
-function monthHeading() {
-  return document.querySelector<HTMLElement>("[data-month-heading]");
+export function focusMonthHeading() {
+  document.querySelector<HTMLElement>("[data-month-heading]")?.focus();
 }
 
 export function dayCellOf(date: IsoDate) {

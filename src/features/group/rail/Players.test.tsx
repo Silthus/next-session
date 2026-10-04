@@ -150,6 +150,7 @@ describe("Players", () => {
     await userEvent.click(within(card).getByRole("button", { name: "Remove" }));
     await userEvent.click(within(card).getByRole("button", { name: "Remove Ana" }));
     expect(onRemove).toHaveBeenCalledWith("Ana");
+    expect(document.activeElement).toBe(within(card).getByRole("button", { name: "Add player" }));
   });
 
   it("shows a Player's actions inside their row and closes them with Escape", async () => {

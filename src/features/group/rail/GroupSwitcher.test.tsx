@@ -109,6 +109,7 @@ describe("GroupSwitcher", () => {
     );
     await userEvent.click(within(confirm).getByRole("button", { name: "Keep" }));
     expect(screen.queryByRole("group")).toBeNull();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Delete group" }));
 
     await userEvent.click(screen.getByRole("button", { name: "Delete group" }));
     await userEvent.click(screen.getByRole("button", { name: "Delete Thursday Crew" }));

@@ -66,7 +66,10 @@ export function Players<Player extends PlayerRow>({
               key={entry.player._id}
               entry={entry}
               onRename={(name) => onRename(entry.player._id, name)}
-              onRemove={() => onRemove(entry.player._id)}
+              onRemove={async () => {
+                await onRemove(entry.player._id);
+                addButton.current?.focus();
+              }}
             />
           ))}
         </ul>
