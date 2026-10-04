@@ -86,36 +86,38 @@ function AccountForm({
           ? "Open it on any device. The player link stays exactly the same, your players notice nothing."
           : "Open your groups on this device."}
       </p>
-      {intent === "save" && <ModeSwitch mode={mode} onChange={switchMode} />}
-      <Field label="Email">
-        {({ id }) => (
-          <input
-            id={id}
-            type="email"
-            required
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@example.com"
-            className={inputClassName}
-          />
-        )}
-      </Field>
-      <Field label="Password" hint={mode === "create" ? "At least 8 characters." : undefined}>
-        {({ id, hintId }) => (
-          <input
-            ref={passwordField}
-            id={id}
-            aria-describedby={hintId}
-            type="password"
-            required
-            autoComplete={mode === "create" ? "new-password" : "current-password"}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className={inputClassName}
-          />
-        )}
-      </Field>
+      <fieldset disabled={busy} className="flex flex-col gap-4 disabled:opacity-70">
+        {intent === "save" && <ModeSwitch mode={mode} onChange={switchMode} />}
+        <Field label="Email">
+          {({ id }) => (
+            <input
+              id={id}
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@example.com"
+              className={inputClassName}
+            />
+          )}
+        </Field>
+        <Field label="Password" hint={mode === "create" ? "At least 8 characters." : undefined}>
+          {({ id, hintId }) => (
+            <input
+              ref={passwordField}
+              id={id}
+              aria-describedby={hintId}
+              type="password"
+              required
+              autoComplete={mode === "create" ? "new-password" : "current-password"}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className={inputClassName}
+            />
+          )}
+        </Field>
+      </fieldset>
       {failure && (
         <div className="flex flex-wrap items-center gap-x-2 text-sm">
           <p role="alert" className="font-medium text-busy">

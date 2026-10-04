@@ -65,7 +65,7 @@ export function Landing() {
     <>
       <LandingView
         state={landingState(phase, failure, created, savedAs)}
-        showLogIn={!signedIn && phase !== "creating"}
+        showLogIn={gm.status === "signedOut" && (phase === "idle" || phase === "failed")}
         onCreate={() => void create()}
         onLogIn={() => setSheet("logIn")}
         onSave={() => setSheet("save")}

@@ -128,6 +128,10 @@ describe("AccountSheet saving a Group", () => {
 
     expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Saving…" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("radio", { name: "I already have one" }).matches(":disabled")).toBe(
+      true,
+    );
+    expect(screen.getByLabelText("Email").matches(":disabled")).toBe(true);
     expect(screen.getByLabelText("Email")).toHaveProperty("value", email);
     expect(screen.getByLabelText("Password")).toHaveProperty("value", password);
     finish();
