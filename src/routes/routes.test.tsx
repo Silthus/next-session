@@ -3,6 +3,8 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { routeTree } from "../routeTree.gen";
 
+vi.mock("../features/landing/Landing", () => ({ Landing: () => <main>Landing</main> }));
+
 function renderAt(path: string) {
   const router = createRouter({
     routeTree,
@@ -59,7 +61,7 @@ describe("legal routes", () => {
 describe("document titles", () => {
   it("names the landing page after the product", async () => {
     renderAt("/");
-    expect(await screen.findByRole("heading", { level: 1, name: "Next Session" })).toBeTruthy();
+    expect(await screen.findByRole("main")).toBeTruthy();
     expect(document.title).toBe("Next Session");
   });
 });

@@ -7,6 +7,8 @@ test("the landing page renders the app shell without errors", async ({ page }) =
   await page.goto("/");
 
   await expect(page).toHaveTitle("Next Session");
-  await expect(page.getByRole("heading", { level: 1, name: "Next Session" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Stop chasing the date." }),
+  ).toBeVisible();
   expect(pageErrors).toEqual([]);
 });
