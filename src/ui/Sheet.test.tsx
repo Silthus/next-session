@@ -75,6 +75,43 @@ describe("Sheet", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  async function pressCloseFromKeyboard() {
+    const closeButton = screen.getByRole("button", { name: "Close" });
+    for (let presses = 0; presses < 5 && document.activeElement !== closeButton; presses++) {
+      await userEvent.tab();
+    }
+    expect(document.activeElement).toBe(closeButton);
+    await userEvent.keyboard("{Enter}");
+    return closeButton;
+  }
+
+  it("closes from the keyboard on the Close button", async () => {
+    const onClose = vi.fn();
+    render(
+      <Sheet open title="Keep My group" onClose={onClose}>
+        <input aria-label="Email" />
+      </Sheet>,
+    );
+
+    await pressCloseFromKeyboard();
+
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("holds the Close button on the keyboard while it is not dismissible", async () => {
+    const onClose = vi.fn();
+    render(
+      <Sheet open title="Keep My group" dismissible={false} onClose={onClose}>
+        <input aria-label="Email" />
+      </Sheet>,
+    );
+
+    const closeButton = await pressCloseFromKeyboard();
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(closeButton);
+  });
+
   it("stays open when a drag that started inside the panel ends on the backdrop", () => {
     const onClose = vi.fn();
     render(

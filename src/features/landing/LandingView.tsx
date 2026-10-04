@@ -177,7 +177,7 @@ function LoggedInAs({ email }: { email: string }) {
   const line = useFocusOnMount();
   return (
     <p ref={line} role="status" tabIndex={-1} className="max-w-sm text-sm text-ink-2 outline-none">
-      Logged in as <span className="font-semibold break-all text-ink">{email}</span>. No groups here
+      Signed in as <span className="font-semibold break-all text-ink">{email}</span>. No groups here
       yet, so create your first link.
     </p>
   );

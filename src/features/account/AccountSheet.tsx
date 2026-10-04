@@ -18,7 +18,15 @@ type AccountSheetProps = {
   open: boolean;
   onClose: () => void;
   onSubmit: (input: SaveInput) => Promise<unknown>;
-} & ({ intent: "save"; groupName: string; signedInAs?: string } | { intent: "logIn" });
+} & (
+  | {
+      intent: "save";
+      groupName: string;
+      signedInAs?: string;
+      onFinish: () => Promise<unknown>;
+    }
+  | { intent: "logIn" }
+);
 
 export function AccountSheet(props: AccountSheetProps) {
   const { open, onClose } = props;
@@ -53,26 +61,26 @@ function AccountForm({
   const signedInAs = props.intent === "save" ? props.signedInAs : undefined;
   if (signedInAs && !busy && finishingAs === null) setFinishingAs(signedInAs);
 
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    if (finishingAs === null && mode === "create" && password.length < MIN_PASSWORD_LENGTH) {
-      setFailure(weakPassword);
-      return;
-    }
+  const run = async (action: () => Promise<unknown>) => {
     setBusy(true);
     setFailure(null);
     try {
-      await onSubmit(
-        finishingAs === null
-          ? { email: email.trim(), password, mode }
-          : { email: finishingAs, password: "", mode },
-      );
+      await action();
       setBusy(false);
       onClose();
     } catch (error) {
       setFailure(describeFailure(error, intent));
       setBusy(false);
     }
+  };
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    if (mode === "create" && password.length < MIN_PASSWORD_LENGTH) {
+      setFailure(weakPassword);
+      return;
+    }
+    void run(() => onSubmit({ email: email.trim(), password, mode }));
   };
 
   const switchMode = (next: SaveMode) => {
@@ -94,13 +102,13 @@ function AccountForm({
         groupName={props.groupName}
         failure={failure}
         busy={busy}
-        onSubmit={(event) => void submit(event)}
+        onFinish={() => void run(props.onFinish)}
       />
     );
   }
 
   return (
-    <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
+    <form onSubmit={submit} className="flex flex-col gap-4">
       <p className="text-ink-2">
         {intent === "save"
           ? "Open it on any device. The player link stays exactly the same, your players notice nothing."
@@ -174,19 +182,23 @@ function FinishSave({
   groupName,
   failure,
   busy,
-  onSubmit,
+  onFinish,
 }: {
   email: string;
   groupName: string;
   failure: Failure | null;
   busy: boolean;
-  onSubmit: (event: FormEvent) => void;
+  onFinish: () => void;
 }) {
+  const finish = (event: FormEvent) => {
+    event.preventDefault();
+    onFinish();
+  };
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4">
-      <p className="text-ink-2">
-        You're signed in as <span className="font-semibold break-all text-ink">{email}</span>.
-        Finish moving {groupName} to your account.
+    <form onSubmit={finish} className="flex flex-col gap-4">
+      <p className="min-w-0 break-words text-ink-2">
+        Signed in as <span className="font-semibold break-all text-ink">{email}</span>. Finish
+        moving {groupName} to your account.
       </p>
       {failure && (
         <p role="alert" className="text-sm font-medium text-busy">

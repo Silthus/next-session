@@ -52,16 +52,18 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
   const [focusAfterSave, setFocusAfterSave] = useState(false);
   const headingFocused = useCallback(() => setFocusAfterSave(false), []);
 
-  const save = async (input: SaveInput) => {
+  const saveThrough = async (action: () => Promise<unknown>) => {
     setSaving(true);
     try {
-      await gm.save(input);
+      await action();
       setFocusAfterSave(true);
       toasts.show("Saved. Open it anywhere with your account.");
     } finally {
       setSaving(false);
     }
   };
+  const save = (input: SaveInput) => saveThrough(() => gm.save(input));
+  const finish = () => saveThrough(gm.finishSave);
 
   const headerActions = (gm.status === "anonymous" || gm.status === "account") && group && (
     <HeaderAccount
@@ -92,6 +94,7 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         groupName={saveSheetFor ?? ""}
         signedInAs={gm.status === "account" ? gm.email : undefined}
         onSubmit={save}
+        onFinish={finish}
         onClose={() => setSaveSheetFor(null)}
       />
     </>

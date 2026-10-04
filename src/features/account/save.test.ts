@@ -1,7 +1,13 @@
 import { ConvexError } from "convex/values";
 import { describe, expect, it } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { PENDING_SAVE_KEY, resumePendingSave, saveGroups, type SaveDeps } from "./save";
+import {
+  finishPendingSave,
+  PENDING_SAVE_KEY,
+  resumePendingSave,
+  saveGroups,
+  type SaveDeps,
+} from "./save";
 
 const groupId = "group-1" as Id<"groups">;
 
@@ -30,7 +36,6 @@ function fakeDeps(overrides: Partial<SaveDeps> = {}) {
       return Promise.resolve({ groupIds: [groupId] });
     },
     storage,
-    isAccount: false,
     ...overrides,
   };
   return { deps, calls, storage };
@@ -92,22 +97,22 @@ describe("saveGroups", () => {
   });
 });
 
-describe("retrying a Save after the sign-in went through", () => {
+describe("finishPendingSave", () => {
   it("redeems the pending claim instead of starting a new Save", async () => {
-    const { deps, calls, storage } = fakeDeps({ isAccount: true });
+    const { deps, calls, storage } = fakeDeps();
     storage.setItem(PENDING_SAVE_KEY, "left-over");
 
-    expect(await saveGroups({ ...input, mode: "create" }, deps)).toEqual({ groupIds: [groupId] });
+    expect(await finishPendingSave(deps)).toEqual({ groupIds: [groupId] });
     expect(calls).toEqual(["finishSave left-over"]);
     expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
   });
 
   it("fails as an invalid claim once the server refused the pending one", async () => {
-    const { deps, calls, storage } = fakeDeps({ isAccount: true, finishSave: claimInvalid });
+    const { deps, calls, storage } = fakeDeps({ finishSave: claimInvalid });
     storage.setItem(PENDING_SAVE_KEY, "expired");
-    await expect(saveGroups({ ...input, mode: "create" }, deps)).rejects.toThrow();
+    await expect(finishPendingSave(deps)).rejects.toThrow();
 
-    await expect(saveGroups({ ...input, mode: "create" }, deps)).rejects.toMatchObject({
+    await expect(finishPendingSave(deps)).rejects.toMatchObject({
       data: { code: "CLAIM_INVALID" },
     });
     expect(calls).toEqual([]);

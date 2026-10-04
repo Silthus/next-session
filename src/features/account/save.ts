@@ -17,30 +17,26 @@ export type SaveDeps = {
   ) => Promise<unknown>;
   finishSave: (args: { code: string }) => Promise<SaveResult>;
   storage: Pick<Storage, "getItem" | "setItem" | "removeItem">;
-  isAccount: boolean;
 };
+
+type ClaimDeps = Pick<SaveDeps, "finishSave" | "storage">;
 
 const FLOWS = { create: "signUp", logIn: "signIn" } as const;
 
-export async function saveGroups(input: SaveInput, deps: SaveDeps) {
-  if (deps.isAccount) return await finishSaveAsAccount(deps);
-  return await saveAnonymousGroups(input, deps);
-}
-
-async function finishSaveAsAccount(deps: SaveDeps) {
-  const code = deps.storage.getItem(PENDING_SAVE_KEY);
-  if (code === null) throw new ConvexError({ code: "CLAIM_INVALID" });
-  return await redeem(code, deps);
-}
-
-async function saveAnonymousGroups({ email, password, mode }: SaveInput, deps: SaveDeps) {
+export async function saveGroups({ email, password, mode }: SaveInput, deps: SaveDeps) {
   const { code } = await deps.startSave();
   deps.storage.setItem(PENDING_SAVE_KEY, code);
   await deps.signIn("password", { email, password, flow: FLOWS[mode] });
   return await redeem(code, deps);
 }
 
-export async function resumePendingSave(deps: Pick<SaveDeps, "finishSave" | "storage">) {
+export async function finishPendingSave(deps: ClaimDeps) {
+  const code = deps.storage.getItem(PENDING_SAVE_KEY);
+  if (code === null) throw new ConvexError({ code: "CLAIM_INVALID" });
+  return await redeem(code, deps);
+}
+
+export async function resumePendingSave(deps: ClaimDeps) {
   const code = deps.storage.getItem(PENDING_SAVE_KEY);
   if (code === null) return null;
   return await redeem(code, deps).catch(() => null);
@@ -48,17 +44,14 @@ export async function resumePendingSave(deps: Pick<SaveDeps, "finishSave" | "sto
 
 const redemptions = new Map<string, Promise<SaveResult>>();
 
-function redeem(code: string, deps: Pick<SaveDeps, "finishSave" | "storage">) {
+function redeem(code: string, deps: ClaimDeps) {
   const inFlight =
     redemptions.get(code) ?? redeemOnce(code, deps).finally(() => redemptions.delete(code));
   redemptions.set(code, inFlight);
   return inFlight;
 }
 
-async function redeemOnce(
-  code: string,
-  { finishSave, storage }: Pick<SaveDeps, "finishSave" | "storage">,
-) {
+async function redeemOnce(code: string, { finishSave, storage }: ClaimDeps) {
   try {
     const result = await finishSave({ code });
     forgetClaim(storage, code);

@@ -108,11 +108,28 @@ async function holdPasswordSignIn(page: Page) {
 async function logInFromElsewhere(browser: Browser, email: string) {
   const elsewhere = await browser.newContext();
   const page = await elsewhere.newPage();
+  const noGroupsLines = await countNoGroupsLines(page);
   const sheet = await openLogIn(page);
   await sheet.getByLabel("Email").fill(email);
   await sheet.getByLabel("Password").fill(password);
   await sheet.getByRole("button", { name: "Log in" }).click();
-  return { page, close: () => elsewhere.close() };
+  return { page, noGroupsLines, close: () => elsewhere.close() };
+}
+
+async function countNoGroupsLines(page: Page) {
+  await page.addInitScript(() => {
+    const record = window as unknown as { noGroupsLines: number };
+    const seen = new WeakSet<Element>();
+    record.noGroupsLines = 0;
+    new MutationObserver(() => {
+      for (const line of document.querySelectorAll('[role="status"]')) {
+        if (seen.has(line) || !line.textContent?.includes("No groups here yet")) continue;
+        seen.add(line);
+        record.noGroupsLines++;
+      }
+    }).observe(document, { childList: true, subtree: true, characterData: true });
+  });
+  return () => page.evaluate(() => (window as unknown as { noGroupsLines: number }).noGroupsLines);
 }
 
 async function openLogIn(page: Page) {
@@ -148,6 +165,7 @@ test("saving to a new Account keeps the Share Link, and logging in finds the Gro
 
   const otherDevice = await logInFromElsewhere(browser, email);
   await expect(otherDevice.page).toHaveURL(groupPath);
+  expect(await otherDevice.noGroupsLines()).toBe(0);
   await otherDevice.close();
 });
 
@@ -180,7 +198,7 @@ test.describe("a Save whose move fails after the sign-in", () => {
     await page.getByRole("button", { name: "save it to an account" }).click();
     const sheet = await fillSaveSheet(page, email);
     await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
-    await expect(sheet.getByText(`You're signed in as ${email}.`)).toBeVisible();
+    await expect(sheet.getByText(`Signed in as ${email}.`)).toBeVisible();
     await sheet.getByRole("button", { name: "Finish saving" }).click();
 
     await expect(page.getByRole("status").filter({ hasText: `Saved to ${email}.` })).toBeFocused();
@@ -234,6 +252,7 @@ test("logging in to an Account without Groups names it and points to the first l
   page,
 }) => {
   const email = await signUpAccountWithoutGroups();
+  const noGroupsLines = await countNoGroupsLines(page);
 
   const sheet = await openLogIn(page);
   await expect(sheet.getByLabel("Email")).toBeFocused();
@@ -241,11 +260,13 @@ test("logging in to an Account without Groups names it and points to the first l
   await sheet.getByLabel("Password").fill(password);
   await sheet.getByRole("button", { name: "Log in" }).click();
 
+  await expect(page.getByRole("button", { name: "Log in" })).toBeHidden();
   await expect(page.getByRole("status")).toHaveText(
-    `Logged in as ${email}. No groups here yet, so create your first link.`,
+    `Signed in as ${email}. No groups here yet, so create your first link.`,
   );
   await expect(page.getByRole("status")).toBeFocused();
   await expect(page.getByRole("button", { name: "Create your link" })).toBeVisible();
+  expect(await noGroupsLines()).toBe(1);
 });
 
 test("a wrong password says so and keeps the sheet open", async ({ page, browser }) => {

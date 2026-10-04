@@ -71,7 +71,7 @@ describe("LandingView", () => {
 
     const line = await screen.findByRole("status");
     expect(line.textContent).toBe(
-      "Logged in as gm@example.test. No groups here yet, so create your first link.",
+      "Signed in as gm@example.test. No groups here yet, so create your first link.",
     );
     expect(document.activeElement).toBe(line);
     expect(screen.getByRole("button", { name: "Create your link" })).toBeTruthy();

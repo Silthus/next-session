@@ -60,12 +60,18 @@ export function Landing() {
     setSavedAs(input.email);
   };
 
+  const finish = async () => {
+    await gm.finishSave();
+    setSavedAs(gm.email);
+  };
+
   const logIn = async (input: Omit<SaveInput, "mode">) => {
     await gm.logIn(input);
     setLoggedInAs(input.email);
   };
 
   const sheetClosed = sheet === null;
+  const accountWithoutGroups = gm.status === "account" && groups?.length === 0;
   const resolving = gm.status === "loading" || (signedIn && groups === undefined);
   if ((phase === "idle" && resolving) || returningTo) {
     return <div className="min-h-dvh" />;
@@ -76,7 +82,7 @@ export function Landing() {
       <LandingView
         state={landingState(phase, failure, created, sheetClosed ? savedAs : undefined)}
         showLogIn={gm.status === "signedOut" && (phase === "idle" || phase === "failed")}
-        loggedInAs={sheetClosed ? loggedInAs : undefined}
+        loggedInAs={sheetClosed && accountWithoutGroups ? loggedInAs : undefined}
         onCreate={() => void create()}
         onLogIn={() => setSheet("logIn")}
         onSave={() => setSheet("save")}
@@ -88,6 +94,7 @@ export function Landing() {
           groupName={created.name}
           signedInAs={gm.status === "account" ? gm.email : undefined}
           onSubmit={save}
+          onFinish={finish}
           onClose={() => setSheet(null)}
         />
       ) : (

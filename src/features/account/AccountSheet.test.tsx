@@ -32,7 +32,14 @@ function renderSheet(props: SheetProps) {
 }
 
 function renderSaveSheet(onSubmit: Submit, onClose = vi.fn()) {
-  renderSheet({ open: true, intent: "save", groupName: "My group", onSubmit, onClose });
+  renderSheet({
+    open: true,
+    intent: "save",
+    groupName: "My group",
+    onSubmit,
+    onFinish: vi.fn(),
+    onClose,
+  });
   return onClose;
 }
 
@@ -178,12 +185,17 @@ describe("AccountSheet saving a Group", () => {
 describe("AccountSheet finishing a Save after the sign-in went through", () => {
   it("asks only to finish, as the signed-in Account, once the move failed", async () => {
     let failMove: (error: Error) => void = () => {};
-    const onSubmit = vi
-      .fn<Submit>()
-      .mockImplementationOnce(() => new Promise((_, reject) => (failMove = reject)))
-      .mockResolvedValueOnce(undefined);
+    const onSubmit = vi.fn<Submit>(() => new Promise((_, reject) => (failMove = reject)));
+    const onFinish = vi.fn(() => Promise.resolve());
     const onClose = vi.fn();
-    const props = { open: true, intent: "save", groupName: "My group", onSubmit, onClose } as const;
+    const props = {
+      open: true,
+      intent: "save",
+      groupName: "My group",
+      onSubmit,
+      onFinish,
+      onClose,
+    } as const;
     const replaceProps = renderSheet(props);
 
     await fillIn();
@@ -196,13 +208,32 @@ describe("AccountSheet finishing a Save after the sign-in went through", () => {
     expect(screen.queryByLabelText("Email")).toBeNull();
     expect(screen.queryByLabelText("Password")).toBeNull();
     expect(screen.getByText(email).closest("p")?.textContent).toBe(
-      `You're signed in as ${email}. Finish moving My group to your account.`,
+      `Signed in as ${email}. Finish moving My group to your account.`,
     );
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Finish saving" }));
     await userEvent.click(screen.getByRole("button", { name: "Finish saving" }));
 
-    expect(onSubmit).toHaveBeenLastCalledWith({ email, password: "", mode: "create" });
+    expect(onFinish).toHaveBeenCalledOnce();
+    expect(onSubmit).toHaveBeenCalledOnce();
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("wraps a long unbroken group name instead of overflowing the sheet", async () => {
+    const groupName = "Dragonsofthenorthernwastesandtheirendlesscampaign";
+    renderSheet({
+      open: true,
+      intent: "save",
+      groupName,
+      signedInAs: email,
+      onSubmit: vi.fn(),
+      onFinish: vi.fn(),
+      onClose: vi.fn(),
+    });
+
+    const line = (await screen.findByText(email)).closest("p");
+    expect(line?.textContent).toContain(groupName);
+    expect(line?.classList).toContain("break-words");
+    expect(line?.classList).toContain("min-w-0");
   });
 
   it("says when the Save expired before the Group moved", async () => {
@@ -211,7 +242,8 @@ describe("AccountSheet finishing a Save after the sign-in went through", () => {
       intent: "save",
       groupName: "My group",
       signedInAs: email,
-      onSubmit: () => Promise.reject(new ConvexError({ code: "CLAIM_INVALID" })),
+      onSubmit: vi.fn(),
+      onFinish: () => Promise.reject(new ConvexError({ code: "CLAIM_INVALID" })),
       onClose: vi.fn(),
     });
 
