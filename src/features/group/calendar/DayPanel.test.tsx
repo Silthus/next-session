@@ -93,9 +93,14 @@ describe("DayPanel", () => {
     );
   });
 
-  it("holds the button while the change is on its way", () => {
-    renderPanel({ pending: true });
-    expect(screen.getByRole("button", { name: "Saving…" })).toHaveProperty("disabled", true);
+  it("holds the button, and its focus, while the change is on its way", async () => {
+    const { onSchedule } = renderPanel({ pending: true });
+    const button = screen.getByRole("button", { name: "Saving…" });
+    expect(button.getAttribute("aria-disabled")).toBe("true");
+    button.focus();
+    await userEvent.click(button);
+    expect(onSchedule).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(button);
   });
 
   it("goes back to the overview", async () => {

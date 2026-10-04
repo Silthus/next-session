@@ -128,33 +128,36 @@ function SessionAction({
   onSchedule: () => void;
   onUnschedule: (session: CalendarSession) => void;
 }) {
-  const busyLabel = pending ? "Saving…" : false;
-  if (day.session === null) {
-    return (
-      <Button
-        size="lg"
-        className="w-full"
-        disabled={!day.bookable}
-        busy={busyLabel}
-        onClick={onSchedule}
-      >
-        <IconStar />
-        Schedule session
-      </Button>
-    );
-  }
-  if (!day.bookable) {
+  const session = day.session;
+  if (session && !day.bookable) {
     return <p className="text-sm text-ink-3">You played this night. Past dates are read-only.</p>;
   }
-  const session = day.session;
+  const act = () => {
+    if (pending) return;
+    if (session) onUnschedule(session);
+    else onSchedule();
+  };
   return (
     <Button
-      variant="secondary"
+      size="lg"
+      variant={session ? "secondary" : "primary"}
       className="w-full"
-      busy={busyLabel}
-      onClick={() => onUnschedule(session)}
+      disabled={!day.bookable}
+      aria-disabled={pending || undefined}
+      aria-busy={pending || undefined}
+      onClick={act}
     >
-      Unschedule this session
+      {pending ? "Saving…" : <ActionLabel scheduled={session !== null} />}
     </Button>
+  );
+}
+
+function ActionLabel({ scheduled }: { scheduled: boolean }) {
+  if (scheduled) return "Unschedule this session";
+  return (
+    <>
+      <IconStar />
+      Schedule session
+    </>
   );
 }

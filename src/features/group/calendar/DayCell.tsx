@@ -36,6 +36,7 @@ export function DayCell({
       aria-label={dayCellLabel(day, players.length)}
       aria-pressed={selected}
       aria-current={isToday ? "date" : undefined}
+      data-date={day.date}
       style={tintOf(day)}
       className={cn(
         "relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2",

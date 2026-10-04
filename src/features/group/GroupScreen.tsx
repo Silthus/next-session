@@ -1,6 +1,6 @@
 import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useConvexAuth, useQuery } from "convex/react";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { IsoDate, IsoMonth } from "../../../shared/dates";
@@ -16,6 +16,7 @@ import { visibleDay, visibleMonth } from "./calendar/calendarDates";
 import { DayPanel } from "./calendar/DayPanel";
 import { HeatCalendar } from "./calendar/HeatCalendar";
 import { useSessionActions } from "./calendar/useSessionActions";
+import { useMonthSchedule } from "./calendar/useMonthSchedule";
 import { useToday } from "./calendar/useToday";
 
 export type GroupSearch = { month?: string; day?: string };
@@ -50,26 +51,30 @@ function GroupSurface({
   search: GroupSearch;
 }) {
   const today = useToday();
-  const month = visibleMonth(search.month, today);
-  const selectedDay = visibleDay(search.day, month);
-  const schedule = useQuery(api.schedule.month, { groupId, month });
+  const loaded = useMonthSchedule(groupId, visibleMonth(search.month, today));
   const sessions = useSessionActions(groupId);
   const navigate = useNavigate({ from: "/g/$groupId" });
   const showMonth = (next: IsoMonth) => void navigate({ search: { month: next } });
   const selectDay = (day: IsoDate | null) =>
     void navigate({ search: (previous) => ({ ...previous, day: day ?? undefined }) });
+  const selectedDay = loaded ? visibleDay(search.day, loaded.month) : null;
+  const closeDay = () => {
+    selectDay(null);
+    if (selectedDay) dayCellOf(selectedDay)?.focus();
+  };
 
   useEffect(() => {
     if (selectedDay === null) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") selectDay(null);
+      if (event.key === "Escape") closeDay();
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   });
 
+  if (loaded === undefined) return <GroupLoading name={name} />;
+  const { month, schedule } = loaded;
   if (schedule === null) return <FirstGroupFallback />;
-  if (schedule === undefined) return <GroupLoading name={name} />;
 
   const summary = summarizeMonth({ month, today, ...schedule });
   const day = summary.days.find((candidate) => candidate.date === selectedDay) ?? null;
@@ -81,7 +86,7 @@ function GroupSurface({
         playerCount={schedule.players.length}
         today={today}
         pending={sessions.isPending(day.date)}
-        onClose={() => selectDay(null)}
+        onClose={closeDay}
         onSchedule={() => void sessions.schedule(day.date)}
         onUnschedule={(session) => void sessions.unschedule(session)}
         className={className}
@@ -100,17 +105,15 @@ function GroupSurface({
           onSelectDay={selectDay}
           onMonthChange={showMonth}
         />
-        <aside aria-label="Group details" className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           {dayPanel("hidden lg:block")}
           {!day && <PickANightHint />}
-        </aside>
+        </div>
       </div>
       {day && (
-        <div className="fixed inset-x-0 bottom-0 z-30 lg:hidden">
-          <div className="mx-auto max-w-lg px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-            {dayPanel("shadow-[0_-8px_32px_-12px_rgb(0_0_0/0.35)]")}
-          </div>
-        </div>
+        <MobileDaySheet date={day.date}>
+          {dayPanel("shadow-[0_-8px_32px_-12px_rgb(0_0_0/0.35)]")}
+        </MobileDaySheet>
       )}
       {sessions.toast && (
         <Toast
@@ -126,6 +129,47 @@ function GroupSurface({
       )}
     </GroupFrame>
   );
+}
+
+function MobileDaySheet({ date, children }: { date: IsoDate; children: ReactNode }) {
+  const sheet = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    const element = sheet.current;
+    if (!element) return;
+    const observer = new ResizeObserver(() => setHeight(element.offsetHeight));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const cell = dayCellOf(date);
+    if (cell && height > 0) revealAbove(cell, height);
+  }, [date, height]);
+
+  return (
+    <>
+      <div aria-hidden="true" style={{ height }} className="lg:hidden" />
+      <div ref={sheet} className="fixed inset-x-0 bottom-0 z-30 lg:hidden">
+        <div className="mx-auto max-w-lg px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          {children}
+        </div>
+      </div>
+    </>
+  );
+}
+
+const SHEET_GAP_PX = 12;
+
+function revealAbove(element: HTMLElement, sheetHeight: number) {
+  const visibleBottom = window.innerHeight - sheetHeight - SHEET_GAP_PX;
+  const overlap = element.getBoundingClientRect().bottom - visibleBottom;
+  if (overlap > 0) window.scrollBy({ top: overlap });
+}
+
+function dayCellOf(date: IsoDate) {
+  return document.querySelector<HTMLElement>(`[data-date="${date}"]`);
 }
 
 function PickANightHint() {
@@ -147,9 +191,11 @@ function GroupFrame({ heading, children }: { heading: ReactNode; children: React
           <Link to="/" aria-label="Next Session home" className="shrink-0">
             <Logo />
           </Link>
-          <span className="text-ink-3" aria-hidden="true">
-            /
-          </span>
+          {heading && (
+            <span className="text-ink-3" aria-hidden="true">
+              /
+            </span>
+          )}
           {heading}
         </div>
       </header>

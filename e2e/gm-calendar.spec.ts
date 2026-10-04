@@ -3,7 +3,7 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 import type { Id } from "../convex/_generated/dataModel";
 import type { Answer } from "../shared/answers";
-import { addMonths, monthOf, todayUtc } from "../shared/dates";
+import { addMonths, monthDays, monthOf, todayUtc } from "../shared/dates";
 
 const convexUrl = "http://127.0.0.1:3210";
 const authStorageSuffix = convexUrl.replace(/[^a-zA-Z0-9]/g, "");
@@ -77,6 +77,27 @@ test("the GM reads the heat-map and sees who is free on a night", async ({ page 
   await panel.getByRole("button", { name: "Overview" }).click();
   await expect(panel).toBeHidden();
   await expect(page).not.toHaveURL(/day=/);
+  await expect(dayCell(page, /, \w+ 6: /)).toBeFocused();
+});
+
+test("on a phone the day sheet leaves the tapped night in view", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  const gm = await signInAnonymousGm();
+  await seedThursdayCrew(gm);
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+
+  const lastNight = dayCell(page, new RegExp(`, \\w+ ${String(monthDays(nextMonth).length)}: `));
+  await lastNight.click();
+  const sheet = page.getByRole("region", {
+    name: new RegExp(`${String(monthDays(nextMonth).length)}$`),
+  });
+  await expect(sheet).toBeVisible();
+  await expect
+    .poll(async () => {
+      const [cell, panel] = await Promise.all([lastNight.boundingBox(), sheet.boundingBox()]);
+      return cell && panel ? cell.y + cell.height <= panel.y : false;
+    })
+    .toBe(true);
 });
 
 test("the GM schedules a Session, unschedules it, and undoes that", async ({ page }) => {
@@ -85,17 +106,25 @@ test("the GM schedules a Session, unschedules it, and undoes that", async ({ pag
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
 
   const panel = page.getByRole("region", { name: /, \w+ 5$/ });
+  const toast = page.getByRole("status");
   await panel.getByRole("button", { name: "Schedule session" }).click();
-  await expect(page.getByRole("status")).toContainText("Players see it on the link.");
+  await expect(toast).toContainText("Players see it on the link.");
   await expect(dayCell(page, /, \w+ 5: everyone free, Session scheduled$/)).toBeVisible();
-  await expect.poll(async () => (await sessionDates(gm)).includes(night(5))).toBe(true);
+  await expect.poll(() => sessionDates(gm)).toEqual([night(5)]);
 
-  await panel.getByRole("button", { name: "Unschedule this session" }).click();
-  await expect(page.getByRole("status")).toContainText("removed");
+  await toast.getByRole("button", { name: "Undo" }).click();
   await expect(dayCell(page, /, \w+ 5: everyone free$/)).toBeVisible();
   await expect.poll(() => sessionDates(gm)).toEqual([]);
 
-  await page.getByRole("status").getByRole("button", { name: "Undo" }).click();
+  await panel.getByRole("button", { name: "Schedule session" }).click();
+  await expect.poll(() => sessionDates(gm)).toEqual([night(5)]);
+
+  await panel.getByRole("button", { name: "Unschedule this session" }).click();
+  await expect(toast).toContainText("removed");
+  await expect(dayCell(page, /, \w+ 5: everyone free$/)).toBeVisible();
+  await expect.poll(() => sessionDates(gm)).toEqual([]);
+
+  await toast.getByRole("button", { name: "Undo" }).click();
   await expect(dayCell(page, /, \w+ 5: everyone free, Session scheduled$/)).toBeVisible();
   await expect.poll(() => sessionDates(gm)).toEqual([night(5)]);
 });
@@ -115,13 +144,16 @@ test("month navigation lives in the URL and stops at the end of the Booking Wind
   await openAsGm(page, gm, `/g/${gm.groupId}`);
   const months = [monthOf(today), nextMonth, addMonths(monthOf(today), 2)].map(monthName);
 
+  const next = page.getByRole("button", { name: "Next month" });
   await expect(page.getByRole("heading", { level: 2, name: months[0] })).toBeVisible();
-  await page.getByRole("button", { name: "Next month" }).click();
+  await next.focus();
+  await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { level: 2, name: months[1] })).toBeVisible();
   await expect(page).toHaveURL(new RegExp(`month=${nextMonth}`));
-  await page.getByRole("button", { name: "Next month" }).click();
+  await expect(next).toBeFocused();
+  await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { level: 2, name: months[2] })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Next month" })).toBeDisabled();
+  await expect(next).toBeDisabled();
 
   await page.getByRole("button", { name: "Previous month" }).click();
   await page.getByRole("button", { name: "Previous month" }).click();
@@ -137,10 +169,14 @@ function monthName(month: string) {
   }).format(new Date(`${month}-01T00:00:00Z`));
 }
 
-test("another GM's Group falls back to the GM's own Group", async ({ page }) => {
+test("another GM's Group or a malformed id falls back to the GM's own Group", async ({ page }) => {
   const gm = await signInAnonymousGm();
   const stranger = await signInAnonymousGm();
   await openAsGm(page, gm, `/g/${stranger.groupId}`);
+  await expect(page).toHaveURL(new RegExp(`/g/${gm.groupId}$`));
+  await expect(page.getByRole("heading", { level: 1, name: "My group" })).toBeVisible();
+
+  await page.goto("/g/not-a-group");
   await expect(page).toHaveURL(new RegExp(`/g/${gm.groupId}$`));
   await expect(page.getByRole("heading", { level: 1, name: "My group" })).toBeVisible();
 });
