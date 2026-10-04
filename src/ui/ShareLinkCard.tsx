@@ -73,14 +73,19 @@ export function ShareLinkCard({
       {copyState === "blocked" && (
         <p className="mt-2 text-xs text-ink-2">Long-press the link to copy it.</p>
       )}
-      {!compact && (
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <ShareTargets url={url} />
+      <div
+        className={cn(
+          "flex flex-wrap items-center justify-between gap-3",
+          compact ? "mt-2" : "mt-3",
+        )}
+      >
+        <ShareTargets url={url} />
+        {!compact && (
           <p className="text-xs text-ink-3">
             Anyone with the link can answer. Keep it in the group.
           </p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
