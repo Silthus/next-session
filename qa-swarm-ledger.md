@@ -59,3 +59,7 @@ Churn rule: round 4 had only minor/nit after verification -> focused delta revie
 GPT: 1 minor (post-Save focus ran before the dialog closed). Opus: 3 minor (stale failure after the lift, Delete not held during New group, weak IME e2e). No major. Fixed red-first in 71163ef. Second focused delta on dac8aa5..71163ef.
 ## Delta review 2 (dac8aa5..71163ef)
 GPT and Opus both: 1 minor, the same one (Rename unmounts the Popover before onClosed, so a seen failure came back). Fixed red-first in bc3d49f. Delta 3 on 71163ef..bc3d49f.
+## Delta review 3 (71163ef..bc3d49f)
+GPT: (none). Opus: (none). Clean round on bc3d49f. CI check+e2e green on bc3d49f.
+## Merge main (#43 player surface) at fd0d29d
+Clean merge; `git diff origin/main...fd0d29d` identical to `8d77c6d...bc3d49f`. Gate 568 tests; full e2e 33 passed (a first cold run failed 7 first-in-worker tests on Vite dep re-optimization after bun install; the rerun passed all).
