@@ -6,7 +6,7 @@ describe("sessionErrorMessage", () => {
   it.each([
     [{ code: "SESSION_EXISTS" }, "That night is already scheduled."],
     [{ code: "OUT_OF_WINDOW" }, "That date can't change anymore."],
-    [{ code: "NOT_FOUND" }, "That Session is gone already."],
+    [{ code: "NOT_FOUND" }, "That session is gone already."],
     [
       { code: "RATE_LIMITED", retryAfter: 4000 },
       "Too many changes at once. Try again in a moment.",

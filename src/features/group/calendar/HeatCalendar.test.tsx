@@ -1,8 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import type { Answer } from "../../../../shared/answers";
 import { summarizeMonth } from "../../../../shared/monthSummary";
+import type { CalendarSession } from "./DayCell";
 import { HeatCalendar } from "./HeatCalendar";
 
 const today = "2026-10-02";
@@ -18,7 +20,7 @@ function renderCalendar({
   month = "2026-10",
   players = rosterOf(3),
   answers = [] as { playerId: string; date: string; answer: Answer }[],
-  sessions = [] as { _id: string; date: string }[],
+  sessions = [] as CalendarSession[],
   selectedDay = null as string | null,
 } = {}) {
   const onSelectDay = vi.fn();
@@ -61,7 +63,7 @@ describe("HeatCalendar", () => {
         { playerId: "p0", date: "2026-10-09", answer: "free" },
         { playerId: "p1", date: "2026-10-09", answer: "free" },
       ],
-      sessions: [{ _id: "s1", date: "2026-10-09" }],
+      sessions: [{ _id: "s1" as Id<"sessions">, date: "2026-10-09" }],
     });
     expect(
       screen.getByRole("button", {

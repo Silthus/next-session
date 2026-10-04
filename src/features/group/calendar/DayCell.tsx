@@ -1,11 +1,14 @@
 import type { CSSProperties } from "react";
 import type { Answer } from "../../../../shared/answers";
-import type { DaySummary, PlayerRow, SessionRow } from "../../../../shared/monthSummary";
+import type { Id } from "../../../../convex/_generated/dataModel";
+import type { IsoDate } from "../../../../shared/dates";
+import type { DaySummary, PlayerRow } from "../../../../shared/monthSummary";
 import { cn } from "../../../ui/cn";
 import { longDayLabel } from "./calendarDates";
 import { IconStar } from "./icons";
 
-export type CalendarDay = DaySummary<PlayerRow, SessionRow>;
+export type CalendarSession = { _id: Id<"sessions">; date: IsoDate };
+export type CalendarDay = DaySummary<PlayerRow, CalendarSession>;
 
 export const MAX_PLAYERS_WITH_BARS = 8;
 const MAX_TINT_PERCENT = 55;

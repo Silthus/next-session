@@ -1,14 +1,14 @@
 import { useId } from "react";
 import type { Answer } from "../../../../shared/answers";
 import type { IsoDate } from "../../../../shared/dates";
-import type { PlayerRow, SessionRow } from "../../../../shared/monthSummary";
+import type { PlayerRow } from "../../../../shared/monthSummary";
 import { Avatar } from "../../../ui/Avatar";
 import { Button } from "../../../ui/Button";
 import { Card } from "../../../ui/Card";
 import { cn } from "../../../ui/cn";
 import { Dot } from "../../../ui/Dot";
 import { longDayLabel, relativeDay } from "./calendarDates";
-import type { CalendarDay } from "./DayCell";
+import type { CalendarDay, CalendarSession } from "./DayCell";
 import { IconChevron, IconStar } from "./icons";
 
 const answerLabels: Record<Answer, string> = { free: "Free", maybe: "Maybe", busy: "Busy" };
@@ -34,7 +34,7 @@ export function DayPanel({
   pending: boolean;
   onClose: () => void;
   onSchedule: () => void;
-  onUnschedule: (session: SessionRow) => void;
+  onUnschedule: (session: CalendarSession) => void;
   className?: string;
 }) {
   const headingId = useId();
@@ -126,7 +126,7 @@ function SessionAction({
   day: CalendarDay;
   pending: boolean;
   onSchedule: () => void;
-  onUnschedule: (session: SessionRow) => void;
+  onUnschedule: (session: CalendarSession) => void;
 }) {
   const busyLabel = pending ? "Saving…" : false;
   if (day.session === null) {

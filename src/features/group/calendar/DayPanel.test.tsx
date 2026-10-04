@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import type { Answer } from "../../../../shared/answers";
 import { summarizeMonth } from "../../../../shared/monthSummary";
 import { DayPanel } from "./DayPanel";
@@ -28,7 +29,7 @@ function renderPanel({
     today,
     players: roster,
     answers: Object.entries(answers).map(([playerId, answer]) => ({ playerId, date, answer })),
-    sessions: scheduled ? [{ _id: "s1", date }] : [],
+    sessions: scheduled ? [{ _id: "s1" as Id<"sessions">, date }] : [],
   });
   const day = summary.days.find((d) => d.date === date)!;
   const handlers = { onClose: vi.fn(), onSchedule: vi.fn(), onUnschedule: vi.fn() };

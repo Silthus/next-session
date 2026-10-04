@@ -79,7 +79,7 @@ function GroupSurface({
         day={day}
         playerCount={schedule.players.length}
         today={today}
-        pending={sessions.pendingDate === day.date}
+        pending={sessions.isPending(day.date)}
         onClose={() => selectDay(null)}
         onSchedule={() => void sessions.schedule(day.date)}
         onUnschedule={(session) => void sessions.unschedule(session)}

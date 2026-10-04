@@ -4,18 +4,16 @@ import { useEffect, useState } from "react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import type { IsoDate } from "../../../../shared/dates";
-import type { SessionRow } from "../../../../shared/monthSummary";
 import { dayLabel } from "./calendarDates";
+import type { CalendarSession } from "./DayCell";
 import { sessionErrorMessage } from "./sessionErrors";
 
 const TOAST_MS = 5000;
 
 export type SessionToast = { id: number; message: string; undo?: () => void };
 
-type CachedSession = { _id: Id<"sessions">; date: string };
-
 export function useSessionActions(groupId: Id<"groups">) {
-  const [pendingDate, setPendingDate] = useState<IsoDate | null>(null);
+  const [pendingDates, setPendingDates] = useState<ReadonlySet<IsoDate>>(new Set());
   const [toast, setToast] = useState<SessionToast | null>(null);
   const scheduleSession = useMutation(api.sessions.schedule).withOptimisticUpdate(
     (store, { date }) =>
@@ -38,13 +36,13 @@ export function useSessionActions(groupId: Id<"groups">) {
   }, [toast]);
 
   async function settle(date: IsoDate, change: () => Promise<SessionToast>) {
-    setPendingDate(date);
+    setPendingDates((dates) => new Set(dates).add(date));
     try {
       setToast(await change());
     } catch (error) {
       setToast({ id: Date.now(), message: sessionErrorMessage(error) });
     } finally {
-      setPendingDate(null);
+      setPendingDates((dates) => withoutDate(dates, date));
     }
   }
 
@@ -59,9 +57,9 @@ export function useSessionActions(groupId: Id<"groups">) {
     });
   }
 
-  function unschedule(session: SessionRow) {
+  function unschedule(session: CalendarSession) {
     return settle(session.date, async () => {
-      await unscheduleSession({ sessionId: session._id as Id<"sessions"> });
+      await unscheduleSession({ sessionId: session._id });
       return {
         id: Date.now(),
         message: `Session on ${dayLabel(session.date)} removed.`,
@@ -70,16 +68,28 @@ export function useSessionActions(groupId: Id<"groups">) {
     });
   }
 
-  return { schedule, unschedule, pendingDate, toast, dismissToast: () => setToast(null) };
+  return {
+    schedule,
+    unschedule,
+    isPending: (date: IsoDate) => pendingDates.has(date),
+    toast,
+    dismissToast: () => setToast(null),
+  };
 }
 
 function editCachedSessions(
   store: OptimisticLocalStore,
   groupId: Id<"groups">,
-  edit: (sessions: CachedSession[]) => CachedSession[],
+  edit: (sessions: CalendarSession[]) => CalendarSession[],
 ) {
   for (const { args, value } of store.getAllQueries(api.schedule.month)) {
     if (args.groupId !== groupId || !value) continue;
     store.setQuery(api.schedule.month, args, { ...value, sessions: edit(value.sessions) });
   }
+}
+
+function withoutDate(dates: ReadonlySet<IsoDate>, date: IsoDate) {
+  const remaining = new Set(dates);
+  remaining.delete(date);
+  return remaining;
 }
