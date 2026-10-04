@@ -244,6 +244,17 @@ describe("Join", () => {
       );
     });
 
+    it("lets the Player clear a carried name", async () => {
+      renderJoin({ players: longRoster() });
+      await userEvent.type(await screen.findByRole("searchbox", { name: "Find your name" }), "Dev");
+      const field = screen.getByRole("textbox", { name: "Not listed? Your name" });
+
+      await userEvent.clear(field);
+
+      expect(field).toHaveProperty("value", "");
+      expect(screen.getByRole("button", { name: "Join" })).toHaveProperty("disabled", true);
+    });
+
     it("keeps the name the Player typed into the join field over the filter", async () => {
       renderJoin({ players: longRoster() });
       const field = await screen.findByRole("textbox", { name: "Not listed? Your name" });

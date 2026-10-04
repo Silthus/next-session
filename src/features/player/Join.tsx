@@ -29,7 +29,7 @@ export function Join({
   onPick: (player: RosterPlayer) => void;
   onJoin: (name: string) => Promise<unknown>;
 }) {
-  const [typedName, setTypedName] = useState<string | null>(null);
+  const [ownedName, setOwnedName] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
   const [joining, setJoining] = useState(false);
   const [refusal, setRefusal] = useState<AppErrorData | null | undefined>(undefined);
@@ -43,11 +43,11 @@ export function Join({
     (player) => player._id === takenPlayerId || nameMatches(player.name, activeFilter),
   );
   const unmatchedFilter = shownPlayers.length === 0 ? activeFilter.trim() : "";
-  const name = typedName ?? unmatchedFilter;
+  const name = ownedName ?? unmatchedFilter;
 
   async function join(event: FormEvent) {
     event.preventDefault();
-    setTypedName(name);
+    setOwnedName(name);
     setJoining(true);
     setRefusal(undefined);
     try {
@@ -105,7 +105,7 @@ export function Join({
         <form className="mt-4 flex gap-2" onSubmit={(event) => void join(event)}>
           <input
             value={name}
-            onChange={(event) => setTypedName(event.target.value)}
+            onChange={(event) => setOwnedName(event.target.value)}
             aria-label={fieldLabel}
             placeholder={fieldLabel}
             autoComplete="given-name"
