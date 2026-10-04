@@ -17,13 +17,15 @@ describe("Toast", () => {
   });
 
   it("announces its message as a status with an optional action", async () => {
-    const onAction = vi.fn();
+    const run = vi.fn();
     render(
-      <Toast message={{ id: 1, text: "Session on Fri, Oct 16.", action: "Undo", onAction }} />,
+      <Toast
+        message={{ id: 1, text: "Session on Fri, Oct 16.", action: { label: "Undo", run } }}
+      />,
     );
     expect(screen.getByRole("status").textContent).toContain("Session on Fri, Oct 16.");
     await userEvent.click(screen.getByRole("button", { name: "Undo" }));
-    expect(onAction).toHaveBeenCalledOnce();
+    expect(run).toHaveBeenCalledOnce();
   });
 
   it("empties the live region when the message goes away", () => {

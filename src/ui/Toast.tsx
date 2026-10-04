@@ -2,7 +2,11 @@ import { cn } from "./cn";
 
 type ToastPosition = "bottom" | "top";
 
-export type ToastMessage = { id: number; text: string; action?: string; onAction?: () => void };
+export type ToastMessage = {
+  id: number;
+  text: string;
+  action?: { label: string; run: () => void };
+};
 
 const positions: Record<ToastPosition, string> = {
   bottom: "bottom-20",
@@ -37,10 +41,10 @@ function ToastPill({ message }: { message: ToastMessage }) {
       {message.action && (
         <button
           type="button"
-          onClick={message.onAction}
+          onClick={message.action.run}
           className="font-semibold text-paper underline underline-offset-2"
         >
-          {message.action}
+          {message.action.label}
         </button>
       )}
     </div>

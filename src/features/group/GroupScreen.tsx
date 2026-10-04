@@ -326,8 +326,7 @@ function toastMessage(toast: GroupToast, undo: (toast: GroupToast) => void): Toa
   return {
     id: toast.id,
     text: toast.message,
-    action: toast.undo && "Undo",
-    onAction: () => undo(toast),
+    ...(toast.undo && { action: { label: "Undo", run: () => undo(toast) } }),
   };
 }
 
