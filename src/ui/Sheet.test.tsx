@@ -75,6 +75,25 @@ describe("Sheet", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it("ignores Escape, the backdrop, and a close the browser started while it is not dismissible", () => {
+    const onClose = vi.fn();
+    render(
+      <Sheet open title="Keep My group" dismissible={false} onClose={onClose}>
+        body
+      </Sheet>,
+    );
+    const dialog = screen.getByRole<HTMLDialogElement>("dialog");
+
+    fireEvent(dialog, new Event("cancel", { cancelable: true }));
+    fireEvent.pointerDown(dialog);
+    fireEvent.click(dialog);
+    closeNatively(dialog);
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(showModal).toHaveBeenCalledTimes(2);
+    expect(dialog.open).toBe(true);
+  });
+
   async function pressCloseFromKeyboard() {
     const closeButton = screen.getByRole("button", { name: "Close" });
     for (let presses = 0; presses < 5 && document.activeElement !== closeButton; presses++) {

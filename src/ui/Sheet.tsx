@@ -34,9 +34,13 @@ export function Sheet({
     else closeModal(dialog);
   }, [open, reshowTick]);
 
+  const requestClose = () => {
+    if (dismissible) onClose();
+  };
+
   const reportNativeClose = () => {
     if (!open || dialogRef.current?.open) return;
-    onClose();
+    requestClose();
     reshow();
   };
 
@@ -44,7 +48,7 @@ export function Sheet({
     pressedBackdrop.current = event.target === event.currentTarget;
   };
   const closeOnBackdrop = (event: MouseEvent<HTMLDialogElement>) => {
-    if (pressedBackdrop.current && event.target === event.currentTarget) onClose();
+    if (pressedBackdrop.current && event.target === event.currentTarget) requestClose();
   };
 
   return (
@@ -53,7 +57,7 @@ export function Sheet({
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();
-        onClose();
+        requestClose();
       }}
       onClose={reportNativeClose}
       onPointerDown={rememberPress}
@@ -66,7 +70,7 @@ export function Sheet({
             {title}
           </h2>
           <div className="mt-4">{children}</div>
-          <CloseButton dismissible={dismissible} onClose={onClose} />
+          <CloseButton dismissible={dismissible} onClose={requestClose} />
         </div>
       )}
     </dialog>
@@ -79,9 +83,7 @@ function CloseButton({ dismissible, onClose }: { dismissible: boolean; onClose: 
       type="button"
       aria-label="Close"
       aria-disabled={!dismissible || undefined}
-      onClick={() => {
-        if (dismissible) onClose();
-      }}
+      onClick={onClose}
       className="absolute top-4 right-3 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"
     >
       <IconClose className="size-5" />
