@@ -32,7 +32,7 @@ export function Join({
   const refusalId = useId();
   const heading = useFocusOnMount<HTMLHeadingElement>();
   const takenPlayerId = refusal?.code === "NAME_TAKEN" ? refusal.playerId : null;
-  const fieldLabel = players.length > 0 ? "Not listed? Type your name" : "Your name";
+  const fieldLabel = players.length > 0 ? "Not listed? Your name" : "Your name";
 
   async function join(event: FormEvent) {
     event.preventDefault();
@@ -110,7 +110,10 @@ export function Join({
       </section>
       <p className="text-center text-xs text-ink-3">
         Planning your own game?{" "}
-        <Link to="/" className="-my-3 inline-block py-3 font-semibold text-accent hover:underline">
+        <Link
+          to="/"
+          className="-my-3.5 inline-block py-3.5 font-semibold text-accent hover:underline"
+        >
           Create your link
         </Link>
       </p>

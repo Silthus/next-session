@@ -53,7 +53,7 @@ describe("Join", () => {
   it("joins with a typed name and keeps Join disabled while it is blank", async () => {
     const { onJoin } = renderJoin();
     const join = await screen.findByRole("button", { name: "Join" });
-    const field = screen.getByRole("textbox", { name: "Not listed? Type your name" });
+    const field = screen.getByRole("textbox", { name: "Not listed? Your name" });
 
     await userEvent.type(field, "   ");
     expect(join).toHaveProperty("disabled", true);
@@ -67,7 +67,7 @@ describe("Join", () => {
     const { onPick } = renderJoin({ onJoin: () => new Promise(() => {}) });
 
     await userEvent.type(
-      await screen.findByRole("textbox", { name: "Not listed? Type your name" }),
+      await screen.findByRole("textbox", { name: "Not listed? Your name" }),
       "Dev{Enter}",
     );
 
@@ -98,7 +98,7 @@ describe("Join", () => {
     });
 
     await userEvent.type(
-      await screen.findByRole("textbox", { name: "Not listed? Type your name" }),
+      await screen.findByRole("textbox", { name: "Not listed? Your name" }),
       "ana{Enter}",
     );
 
@@ -118,7 +118,7 @@ describe("Join", () => {
     renderJoin({ onJoin: () => Promise.reject(new ConvexError(data)) });
 
     await userEvent.type(
-      await screen.findByRole("textbox", { name: "Not listed? Type your name" }),
+      await screen.findByRole("textbox", { name: "Not listed? Your name" }),
       "Dev{Enter}",
     );
 

@@ -25,6 +25,10 @@ export function joinErrorCopy(error: AppErrorData | null): string {
   }
 }
 
+export function fillRestErrorCopy(error: AppErrorData | null): string {
+  return error?.code === "OUT_OF_WINDOW" ? "Those nights are locked now." : answerErrorCopy(error);
+}
+
 export function answerErrorCopy(error: AppErrorData | null): string {
   switch (error?.code) {
     case "RATE_LIMITED":

@@ -44,17 +44,14 @@ function tile(page: Page, date: IsoDate) {
 }
 
 async function answerAs(page: Page, group: SeededGroup, name: string) {
-  const playerId = group.playerIds[name]!;
-  await page.addInitScript(
-    ({ groupId, playerId, name }) => {
-      localStorage.setItem(
-        "next-session.players",
-        JSON.stringify({ [groupId]: { playerId, name } }),
-      );
-      localStorage.setItem(`next-session.playerHint.${groupId}`, "1");
-    },
-    { groupId: group.groupId, playerId, name },
-  );
+  await rememberPlayerWithoutHint(page, group, name);
+  await markHintSeen(page, group);
+}
+
+async function markHintSeen(page: Page, group: SeededGroup) {
+  await page.addInitScript((groupId) => {
+    localStorage.setItem(`next-session.playerHint.${groupId}`, "1");
+  }, group.groupId);
 }
 
 async function playerAnswersInMonth(group: SeededGroup, name: string, month: string) {
@@ -128,7 +125,7 @@ test.describe("the player surface", () => {
     await page.goto(group.link);
     await expect(page.getByRole("heading", { level: 1, name: "Thursday Crew" })).toBeVisible();
     await expect(page).toHaveTitle("Thursday Crew · Next Session");
-    await page.getByRole("textbox", { name: "Not listed? Type your name" }).fill("Dev");
+    await page.getByRole("textbox", { name: "Not listed? Your name" }).fill("Dev");
     await page.getByRole("button", { name: "Join" }).click();
 
     await expect(page.getByText("Answering as")).toContainText("Dev");
@@ -255,7 +252,7 @@ test.describe("the player surface", () => {
     await page.goto(group.link);
     await page.getByRole("button", { name: /^Mark the other/ }).click();
 
-    await expect(page.getByRole("status")).toHaveText("That night is locked now.");
+    await expect(page.getByRole("status")).toHaveText("Those nights are locked now.");
     const nightsLeft = monthDays(beyondWindow).filter((date) => date >= `${beyondWindow}-15`);
     await expect(page.getByText(progressText(0, nightsLeft.length))).toBeVisible();
     await expect(
@@ -284,7 +281,7 @@ test.describe("the player surface", () => {
     const group = await seedGroup();
 
     await page.goto(group.link);
-    await page.getByRole("textbox", { name: "Not listed? Type your name" }).fill("  ana ");
+    await page.getByRole("textbox", { name: "Not listed? Your name" }).fill("  ana ");
     await page.getByRole("button", { name: "Join" }).click();
 
     await expect(page.getByRole("alert")).toHaveText(
@@ -372,9 +369,7 @@ test.describe("player surface screenshots", () => {
       groupId: group.groupId,
       date: days[Math.min(2, days.length - 1)]!,
     });
-    await page.addInitScript((groupId) => {
-      localStorage.setItem(`next-session.playerHint.${groupId}`, "1");
-    }, group.groupId);
+    await markHintSeen(page, group);
 
     for (const viewport of viewports) {
       for (const colorScheme of schemes) {

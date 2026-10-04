@@ -9,7 +9,7 @@ import { Toast } from "../../ui/Toast";
 import { Join } from "./Join";
 import { LinkGone } from "./LinkGone";
 import { PlayerCalendar } from "./PlayerCalendar";
-import { answerErrorCopy, appErrorOf } from "./playerErrors";
+import { answerErrorCopy, appErrorOf, fillRestErrorCopy } from "./playerErrors";
 import {
   browserStorage,
   forgetPlayer,
@@ -149,8 +149,7 @@ function PlayerAnswers({
     setHintVisible(false);
   }
 
-  function reportFailure(error: unknown) {
-    const message = answerErrorCopy(appErrorOf(error));
+  function showToast(message: string) {
     setToast((current) => ({ message, id: (current?.id ?? 0) + 1 }));
   }
 
@@ -169,11 +168,15 @@ function PlayerAnswers({
         onHintToggle={() => (hintVisible ? dismissHint() : setHintVisible(true))}
         onAnswer={(date, answer) => {
           if (hintVisible) dismissHint();
-          saveAnswer({ shareToken, playerId, date, answer }).catch(reportFailure);
+          saveAnswer({ shareToken, playerId, date, answer }).catch((error: unknown) =>
+            showToast(answerErrorCopy(appErrorOf(error))),
+          );
         }}
         onFillRest={(fillMonth) => {
           if (hintVisible) dismissHint();
-          fillRest({ shareToken, playerId, month: fillMonth }).catch(reportFailure);
+          fillRest({ shareToken, playerId, month: fillMonth }).catch((error: unknown) =>
+            showToast(fillRestErrorCopy(appErrorOf(error))),
+          );
         }}
         onMonthChange={onMonthChange}
         onNotYou={onNotYou}

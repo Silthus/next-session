@@ -4,7 +4,7 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState, type ComponentProps, type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -60,6 +60,22 @@ function renderCalendar(overrides: Partial<Props> = {}) {
   const props = calendarProps({ ...handlers, ...overrides });
   renderInRouter(() => <PlayerCalendar {...props} />);
   return handlers;
+}
+
+function CalendarWithRefusingBackend() {
+  const [answers, setAnswers] = useState<Props["answers"]>({ "2026-10-04": "free" });
+  return (
+    <PlayerCalendar
+      {...calendarProps({
+        answers,
+        onFillRest: () => {
+          const before = answers;
+          setAnswers(everyDayFrom(4, 31));
+          setTimeout(() => setAnswers(before), 10);
+        },
+      })}
+    />
+  );
 }
 
 function CalendarWithBackend() {
@@ -236,6 +252,24 @@ describe("PlayerCalendar", () => {
     expect(screen.getByRole("heading", { level: 2, name: "November 2026" })).toBe(
       document.activeElement,
     );
+  });
+
+  it("gives focus back to Fill Rest when the backend refuses it", async () => {
+    renderInRouter(() => <CalendarWithRefusingBackend />);
+
+    await userEvent.click(await screen.findByRole("button", { name: /^Mark the other/ }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /^Mark the other/ })).toBe(document.activeElement),
+    );
+  });
+
+  it("explains that past nights lock under a read-only month", async () => {
+    renderCalendar({ month: "2026-09" });
+
+    expect(
+      await screen.findByText("Past nights lock. Future months unlock two ahead."),
+    ).toBeTruthy();
   });
 
   it("ties the first-visit hint to the tile it points at", async () => {

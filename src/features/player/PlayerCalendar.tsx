@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState, type RefObject, type TouchEvent } from "react";
-import { nextAnswer, type Answer } from "../../../shared/answers";
+import { ANSWERS, nextAnswer, type Answer } from "../../../shared/answers";
 import type { IsoDate, IsoMonth } from "../../../shared/dates";
 import { pageTitle } from "../../lib/pageTitle";
 import { Button } from "../../ui/Button";
@@ -16,10 +16,8 @@ import { dayLabel, monthName, playerMonth, type PlayerDay, type PlayerMonth } fr
 const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 const FILL_STAGGER_MS = 26;
 const SWIPE_MIN_PX = 50;
-const TIPS = [
-  "Tap again to cycle: free, maybe, busy.",
-  "Past nights lock. Future months unlock two ahead.",
-];
+const LOCK_TIP = "Past nights lock. Future months unlock two ahead.";
+const TIPS = ["Tap again to cycle: free, maybe, busy.", LOCK_TIP];
 
 const answerLabels: Record<Answer, string> = { free: "Free", maybe: "Maybe", busy: "Busy" };
 const answerGlyphs: Record<Answer, string> = { free: "✓", maybe: "?", busy: "✕" };
@@ -64,12 +62,16 @@ export function PlayerCalendar({
   const heading = useFocusOnMount<HTMLHeadingElement>();
   const monthHeading = useRef<HTMLHeadingElement>(null);
   const doneHeading = useRef<HTMLParagraphElement>(null);
+  const fillRestSlot = useRef<HTMLDivElement>(null);
   const focusDoneCardWhenDone = useRef(false);
 
   useEffect(() => {
-    if (!view.done || !focusDoneCardWhenDone.current) return;
-    focusDoneCardWhenDone.current = false;
-    doneHeading.current?.focus();
+    if (view.done && focusDoneCardWhenDone.current) {
+      focusDoneCardWhenDone.current = false;
+      doneHeading.current?.focus();
+    } else if (!view.done && document.activeElement === document.body) {
+      fillRestSlot.current?.querySelector("button")?.focus();
+    }
   }, [view.done]);
 
   function answer(day: PlayerDay) {
@@ -114,7 +116,7 @@ export function PlayerCalendar({
               <button
                 type="button"
                 onClick={onNotYou}
-                className="-mx-1 -my-3 px-1 py-3 underline underline-offset-2 hover:text-ink"
+                className="-mx-1 -my-3.5 px-1 py-3.5 underline underline-offset-2 hover:text-ink"
               >
                 Not you?
               </button>
@@ -165,20 +167,24 @@ export function PlayerCalendar({
               onFillNextMonth={fillNextMonth}
             />
           ) : (
-            <Button
-              variant={view.progress.answered > 0 ? "secondary" : "ghost"}
-              size="lg"
-              className={cn("w-full", view.progress.answered > 0 && "border-busy/40! text-busy!")}
-              onClick={fillRest}
-            >
-              <span className="size-3 rounded-full bg-busy" aria-hidden="true" />
-              Mark the other {view.fillRest.length} night{view.fillRest.length === 1 ? "" : "s"}{" "}
-              busy
-            </Button>
+            <div ref={fillRestSlot}>
+              <Button
+                variant={view.progress.answered > 0 ? "secondary" : "ghost"}
+                size="lg"
+                className={cn("w-full", view.progress.answered > 0 && "border-busy/40! text-busy!")}
+                onClick={fillRest}
+              >
+                <span className="size-3 rounded-full bg-busy" aria-hidden="true" />
+                Mark the other {view.fillRest.length} night{view.fillRest.length === 1 ? "" : "s"}{" "}
+                busy
+              </Button>
+            </div>
           ))}
 
         <Legend />
-        <p className="text-center text-xs text-ink-3">{TIPS[Math.floor(taps / 3) % TIPS.length]}</p>
+        <p className="text-center text-xs text-ink-3">
+          {view.readOnly ? LOCK_TIP : TIPS[Math.floor(taps / 3) % TIPS.length]}
+        </p>
       </main>
 
       <footer className="mx-auto flex w-full max-w-xl flex-col items-center gap-2 px-4 pb-6 sm:px-5">
@@ -359,9 +365,7 @@ function DayTile({
         {day.dayOfMonth}
       </span>
       {day.answer && (
-        <span className="self-end text-xs leading-none font-bold opacity-90 sm:text-sm">
-          {answerGlyphs[day.answer]}
-        </span>
+        <span className="self-end text-sm leading-none font-bold">{answerGlyphs[day.answer]}</span>
       )}
       {day.session && (
         <span className="absolute -top-1.5 -right-1.5 rounded-full bg-accent px-1 text-[9px] leading-4 font-bold text-accent-ink">
@@ -444,7 +448,7 @@ function DoneCard({
 function Legend() {
   return (
     <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-sm text-ink-2">
-      {(Object.keys(answerLabels) as Answer[]).map((answer) => (
+      {ANSWERS.map((answer) => (
         <li key={answer} className="flex items-center gap-1.5">
           <span
             aria-hidden="true"
