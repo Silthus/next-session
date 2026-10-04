@@ -4,14 +4,14 @@ import { api } from "../convex/_generated/api";
 import type { Id } from "../convex/_generated/dataModel";
 import { ANSWERS } from "../shared/answers";
 import { addMonths, monthDays, monthOf, todayUtc, type IsoDate } from "../shared/dates";
+import { convexUrl, toastRegion } from "./helpers";
 
-const backendUrl = process.env.E2E_CONVEX_URL ?? "http://127.0.0.1:3210";
 const screenshotDir = "test-results/player-screenshots";
 
 type SeededGroup = Awaited<ReturnType<typeof seedGroup>>;
 
 async function seedGroup(players: string[] = ["Ana", "Ben", "Chiara"]) {
-  const gm = new ConvexHttpClient(backendUrl);
+  const gm = new ConvexHttpClient(convexUrl);
   const { tokens } = await gm.action(api.auth.signIn, { provider: "anonymous" });
   gm.setAuth(tokens!.token);
   const groupId = await gm.mutation(api.groups.create, {});
@@ -23,6 +23,39 @@ async function seedGroup(players: string[] = ["Ana", "Ben", "Chiara"]) {
   const { shareToken } = (await gm.query(api.groups.get, { groupId }))!;
   return { gm, groupId, shareToken, playerIds, link: `/s/${shareToken}` };
 }
+
+const longRoster = [
+  "Ana",
+  "Ben",
+  "Chiara",
+  "Dev",
+  "Eli",
+  "Farah",
+  "Gus",
+  "Hana",
+  "Ivo",
+  "Jun",
+  "Kai",
+  "Lena",
+  "Mateo",
+  "Nia",
+  "Oskar",
+  "Priya",
+  "Quinn",
+  "Rosa",
+  "Sami",
+  "Tomás",
+  "Uma",
+  "Vik",
+  "Wen",
+  "Xavi",
+  "Yara",
+  "Zoë Ölund",
+  "Amara Okafor-Lindqvist",
+  "Bo",
+  "Cleo",
+  "Dario",
+];
 
 function dayLabel(date: IsoDate) {
   return new Intl.DateTimeFormat("en-US", {
@@ -220,7 +253,7 @@ test.describe("the player surface", () => {
     await page.goto(group.link);
     await tile(page, yesterday).click();
 
-    await expect(page.getByRole("status")).toHaveText("That night is locked now.");
+    await expect(toastRegion(page)).toHaveText("That night is locked now.");
     await expect(tile(page, yesterday)).toHaveAccessibleName(`${dayLabel(yesterday)}: Not set`);
     expect(await savedAnswers(group, "Ana", monthOf(yesterday))).toEqual({});
   });
@@ -252,7 +285,7 @@ test.describe("the player surface", () => {
     await page.goto(group.link);
     await page.getByRole("button", { name: /^Mark the other/ }).click();
 
-    await expect(page.getByRole("status")).toHaveText("Those nights are locked now.");
+    await expect(toastRegion(page)).toHaveText("Those nights are locked now.");
     const nightsLeft = monthDays(beyondWindow).filter((date) => date >= `${beyondWindow}-15`);
     await expect(page.getByText(progressText(0, nightsLeft.length))).toBeVisible();
     await expect(
@@ -290,6 +323,25 @@ test.describe("the player surface", () => {
     await expect(
       page.getByRole("button", { name: "Ana", exact: true }),
     ).toHaveAccessibleDescription("That name exists. Tap it, or add a last initial.");
+  });
+
+  test("a player on a long Roster finds their name with the filter", async ({ page }) => {
+    const group = await seedGroup(longRoster);
+    await markHintSeen(page, group);
+
+    await page.goto(group.link);
+    const chips = page.getByRole("list").getByRole("button");
+    await expect(chips).toHaveCount(longRoster.length);
+    const filter = page.getByRole("searchbox", { name: "Find your name" });
+
+    await filter.fill("nobody");
+    await expect(chips).toHaveCount(0);
+    await expect(page.getByRole("status")).toHaveText("No names match. Add yours below.");
+
+    await filter.fill("zoe");
+    await expect(chips).toHaveCount(1);
+    await page.getByRole("button", { name: "Zoë Ölund" }).click();
+    await expect(page.getByText("Answering as")).toContainText("Zoë Ölund");
   });
 
   test("a player the GM removed lands on the join screen", async ({ page }) => {
@@ -433,20 +485,20 @@ test.describe("player surface screenshots", () => {
   async function captureEveryVariant(
     page: Page,
     link: string,
-    name: string,
-    ready: () => Promise<void>,
+    capture: (shot: (name: string) => Promise<unknown>) => Promise<void>,
   ) {
     for (const viewport of viewports) {
       for (const colorScheme of schemes) {
         await page.setViewportSize(viewport);
         await page.emulateMedia({ colorScheme });
         await page.goto(link);
-        await ready();
-        await page.screenshot({
-          path: `${screenshotDir}/${name}-${viewport.label}-${colorScheme}.png`,
-          fullPage: true,
-          animations: "disabled",
-        });
+        await capture((name) =>
+          page.screenshot({
+            path: `${screenshotDir}/${name}--${viewport.label}--${colorScheme}.png`,
+            fullPage: true,
+            animations: "disabled",
+          }),
+        );
       }
     }
   }
@@ -455,9 +507,10 @@ test.describe("player surface screenshots", () => {
     const group = await seedGroup(["Ana", "Ben"]);
     await rememberPlayerWithoutHint(page, group, "Ana");
 
-    await captureEveryVariant(page, group.link, "hint", () =>
-      expect(page.getByRole("tooltip")).toBeVisible(),
-    );
+    await captureEveryVariant(page, group.link, async (shot) => {
+      await expect(page.getByRole("tooltip")).toBeVisible();
+      await shot("hint");
+    });
   });
 
   test("the done card at 390 and 1440 px, light and dark", async ({ page }) => {
@@ -469,8 +522,23 @@ test.describe("player surface screenshots", () => {
     });
     await answerAs(page, group, "Ben");
 
-    await captureEveryVariant(page, group.link, "done", () =>
-      expect(page.getByText("Your GM sees it already.")).toBeVisible(),
-    );
+    await captureEveryVariant(page, group.link, async (shot) => {
+      await expect(page.getByText("Your GM sees it already.")).toBeVisible();
+      await shot("done");
+    });
+  });
+
+  test("the long-Roster join screen at 390 and 1440 px, light and dark", async ({ page }) => {
+    const group = await seedGroup(longRoster);
+    const filter = page.getByRole("searchbox", { name: "Find your name" });
+
+    await captureEveryVariant(page, group.link, async (shot) => {
+      await expect(filter).toBeVisible();
+      await shot("join-long-roster");
+
+      await filter.fill("an");
+      await expect(page.getByRole("button", { name: "Ana", exact: true })).toBeVisible();
+      await shot("join-long-roster-filtered");
+    });
   });
 });

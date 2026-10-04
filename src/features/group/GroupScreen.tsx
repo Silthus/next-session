@@ -5,13 +5,14 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
 import { summarizeMonth } from "../../../shared/monthSummary";
+import { dismissNudge, nudgeDismissedAt, rememberLastGroup } from "../../lib/storage";
 import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
 import { LegalFooter } from "../../ui/LegalFooter";
 import { Logo } from "../../ui/Logo";
 import { ShareLinkCard } from "../../ui/ShareLinkCard";
 import { Skeleton } from "../../ui/Skeleton";
-import { Toast } from "../../ui/Toast";
+import { Toast, type ToastMessage } from "../../ui/Toast";
 import { AccountSheet } from "../account/AccountSheet";
 import type { SaveInput } from "../account/save";
 import { useGm } from "../account/useGm";
@@ -30,11 +31,10 @@ import { HeaderAccount } from "./rail/HeaderAccount";
 import { Nudge } from "./rail/Nudge";
 import { showsNudge } from "./rail/nudge";
 import { Players } from "./rail/Players";
-import { dismissNudge, nudgeDismissedAt, rememberLastGroup } from "./rail/railStorage";
 import { Sessions } from "./rail/Sessions";
 import { useRailActions } from "./rail/useRailActions";
 import { useWideLayout } from "./rail/useWideLayout";
-import { useToast, type GroupToast } from "./useToast";
+import { useToast, type GroupToast, type ShowToast } from "./useToast";
 
 export type GroupSearch = { month?: string; day?: string };
 
@@ -80,11 +80,12 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         saving,
         search,
         headerActions,
-        toasts,
+        showToast: toasts.show,
         focusHeading: focusAfterSave && saveSheetFor === null,
         onHeadingFocused: headingFocused,
         onSave: setSaveSheetFor,
       })}
+      <GroupToastRegion toasts={toasts} search={search} />
       <AccountSheet
         open={saveSheetFor !== null}
         intent="save"
@@ -102,7 +103,7 @@ function surfaceFor({
   saving,
   search,
   headerActions,
-  toasts,
+  showToast,
   focusHeading,
   onHeadingFocused,
   onSave,
@@ -112,7 +113,7 @@ function surfaceFor({
   saving: boolean;
   search: GroupSearch;
   headerActions: ReactNode;
-  toasts: Toasts;
+  showToast: ShowToast;
   focusHeading: boolean;
   onHeadingFocused: () => void;
   onSave: (groupName: string) => void;
@@ -128,7 +129,7 @@ function surfaceFor({
       saving={saving}
       search={search}
       headerActions={headerActions}
-      toasts={toasts}
+      showToast={showToast}
       focusHeading={focusHeading}
       onHeadingFocused={onHeadingFocused}
       onSave={() => onSave(group.name)}
@@ -150,7 +151,7 @@ function GroupSurface({
   saving,
   search,
   headerActions,
-  toasts,
+  showToast,
   focusHeading,
   onHeadingFocused,
   onSave,
@@ -160,7 +161,7 @@ function GroupSurface({
   saving: boolean;
   search: GroupSearch;
   headerActions: ReactNode;
-  toasts: Toasts;
+  showToast: ShowToast;
   focusHeading: boolean;
   onHeadingFocused: () => void;
   onSave: () => void;
@@ -170,8 +171,8 @@ function GroupSurface({
   const wide = useWideLayout();
   const requestedMonth = visibleMonth(search.month, today);
   const loaded = useMonthSchedule(groupId, requestedMonth);
-  const sessions = useSessionActions(groupId, toasts.show);
-  const rail = useRailActions(groupId, toasts.show);
+  const sessions = useSessionActions(groupId, showToast);
+  const rail = useRailActions(groupId, showToast);
   const [nudgeSnoozedAt, setNudgeSnoozedAt] = useState(() => nudgeDismissedAt());
   const [openedAt] = useState(() => Date.now());
   const navigate = useNavigate({ from: "/g/$groupId" });
@@ -207,12 +208,6 @@ function GroupSurface({
     return () => window.removeEventListener("keydown", closeOnEscape);
   });
 
-  const undo = (toast: GroupToast) => {
-    toasts.release();
-    toasts.dismiss();
-    toast.undo?.();
-    if (document.activeElement?.closest('[role="status"]')) focusMonthHeading();
-  };
   const rotate = () => void rail.rotate();
   const laterNudge = () => {
     const now = Date.now();
@@ -302,20 +297,37 @@ function GroupSurface({
           {dayPanel("shadow-[0_-8px_32px_-12px_rgb(0_0_0/0.35)]")}
         </MobileDaySheet>
       )}
-      {toasts.toast && (
-        <div onFocus={toasts.hold} onBlur={toasts.release}>
-          <Toast
-            key={toasts.toast.id}
-            position={day && !wide ? "top" : "bottom"}
-            action={toasts.toast.undo && "Undo"}
-            onAction={() => toasts.toast && undo(toasts.toast)}
-          >
-            {toasts.toast.message}
-          </Toast>
-        </div>
-      )}
     </GroupFrame>
   );
+}
+
+function GroupToastRegion({ toasts, search }: { toasts: Toasts; search: GroupSearch }) {
+  const today = useToday();
+  const wide = useWideLayout();
+  const dayOpen = visibleDay(search.day, visibleMonth(search.month, today)) !== null;
+  const undo = (toast: GroupToast) => {
+    toasts.release();
+    toasts.dismiss();
+    toast.undo?.();
+    if (document.activeElement?.closest('[role="status"]')) focusMonthHeading();
+  };
+
+  return (
+    <div onFocus={toasts.hold} onBlur={toasts.release}>
+      <Toast
+        position={dayOpen && !wide ? "top" : "bottom"}
+        message={toasts.toast && toastMessage(toasts.toast, undo)}
+      />
+    </div>
+  );
+}
+
+function toastMessage(toast: GroupToast, undo: (toast: GroupToast) => void): ToastMessage {
+  return {
+    id: toast.id,
+    text: toast.message,
+    ...(toast.undo && { action: { label: "Undo", run: () => undo(toast) } }),
+  };
 }
 
 function insideDialog(target: EventTarget | null) {

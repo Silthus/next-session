@@ -1,56 +1,16 @@
 import { expect, test, type Page } from "@playwright/test";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
-import type { Id } from "../convex/_generated/dataModel";
-import type { Answer } from "../shared/answers";
 import { addMonths, monthOf, todayUtc } from "../shared/dates";
-
-const convexUrl = "http://127.0.0.1:3210";
-const authStorageSuffix = convexUrl.replace(/[^a-zA-Z0-9]/g, "");
-
-type Tokens = { token: string; refreshToken: string };
-type Gm = { tokens: Tokens; client: ConvexHttpClient; groupId: Id<"groups">; shareToken: string };
-
-async function signInAnonymousGm(): Promise<Gm> {
-  const client = new ConvexHttpClient(convexUrl);
-  const { tokens } = await client.action(api.auth.signIn, { provider: "anonymous" });
-  if (!tokens) throw new Error("The anonymous sign-in returned no tokens");
-  client.setAuth(tokens.token);
-  const [group] = await client.query(api.groups.mine, {});
-  if (!group) throw new Error("The anonymous sign-in made no Group");
-  return { tokens, client, groupId: group.id, shareToken: await shareTokenOf(client, group.id) };
-}
-
-async function shareTokenOf(client: ConvexHttpClient, groupId: Id<"groups">) {
-  const view = await client.query(api.groups.get, { groupId });
-  if (!view) throw new Error("The GM cannot read their Group");
-  return view.shareToken;
-}
-
-async function seedPlayer(gm: Gm, name: string, answers: Record<string, Answer> = {}) {
-  const visitor = new ConvexHttpClient(convexUrl);
-  const playerId = await visitor.mutation(api.player.join, { shareToken: gm.shareToken, name });
-  for (const [date, answer] of Object.entries(answers)) {
-    await visitor.mutation(api.player.answer, {
-      shareToken: gm.shareToken,
-      playerId,
-      date,
-      answer,
-    });
-  }
-}
-
-async function openAsGm(page: Page, gm: Gm, path: string) {
-  await page.goto("/terms");
-  await page.evaluate(
-    ([suffix, tokens]) => {
-      localStorage.setItem(`__convexAuthJWT_${suffix}`, tokens.token);
-      localStorage.setItem(`__convexAuthRefreshToken_${suffix}`, tokens.refreshToken);
-    },
-    [authStorageSuffix, gm.tokens] as const,
-  );
-  await page.goto(path);
-}
+import {
+  openAsGm,
+  password,
+  seedPlayer,
+  shareTokenOf,
+  signInAnonymousGm,
+  signUpAccountWithGroup,
+  toastRegion,
+  type Gm,
+} from "./helpers";
 
 async function rosterNames(gm: Gm) {
   const schedule = await gm.client.query(api.schedule.month, {
@@ -96,7 +56,7 @@ test("the GM copies, rotates, and undoes the Share Link from the rail", async ({
 
   await rail.getByRole("button", { name: "Rotate" }).focus();
   await page.keyboard.press("Enter");
-  const toast = page.getByRole("status");
+  const toast = toastRegion(page);
   await expect(toast).toContainText("Link rotated. Old links stopped working.");
   await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).not.toBe(gm.shareToken);
   const rotated = await shareTokenOf(gm.client, gm.groupId);
@@ -106,7 +66,7 @@ test("the GM copies, rotates, and undoes the Share Link from the rail", async ({
 
   await toast.getByRole("button", { name: "Undo" }).focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("status")).toContainText("The old link works again.");
+  await expect(toast).toContainText("The old link works again.");
   await expect(page.locator("[data-month-heading]")).toBeFocused();
   await expect(rail.getByText(`/s/${gm.shareToken}`)).toBeVisible();
   await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).toBe(gm.shareToken);
@@ -118,13 +78,15 @@ test("the newest action owns the only toast", async ({ page }) => {
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
   const rail = page.getByRole("complementary", { name: "Group overview" });
 
-  await rail.getByRole("button", { name: "Rotate" }).click();
-  await expect(page.getByRole("status")).toContainText("Link rotated.");
-  await rail.getByRole("button", { name: "Schedule session" }).click();
-  await expect(page.getByRole("status")).toHaveCount(1);
-  await expect(page.getByRole("status")).toContainText("Players see it on the link.");
+  const toast = toastRegion(page);
 
-  await page.getByRole("status").getByRole("button", { name: "Undo" }).click();
+  await rail.getByRole("button", { name: "Rotate" }).click();
+  await expect(toast).toContainText("Link rotated.");
+  await rail.getByRole("button", { name: "Schedule session" }).click();
+  await expect(toast).toContainText("Players see it on the link.");
+  await expect(toast).not.toContainText("Link rotated.");
+
+  await toast.getByRole("button", { name: "Undo" }).click();
   await expect(rail.getByRole("button", { name: "Schedule session" })).toBeVisible();
   await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).not.toBe(gm.shareToken);
 });
@@ -280,21 +242,6 @@ test("on a phone the rail sits under the calendar behind a segmented control", a
   await expect(page.getByRole("region", { name: "Sessions" })).toBeVisible();
 });
 
-const password = "game-night-2026";
-
-async function signUpAccountWithGroup() {
-  const email = `gm-${String(Date.now())}-${Math.random().toString(36).slice(2, 8)}@example.test`;
-  const client = new ConvexHttpClient(convexUrl);
-  const { tokens } = await client.action(api.auth.signIn, {
-    provider: "password",
-    params: { email, password, flow: "signUp" },
-  });
-  if (!tokens) throw new Error("The sign-up returned no tokens");
-  client.setAuth(tokens.token);
-  await client.mutation(api.groups.create, {});
-  return { email, client };
-}
-
 test("an Anonymous GM saves into an Account from the header and stays on the Group", async ({
   page,
 }) => {
@@ -314,9 +261,14 @@ test("an Anonymous GM saves into an Account from the header and stays on the Gro
   await sheet.getByText("I already have one").click();
   await sheet.getByLabel("Email").fill(account.email);
   await sheet.getByLabel("Password").fill(password);
+  const region = toastRegion(page);
+  await expect(region).toHaveCount(1);
+  await region.evaluate((element) => element.setAttribute("data-region-before-save", ""));
   await sheet.getByRole("button", { name: "Log in and save" }).click();
 
-  await expect(page.getByRole("status")).toHaveText("Saved. Open it anywhere with your account.");
+  await expect(page.locator("[data-region-before-save]")).toHaveText(
+    "Saved. Open it anywhere with your account.",
+  );
   await expect(page).toHaveURL(new RegExp(`/g/${gm.groupId}\\?`));
   await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
   await expect(page.locator("[data-month-heading]")).toBeFocused();
@@ -335,7 +287,7 @@ test("on a phone the toast clears the open day sheet", async ({ page }) => {
 
   const sheet = page.getByRole("region", { name: /, \w+ 5$/ });
   await sheet.getByRole("button", { name: "Schedule session" }).click();
-  const toast = page.getByRole("status");
+  const toast = toastRegion(page);
   await expect(toast).toContainText("Players see it on the link.");
   const [toastBox, sheetBox] = await Promise.all([toast.boundingBox(), sheet.boundingBox()]);
   expect(toastBox!.y + toastBox!.height).toBeLessThanOrEqual(sheetBox!.y);
@@ -394,7 +346,7 @@ test.describe("screenshots", () => {
         await shot("rail");
 
         await page.getByRole("button", { name: "Rotate" }).first().click();
-        await expect(page.getByRole("status")).toContainText("Link rotated.");
+        await expect(toastRegion(page)).toContainText("Link rotated.");
         await shot("rotate-undo", false);
 
         await switcher(page, "Thursday Crew").click();

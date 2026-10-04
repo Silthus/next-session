@@ -4,12 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { fillRestDates, type Answer } from "../../../shared/answers";
 import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
-import { Skeleton } from "../../ui/Skeleton";
-import { Toast } from "../../ui/Toast";
-import { Join } from "./Join";
-import { LinkGone } from "./LinkGone";
-import { PlayerCalendar } from "./PlayerCalendar";
-import { answerErrorCopy, appErrorOf, fillRestErrorCopy } from "./playerErrors";
+import { errorMessage } from "../../lib/errors";
 import {
   browserStorage,
   forgetPlayer,
@@ -18,7 +13,12 @@ import {
   recallPlayer,
   rememberPlayer,
   type PlayerIdentity,
-} from "./playerIdentity";
+} from "../../lib/storage";
+import { NotFoundScreen } from "../../ui/NotFoundScreen";
+import { Skeleton } from "../../ui/Skeleton";
+import { Toast, type ToastMessage } from "../../ui/Toast";
+import { Join } from "./Join";
+import { PlayerCalendar } from "./PlayerCalendar";
 import { visibleMonth } from "./playerMonth";
 import { useTodayUtc } from "./useTodayUtc";
 
@@ -39,7 +39,7 @@ export function PlayerScreen({
 }) {
   const group = useQuery(api.player.group, { shareToken });
   if (group === undefined) return <PlayerLoading />;
-  if (group === null) return <LinkGone />;
+  if (group === null) return <NotFoundScreen kind="link" />;
   return (
     <PlayerGroup
       key={group.groupId}
@@ -136,7 +136,7 @@ function PlayerAnswers({
       store.setQuery(api.player.answers, query, withRestBusy(current, args.month, today));
   });
   const [hintVisible, setHintVisible] = useState(() => !hasSeenHint(storage, group.groupId));
-  const [toast, setToast] = useState<{ message: string; id: number } | null>(null);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
 
   useEffect(() => {
     if (toast === null) return;
@@ -150,10 +150,10 @@ function PlayerAnswers({
   }
 
   function showToast(message: string) {
-    setToast((current) => ({ message, id: (current?.id ?? 0) + 1 }));
+    setToast((current) => ({ text: message, id: (current?.id ?? 0) + 1 }));
   }
 
-  if (answers === null) return <LinkGone />;
+  if (answers === null) return <NotFoundScreen kind="link" />;
 
   return (
     <>
@@ -169,19 +169,19 @@ function PlayerAnswers({
         onAnswer={(date, answer) => {
           if (hintVisible) dismissHint();
           saveAnswer({ shareToken, playerId, date, answer }).catch((error: unknown) =>
-            showToast(answerErrorCopy(appErrorOf(error))),
+            showToast(errorMessage(error, "answer")),
           );
         }}
         onFillRest={(fillMonth) => {
           if (hintVisible) dismissHint();
           const saving = fillRest({ shareToken, playerId, month: fillMonth });
-          saving.catch((error: unknown) => showToast(fillRestErrorCopy(appErrorOf(error))));
+          saving.catch((error: unknown) => showToast(errorMessage(error, "fillRest")));
           return saving;
         }}
         onMonthChange={onMonthChange}
         onNotYou={onNotYou}
       />
-      {toast && <Toast key={toast.id}>{toast.message}</Toast>}
+      <Toast message={toast} />
     </>
   );
 }

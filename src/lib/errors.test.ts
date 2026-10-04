@@ -13,6 +13,18 @@ describe("errorMessage", () => {
     ["group", { code: "TOO_MANY_GROUPS" }, "You have 50 groups. Delete one to make room."],
     ["group", { code: "NOT_FOUND" }, "That group is gone already."],
     ["shareLink", { code: "UNDO_EXPIRED" }, "Too late to undo. Share the new link."],
+    [
+      "join",
+      { code: "NAME_TAKEN", playerId: "p1" },
+      "That name exists. Tap it, or add a last initial.",
+    ],
+    ["join", { code: "ROSTER_FULL" }, "This group is full. Ask your GM to make room."],
+    ["join", { code: "INVALID_NAME" }, "Use a name of up to 60 characters."],
+    ["join", { code: "RATE_LIMITED", retryAfter: 4000 }, "Slow down a moment, then try again."],
+    ["answer", { code: "RATE_LIMITED", retryAfter: 4000 }, "Slow down a moment."],
+    ["answer", { code: "OUT_OF_WINDOW" }, "That night is locked now."],
+    ["fillRest", { code: "RATE_LIMITED", retryAfter: 4000 }, "Slow down a moment."],
+    ["fillRest", { code: "OUT_OF_WINDOW" }, "Those nights are locked now."],
   ] as const)("explains a %s %o", (topic, data, message) => {
     expect(errorMessage(new ConvexError(data), topic)).toBe(message);
   });
@@ -35,5 +47,13 @@ describe("errorMessage", () => {
       "That didn't work. Try again.",
     );
     expect(errorMessage(new ConvexError("plain"), "group")).toBe("That didn't work. Try again.");
+    expect(errorMessage(new Error("Server Error"), "join")).toBe("That didn't work. Try again.");
+  });
+
+  it.each(["answer", "fillRest"] as const)("asks to retry an unsaved %s", (topic) => {
+    expect(errorMessage(new Error("Server Error"), topic)).toBe("That didn't save. Try again.");
+    expect(errorMessage(new ConvexError({ code: "NOT_FOUND" }), topic)).toBe(
+      "That didn't save. Try again.",
+    );
   });
 });
