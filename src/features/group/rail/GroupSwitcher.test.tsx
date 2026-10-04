@@ -104,6 +104,18 @@ describe("GroupSwitcher", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
+  it("forgets a seen failure when the GM turns to renaming", async () => {
+    renderSwitcher({
+      onCreate: () => Promise.reject(new ConvexError({ code: "TOO_MANY_GROUPS" })),
+    });
+    await openMenu();
+    await userEvent.click(screen.getByRole("button", { name: "New group" }));
+    await userEvent.click(screen.getByRole("button", { name: "Rename group" }));
+    await userEvent.keyboard("{Escape}");
+    await openMenu();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
   it("holds Delete while a new Group is on its way", async () => {
     renderSwitcher({ onCreate: () => new Promise(() => undefined) });
     await openMenu();

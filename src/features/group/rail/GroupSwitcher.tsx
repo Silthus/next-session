@@ -43,6 +43,9 @@ export function GroupSwitcher({ group, onRename, ...menu }: GroupSwitcherProps) 
       setPending(null);
     }
   };
+  const forgetSeenFailure = () => {
+    if (pending === null) setFailure(null);
+  };
   const trigger = useRef<HTMLButtonElement>(null);
   const refocusTrigger = useRef(false);
   const stopRenaming = () => {
@@ -78,9 +81,7 @@ export function GroupSwitcher({ group, onRename, ...menu }: GroupSwitcherProps) 
     <Popover
       triggerRef={trigger}
       className="w-72 max-w-[calc(100vw-2rem)]"
-      onClosed={() => {
-        if (pending === null) setFailure(null);
-      }}
+      onClosed={forgetSeenFailure}
       trigger={(props) => (
         <h1 className="min-w-0">
           <button
@@ -100,7 +101,10 @@ export function GroupSwitcher({ group, onRename, ...menu }: GroupSwitcherProps) 
         pending={pending}
         failure={failure}
         run={run}
-        onStartRename={() => setRenaming(true)}
+        onStartRename={() => {
+          forgetSeenFailure();
+          setRenaming(true);
+        }}
       />
     </Popover>
   );
