@@ -58,7 +58,7 @@ export function Sheet({
       onClose={reportNativeClose}
       onPointerDown={rememberPress}
       onClick={closeOnBackdrop}
-      className="animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-ink/40 open:flex sm:items-center"
+      className="animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-black/40 dark:backdrop:bg-black/70 open:flex sm:items-center"
     >
       {open && (
         <div className="animate-rise max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl">

@@ -122,6 +122,14 @@ test.describe("on a dark OS", () => {
     const canvas = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
     expect(canvas).toBe("rgb(15, 14, 19)");
   });
+
+  test("an open sheet dims the page behind it", async ({ page }) => {
+    const sheet = await openLogIn(page);
+    const backdrop = await sheet.evaluate(
+      (dialog) => getComputedStyle(dialog, "::backdrop").backgroundColor,
+    );
+    expect(backdrop).toBe("oklab(0 0 0 / 0.7)");
+  });
 });
 
 const screenshotDir = process.env.E2E_SCREENSHOTS;
