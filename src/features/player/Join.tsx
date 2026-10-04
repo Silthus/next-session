@@ -37,8 +37,9 @@ export function Join({
   const takenPlayerId = refusal?.code === "NAME_TAKEN" ? refusal.playerId : null;
   const fieldLabel = players.length > 0 ? "Not listed? Your name" : "Your name";
   const filterable = players.length > CHIPS_WITHOUT_FILTER;
+  const activeFilter = filterable ? filter : "";
   const shownPlayers = alphabetical(players).filter(
-    (player) => player._id === takenPlayerId || nameMatches(player.name, filter),
+    (player) => player._id === takenPlayerId || nameMatches(player.name, activeFilter),
   );
 
   async function join(event: FormEvent) {
@@ -199,8 +200,23 @@ function nameMatches(name: string, filter: string) {
   return searchable(name).includes(searchable(filter.trim()));
 }
 
+const LETTERS_WITHOUT_DECOMPOSITION: Record<string, string> = {
+  ø: "o",
+  ł: "l",
+  đ: "d",
+  ð: "d",
+  þ: "th",
+  æ: "ae",
+  œ: "oe",
+  ß: "ss",
+  ı: "i",
+};
+
 function searchable(text: string) {
-  return text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
+  const unaccented = text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
+  return Array.from(unaccented, (letter) => LETTERS_WITHOUT_DECOMPOSITION[letter] ?? letter).join(
+    "",
+  );
 }
 
 function alphabetical(players: RosterPlayer[]) {

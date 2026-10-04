@@ -4,10 +4,10 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps, type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { Join } from "./Join";
@@ -27,17 +27,19 @@ function longRoster() {
 
 function renderJoin(props: Partial<ComponentProps<typeof Join>> = {}) {
   const handlers = { onPick: vi.fn(), onJoin: vi.fn(() => Promise.resolve()) };
-  const rootRoute = createRootRoute({
-    component: () => (
-      <Join groupName="Thursday Crew" players={[chiara, ana, ben]} {...handlers} {...props} />
-    ),
-  });
+  renderInRouter(() => (
+    <Join groupName="Thursday Crew" players={[chiara, ana, ben]} {...handlers} {...props} />
+  ));
+  return handlers;
+}
+
+function renderInRouter(component: () => ReactNode) {
+  const rootRoute = createRootRoute({ component });
   const router = createRouter({
     routeTree: rootRoute,
     history: createMemoryHistory({ initialEntries: ["/"] }),
   });
   render(<RouterProvider router={router} />);
-  return handlers;
 }
 
 describe("Join", () => {
@@ -203,6 +205,37 @@ describe("Join", () => {
 
       expect(await screen.findByRole("button", { name: "Ana" })).toBeTruthy();
       expect(screen.getAllByRole("listitem")).toHaveLength(2);
+    });
+
+    it("matches letters with a stroke by their plain spelling", async () => {
+      const soren = { _id: "player-soren" as Id<"players">, name: "Søren Łukasz" };
+      renderJoin({ players: [...longRoster(), soren] });
+
+      await userEvent.type(
+        await screen.findByRole("searchbox", { name: "Find your name" }),
+        "soren luk",
+      );
+
+      expect(screen.getAllByRole("listitem")).toHaveLength(1);
+      expect(screen.getByRole("button", { name: "Søren Łukasz" })).toBeTruthy();
+    });
+
+    it("shows every chip again once the Roster shrinks to twelve names", async () => {
+      let shrinkRoster = () => {};
+      function ShrinkingRoster() {
+        const [players, setPlayers] = useState(longRoster().slice(0, 13));
+        shrinkRoster = () => setPlayers((current) => current.slice(0, 12));
+        return (
+          <Join groupName="Thursday Crew" players={players} onPick={vi.fn()} onJoin={vi.fn()} />
+        );
+      }
+      renderInRouter(() => <ShrinkingRoster />);
+      await userEvent.type(await screen.findByRole("searchbox", { name: "Find your name" }), "zo");
+
+      act(() => shrinkRoster());
+
+      expect(screen.queryByRole("searchbox", { name: "Find your name" })).toBeNull();
+      expect(screen.getAllByRole("listitem")).toHaveLength(12);
     });
   });
 });
