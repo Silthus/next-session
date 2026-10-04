@@ -4,14 +4,14 @@ import { api } from "../convex/_generated/api";
 import type { Id } from "../convex/_generated/dataModel";
 import { ANSWERS } from "../shared/answers";
 import { addMonths, monthDays, monthOf, todayUtc, type IsoDate } from "../shared/dates";
+import { convexUrl } from "./helpers";
 
-const backendUrl = process.env.E2E_CONVEX_URL ?? "http://127.0.0.1:3210";
 const screenshotDir = "test-results/player-screenshots";
 
 type SeededGroup = Awaited<ReturnType<typeof seedGroup>>;
 
 async function seedGroup(players: string[] = ["Ana", "Ben", "Chiara"]) {
-  const gm = new ConvexHttpClient(backendUrl);
+  const gm = new ConvexHttpClient(convexUrl);
   const { tokens } = await gm.action(api.auth.signIn, { provider: "anonymous" });
   gm.setAuth(tokens!.token);
   const groupId = await gm.mutation(api.groups.create, {});

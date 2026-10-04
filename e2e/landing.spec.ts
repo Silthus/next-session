@@ -1,11 +1,7 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { newEmail, password } from "./helpers";
 
-const password = "game-night-2026";
 const shareLinkPattern = /^localhost:5173\/s\/[A-Za-z0-9_-]{10}$/;
-
-function newEmail() {
-  return `gm-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.test`;
-}
 
 async function createLink(page: Page) {
   await page.goto("/");

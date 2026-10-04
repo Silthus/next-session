@@ -1,52 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
-import type { Id } from "../convex/_generated/dataModel";
-import type { Answer } from "../shared/answers";
 import { addMonths, monthDays, monthOf, todayUtc } from "../shared/dates";
-
-const convexUrl = "http://127.0.0.1:3210";
-const authStorageSuffix = convexUrl.replace(/[^a-zA-Z0-9]/g, "");
-
-type Tokens = { token: string; refreshToken: string };
-type Gm = { tokens: Tokens; client: ConvexHttpClient; groupId: Id<"groups">; shareToken: string };
-
-async function signInAnonymousGm(): Promise<Gm> {
-  const client = new ConvexHttpClient(convexUrl);
-  const { tokens } = await client.action(api.auth.signIn, { provider: "anonymous" });
-  if (!tokens) throw new Error("The anonymous sign-in returned no tokens");
-  client.setAuth(tokens.token);
-  const [group] = await client.query(api.groups.mine, {});
-  if (!group) throw new Error("The anonymous sign-in made no Group");
-  const view = await client.query(api.groups.get, { groupId: group.id });
-  if (!view) throw new Error("The new GM cannot read their Group");
-  return { tokens, client, groupId: group.id, shareToken: view.shareToken };
-}
-
-async function seedPlayer(gm: Gm, name: string, answers: Record<string, Answer>) {
-  const visitor = new ConvexHttpClient(convexUrl);
-  const playerId = await visitor.mutation(api.player.join, { shareToken: gm.shareToken, name });
-  for (const [date, answer] of Object.entries(answers)) {
-    await visitor.mutation(api.player.answer, {
-      shareToken: gm.shareToken,
-      playerId,
-      date,
-      answer,
-    });
-  }
-}
-
-async function openAsGm(page: Page, gm: Gm, path: string) {
-  await page.goto("/terms");
-  await page.evaluate(
-    ([suffix, tokens]) => {
-      localStorage.setItem(`__convexAuthJWT_${suffix}`, tokens.token);
-      localStorage.setItem(`__convexAuthRefreshToken_${suffix}`, tokens.refreshToken);
-    },
-    [authStorageSuffix, gm.tokens] as const,
-  );
-  await page.goto(path);
-}
+import { openAsGm, seedPlayer, signInAnonymousGm, type Gm } from "./helpers";
 
 let today = todayUtc(Date.now());
 let nextMonth = addMonths(monthOf(today), 1);
