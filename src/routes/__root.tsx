@@ -7,7 +7,7 @@ export const Route = createRootRoute({
     meta: [{ title: match._notFound ? pageTitle("Nothing here") : pageTitle() }],
   }),
   component: Root,
-  notFoundComponent: NotFoundScreen,
+  notFoundComponent: () => <NotFoundScreen kind="page" />,
 });
 
 function Root() {

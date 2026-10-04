@@ -9,7 +9,7 @@ import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
 import { Eyebrow } from "../../ui/Eyebrow";
 import { PageShell } from "../../ui/PageShell";
-import { useFocusOnMount } from "./useFocusOnMount";
+import { useFocusOnMount } from "../../ui/useFocusOnMount";
 
 export type RosterPlayer = { _id: Id<"players">; name: string };
 

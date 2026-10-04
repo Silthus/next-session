@@ -5,10 +5,10 @@ import { api } from "../../../convex/_generated/api";
 import { fillRestDates, type Answer } from "../../../shared/answers";
 import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
 import { errorMessage } from "../../lib/errors";
+import { NotFoundScreen } from "../../ui/NotFoundScreen";
 import { Skeleton } from "../../ui/Skeleton";
 import { Toast } from "../../ui/Toast";
 import { Join } from "./Join";
-import { LinkGone } from "./LinkGone";
 import { PlayerCalendar } from "./PlayerCalendar";
 import {
   browserStorage,
@@ -39,7 +39,7 @@ export function PlayerScreen({
 }) {
   const group = useQuery(api.player.group, { shareToken });
   if (group === undefined) return <PlayerLoading />;
-  if (group === null) return <LinkGone />;
+  if (group === null) return <NotFoundScreen kind="link" />;
   return (
     <PlayerGroup
       key={group.groupId}
@@ -153,7 +153,7 @@ function PlayerAnswers({
     setToast((current) => ({ message, id: (current?.id ?? 0) + 1 }));
   }
 
-  if (answers === null) return <LinkGone />;
+  if (answers === null) return <NotFoundScreen kind="link" />;
 
   return (
     <>
