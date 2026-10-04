@@ -73,12 +73,12 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
   await test.step("2. The GM opens the Group and renames it", async () => {
     await gm.getByRole("link", { name: "Open your group →" }).click();
     await expect(gm).toHaveURL(/\/g\/\w+$/);
+    await expect(rail(gm).getByText(shareLink)).toBeVisible();
     await gm.getByRole("heading", { level: 1 }).getByRole("button", { name: "My group" }).click();
     await gm.getByRole("button", { name: "Rename group" }).click();
     await gm.getByRole("textbox", { name: "Group name" }).fill(groupName);
     await gm.keyboard.press("Enter");
     await expect(switcher(gm)).toBeVisible();
-    await expect(rail(gm).getByText(shareLink)).toBeVisible();
     await shoot(gm, testInfo, "2-group-renamed");
   });
 

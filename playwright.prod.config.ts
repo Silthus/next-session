@@ -14,7 +14,10 @@ export default defineConfig({
   forbidOnly: true,
   timeout: 300_000,
   expect: { timeout: 15_000 },
-  reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report/production" }]],
+  reporter: [
+    ["list", { printSteps: true }],
+    ["html", { open: "never", outputFolder: "playwright-report/production" }],
+  ],
   use: {
     baseURL,
     actionTimeout: 15_000,
