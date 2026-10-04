@@ -1,15 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Id } from "../../../convex/_generated/dataModel";
+import type { Id } from "../../convex/_generated/dataModel";
 import {
   browserStorage,
+  dismissNudge,
   forgetPlayer,
   hasSeenHint,
+  lastGroupId,
   markHintSeen,
+  nudgeDismissedAt,
   recallPlayer,
+  rememberLastGroup,
   rememberPlayer,
-} from "./playerIdentity";
+  returningGroupId,
+  type KeyValueStorage,
+} from "./storage";
 
-class MemoryStorage implements Pick<Storage, "getItem" | "setItem" | "removeItem"> {
+class MemoryStorage implements KeyValueStorage {
   readonly items = new Map<string, string>();
   getItem(key: string) {
     return this.items.get(key) ?? null;
@@ -24,6 +30,13 @@ class MemoryStorage implements Pick<Storage, "getItem" | "setItem" | "removeItem
 
 const ana = { playerId: "player-ana" as Id<"players">, name: "Ana" };
 const ben = { playerId: "player-ben" as Id<"players">, name: "Ben" };
+
+function blockedStorage(): KeyValueStorage {
+  const fail = () => {
+    throw new Error("SecurityError");
+  };
+  return { getItem: fail, setItem: fail, removeItem: fail };
+}
 
 let storage: MemoryStorage;
 
@@ -69,17 +82,7 @@ describe("player identity", () => {
   });
 
   it("recalls nobody and remembers nothing when storage is blocked", () => {
-    const blocked = {
-      getItem: () => {
-        throw new Error("SecurityError");
-      },
-      setItem: () => {
-        throw new Error("SecurityError");
-      },
-      removeItem: () => {
-        throw new Error("SecurityError");
-      },
-    };
+    const blocked = blockedStorage();
 
     expect(() => rememberPlayer(blocked, "group-1", ana)).not.toThrow();
     expect(recallPlayer(blocked, "group-1")).toBeNull();
@@ -97,6 +100,45 @@ describe("first-visit hint", () => {
     expect(hasSeenHint(storage, "group-2")).toBe(false);
     expect(storage.getItem("next-session.playerHint.group-1")).not.toBeNull();
   });
+});
+
+describe("last Group", () => {
+  it("remembers the Group a GM opened last", () => {
+    expect(lastGroupId(storage)).toBeNull();
+    rememberLastGroup("g2", storage);
+    expect(lastGroupId(storage)).toBe("g2");
+    expect(storage.getItem("next-session.lastGroup")).toBe("g2");
+  });
+
+  it("sends a returning GM to their last Group while they still own it", () => {
+    const groups = [{ id: "g1" }, { id: "g2" }];
+    expect(returningGroupId(groups, "g2")).toBe("g2");
+    expect(returningGroupId(groups, "gone")).toBe("g1");
+    expect(returningGroupId(groups, null)).toBe("g1");
+    expect(returningGroupId([], "g2")).toBeUndefined();
+    expect(returningGroupId(undefined, "g2")).toBeUndefined();
+  });
+});
+
+describe("nudge dismissal", () => {
+  it("remembers when the GM said Later", () => {
+    expect(nudgeDismissedAt(storage)).toBeNull();
+    dismissNudge(1_700_000_000_000, storage);
+    expect(nudgeDismissedAt(storage)).toBe(1_700_000_000_000);
+  });
+
+  it("ignores a value it cannot read", () => {
+    storage.setItem("next-session.nudgeDismissedAt", "soon");
+    expect(nudgeDismissedAt(storage)).toBeNull();
+  });
+});
+
+it("keeps the last Group and nudge working when the browser blocks storage", () => {
+  const storage = blockedStorage();
+  expect(() => rememberLastGroup("g1", storage)).not.toThrow();
+  expect(lastGroupId(storage)).toBeNull();
+  expect(() => dismissNudge(1, storage)).not.toThrow();
+  expect(nudgeDismissedAt(storage)).toBeNull();
 });
 
 describe("browserStorage", () => {

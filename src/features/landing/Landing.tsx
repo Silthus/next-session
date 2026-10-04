@@ -6,7 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { AccountSheet, type AccountIntent } from "../account/AccountSheet";
 import type { SaveInput } from "../account/save";
 import { useGm } from "../account/useGm";
-import { lastGroupId, returningGroupId } from "../group/rail/railStorage";
+import { lastGroupId, returningGroupId } from "../../lib/storage";
 import { LandingView, type LandingState } from "./LandingView";
 
 type Phase = "idle" | "creating" | "created" | "failed";

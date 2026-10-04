@@ -18,7 +18,7 @@ import {
   recallPlayer,
   rememberPlayer,
   type PlayerIdentity,
-} from "./playerIdentity";
+} from "../../lib/storage";
 import { visibleMonth } from "./playerMonth";
 import { useTodayUtc } from "./useTodayUtc";
 
