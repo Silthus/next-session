@@ -16,16 +16,26 @@ function rosterOf(count: number) {
   }));
 }
 
+type CalendarSetup = {
+  month?: string;
+  loadedMonth?: string;
+  players?: { _id: string; name: string }[];
+  answers?: { playerId: string; date: string; answer: Answer }[];
+  sessions?: CalendarSession[];
+  selectedDay?: string | null;
+};
+
 function renderCalendar({
   month = "2026-10",
+  loadedMonth = month,
   players = rosterOf(3),
-  answers = [] as { playerId: string; date: string; answer: Answer }[],
-  sessions = [] as CalendarSession[],
-  selectedDay = null as string | null,
-} = {}) {
+  answers = [],
+  sessions = [],
+  selectedDay = null,
+}: CalendarSetup = {}) {
   const onSelectDay = vi.fn();
   const onMonthChange = vi.fn();
-  const summary = summarizeMonth({ month, today, players, answers, sessions });
+  const summary = summarizeMonth({ month: loadedMonth, today, players, answers, sessions });
   render(
     <HeatCalendar
       month={month}
@@ -41,6 +51,24 @@ function renderCalendar({
 }
 
 describe("HeatCalendar", () => {
+  it("steps from the requested month and holds the old grid while the next month loads", async () => {
+    const { onMonthChange } = renderCalendar({ month: "2026-11", loadedMonth: "2026-10" });
+    expect(screen.getByRole("heading", { name: "November 2026" })).toBeTruthy();
+    const grid = screen.getByRole("button", { name: /^Friday, October 16:/ }).parentElement!;
+    expect(grid.getAttribute("aria-busy")).toBe("true");
+    expect(grid.hasAttribute("inert")).toBe(true);
+
+    await userEvent.click(screen.getByRole("button", { name: "Next month" }));
+    expect(onMonthChange).toHaveBeenCalledWith("2026-12");
+  });
+
+  it("shows a loaded grid as settled", () => {
+    renderCalendar();
+    const grid = screen.getByRole("button", { name: /^Friday, October 16:/ }).parentElement!;
+    expect(grid.hasAttribute("aria-busy")).toBe(false);
+    expect(grid.hasAttribute("inert")).toBe(false);
+  });
+
   it("shows the month and sums up each day for screen readers", () => {
     renderCalendar({
       answers: [

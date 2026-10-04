@@ -2,6 +2,7 @@ import { addMonths, monthOf, type IsoDate, type IsoMonth } from "../../../../sha
 import type { PlayerRow } from "../../../../shared/monthSummary";
 import { Button } from "../../../ui/Button";
 import { Card } from "../../../ui/Card";
+import { cn } from "../../../ui/cn";
 import { lastVisibleMonth, leadingBlanks, monthLabel, WEEKDAYS } from "./calendarDates";
 import { DayCell, MAX_PLAYERS_WITH_BARS, type CalendarDay } from "./DayCell";
 import { IconChevron, IconStar } from "./icons";
@@ -23,10 +24,19 @@ export function HeatCalendar({
   onSelectDay: (day: IsoDate | null) => void;
   onMonthChange: (month: IsoMonth) => void;
 }) {
+  const gridMonth = days[0] ? monthOf(days[0].date) : month;
+  const loading = gridMonth !== month;
   return (
     <Card className="p-3 sm:p-5">
       <MonthHeader month={month} today={today} onMonthChange={onMonthChange} />
-      <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
+      <div
+        aria-busy={loading || undefined}
+        inert={loading}
+        className={cn(
+          "grid grid-cols-7 gap-1 transition-opacity duration-150 sm:gap-1.5",
+          loading && "opacity-50",
+        )}
+      >
         {WEEKDAYS.map((weekday) => (
           <span
             key={weekday}
@@ -36,7 +46,7 @@ export function HeatCalendar({
             {weekday}
           </span>
         ))}
-        {Array.from({ length: leadingBlanks(month) }, (_, i) => (
+        {Array.from({ length: leadingBlanks(gridMonth) }, (_, i) => (
           <span key={`blank-${String(i)}`} />
         ))}
         {days.map((day) => (
@@ -67,7 +77,13 @@ function MonthHeader({
   return (
     <div className="mb-3 flex items-center justify-between gap-2">
       <div className="flex min-w-0 items-center gap-2">
-        <h2 className="font-display text-xl font-bold sm:text-2xl">{monthLabel(month)}</h2>
+        <h2
+          tabIndex={-1}
+          data-month-heading
+          className="font-display text-xl font-bold outline-none sm:text-2xl"
+        >
+          {monthLabel(month)}
+        </h2>
         {month < monthOf(today) && (
           <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs font-semibold text-ink-3">
             Past month

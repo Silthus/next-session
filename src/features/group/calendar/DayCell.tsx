@@ -42,7 +42,7 @@ export function DayCell({
         "relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2",
         cellTone(day),
         selected
-          ? "z-10 outline-2 outline-offset-2 outline-ink"
+          ? "z-10 outline-2 outline-offset-2 outline-ink focus-visible:outline-offset-4 focus-visible:outline-accent"
           : "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
         day.past ? "cursor-default opacity-40" : "active:scale-[0.97]",
       )}

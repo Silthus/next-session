@@ -51,7 +51,8 @@ function GroupSurface({
   search: GroupSearch;
 }) {
   const today = useToday();
-  const loaded = useMonthSchedule(groupId, visibleMonth(search.month, today));
+  const requestedMonth = visibleMonth(search.month, today);
+  const loaded = useMonthSchedule(groupId, requestedMonth);
   const sessions = useSessionActions(groupId);
   const navigate = useNavigate({ from: "/g/$groupId" });
   const showMonth = (next: IsoMonth) => void navigate({ search: { month: next } });
@@ -60,7 +61,7 @@ function GroupSurface({
   const selectedDay = loaded ? visibleDay(search.day, loaded.month) : null;
   const closeDay = () => {
     selectDay(null);
-    if (selectedDay) dayCellOf(selectedDay)?.focus();
+    if (selectedDay) focusAfterClosing(selectedDay);
   };
 
   useEffect(() => {
@@ -97,7 +98,7 @@ function GroupSurface({
     <GroupFrame heading={<GroupName name={name} />}>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
         <HeatCalendar
-          month={month}
+          month={requestedMonth}
           today={today}
           players={schedule.players}
           days={summary.days}
@@ -168,6 +169,16 @@ function revealAbove(element: HTMLElement, sheetHeight: number) {
   if (overlap > 0) window.scrollBy({ top: overlap });
 }
 
+function focusAfterClosing(date: IsoDate) {
+  const cell = dayCellOf(date);
+  const target = cell && !cell.matches(":disabled") ? cell : monthHeading();
+  target?.focus();
+}
+
+function monthHeading() {
+  return document.querySelector<HTMLElement>("[data-month-heading]");
+}
+
 function dayCellOf(date: IsoDate) {
   return document.querySelector<HTMLElement>(`[data-date="${date}"]`);
 }
@@ -216,11 +227,8 @@ function GroupLoading({ name }: { name?: string }) {
     <GroupFrame
       heading={name === undefined ? <Skeleton className="h-7 w-40" /> : <GroupName name={name} />}
     >
-      <div
-        className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]"
-        aria-busy="true"
-        aria-label="Loading your group"
-      >
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]" role="status" aria-busy="true">
+        <span className="sr-only">Loading your group</span>
         <Skeleton className="aspect-[7/6] w-full rounded-lg" />
         <div className="flex flex-col gap-4">
           <Skeleton className="h-28 rounded-lg" />
