@@ -18,19 +18,29 @@ type GroupSwitcherProps = {
   onDelete: () => Promise<unknown>;
 };
 
-export function GroupSwitcher({ group, onRename, onCreate, ...menu }: GroupSwitcherProps) {
+type Pending = "creating" | "deleting";
+
+type RunAction = (kind: Pending, action: () => Promise<unknown>) => Promise<boolean>;
+
+export function GroupSwitcher({ group, onRename, ...menu }: GroupSwitcherProps) {
   const [renaming, setRenaming] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const createStarted = useRef(false);
-  const create = async () => {
-    if (createStarted.current) return;
-    createStarted.current = true;
-    setCreating(true);
+  const [pending, setPending] = useState<Pending | null>(null);
+  const [failure, setFailure] = useState<string | null>(null);
+  const started = useRef(false);
+  const run: RunAction = async (kind, action) => {
+    if (started.current) return false;
+    started.current = true;
+    setPending(kind);
+    setFailure(null);
     try {
-      await onCreate();
+      await action();
+      return true;
+    } catch (error) {
+      setFailure(errorMessage(error, "group"));
+      return false;
     } finally {
-      createStarted.current = false;
-      setCreating(false);
+      started.current = false;
+      setPending(null);
     }
   };
   const trigger = useRef<HTMLButtonElement>(null);
@@ -84,8 +94,9 @@ export function GroupSwitcher({ group, onRename, onCreate, ...menu }: GroupSwitc
       <SwitcherMenu
         group={group}
         {...menu}
-        creating={creating}
-        onCreate={create}
+        pending={pending}
+        failure={failure}
+        run={run}
         onStartRename={() => setRenaming(true)}
       />
     </Popover>
@@ -98,12 +109,17 @@ function SwitcherMenu({
   onOpen,
   onCreate,
   onDelete,
-  creating,
+  pending,
+  failure,
+  run,
   onStartRename,
-}: Omit<GroupSwitcherProps, "onRename"> & { creating: boolean; onStartRename: () => void }) {
+}: Omit<GroupSwitcherProps, "onRename"> & {
+  pending: Pending | null;
+  failure: string | null;
+  run: RunAction;
+  onStartRename: () => void;
+}) {
   const close = useClosePopover();
-  const [busy, setBusy] = useState<"creating" | "deleting" | null>(null);
-  const [failure, setFailure] = useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const deleteButton = useRef<HTMLButtonElement>(null);
   const refocusDelete = useRef(false);
@@ -119,16 +135,8 @@ function SwitcherMenu({
   }, [confirmingDelete]);
   const playerCount = groups?.find((candidate) => candidate.id === group.id)?.playerCount ?? 0;
 
-  const run = async (kind: "creating" | "deleting", action: () => Promise<unknown>) => {
-    setBusy(kind);
-    setFailure(null);
-    try {
-      await action();
-      close({ refocus: false });
-    } catch (error) {
-      setFailure(errorMessage(error, "group"));
-      setBusy(null);
-    }
+  const act = async (kind: Pending, action: () => Promise<unknown>) => {
+    if (await run(kind, action)) close({ refocus: false });
   };
 
   const open = (event: MouseEvent, groupId: string) => {
@@ -168,11 +176,11 @@ function SwitcherMenu({
       )}
       <button
         type="button"
-        disabled={busy !== null || creating}
-        onClick={() => void run("creating", onCreate)}
+        disabled={pending !== null}
+        onClick={() => void act("creating", onCreate)}
         className={cn(menuItemClassName, "mt-1 font-semibold text-accent-strong")}
       >
-        {creating ? (
+        {pending === "creating" ? (
           "Making your group…"
         ) : (
           <>
@@ -186,8 +194,8 @@ function SwitcherMenu({
         <DeleteConfirm
           name={group.name}
           playerCount={playerCount}
-          busy={busy === "deleting"}
-          onDelete={() => void run("deleting", onDelete)}
+          busy={pending === "deleting"}
+          onDelete={() => void act("deleting", onDelete)}
           onKeep={keepGroup}
         />
       ) : (

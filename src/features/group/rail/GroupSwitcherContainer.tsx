@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { GroupSwitcher } from "./GroupSwitcher";
+import { useIsMounted } from "./useIsMounted";
 
 export function GroupSwitcherContainer({ group }: { group: { id: Id<"groups">; name: string } }) {
   const groups = useQuery(api.groups.mine);
@@ -10,12 +11,14 @@ export function GroupSwitcherContainer({ group }: { group: { id: Id<"groups">; n
   const renameGroup = useMutation(api.groups.rename);
   const removeGroup = useMutation(api.groups.remove);
   const navigate = useNavigate();
+  const isMounted = useIsMounted();
   const open = (groupId: string, replace = false) =>
     void navigate({ to: "/g/$groupId", params: { groupId }, replace });
 
   const deleteGroup = async () => {
     const next = groups?.find((candidate) => candidate.id !== group.id);
     await removeGroup({ groupId: group.id });
+    if (!isMounted()) return;
     if (next) open(next.id, true);
     else void navigate({ to: "/", replace: true });
   };
@@ -25,7 +28,10 @@ export function GroupSwitcherContainer({ group }: { group: { id: Id<"groups">; n
       group={group}
       groups={groups}
       onOpen={open}
-      onCreate={async () => open(await createGroup({}))}
+      onCreate={async () => {
+        const groupId = await createGroup({});
+        if (isMounted()) open(groupId);
+      }}
       onRename={(name) => renameGroup({ groupId: group.id, name })}
       onDelete={deleteGroup}
     />

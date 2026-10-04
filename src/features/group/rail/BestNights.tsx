@@ -2,8 +2,8 @@ import type { IsoDate } from "../../../../shared/dates";
 import { Avatar } from "../../../ui/Avatar";
 import { cn } from "../../../ui/cn";
 import { IconStar } from "../../../ui/icons";
+import { nightLabel } from "../calendar/calendarDates";
 import type { CalendarDay } from "../calendar/DayCell";
-import { nightLabel } from "./railDates";
 import { EmptyLine, RailCard } from "./RailCard";
 
 const SHOWN_AVATARS = 4;

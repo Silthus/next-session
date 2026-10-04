@@ -148,8 +148,13 @@ test("the GM adds, renames, and removes Players", async ({ page }) => {
   await page.keyboard.press("Enter");
   await expect(players.getByRole("listitem")).toHaveText([/Ana/, /Ben/]);
 
+  await page.goto(`/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
   await players.getByRole("button", { name: "More for Ben" }).click();
   await players.getByRole("button", { name: "Rename" }).click();
+  await players
+    .getByRole("textbox", { name: "New name for Ben" })
+    .dispatchEvent("keydown", { key: "Escape", isComposing: true, bubbles: true });
+  await expect(page.getByRole("region", { name: /, \w+ 5$/ })).toBeVisible();
   await players.getByRole("textbox", { name: "New name for Ben" }).fill("Benedikt");
   await page.keyboard.press("Enter");
   await expect(players.getByRole("listitem")).toHaveText([/Ana/, /Benedikt/]);
@@ -226,6 +231,9 @@ test("the switcher opens, makes, renames and deletes Groups, and the landing ret
   await page.getByRole("button", { name: "Delete My group" }).click();
   await expect(page).toHaveURL(new RegExp(`/g/${gm.groupId}$`));
   await expect.poll(async () => (await gm.client.query(api.groups.mine, {})).length).toBe(2);
+  await page.goBack();
+  await expect(page).toHaveURL(new RegExp(`/g/${otherId}$`));
+  await expect(switcher(page, "Thursday Crew")).toBeVisible();
 });
 
 test("an Anonymous GM is nudged to save once a Player joins, until Later", async ({ page }) => {
@@ -310,6 +318,7 @@ test("an Anonymous GM saves into an Account from the header and stays on the Gro
   await expect(page.getByRole("status")).toHaveText("Saved. Open it anywhere with your account.");
   await expect(page).toHaveURL(new RegExp(`/g/${gm.groupId}\\?`));
   await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
+  await expect(page.locator("[data-month-heading]")).toBeFocused();
   await expect(page.getByText(`/s/${gm.shareToken}`)).toBeVisible();
   await expect(dayPanel).toBeVisible();
   await expect

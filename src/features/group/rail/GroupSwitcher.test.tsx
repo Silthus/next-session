@@ -78,6 +78,20 @@ describe("GroupSwitcher", () => {
     );
   });
 
+  it("still says why a new Group failed after the menu was closed meanwhile", async () => {
+    let fail: (error: unknown) => void = () => undefined;
+    renderSwitcher({ onCreate: () => new Promise((_, reject) => (fail = reject)) });
+    await openMenu();
+    await userEvent.click(screen.getByRole("button", { name: "New group" }));
+    await userEvent.keyboard("{Escape}");
+    await act(async () => {
+      fail(new ConvexError({ code: "RATE_LIMITED", retryAfter: 1000 }));
+      await Promise.resolve();
+    });
+    await openMenu();
+    expect(screen.getByRole("alert").textContent).toBe("Slow down a moment, then try again.");
+  });
+
   it("renames the Group inline with Enter", async () => {
     const { onRename } = renderSwitcher();
     await openMenu();

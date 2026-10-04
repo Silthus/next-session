@@ -49,11 +49,13 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
   const [saveSheetFor, setSaveSheetFor] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const toasts = useToast(groupId);
+  const [focusAfterSave, setFocusAfterSave] = useState(false);
 
   const save = async (input: SaveInput) => {
     setSaving(true);
     try {
       await gm.save(input);
+      setFocusAfterSave(true);
       toasts.show("Saved. Open it anywhere with your account.");
     } finally {
       setSaving(false);
@@ -78,6 +80,8 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         search,
         headerActions,
         toasts,
+        focusHeading: focusAfterSave && saveSheetFor === null,
+        onHeadingFocused: () => setFocusAfterSave(false),
         onSave: setSaveSheetFor,
       })}
       <AccountSheet
@@ -98,6 +102,8 @@ function surfaceFor({
   search,
   headerActions,
   toasts,
+  focusHeading,
+  onHeadingFocused,
   onSave,
 }: {
   status: ReturnType<typeof useGm>["status"];
@@ -106,6 +112,8 @@ function surfaceFor({
   search: GroupSearch;
   headerActions: ReactNode;
   toasts: Toasts;
+  focusHeading: boolean;
+  onHeadingFocused: () => void;
   onSave: (groupName: string) => void;
 }) {
   if (status === "signedOut" && !saving) return <Navigate to="/" replace />;
@@ -120,6 +128,8 @@ function surfaceFor({
       search={search}
       headerActions={headerActions}
       toasts={toasts}
+      focusHeading={focusHeading}
+      onHeadingFocused={onHeadingFocused}
       onSave={() => onSave(group.name)}
     />
   );
@@ -140,6 +150,8 @@ function GroupSurface({
   search,
   headerActions,
   toasts,
+  focusHeading,
+  onHeadingFocused,
   onSave,
 }: {
   group: GroupView;
@@ -148,6 +160,8 @@ function GroupSurface({
   search: GroupSearch;
   headerActions: ReactNode;
   toasts: Toasts;
+  focusHeading: boolean;
+  onHeadingFocused: () => void;
   onSave: () => void;
 }) {
   const groupId = group.id;
@@ -172,10 +186,18 @@ function GroupSurface({
 
   useEffect(() => rememberLastGroup(groupId), [groupId]);
 
+  const monthShown = loaded?.schedule != null;
+  useEffect(() => {
+    if (!focusHeading || !monthShown) return;
+    focusMonthHeading();
+    onHeadingFocused();
+  }, [focusHeading, monthShown, onHeadingFocused]);
+
   useEffect(() => {
     if (selectedDay === null) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !insideDialog(event.target)) closeDay();
+      if (event.key !== "Escape" || event.isComposing || insideDialog(event.target)) return;
+      closeDay();
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
@@ -311,7 +333,7 @@ function GroupFrame({
 }) {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-20 border-b border-line bg-paper/85 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-line bg-paper/85 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
           <Link to="/" aria-label="Next Session home" className="shrink-0">
             <Logo />

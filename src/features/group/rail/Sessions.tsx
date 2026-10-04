@@ -1,9 +1,8 @@
 import { useId, useState } from "react";
 import type { IsoDate } from "../../../../shared/dates";
 import { IconChevron, IconStar } from "../../../ui/icons";
-import { longDayLabel, relativeDay } from "../calendar/calendarDates";
+import { longDayLabel, nightLabel, relativeDay } from "../calendar/calendarDates";
 import type { CalendarSession } from "../calendar/DayCell";
-import { nightLabel } from "./railDates";
 import { EmptyLine, RailCard } from "./RailCard";
 
 export function Sessions({
