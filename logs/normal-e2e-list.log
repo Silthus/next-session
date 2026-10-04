@@ -1,0 +1,47 @@
+Listing tests:
+  [chromium] › gm-calendar.spec.ts:68:1 › the GM reads the heat-map and sees who is free on a night
+  [chromium] › gm-calendar.spec.ts:89:1 › on a phone the day sheet leaves the tapped night in view
+  [chromium] › gm-calendar.spec.ts:118:1 › the GM schedules a Session, unschedules it, and undoes that
+  [chromium] › gm-calendar.spec.ts:157:1 › month navigation lives in the URL and stops at the end of the Booking Window
+  [chromium] › gm-calendar.spec.ts:190:1 › another GM's Group or a malformed id falls back to the GM's own Group
+  [chromium] › gm-calendar.spec.ts:202:1 › a signed-out visitor lands on the landing page
+  [chromium] › gm-rail.spec.ts:81:1 › the GM copies, rotates, and undoes the Share Link from the rail
+  [chromium] › gm-rail.spec.ts:115:1 › the newest action owns the only toast
+  [chromium] › gm-rail.spec.ts:132:1 › the GM adds, renames, and removes Players
+  [chromium] › gm-rail.spec.ts:170:1 › Best Nights and Sessions open their day
+  [chromium] › gm-rail.spec.ts:194:1 › the switcher opens, makes, renames and deletes Groups, and the landing returns to the last one
+  [chromium] › gm-rail.spec.ts:240:1 › an Anonymous GM is nudged to save once a Player joins, until Later
+  [chromium] › gm-rail.spec.ts:264:1 › on a phone the rail sits under the calendar behind a segmented control
+  [chromium] › gm-rail.spec.ts:298:1 › an Anonymous GM saves into an Account from the header and stays on the Group
+  [chromium] › gm-rail.spec.ts:330:1 › on a phone the toast clears the open day sheet
+  [chromium] › gm-rail.spec.ts:346:1 › deleting the last Group of an Anonymous GM returns to the landing
+  [chromium] › gm-rail.spec.ts:363:7 › screenshots › 390px light
+  [chromium] › gm-rail.spec.ts:363:7 › screenshots › 390px dark
+  [chromium] › gm-rail.spec.ts:363:7 › screenshots › 1440px light
+  [chromium] › gm-rail.spec.ts:363:7 › screenshots › 1440px dark
+  [chromium] › landing.spec.ts:48:1 › one click puts the link in hand and lands the GM on their Group
+  [chromium] › landing.spec.ts:63:1 › saving to a new Account keeps the Share Link, and logging in finds the Group
+  [chromium] › landing.spec.ts:83:1 › saving into an Account that has older Groups keeps showing the new Group
+  [chromium] › landing.spec.ts:103:1 › a wrong password says so and keeps the sheet open
+  [chromium] › landing.spec.ts:119:3 › on a dark OS › a cold load paints a dark canvas
+  [chromium] › landing.spec.ts:134:7 › screenshots › 390px light
+  [chromium] › landing.spec.ts:134:7 › screenshots › 390px dark
+  [chromium] › landing.spec.ts:134:7 › screenshots › 1440px light
+  [chromium] › landing.spec.ts:134:7 › screenshots › 1440px dark
+  [chromium] › player.spec.ts:118:3 › the player surface › a new player joins by name, answers, fills the rest, and comes back
+  [chromium] › player.spec.ts:172:3 › the player surface › taps and Fill Rest show at once, before the backend answers
+  [chromium] › player.spec.ts:198:3 › the player surface › a first Fill Rest dismisses the first-visit hint
+  [chromium] › player.spec.ts:214:3 › the player surface › a tap the backend refuses rolls back and says why
+  [chromium] › player.spec.ts:228:3 › the player surface › tapping a night back to not set clears its Answer
+  [chromium] › player.spec.ts:246:3 › the player surface › a Fill Rest the backend refuses rolls back and says why
+  [chromium] › player.spec.ts:264:3 › the player surface › a listed player answers with one tap and can switch with Not you?
+  [chromium] › player.spec.ts:280:3 › the player surface › a taken name points at the existing chip
+  [chromium] › player.spec.ts:295:3 › the player surface › a player the GM removed lands on the join screen
+  [chromium] › player.spec.ts:309:3 › the player surface › a past month is read-only
+  [chromium] › player.spec.ts:327:3 › the player surface › an unknown link says it no longer works
+  [chromium] › player.spec.ts:364:3 › player surface screenshots › every player screen at 390 and 1440 px, light and dark
+  [chromium] › player.spec.ts:411:3 › player surface screenshots › the past month at 390 and 1440 px, light and dark
+  [chromium] › player.spec.ts:454:3 › player surface screenshots › the first-visit hint at 390 and 1440 px, light and dark
+  [chromium] › player.spec.ts:463:3 › player surface screenshots › the done card at 390 and 1440 px, light and dark
+  [chromium] › smoke.spec.ts:3:1 › the landing page renders the app shell without errors
+Total: 45 tests in 5 files

@@ -1,0 +1,57 @@
+$ playwright test --config playwright.prod.config.ts
+
+Running 1 test using 1 worker
+
+  ✘  1 [production] › e2e/production.spec.ts:54:1 › a GM and a Player schedule a Session on the deployed app (5.0m)
+
+
+  1) [production] › e2e/production.spec.ts:54:1 › a GM and a Player schedule a Session on the deployed app › 3. A Player joins from the Share Link and answers 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: locator.fill: Test ended.
+    Call log:
+      - waiting for getByRole('textbox', { name: 'Not listed? Your name' })
+
+
+      89 |     await player.goto(`${shareLink}?month=${nextMonth}`);
+      90 |     await expect(player.getByRole("heading", { level: 1, name: groupName })).toBeVisible();
+    > 91 |     await player.getByRole("textbox", { name: "Not listed? Your name" }).fill(playerName);
+         |                                                                          ^
+      92 |     await player.getByRole("button", { name: "Join" }).click();
+      93 |     await expect(player.getByText("Answering as")).toContainText(playerName);
+      94 |     await tapUntil(player, dateOf(5), "Free");
+        at ~/dev/ns-worktrees/ticket-23/e2e/production.spec.ts:91:74
+        at ~/dev/ns-worktrees/ticket-23/e2e/production.spec.ts:88:3
+
+    attachment #1: 1-link-created (image/png) ──────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/attachments/1-link-created-480c22d606a34d3608627d93b31f80032b5142d1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: 2-group-renamed (image/png) ─────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/attachments/2-group-renamed-fa8df0add574d1d23805efed9c7a2286ed5043e9.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #4: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/error-context.md
+
+    attachment #6: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Slow test file: [production] › e2e/production.spec.ts (5.0m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 failed
+    [production] › e2e/production.spec.ts:54:1 › a GM and a Player schedule a Session on the deployed app 
+error: script "e2e:prod" exited with code 1

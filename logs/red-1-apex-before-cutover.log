@@ -1,0 +1,41 @@
+$ playwright test --config playwright.prod.config.ts
+
+Running 1 test using 1 worker
+
+  ✘  1 [production] › e2e/production.spec.ts:9:1 › a GM and a Player schedule a Session on the deployed app (897ms)
+
+
+  1) [production] › e2e/production.spec.ts:9:1 › a GM and a Player schedule a Session on the deployed app › 1. Create your link shows the Share Link in place 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "https://next-session.link"
+    Received: "https://little-spaniel-709.convex.site"
+
+      14 |   await test.step("1. Create your link shows the Share Link in place", async () => {
+      15 |     await gm.goto("/");
+    > 16 |     expect(new URL(gm.url()).origin).toBe(appOrigin);
+         |                                      ^
+      17 |     await gm.getByRole("button", { name: "Create your link" }).click();
+      18 |     await expect(gm.getByText("Your link is ready. Send it to your players.")).toBeVisible();
+      19 |     await expect(gm.locator("code")).toHaveText(/\/s\/[A-Za-z0-9_-]{10}$/);
+        at ~/dev/ns-worktrees/ticket-23/e2e/production.spec.ts:16:38
+        at ~/dev/ns-worktrees/ticket-23/e2e/production.spec.ts:14:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [production] › e2e/production.spec.ts:9:1 › a GM and a Player schedule a Session on the deployed app 
+error: script "e2e:prod" exited with code 1

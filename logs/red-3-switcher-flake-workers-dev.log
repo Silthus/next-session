@@ -1,0 +1,54 @@
+$ playwright test --config playwright.prod.config.ts
+
+Running 1 test using 1 worker
+
+     1.1 [production] › e2e/production.spec.ts:54:1 › a GM and a Player schedule a Session on the deployed app › 1. Create your link shows the Share Link in place (639ms)
+     1.2 [production] › e2e/production.spec.ts:54:1 › a GM and a Player schedule a Session on the deployed app › 2. The GM opens the Group and renames it (15.1s)
+  ✘  1 [production] › e2e/production.spec.ts:54:1 › a GM and a Player schedule a Session on the deployed app (15.8s)
+
+
+  1) [production] › e2e/production.spec.ts:54:1 › a GM and a Player schedule a Session on the deployed app › 2. The GM opens the Group and renames it 
+
+    TimeoutError: locator.click: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Rename group' })
+        - locator resolved to <button type="button" class="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-surface-2 disabled:opacity-50">Rename group</button>
+      - attempting click action
+        - waiting for element to be visible, enabled and stable
+        - element is not stable
+      - retrying click action
+        - waiting for element to be visible, enabled and stable
+      - element was detached from the DOM, retrying
+
+
+      75 |     await expect(gm).toHaveURL(/\/g\/\w+$/);
+      76 |     await gm.getByRole("heading", { level: 1 }).getByRole("button", { name: "My group" }).click();
+    > 77 |     await gm.getByRole("button", { name: "Rename group" }).click();
+         |                                                            ^
+      78 |     await gm.getByRole("textbox", { name: "Group name" }).fill(groupName);
+      79 |     await gm.keyboard.press("Enter");
+      80 |     await expect(switcher(gm)).toBeVisible();
+        at ~/dev/ns-worktrees/ticket-23/e2e/production.spec.ts:77:60
+        at ~/dev/ns-worktrees/ticket-23/e2e/production.spec.ts:73:3
+
+    attachment #1: 1-link-created (image/png) ──────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/attachments/1-link-created-480c22d606a34d3608627d93b31f80032b5142d1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [production] › e2e/production.spec.ts:54:1 › a GM and a Player schedule a Session on the deployed app 
+error: script "e2e:prod" exited with code 1

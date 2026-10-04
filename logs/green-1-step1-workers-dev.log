@@ -1,0 +1,7 @@
+$ playwright test --config playwright.prod.config.ts
+
+Running 1 test using 1 worker
+
+  ✓  1 [production] › e2e/production.spec.ts:9:1 › a GM and a Player schedule a Session on the deployed app (1.4s)
+
+  1 passed (1.9s)
