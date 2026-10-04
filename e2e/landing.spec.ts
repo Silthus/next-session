@@ -6,9 +6,7 @@ import {
   type Page,
   type WebSocketRoute,
 } from "@playwright/test";
-import { ConvexHttpClient } from "convex/browser";
-import { api } from "../convex/_generated/api";
-import { convexUrl, newEmail, password, toastRegion } from "./helpers";
+import { newEmail, password, signUpAccount, toastRegion } from "./helpers";
 
 const shareLinkPattern = /^localhost:5173\/s\/[A-Za-z0-9_-]{10}$/;
 
@@ -49,16 +47,6 @@ async function seedAccount(browser: Browser) {
   return { email, groupPath };
 }
 
-async function signUpAccountWithoutGroups() {
-  const email = newEmail();
-  const client = new ConvexHttpClient(convexUrl);
-  await client.action(api.auth.signIn, {
-    provider: "password",
-    params: { email, password, flow: "signUp" },
-  });
-  return email;
-}
-
 type Sync = { client: WebSocketRoute; server: WebSocketRoute };
 
 async function interceptSync(page: Page, onClientMessage: (text: string, sync: Sync) => boolean) {
@@ -90,6 +78,20 @@ function failMutation(client: WebSocketRoute, text: string, failure: object) {
 
 const serverError = { result: "Server Error" };
 const claimInvalid = { result: "", errorData: { code: "CLAIM_INVALID" } };
+
+async function failThenHoldFinishSave(page: Page) {
+  let finishes = 0;
+  let release: () => void = () => {};
+  await interceptSync(page, (text, { client, server }) => {
+    if (!isFinishSave(text)) return false;
+    finishes += 1;
+    if (finishes === 1) failMutation(client, text, serverError);
+    else if (finishes === 2) release = () => server.send(text);
+    else return false;
+    return true;
+  });
+  return { release: () => release() };
+}
 
 async function failFinishSaves(page: Page, failures: object[]) {
   const pending = [...failures];
@@ -294,6 +296,29 @@ test.describe("a Save that expires", () => {
   });
 });
 
+test("a retry dismissed, reopened, then finished in the background keeps the Save", async ({
+  page,
+}) => {
+  const email = newEmail();
+  const finish = await failThenHoldFinishSave(page);
+  const { shareLink } = await createLink(page);
+
+  await page.getByRole("button", { name: "save it to an account" }).click();
+  const sheet = await fillSaveSheet(page, email);
+  await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "save it to an account" }).click();
+  await expect(sheet.getByRole("button", { name: "Finish saving" })).toBeVisible();
+  finish.release();
+  await expect
+    .poll(() => page.evaluate(() => sessionStorage.getItem("next-session.pendingSave")))
+    .toBeNull();
+  await page.keyboard.press("Escape");
+
+  await expect(page.getByText(`Saved to ${email}.`)).toBeVisible();
+  await expect(page.locator("code")).toHaveText(shareLink);
+});
+
 test("pressing Escape again and again mid-Save keeps the sheet up until it is done", async ({
   page,
 }) => {
@@ -319,7 +344,7 @@ test("pressing Escape again and again mid-Save keeps the sheet up until it is do
 test("logging in to an Account without Groups names it and points to the first link", async ({
   page,
 }) => {
-  const email = await signUpAccountWithoutGroups();
+  const { email } = await signUpAccount();
   const noGroupsLines = await countNoGroupsLines(page);
 
   const sheet = await openLogIn(page);
