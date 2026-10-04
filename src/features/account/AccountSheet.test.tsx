@@ -232,8 +232,6 @@ describe("AccountSheet finishing a Save after the sign-in went through", () => {
 
     const line = (await screen.findByText(email)).closest("p");
     expect(line?.textContent).toContain(groupName);
-    expect(line?.classList).toContain("break-words");
-    expect(line?.classList).toContain("min-w-0");
   });
 
   it("says when the Save expired before the Group moved", async () => {
@@ -296,6 +294,31 @@ describe("AccountSheet finishing a Save after the sign-in went through", () => {
 
     expect(onClose).toHaveBeenCalledOnce();
     expect(onFinish).toHaveBeenCalledOnce();
+  });
+
+  it("offers only to close when the first Save expired after the sign-in", async () => {
+    let failMove: (error: Error) => void = () => {};
+    const props = {
+      open: true,
+      intent: "save",
+      groupName: "My group",
+      onSubmit: vi.fn<Submit>(() => new Promise((_, reject) => (failMove = reject))),
+      onFinish: vi.fn(),
+      onClose: vi.fn(),
+    } as const;
+    const replaceProps = renderSheet(props);
+
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+    replaceProps({ ...props, signedInAs: email });
+    act(() => failMove(new ConvexError({ code: "CLAIM_INVALID" })));
+    await screen.findByRole("alert");
+
+    expect(screen.queryByRole("button", { name: "Finish saving" })).toBeNull();
+    const primary = screen
+      .getAllByRole<HTMLButtonElement>("button")
+      .find((button) => button.type === "submit");
+    expect(primary?.textContent).toBe("Close");
   });
 });
 

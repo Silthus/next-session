@@ -1,4 +1,11 @@
-import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
+import {
+  expect,
+  test,
+  type Browser,
+  type Locator,
+  type Page,
+  type WebSocketRoute,
+} from "@playwright/test";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 
@@ -23,12 +30,17 @@ function openGroupLink(page: Page) {
   return page.getByRole("link", { name: "Open your group →" });
 }
 
-async function saveToNewAccount(page: Page, email: string) {
-  await page.getByRole("button", { name: "save it to an account" }).click();
+async function fillSaveSheet(page: Page, email: string) {
   const sheet = page.getByRole("dialog", { name: /^Keep / });
   await sheet.getByLabel("Email").fill(email);
   await sheet.getByLabel("Password").fill(password);
   await sheet.getByRole("button", { name: "Save group" }).click();
+  return sheet;
+}
+
+async function saveToNewAccount(page: Page, email: string) {
+  await page.getByRole("button", { name: "save it to an account" }).click();
+  await fillSaveSheet(page, email);
   await expect(page.getByRole("status").filter({ hasText: `Saved to ${email}.` })).toBeFocused();
 }
 
@@ -52,36 +64,51 @@ async function signUpAccountWithoutGroups() {
   return email;
 }
 
-async function failFirstFinishSave(page: Page) {
-  let failed = false;
+type Sync = { client: WebSocketRoute; server: WebSocketRoute };
+
+async function interceptSync(page: Page, onClientMessage: (text: string, sync: Sync) => boolean) {
   await page.routeWebSocket(/\/api\/.*\/sync/, (client) => {
     const server = client.connectToServer();
     client.onMessage((message) => {
-      const text = String(message);
-      if (!failed && text.includes('"udfPath":"account:finishSave"')) {
-        failed = true;
-        const { requestId } = JSON.parse(text) as { requestId: number };
-        client.send(
-          JSON.stringify({
-            type: "MutationResponse",
-            requestId,
-            success: false,
-            result: "Server Error",
-            logLines: [],
-          }),
-        );
-      } else server.send(message);
+      if (!onClientMessage(String(message), { client, server })) server.send(message);
     });
     server.onMessage((message) => client.send(message));
   });
 }
 
-async function fillSaveSheet(page: Page, email: string) {
-  const sheet = page.getByRole("dialog", { name: /^Keep / });
-  await sheet.getByLabel("Email").fill(email);
-  await sheet.getByLabel("Password").fill(password);
-  await sheet.getByRole("button", { name: "Save group" }).click();
-  return sheet;
+function isFinishSave(text: string) {
+  return text.includes('"udfPath":"account:finishSave"');
+}
+
+function failMutation(client: WebSocketRoute, text: string, failure: object) {
+  const { requestId } = JSON.parse(text) as { requestId: number };
+  client.send(
+    JSON.stringify({
+      type: "MutationResponse",
+      requestId,
+      success: false,
+      logLines: [],
+      ...failure,
+    }),
+  );
+}
+
+async function failFirstFinishSave(page: Page) {
+  let failed = false;
+  await interceptSync(page, (text, { client }) => {
+    if (failed || !isFinishSave(text)) return false;
+    failed = true;
+    failMutation(client, text, { result: "Server Error" });
+    return true;
+  });
+}
+
+async function expireEveryFinishSave(page: Page) {
+  await interceptSync(page, (text, { client }) => {
+    if (!isFinishSave(text)) return false;
+    failMutation(client, text, { result: "", errorData: { code: "CLAIM_INVALID" } });
+    return true;
+  });
 }
 
 function backdropColor(sheet: Locator) {
@@ -89,30 +116,22 @@ function backdropColor(sheet: Locator) {
 }
 
 async function holdPasswordSignIn(page: Page) {
-  const held: string[] = [];
-  let release: () => void = () => {};
-  await page.routeWebSocket(/\/api\/.*\/sync/, (client) => {
-    const server = client.connectToServer();
-    client.onMessage((message) => {
-      const text = String(message);
-      if (text.includes('"udfPath":"auth:signIn"') && text.includes('"provider":"password"')) {
-        held.push(text);
-      } else server.send(message);
-    });
-    server.onMessage((message) => client.send(message));
-    release = () => held.splice(0).forEach((text) => server.send(text));
+  const held: (() => void)[] = [];
+  await interceptSync(page, (text, { server }) => {
+    if (!text.includes('"udfPath":"auth:signIn"') || !text.includes('"provider":"password"')) {
+      return false;
+    }
+    held.push(() => server.send(text));
+    return true;
   });
-  return { heldCount: () => held.length, release: () => release() };
+  return { heldCount: () => held.length, release: () => held.splice(0).forEach((send) => send()) };
 }
 
 async function logInFromElsewhere(browser: Browser, email: string) {
   const elsewhere = await browser.newContext();
   const page = await elsewhere.newPage();
   const noGroupsLines = await countNoGroupsLines(page);
-  const sheet = await openLogIn(page);
-  await sheet.getByLabel("Email").fill(email);
-  await sheet.getByLabel("Password").fill(password);
-  await sheet.getByRole("button", { name: "Log in" }).click();
+  await logIn(await openLogIn(page), email);
   return { page, noGroupsLines, close: () => elsewhere.close() };
 }
 
@@ -136,6 +155,12 @@ async function openLogIn(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "Log in" }).click();
   return page.getByRole("dialog", { name: "Log in" });
+}
+
+async function logIn(sheet: Locator, email: string) {
+  await sheet.getByLabel("Email").fill(email);
+  await sheet.getByLabel("Password").fill(password);
+  await sheet.getByRole("button", { name: "Log in" }).click();
 }
 
 test("one click puts the link in hand and lands the GM on their Group", async ({ page }) => {
@@ -245,6 +270,22 @@ test.describe("a Save whose move fails after the sign-in", () => {
   });
 });
 
+test("closing a Save that expired starts the landing over", async ({ page }) => {
+  await expireEveryFinishSave(page);
+  await createLink(page);
+
+  await page.getByRole("button", { name: "save it to an account" }).click();
+  const sheet = await fillSaveSheet(page, newEmail());
+  await expect(sheet.getByRole("alert")).toHaveText(
+    "This save expired before the group moved. Close this and create a new link.",
+  );
+  await sheet.getByRole("button", { name: "Close", exact: true }).last().click();
+
+  await expect(sheet).toBeHidden();
+  await expect(page.getByRole("button", { name: "Create your link" })).toBeVisible();
+  await expect(page.locator("code")).toBeHidden();
+});
+
 test("pressing Escape again and again mid-Save keeps the sheet up until it is done", async ({
   page,
 }) => {
@@ -275,9 +316,7 @@ test("logging in to an Account without Groups names it and points to the first l
 
   const sheet = await openLogIn(page);
   await expect(sheet.getByLabel("Email")).toBeFocused();
-  await sheet.getByLabel("Email").fill(email);
-  await sheet.getByLabel("Password").fill(password);
-  await sheet.getByRole("button", { name: "Log in" }).click();
+  await logIn(sheet, email.replace(/^gm/, "GM"));
 
   await expect(page.getByRole("button", { name: "Log in" })).toBeHidden();
   await expect(page.getByRole("status")).toHaveText(

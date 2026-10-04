@@ -11,8 +11,6 @@ export type AccountIntent = "save" | "logIn";
 
 type Failure = { message: string; offer?: SaveMode; claimExpired?: boolean };
 
-type FinishStep = { email: string; claimExpired: boolean };
-
 const MIN_PASSWORD_LENGTH = 8;
 const weakPassword: Failure = { message: "Use at least 8 characters for the password." };
 
@@ -33,15 +31,15 @@ type AccountSheetProps = {
 export function AccountSheet(props: AccountSheetProps) {
   const { open, onClose } = props;
   const [busy, setBusy] = useState(false);
-  const [finishStep, setFinishStep] = useState<FinishStep | null>(null);
+  const [finishingAs, setFinishingAs] = useState<string | null>(null);
   const signedInAs = props.intent === "save" ? props.signedInAs : undefined;
-  if (!open && finishStep !== null) setFinishStep(null);
-  if (open && signedInAs && !busy && finishStep === null) {
-    setFinishStep({ email: signedInAs, claimExpired: false });
+  if (!open && finishingAs !== null) setFinishingAs(null);
+  if (open && signedInAs && !busy && finishingAs === null) {
+    setFinishingAs(signedInAs);
   }
 
   const dismiss = () => {
-    if (props.intent === "save" && finishStep && !finishStep.claimExpired) {
+    if (props.intent === "save" && finishingAs !== null) {
       finishInBackground(props.onFinish);
     }
     onClose();
@@ -50,15 +48,7 @@ export function AccountSheet(props: AccountSheetProps) {
   const title = props.intent === "save" ? `Keep ${props.groupName}` : "Log in";
   return (
     <Sheet open={open} title={title} dismissible={!busy} onClose={dismiss}>
-      {open && (
-        <AccountForm
-          {...props}
-          busy={busy}
-          setBusy={setBusy}
-          finishStep={finishStep}
-          onClaimExpired={() => setFinishStep((step) => step && { ...step, claimExpired: true })}
-        />
-      )}
+      {open && <AccountForm {...props} busy={busy} setBusy={setBusy} finishingAs={finishingAs} />}
     </Sheet>
   );
 }
@@ -70,14 +60,12 @@ function finishInBackground(finish: () => Promise<unknown>) {
 function AccountForm({
   busy,
   setBusy,
-  finishStep,
-  onClaimExpired,
+  finishingAs,
   ...props
 }: AccountSheetProps & {
   busy: boolean;
   setBusy: (busy: boolean) => void;
-  finishStep: FinishStep | null;
-  onClaimExpired: () => void;
+  finishingAs: string | null;
 }) {
   const { intent, onSubmit, onClose } = props;
   const [mode, setMode] = useState<SaveMode>(intent === "save" ? "create" : "logIn");
@@ -94,9 +82,7 @@ function AccountForm({
       setBusy(false);
       onClose();
     } catch (error) {
-      const failed = describeFailure(error, intent);
-      if (failed.claimExpired) onClaimExpired();
-      setFailure(failed);
+      setFailure(describeFailure(error, intent));
       setBusy(false);
     }
   };
@@ -122,10 +108,10 @@ function AccountForm({
 
   const offer = failure?.offer;
 
-  if (finishStep !== null && props.intent === "save") {
+  if (finishingAs !== null && props.intent === "save") {
     return (
       <FinishSave
-        step={finishStep}
+        email={finishingAs}
         groupName={props.groupName}
         failure={failure}
         busy={busy}
@@ -206,29 +192,30 @@ function AccountForm({
 }
 
 function FinishSave({
-  step,
+  email,
   groupName,
   failure,
   busy,
   onFinish,
   onClose,
 }: {
-  step: FinishStep;
+  email: string;
   groupName: string;
   failure: Failure | null;
   busy: boolean;
   onFinish: () => void;
   onClose: () => void;
 }) {
+  const claimExpired = failure?.claimExpired;
   const finish = (event: FormEvent) => {
     event.preventDefault();
-    if (step.claimExpired) onClose();
+    if (claimExpired) onClose();
     else onFinish();
   };
   return (
     <form onSubmit={finish} className="flex flex-col gap-4">
       <p className="min-w-0 break-words text-ink-2">
-        Signed in as <span className="font-semibold break-all text-ink">{step.email}</span>. Finish
+        Signed in as <span className="font-semibold break-all text-ink">{email}</span>. Finish
         moving {groupName} to your account.
       </p>
       {failure && (
@@ -237,7 +224,7 @@ function FinishSave({
         </p>
       )}
       <Button autoFocus type="submit" size="lg" busy={busy && "Saving…"} className="w-full">
-        {step.claimExpired ? "Close" : "Finish saving"}
+        {claimExpired ? "Close" : "Finish saving"}
       </Button>
     </form>
   );

@@ -84,7 +84,7 @@ function CloseButton({ dismissible, onClose }: { dismissible: boolean; onClose: 
       aria-label="Close"
       aria-disabled={!dismissible || undefined}
       onClick={onClose}
-      className="absolute top-4 right-3 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"
+      className="absolute top-4 right-3 inline-flex size-11 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"
     >
       <IconClose className="size-5" />
     </button>

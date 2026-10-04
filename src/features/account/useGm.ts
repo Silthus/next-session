@@ -62,10 +62,10 @@ function confirmIdentity({ client, fetchAccessToken }: LiveSession) {
 }
 
 function useResumeLeftOverSave(status: GmStatus, redeemClaim: ClaimDeps["finishSave"]) {
-  const settledStatus = useRef<GmStatus>("loading");
+  const resolved = useRef(false);
   useEffect(() => {
-    if (settledStatus.current !== "loading" || status === "loading") return;
-    settledStatus.current = status;
+    if (resolved.current || status === "loading") return;
+    resolved.current = true;
     if (status === "account")
       void resumePendingSave({ finishSave: redeemClaim, storage: sessionStorage });
   }, [status, redeemClaim]);
