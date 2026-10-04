@@ -71,11 +71,14 @@ function renderCalendar(overrides: Partial<Props> = {}) {
 }
 
 function CalendarWithRefusingBackend() {
+  const [month, setMonth] = useState("2026-10");
   const [answers, setAnswers] = useState<Props["answers"]>({ "2026-10-04": "free" });
   return (
     <PlayerCalendar
       {...calendarProps({
+        month,
         answers,
+        onMonthChange: setMonth,
         onFillRest: () => {
           const before = answers;
           setAnswers(everyDayFrom(4, 31));
@@ -304,6 +307,24 @@ describe("PlayerCalendar", () => {
 
     await screen.findByRole("button", { name: /^Mark the other/ });
     expect(await tile("Monday, October 5: Not set")).toBe(document.activeElement);
+  });
+
+  it("ignores a refusal for a month the player swiped away from", async () => {
+    renderInRouter(() => <CalendarWithRefusingBackend />);
+    await userEvent.click(await screen.findByRole("button", { name: /^Mark the other/ }));
+    (document.activeElement as HTMLElement).blur();
+
+    swipe(
+      screen.getByRole("group", { name: "October 2026" }),
+      { x: 200, y: 100 },
+      { x: 100, y: 100 },
+    );
+    await screen.findByRole("heading", { level: 2, name: "November 2026" });
+    await new Promise((settle) => setTimeout(settle, 100));
+
+    expect(screen.getByRole("button", { name: /^Mark the other/ })).not.toBe(
+      document.activeElement,
+    );
   });
 
   it("explains that past nights lock under a read-only month", async () => {

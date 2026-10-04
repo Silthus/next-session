@@ -65,7 +65,7 @@ export function PlayerCalendar({
   const fillRestSlot = useRef<HTMLDivElement>(null);
   const focusDoneCardWhenDone = useRef(false);
   const focusMonthHeadingWhenShown = useRef(false);
-  const fillRestRefused = useRef(false);
+  const refusedFillRestMonth = useRef<IsoMonth | null>(null);
   const [refusedFillRests, setRefusedFillRests] = useState(0);
 
   useEffect(() => {
@@ -75,11 +75,13 @@ export function PlayerCalendar({
   }, [view.done]);
 
   useEffect(() => {
-    if (!fillRestRefused.current || view.done) return;
-    fillRestRefused.current = false;
-    if (focusFellOffThePage(doneHeading.current))
+    const refusedMonth = refusedFillRestMonth.current;
+    if (refusedMonth === null || (refusedMonth === month && view.done)) return;
+    refusedFillRestMonth.current = null;
+    if (refusedMonth === month && focusFellOffThePage()) {
       fillRestSlot.current?.querySelector("button")?.focus();
-  }, [view.done, refusedFillRests]);
+    }
+  }, [month, view.done, refusedFillRests]);
 
   useEffect(() => {
     if (!focusMonthHeadingWhenShown.current) return;
@@ -99,7 +101,7 @@ export function PlayerCalendar({
     setTimeout(() => setStagger(new Map()), view.fillRest.length * FILL_STAGGER_MS + 300);
     focusDoneCardWhenDone.current = true;
     onFillRest(month).catch(() => {
-      fillRestRefused.current = true;
+      refusedFillRestMonth.current = month;
       setRefusedFillRests((count) => count + 1);
     });
   }
@@ -498,9 +500,8 @@ function tileLabel(day: PlayerDay): string {
   return `${dayLabel(day.date)}: ${answer}${day.session ? ", Session" : ""}`;
 }
 
-function focusFellOffThePage(doneHeading: HTMLElement | null) {
-  const focused = document.activeElement;
-  return focused === null || focused === document.body || focused === doneHeading;
+function focusFellOffThePage() {
+  return document.activeElement === null || document.activeElement === document.body;
 }
 
 function vibrate(pattern: number | number[]) {
