@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Sheet } from "./Sheet";
 
@@ -45,6 +46,91 @@ describe("Sheet", () => {
     expect(onClose).toHaveBeenCalledTimes(2);
   });
 
+  it("closes from the Close button in its header", async () => {
+    const onClose = vi.fn();
+    render(
+      <Sheet open title="Keep My group" onClose={onClose}>
+        body
+      </Sheet>,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("holds the Close button, still focusable, while it is not dismissible", async () => {
+    const onClose = vi.fn();
+    render(
+      <Sheet open title="Keep My group" dismissible={false} onClose={onClose}>
+        body
+      </Sheet>,
+    );
+    const closeButton = screen.getByRole("button", { name: "Close" });
+
+    await userEvent.click(closeButton);
+
+    expect(closeButton.getAttribute("aria-disabled")).toBe("true");
+    expect(document.activeElement).toBe(closeButton);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("ignores Escape, the backdrop, and a close the browser started while it is not dismissible", () => {
+    const onClose = vi.fn();
+    render(
+      <Sheet open title="Keep My group" dismissible={false} onClose={onClose}>
+        body
+      </Sheet>,
+    );
+    const dialog = screen.getByRole<HTMLDialogElement>("dialog");
+
+    fireEvent(dialog, new Event("cancel", { cancelable: true }));
+    fireEvent.pointerDown(dialog);
+    fireEvent.click(dialog);
+    closeNatively(dialog);
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(showModal).toHaveBeenCalledTimes(2);
+    expect(dialog.open).toBe(true);
+  });
+
+  async function pressCloseFromKeyboard() {
+    const closeButton = screen.getByRole("button", { name: "Close" });
+    for (let presses = 0; presses < 5 && document.activeElement !== closeButton; presses++) {
+      await userEvent.tab();
+    }
+    expect(document.activeElement).toBe(closeButton);
+    await userEvent.keyboard("{Enter}");
+    return closeButton;
+  }
+
+  it("closes from the keyboard on the Close button", async () => {
+    const onClose = vi.fn();
+    render(
+      <Sheet open title="Keep My group" onClose={onClose}>
+        <input aria-label="Email" />
+      </Sheet>,
+    );
+
+    await pressCloseFromKeyboard();
+
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("holds the Close button on the keyboard while it is not dismissible", async () => {
+    const onClose = vi.fn();
+    render(
+      <Sheet open title="Keep My group" dismissible={false} onClose={onClose}>
+        <input aria-label="Email" />
+      </Sheet>,
+    );
+
+    const closeButton = await pressCloseFromKeyboard();
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(closeButton);
+  });
+
   it("stays open when a drag that started inside the panel ends on the backdrop", () => {
     const onClose = vi.fn();
     render(
@@ -79,7 +165,7 @@ describe("Sheet", () => {
     expect(screen.queryByText("body")).toBeNull();
   });
 
-  it("tells the parent when the browser closes the dialog on its own", () => {
+  it("shows the dialog again when the browser closes it while the parent keeps it open", () => {
     const onClose = vi.fn();
     render(
       <Sheet open title="Keep My group" onClose={onClose}>
@@ -87,8 +173,35 @@ describe("Sheet", () => {
       </Sheet>,
     );
     const dialog = screen.getByRole<HTMLDialogElement>("dialog");
-    dialog.open = false;
-    fireEvent(dialog, new Event("close"));
+
+    closeNatively(dialog);
+
     expect(onClose).toHaveBeenCalledOnce();
+    expect(showModal).toHaveBeenCalledTimes(2);
+    expect(dialog.open).toBe(true);
+  });
+
+  it("stays closed when the parent agrees to a close the browser started", () => {
+    function Parent() {
+      const [open, setOpen] = useState(true);
+      return (
+        <Sheet open={open} title="Keep My group" onClose={() => setOpen(false)}>
+          body
+        </Sheet>
+      );
+    }
+    render(<Parent />);
+    const dialog = screen.getByRole<HTMLDialogElement>("dialog");
+
+    closeNatively(dialog);
+
+    expect(showModal).toHaveBeenCalledOnce();
+    expect(dialog.open).toBe(false);
+    expect(screen.queryByText("body")).toBeNull();
   });
 });
+
+function closeNatively(dialog: HTMLDialogElement) {
+  dialog.open = false;
+  fireEvent(dialog, new Event("close"));
+}

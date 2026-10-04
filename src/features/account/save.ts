@@ -19,6 +19,8 @@ export type SaveDeps = {
   storage: Pick<Storage, "getItem" | "setItem" | "removeItem">;
 };
 
+export type ClaimDeps = Pick<SaveDeps, "finishSave" | "storage">;
+
 const FLOWS = { create: "signUp", logIn: "signIn" } as const;
 
 export async function saveGroups({ email, password, mode }: SaveInput, deps: SaveDeps) {
@@ -28,25 +30,26 @@ export async function saveGroups({ email, password, mode }: SaveInput, deps: Sav
   return await redeem(code, deps);
 }
 
-export async function resumePendingSave(deps: Pick<SaveDeps, "finishSave" | "storage">) {
+export async function finishPendingSave(deps: ClaimDeps) {
   const code = deps.storage.getItem(PENDING_SAVE_KEY);
-  if (code === null) return null;
-  return await redeem(code, deps).catch(() => null);
+  if (code === null) throw new ConvexError({ code: "CLAIM_INVALID" });
+  return await redeem(code, deps);
+}
+
+export function resumePendingSave(deps: ClaimDeps) {
+  return finishPendingSave(deps).catch(() => null);
 }
 
 const redemptions = new Map<string, Promise<SaveResult>>();
 
-function redeem(code: string, deps: Pick<SaveDeps, "finishSave" | "storage">) {
+function redeem(code: string, deps: ClaimDeps) {
   const inFlight =
     redemptions.get(code) ?? redeemOnce(code, deps).finally(() => redemptions.delete(code));
   redemptions.set(code, inFlight);
   return inFlight;
 }
 
-async function redeemOnce(
-  code: string,
-  { finishSave, storage }: Pick<SaveDeps, "finishSave" | "storage">,
-) {
+async function redeemOnce(code: string, { finishSave, storage }: ClaimDeps) {
   try {
     const result = await finishSave({ code });
     forgetClaim(storage, code);
@@ -61,7 +64,7 @@ function forgetClaim(storage: SaveDeps["storage"], code: string) {
   if (storage.getItem(PENDING_SAVE_KEY) === code) storage.removeItem(PENDING_SAVE_KEY);
 }
 
-function isClaimInvalid(error: unknown) {
+export function isClaimInvalid(error: unknown) {
   return (
     error instanceof ConvexError && (error.data as { code?: unknown }).code === "CLAIM_INVALID"
   );

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ConvexError } from "convex/values";
-import { useEffect, useRef, type MouseEvent } from "react";
+import { useEffect, useRef } from "react";
 import { Button, buttonClassName } from "../../ui/Button";
 import { IconCheck } from "../../ui/icons";
 import { LegalFooter } from "../../ui/LegalFooter";
@@ -17,10 +17,10 @@ export type LandingState =
 type LandingViewProps = {
   state: LandingState;
   showLogIn: boolean;
+  loggedInAs?: string;
   onCreate: () => void;
   onLogIn: () => void;
   onSave: () => void;
-  onOpenGroup: (groupId: string) => void;
 };
 
 const column = "mx-auto w-full max-w-5xl px-4 sm:px-6";
@@ -29,10 +29,10 @@ const steps = ["Create your link", "Send it to the group", "Pick the best night"
 export function LandingView({
   state,
   showLogIn,
+  loggedInAs,
   onCreate,
   onLogIn,
   onSave,
-  onOpenGroup,
 }: LandingViewProps) {
   return (
     <div className="flex min-h-dvh flex-col">
@@ -57,9 +57,10 @@ export function LandingView({
             nights fall out by themselves.
           </p>
           {state.phase === "created" ? (
-            <LinkInHand {...state} onSave={onSave} onOpenGroup={onOpenGroup} />
+            <LinkInHand {...state} onSave={onSave} />
           ) : (
             <CreateLink
+              loggedInAs={loggedInAs}
               busy={state.phase === "creating"}
               failure={state.phase === "failed" ? createFailure(state.error) : undefined}
               onCreate={onCreate}
@@ -77,16 +78,19 @@ export function LandingView({
 }
 
 function CreateLink({
+  loggedInAs,
   busy,
   failure,
   onCreate,
 }: {
+  loggedInAs?: string;
   busy: boolean;
   failure?: string;
   onCreate: () => void;
 }) {
   return (
     <div className="flex flex-col gap-3">
+      {loggedInAs && <LoggedInAs email={loggedInAs} />}
       <Button
         size="lg"
         onClick={onCreate}
@@ -120,24 +124,13 @@ function LinkInHand({
   groupId,
   savedAs,
   onSave,
-  onOpenGroup,
 }: {
   shareUrl: string;
   groupId: string;
   savedAs?: string;
   onSave: () => void;
-  onOpenGroup: (groupId: string) => void;
 }) {
-  const ready = useRef<HTMLParagraphElement>(null);
-  useEffect(() => ready.current?.focus(), []);
-
-  const openGroup = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-      return;
-    }
-    event.preventDefault();
-    onOpenGroup(groupId);
-  };
+  const ready = useFocusOnMount();
 
   return (
     <div className="flex max-w-lg animate-rise flex-col gap-4">
@@ -153,13 +146,13 @@ function LinkInHand({
       </p>
       <ShareLinkCard url={shareUrl} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <a
-          href={`/g/${groupId}`}
-          onClick={openGroup}
+        <Link
+          to="/g/$groupId"
+          params={{ groupId }}
           className={buttonClassName("secondary", "lg", "self-start")}
         >
           Open your group →
-        </a>
+        </Link>
         {savedAs ? (
           <SavedTo email={savedAs} />
         ) : (
@@ -180,14 +173,29 @@ function LinkInHand({
   );
 }
 
+function LoggedInAs({ email }: { email: string }) {
+  const line = useFocusOnMount();
+  return (
+    <p ref={line} role="status" tabIndex={-1} className="max-w-sm text-sm text-ink-2 outline-none">
+      Signed in as <span className="font-semibold break-all text-ink">{email}</span>. No groups here
+      yet, so create your first link.
+    </p>
+  );
+}
+
 function SavedTo({ email }: { email: string }) {
-  const line = useRef<HTMLParagraphElement>(null);
-  useEffect(() => line.current?.focus(), []);
+  const line = useFocusOnMount();
   return (
     <p ref={line} role="status" tabIndex={-1} className="text-xs text-ink-3 outline-none">
       Saved to <span className="break-all">{email}</span>.
     </p>
   );
+}
+
+function useFocusOnMount() {
+  const element = useRef<HTMLParagraphElement>(null);
+  useEffect(() => element.current?.focus(), []);
+  return element;
 }
 
 function createFailure(error: unknown) {

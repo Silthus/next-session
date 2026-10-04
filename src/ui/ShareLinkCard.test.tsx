@@ -82,10 +82,13 @@ describe("ShareLinkCard", () => {
     expect(share).toHaveBeenCalledWith({ text: message });
   });
 
-  it("hides the share row when compact and offers Rotate when asked", async () => {
+  it("keeps the share targets but drops the hint when compact, and offers Rotate when asked", async () => {
+    vi.stubGlobal("navigator", { ...navigator, share: () => Promise.resolve() });
     const onRotate = vi.fn();
     render(<ShareLinkCard url={url} compact onRotate={onRotate} />);
-    expect(screen.queryByRole("link", { name: "Share via WhatsApp" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Share via WhatsApp" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Share via Telegram" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Share" })).toBeTruthy();
     expect(screen.queryByText("Anyone with the link can answer. Keep it in the group.")).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "Rotate" }));
     expect(onRotate).toHaveBeenCalledOnce();

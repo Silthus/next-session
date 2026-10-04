@@ -90,3 +90,19 @@ export function IconMore({ className }: { className?: string }) {
     </svg>
   );
 }
+
+export function IconClose({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={cn("size-4", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M5 5l10 10M15 5L5 15" />
+    </svg>
+  );
+}

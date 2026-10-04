@@ -1,11 +1,11 @@
-import { useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { lastGroupId, returningGroupId } from "../../lib/storage";
 import { AccountSheet, type AccountIntent } from "../account/AccountSheet";
-import type { SaveInput } from "../account/save";
+import { isClaimInvalid, type SaveInput } from "../account/save";
 import { useGm } from "../account/useGm";
 import { LandingView, type LandingState } from "./LandingView";
 
@@ -15,7 +15,7 @@ type CreatedGroup = { id: string; name: string; shareToken: string };
 
 export function Landing() {
   const gm = useGm();
-  const router = useRouter();
+  const navigate = useNavigate();
   const signedIn = gm.status === "anonymous" || gm.status === "account";
   const groups = useQuery(api.groups.mine, signedIn ? {} : "skip");
   const createGroup = useMutation(api.groups.create);
@@ -23,7 +23,9 @@ export function Landing() {
   const [failure, setFailure] = useState<unknown>(null);
   const [createdGroupId, setCreatedGroupId] = useState<Id<"groups"> | null>(null);
   const [created, setCreated] = useState<CreatedGroup | null>(null);
-  const [savedAs, setSavedAs] = useState<string | undefined>();
+  const [saved, setSaved] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [claimExpired, setClaimExpired] = useState(false);
   const [sheet, setSheet] = useState<AccountIntent | null>(null);
 
   const newGroupId = createdGroupId ?? (phase === "created" ? groups?.[0]?.id : undefined);
@@ -32,20 +34,22 @@ export function Landing() {
     newGroupId && !created ? { groupId: newGroupId } : "skip",
   );
   if (newGroup && !created) setCreated(newGroup);
+  if (claimExpired && !saved && sheet === null) startOver();
 
   const returningTo =
     phase === "idle" || phase === "failed" ? returningGroupId(groups, lastGroupId()) : undefined;
 
   useEffect(() => {
-    if (returningTo) router.history.replace(groupPath(returningTo));
-  }, [returningTo, router]);
+    if (returningTo)
+      void navigate({ to: "/g/$groupId", params: { groupId: returningTo }, replace: true });
+  }, [returningTo, navigate]);
 
   const create = async () => {
     setPhase("creating");
     try {
       if (signedIn) setCreatedGroupId(await createGroup({}));
       else await gm.createLink();
-      if (gm.status === "account") setSavedAs(gm.email);
+      if (gm.status === "account") setSaved(true);
       setPhase("created");
     } catch (error) {
       setFailure(error);
@@ -53,11 +57,31 @@ export function Landing() {
     }
   };
 
-  const save = async (input: SaveInput) => {
-    await gm.save(input);
-    setSavedAs(input.email);
+  const saveWith = async (action: () => Promise<unknown>) => {
+    try {
+      await action();
+    } catch (error) {
+      if (isClaimInvalid(error)) setClaimExpired(true);
+      throw error;
+    }
+    setSaved(true);
   };
 
+  function startOver() {
+    setClaimExpired(false);
+    setPhase("idle");
+    setCreated(null);
+    setCreatedGroupId(null);
+  }
+
+  const logIn = async (input: Omit<SaveInput, "mode">) => {
+    await gm.logIn(input);
+    setLoggedIn(true);
+  };
+
+  const sheetClosed = sheet === null;
+  const account = gm.status === "account";
+  const accountWithoutGroups = account && groups?.length === 0;
   const resolving = gm.status === "loading" || (signedIn && groups === undefined);
   if ((phase === "idle" && resolving) || returningTo) {
     return <div className="min-h-dvh" />;
@@ -66,26 +90,33 @@ export function Landing() {
   return (
     <>
       <LandingView
-        state={landingState(phase, failure, created, savedAs)}
+        state={landingState(
+          phase,
+          failure,
+          created,
+          sheetClosed && account && saved ? gm.email : undefined,
+        )}
         showLogIn={gm.status === "signedOut" && (phase === "idle" || phase === "failed")}
+        loggedInAs={sheetClosed && accountWithoutGroups && loggedIn ? gm.email : undefined}
         onCreate={() => void create()}
         onLogIn={() => setSheet("logIn")}
         onSave={() => setSheet("save")}
-        onOpenGroup={(groupId) => router.history.push(groupPath(groupId))}
       />
       {sheet === "save" && created ? (
         <AccountSheet
           open
           intent="save"
           groupName={created.name}
-          onSubmit={save}
+          signedInAs={account ? gm.email : undefined}
+          onSubmit={(input) => saveWith(() => gm.save(input))}
+          onFinish={() => (saved ? Promise.resolve() : saveWith(gm.finishSave))}
           onClose={() => setSheet(null)}
         />
       ) : (
         <AccountSheet
           open={sheet === "logIn"}
           intent="logIn"
-          onSubmit={gm.logIn}
+          onSubmit={logIn}
           onClose={() => setSheet(null)}
         />
       )}
@@ -103,10 +134,6 @@ function landingState(
   if (phase !== "created") return { phase };
   if (!created) return { phase: "creating" };
   return { phase, groupId: created.id, shareUrl: shareUrl(created.shareToken), savedAs };
-}
-
-function groupPath(groupId: string) {
-  return `/g/${groupId}`;
 }
 
 function shareUrl(shareToken: string) {

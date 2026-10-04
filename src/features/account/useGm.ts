@@ -8,9 +8,15 @@ import {
   useQuery,
 } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { api } from "../../../convex/_generated/api";
-import { resumePendingSave, saveGroups, type SaveInput } from "./save";
+import {
+  finishPendingSave,
+  resumePendingSave,
+  saveGroups,
+  type ClaimDeps,
+  type SaveInput,
+} from "./save";
 
 export type GmStatus = "loading" | "signedOut" | "anonymous" | "account";
 
@@ -55,6 +61,16 @@ function confirmIdentity({ client, fetchAccessToken }: LiveSession) {
   });
 }
 
+function useResumeLeftOverSave(status: GmStatus, redeemClaim: ClaimDeps["finishSave"]) {
+  const resolved = useRef(false);
+  useEffect(() => {
+    if (resolved.current || status === "loading") return;
+    resolved.current = true;
+    if (status === "account")
+      void resumePendingSave({ finishSave: redeemClaim, storage: sessionStorage });
+  }, [status, redeemClaim]);
+}
+
 export function useGm() {
   const auth = useConvexAuth();
   const me = useQuery(api.account.me);
@@ -71,12 +87,10 @@ export function useGm() {
     [providerSignIn, client, fetchAccessToken, isAuthenticated],
   );
   const startSave = useMutation(api.account.startSave);
-  const finishSave = useMutation(api.account.finishSave);
+  const redeemClaim = useMutation(api.account.finishSave);
   const status = gmStatus(auth, me);
 
-  useEffect(() => {
-    if (status === "account") void resumePendingSave({ finishSave, storage: sessionStorage });
-  }, [status, finishSave]);
+  useResumeLeftOverSave(status, redeemClaim);
 
   const actions = useMemo(
     () => ({
@@ -87,12 +101,13 @@ export function useGm() {
         saveGroups(input, {
           startSave: () => startSave({}),
           signIn,
-          finishSave,
+          finishSave: redeemClaim,
           storage: sessionStorage,
         }),
+      finishSave: () => finishPendingSave({ finishSave: redeemClaim, storage: sessionStorage }),
       signOut,
     }),
-    [signIn, signOut, startSave, finishSave],
+    [signIn, signOut, startSave, redeemClaim],
   );
 
   return { status, email: me?.email, ...actions };

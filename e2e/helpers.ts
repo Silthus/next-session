@@ -31,7 +31,7 @@ export async function signInAnonymousGm(): Promise<Gm> {
   return { tokens, client, groupId: group.id, shareToken: await shareTokenOf(client, group.id) };
 }
 
-export async function signUpAccountWithGroup() {
+export async function signUpAccount() {
   const email = newEmail();
   const client = new ConvexHttpClient(convexUrl);
   const { tokens } = await client.action(api.auth.signIn, {
@@ -40,8 +40,13 @@ export async function signUpAccountWithGroup() {
   });
   if (!tokens) throw new Error("The sign-up returned no tokens");
   client.setAuth(tokens.token);
-  await client.mutation(api.groups.create, {});
   return { email, client };
+}
+
+export async function signUpAccountWithGroup() {
+  const account = await signUpAccount();
+  await account.client.mutation(api.groups.create, {});
+  return account;
 }
 
 export async function shareTokenOf(client: ConvexHttpClient, groupId: Id<"groups">) {
