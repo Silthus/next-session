@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
 import {
+  browserStorage,
   forgetPlayer,
   hasSeenHint,
   markHintSeen,
@@ -95,5 +96,30 @@ describe("first-visit hint", () => {
     expect(hasSeenHint(storage, "group-1")).toBe(true);
     expect(hasSeenHint(storage, "group-2")).toBe(false);
     expect(storage.getItem("next-session.playerHint.group-1")).not.toBeNull();
+  });
+});
+
+describe("browserStorage", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
+  it("is the page's localStorage when the browser allows it", () => {
+    rememberPlayer(browserStorage(), "group-1", ana);
+
+    expect(recallPlayer(localStorage, "group-1")).toEqual(ana);
+  });
+
+  it("remembers nobody instead of crashing when the browser blocks site data", () => {
+    vi.spyOn(window, "localStorage", "get").mockImplementation(() => {
+      throw new DOMException("The operation is insecure.", "SecurityError");
+    });
+
+    const storage = browserStorage();
+    rememberPlayer(storage, "group-1", ana);
+
+    expect(recallPlayer(storage, "group-1")).toBeNull();
+    expect(hasSeenHint(storage, "group-1")).toBe(false);
   });
 });

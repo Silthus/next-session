@@ -9,6 +9,7 @@ import { cn } from "../../ui/cn";
 import { Eyebrow } from "../../ui/Eyebrow";
 import { PageShell } from "../../ui/PageShell";
 import { appErrorOf, joinErrorCopy } from "./playerErrors";
+import { useFocusOnMount } from "./useFocusOnMount";
 
 export type RosterPlayer = { _id: Id<"players">; name: string };
 
@@ -29,6 +30,7 @@ export function Join({
   const [joining, setJoining] = useState(false);
   const [refusal, setRefusal] = useState<AppErrorData | null | undefined>(undefined);
   const refusalId = useId();
+  const heading = useFocusOnMount<HTMLHeadingElement>();
   const takenPlayerId = refusal?.code === "NAME_TAKEN" ? refusal.playerId : null;
   const fieldLabel = players.length > 0 ? "Not listed? Type your name" : "Your name";
 
@@ -50,7 +52,13 @@ export function Join({
       <title>{pageTitle(groupName)}</title>
       <div className="animate-rise">
         <Eyebrow>You're invited to</Eyebrow>
-        <h1 className="mt-1 font-display text-4xl font-extrabold break-words">{groupName}</h1>
+        <h1
+          ref={heading}
+          tabIndex={-1}
+          className="mt-1 font-display text-4xl font-extrabold break-words outline-none"
+        >
+          {groupName}
+        </h1>
         <p className="mt-2 text-ink-2">Tap the nights you can play. No account, takes a minute.</p>
       </div>
       <section className="animate-rise rounded-xl border border-line bg-surface p-5 shadow-card">
@@ -67,6 +75,7 @@ export function Join({
                 <PlayerChip
                   player={player}
                   highlighted={player._id === takenPlayerId}
+                  disabled={joining}
                   describedBy={player._id === takenPlayerId ? refusalId : undefined}
                   onPick={onPick}
                 />
@@ -113,11 +122,13 @@ export function Join({
 function PlayerChip({
   player,
   highlighted,
+  disabled,
   describedBy,
   onPick,
 }: {
   player: RosterPlayer;
   highlighted: boolean;
+  disabled: boolean;
   describedBy: string | undefined;
   onPick: (player: RosterPlayer) => void;
 }) {
@@ -125,10 +136,13 @@ function PlayerChip({
     <button
       type="button"
       onClick={() => onPick(player)}
+      disabled={disabled}
       aria-describedby={describedBy}
       className={cn(
-        "flex min-h-11 items-center gap-2 rounded-full border bg-paper py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95",
-        highlighted ? "animate-pop border-accent bg-accent-soft ring-2 ring-accent" : "border-line",
+        "flex min-h-11 items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60",
+        highlighted
+          ? "animate-pop border-accent bg-accent-soft ring-2 ring-accent"
+          : "border-line bg-paper",
       )}
     >
       <Avatar name={player.name} size="sm" />
@@ -138,5 +152,5 @@ function PlayerChip({
 }
 
 function alphabetical(players: RosterPlayer[]) {
-  return players.toSorted((a, b) => a.name.localeCompare(b.name));
+  return [...players].sort((a, b) => a.name.localeCompare(b.name));
 }

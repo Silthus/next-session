@@ -69,6 +69,14 @@ describe("PlayerCalendar", () => {
     expect(onNotYou).toHaveBeenCalledOnce();
   });
 
+  it("moves focus to the Group name so screen readers start there", async () => {
+    renderCalendar();
+
+    expect(await screen.findByRole("heading", { level: 1, name: "Thursday Crew" })).toBe(
+      document.activeElement,
+    );
+  });
+
   it("cycles a tile from not set to free, maybe, busy and back", async () => {
     const { onAnswer } = renderCalendar({
       answers: { "2026-10-05": "free", "2026-10-06": "maybe", "2026-10-07": "busy" },
@@ -124,11 +132,7 @@ describe("PlayerCalendar", () => {
     expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("7");
     await userEvent.click(screen.getByRole("button", { name: "Mark the other 26 nights busy" }));
 
-    expect(onFillRest).toHaveBeenCalledOnce();
-    const [month, dates] = onFillRest.mock.calls[0] as [string, string[]];
-    expect(month).toBe("2026-10");
-    expect(dates).toHaveLength(26);
-    expect(dates[0]).toBe("2026-10-06");
+    expect(onFillRest.mock.calls).toEqual([["2026-10"]]);
   });
 
   it("celebrates a done month and offers the next one", async () => {

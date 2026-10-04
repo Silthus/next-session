@@ -10,6 +10,7 @@ import { Logo } from "../../ui/Logo";
 import { Skeleton } from "../../ui/Skeleton";
 import { IconChevron } from "./IconChevron";
 import { Progress } from "./Progress";
+import { useFocusOnMount } from "./useFocusOnMount";
 import { dayLabel, monthName, playerMonth, type PlayerDay, type PlayerMonth } from "./playerMonth";
 
 const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
@@ -24,7 +25,7 @@ const answerLabels: Record<Answer, string> = { free: "Free", maybe: "Maybe", bus
 const answerGlyphs: Record<Answer, string> = { free: "✓", maybe: "?", busy: "✕" };
 const answerTiles: Record<Answer | "none", string> = {
   free: "border-free bg-free text-white dark:text-paper",
-  maybe: "border-maybe bg-maybe text-white dark:text-paper",
+  maybe: "border-maybe bg-maybe text-ink dark:text-paper",
   busy: "border-busy bg-busy text-white dark:text-paper",
   none: "border-line bg-surface text-ink hover:border-line-strong",
 };
@@ -51,7 +52,7 @@ export function PlayerCalendar({
   sessionDates: IsoDate[];
   hintVisible: boolean;
   onAnswer: (date: IsoDate, answer: Answer | null) => void;
-  onFillRest: (month: IsoMonth, dates: IsoDate[]) => void;
+  onFillRest: (month: IsoMonth) => void;
   onMonthChange: (month: IsoMonth) => void;
   onNotYou: () => void;
   onHintToggle: () => void;
@@ -60,6 +61,7 @@ export function PlayerCalendar({
   const [taps, setTaps] = useState(0);
   const [stagger, setStagger] = useState<ReadonlyMap<IsoDate, number>>(new Map());
   const loaded = answers !== undefined;
+  const heading = useFocusOnMount<HTMLHeadingElement>();
 
   function answer(day: PlayerDay) {
     vibrate(8);
@@ -71,7 +73,7 @@ export function PlayerCalendar({
     vibrate([20, 10, 20]);
     setStagger(new Map(view.fillRest.map((date, index) => [date, index])));
     setTimeout(() => setStagger(new Map()), view.fillRest.length * FILL_STAGGER_MS + 300);
-    onFillRest(month, view.fillRest);
+    onFillRest(month);
   }
 
   return (
@@ -81,7 +83,13 @@ export function PlayerCalendar({
         <div className="flex min-w-0 items-center gap-3">
           <Logo className="size-9 shrink-0" />
           <div className="min-w-0 leading-tight">
-            <h1 className="truncate font-display text-lg font-bold">{groupName}</h1>
+            <h1
+              ref={heading}
+              tabIndex={-1}
+              className="truncate font-display text-lg font-bold outline-none"
+            >
+              {groupName}
+            </h1>
             <p className="text-xs text-ink-3">
               Answering as <span className="font-semibold text-ink">{playerName}</span> ·{" "}
               <button
@@ -99,7 +107,7 @@ export function PlayerCalendar({
           aria-label="How it works"
           aria-expanded={hintVisible}
           onClick={onHintToggle}
-          className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"
         >
           ?
         </button>
@@ -129,7 +137,7 @@ export function PlayerCalendar({
             <Button
               variant={view.progress.answered > 0 ? "secondary" : "ghost"}
               size="lg"
-              className={cn("w-full", view.progress.answered > 0 && "border-busy/40 text-busy")}
+              className={cn("w-full", view.progress.answered > 0 && "border-busy/40! text-busy!")}
               onClick={fillRest}
             >
               <span className="size-3 rounded-full bg-busy" aria-hidden="true" />
@@ -206,7 +214,7 @@ function MonthCard({
           <Button
             variant="ghost"
             size="sm"
-            className="size-10 px-0"
+            className="size-11! px-0!"
             aria-label="Previous month"
             onClick={() => onMonthChange(view.previousMonth)}
           >
@@ -215,7 +223,7 @@ function MonthCard({
           <Button
             variant="ghost"
             size="sm"
-            className="size-10 px-0"
+            className="size-11! px-0!"
             aria-label="Next month"
             disabled={view.nextMonth === null}
             onClick={() => view.nextMonth && onMonthChange(view.nextMonth)}
@@ -224,7 +232,7 @@ function MonthCard({
           </Button>
         </div>
       </div>
-      <div role="group" aria-label={view.label} className="grid grid-cols-7 gap-1.5 sm:gap-2">
+      <div role="group" aria-label={view.label} className="grid grid-cols-7 gap-1 sm:gap-2">
         {WEEKDAYS.map((weekday) => (
           <span
             key={weekday}
@@ -310,21 +318,30 @@ function DayTile({
   );
 }
 
+const hintAnchors = {
+  start: { bubble: "left-0", arrow: "left-4" },
+  center: { bubble: "left-1/2 -translate-x-1/2", arrow: "left-1/2 -translate-x-1/2" },
+  end: { bubble: "right-0", arrow: "right-4" },
+};
+
+function hintAnchorFor(column: number) {
+  if (column < 3) return hintAnchors.start;
+  return column === 3 ? hintAnchors.center : hintAnchors.end;
+}
+
 function FirstVisitHint({ column }: { column: number }) {
+  const anchor = hintAnchorFor(column);
   return (
     <div
       role="tooltip"
       className={cn(
-        "animate-rise pointer-events-none absolute top-full z-10 mt-2 w-52 rounded-md bg-ink px-3 py-2 text-xs leading-snug font-medium text-paper shadow-card",
-        column >= 4 ? "right-0" : "left-0",
+        "animate-rise pointer-events-none absolute top-full z-10 mt-2 w-52 max-w-[calc(100vw-2rem)] rounded-md bg-ink px-3 py-2 text-xs leading-snug font-medium text-paper shadow-card",
+        anchor.bubble,
       )}
     >
       <span
         aria-hidden="true"
-        className={cn(
-          "absolute -top-1 size-2.5 rotate-45 bg-ink",
-          column >= 4 ? "right-4" : "left-4",
-        )}
+        className={cn("absolute -top-1 size-2.5 rotate-45 bg-ink", anchor.arrow)}
       />
       Tap a night you can play. Tap again for maybe, then busy.
     </div>
@@ -342,7 +359,7 @@ function DoneCard({
 }) {
   return (
     <div className="animate-rise flex flex-col gap-2 rounded-lg border border-free bg-free-soft p-4 text-center">
-      <p className="font-display text-lg font-bold text-free">
+      <p className="font-display text-lg font-bold text-ink dark:text-free">
         {nextMonth ? `All set for ${monthName(month)} ✓` : "All set for now ✓"}
       </p>
       <p className="text-sm text-ink-2">Your GM sees it already.</p>

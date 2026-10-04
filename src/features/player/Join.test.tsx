@@ -63,6 +63,28 @@ describe("Join", () => {
     expect(onJoin).toHaveBeenCalledWith("   Dev");
   });
 
+  it("keeps the chips out of reach while a join is on its way", async () => {
+    const { onPick } = renderJoin({ onJoin: () => new Promise(() => {}) });
+
+    await userEvent.type(
+      await screen.findByRole("textbox", { name: "Not listed? Type your name" }),
+      "Dev{Enter}",
+    );
+
+    expect(screen.getByRole("button", { name: "Joining…" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("button", { name: "Ben" })).toHaveProperty("disabled", true);
+    await userEvent.click(screen.getByRole("button", { name: "Ben" }));
+    expect(onPick).not.toHaveBeenCalled();
+  });
+
+  it("moves focus to the Group name so screen readers start there", async () => {
+    renderJoin();
+
+    expect(await screen.findByRole("heading", { level: 1, name: "Thursday Crew" })).toBe(
+      document.activeElement,
+    );
+  });
+
   it("asks for a name with the field alone when the Roster is empty", async () => {
     renderJoin({ players: [] });
 

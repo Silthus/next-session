@@ -62,6 +62,51 @@ async function playerAnswersInMonth(group: SeededGroup, name: string, month: str
   return schedule!.answers.filter((answer) => answer.playerId === group.playerIds[name]);
 }
 
+async function savedAnswers(group: SeededGroup, name: string, month: string) {
+  const answers = await playerAnswersInMonth(group, name, month);
+  return Object.fromEntries(answers.map(({ date, answer }) => [date, answer]));
+}
+
+async function playerIdOf(group: SeededGroup, name: string) {
+  const view = await group.gm.query(api.player.group, { shareToken: group.shareToken });
+  return view!.players.find((player) => player.name === name)!._id;
+}
+
+async function rememberPlayerWithoutHint(page: Page, group: SeededGroup, name: string) {
+  await page.addInitScript(
+    ({ groupId, playerId, name }) => {
+      localStorage.setItem(
+        "next-session.players",
+        JSON.stringify({ [groupId]: { playerId, name } }),
+      );
+    },
+    { groupId: group.groupId, playerId: group.playerIds[name]!, name },
+  );
+}
+
+async function holdMutations(page: Page) {
+  const held: string[] = [];
+  let holding = true;
+  let releaseTo: (text: string) => void = () => undefined;
+  await page.routeWebSocket(/\/api\/.*\/sync/, (client) => {
+    const server = client.connectToServer();
+    client.onMessage((message) => {
+      const text = String(message);
+      if (holding && text.includes('"type":"Mutation"')) held.push(text);
+      else server.send(message);
+    });
+    server.onMessage((message) => client.send(message));
+    releaseTo = (text) => server.send(text);
+  });
+  return {
+    heldCount: () => held.length,
+    release: () => {
+      holding = false;
+      held.splice(0).forEach((text) => releaseTo(text));
+    },
+  };
+}
+
 test.describe("the player surface", () => {
   const today = todayUtc(Date.now());
   const month = monthOf(today);
@@ -80,6 +125,7 @@ test.describe("the player surface", () => {
     await page.getByRole("button", { name: "Join" }).click();
 
     await expect(page.getByText("Answering as")).toContainText("Dev");
+    group.playerIds.Dev = await playerIdOf(group, "Dev");
     await expect(page.getByRole("tooltip")).toBeVisible();
     await expect(page.getByText(`0 of ${bookableDays.length} nights set`)).toBeVisible();
     await tile(page, today).click();
@@ -87,6 +133,7 @@ test.describe("the player surface", () => {
     await expect(page.getByRole("tooltip")).toBeHidden();
     await tile(page, today).click();
     await expect(tile(page, today)).toHaveAccessibleName(`${dayLabel(today)}: Maybe, Session`);
+    await expect.poll(() => savedAnswers(group, "Dev", month)).toEqual({ [today]: "maybe" });
 
     await page.reload();
     await expect(page.getByText("Answering as")).toContainText("Dev");
@@ -104,13 +151,11 @@ test.describe("the player surface", () => {
     await expect(page.getByText(`All set for ${monthName(month)} ✓`)).toBeVisible();
     await expect(page.getByText("All nights set")).toBeVisible();
 
-    const devId = (await group.gm.query(api.player.group, {
-      shareToken: group.shareToken,
-    }))!.players.find((player) => player.name === "Dev")!._id;
-    group.playerIds.Dev = devId;
     await expect
-      .poll(async () => (await playerAnswersInMonth(group, "Dev", month)).length)
-      .toBe(bookableDays.length);
+      .poll(() => savedAnswers(group, "Dev", month))
+      .toEqual(
+        Object.fromEntries(bookableDays.map((date) => [date, date === today ? "maybe" : "busy"])),
+      );
 
     await page.getByRole("button", { name: `Fill ${monthName(addMonths(month, 1))} →` }).click();
     await expect(page).toHaveURL(new RegExp(`month=${addMonths(month, 1)}`));
@@ -118,6 +163,60 @@ test.describe("the player surface", () => {
       monthName(addMonths(month, 1)),
     );
     expect(pageErrors).toEqual([]);
+  });
+
+  test("taps and Fill Rest show at once, before the backend answers", async ({ page }) => {
+    const group = await seedGroup();
+    await rememberPlayerWithoutHint(page, group, "Ana");
+    const mutations = await holdMutations(page);
+
+    await page.goto(group.link);
+    await expect(page.getByRole("tooltip")).toBeVisible();
+    await tile(page, today).click();
+    await expect(tile(page, today)).toHaveAccessibleName(`${dayLabel(today)}: Free`);
+    await expect(page.getByText(`1 of ${bookableDays.length} nights set`)).toBeVisible();
+    if (bookableDays.length > 1) {
+      await page.getByRole("button", { name: /^Mark the other/ }).click();
+    }
+    await expect(page.getByText(`All set for ${monthName(month)} ✓`)).toBeVisible();
+    expect(mutations.heldCount()).toBe(bookableDays.length > 1 ? 2 : 1);
+    expect(await savedAnswers(group, "Ana", month)).toEqual({});
+
+    mutations.release();
+    await expect
+      .poll(() => savedAnswers(group, "Ana", month))
+      .toEqual(
+        Object.fromEntries(bookableDays.map((date) => [date, date === today ? "free" : "busy"])),
+      );
+  });
+
+  test("a first Fill Rest dismisses the first-visit hint", async ({ page }) => {
+    const group = await seedGroup();
+    await rememberPlayerWithoutHint(page, group, "Ana");
+
+    await page.goto(group.link);
+    await expect(page.getByRole("tooltip")).toBeVisible();
+    test.skip(bookableDays.length === 1, "only today is left to answer this month");
+    await page.getByRole("button", { name: /^Mark the other/ }).click();
+
+    await expect(page.getByRole("tooltip")).toBeHidden();
+    await page.reload();
+    await expect(page.getByRole("progressbar")).toBeVisible();
+    await expect(page.getByRole("tooltip")).toBeHidden();
+  });
+
+  test("a tap the backend refuses rolls back and says why", async ({ page }) => {
+    const group = await seedGroup();
+    await answerAs(page, group, "Ana");
+    const yesterday = todayUtc(Date.now() - 86_400_000);
+    await page.clock.setFixedTime(new Date(`${yesterday}T12:00:00Z`));
+
+    await page.goto(group.link);
+    await tile(page, yesterday).click();
+
+    await expect(page.getByRole("status")).toHaveText("That night is locked now.");
+    await expect(tile(page, yesterday)).toHaveAccessibleName(`${dayLabel(yesterday)}: Not set`);
+    expect(await savedAnswers(group, "Ana", monthOf(yesterday))).toEqual({});
   });
 
   test("a listed player answers with one tap and can switch with Not you?", async ({ page }) => {
@@ -196,6 +295,7 @@ test.describe("the player surface", () => {
 });
 
 test.describe("player surface screenshots", () => {
+  test.skip(!process.env.PLAYER_SCREENSHOTS, "proof screenshots: run with PLAYER_SCREENSHOTS=1");
   const viewports = [
     { label: "390", width: 390, height: 844 },
     { label: "1440", width: 1440, height: 900 },

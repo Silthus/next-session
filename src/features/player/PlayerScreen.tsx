@@ -11,6 +11,7 @@ import { LinkGone } from "./LinkGone";
 import { PlayerCalendar } from "./PlayerCalendar";
 import { answerErrorCopy, appErrorOf } from "./playerErrors";
 import {
+  browserStorage,
   forgetPlayer,
   hasSeenHint,
   markHintSeen,
@@ -25,6 +26,7 @@ type PlayerGroupView = NonNullable<FunctionReturnType<typeof api.player.group>>;
 type MonthChange = (month: IsoMonth) => void;
 
 const TOAST_MS = 4000;
+const storage = browserStorage();
 
 export function PlayerScreen({
   shareToken,
@@ -60,18 +62,18 @@ function PlayerGroup({
   requestedMonth: string | undefined;
   onMonthChange: MonthChange;
 }) {
-  const [identity, setIdentity] = useState(() => recallPlayer(localStorage, group.groupId));
+  const [identity, setIdentity] = useState(() => recallPlayer(storage, group.groupId));
   const join = useMutation(api.player.join);
   const player = group.players.find(({ _id }) => _id === identity?.playerId);
   const removed = identity !== null && player === undefined;
 
   useEffect(() => {
-    if (removed) forgetPlayer(localStorage, group.groupId);
+    if (removed) forgetPlayer(storage, group.groupId);
   }, [removed, group.groupId]);
 
   function answerAs(next: PlayerIdentity | null) {
-    if (next) rememberPlayer(localStorage, group.groupId, next);
-    else forgetPlayer(localStorage, group.groupId);
+    if (next) rememberPlayer(storage, group.groupId, next);
+    else forgetPlayer(storage, group.groupId);
     setIdentity(next);
   }
 
@@ -132,8 +134,8 @@ function PlayerAnswers({
     const current = store.getQuery(api.player.answers, query);
     if (current) store.setQuery(api.player.answers, query, withRestBusy(current, args.month));
   });
-  const [hintVisible, setHintVisible] = useState(() => !hasSeenHint(localStorage, group.groupId));
-  const [toast, setToast] = useState<string | null>(null);
+  const [hintVisible, setHintVisible] = useState(() => !hasSeenHint(storage, group.groupId));
+  const [toast, setToast] = useState<{ message: string; id: number } | null>(null);
 
   useEffect(() => {
     if (toast === null) return;
@@ -142,12 +144,13 @@ function PlayerAnswers({
   }, [toast]);
 
   function dismissHint() {
-    markHintSeen(localStorage, group.groupId);
+    markHintSeen(storage, group.groupId);
     setHintVisible(false);
   }
 
   function reportFailure(error: unknown) {
-    setToast(answerErrorCopy(appErrorOf(error)));
+    const message = answerErrorCopy(appErrorOf(error));
+    setToast((current) => ({ message, id: (current?.id ?? 0) + 1 }));
   }
 
   if (answers === null) return <LinkGone />;
@@ -168,12 +171,13 @@ function PlayerAnswers({
           saveAnswer({ shareToken, playerId, date, answer }).catch(reportFailure);
         }}
         onFillRest={(fillMonth) => {
+          if (hintVisible) dismissHint();
           fillRest({ shareToken, playerId, month: fillMonth }).catch(reportFailure);
         }}
         onMonthChange={onMonthChange}
         onNotYou={onNotYou}
       />
-      {toast && <Toast>{toast}</Toast>}
+      {toast && <Toast key={toast.id}>{toast.message}</Toast>}
     </>
   );
 }

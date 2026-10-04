@@ -2,11 +2,21 @@ import type { Id } from "../../../convex/_generated/dataModel";
 
 export type PlayerIdentity = { playerId: Id<"players">; name: string };
 
-type KeyValueStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+export type KeyValueStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 type RememberedPlayers = Record<string, PlayerIdentity>;
 
 const PLAYERS_KEY = "next-session.players";
 const HINT_KEY_PREFIX = "next-session.playerHint.";
+
+const noStorage: KeyValueStorage = {
+  getItem: () => null,
+  setItem: () => undefined,
+  removeItem: () => undefined,
+};
+
+export function browserStorage(): KeyValueStorage {
+  return attempt(() => window.localStorage, noStorage);
+}
 
 export function rememberPlayer(storage: KeyValueStorage, groupId: string, player: PlayerIdentity) {
   writePlayers(storage, { ...readPlayers(storage), [groupId]: player });
