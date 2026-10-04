@@ -1,0 +1,85 @@
+import type { OptimisticLocalStore } from "convex/browser";
+import { useMutation } from "convex/react";
+import { useEffect, useState } from "react";
+import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
+import type { IsoDate } from "../../../../shared/dates";
+import type { SessionRow } from "../../../../shared/monthSummary";
+import { dayLabel } from "./calendarDates";
+import { sessionErrorMessage } from "./sessionErrors";
+
+const TOAST_MS = 5000;
+
+export type SessionToast = { id: number; message: string; undo?: () => void };
+
+type CachedSession = { _id: Id<"sessions">; date: string };
+
+export function useSessionActions(groupId: Id<"groups">) {
+  const [pendingDate, setPendingDate] = useState<IsoDate | null>(null);
+  const [toast, setToast] = useState<SessionToast | null>(null);
+  const scheduleSession = useMutation(api.sessions.schedule).withOptimisticUpdate(
+    (store, { date }) =>
+      editCachedSessions(store, groupId, (sessions) => [
+        ...sessions,
+        { _id: `optimistic-${date}` as Id<"sessions">, date },
+      ]),
+  );
+  const unscheduleSession = useMutation(api.sessions.unschedule).withOptimisticUpdate(
+    (store, { sessionId }) =>
+      editCachedSessions(store, groupId, (sessions) =>
+        sessions.filter((session) => session._id !== sessionId),
+      ),
+  );
+
+  useEffect(() => {
+    if (toast === null) return;
+    const timer = setTimeout(() => setToast(null), TOAST_MS);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  async function settle(date: IsoDate, change: () => Promise<SessionToast>) {
+    setPendingDate(date);
+    try {
+      setToast(await change());
+    } catch (error) {
+      setToast({ id: Date.now(), message: sessionErrorMessage(error) });
+    } finally {
+      setPendingDate(null);
+    }
+  }
+
+  function schedule(date: IsoDate) {
+    return settle(date, async () => {
+      const sessionId = await scheduleSession({ groupId, date });
+      return {
+        id: Date.now(),
+        message: `Session on ${dayLabel(date)}. Players see it on the link.`,
+        undo: () => void unschedule({ _id: sessionId, date }),
+      };
+    });
+  }
+
+  function unschedule(session: SessionRow) {
+    return settle(session.date, async () => {
+      await unscheduleSession({ sessionId: session._id as Id<"sessions"> });
+      return {
+        id: Date.now(),
+        message: `Session on ${dayLabel(session.date)} removed.`,
+        undo: () => void schedule(session.date),
+      };
+    });
+  }
+
+  return { schedule, unschedule, pendingDate, toast, dismissToast: () => setToast(null) };
+}
+
+function editCachedSessions(
+  store: OptimisticLocalStore,
+  groupId: Id<"groups">,
+  edit: (sessions: CachedSession[]) => CachedSession[],
+) {
+  for (const { args, value } of store.getAllQueries(api.schedule.month)) {
+    if (args.groupId !== groupId || !value) continue;
+    store.setQuery(api.schedule.month, args, { ...value, sessions: edit(value.sessions) });
+  }
+}

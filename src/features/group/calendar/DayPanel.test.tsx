@@ -8,13 +8,21 @@ import { DayPanel } from "./DayPanel";
 const today = "2026-10-02";
 const players = ["Ana", "Ben", "Chiara", "Dev", "Eli"].map((name) => ({ _id: name, name }));
 
+type PanelSetup = {
+  date?: string;
+  answers?: Record<string, Answer>;
+  scheduled?: boolean;
+  pending?: boolean;
+  roster?: typeof players;
+};
+
 function renderPanel({
   date = "2026-10-16",
-  answers = {} as Record<string, Answer>,
+  answers = {},
   scheduled = false,
   pending = false,
   roster = players,
-} = {}) {
+}: PanelSetup = {}) {
   const summary = summarizeMonth({
     month: date.slice(0, 7),
     today,
