@@ -200,8 +200,15 @@ test.describe("screenshots", () => {
         await shot("link-created");
 
         await page.getByRole("button", { name: "save it to an account" }).click();
-        await expect(page.getByRole("dialog", { name: /^Keep / })).toBeVisible();
-        await shot("save-sheet", { sheet: true });
+        const saveSheet = page.getByRole("dialog", { name: /^Keep / });
+        await expect(saveSheet.getByRole("button", { name: "Close" })).toBeVisible();
+        await shot("sheet", { sheet: true });
+        await saveSheet.getByRole("button", { name: "Close" }).click();
+
+        await openGroupLink(page).click();
+        await expect(page.getByRole("heading", { level: 1 }).getByRole("button")).toBeVisible();
+        await expect(page.getByRole("link", { name: "Share via WhatsApp" })).toBeVisible();
+        await shot("share-compact");
         await context.close();
       });
     }

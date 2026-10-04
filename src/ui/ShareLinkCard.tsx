@@ -130,7 +130,7 @@ function ShareTargets({ url }: { url: string }) {
     {
       label: "Mail",
       glyph: "@",
-      tone: "bg-surface-2 text-ink",
+      tone: "bg-surface text-ink",
       href: `mailto:?subject=${encodeURIComponent("Our next game night")}&body=${encoded}`,
       newTab: false,
     },
@@ -153,7 +153,7 @@ function ShareTargets({ url }: { url: string }) {
           type="button"
           aria-label="Share"
           onClick={() => shareNatively(message)}
-          className={cn(roundTarget, "bg-surface-2 text-ink")}
+          className={cn(roundTarget, "bg-surface text-ink")}
         >
           ↗
         </button>
