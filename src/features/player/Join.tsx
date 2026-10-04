@@ -55,7 +55,11 @@ export function Join({
   }
 
   return (
-    <PageShell maxWidth="md" centerFooter className="flex flex-col justify-center gap-6">
+    <PageShell
+      maxWidth="md"
+      centerFooter
+      className={cn("flex flex-col gap-6", !filterable && "justify-center")}
+    >
       <title>{pageTitle(groupName)}</title>
       <div className="animate-rise">
         <Eyebrow>You're invited to</Eyebrow>

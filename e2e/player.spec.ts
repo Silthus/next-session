@@ -24,6 +24,39 @@ async function seedGroup(players: string[] = ["Ana", "Ben", "Chiara"]) {
   return { gm, groupId, shareToken, playerIds, link: `/s/${shareToken}` };
 }
 
+const longRoster = [
+  "Ana",
+  "Ben",
+  "Chiara",
+  "Dev",
+  "Eli",
+  "Farah",
+  "Gus",
+  "Hana",
+  "Ivo",
+  "Jun",
+  "Kai",
+  "Lena",
+  "Mateo",
+  "Nia",
+  "Oskar",
+  "Priya",
+  "Quinn",
+  "Rosa",
+  "Sami",
+  "Tomás",
+  "Uma",
+  "Vik",
+  "Wen",
+  "Xavi",
+  "Yara",
+  "Zoë Ölund",
+  "Amara Okafor-Lindqvist",
+  "Bo",
+  "Cleo",
+  "Dario",
+];
+
 function dayLabel(date: IsoDate) {
   return new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -292,6 +325,25 @@ test.describe("the player surface", () => {
     ).toHaveAccessibleDescription("That name exists. Tap it, or add a last initial.");
   });
 
+  test("a player on a long Roster finds their name with the filter", async ({ page }) => {
+    const group = await seedGroup(longRoster);
+    await markHintSeen(page, group);
+
+    await page.goto(group.link);
+    const chips = page.getByRole("list").getByRole("button");
+    await expect(chips).toHaveCount(longRoster.length);
+    const filter = page.getByRole("searchbox", { name: "Find your name" });
+
+    await filter.fill("nobody");
+    await expect(chips).toHaveCount(0);
+    await expect(page.getByRole("status")).toHaveText("No names match. Add yours below.");
+
+    await filter.fill("zoe");
+    await expect(chips).toHaveCount(1);
+    await page.getByRole("button", { name: "Zoë Ölund" }).click();
+    await expect(page.getByText("Answering as")).toContainText("Zoë Ölund");
+  });
+
   test("a player the GM removed lands on the join screen", async ({ page }) => {
     const group = await seedGroup();
     await answerAs(page, group, "Chiara");
@@ -472,5 +524,30 @@ test.describe("player surface screenshots", () => {
     await captureEveryVariant(page, group.link, "done", () =>
       expect(page.getByText("Your GM sees it already.")).toBeVisible(),
     );
+  });
+
+  test("the long-Roster join screen at 390 and 1440 px, light and dark", async ({ page }) => {
+    const group = await seedGroup(longRoster);
+    const filter = page.getByRole("searchbox", { name: "Find your name" });
+    const shot = (name: string, viewport: { label: string }, colorScheme: string) =>
+      page.screenshot({
+        path: `${screenshotDir}/${name}--${viewport.label}--${colorScheme}.png`,
+        fullPage: true,
+        animations: "disabled",
+      });
+
+    for (const viewport of viewports) {
+      for (const colorScheme of schemes) {
+        await page.setViewportSize(viewport);
+        await page.emulateMedia({ colorScheme });
+        await page.goto(group.link);
+        await expect(filter).toBeVisible();
+        await shot("join-long-roster", viewport, colorScheme);
+
+        await filter.fill("an");
+        await expect(page.getByRole("button", { name: "Ana", exact: true })).toBeVisible();
+        await shot("join-long-roster-filtered", viewport, colorScheme);
+      }
+    }
   });
 });
