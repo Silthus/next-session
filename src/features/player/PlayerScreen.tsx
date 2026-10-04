@@ -7,7 +7,7 @@ import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
 import { errorMessage } from "../../lib/errors";
 import { NotFoundScreen } from "../../ui/NotFoundScreen";
 import { Skeleton } from "../../ui/Skeleton";
-import { Toast } from "../../ui/Toast";
+import { Toast, type ToastMessage } from "../../ui/Toast";
 import { Join } from "./Join";
 import { PlayerCalendar } from "./PlayerCalendar";
 import {
@@ -136,7 +136,7 @@ function PlayerAnswers({
       store.setQuery(api.player.answers, query, withRestBusy(current, args.month, today));
   });
   const [hintVisible, setHintVisible] = useState(() => !hasSeenHint(storage, group.groupId));
-  const [toast, setToast] = useState<{ message: string; id: number } | null>(null);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
 
   useEffect(() => {
     if (toast === null) return;
@@ -150,7 +150,7 @@ function PlayerAnswers({
   }
 
   function showToast(message: string) {
-    setToast((current) => ({ message, id: (current?.id ?? 0) + 1 }));
+    setToast((current) => ({ text: message, id: (current?.id ?? 0) + 1 }));
   }
 
   if (answers === null) return <NotFoundScreen kind="link" />;
@@ -181,7 +181,7 @@ function PlayerAnswers({
         onMonthChange={onMonthChange}
         onNotYou={onNotYou}
       />
-      {toast && <Toast key={toast.id}>{toast.message}</Toast>}
+      <Toast message={toast} />
     </>
   );
 }

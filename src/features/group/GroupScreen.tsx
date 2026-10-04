@@ -11,7 +11,7 @@ import { LegalFooter } from "../../ui/LegalFooter";
 import { Logo } from "../../ui/Logo";
 import { ShareLinkCard } from "../../ui/ShareLinkCard";
 import { Skeleton } from "../../ui/Skeleton";
-import { Toast } from "../../ui/Toast";
+import { Toast, type ToastMessage } from "../../ui/Toast";
 import { AccountSheet } from "../account/AccountSheet";
 import type { SaveInput } from "../account/save";
 import { useGm } from "../account/useGm";
@@ -302,20 +302,23 @@ function GroupSurface({
           {dayPanel("shadow-[0_-8px_32px_-12px_rgb(0_0_0/0.35)]")}
         </MobileDaySheet>
       )}
-      {toasts.toast && (
-        <div onFocus={toasts.hold} onBlur={toasts.release}>
-          <Toast
-            key={toasts.toast.id}
-            position={day && !wide ? "top" : "bottom"}
-            action={toasts.toast.undo && "Undo"}
-            onAction={() => toasts.toast && undo(toasts.toast)}
-          >
-            {toasts.toast.message}
-          </Toast>
-        </div>
-      )}
+      <div onFocus={toasts.hold} onBlur={toasts.release}>
+        <Toast
+          position={day && !wide ? "top" : "bottom"}
+          message={toasts.toast && toastMessage(toasts.toast, undo)}
+        />
+      </div>
     </GroupFrame>
   );
+}
+
+function toastMessage(toast: GroupToast, undo: (toast: GroupToast) => void): ToastMessage {
+  return {
+    id: toast.id,
+    text: toast.message,
+    action: toast.undo && "Undo",
+    onAction: () => undo(toast),
+  };
 }
 
 function insideDialog(target: EventTarget | null) {

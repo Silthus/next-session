@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
 import { cn } from "./cn";
 
 type ToastPosition = "bottom" | "top";
+
+export type ToastMessage = { id: number; text: string; action?: string; onAction?: () => void };
 
 const positions: Record<ToastPosition, string> = {
   bottom: "bottom-20",
@@ -9,32 +10,37 @@ const positions: Record<ToastPosition, string> = {
 };
 
 export function Toast({
-  children,
-  action,
-  onAction,
+  message,
   position = "bottom",
 }: {
-  children: ReactNode;
-  action?: string;
-  onAction?: () => void;
+  message: ToastMessage | null;
   position?: ToastPosition;
 }) {
   return (
     <div
       role="status"
+      aria-live="polite"
       className={cn(
-        "animate-rise fixed left-1/2 z-40 flex w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full bg-ink px-4 py-2.5 text-sm font-medium text-paper shadow-card",
+        "fixed left-1/2 z-40 w-max max-w-[calc(100vw-2rem)] -translate-x-1/2",
         positions[position],
       )}
     >
-      {children}
-      {action && (
+      {message && <ToastPill key={message.id} message={message} />}
+    </div>
+  );
+}
+
+function ToastPill({ message }: { message: ToastMessage }) {
+  return (
+    <div className="animate-rise flex items-center gap-3 rounded-full bg-ink px-4 py-2.5 text-sm font-medium text-paper shadow-card">
+      {message.text}
+      {message.action && (
         <button
           type="button"
-          onClick={onAction}
+          onClick={message.onAction}
           className="font-semibold text-paper underline underline-offset-2"
         >
-          {action}
+          {message.action}
         </button>
       )}
     </div>
