@@ -5,43 +5,48 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { render, screen, waitFor } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { describe, expect, it } from "vitest";
-import { NotFoundScreen } from "./NotFoundScreen";
+import { NotFoundScreen, type NotFoundKind } from "./NotFoundScreen";
 
-function renderScreen(screenElement: React.ReactElement) {
+function renderInRouter(element: ReactElement) {
   const router = createRouter({
-    routeTree: createRootRoute({ component: () => screenElement }),
+    routeTree: createRootRoute({ component: () => element }),
     history: createMemoryHistory({ initialEntries: ["/"] }),
   });
   render(<RouterProvider router={router} />);
 }
 
 describe("NotFoundScreen", () => {
-  it("says the link no longer works, takes focus, and points to a new link", async () => {
-    renderScreen(<NotFoundScreen kind="link" />);
+  it.each<{ kind: NotFoundKind; headline: string; explanation: RegExp }>([
+    {
+      kind: "link",
+      headline: "This link no longer works",
+      explanation: /rotated the link or deleted the group/,
+    },
+    {
+      kind: "page",
+      headline: "Nothing here",
+      explanation: /The page you were looking for does not exist\./,
+    },
+  ])(
+    "says $headline for a $kind, takes focus, and points home",
+    async ({ kind, headline, explanation }) => {
+      renderInRouter(<NotFoundScreen kind={kind} />);
 
-    const heading = await screen.findByRole("heading", {
-      level: 1,
-      name: "This link no longer works",
-    });
-    expect(heading).toBe(document.activeElement);
-    expect(screen.getByText(/rotated the link or deleted the group/)).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Plan your own game" })).toHaveProperty(
-      "pathname",
-      "/",
-    );
+      const heading = await screen.findByRole("heading", { level: 1, name: headline });
+      expect(heading).toBe(document.activeElement);
+      expect(screen.getByText(explanation)).toBeTruthy();
+      expect(screen.getByRole("link", { name: "Plan your own game" })).toHaveProperty(
+        "pathname",
+        "/",
+      );
+    },
+  );
+
+  it("titles the document after a dead link", async () => {
+    renderInRouter(<NotFoundScreen kind="link" />);
+
     await waitFor(() => expect(document.title).toBe("This link no longer works · Next Session"));
-  });
-
-  it("says a page does not exist and takes focus", async () => {
-    renderScreen(<NotFoundScreen kind="page" />);
-
-    const heading = await screen.findByRole("heading", { level: 1, name: "Nothing here" });
-    expect(heading).toBe(document.activeElement);
-    expect(screen.getByText("The page you were looking for does not exist.")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Plan your own game" })).toHaveProperty(
-      "pathname",
-      "/",
-    );
   });
 });
