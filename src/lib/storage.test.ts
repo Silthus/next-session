@@ -124,6 +124,7 @@ describe("nudge dismissal", () => {
   it("remembers when the GM said Later", () => {
     expect(nudgeDismissedAt(storage)).toBeNull();
     dismissNudge(1_700_000_000_000, storage);
+    expect(storage.getItem("next-session.nudgeDismissedAt")).toBe("1700000000000");
     expect(nudgeDismissedAt(storage)).toBe(1_700_000_000_000);
   });
 
