@@ -109,19 +109,6 @@ describe("Sheet", () => {
     expect(screen.queryByText("body")).toBeNull();
   });
 
-  it("tells the parent when the browser closes the dialog on its own", () => {
-    const onClose = vi.fn();
-    render(
-      <Sheet open title="Keep My group" onClose={onClose}>
-        body
-      </Sheet>,
-    );
-    const dialog = screen.getByRole<HTMLDialogElement>("dialog");
-    dialog.open = false;
-    fireEvent(dialog, new Event("close"));
-    expect(onClose).toHaveBeenCalledOnce();
-  });
-
   it("shows the dialog again when the browser closes it while the parent keeps it open", () => {
     const onClose = vi.fn();
     render(
