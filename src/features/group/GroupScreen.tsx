@@ -78,6 +78,7 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         status: gm.status,
         group,
         saving,
+        holdingForSave: saving || saveSheetFor !== null,
         search,
         headerActions,
         toasts,
@@ -100,6 +101,7 @@ function surfaceFor({
   status,
   group,
   saving,
+  holdingForSave,
   search,
   headerActions,
   toasts,
@@ -110,6 +112,7 @@ function surfaceFor({
   status: ReturnType<typeof useGm>["status"];
   group: GroupView | null | undefined;
   saving: boolean;
+  holdingForSave: boolean;
   search: GroupSearch;
   headerActions: ReactNode;
   toasts: Toasts;
@@ -117,8 +120,8 @@ function surfaceFor({
   onHeadingFocused: () => void;
   onSave: (groupName: string) => void;
 }) {
-  if (status === "signedOut" && !saving) return <Navigate to="/" replace />;
-  if (group === null && !saving) return <FirstGroupFallback />;
+  if (status === "signedOut" && !holdingForSave) return <Navigate to="/" replace />;
+  if (group === null && !holdingForSave) return <FirstGroupFallback />;
   if (!group) return <GroupLoading />;
   return (
     <GroupSurface

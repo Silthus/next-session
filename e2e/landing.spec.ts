@@ -52,6 +52,38 @@ async function signUpAccountWithoutGroups() {
   return email;
 }
 
+async function failFirstFinishSave(page: Page) {
+  let failed = false;
+  await page.routeWebSocket(/\/api\/.*\/sync/, (client) => {
+    const server = client.connectToServer();
+    client.onMessage((message) => {
+      const text = String(message);
+      if (!failed && text.includes('"udfPath":"account:finishSave"')) {
+        failed = true;
+        const { requestId } = JSON.parse(text) as { requestId: number };
+        client.send(
+          JSON.stringify({
+            type: "MutationResponse",
+            requestId,
+            success: false,
+            result: "Server Error",
+            logLines: [],
+          }),
+        );
+      } else server.send(message);
+    });
+    server.onMessage((message) => client.send(message));
+  });
+}
+
+async function fillSaveSheet(page: Page, email: string) {
+  const sheet = page.getByRole("dialog", { name: /^Keep / });
+  await sheet.getByLabel("Email").fill(email);
+  await sheet.getByLabel("Password").fill(password);
+  await sheet.getByRole("button", { name: "Save group" }).click();
+  return sheet;
+}
+
 async function openLogIn(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "Log in" }).click();
@@ -111,6 +143,39 @@ test("saving into an Account that has older Groups keeps showing the new Group",
   await expect(page.locator("code")).toHaveText(shareLink);
   await expect(openGroupLink(page)).toHaveAttribute("href", groupPath);
   expect(groupPath).not.toBe(olderGroupPath);
+});
+
+test.describe("a Save whose move fails after the sign-in", () => {
+  test("goes through on retry from the landing", async ({ page }) => {
+    const email = newEmail();
+    await failFirstFinishSave(page);
+    const { shareLink } = await createLink(page);
+
+    await page.getByRole("button", { name: "save it to an account" }).click();
+    const sheet = await fillSaveSheet(page, email);
+    await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
+    await sheet.getByRole("button", { name: "Save group" }).click();
+
+    await expect(page.getByRole("status").filter({ hasText: `Saved to ${email}.` })).toBeFocused();
+    await expect(page.locator("code")).toHaveText(shareLink);
+  });
+
+  test("goes through on retry from the Group header", async ({ page }) => {
+    const email = newEmail();
+    await failFirstFinishSave(page);
+    const { shareLink, groupPath } = await createLink(page);
+    await openGroupLink(page).click();
+    await expect(page).toHaveURL(groupPath);
+
+    await page.getByRole("button", { name: "Save your group" }).click();
+    const sheet = await fillSaveSheet(page, email);
+    await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
+    await sheet.getByRole("button", { name: "Save group" }).click();
+
+    await expect(page.getByRole("status")).toHaveText("Saved. Open it anywhere with your account.");
+    await expect(page).toHaveURL(new RegExp(`^[^?]*${groupPath}`));
+    await expect(page.getByText(shareLink.replace(/^localhost:5173/, ""))).toBeVisible();
+  });
 });
 
 test("logging in to an Account without Groups names it and points to the first link", async ({

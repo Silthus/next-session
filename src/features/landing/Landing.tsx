@@ -65,6 +65,7 @@ export function Landing() {
     setLoggedInAs(input.email);
   };
 
+  const sheetClosed = sheet === null;
   const resolving = gm.status === "loading" || (signedIn && groups === undefined);
   if ((phase === "idle" && resolving) || returningTo) {
     return <div className="min-h-dvh" />;
@@ -73,9 +74,9 @@ export function Landing() {
   return (
     <>
       <LandingView
-        state={landingState(phase, failure, created, savedAs)}
+        state={landingState(phase, failure, created, sheetClosed ? savedAs : undefined)}
         showLogIn={gm.status === "signedOut" && (phase === "idle" || phase === "failed")}
-        loggedInAs={loggedInAs}
+        loggedInAs={sheetClosed ? loggedInAs : undefined}
         onCreate={() => void create()}
         onLogIn={() => setSheet("logIn")}
         onSave={() => setSheet("save")}
