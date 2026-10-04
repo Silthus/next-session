@@ -1,0 +1,97 @@
+$ tsc -p tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p convex/tsconfig.json && eslint . && prettier --check . && vitest run && vite build && wrangler deploy --dry-run
+Checking formatting...
+All matched files use Prettier code style!
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-21
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+
+ Test Files  34 passed (34)
+      Tests  400 passed (400)
+   Start at  04:24:32
+   Duration  3.34s (tests 42%, environment 33%, transform 12%, import 8%, setup 4%, worker 1%)
+
+    Isolate  34 workers spawned · ~375ms startup each (spawn + environment, per file)
+             at least ~475ms faster with isolate: false — reuses workers across files instead of one per file
+
+Warning: Route file "/home/coder/dev/ns-worktrees/ticket-21/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+
+If this file is not intended to be a route, you can exclude it using one of these options:
+  1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-21/src/routes/-routes.test.tsx" (prefix with "-")
+  2. Use 'routeFileIgnorePattern' in your config to match this file
+
+Current configuration:
+  routeFileIgnorePrefix: "-"
+  routeFileIgnorePattern: undefined
+vite v8.3.2 building client environment for production...
+transforming...
+✓ 227 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                          0.45 kB │ gzip:   0.28 kB
+dist/assets/jetbrains-mono-greek-500-normal-JpySY46c.woff2               4.28 kB
+dist/assets/jetbrains-mono-cyrillic-500-normal-DmUKJPL_.woff2            5.35 kB
+dist/assets/jetbrains-mono-vietnamese-500-normal-DNRqzVM1.woff           5.47 kB
+dist/assets/jetbrains-mono-greek-500-normal-D7SFKleX.woff                5.72 kB
+dist/assets/jetbrains-mono-cyrillic-500-normal-DJqRU3vO.woff             7.02 kB
+dist/assets/jetbrains-mono-latin-ext-500-normal-Cut-4mMH.woff2           7.52 kB
+dist/assets/inter-vietnamese-wght-normal-CBcvBZtf.woff2                 10.25 kB
+dist/assets/jetbrains-mono-latin-ext-500-normal-ckzbgY84.woff           10.33 kB
+dist/assets/inter-greek-ext-wght-normal-DlzME5K_.woff2                  11.23 kB
+dist/assets/bricolage-grotesque-vietnamese-opsz-normal-D9N6E8K1.woff2   12.98 kB
+dist/assets/inter-cyrillic-wght-normal-DqGufNeO.woff2                   18.74 kB
+dist/assets/inter-greek-wght-normal-CkhJZR-_.woff2                      18.99 kB
+dist/assets/jetbrains-mono-latin-500-normal-BWZEU5yA.woff2              21.83 kB
+dist/assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2               25.96 kB
+dist/assets/jetbrains-mono-latin-500-normal-CJOVTJB7.woff               28.20 kB
+dist/assets/bricolage-grotesque-latin-ext-opsz-normal-IcJDqblK.woff2    30.73 kB
+dist/assets/inter-latin-wght-normal-Dx4kXJAl.woff2                      48.25 kB
+dist/assets/bricolage-grotesque-latin-opsz-normal-Cre6nC2_.woff2        76.88 kB
+dist/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2                  85.06 kB
+dist/assets/index-CMIRs3ti.css                                          43.40 kB │ gzip:  14.92 kB
+dist/assets/terms-Bu3bP1a1.js                                            0.14 kB │ gzip:   0.14 kB
+dist/assets/imprint-C_2hw1DT.js                                          0.14 kB │ gzip:   0.14 kB
+dist/assets/privacy-Z8jryNwS.js                                          0.14 kB │ gzip:   0.14 kB
+dist/assets/routes-BL58lNrF.js                                           0.16 kB │ gzip:   0.15 kB
+dist/assets/Eyebrow-Dn8gpp4I.js                                          0.22 kB │ gzip:   0.19 kB
+dist/assets/LegalPage-Si-yJ9Mf.js                                       12.11 kB │ gzip:   5.00 kB
+dist/assets/s._shareToken-CZz32Dke.js                                   21.39 kB │ gzip:   7.45 kB
+dist/assets/index-BnTOKVNQ.js                                          391.49 kB │ gzip: 122.57 kB
+
+✓ built in 242ms
+
+ ⛅️ wrangler 4.147.0
+────────────────────
+✨ Read 30 files from the assets directory /home/coder/dev/ns-worktrees/ticket-21/dist
+Total Upload: 0.81 KiB / gzip: 0.46 KiB
+Your Worker has access to the following bindings:
+Binding            Resource      
+env.ASSETS         Assets        
+
+--dry-run: exiting now.

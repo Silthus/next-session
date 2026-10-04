@@ -1,0 +1,94 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-21
+
+ ❯ |ui| src/features/player/playerIdentity.test.ts (0 test)
+ ❯ |ui| src/features/player/Join.test.tsx (0 test)
+ ❯ |ui| src/features/player/PlayerCalendar.test.tsx (0 test)
+ ❯ |ui| src/features/player/playerMonth.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/player/Join.test.tsx [ src/features/player/Join.test.tsx ]
+Error: Failed to resolve import "./Join" from "src/features/player/Join.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/coder/dev/ns-worktrees/ticket-21/src/features/player/Join.test.tsx:8:21
+  4  |  import { ConvexError } from "convex/values";
+  5  |  import { describe, expect, it, vi } from "vitest";
+  6  |  import { Join } from "./Join";
+     |                        ^
+  7  |  var _jsxFileName = "/home/coder/dev/ns-worktrees/ticket-21/src/features/player/Join.test.tsx";
+  8  |  import { jsxDEV as _jsxDEV } from "react/jsx-dev-runtime";
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/node.js:26423:18
+ ❯ node_modules/vite/dist/node/chunks/node.js:26493:30
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/node.js:26459:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/node.js:19988:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx [ src/features/player/PlayerCalendar.test.tsx ]
+Error: Failed to resolve import "./PlayerCalendar" from "src/features/player/PlayerCalendar.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/coder/dev/ns-worktrees/ticket-21/src/features/player/PlayerCalendar.test.tsx:6:31
+  3  |  import userEvent from "@testing-library/user-event";
+  4  |  import { describe, expect, it, vi } from "vitest";
+  5  |  import { PlayerCalendar } from "./PlayerCalendar";
+     |                                  ^
+  6  |  var _jsxFileName = "/home/coder/dev/ns-worktrees/ticket-21/src/features/player/PlayerCalendar.test.tsx";
+  7  |  import { jsxDEV as _jsxDEV } from "react/jsx-dev-runtime";
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/node.js:26423:18
+ ❯ node_modules/vite/dist/node/chunks/node.js:26493:30
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/node.js:26459:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/node.js:19988:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |ui| src/features/player/playerIdentity.test.ts [ src/features/player/playerIdentity.test.ts ]
+Error: Failed to resolve import "./playerIdentity" from "src/features/player/playerIdentity.test.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/coder/dev/ns-worktrees/ticket-21/src/features/player/playerIdentity.test.ts:9:7
+  1  |  import { beforeEach, describe, expect, it } from "vitest";
+  2  |  import { forgetPlayer, hasSeenHint, markHintSeen, recallPlayer, rememberPlayer } from "./playerIdentity";
+     |                                                                                         ^
+  3  |  class MemoryStorage {
+  4  |  	items = new Map();
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/node.js:26423:18
+ ❯ node_modules/vite/dist/node/chunks/node.js:26493:30
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/node.js:26459:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/node.js:19988:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |ui| src/features/player/playerMonth.test.ts [ src/features/player/playerMonth.test.ts ]
+Error: Failed to resolve import "./playerMonth" from "src/features/player/playerMonth.test.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/coder/dev/ns-worktrees/ticket-21/src/features/player/playerMonth.test.ts:2:42
+  1  |  import { describe, expect, it } from "vitest";
+  2  |  import { playerMonth, visibleMonth } from "./playerMonth";
+     |                                             ^
+  3  |  const today = "2026-10-04";
+  4  |  function october(overrides = {}) {
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/node.js:26423:18
+ ❯ node_modules/vite/dist/node/chunks/node.js:26493:30
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/node.js:26459:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/node.js:19988:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  4 failed (4)
+      Tests  no tests
+   Start at  04:09:46
+   Duration  845ms (environment 84%, setup 12%, transform 3%, worker 1%)
+
