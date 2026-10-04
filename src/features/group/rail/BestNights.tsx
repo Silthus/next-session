@@ -61,13 +61,14 @@ function NightRow({
   const label = nightLabel(night.date);
   const counts = countsLine(night, playerCount);
   const freeNames = night.free.map((player) => player.name).join(", ");
+  const free = freeNames ? `. Free: ${freeNames}` : "";
   const scheduled = night.session ? ". Session scheduled" : "";
   const hidden = night.free.length - SHOWN_AVATARS;
   return (
     <button
       type="button"
       onClick={onSelect}
-      aria-label={`${label}, ${counts}. Free: ${freeNames}${scheduled}`}
+      aria-label={`${label}, ${counts}${free}${scheduled}`}
       className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-surface-2"
     >
       <span

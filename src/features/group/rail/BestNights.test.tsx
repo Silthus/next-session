@@ -61,6 +61,13 @@ describe("BestNights", () => {
     expect(within(night).getByText("+2")).toBeTruthy();
   });
 
+  it("names no one free on a night of maybes", () => {
+    renderBestNights(monthWith({ answers: { "2026-10-16": { Ana: "maybe", Ben: "maybe" } } }));
+    expect(
+      screen.getByRole("button", { name: "Friday, Oct 16, 0 of 5 free, 2 maybe" }),
+    ).toBeTruthy();
+  });
+
   it("marks a night that already has a Session", () => {
     renderBestNights(
       monthWith({ answers: { "2026-10-16": { Ana: "free" } }, sessions: ["2026-10-16"] }),

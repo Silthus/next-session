@@ -199,7 +199,7 @@ test("the switcher opens, makes, renames and deletes Groups, and the landing ret
   await switcher(page, "My group").click();
   await page.getByRole("button", { name: "Delete group" }).click();
   await expect(page.getByRole("group", { name: "Delete My group?" })).toContainText(
-    "The player link stops working.",
+    "the player link stops working.",
   );
   await page.getByRole("button", { name: "Delete My group" }).click();
   await expect(page).toHaveURL(new RegExp(`/g/${gm.groupId}$`));
@@ -246,6 +246,78 @@ test("on a phone the rail sits under the calendar behind a segmented control", a
   await page.keyboard.press("ArrowRight");
   await expect(tabs.getByRole("tab", { name: "Sessions" })).toBeFocused();
   await expect(page.getByRole("region", { name: "Sessions" })).toBeVisible();
+});
+
+const password = "game-night-2026";
+
+async function signUpAccountWithGroup() {
+  const email = `gm-${String(Date.now())}-${Math.random().toString(36).slice(2, 8)}@example.test`;
+  const client = new ConvexHttpClient(convexUrl);
+  const { tokens } = await client.action(api.auth.signIn, {
+    provider: "password",
+    params: { email, password, flow: "signUp" },
+  });
+  if (!tokens) throw new Error("The sign-up returned no tokens");
+  client.setAuth(tokens.token);
+  await client.mutation(api.groups.create, {});
+  return { email, client };
+}
+
+test("an Anonymous GM saves into an Account from the header and stays on the Group", async ({
+  page,
+}) => {
+  const account = await signUpAccountWithGroup();
+  const gm = await signInAnonymousGm();
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
+  const dayPanel = page.getByRole("region", { name: /, \w+ 5$/ });
+
+  await page.getByRole("button", { name: "Save your group" }).click();
+  const sheet = page.getByRole("dialog", { name: "Keep My group" });
+  await expect(sheet).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(sheet).toBeHidden();
+  await expect(dayPanel).toBeVisible();
+
+  await page.getByRole("button", { name: "Save your group" }).click();
+  await sheet.getByText("I already have one").click();
+  await sheet.getByLabel("Email").fill(account.email);
+  await sheet.getByLabel("Password").fill(password);
+  await sheet.getByRole("button", { name: "Log in and save" }).click();
+
+  await expect(page.getByRole("status")).toHaveText("Saved. Open it anywhere with your account.");
+  await expect(page).toHaveURL(new RegExp(`/g/${gm.groupId}\\?`));
+  await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
+  await expect(page.getByText(`/s/${gm.shareToken}`)).toBeVisible();
+  await expect(dayPanel).toBeVisible();
+  await expect
+    .poll(async () => (await account.client.query(api.groups.mine, {})).map((group) => group.id))
+    .toContain(gm.groupId);
+});
+
+test("on a phone the toast clears the open day sheet", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const gm = await signInAnonymousGm();
+  await seedCrew(gm);
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
+
+  const sheet = page.getByRole("region", { name: /, \w+ 5$/ });
+  await sheet.getByRole("button", { name: "Schedule session" }).click();
+  const toast = page.getByRole("status");
+  await expect(toast).toContainText("Players see it on the link.");
+  const [toastBox, sheetBox] = await Promise.all([toast.boundingBox(), sheet.boundingBox()]);
+  expect(toastBox!.y + toastBox!.height).toBeLessThanOrEqual(sheetBox!.y);
+  await toast.getByRole("button", { name: "Undo" }).click();
+  await expect(sheet.getByRole("button", { name: "Schedule session" })).toBeVisible();
+});
+
+test("deleting the last Group of an Anonymous GM returns to the landing", async ({ page }) => {
+  const gm = await signInAnonymousGm();
+  await openAsGm(page, gm, `/g/${gm.groupId}`);
+  await switcher(page, "My group").click();
+  await page.getByRole("button", { name: "Delete group" }).click();
+  await page.getByRole("button", { name: "Delete My group" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("button", { name: "Create your link" })).toBeVisible();
 });
 
 const screenshotDir = process.env.E2E_SCREENSHOTS;

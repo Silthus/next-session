@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import { describe, expect, it, vi } from "vitest";
@@ -105,7 +105,7 @@ describe("GroupSwitcher", () => {
     await userEvent.click(screen.getByRole("button", { name: "Delete group" }));
     const confirm = screen.getByRole("group", { name: "Delete Thursday Crew?" });
     expect(confirm.textContent).toContain(
-      "Its 5 players and all their answers go too, and the player link stops working.",
+      "Its 5 players, their answers and its sessions go too, and the player link stops working.",
     );
     await userEvent.click(within(confirm).getByRole("button", { name: "Keep" }));
     expect(screen.queryByRole("group")).toBeNull();
@@ -113,6 +113,28 @@ describe("GroupSwitcher", () => {
     await userEvent.click(screen.getByRole("button", { name: "Delete group" }));
     await userEvent.click(screen.getByRole("button", { name: "Delete Thursday Crew" }));
     expect(onDelete).toHaveBeenCalledOnce();
+  });
+
+  it("stays open when focus drops to the page, and Escape still closes it", async () => {
+    const onWindowKey = vi.fn();
+    window.addEventListener("keydown", onWindowKey);
+    renderSwitcher();
+    await openMenu();
+    act(() => (document.activeElement as HTMLElement).blur());
+    expect(screen.getAllByRole("link")).toHaveLength(2);
+
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(onWindowKey).not.toHaveBeenCalled();
+    window.removeEventListener("keydown", onWindowKey);
+  });
+
+  it("offers delete only once it can name what is lost", async () => {
+    renderSwitcher({ groups: undefined });
+    await openMenu();
+    expect(screen.getByRole("button", { name: "Delete group" }).hasAttribute("disabled")).toBe(
+      true,
+    );
   });
 
   it("closes the menu with Escape or a click outside", async () => {

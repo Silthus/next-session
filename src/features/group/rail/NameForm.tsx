@@ -6,6 +6,7 @@ import { codeMessage, errorMessage, type ErrorTopic } from "../../../lib/errors"
 
 export function NameForm({
   label,
+  autoFocus = true,
   initialName = "",
   placeholder,
   submitLabel,
@@ -16,6 +17,7 @@ export function NameForm({
   inputClassName,
 }: {
   label: string;
+  autoFocus?: boolean;
   initialName?: string;
   placeholder?: string;
   submitLabel: string;
@@ -33,9 +35,10 @@ export function NameForm({
   const failureId = useId();
 
   useEffect(() => {
+    if (!autoFocus) return;
     field.current?.focus();
     field.current?.select();
-  }, []);
+  }, [autoFocus]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -62,7 +65,7 @@ export function NameForm({
       onKeyDown={(event) => {
         if (event.key !== "Escape") return;
         event.stopPropagation();
-        onCancel();
+        if (!busy) onCancel();
       }}
       className={cn("flex min-w-0 flex-col gap-1.5", className)}
     >

@@ -3,6 +3,7 @@ import type { OptimisticLocalStore } from "convex/browser";
 import { getFunctionName, type FunctionReference } from "convex/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../../convex/_generated/dataModel";
+import type { ShowToast } from "../useToast";
 import { useSessionActions } from "./useSessionActions";
 
 type Call = { args: Record<string, unknown>; resolve: (value: unknown) => void };
@@ -26,14 +27,21 @@ vi.mock("convex/react", () => ({
 }));
 
 const groupId = "g1" as Id<"groups">;
+const show = vi.fn<ShowToast>();
+
+function lastToast() {
+  const [message, undo] = show.mock.calls.at(-1) ?? [];
+  return { message, undo };
+}
 
 beforeEach(() => {
   for (const name of Object.keys(calls)) delete calls[name];
+  show.mockReset();
 });
 
 describe("useSessionActions", () => {
   it("keeps every night pending until its own change settles", async () => {
-    const { result } = renderHook(() => useSessionActions(groupId));
+    const { result } = renderHook(() => useSessionActions(groupId, show));
     act(() => void result.current.schedule("2026-11-05"));
     act(() => void result.current.schedule("2026-11-06"));
     expect(result.current.isPending("2026-11-05")).toBe(true);
@@ -48,10 +56,10 @@ describe("useSessionActions", () => {
   });
 
   it("ignores a second change to a night while the first is on its way", async () => {
-    const { result } = renderHook(() => useSessionActions(groupId));
+    const { result } = renderHook(() => useSessionActions(groupId, show));
     act(() => void result.current.schedule("2026-11-05"));
     await settle("sessions:schedule", 0, "s5");
-    const undoSchedule = result.current.toast?.undo;
+    const undoSchedule = lastToast().undo;
 
     act(() => void result.current.unschedule({ _id: "s5" as Id<"sessions">, date: "2026-11-05" }));
     act(() => undoSchedule?.());
@@ -61,61 +69,18 @@ describe("useSessionActions", () => {
     expect(result.current.isPending("2026-11-05")).toBe(false);
   });
 
-  it("keeps a held toast, and lets it go five seconds after release", async () => {
-    vi.useFakeTimers();
-    try {
-      const { result } = renderHook(() => useSessionActions(groupId));
-      act(() => void result.current.schedule("2026-11-05"));
-      await settle("sessions:schedule", 0, "s5");
-      act(() => result.current.holdToast());
-      act(() => {
-        vi.advanceTimersByTime(10_000);
-      });
-      expect(result.current.toast?.date).toBe("2026-11-05");
-
-      act(() => result.current.releaseToast());
-      act(() => {
-        vi.advanceTimersByTime(5000);
-      });
-      expect(result.current.toast).toBeNull();
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it("does not carry a hold over to the next toast", async () => {
-    vi.useFakeTimers();
-    try {
-      const { result } = renderHook(() => useSessionActions(groupId));
-      act(() => void result.current.schedule("2026-11-05"));
-      await settle("sessions:schedule", 0, "s5");
-      act(() => result.current.holdToast());
-      act(() => void result.current.schedule("2026-11-06"));
-      await settle("sessions:schedule", 1, "s6");
-
-      act(() => {
-        vi.advanceTimersByTime(5000);
-      });
-      expect(result.current.toast).toBeNull();
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
   it("undoes a new Session with the id the server returned", async () => {
-    const { result } = renderHook(() => useSessionActions(groupId));
+    const { result } = renderHook(() => useSessionActions(groupId, show));
     act(() => void result.current.schedule("2026-11-05"));
     await settle("sessions:schedule", 0, "s5");
-    expect(result.current.toast?.message).toBe(
-      "Session on Thu, Nov 5. Players see it on the link.",
-    );
+    expect(lastToast().message).toBe("Session on Thu, Nov 5. Players see it on the link.");
 
-    act(() => result.current.toast?.undo?.());
+    act(() => lastToast().undo?.());
     expect(calls["sessions:unschedule"]![0]!.args).toEqual({ sessionId: "s5" });
   });
 
   it("shows a scheduled night in every cached month of the Group at once", () => {
-    renderHook(() => useSessionActions(groupId));
+    renderHook(() => useSessionActions(groupId, show));
     const store = fakeStore({
       "g1|2026-10": [{ _id: "s1", date: "2026-10-09" }],
       "g1|2026-11": [{ _id: "s1", date: "2026-10-09" }],

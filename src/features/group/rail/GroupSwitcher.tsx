@@ -161,6 +161,7 @@ function SwitcherMenu({
       ) : (
         <button
           type="button"
+          disabled={groups === undefined}
           onClick={() => setConfirmingDelete(true)}
           className={cn(menuItemClassName, "text-busy hover:bg-busy-soft")}
         >
@@ -211,8 +212,11 @@ function DeleteConfirm({
 }
 
 function lossLine(playerCount: number) {
-  if (playerCount === 0) return "The player link stops working.";
-  return `Its ${playersLabel(playerCount)} and all their answers go too, and the player link stops working.`;
+  const lost =
+    playerCount === 0
+      ? "Its sessions go too"
+      : `Its ${playersLabel(playerCount)}, their answers and its sessions go too`;
+  return `${lost}, and the player link stops working.`;
 }
 
 function playersLabel(count: number) {

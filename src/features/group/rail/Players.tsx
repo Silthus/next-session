@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import type { PlayerProgress, PlayerRow } from "../../../../shared/monthSummary";
 import { Avatar } from "../../../ui/Avatar";
 import { Button } from "../../../ui/Button";
@@ -6,36 +6,52 @@ import { cn } from "../../../ui/cn";
 import { IconCheck, IconMore } from "../../../ui/icons";
 import { errorMessage } from "../../../lib/errors";
 import { NameForm } from "./NameForm";
-import { MenuButton, Popover } from "./Popover";
 import { EmptyLine, RailCard } from "./RailCard";
 
-type PlayersProps = {
-  progress: readonly PlayerProgress<PlayerRow>[];
+type PlayersProps<Player extends PlayerRow> = {
+  progress: readonly PlayerProgress<Player>[];
   onAdd: (name: string) => Promise<unknown>;
-  onRename: (playerId: string, name: string) => Promise<unknown>;
-  onRemove: (playerId: string) => Promise<unknown>;
+  onRename: (playerId: Player["_id"], name: string) => Promise<unknown>;
+  onRemove: (playerId: Player["_id"]) => Promise<unknown>;
 };
 
-export function Players({ progress, onAdd, onRename, onRemove }: PlayersProps) {
-  const [adding, setAdding] = useState(progress.length === 0);
+type AddForm = "closed" | "open" | "openedByGm";
+
+export function Players<Player extends PlayerRow>({
+  progress,
+  onAdd,
+  onRename,
+  onRemove,
+}: PlayersProps<Player>) {
+  const [addForm, setAddForm] = useState<AddForm>(progress.length === 0 ? "open" : "closed");
   const addButton = useRef<HTMLButtonElement>(null);
+  const refocusAdd = useRef(false);
   const closeForm = () => {
-    setAdding(false);
-    addButton.current?.focus();
+    refocusAdd.current = true;
+    setAddForm("closed");
   };
+
+  useEffect(() => {
+    if (addForm !== "closed" || !refocusAdd.current) return;
+    refocusAdd.current = false;
+    addButton.current?.focus();
+  }, [addForm]);
+
   return (
     <RailCard
       title={`Players · ${String(progress.length)}`}
       action={
-        <button
-          ref={addButton}
-          type="button"
-          aria-label="Add player"
-          onClick={() => setAdding(true)}
-          className="rounded-sm text-xs font-semibold text-accent-strong hover:underline"
-        >
-          + Add
-        </button>
+        addForm === "closed" && (
+          <button
+            ref={addButton}
+            type="button"
+            aria-label="Add player"
+            onClick={() => setAddForm("openedByGm")}
+            className="rounded-sm text-xs font-semibold text-accent-strong hover:underline"
+          >
+            + Add
+          </button>
+        )
       }
     >
       {progress.length === 0 && (
@@ -55,9 +71,10 @@ export function Players({ progress, onAdd, onRename, onRemove }: PlayersProps) {
           ))}
         </ul>
       )}
-      {adding && (
+      {addForm !== "closed" && (
         <NameForm
           label="Player name"
+          autoFocus={addForm === "openedByGm"}
           placeholder="Player name"
           submitLabel="Add"
           topic="roster"
@@ -73,7 +90,7 @@ export function Players({ progress, onAdd, onRename, onRemove }: PlayersProps) {
   );
 }
 
-type Mode = "view" | "renaming" | "confirmingRemove";
+type Mode = "view" | "actions" | "renaming" | "confirmingRemove";
 
 function PlayerItem({
   entry: { player, answered, fillable },
@@ -87,9 +104,15 @@ function PlayerItem({
   const [mode, setMode] = useState<Mode>("view");
   const more = useRef<HTMLButtonElement>(null);
   const refocusMore = useRef(false);
+  const actionsId = useId();
   const backToView = () => {
     refocusMore.current = true;
     setMode("view");
+  };
+  const closeOnEscape = (event: KeyboardEvent) => {
+    if (event.key !== "Escape") return;
+    event.stopPropagation();
+    backToView();
   };
 
   useEffect(() => {
@@ -122,37 +145,47 @@ function PlayerItem({
       </li>
     );
   }
+  const showingActions = mode === "actions";
   return (
-    <li className="group flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-surface-2">
+    <li
+      onKeyDown={showingActions ? closeOnEscape : undefined}
+      className="group flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-surface-2"
+    >
       <Avatar name={player.name} size="sm" />
       <span className="min-w-0 flex-1 truncate text-sm font-medium">{player.name}</span>
-      <AnswerProgress answered={answered} fillable={fillable} />
-      <Popover
-        triggerRef={more}
-        align="end"
-        className="w-36"
-        trigger={(props) => (
-          <button
-            {...props}
-            type="button"
-            aria-label={`More for ${player.name}`}
-            className="rounded-sm p-1 text-ink-3 transition-opacity hover:text-ink focus-visible:opacity-100 aria-expanded:opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100"
-          >
-            <IconMore />
+      {showingActions ? (
+        <span id={actionsId} className="flex shrink-0 items-center gap-1">
+          <button type="button" className={rowActionClassName} onClick={() => setMode("renaming")}>
+            Rename
           </button>
-        )}
+          <button
+            type="button"
+            className={cn(rowActionClassName, "text-busy hover:bg-busy-soft")}
+            onClick={() => setMode("confirmingRemove")}
+          >
+            Remove
+          </button>
+        </span>
+      ) : (
+        <AnswerProgress answered={answered} fillable={fillable} />
+      )}
+      <button
+        ref={more}
+        type="button"
+        aria-label={`More for ${player.name}`}
+        aria-expanded={showingActions}
+        aria-controls={showingActions ? actionsId : undefined}
+        onClick={() => setMode(showingActions ? "view" : "actions")}
+        className="rounded-sm p-1 text-ink-3 transition-opacity hover:text-ink focus-visible:opacity-100 aria-expanded:opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100"
       >
-        <MenuButton onSelect={() => setMode("renaming")}>Rename</MenuButton>
-        <MenuButton
-          onSelect={() => setMode("confirmingRemove")}
-          className="text-busy hover:bg-busy-soft"
-        >
-          Remove
-        </MenuButton>
-      </Popover>
+        <IconMore />
+      </button>
     </li>
   );
 }
+
+const rowActionClassName =
+  "rounded-sm px-2 py-1 text-xs font-semibold text-ink-2 hover:bg-surface hover:text-ink";
 
 function AnswerProgress({ answered, fillable }: { answered: number; fillable: number }) {
   if (fillable > 0 && answered === fillable) {
@@ -203,14 +236,22 @@ function RemoveConfirm({
       onKeyDown={(event) => {
         if (event.key !== "Escape") return;
         event.stopPropagation();
-        onKeep();
+        if (!busy) onKeep();
       }}
       className="rounded-md bg-busy-soft p-2.5 text-xs text-ink"
     >
-      <p id={questionId} className="font-medium">{`Remove ${name}? Their answers go too.`}</p>
-      <div className="mt-2 flex gap-2">
-        <Button size="sm" variant="danger" busy={busy && "Removing…"} onClick={() => void remove()}>
-          {`Remove ${name}`}
+      <p id={questionId} className="font-medium break-words">
+        {`Remove ${name}? Their answers go too.`}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          variant="danger"
+          busy={busy && "Removing…"}
+          onClick={() => void remove()}
+          className="max-w-full"
+        >
+          <span className="truncate">{`Remove ${name}`}</span>
         </Button>
         <Button size="sm" variant="ghost" onClick={onKeep} disabled={busy} autoFocus>
           Keep

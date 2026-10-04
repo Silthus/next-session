@@ -52,21 +52,27 @@ export function Popover({
     const closeOutside = (event: PointerEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.stopPropagation();
+      setOpen(false);
+      triggerRef.current?.focus();
+    };
     document.addEventListener("pointerdown", closeOutside);
-    return () => document.removeEventListener("pointerdown", closeOutside);
-  }, [open]);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open, triggerRef]);
 
   return (
     <div
       ref={rootRef}
       className="relative min-w-0"
-      onKeyDown={(event) => {
-        if (event.key !== "Escape" || !open) return;
-        event.stopPropagation();
-        close();
-      }}
       onBlur={(event) => {
-        if (!rootRef.current?.contains(event.relatedTarget)) setOpen(false);
+        const next = event.relatedTarget;
+        if (next !== null && !rootRef.current?.contains(next)) setOpen(false);
       }}
     >
       {trigger({

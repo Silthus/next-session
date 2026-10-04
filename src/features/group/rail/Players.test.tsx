@@ -62,6 +62,22 @@ describe("Players", () => {
       ),
     ).toBeTruthy();
     expect(within(card).getByRole("textbox", { name: "Player name" })).toBeTruthy();
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it("focuses the name field when the GM opens the form, and hides + Add meanwhile", async () => {
+    const { card } = renderPlayers();
+    await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
+    expect(document.activeElement).toBe(within(card).getByRole("textbox", { name: "Player name" }));
+    expect(within(card).queryByRole("button", { name: "Add player" })).toBeNull();
+  });
+
+  it("keeps the form while a name is on its way, even on Escape", async () => {
+    const { card } = renderPlayers(monthWith({}), { onAdd: () => new Promise(() => undefined) });
+    await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
+    await userEvent.type(within(card).getByRole("textbox", { name: "Player name" }), "Fay{Enter}");
+    await userEvent.keyboard("{Escape}");
+    expect(within(card).getByRole("textbox", { name: "Player name" })).toBeTruthy();
   });
 
   it("adds a Player and closes the form", async () => {
@@ -136,13 +152,18 @@ describe("Players", () => {
     expect(onRemove).toHaveBeenCalledWith("Ana");
   });
 
-  it("closes a Player's menu with Escape", async () => {
-    const { card } = renderPlayers(monthWith({ players: rosterOf("Ana") }));
+  it("shows a Player's actions inside their row and closes them with Escape", async () => {
+    const { card } = renderPlayers(monthWith({ players: rosterOf("Ana", "Ben") }));
     const more = within(card).getByRole("button", { name: "More for Ana" });
     await userEvent.click(more);
     expect(more.getAttribute("aria-expanded")).toBe("true");
+    const [anaRow] = within(card).getAllByRole("listitem");
+    expect(within(anaRow!).getByRole("button", { name: "Rename" })).toBeTruthy();
+    expect(within(anaRow!).getByRole("button", { name: "Remove" })).toBeTruthy();
+
     await userEvent.keyboard("{Escape}");
     expect(more.getAttribute("aria-expanded")).toBe("false");
+    expect(within(card).queryByRole("button", { name: "Rename" })).toBeNull();
     expect(document.activeElement).toBe(more);
   });
 });

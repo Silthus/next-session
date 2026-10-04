@@ -20,7 +20,7 @@ import { focusDay } from "./calendar/dayFocus";
 import { DayPanel } from "./calendar/DayPanel";
 import { HeatCalendar } from "./calendar/HeatCalendar";
 import { MobileDaySheet } from "./calendar/MobileDaySheet";
-import { useSessionActions, type SessionToast } from "./calendar/useSessionActions";
+import { useSessionActions } from "./calendar/useSessionActions";
 import { useMonthSchedule } from "./calendar/useMonthSchedule";
 import { useToday } from "./calendar/useToday";
 import { BestNights } from "./rail/BestNights";
@@ -32,14 +32,15 @@ import { showsNudge } from "./rail/nudge";
 import { Players } from "./rail/Players";
 import { dismissNudge, nudgeDismissedAt, rememberLastGroup } from "./rail/railStorage";
 import { Sessions } from "./rail/Sessions";
-import { useRailActions, type RailToast } from "./rail/useRailActions";
+import { useRailActions } from "./rail/useRailActions";
 import { useWideLayout } from "./rail/useWideLayout";
+import { useToast, type GroupToast } from "./useToast";
 
 export type GroupSearch = { month?: string; day?: string };
 
 type GroupView = { id: Id<"groups">; name: string; shareToken: string };
 
-const SAVED_NOTICE_MS = 5000;
+type Toasts = ReturnType<typeof useToast>;
 
 export function GroupScreen({ groupId, search }: { groupId: string; search: GroupSearch }) {
   const gm = useGm();
@@ -47,13 +48,13 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
   const group = useQuery(api.groups.get, signedIn ? { groupId } : "skip");
   const [saveSheetFor, setSaveSheetFor] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [savedNotice, setSavedNotice] = useState(false);
+  const toasts = useToast();
 
   const save = async (input: SaveInput) => {
     setSaving(true);
     try {
       await gm.save(input);
-      setSavedNotice(true);
+      toasts.show("Saved. Open it anywhere with your account.");
     } finally {
       setSaving(false);
     }
@@ -76,6 +77,7 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         saving,
         search,
         headerActions,
+        toasts,
         onSave: setSaveSheetFor,
       })}
       <AccountSheet
@@ -85,7 +87,6 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         onSubmit={save}
         onClose={() => setSaveSheetFor(null)}
       />
-      {savedNotice && <SavedNotice onDone={() => setSavedNotice(false)} />}
     </>
   );
 }
@@ -96,6 +97,7 @@ function surfaceFor({
   saving,
   search,
   headerActions,
+  toasts,
   onSave,
 }: {
   status: ReturnType<typeof useGm>["status"];
@@ -103,6 +105,7 @@ function surfaceFor({
   saving: boolean;
   search: GroupSearch;
   headerActions: ReactNode;
+  toasts: Toasts;
   onSave: (groupName: string) => void;
 }) {
   if (status === "signedOut" && !saving) return <Navigate to="/" replace />;
@@ -116,17 +119,10 @@ function surfaceFor({
       saving={saving}
       search={search}
       headerActions={headerActions}
+      toasts={toasts}
       onSave={() => onSave(group.name)}
     />
   );
-}
-
-function SavedNotice({ onDone }: { onDone: () => void }) {
-  useEffect(() => {
-    const timer = setTimeout(onDone, SAVED_NOTICE_MS);
-    return () => clearTimeout(timer);
-  }, [onDone]);
-  return <Toast>Saved. Open it anywhere with your account.</Toast>;
 }
 
 function FirstGroupFallback() {
@@ -143,6 +139,7 @@ function GroupSurface({
   saving,
   search,
   headerActions,
+  toasts,
   onSave,
 }: {
   group: GroupView;
@@ -150,6 +147,7 @@ function GroupSurface({
   saving: boolean;
   search: GroupSearch;
   headerActions: ReactNode;
+  toasts: Toasts;
   onSave: () => void;
 }) {
   const groupId = group.id;
@@ -157,8 +155,8 @@ function GroupSurface({
   const wide = useWideLayout();
   const requestedMonth = visibleMonth(search.month, today);
   const loaded = useMonthSchedule(groupId, requestedMonth);
-  const sessions = useSessionActions(groupId);
-  const rail = useRailActions(groupId);
+  const sessions = useSessionActions(groupId, toasts.show);
+  const rail = useRailActions(groupId, toasts.show);
   const [nudgeSnoozedAt, setNudgeSnoozedAt] = useState(() => nudgeDismissedAt());
   const [openedAt] = useState(() => Date.now());
   const navigate = useNavigate({ from: "/g/$groupId" });
@@ -177,29 +175,18 @@ function GroupSurface({
   useEffect(() => {
     if (selectedDay === null) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeDay();
+      if (event.key === "Escape" && !insideDialog(event.target)) closeDay();
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   });
 
-  const undoSession = (toast: SessionToast | null) => {
-    if (!toast?.undo) return;
-    toast.undo();
-    sessions.releaseToast();
-    sessions.dismissToast();
-    focusDay(toast.date);
+  const undo = (toast: GroupToast) => {
+    toasts.release();
+    toasts.dismiss();
+    toast.undo?.();
   };
-  const undoRail = (toast: RailToast | null) => {
-    if (!toast?.undo) return;
-    toast.undo();
-    rail.releaseToast();
-    rail.dismissToast();
-  };
-  const rotate = () => {
-    sessions.dismissToast();
-    void rail.rotate();
-  };
+  const rotate = () => void rail.rotate();
   const laterNudge = () => {
     const now = Date.now();
     dismissNudge(now);
@@ -225,14 +212,8 @@ function GroupSurface({
         today={today}
         pending={sessions.isPending(day.date)}
         onClose={closeDay}
-        onSchedule={() => {
-          rail.dismissToast();
-          void sessions.schedule(day.date);
-        }}
-        onUnschedule={(session) => {
-          rail.dismissToast();
-          void sessions.unschedule(session);
-        }}
+        onSchedule={() => void sessions.schedule(day.date)}
+        onUnschedule={(session) => void sessions.unschedule(session)}
         className={className}
       />
     );
@@ -242,7 +223,6 @@ function GroupSurface({
     dismissedAt: nudgeSnoozedAt,
     now: openedAt,
   });
-  const toastPosition = day && !wide ? "top" : "bottom";
 
   return (
     <GroupFrame heading={heading} actions={headerActions}>
@@ -294,33 +274,24 @@ function GroupSurface({
           {dayPanel("shadow-[0_-8px_32px_-12px_rgb(0_0_0/0.35)]")}
         </MobileDaySheet>
       )}
-      {rail.toast ? (
-        <div onFocus={rail.holdToast} onBlur={rail.releaseToast}>
+      {toasts.toast && (
+        <div onFocus={toasts.hold} onBlur={toasts.release}>
           <Toast
-            key={`rail-${String(rail.toast.id)}`}
-            position={toastPosition}
-            action={rail.toast.undo && "Undo"}
-            onAction={() => undoRail(rail.toast)}
+            key={toasts.toast.id}
+            position={day && !wide ? "top" : "bottom"}
+            action={toasts.toast.undo && "Undo"}
+            onAction={() => toasts.toast && undo(toasts.toast)}
           >
-            {rail.toast.message}
+            {toasts.toast.message}
           </Toast>
         </div>
-      ) : (
-        sessions.toast && (
-          <div onFocus={sessions.holdToast} onBlur={sessions.releaseToast}>
-            <Toast
-              key={`session-${String(sessions.toast.id)}`}
-              position={toastPosition}
-              action={sessions.toast.undo && "Undo"}
-              onAction={() => undoSession(sessions.toast)}
-            >
-              {sessions.toast.message}
-            </Toast>
-          </div>
-        )
       )}
     </GroupFrame>
   );
+}
+
+function insideDialog(target: EventTarget | null) {
+  return target instanceof Element && target.closest("dialog") !== null;
 }
 
 function shareLinkUrl(shareToken: string) {
