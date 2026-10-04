@@ -1,4 +1,4 @@
-import { useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
@@ -15,7 +15,7 @@ type CreatedGroup = { id: string; name: string; shareToken: string };
 
 export function Landing() {
   const gm = useGm();
-  const router = useRouter();
+  const navigate = useNavigate();
   const signedIn = gm.status === "anonymous" || gm.status === "account";
   const groups = useQuery(api.groups.mine, signedIn ? {} : "skip");
   const createGroup = useMutation(api.groups.create);
@@ -37,8 +37,9 @@ export function Landing() {
     phase === "idle" || phase === "failed" ? returningGroupId(groups, lastGroupId()) : undefined;
 
   useEffect(() => {
-    if (returningTo) router.history.replace(groupPath(returningTo));
-  }, [returningTo, router]);
+    if (returningTo)
+      void navigate({ to: "/g/$groupId", params: { groupId: returningTo }, replace: true });
+  }, [returningTo, navigate]);
 
   const create = async () => {
     setPhase("creating");
@@ -71,7 +72,6 @@ export function Landing() {
         onCreate={() => void create()}
         onLogIn={() => setSheet("logIn")}
         onSave={() => setSheet("save")}
-        onOpenGroup={(groupId) => router.history.push(groupPath(groupId))}
       />
       {sheet === "save" && created ? (
         <AccountSheet
@@ -103,10 +103,6 @@ function landingState(
   if (phase !== "created") return { phase };
   if (!created) return { phase: "creating" };
   return { phase, groupId: created.id, shareUrl: shareUrl(created.shareToken), savedAs };
-}
-
-function groupPath(groupId: string) {
-  return `/g/${groupId}`;
 }
 
 function shareUrl(shareToken: string) {

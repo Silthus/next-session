@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ConvexError } from "convex/values";
-import { useEffect, useRef, type MouseEvent } from "react";
+import { useEffect, useRef } from "react";
 import { Button, buttonClassName } from "../../ui/Button";
 import { IconCheck } from "../../ui/icons";
 import { LegalFooter } from "../../ui/LegalFooter";
@@ -20,20 +20,12 @@ type LandingViewProps = {
   onCreate: () => void;
   onLogIn: () => void;
   onSave: () => void;
-  onOpenGroup: (groupId: string) => void;
 };
 
 const column = "mx-auto w-full max-w-5xl px-4 sm:px-6";
 const steps = ["Create your link", "Send it to the group", "Pick the best night"];
 
-export function LandingView({
-  state,
-  showLogIn,
-  onCreate,
-  onLogIn,
-  onSave,
-  onOpenGroup,
-}: LandingViewProps) {
+export function LandingView({ state, showLogIn, onCreate, onLogIn, onSave }: LandingViewProps) {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className={`${column} flex items-center justify-between py-5`}>
@@ -57,7 +49,7 @@ export function LandingView({
             nights fall out by themselves.
           </p>
           {state.phase === "created" ? (
-            <LinkInHand {...state} onSave={onSave} onOpenGroup={onOpenGroup} />
+            <LinkInHand {...state} onSave={onSave} />
           ) : (
             <CreateLink
               busy={state.phase === "creating"}
@@ -120,24 +112,14 @@ function LinkInHand({
   groupId,
   savedAs,
   onSave,
-  onOpenGroup,
 }: {
   shareUrl: string;
   groupId: string;
   savedAs?: string;
   onSave: () => void;
-  onOpenGroup: (groupId: string) => void;
 }) {
   const ready = useRef<HTMLParagraphElement>(null);
   useEffect(() => ready.current?.focus(), []);
-
-  const openGroup = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-      return;
-    }
-    event.preventDefault();
-    onOpenGroup(groupId);
-  };
 
   return (
     <div className="flex max-w-lg animate-rise flex-col gap-4">
@@ -153,13 +135,13 @@ function LinkInHand({
       </p>
       <ShareLinkCard url={shareUrl} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <a
-          href={`/g/${groupId}`}
-          onClick={openGroup}
+        <Link
+          to="/g/$groupId"
+          params={{ groupId }}
           className={buttonClassName("secondary", "lg", "self-start")}
         >
           Open your group →
-        </a>
+        </Link>
         {savedAs ? (
           <SavedTo email={savedAs} />
         ) : (

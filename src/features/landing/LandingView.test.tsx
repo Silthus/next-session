@@ -20,7 +20,6 @@ function renderLanding(overrides: Partial<Props> = {}) {
     onCreate: vi.fn(),
     onLogIn: vi.fn(),
     onSave: vi.fn(),
-    onOpenGroup: vi.fn(),
     ...overrides,
   };
   const router = createRouter({
@@ -28,7 +27,7 @@ function renderLanding(overrides: Partial<Props> = {}) {
     history: createMemoryHistory({ initialEntries: ["/"] }),
   });
   render(<RouterProvider router={router} />);
-  return props;
+  return { props, router };
 }
 
 const created = {
@@ -39,7 +38,7 @@ const created = {
 
 describe("LandingView", () => {
   it("creates the link with one click, which accepts the Terms and the Privacy Policy", async () => {
-    const props = renderLanding();
+    const { props } = renderLanding();
 
     expect(
       await screen.findByRole("heading", { level: 1, name: "Stop chasing the date." }),
@@ -56,7 +55,7 @@ describe("LandingView", () => {
   });
 
   it("opens the log in sheet from the header", async () => {
-    const props = renderLanding();
+    const { props } = renderLanding();
     await userEvent.click(await screen.findByRole("button", { name: "Log in" }));
     expect(props.onLogIn).toHaveBeenCalledOnce();
   });
@@ -82,7 +81,7 @@ describe("LandingView", () => {
     ],
     [new Error("Server Error"), "That didn't work. Try again."],
   ])("says why making the link failed and lets the GM try again", async (error, message) => {
-    const props = renderLanding({ state: { phase: "failed", error } });
+    const { props } = renderLanding({ state: { phase: "failed", error } });
     expect((await screen.findByRole("alert")).textContent).toBe(message);
     await userEvent.click(screen.getByRole("button", { name: "Create your link" }));
     expect(props.onCreate).toHaveBeenCalledOnce();
@@ -100,17 +99,17 @@ describe("LandingView", () => {
   });
 
   it("opens the Group from the link-created moment", async () => {
-    const props = renderLanding({ state: created });
+    const { router } = renderLanding({ state: created });
 
     const open = await screen.findByRole("link", { name: "Open your group →" });
     expect(open.getAttribute("href")).toBe("/g/group-1");
 
     await userEvent.click(open);
-    expect(props.onOpenGroup).toHaveBeenCalledWith("group-1");
+    expect(router.state.location.pathname).toBe("/g/group-1");
   });
 
   it("offers to save the new Group to an account", async () => {
-    const props = renderLanding({ state: created });
+    const { props } = renderLanding({ state: created });
     await userEvent.click(await screen.findByRole("button", { name: "save it to an account" }));
     expect(props.onSave).toHaveBeenCalledOnce();
   });
