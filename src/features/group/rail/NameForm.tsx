@@ -3,6 +3,7 @@ import { normalizeName, NAME_MAX_LENGTH } from "../../../../shared/names";
 import { Button } from "../../../ui/Button";
 import { cn } from "../../../ui/cn";
 import { codeMessage, errorMessage, type ErrorTopic } from "../../../lib/errors";
+import { isImeComposing } from "../../../lib/keyboard";
 
 export function NameForm({
   label,
@@ -63,7 +64,7 @@ export function NameForm({
     <form
       onSubmit={(event) => void submit(event)}
       onKeyDown={(event) => {
-        if (event.key !== "Escape" || event.nativeEvent.isComposing) return;
+        if (event.key !== "Escape" || isImeComposing(event.nativeEvent)) return;
         event.stopPropagation();
         if (!busy) onCancel();
       }}

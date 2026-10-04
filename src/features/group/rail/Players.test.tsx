@@ -117,11 +117,14 @@ describe("Players", () => {
     expect(document.activeElement).toBe(within(card).getByRole("heading"));
   });
 
-  it("keeps an IME conversion's Escape for the IME", async () => {
+  it.each([
+    ["an IME conversion's", { isComposing: true }],
+    ["Safari's IME conversion", { keyCode: 229 }],
+  ])("keeps %s Escape for the IME", async (_case, composition) => {
     const { card } = renderPlayers();
     await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
     const field = within(card).getByRole("textbox", { name: "Player name" });
-    fireEvent.keyDown(field, { key: "Escape", isComposing: true });
+    fireEvent.keyDown(field, { key: "Escape", ...composition });
     expect(within(card).getByRole("textbox", { name: "Player name" })).toBe(field);
   });
 

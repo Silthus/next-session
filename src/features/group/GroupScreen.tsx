@@ -5,6 +5,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
 import { summarizeMonth } from "../../../shared/monthSummary";
+import { isImeComposing } from "../../lib/keyboard";
 import { dismissNudge, nudgeDismissedAt, rememberLastGroup } from "../../lib/storage";
 import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
@@ -208,7 +209,7 @@ function GroupSurface({
   useEffect(() => {
     if (selectedDay === null) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || event.isComposing || insideDialog(event.target)) return;
+      if (event.key !== "Escape" || isImeComposing(event) || insideDialog(event.target)) return;
       closeDay();
     };
     window.addEventListener("keydown", closeOnEscape);
