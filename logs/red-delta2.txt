@@ -1,0 +1,64 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-21
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/player/PlayerCalendar.test.tsx (25 tests | 1 failed) 1744ms
+   ❯ PlayerCalendar (25)
+     × ignores a refusal for a month the player swiped away from 191ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > ignores a refusal for a month the player swiped away from
+AssertionError: expected <button type="button" …(1)>…(1)</button> not to be <button type="button" …(1)>…(1)</button> // Object.is equality
+ ❯ src/features/player/PlayerCalendar.test.tsx:325:73
+    323|     await new Promise((settle) => setTimeout(settle, 100));
+    324|
+    325|     expect(screen.getByRole("button", { name: /^Mark the other/ })).no…
+       |                                                                         ^
+    326|       document.activeElement,
+    327|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  1 failed | 60 passed (61)
+   Start at  05:55:43
+   Duration  2.48s (tests 44%, environment 41%, setup 6%, transform 5%, import 4%)
+

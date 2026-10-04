@@ -1,0 +1,1083 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-21
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/player/PlayerCalendar.test.tsx (20 tests | 3 failed) 1065ms
+   ❯ PlayerCalendar (20)
+     × hands focus to the done card after Fill Rest and to the month after Fill next 67ms
+     × ties the first-visit hint to the tile it points at 38ms
+     × offers no How it works on a read-only month 35ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > hands focus to the done card after Fill Rest and to the month after Fill next
+AssertionError: expected <p …(1)></p> to be <body><div>…(1)</div></body> // Object.is equality
+
+- Expected
++ Received
+
+- <body>
+-   <div>
+-     <div
+-       class="flex min-h-dvh flex-col"
+-     >
+-       <header
+-         class="mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-4 py-4 sm:px-5"
+-       >
+-         <div
+-           class="flex min-w-0 items-center gap-3"
+-         >
+-           <svg
+-             aria-hidden="true"
+-             class="size-8 size-9 shrink-0"
+-             viewBox="0 0 32 32"
+-           >
+-             <rect
+-               class="fill-accent"
+-               height="28"
+-               rx="9"
+-               width="28"
+-               x="2"
+-               y="2"
+-             />
+-             <path
+-               class="fill-accent-strong"
+-               d="M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"
+-             />
+-             <circle
+-               class="fill-accent-ink"
+-               cx="16"
+-               cy="20"
+-               r="5"
+-             />
+-           </svg>
+-           <div
+-             class="min-w-0 leading-tight"
+-           >
+-             <h1
+-               class="truncate font-display text-lg font-bold outline-none"
+-               tabindex="-1"
+-             >
+-               Thursday Crew
+-             </h1>
+-             <p
+-               class="text-xs text-ink-3"
+-             >
+-               Answering as 
+-               <span
+-                 class="font-semibold text-ink"
+-               >
+-                 Ana
+-               </span>
+-                ·
+-                
+-               <button
+-                 class="underline underline-offset-2 hover:text-ink"
+-                 type="button"
+-               >
+-                 Not you?
+-               </button>
+-             </p>
+-           </div>
+-         </div>
+-         <button
+-           aria-expanded="false"
+-           aria-label="How it works"
+-           class="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"
+-           type="button"
+-         >
+-           ?
+-         </button>
+-       </header>
+-       <main
+-         class="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5"
+-       >
+-         <div
+-           class="rounded-lg border border-line bg-surface p-3.5 shadow-card"
+-         >
+-           <div>
+-             <div
+-               class="mb-1.5 flex items-baseline justify-between text-xs"
+-             >
+-               <span
+-                 class="font-mono tracking-[0.14em] text-ink-3 uppercase"
+-               >
+-                 All nights set
+-               </span>
+-               <span
+-                 class="font-mono tabular-nums font-semibold text-free"
+-               >
+-                 ✓ done
+-               </span>
+-             </div>
+-             <div
+-               aria-label="Nights set"
+-               aria-valuemax="100"
+-               aria-valuemin="0"
+-               aria-valuenow="100"
+-               class="h-2.5 w-full overflow-hidden rounded-full bg-surface-2"
+-               role="progressbar"
+-             >
+-               <div
+-                 class="h-full rounded-full transition-[width,background-color] duration-300 ease-out bg-free"
+-                 style="width: 100%;"
+-               />
+-             </div>
+-           </div>
+-         </div>
+-         <section
+-           class="rounded-xl border border-line bg-surface p-3 shadow-card sm:p-4"
+-         >
+-           <div
+-             class="mb-3 flex items-center justify-between gap-2"
+-           >
+-             <div
+-               class="flex flex-wrap items-center gap-x-2 gap-y-1"
+-             >
+-               <h2
+-                 class="font-display text-2xl font-bold"
+-               >
+-                 October 2026
+-               </h2>
+-             </div>
+-             <div
+-               class="flex shrink-0 items-center gap-1"
+-             >
+-               <button
+-                 aria-label="Previous month"
+-                 class="inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm size-11! px-0!"
+-                 type="button"
+-               >
+-                 <svg
+-                   aria-hidden="true"
+-                   class="size-4 rotate-90"
+-                   fill="none"
+-                   stroke="currentColor"
+-                   stroke-linecap="round"
+-                   stroke-linejoin="round"
+-                   stroke-width="2"
+-                   viewBox="0 0 20 20"
+-                 >
+-                   <path
+-                     d="M5 7.5l5 5 5-5"
+-                   />
+-                 </svg>
+-               </button>
+-               <button
+-                 aria-label="Next month"
+-                 class="inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm size-11! px-0!"
+-                 type="button"
+-               >
+-                 <svg
+-                   aria-hidden="true"
+-                   class="size-4 -rotate-90"
+-                   fill="none"
+-                   stroke="currentColor"
+-                   stroke-linecap="round"
+-                   stroke-linejoin="round"
+-                   stroke-width="2"
+-                   viewBox="0 0 20 20"
+-                 >
+-                   <path
+-                     d="M5 7.5l5 5 5-5"
+-                   />
+-                 </svg>
+-               </button>
+-             </div>
+-           </div>
+-           <div
+-             aria-label="October 2026"
+-             class="grid grid-cols-7 gap-1 sm:gap-2"
+-             role="group"
+-           >
+-             <span
+-               aria-hidden="true"
+-               class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+-             >
+-               Mo
+-             </span>
+-             <span
+-               aria-hidden="true"
+-               class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+-             >
+-               Tu
+-             </span>
+-             <span
+-               aria-hidden="true"
+-               class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+-             >
+-               We
+-             </span>
+-             <span
+-               aria-hidden="true"
+-               class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+-             >
+-               Th
+-             </span>
+-             <span
+-               aria-hidden="true"
+-               class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+-             >
+-               Fr
+-             </span>
+-             <span
+-               aria-hidden="true"
+-               class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+-             >
+-               Sa
+-             </span>
+-             <span
+-               aria-hidden="true"
+-               class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+-             >
+-               Su
+-             </span>
+-             <span
+-               aria-hidden="true"
+-             />
+-             <span
+-               aria-hidden="true"
+-             />
+-             <span
+-               aria-hidden="true"
+-             />
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Thursday, October 1: Not set"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-line bg-surface text-ink hover:border-line-strong cursor-default opacity-45 saturate-50"
+-                 disabled=""
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   1
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Friday, October 2: Not set"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-line bg-surface text-ink hover:border-line-strong cursor-default opacity-45 saturate-50"
+-                 disabled=""
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   2
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Saturday, October 3: Not set"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-line bg-surface text-ink hover:border-line-strong cursor-default opacity-45 saturate-50"
+-                 disabled=""
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   3
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Sunday, October 4: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   4
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Monday, October 5: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 0ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   5
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Tuesday, October 6: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 26ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   6
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Wednesday, October 7: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 52ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   7
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Thursday, October 8: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 78ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   8
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Friday, October 9: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 104ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   9
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Saturday, October 10: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 130ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   10
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Sunday, October 11: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 156ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   11
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Monday, October 12: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 182ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   12
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Tuesday, October 13: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 208ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   13
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Wednesday, October 14: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 234ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   14
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Thursday, October 15: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 260ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   15
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Friday, October 16: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 286ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   16
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Saturday, October 17: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 312ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   17
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Sunday, October 18: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 338ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   18
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Monday, October 19: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 364ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   19
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Tuesday, October 20: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 390ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   20
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Wednesday, October 21: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 416ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   21
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Thursday, October 22: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 442ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   22
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Friday, October 23: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 468ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   23
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Saturday, October 24: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 494ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   24
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Sunday, October 25: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 520ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   25
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Monday, October 26: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 546ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   26
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Tuesday, October 27: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 572ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   27
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Wednesday, October 28: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 598ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   28
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Thursday, October 29: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 624ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   29
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Friday, October 30: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 650ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   30
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-             <div
+-               class="relative"
+-             >
+-               <button
+-                 aria-label="Saturday, October 31: Busy"
+-                 class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-busy bg-busy text-white dark:text-paper active:scale-95"
+-                 style="transition-delay: 676ms;"
+-                 type="button"
+-               >
+-                 <span
+-                   class="text-sm leading-none font-semibold sm:text-base"
+-                 >
+-                   31
+-                 </span>
+-                 <span
+-                   class="self-end text-xs leading-none font-bold opacity-90 sm:text-sm"
+-                 >
+-                   ✕
+-                 </span>
+-               </button>
+-             </div>
+-           </div>
+-         </section>
+-         <div
+-           class="animate-rise flex flex-col gap-2 rounded-lg border border-free bg-free-soft p-4 text-center"
+-         >
+  <p
+    class="font-display text-lg font-bold text-ink dark:text-free"
+  >
+    All set for October ✓
+-           </p>
+-           <p
+-             class="text-sm text-ink-2"
+-           >
+-             Your GM sees it already.
+-           </p>
+-           <button
+-             class="inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-free text-white hover:brightness-105 dark:text-paper h-14 px-6 text-base gap-2.5 rounded-lg mt-1"
+-             type="button"
+-           >
+-             Fill 
+-             November
+-              →
+-           </button>
+-         </div>
+-         <ul
+-           class="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-sm text-ink-2"
+-         >
+-           <li
+-             class="flex items-center gap-1.5"
+-           >
+-             <span
+-               aria-hidden="true"
+-               class="inline-flex size-5 items-center justify-center rounded-sm text-[10px] font-bold border-free bg-free text-white dark:text-paper"
+-             >
+-               ✓
+-             </span>
+-             Free
+-           </li>
+-           <li
+-             class="flex items-center gap-1.5"
+-           >
+-             <span
+-               aria-hidden="true"
+-               class="inline-flex size-5 items-center justify-center rounded-sm text-[10px] font-bold border-maybe bg-maybe text-ink dark:text-paper"
+-             >
+-               ?
+-             </span>
+-             Maybe
+-           </li>
+-           <li
+-             class="flex items-center gap-1.5"
+-           >
+-             <span
+-               aria-hidden="true"
+-               class="inline-flex size-5 items-center justify-center rounded-sm text-[10px] font-bold border-busy bg-busy text-white dark:text-paper"
+-             >
+-               ✕
+-             </span>
+-             Busy
+-           </li>
+-           <li
+-             class="flex items-center gap-1.5"
+-           >
+-             <span
+-               aria-hidden="true"
+-               class="inline-block size-5 rounded-sm border border-line bg-surface"
+-             />
+-             Not set
+-           </li>
+-         </ul>
+-         <p
+-           class="text-center text-xs text-ink-3"
+-         >
+-           Tap again to cycle: free, maybe, busy.
+  </p>
+-       </main>
+-       <footer
+-         class="mx-auto flex w-full max-w-xl flex-col items-center gap-2 px-4 pb-6 sm:px-5"
+-       >
+-         <a
+-           aria-current="page"
+-           class="text-xs font-semibold text-accent hover:underline active"
+-           data-status="active"
+-           href="/"
+-         >
+-           Plan your own game →
+-         </a>
+-         <footer
+-           class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3 justify-center"
+-         >
+-           <a
+-             class="transition-colors hover:text-ink"
+-             href="/terms"
+-           >
+-             Terms
+-           </a>
+-           <a
+-             class="transition-colors hover:text-ink"
+-             href="/privacy"
+-           >
+-             Privacy
+-           </a>
+-           <a
+-             class="transition-colors hover:text-ink"
+-             href="/imprint"
+-           >
+-             Imprint
+-           </a>
+-         </footer>
+-       </footer>
+-     </div>
+-   </div>
+- </body>
+
+ ❯ src/features/player/PlayerCalendar.test.tsx:225:55
+    223|
+    224|     await userEvent.click(await screen.findByRole("button", { name: /^…
+    225|     expect(screen.getByText("All set for October ✓")).toBe(document.ac…
+       |                                                       ^
+    226|     expect(screen.getByRole("status").textContent).toContain("Your GM …
+    227|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > ties the first-visit hint to the tile it points at
+AssertionError: expected null to be '' // Object.is equality
+
+- Expected:
+""
+
++ Received:
+null
+
+ ❯ src/features/player/PlayerCalendar.test.tsx:238:72
+    236|
+    237|     const hint = await screen.findByRole("tooltip");
+    238|     expect((await tile(/October 4/)).getAttribute("aria-describedby"))…
+       |                                                                        ^
+    239|   });
+    240|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > offers no How it works on a read-only month
+AssertionError: expected <button type="button" …(3)></button> to be null
+
+- Expected:
+null
+
++ Received:
+<button
+  aria-expanded="false"
+  aria-label="How it works"
+  class="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"
+  type="button"
+>
+  ?
+</button>
+
+ ❯ src/features/player/PlayerCalendar.test.tsx:245:68
+    243|
+    244|     expect(await screen.findByText("Past · read only")).toBeTruthy();
+    245|     expect(screen.queryByRole("button", { name: "How it works" })).toB…
+       |                                                                    ^
+    246|   });
+    247|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  3 failed | 52 passed (55)
+   Start at  05:02:04
+   Duration  1.81s (environment 44%, tests 40%, setup 6%, transform 6%, import 4%)
+

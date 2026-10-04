@@ -1,0 +1,82 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-21
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/player/PlayerCalendar.test.tsx (23 tests | 2 failed) 1318ms
+   ❯ PlayerCalendar (23)
+     × says all set for now at the end of the Booking Window 46ms
+     × leaves focus alone when a tap, not a refused Fill Rest, reopens a done month 71ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > says all set for now at the end of the Booking Window
+AssertionError: expected null to be 'true' // Object.is equality
+
+- Expected:
+"true"
+
++ Received:
+null
+
+ ❯ src/features/player/PlayerCalendar.test.tsx:213:94
+    211|     expect(await screen.findByText("All set for now ✓")).toBeTruthy();
+    212|     expect(screen.queryByRole("button", { name: /^Fill / })).toBeNull(…
+    213|     expect(screen.getByRole("button", { name: "Next month" }).getAttri…
+       |                                                                                              ^
+    214|       "true",
+    215|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > leaves focus alone when a tap, not a refused Fill Rest, reopens a done month
+AssertionError: expected <button type="button" …(1)>…(1)</button> not to be <button type="button" …(1)>…(1)</button> // Object.is equality
+ ❯ src/features/player/PlayerCalendar.test.tsx:293:92
+    291|     fireEvent.click(lastNight);
+    292|
+    293|     expect(await screen.findByRole("button", { name: "Mark the other 1…
+       |                                                                                            ^
+    294|       document.activeElement,
+    295|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  2 failed | 57 passed (59)
+   Start at  05:39:45
+   Duration  2.09s (environment 44%, tests 38%, setup 7%, transform 5%, import 5%)
+

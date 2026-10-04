@@ -31,14 +31,30 @@ Not implemented: Window's scrollTo() method
 Not implemented: Window's scrollTo() method
 Not implemented: Window's scrollTo() method
 Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
 
- Test Files  34 passed (34)
-      Tests  400 passed (400)
-   Start at  04:24:32
-   Duration  3.34s (tests 42%, environment 33%, transform 12%, import 8%, setup 4%, worker 1%)
+ Test Files  35 passed (35)
+      Tests  418 passed (418)
+   Start at  05:56:41
+   Duration  3.53s (tests 44%, environment 32%, transform 11%, import 9%, setup 4%)
 
-    Isolate  34 workers spawned · ~375ms startup each (spawn + environment, per file)
-             at least ~475ms faster with isolate: false — reuses workers across files instead of one per file
+    Isolate  35 workers spawned · ~403ms startup each (spawn + environment, per file)
+             at least ~537ms faster with isolate: false — reuses workers across files instead of one per file
 
 Warning: Route file "/home/coder/dev/ns-worktrees/ticket-21/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
 
@@ -51,7 +67,7 @@ Current configuration:
   routeFileIgnorePattern: undefined
 vite v8.3.2 building client environment for production...
 transforming...
-✓ 227 modules transformed.
+✓ 228 modules transformed.
 rendering chunks...
 computing gzip size...
 dist/index.html                                                          0.45 kB │ gzip:   0.28 kB
@@ -74,15 +90,15 @@ dist/assets/bricolage-grotesque-latin-ext-opsz-normal-IcJDqblK.woff2    30.73 kB
 dist/assets/inter-latin-wght-normal-Dx4kXJAl.woff2                      48.25 kB
 dist/assets/bricolage-grotesque-latin-opsz-normal-Cre6nC2_.woff2        76.88 kB
 dist/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2                  85.06 kB
-dist/assets/index-CMIRs3ti.css                                          43.40 kB │ gzip:  14.92 kB
-dist/assets/terms-Bu3bP1a1.js                                            0.14 kB │ gzip:   0.14 kB
-dist/assets/imprint-C_2hw1DT.js                                          0.14 kB │ gzip:   0.14 kB
-dist/assets/privacy-Z8jryNwS.js                                          0.14 kB │ gzip:   0.14 kB
-dist/assets/routes-BL58lNrF.js                                           0.16 kB │ gzip:   0.15 kB
-dist/assets/Eyebrow-Dn8gpp4I.js                                          0.22 kB │ gzip:   0.19 kB
-dist/assets/LegalPage-Si-yJ9Mf.js                                       12.11 kB │ gzip:   5.00 kB
-dist/assets/s._shareToken-CZz32Dke.js                                   21.39 kB │ gzip:   7.45 kB
-dist/assets/index-BnTOKVNQ.js                                          391.49 kB │ gzip: 122.57 kB
+dist/assets/index--ivYMmw_.css                                          44.32 kB │ gzip:  15.14 kB
+dist/assets/terms-JdqW3hRv.js                                            0.14 kB │ gzip:   0.14 kB
+dist/assets/imprint-FJICqUH2.js                                          0.14 kB │ gzip:   0.14 kB
+dist/assets/privacy-CZ5pbBRo.js                                          0.14 kB │ gzip:   0.15 kB
+dist/assets/routes-Dar7RT7s.js                                           0.16 kB │ gzip:   0.15 kB
+dist/assets/Eyebrow-CpnUH0bh.js                                          0.22 kB │ gzip:   0.19 kB
+dist/assets/LegalPage-Dw6C8XZZ.js                                       12.11 kB │ gzip:   5.00 kB
+dist/assets/s._shareToken-Ba3LLE1w.js                                   23.61 kB │ gzip:   8.16 kB
+dist/assets/index-CKzRz9sl.js                                          391.49 kB │ gzip: 122.58 kB
 
 ✓ built in 242ms
 

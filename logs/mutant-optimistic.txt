@@ -1,0 +1,63 @@
+[WebServer] CONVEX_AGENT_MODE=anonymous mode is in beta, functionality may change in the future.
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 3310 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:3310
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ 04:46:57 Convex functions ready! (2.02s)
+[WebServer] ✔ Successfully set 2 environment variables from stdin (2 updated, 1 unchanged) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-21/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-21/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+
+Running 1 test using 1 worker
+
+  ✘  1 [chromium] › e2e/player.spec.ts:168:3 › the player surface › taps and Fill Rest show at once, before the backend answers (5.9s)
+
+
+  1) [chromium] › e2e/player.spec.ts:168:3 › the player surface › taps and Fill Rest show at once, before the backend answers 
+
+    Error: expect(locator).toHaveAccessibleName(expected) failed
+
+    Locator:  getByRole('button', { name: /^Sunday, October 4:/ })
+    Expected: "Sunday, October 4: Free"
+    Received: "Sunday, October 4: Not set"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveAccessibleName" getByRole('button', { name: /^Sunday, October 4:/ }) with timeout 5000ms
+      - waiting for getByRole('button', { name: /^Sunday, October 4:/ })
+        3 × locator resolved to <button type="button" aria-label="Sunday, October 4: Not set" class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-line bg-surface text-ink hover:border-line-strong animate-pop active:scale-95">…</button>
+          - unexpected value "Sunday, October 4: Not set"
+        11 × locator resolved to <button type="button" aria-label="Sunday, October 4: Not set" class="relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none sm:p-2 border-line bg-surface text-ink hover:border-line-strong active:scale-95">…</button>
+           - unexpected value "Sunday, October 4: Not set"
+
+
+      174 |     await expect(page.getByRole("tooltip")).toBeVisible();
+      175 |     await tile(page, today).click();
+    > 176 |     await expect(tile(page, today)).toHaveAccessibleName(`${dayLabel(today)}: Free`);
+          |                                     ^
+      177 |     await expect(page.getByText(`1 of ${bookableDays.length} nights set`)).toBeVisible();
+      178 |     if (bookableDays.length > 1) {
+      179 |       await page.getByRole("button", { name: /^Mark the other/ }).click();
+        at /home/coder/dev/ns-worktrees/ticket-21/e2e/player.spec.ts:176:37
+
+    Error Context: test-results/player-the-player-surface--3c54b--before-the-backend-answers-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/player-the-player-surface--3c54b--before-the-backend-answers-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/player-the-player-surface--3c54b--before-the-backend-answers-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e/player.spec.ts:168:3 › the player surface › taps and Fill Rest show at once, before the backend answers 
