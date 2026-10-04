@@ -1,0 +1,57 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-51
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/player/Join.test.tsx (23 tests | 1 failed) 941ms
+   ❯ Join (23)
+     ❯ with a long Roster (12)
+       × announces when no name matches and carries the name into the join field 36ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/player/Join.test.tsx > Join > with a long Roster > announces when no name matches and carries the name into the join field
+AssertionError: expected <input …(6)></input> to have property "value" with value 'Dev'
+
+- Expected
++ Received
+
+- Dev
+
+ ❯ src/features/player/Join.test.tsx:218:21
+    216|       expect(announcement.textContent).toBe("No names match. Add yours…
+    217|       const field = screen.getByRole("textbox", { name: "Not listed? Y…
+    218|       expect(field).toHaveProperty("value", "Dev");
+       |                     ^
+    219|
+    220|       await userEvent.click(screen.getByRole("button", { name: "Join" …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 22 passed (23)
+   Start at  09:52:44
+   Duration  1.68s (tests 59%, environment 28%, import 5%, transform 5%, setup 4%)
+

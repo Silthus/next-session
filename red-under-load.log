@@ -1,0 +1,1440 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-51
+
+Not implemented: Window's scrollTo() method
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 24 skipped (25)
+   Start at  09:41:18
+   Duration  2.68s (environment 49%, tests 29%, transform 9%, import 8%, setup 6%, worker 1%)
+
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-51
+
+Not implemented: Window's scrollTo() method
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 24 skipped (25)
+   Start at  09:41:21
+   Duration  2.09s (environment 38%, tests 32%, transform 12%, import 10%, setup 8%)
+
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-51
+
+Not implemented: Window's scrollTo() method
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 24 skipped (25)
+   Start at  09:41:24
+   Duration  1.98s (environment 38%, tests 37%, transform 13%, import 8%, setup 4%)
+
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-51
+
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/player/PlayerCalendar.test.tsx (25 tests | 1 failed | 24 skipped) 1987ms
+   ❯ PlayerCalendar (25)
+     × keeps focus on the night the player moved to while a refused Fill Rest rolls back 1986ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > keeps focus on the night the player moved to while a refused Fill Rest rolls back
+TestingLibraryElementError: Unable to find role="button" and name "Monday, October 5: Busy"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-4 py-4 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex min-w-0 items-center gap-3"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-9 shrink-0"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"min-w-0 leading-tight"[39m
+          [36m>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"truncate font-display text-lg font-bold outline-none"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+            [36m>[39m
+              [0mThursday Crew[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mAnswering as[0m
+              [0m [0m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-block max-w-40 truncate align-bottom font-semibold text-ink"[39m
+              [36m>[39m
+                [0mAna[0m
+              [36m</span>[39m
+              [0m [0m
+              [0m·[0m
+              [0m [0m
+              [36m<button[39m
+                [33mclass[39m=[32m"-mx-1 -my-3.5 px-1 py-3.5 underline underline-offset-2 hover:text-ink"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mNot you?[0m
+              [36m</button>[39m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33maria-label[39m=[32m"How it works"[39m
+          [33mclass[39m=[32m"inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m?[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-lg border border-line bg-surface p-3.5 shadow-card"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mb-1.5 flex items-baseline justify-between text-xs"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tracking-[0.14em] text-ink-3 uppercase"[39m
+              [36m>[39m
+                [0m1 of 28 nights set[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tabular-nums text-ink-2"[39m
+              [36m>[39m
+                [0m4%[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Nights set"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"4"[39m
+              [33mclass[39m=[32m"h-2.5 w-full overflow-hidden rounded-full bg-surface-2"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"h-full rounded-full transition-[width,background-color] duration-300 ease-out bg-accent"[39m
+                [33mstyle[39m=[32m"width: 4%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"rounded-xl border border-line bg-surface p-3 shadow-card sm:p-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mb-3 flex items-center justify-between gap-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-wrap items-center gap-x-2 gap-y-1"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33maria-live[39m=[32m"polite"[39m
+                [33mclass[39m=[32m"font-display text-2xl font-bold outline-none"[39m
+                [33mtabindex[39m=[32m"-1"[39m
+              [36m>[39m
+                [0mOctober 2026[0m
+              [36m</h2>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex shrink-0 items-center gap-1"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Previous month"[39m
+                [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm size-11! px-0!"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-4 rotate-90"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 20 20"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M5 7.5l5 5 5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-disabled[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"Next month"[39m
+     ...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-4 py-4 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex min-w-0 items-center gap-3"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-9 shrink-0"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"min-w-0 leading-tight"[39m
+          [36m>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"truncate font-display text-lg font-bold outline-none"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+            [36m>[39m
+              [0mThursday Crew[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mAnswering as[0m
+              [0m [0m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-block max-w-40 truncate align-bottom font-semibold text-ink"[39m
+              [36m>[39m
+                [0mAna[0m
+              [36m</span>[39m
+              [0m [0m
+              [0m·[0m
+              [0m [0m
+              [36m<button[39m
+                [33mclass[39m=[32m"-mx-1 -my-3.5 px-1 py-3.5 underline underline-offset-2 hover:text-ink"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mNot you?[0m
+              [36m</button>[39m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33maria-label[39m=[32m"How it works"[39m
+          [33mclass[39m=[32m"inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m?[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-lg border border-line bg-surface p-3.5 shadow-card"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mb-1.5 flex items-baseline justify-between text-xs"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tracking-[0.14em] text-ink-3 uppercase"[39m
+              [36m>[39m
+                [0m1 of 28 nights set[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tabular-nums text-ink-2"[39m
+              [36m>[39m
+                [0m4%[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Nights set"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"4"[39m
+              [33mclass[39m=[32m"h-2.5 w-full overflow-hidden rounded-full bg-surface-2"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"h-full rounded-full transition-[width,background-color] duration-300 ease-out bg-accent"[39m
+                [33mstyle[39m=[32m"width: 4%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"rounded-xl border border-line bg-surface p-3 shadow-card sm:p-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mb-3 flex items-center justify-between gap-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-wrap items-center gap-x-2 gap-y-1"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33maria-live[39m=[32m"polite"[39m
+                [33mclass[39m=[32m"font-display text-2xl font-bold outline-none"[39m
+                [33mtabindex[39m=[32m"-1"[39m
+              [36m>[39m
+                [0mOctober 2026[0m
+              [36m</h2>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex shrink-0 items-center gap-1"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Previous month"[39m
+                [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm size-11! px-0!"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-4 rotate-90"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 20 20"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M5 7.5l5 5 5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-disabled[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"Next month"[39m
+     ...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ tile src/features/player/PlayerCalendar.test.tsx:120:23
+    118|
+    119| async function tile(name: string | RegExp) {
+    120|   return await screen.findByRole("button", { name });
+       |                       ^
+    121| }
+    122|
+ ❯ src/features/player/PlayerCalendar.test.tsx:304:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 24 skipped (25)
+   Start at  09:41:27
+   Duration  3.58s (tests 59%, environment 25%, transform 8%, import 6%, setup 2%)
+
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-51
+
+Not implemented: Window's scrollTo() method
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 24 skipped (25)
+   Start at  09:41:31
+   Duration  2.66s (environment 43%, tests 30%, import 10%, transform 9%, setup 7%)
+
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-51
+
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/player/PlayerCalendar.test.tsx (25 tests | 1 failed | 24 skipped) 1792ms
+   ❯ PlayerCalendar (25)
+     × keeps focus on the night the player moved to while a refused Fill Rest rolls back 1787ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > keeps focus on the night the player moved to while a refused Fill Rest rolls back
+TestingLibraryElementError: Unable to find role="button" and name "Monday, October 5: Busy"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-4 py-4 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex min-w-0 items-center gap-3"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-9 shrink-0"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"min-w-0 leading-tight"[39m
+          [36m>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"truncate font-display text-lg font-bold outline-none"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+            [36m>[39m
+              [0mThursday Crew[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mAnswering as[0m
+              [0m [0m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-block max-w-40 truncate align-bottom font-semibold text-ink"[39m
+              [36m>[39m
+                [0mAna[0m
+              [36m</span>[39m
+              [0m [0m
+              [0m·[0m
+              [0m [0m
+              [36m<button[39m
+                [33mclass[39m=[32m"-mx-1 -my-3.5 px-1 py-3.5 underline underline-offset-2 hover:text-ink"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mNot you?[0m
+              [36m</button>[39m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33maria-label[39m=[32m"How it works"[39m
+          [33mclass[39m=[32m"inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m?[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-lg border border-line bg-surface p-3.5 shadow-card"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mb-1.5 flex items-baseline justify-between text-xs"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tracking-[0.14em] text-ink-3 uppercase"[39m
+              [36m>[39m
+                [0m1 of 28 nights set[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tabular-nums text-ink-2"[39m
+              [36m>[39m
+                [0m4%[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Nights set"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"4"[39m
+              [33mclass[39m=[32m"h-2.5 w-full overflow-hidden rounded-full bg-surface-2"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"h-full rounded-full transition-[width,background-color] duration-300 ease-out bg-accent"[39m
+                [33mstyle[39m=[32m"width: 4%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"rounded-xl border border-line bg-surface p-3 shadow-card sm:p-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mb-3 flex items-center justify-between gap-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-wrap items-center gap-x-2 gap-y-1"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33maria-live[39m=[32m"polite"[39m
+                [33mclass[39m=[32m"font-display text-2xl font-bold outline-none"[39m
+                [33mtabindex[39m=[32m"-1"[39m
+              [36m>[39m
+                [0mOctober 2026[0m
+              [36m</h2>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex shrink-0 items-center gap-1"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Previous month"[39m
+                [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm size-11! px-0!"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-4 rotate-90"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 20 20"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M5 7.5l5 5 5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-disabled[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"Next month"[39m
+     ...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-4 py-4 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex min-w-0 items-center gap-3"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-9 shrink-0"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"min-w-0 leading-tight"[39m
+          [36m>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"truncate font-display text-lg font-bold outline-none"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+            [36m>[39m
+              [0mThursday Crew[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mAnswering as[0m
+              [0m [0m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-block max-w-40 truncate align-bottom font-semibold text-ink"[39m
+              [36m>[39m
+                [0mAna[0m
+              [36m</span>[39m
+              [0m [0m
+              [0m·[0m
+              [0m [0m
+              [36m<button[39m
+                [33mclass[39m=[32m"-mx-1 -my-3.5 px-1 py-3.5 underline underline-offset-2 hover:text-ink"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mNot you?[0m
+              [36m</button>[39m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33maria-label[39m=[32m"How it works"[39m
+          [33mclass[39m=[32m"inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m?[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-lg border border-line bg-surface p-3.5 shadow-card"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mb-1.5 flex items-baseline justify-between text-xs"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tracking-[0.14em] text-ink-3 uppercase"[39m
+              [36m>[39m
+                [0m1 of 28 nights set[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tabular-nums text-ink-2"[39m
+              [36m>[39m
+                [0m4%[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Nights set"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"4"[39m
+              [33mclass[39m=[32m"h-2.5 w-full overflow-hidden rounded-full bg-surface-2"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"h-full rounded-full transition-[width,background-color] duration-300 ease-out bg-accent"[39m
+                [33mstyle[39m=[32m"width: 4%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"rounded-xl border border-line bg-surface p-3 shadow-card sm:p-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mb-3 flex items-center justify-between gap-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-wrap items-center gap-x-2 gap-y-1"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33maria-live[39m=[32m"polite"[39m
+                [33mclass[39m=[32m"font-display text-2xl font-bold outline-none"[39m
+                [33mtabindex[39m=[32m"-1"[39m
+              [36m>[39m
+                [0mOctober 2026[0m
+              [36m</h2>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex shrink-0 items-center gap-1"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Previous month"[39m
+                [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm size-11! px-0!"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-4 rotate-90"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 20 20"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M5 7.5l5 5 5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-disabled[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"Next month"[39m
+     ...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ tile src/features/player/PlayerCalendar.test.tsx:120:23
+    118|
+    119| async function tile(name: string | RegExp) {
+    120|   return await screen.findByRole("button", { name });
+       |                       ^
+    121| }
+    122|
+ ❯ src/features/player/PlayerCalendar.test.tsx:304:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 24 skipped (25)
+   Start at  09:41:34
+   Duration  4.02s (tests 48%, environment 37%, transform 8%, setup 4%, import 4%)
+
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-51
+
+Not implemented: Window's scrollTo() method
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 24 skipped (25)
+   Start at  09:41:39
+   Duration  2.52s (environment 47%, tests 27%, transform 10%, import 9%, setup 6%)
+
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-51
+
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/player/PlayerCalendar.test.tsx (25 tests | 1 failed | 24 skipped) 1643ms
+   ❯ PlayerCalendar (25)
+     × keeps focus on the night the player moved to while a refused Fill Rest rolls back 1642ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > keeps focus on the night the player moved to while a refused Fill Rest rolls back
+TestingLibraryElementError: Unable to find role="button" and name "Monday, October 5: Busy"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-4 py-4 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex min-w-0 items-center gap-3"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-9 shrink-0"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"min-w-0 leading-tight"[39m
+          [36m>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"truncate font-display text-lg font-bold outline-none"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+            [36m>[39m
+              [0mThursday Crew[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mAnswering as[0m
+              [0m [0m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-block max-w-40 truncate align-bottom font-semibold text-ink"[39m
+              [36m>[39m
+                [0mAna[0m
+              [36m</span>[39m
+              [0m [0m
+              [0m·[0m
+              [0m [0m
+              [36m<button[39m
+                [33mclass[39m=[32m"-mx-1 -my-3.5 px-1 py-3.5 underline underline-offset-2 hover:text-ink"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mNot you?[0m
+              [36m</button>[39m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33maria-label[39m=[32m"How it works"[39m
+          [33mclass[39m=[32m"inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m?[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-lg border border-line bg-surface p-3.5 shadow-card"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mb-1.5 flex items-baseline justify-between text-xs"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tracking-[0.14em] text-ink-3 uppercase"[39m
+              [36m>[39m
+                [0m1 of 28 nights set[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tabular-nums text-ink-2"[39m
+              [36m>[39m
+                [0m4%[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Nights set"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"4"[39m
+              [33mclass[39m=[32m"h-2.5 w-full overflow-hidden rounded-full bg-surface-2"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"h-full rounded-full transition-[width,background-color] duration-300 ease-out bg-accent"[39m
+                [33mstyle[39m=[32m"width: 4%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"rounded-xl border border-line bg-surface p-3 shadow-card sm:p-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mb-3 flex items-center justify-between gap-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-wrap items-center gap-x-2 gap-y-1"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33maria-live[39m=[32m"polite"[39m
+                [33mclass[39m=[32m"font-display text-2xl font-bold outline-none"[39m
+                [33mtabindex[39m=[32m"-1"[39m
+              [36m>[39m
+                [0mOctober 2026[0m
+              [36m</h2>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex shrink-0 items-center gap-1"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Previous month"[39m
+                [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm size-11! px-0!"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-4 rotate-90"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 20 20"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M5 7.5l5 5 5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-disabled[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"Next month"[39m
+     ...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-4 py-4 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex min-w-0 items-center gap-3"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-9 shrink-0"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"min-w-0 leading-tight"[39m
+          [36m>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"truncate font-display text-lg font-bold outline-none"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+            [36m>[39m
+              [0mThursday Crew[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mAnswering as[0m
+              [0m [0m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-block max-w-40 truncate align-bottom font-semibold text-ink"[39m
+              [36m>[39m
+                [0mAna[0m
+              [36m</span>[39m
+              [0m [0m
+              [0m·[0m
+              [0m [0m
+              [36m<button[39m
+                [33mclass[39m=[32m"-mx-1 -my-3.5 px-1 py-3.5 underline underline-offset-2 hover:text-ink"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mNot you?[0m
+              [36m</button>[39m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33maria-label[39m=[32m"How it works"[39m
+          [33mclass[39m=[32m"inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m?[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-lg border border-line bg-surface p-3.5 shadow-card"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mb-1.5 flex items-baseline justify-between text-xs"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tracking-[0.14em] text-ink-3 uppercase"[39m
+              [36m>[39m
+                [0m1 of 28 nights set[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tabular-nums text-ink-2"[39m
+              [36m>[39m
+                [0m4%[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Nights set"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"4"[39m
+              [33mclass[39m=[32m"h-2.5 w-full overflow-hidden rounded-full bg-surface-2"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"h-full rounded-full transition-[width,background-color] duration-300 ease-out bg-accent"[39m
+                [33mstyle[39m=[32m"width: 4%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"rounded-xl border border-line bg-surface p-3 shadow-card sm:p-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mb-3 flex items-center justify-between gap-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-wrap items-center gap-x-2 gap-y-1"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33maria-live[39m=[32m"polite"[39m
+                [33mclass[39m=[32m"font-display text-2xl font-bold outline-none"[39m
+                [33mtabindex[39m=[32m"-1"[39m
+              [36m>[39m
+                [0mOctober 2026[0m
+              [36m</h2>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex shrink-0 items-center gap-1"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Previous month"[39m
+                [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm size-11! px-0!"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-4 rotate-90"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 20 20"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M5 7.5l5 5 5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-disabled[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"Next month"[39m
+     ...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ tile src/features/player/PlayerCalendar.test.tsx:120:23
+    118|
+    119| async function tile(name: string | RegExp) {
+    120|   return await screen.findByRole("button", { name });
+       |                       ^
+    121| }
+    122|
+ ❯ src/features/player/PlayerCalendar.test.tsx:304:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 24 skipped (25)
+   Start at  09:41:42
+   Duration  4.05s (tests 44%, environment 38%, transform 9%, import 5%, setup 4%)
+
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-51
+
+Not implemented: Window's scrollTo() method
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 24 skipped (25)
+   Start at  09:41:47
+   Duration  2.97s (environment 43%, tests 28%, transform 11%, import 10%, setup 8%)
+
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-51
+
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/player/PlayerCalendar.test.tsx (25 tests | 1 failed | 24 skipped) 1926ms
+   ❯ PlayerCalendar (25)
+     × keeps focus on the night the player moved to while a refused Fill Rest rolls back 1922ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > keeps focus on the night the player moved to while a refused Fill Rest rolls back
+TestingLibraryElementError: Unable to find role="button" and name "Monday, October 5: Busy"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-4 py-4 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex min-w-0 items-center gap-3"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-9 shrink-0"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"min-w-0 leading-tight"[39m
+          [36m>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"truncate font-display text-lg font-bold outline-none"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+            [36m>[39m
+              [0mThursday Crew[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mAnswering as[0m
+              [0m [0m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-block max-w-40 truncate align-bottom font-semibold text-ink"[39m
+              [36m>[39m
+                [0mAna[0m
+              [36m</span>[39m
+              [0m [0m
+              [0m·[0m
+              [0m [0m
+              [36m<button[39m
+                [33mclass[39m=[32m"-mx-1 -my-3.5 px-1 py-3.5 underline underline-offset-2 hover:text-ink"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mNot you?[0m
+              [36m</button>[39m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33maria-label[39m=[32m"How it works"[39m
+          [33mclass[39m=[32m"inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m?[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-lg border border-line bg-surface p-3.5 shadow-card"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mb-1.5 flex items-baseline justify-between text-xs"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tracking-[0.14em] text-ink-3 uppercase"[39m
+              [36m>[39m
+                [0m1 of 28 nights set[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tabular-nums text-ink-2"[39m
+              [36m>[39m
+                [0m4%[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Nights set"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"4"[39m
+              [33mclass[39m=[32m"h-2.5 w-full overflow-hidden rounded-full bg-surface-2"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"h-full rounded-full transition-[width,background-color] duration-300 ease-out bg-accent"[39m
+                [33mstyle[39m=[32m"width: 4%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"rounded-xl border border-line bg-surface p-3 shadow-card sm:p-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mb-3 flex items-center justify-between gap-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-wrap items-center gap-x-2 gap-y-1"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33maria-live[39m=[32m"polite"[39m
+                [33mclass[39m=[32m"font-display text-2xl font-bold outline-none"[39m
+                [33mtabindex[39m=[32m"-1"[39m
+              [36m>[39m
+                [0mOctober 2026[0m
+              [36m</h2>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex shrink-0 items-center gap-1"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Previous month"[39m
+                [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm size-11! px-0!"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-4 rotate-90"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 20 20"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M5 7.5l5 5 5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-disabled[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"Next month"[39m
+     ...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-4 py-4 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex min-w-0 items-center gap-3"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-9 shrink-0"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"min-w-0 leading-tight"[39m
+          [36m>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"truncate font-display text-lg font-bold outline-none"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+            [36m>[39m
+              [0mThursday Crew[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mAnswering as[0m
+              [0m [0m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-block max-w-40 truncate align-bottom font-semibold text-ink"[39m
+              [36m>[39m
+                [0mAna[0m
+              [36m</span>[39m
+              [0m [0m
+              [0m·[0m
+              [0m [0m
+              [36m<button[39m
+                [33mclass[39m=[32m"-mx-1 -my-3.5 px-1 py-3.5 underline underline-offset-2 hover:text-ink"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mNot you?[0m
+              [36m</button>[39m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33maria-label[39m=[32m"How it works"[39m
+          [33mclass[39m=[32m"inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m?[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-lg border border-line bg-surface p-3.5 shadow-card"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mb-1.5 flex items-baseline justify-between text-xs"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tracking-[0.14em] text-ink-3 uppercase"[39m
+              [36m>[39m
+                [0m1 of 28 nights set[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-mono tabular-nums text-ink-2"[39m
+              [36m>[39m
+                [0m4%[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Nights set"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"4"[39m
+              [33mclass[39m=[32m"h-2.5 w-full overflow-hidden rounded-full bg-surface-2"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"h-full rounded-full transition-[width,background-color] duration-300 ease-out bg-accent"[39m
+                [33mstyle[39m=[32m"width: 4%;"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"rounded-xl border border-line bg-surface p-3 shadow-card sm:p-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mb-3 flex items-center justify-between gap-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-wrap items-center gap-x-2 gap-y-1"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33maria-live[39m=[32m"polite"[39m
+                [33mclass[39m=[32m"font-display text-2xl font-bold outline-none"[39m
+                [33mtabindex[39m=[32m"-1"[39m
+              [36m>[39m
+                [0mOctober 2026[0m
+              [36m</h2>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex shrink-0 items-center gap-1"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Previous month"[39m
+                [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm size-11! px-0!"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-4 rotate-90"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 20 20"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M5 7.5l5 5 5-5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+              [36m<button[39m
+                [33maria-disabled[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"Next month"[39m
+     ...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ tile src/features/player/PlayerCalendar.test.tsx:120:23
+    118|
+    119| async function tile(name: string | RegExp) {
+    120|   return await screen.findByRole("button", { name });
+       |                       ^
+    121| }
+    122|
+ ❯ src/features/player/PlayerCalendar.test.tsx:304:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 24 skipped (25)
+   Start at  09:41:51
+   Duration  4.16s (tests 49%, environment 32%, transform 8%, import 8%, setup 3%)
+
