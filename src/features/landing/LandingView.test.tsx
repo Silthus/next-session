@@ -66,6 +66,17 @@ describe("LandingView", () => {
     expect(screen.queryByRole("button", { name: "Log in" })).toBeNull();
   });
 
+  it("names the account a GM just logged in to and nudges them to their first link", async () => {
+    renderLanding({ showLogIn: false, loggedInAs: "gm@example.test" });
+
+    const line = await screen.findByRole("status");
+    expect(line.textContent).toBe(
+      "Logged in as gm@example.test. No groups here yet, so create your first link.",
+    );
+    expect(document.activeElement).toBe(line);
+    expect(screen.getByRole("button", { name: "Create your link" })).toBeTruthy();
+  });
+
   it("holds the button while the link is being made", async () => {
     renderLanding({ state: { phase: "creating" } });
     expect(await screen.findByRole("button", { name: "Making your link…" })).toHaveProperty(

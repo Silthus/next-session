@@ -1,6 +1,9 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "../convex/_generated/api";
 
 const password = "game-night-2026";
+const convexUrl = "http://127.0.0.1:3210";
 const shareLinkPattern = /^localhost:5173\/s\/[A-Za-z0-9_-]{10}$/;
 
 function newEmail() {
@@ -37,6 +40,16 @@ async function seedAccount(browser: Browser) {
   await saveToNewAccount(page, email);
   await context.close();
   return { email, groupPath };
+}
+
+async function signUpAccountWithoutGroups() {
+  const email = newEmail();
+  const client = new ConvexHttpClient(convexUrl);
+  await client.action(api.auth.signIn, {
+    provider: "password",
+    params: { email, password, flow: "signUp" },
+  });
+  return email;
 }
 
 async function openLogIn(page: Page) {
@@ -98,6 +111,23 @@ test("saving into an Account that has older Groups keeps showing the new Group",
   await expect(page.locator("code")).toHaveText(shareLink);
   await expect(openGroupLink(page)).toHaveAttribute("href", groupPath);
   expect(groupPath).not.toBe(olderGroupPath);
+});
+
+test("logging in to an Account without Groups names it and points to the first link", async ({
+  page,
+}) => {
+  const email = await signUpAccountWithoutGroups();
+
+  const sheet = await openLogIn(page);
+  await sheet.getByLabel("Email").fill(email);
+  await sheet.getByLabel("Password").fill(password);
+  await sheet.getByRole("button", { name: "Log in" }).click();
+
+  await expect(page.getByRole("status")).toHaveText(
+    `Logged in as ${email}. No groups here yet, so create your first link.`,
+  );
+  await expect(page.getByRole("status")).toBeFocused();
+  await expect(page.getByRole("button", { name: "Create your link" })).toBeVisible();
 });
 
 test("a wrong password says so and keeps the sheet open", async ({ page, browser }) => {

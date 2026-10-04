@@ -17,6 +17,7 @@ export type LandingState =
 type LandingViewProps = {
   state: LandingState;
   showLogIn: boolean;
+  loggedInAs?: string;
   onCreate: () => void;
   onLogIn: () => void;
   onSave: () => void;
@@ -25,7 +26,14 @@ type LandingViewProps = {
 const column = "mx-auto w-full max-w-5xl px-4 sm:px-6";
 const steps = ["Create your link", "Send it to the group", "Pick the best night"];
 
-export function LandingView({ state, showLogIn, onCreate, onLogIn, onSave }: LandingViewProps) {
+export function LandingView({
+  state,
+  showLogIn,
+  loggedInAs,
+  onCreate,
+  onLogIn,
+  onSave,
+}: LandingViewProps) {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className={`${column} flex items-center justify-between py-5`}>
@@ -52,6 +60,7 @@ export function LandingView({ state, showLogIn, onCreate, onLogIn, onSave }: Lan
             <LinkInHand {...state} onSave={onSave} />
           ) : (
             <CreateLink
+              loggedInAs={loggedInAs}
               busy={state.phase === "creating"}
               failure={state.phase === "failed" ? createFailure(state.error) : undefined}
               onCreate={onCreate}
@@ -69,16 +78,19 @@ export function LandingView({ state, showLogIn, onCreate, onLogIn, onSave }: Lan
 }
 
 function CreateLink({
+  loggedInAs,
   busy,
   failure,
   onCreate,
 }: {
+  loggedInAs?: string;
   busy: boolean;
   failure?: string;
   onCreate: () => void;
 }) {
   return (
     <div className="flex flex-col gap-3">
+      {loggedInAs && <LoggedInAs email={loggedInAs} />}
       <Button
         size="lg"
         onClick={onCreate}
@@ -118,8 +130,7 @@ function LinkInHand({
   savedAs?: string;
   onSave: () => void;
 }) {
-  const ready = useRef<HTMLParagraphElement>(null);
-  useEffect(() => ready.current?.focus(), []);
+  const ready = useFocusOnMount();
 
   return (
     <div className="flex max-w-lg animate-rise flex-col gap-4">
@@ -162,14 +173,29 @@ function LinkInHand({
   );
 }
 
+function LoggedInAs({ email }: { email: string }) {
+  const line = useFocusOnMount();
+  return (
+    <p ref={line} role="status" tabIndex={-1} className="max-w-sm text-sm text-ink-2 outline-none">
+      Logged in as <span className="font-semibold break-all text-ink">{email}</span>. No groups here
+      yet, so create your first link.
+    </p>
+  );
+}
+
 function SavedTo({ email }: { email: string }) {
-  const line = useRef<HTMLParagraphElement>(null);
-  useEffect(() => line.current?.focus(), []);
+  const line = useFocusOnMount();
   return (
     <p ref={line} role="status" tabIndex={-1} className="text-xs text-ink-3 outline-none">
       Saved to <span className="break-all">{email}</span>.
     </p>
   );
+}
+
+function useFocusOnMount() {
+  const element = useRef<HTMLParagraphElement>(null);
+  useEffect(() => element.current?.focus(), []);
+  return element;
 }
 
 function createFailure(error: unknown) {
