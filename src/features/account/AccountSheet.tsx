@@ -86,8 +86,8 @@ function AccountForm({
           ? "Open it on any device. The player link stays exactly the same, your players notice nothing."
           : "Open your groups on this device."}
       </p>
-      <fieldset disabled={busy} className="flex flex-col gap-4 disabled:opacity-70">
-        {intent === "save" && <ModeSwitch mode={mode} onChange={switchMode} />}
+      <div className="flex flex-col gap-4">
+        {intent === "save" && <ModeSwitch mode={mode} disabled={busy} onChange={switchMode} />}
         <Field label="Email">
           {({ id }) => (
             <input
@@ -96,6 +96,7 @@ function AccountForm({
               required
               autoComplete="email"
               value={email}
+              readOnly={busy}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="you@example.com"
               className={inputClassName}
@@ -112,12 +113,13 @@ function AccountForm({
               required
               autoComplete={mode === "create" ? "new-password" : "current-password"}
               value={password}
+              readOnly={busy}
               onChange={(event) => setPassword(event.target.value)}
               className={inputClassName}
             />
           )}
         </Field>
-      </fieldset>
+      </div>
       {failure && (
         <div className="flex flex-wrap items-center gap-x-2 text-sm">
           <p role="alert" className="font-medium text-busy">
@@ -201,10 +203,18 @@ const modes: { mode: SaveMode; label: string }[] = [
   { mode: "logIn", label: "I already have one" },
 ];
 
-function ModeSwitch({ mode, onChange }: { mode: SaveMode; onChange: (mode: SaveMode) => void }) {
+function ModeSwitch({
+  mode,
+  disabled,
+  onChange,
+}: {
+  mode: SaveMode;
+  disabled: boolean;
+  onChange: (mode: SaveMode) => void;
+}) {
   const name = useId();
   return (
-    <fieldset className="grid grid-cols-2 gap-1 rounded-md bg-surface-2 p-1">
+    <fieldset disabled={disabled} className="grid grid-cols-2 gap-1 rounded-md bg-surface-2 p-1">
       <legend className="sr-only">Account</legend>
       {modes.map((option) => (
         <label

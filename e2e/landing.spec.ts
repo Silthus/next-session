@@ -106,10 +106,11 @@ test("a wrong password says so and keeps the sheet open", async ({ page, browser
   const sheet = await openLogIn(page);
   await sheet.getByLabel("Email").fill(email);
   await sheet.getByLabel("Password").fill("not-the-password");
-  await sheet.getByRole("button", { name: "Log in" }).click();
+  await sheet.getByLabel("Password").press("Enter");
 
   await expect(sheet.getByRole("alert")).toHaveText("Wrong email or password.");
   await expect(sheet.getByLabel("Email")).toHaveValue(email);
+  await expect(sheet.getByLabel("Password")).toBeFocused();
 });
 
 test.describe("on a dark OS", () => {
