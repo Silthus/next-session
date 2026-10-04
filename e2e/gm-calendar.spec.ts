@@ -48,8 +48,14 @@ async function openAsGm(page: Page, gm: Gm, path: string) {
   await page.goto(path);
 }
 
-const today = todayUtc(Date.now());
-const nextMonth = addMonths(monthOf(today), 1);
+let today = todayUtc(Date.now());
+let nextMonth = addMonths(monthOf(today), 1);
+
+test.beforeEach(() => {
+  today = todayUtc(Date.now());
+  nextMonth = addMonths(monthOf(today), 1);
+});
+
 const night = (day: number) => `${nextMonth}-${String(day).padStart(2, "0")}`;
 const dayCell = (page: Page, name: RegExp) => page.getByRole("button", { name });
 

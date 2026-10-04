@@ -8,13 +8,20 @@ export function useToday(): IsoDate {
 
   useEffect(() => {
     const refresh = () => setToday(todayUtc(Date.now()));
-    const midnight = setTimeout(refresh, untilNextUtcDay(Date.now()));
+    let midnight: ReturnType<typeof setTimeout>;
+    const armMidnight = () => {
+      midnight = setTimeout(() => {
+        refresh();
+        armMidnight();
+      }, untilNextUtcDay(Date.now()));
+    };
+    armMidnight();
     document.addEventListener("visibilitychange", refresh);
     return () => {
       clearTimeout(midnight);
       document.removeEventListener("visibilitychange", refresh);
     };
-  }, [today]);
+  }, []);
 
   return today;
 }

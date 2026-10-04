@@ -47,6 +47,20 @@ describe("useSessionActions", () => {
     expect(result.current.isPending("2026-11-05")).toBe(false);
   });
 
+  it("ignores a second change to a night while the first is on its way", async () => {
+    const { result } = renderHook(() => useSessionActions(groupId));
+    act(() => void result.current.schedule("2026-11-05"));
+    await settle("sessions:schedule", 0, "s5");
+    const undoSchedule = result.current.toast?.undo;
+
+    act(() => void result.current.unschedule({ _id: "s5" as Id<"sessions">, date: "2026-11-05" }));
+    act(() => undoSchedule?.());
+    expect(calls["sessions:unschedule"]).toHaveLength(1);
+
+    await settle("sessions:unschedule", 0, "null");
+    expect(result.current.isPending("2026-11-05")).toBe(false);
+  });
+
   it("undoes a new Session with the id the server returned", async () => {
     const { result } = renderHook(() => useSessionActions(groupId));
     act(() => void result.current.schedule("2026-11-05"));

@@ -1,6 +1,6 @@
 import type { OptimisticLocalStore } from "convex/browser";
 import { useMutation } from "convex/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import type { IsoDate } from "../../../../shared/dates";
@@ -13,6 +13,7 @@ const TOAST_MS = 5000;
 export type SessionToast = { id: number; message: string; undo?: () => void };
 
 export function useSessionActions(groupId: Id<"groups">) {
+  const inFlight = useRef(new Set<IsoDate>());
   const [pendingDates, setPendingDates] = useState<ReadonlySet<IsoDate>>(new Set());
   const [toast, setToast] = useState<SessionToast | null>(null);
   const scheduleSession = useMutation(api.sessions.schedule).withOptimisticUpdate(
@@ -36,13 +37,16 @@ export function useSessionActions(groupId: Id<"groups">) {
   }, [toast]);
 
   async function settle(date: IsoDate, change: () => Promise<SessionToast>) {
-    setPendingDates((dates) => new Set(dates).add(date));
+    if (inFlight.current.has(date)) return;
+    inFlight.current.add(date);
+    setPendingDates(new Set(inFlight.current));
     try {
       setToast(await change());
     } catch (error) {
       setToast({ id: Date.now(), message: sessionErrorMessage(error) });
     } finally {
-      setPendingDates((dates) => withoutDate(dates, date));
+      inFlight.current.delete(date);
+      setPendingDates(new Set(inFlight.current));
     }
   }
 
@@ -86,10 +90,4 @@ function editCachedSessions(
     if (args.groupId !== groupId || !value) continue;
     store.setQuery(api.schedule.month, args, { ...value, sessions: edit(value.sessions) });
   }
-}
-
-function withoutDate(dates: ReadonlySet<IsoDate>, date: IsoDate) {
-  const remaining = new Set(dates);
-  remaining.delete(date);
-  return remaining;
 }
