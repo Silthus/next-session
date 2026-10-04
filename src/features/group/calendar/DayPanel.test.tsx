@@ -74,9 +74,10 @@ describe("DayPanel", () => {
     expect(onUnschedule).toHaveBeenCalledWith(expect.objectContaining({ _id: "s1" }));
   });
 
-  it("still unschedules a Session today", () => {
-    renderPanel({ date: today, scheduled: true });
-    expect(screen.getByRole("button", { name: "Unschedule this session" })).toBeTruthy();
+  it("still unschedules a Session today", async () => {
+    const { onUnschedule } = renderPanel({ date: today, scheduled: true });
+    await userEvent.click(screen.getByRole("button", { name: "Unschedule this session" }));
+    expect(onUnschedule).toHaveBeenCalledWith(expect.objectContaining({ _id: "s1", date: today }));
   });
 
   it("offers no Unschedule on a past Session", () => {

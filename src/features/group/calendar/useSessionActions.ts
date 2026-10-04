@@ -16,7 +16,8 @@ export function useSessionActions(groupId: Id<"groups">) {
   const inFlight = useRef(new Set<IsoDate>());
   const [pendingDates, setPendingDates] = useState<ReadonlySet<IsoDate>>(new Set());
   const [toast, setToast] = useState<SessionToast | null>(null);
-  const [toastHeld, setToastHeld] = useState(false);
+  const [heldToastId, setHeldToastId] = useState<number | null>(null);
+  const lastToastId = useRef(0);
   const scheduleSession = useMutation(api.sessions.schedule).withOptimisticUpdate(
     (store, { date }) =>
       editCachedSessions(store, groupId, (sessions) => [
@@ -32,10 +33,15 @@ export function useSessionActions(groupId: Id<"groups">) {
   );
 
   useEffect(() => {
-    if (toast === null || toastHeld) return;
+    if (toast === null || toast.id === heldToastId) return;
     const timer = setTimeout(() => setToast(null), TOAST_MS);
     return () => clearTimeout(timer);
-  }, [toast, toastHeld]);
+  }, [toast, heldToastId]);
+
+  function toastFor(date: IsoDate, message: string, undo?: () => void): SessionToast {
+    lastToastId.current += 1;
+    return { id: lastToastId.current, date, message, undo };
+  }
 
   async function settle(date: IsoDate, change: () => Promise<SessionToast>) {
     if (inFlight.current.has(date)) return;
@@ -44,7 +50,7 @@ export function useSessionActions(groupId: Id<"groups">) {
     try {
       setToast(await change());
     } catch (error) {
-      setToast({ id: Date.now(), date, message: sessionErrorMessage(error) });
+      setToast(toastFor(date, sessionErrorMessage(error)));
     } finally {
       inFlight.current.delete(date);
       setPendingDates(new Set(inFlight.current));
@@ -54,24 +60,18 @@ export function useSessionActions(groupId: Id<"groups">) {
   function schedule(date: IsoDate) {
     return settle(date, async () => {
       const sessionId = await scheduleSession({ groupId, date });
-      return {
-        id: Date.now(),
-        date,
-        message: `Session on ${dayLabel(date)}. Players see it on the link.`,
-        undo: () => void unschedule({ _id: sessionId, date }),
-      };
+      return toastFor(date, `Session on ${dayLabel(date)}. Players see it on the link.`, () => {
+        void unschedule({ _id: sessionId, date });
+      });
     });
   }
 
   function unschedule(session: CalendarSession) {
     return settle(session.date, async () => {
       await unscheduleSession({ sessionId: session._id });
-      return {
-        id: Date.now(),
-        date: session.date,
-        message: `Session on ${dayLabel(session.date)} removed.`,
-        undo: () => void schedule(session.date),
-      };
+      return toastFor(session.date, `Session on ${dayLabel(session.date)} removed.`, () => {
+        void schedule(session.date);
+      });
     });
   }
 
@@ -81,8 +81,8 @@ export function useSessionActions(groupId: Id<"groups">) {
     isPending: (date: IsoDate) => pendingDates.has(date),
     toast,
     dismissToast: () => setToast(null),
-    holdToast: () => setToastHeld(true),
-    releaseToast: () => setToastHeld(false),
+    holdToast: () => setHeldToastId(toast?.id ?? null),
+    releaseToast: () => setHeldToastId(null),
   };
 }
 

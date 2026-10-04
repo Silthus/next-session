@@ -172,9 +172,14 @@ describe("HeatCalendar", () => {
     expect(onMonthChange).toHaveBeenCalledWith("2026-09");
   });
 
-  it("stops at the last month of the Booking Window", () => {
-    renderCalendar({ month: "2026-12" });
-    expect(screen.getByRole("button", { name: "Next month" })).toHaveProperty("disabled", true);
+  it("stops at the last month of the Booking Window and keeps the button focusable", async () => {
+    const { onMonthChange } = renderCalendar({ month: "2026-12" });
+    const next = screen.getByRole("button", { name: "Next month" });
+    expect(next.getAttribute("aria-disabled")).toBe("true");
+    next.focus();
+    await userEvent.click(next);
+    expect(onMonthChange).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(next);
   });
 
   it("draws one bar per Player up to eight Players", () => {

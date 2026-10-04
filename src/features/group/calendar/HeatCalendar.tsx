@@ -74,6 +74,7 @@ function MonthHeader({
   today: IsoDate;
   onMonthChange: (month: IsoMonth) => void;
 }) {
+  const atLastMonth = month >= lastVisibleMonth(today);
   return (
     <div className="mb-3 flex items-center justify-between gap-2">
       <div className="flex min-w-0 items-center gap-2">
@@ -103,8 +104,11 @@ function MonthHeader({
           variant="ghost"
           size="sm"
           aria-label="Next month"
-          disabled={month >= lastVisibleMonth(today)}
-          onClick={() => onMonthChange(addMonths(month, 1))}
+          aria-disabled={atLastMonth || undefined}
+          className={cn(atLastMonth && "cursor-default opacity-50 hover:bg-transparent")}
+          onClick={() => {
+            if (!atLastMonth) onMonthChange(addMonths(month, 1));
+          }}
         >
           <IconChevron direction="right" />
         </Button>

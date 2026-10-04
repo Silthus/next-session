@@ -1,6 +1,6 @@
 import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useConvexAuth, useQuery } from "convex/react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { IsoDate, IsoMonth } from "../../../shared/dates";
@@ -13,8 +13,10 @@ import { Skeleton } from "../../ui/Skeleton";
 import { Toast } from "../../ui/Toast";
 import { gmStatus } from "../account/useGm";
 import { visibleDay, visibleMonth } from "./calendar/calendarDates";
+import { focusDay } from "./calendar/dayFocus";
 import { DayPanel } from "./calendar/DayPanel";
 import { HeatCalendar } from "./calendar/HeatCalendar";
+import { MobileDaySheet } from "./calendar/MobileDaySheet";
 import { useSessionActions, type SessionToast } from "./calendar/useSessionActions";
 import { useMonthSchedule } from "./calendar/useMonthSchedule";
 import { useToday } from "./calendar/useToday";
@@ -125,12 +127,7 @@ function GroupSurface({
         </MobileDaySheet>
       )}
       {sessions.toast && (
-        <div
-          onFocus={sessions.holdToast}
-          onBlur={sessions.releaseToast}
-          onMouseEnter={sessions.holdToast}
-          onMouseLeave={sessions.releaseToast}
-        >
+        <div onFocus={sessions.holdToast} onBlur={sessions.releaseToast}>
           <Toast
             key={sessions.toast.id}
             action={sessions.toast.undo && "Undo"}
@@ -142,57 +139,6 @@ function GroupSurface({
       )}
     </GroupFrame>
   );
-}
-
-function MobileDaySheet({ date, children }: { date: IsoDate; children: ReactNode }) {
-  const sheet = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
-
-  useEffect(() => {
-    const element = sheet.current;
-    if (!element) return;
-    const observer = new ResizeObserver(() => setHeight(element.offsetHeight));
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const cell = dayCellOf(date);
-    if (cell && height > 0) revealAbove(cell, height);
-  }, [date, height]);
-
-  return (
-    <>
-      <div aria-hidden="true" style={{ height }} className="lg:hidden" />
-      <div ref={sheet} className="fixed inset-x-0 bottom-0 z-30 lg:hidden">
-        <div className="mx-auto max-h-[55dvh] max-w-lg overflow-y-auto overscroll-contain px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          {children}
-        </div>
-      </div>
-    </>
-  );
-}
-
-const SHEET_GAP_PX = 12;
-
-function revealAbove(element: HTMLElement, sheetHeight: number) {
-  const visibleBottom = window.innerHeight - sheetHeight - SHEET_GAP_PX;
-  const overlap = element.getBoundingClientRect().bottom - visibleBottom;
-  if (overlap > 0) window.scrollBy({ top: overlap });
-}
-
-function focusDay(date: IsoDate) {
-  const cell = dayCellOf(date);
-  const target = cell && !cell.matches(":disabled") ? cell : monthHeading();
-  target?.focus();
-}
-
-function monthHeading() {
-  return document.querySelector<HTMLElement>("[data-month-heading]");
-}
-
-function dayCellOf(date: IsoDate) {
-  return document.querySelector<HTMLElement>(`[data-date="${date}"]`);
 }
 
 function PickANightHint() {
