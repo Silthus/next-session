@@ -43,3 +43,9 @@ Delta on 6aef4e4..9fa554d: dispatched 09:10
 Delta 2 on 9fa554d..068f467: dispatched 09:17
 ## Delta 2 (9fa554d..068f467) triage — fresh-eyes clean; correctness/adversary (Opus sub) one minor
 - D2-1 Landing.tsx:37 reopen during a dismissed background finish that then succeeds; dismissing again runs a second finish, CLAIM_INVALID wipes the saved state via startOver. FIX: reset only when !saved; onFinish resolves at once once saved. No unit seam for the container race; gate + landing e2e green (gap: race not automated).
+Delta 3 on 068f467..e0c437b (fix 0a9042b + merge of main): dispatched 09:24
+## Delta 3 (fix 0a9042b + merge e0c437b) triage — no blocker/major
+- D3-1 race fix untested. Source: correctness/adversary (minor, test-only). FIX: e2e "a retry dismissed, reopened, then finished in the background keeps the Save" (red without the fix, green with it).
+- D3-2 signUpAccountWithoutGroups duplicates the helpers sign-up. Source: fresh-eyes nit (test-only). FIX: signUpAccount() in e2e/helpers.ts, shared by signUpAccountWithGroup.
+- D3-3 onFinish reads committed `saved`; a click within the ms before commit can show "expired" for a moved Group (state not wiped). Source: correctness/adversary nit. REJECT: milliseconds-wide window, no data loss.
+- Round-4 churn rule: delta 3 left only test-only items, applied -> clean round; merge on green CI.

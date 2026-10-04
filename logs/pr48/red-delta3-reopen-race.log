@@ -1,0 +1,75 @@
+[WebServer] CONVEX_AGENT_MODE=anonymous mode is in beta, functionality may change in the future.
+[WebServer] ✔ Configured a local deployment for http://127.0.0.1:3210 and saved its:
+[WebServer]     name as CONVEX_DEPLOYMENT
+[WebServer]     client URL as VITE_CONVEX_URL
+[WebServer]     HTTP actions URL as VITE_CONVEX_SITE_URL
+[WebServer]  to .env.local
+[WebServer] 
+[WebServer] Write your Convex functions in convex/
+[WebServer] Give us feedback at https://convex.dev/community or support@convex.dev
+[WebServer] View the Convex dashboard at http://127.0.0.1:6790/
+[WebServer] 
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 3210 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:3210
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ 09:28:23 Convex functions ready! (2.07s)
+[WebServer] ✔ Successfully set 2 environment variables from stdin (2 updated, 1 unchanged) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-45/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-45/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 407 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://localhost:5173/
+[WebServer]   ➜  Network: use --host to expose
+
+Running 1 test using 1 worker
+
+[WebServer] 9:28:27 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✘  1 [chromium] › e2e/landing.spec.ts:299:1 › a retry dismissed, reopened, then finished in the background keeps the Save (7.1s)
+
+
+  1) [chromium] › e2e/landing.spec.ts:299:1 › a retry dismissed, reopened, then finished in the background keeps the Save 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Saved to gm-1791106105719-9haind@example.test.')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Saved to gm-1791106105719-9haind@example.test.') with timeout 5000ms
+      - waiting for getByText('Saved to gm-1791106105719-9haind@example.test.')
+
+
+      316 |   await page.keyboard.press("Escape");
+      317 |
+    > 318 |   await expect(page.getByText(`Saved to ${email}.`)).toBeVisible();
+          |                                                      ^
+      319 |   await expect(page.locator("code")).toHaveText(shareLink);
+      320 | });
+      321 |
+        at /home/coder/dev/ns-worktrees/ticket-45/e2e/landing.spec.ts:318:54
+
+    Error Context: test-results/landing-a-retry-dismissed--eaf73-e-background-keeps-the-Save-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/landing-a-retry-dismissed--eaf73-e-background-keeps-the-Save-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/landing-a-retry-dismissed--eaf73-e-background-keeps-the-Save-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e/landing.spec.ts:299:1 › a retry dismissed, reopened, then finished in the background keeps the Save 
