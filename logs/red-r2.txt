@@ -1,0 +1,4 @@
+     × ignores a second change to a night while the first is on its way 7ms
+     × steps from the requested month and holds the old grid while the next month loads 165ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 46 passed (48)

@@ -1,0 +1,5 @@
+     × keeps every night pending until its own change settles 14ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > keeps every night pending until its own change settles
+TypeError: result.current.isPending is not a function
+      Tests  1 failed | 2 passed (3)

@@ -1,0 +1,10 @@
+     × marks today as the current date 41ms
+     × colours each Player's bar by their answer and tints a day by its free share 46ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected null to be 'date' // Object.is equality
+- Expected:
++ Received:
+AssertionError: expected [ 'true', 'true', 'true' ] to deeply equal [ 'free', 'maybe', 'unanswered' ]
+- Expected
++ Received
+      Tests  2 failed | 11 passed (13)

@@ -1,0 +1,1 @@
+5 passed: the GM reads the heat-map / schedules+unschedules+undo / month navigation / foreign group fallback / signed-out redirect (Sun Oct  4 04:16:00 UTC 2026)

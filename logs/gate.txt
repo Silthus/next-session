@@ -1,0 +1,17 @@
+dist/assets/LegalPage-DlsGcBXm.js                                       12.26 kB │ gzip:   5.05 kB
+dist/assets/GroupScreen-Ly5Z4iLD.js                                     19.39 kB │ gzip:   6.83 kB
+dist/assets/index-d4aKtT7t.js                                          391.15 kB │ gzip: 122.36 kB
+
+✓ built in 250ms
+
+ ⛅️ wrangler 4.147.0
+────────────────────
+✨ Read 32 files from the assets directory /home/coder/dev/ns-worktrees/ticket-19/dist
+Total Upload: 0.81 KiB / gzip: 0.46 KiB
+Your Worker has access to the following bindings:
+Binding            Resource      
+env.ASSETS         Assets        
+
+--dry-run: exiting now.
+ Test Files  34 passed (34)
+      Tests  395 passed (395)

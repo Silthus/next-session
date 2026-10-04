@@ -1,0 +1,7 @@
+  ✓  1 [chromium] › e2e/gm-calendar.spec.ts:62:1 › the GM reads the heat-map and sees who is free on a night (1.5s)
+  ✓  2 [chromium] › e2e/gm-calendar.spec.ts:83:1 › on a phone the day sheet leaves the tapped night in view (1.0s)
+  ✓  3 [chromium] › e2e/gm-calendar.spec.ts:103:1 › the GM schedules a Session, unschedules it, and undoes that (2.4s)
+  ✓  4 [chromium] › e2e/gm-calendar.spec.ts:140:1 › month navigation lives in the URL and stops at the end of the Booking Window (1.1s)
+  ✓  5 [chromium] › e2e/gm-calendar.spec.ts:172:1 › another GM's Group or a malformed id falls back to the GM's own Group (1.1s)
+  ✓  6 [chromium] › e2e/gm-calendar.spec.ts:184:1 › a signed-out visitor lands on the landing page (422ms)
+  6 passed (12.0s)
