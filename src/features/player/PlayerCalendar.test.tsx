@@ -4,15 +4,23 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState, type ComponentProps, type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
+import type { Answer } from "../../../shared/answers";
 import { PlayerCalendar } from "./PlayerCalendar";
 
 type Props = ComponentProps<typeof PlayerCalendar>;
 
 const today = "2026-10-04";
+
+function withAnswer(answers: Record<string, Answer>, date: string, answer: Answer | null) {
+  const next = { ...answers };
+  if (answer === null) delete next[date];
+  else next[date] = answer;
+  return next;
+}
 
 function everyDayFrom(first: number, last: number, month = "2026-10") {
   return Object.fromEntries(
@@ -41,7 +49,7 @@ function calendarProps(props: Partial<Props> = {}): Props {
     sessionDates: [],
     hintVisible: false,
     onAnswer: vi.fn(),
-    onFillRest: vi.fn(),
+    onFillRest: vi.fn(() => Promise.resolve(null)),
     onMonthChange: vi.fn(),
     onNotYou: vi.fn(),
     onHintToggle: vi.fn(),
@@ -52,7 +60,7 @@ function calendarProps(props: Partial<Props> = {}): Props {
 function renderCalendar(overrides: Partial<Props> = {}) {
   const handlers = {
     onAnswer: vi.fn<Props["onAnswer"]>(),
-    onFillRest: vi.fn<Props["onFillRest"]>(),
+    onFillRest: vi.fn<Props["onFillRest"]>(() => Promise.resolve(null)),
     onMonthChange: vi.fn<Props["onMonthChange"]>(),
     onNotYou: vi.fn<Props["onNotYou"]>(),
     onHintToggle: vi.fn<Props["onHintToggle"]>(),
@@ -71,24 +79,12 @@ function CalendarWithRefusingBackend() {
         onFillRest: () => {
           const before = answers;
           setAnswers(everyDayFrom(4, 31));
-          setTimeout(() => setAnswers(before), 10);
-        },
-      })}
-    />
-  );
-}
-
-function CalendarWithAnswersSaved() {
-  const [answers, setAnswers] = useState<Props["answers"]>(everyDayFrom(4, 31));
-  return (
-    <PlayerCalendar
-      {...calendarProps({
-        answers,
-        onAnswer: (date, answer) => {
-          const next = { ...answers };
-          if (answer === null) delete next[date];
-          else next[date] = answer;
-          setAnswers(next);
+          return new Promise((_resolve, reject) =>
+            setTimeout(() => {
+              setAnswers(before);
+              reject(new Error("OUT_OF_WINDOW"));
+            }, 50),
+          );
         },
       })}
     />
@@ -103,7 +99,11 @@ function CalendarWithBackend() {
       {...calendarProps({
         month,
         answers,
-        onFillRest: () => setAnswers(everyDayFrom(4, 31)),
+        onAnswer: (date, answer) => setAnswers(withAnswer(answers ?? {}, date, answer)),
+        onFillRest: () => {
+          setAnswers(everyDayFrom(4, 31));
+          return Promise.resolve(null);
+        },
         onMonthChange: (next) => {
           setMonth(next);
           setAnswers({});
@@ -283,16 +283,27 @@ describe("PlayerCalendar", () => {
     );
   });
 
-  it("leaves focus alone when a tap, not a refused Fill Rest, reopens a done month", async () => {
-    renderInRouter(() => <CalendarWithAnswersSaved />);
-    const lastNight = await tile("Saturday, October 31: Busy");
+  it("leaves focus alone when a tap reopens a month that Fill Rest saved", async () => {
+    renderInRouter(() => <CalendarWithBackend />);
+    await userEvent.click(await screen.findByRole("button", { name: /^Mark the other/ }));
     (document.activeElement as HTMLElement).blur();
 
-    fireEvent.click(lastNight);
+    fireEvent.click(await tile("Saturday, October 31: Busy"));
 
     expect(await screen.findByRole("button", { name: "Mark the other 1 night busy" })).not.toBe(
       document.activeElement,
     );
+  });
+
+  it("keeps focus on the night the player moved to while a refused Fill Rest rolls back", async () => {
+    renderInRouter(() => <CalendarWithRefusingBackend />);
+    await userEvent.click(await screen.findByRole("button", { name: /^Mark the other/ }));
+    const night = await tile("Monday, October 5: Busy");
+
+    act(() => night.focus());
+
+    await screen.findByRole("button", { name: /^Mark the other/ });
+    expect(await tile("Monday, October 5: Not set")).toBe(document.activeElement);
   });
 
   it("explains that past nights lock under a read-only month", async () => {

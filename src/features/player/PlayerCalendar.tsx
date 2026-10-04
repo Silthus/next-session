@@ -50,7 +50,7 @@ export function PlayerCalendar({
   sessionDates: IsoDate[];
   hintVisible: boolean;
   onAnswer: (date: IsoDate, answer: Answer | null) => void;
-  onFillRest: (month: IsoMonth) => void;
+  onFillRest: (month: IsoMonth) => Promise<unknown>;
   onMonthChange: (month: IsoMonth) => void;
   onNotYou: () => void;
   onHintToggle: () => void;
@@ -64,20 +64,30 @@ export function PlayerCalendar({
   const doneHeading = useRef<HTMLParagraphElement>(null);
   const fillRestSlot = useRef<HTMLDivElement>(null);
   const focusDoneCardWhenDone = useRef(false);
-  const refocusFillRestIfRefused = useRef(false);
+  const focusMonthHeadingWhenShown = useRef(false);
+  const fillRestRefused = useRef(false);
+  const [refusedFillRests, setRefusedFillRests] = useState(0);
 
   useEffect(() => {
-    if (view.done && focusDoneCardWhenDone.current) {
-      focusDoneCardWhenDone.current = false;
-      doneHeading.current?.focus();
-    } else if (!view.done && refocusFillRestIfRefused.current) {
-      refocusFillRestIfRefused.current = false;
-      fillRestSlot.current?.querySelector("button")?.focus();
-    }
+    if (!view.done || !focusDoneCardWhenDone.current) return;
+    focusDoneCardWhenDone.current = false;
+    doneHeading.current?.focus();
   }, [view.done]);
 
+  useEffect(() => {
+    if (!fillRestRefused.current || view.done) return;
+    fillRestRefused.current = false;
+    if (focusFellOffThePage(doneHeading.current))
+      fillRestSlot.current?.querySelector("button")?.focus();
+  }, [view.done, refusedFillRests]);
+
+  useEffect(() => {
+    if (!focusMonthHeadingWhenShown.current) return;
+    focusMonthHeadingWhenShown.current = false;
+    monthHeading.current?.focus();
+  }, [month]);
+
   function answer(day: PlayerDay) {
-    refocusFillRestIfRefused.current = false;
     vibrate(8);
     setTaps((count) => count + 1);
     onAnswer(day.date, nextAnswer(day.answer));
@@ -88,18 +98,15 @@ export function PlayerCalendar({
     setStagger(new Map(view.fillRest.map((date, index) => [date, index])));
     setTimeout(() => setStagger(new Map()), view.fillRest.length * FILL_STAGGER_MS + 300);
     focusDoneCardWhenDone.current = true;
-    refocusFillRestIfRefused.current = true;
-    onFillRest(month);
-  }
-
-  function changeMonth(next: IsoMonth) {
-    refocusFillRestIfRefused.current = false;
-    onMonthChange(next);
+    onFillRest(month).catch(() => {
+      fillRestRefused.current = true;
+      setRefusedFillRests((count) => count + 1);
+    });
   }
 
   function fillNextMonth(next: IsoMonth) {
-    monthHeading.current?.focus();
-    changeMonth(next);
+    focusMonthHeadingWhenShown.current = true;
+    onMonthChange(next);
   }
 
   return (
@@ -162,7 +169,7 @@ export function PlayerCalendar({
           headingRef={monthHeading}
           stagger={stagger}
           onAnswer={answer}
-          onMonthChange={changeMonth}
+          onMonthChange={onMonthChange}
         />
 
         {!view.readOnly && !loaded && <Skeleton className="h-14 rounded-lg" />}
@@ -182,7 +189,7 @@ export function PlayerCalendar({
                 size="lg"
                 className={cn(
                   "w-full",
-                  view.progress.answered > 0 && "border-busy/40! text-ink! dark:text-busy!",
+                  view.progress.answered > 0 && "border-busy/40! dark:text-busy!",
                 )}
                 onClick={fillRest}
               >
@@ -489,6 +496,11 @@ function Legend() {
 function tileLabel(day: PlayerDay): string {
   const answer = day.answer ? answerLabels[day.answer] : "Not set";
   return `${dayLabel(day.date)}: ${answer}${day.session ? ", Session" : ""}`;
+}
+
+function focusFellOffThePage(doneHeading: HTMLElement | null) {
+  const focused = document.activeElement;
+  return focused === null || focused === document.body || focused === doneHeading;
 }
 
 function vibrate(pattern: number | number[]) {

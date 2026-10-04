@@ -174,9 +174,9 @@ function PlayerAnswers({
         }}
         onFillRest={(fillMonth) => {
           if (hintVisible) dismissHint();
-          fillRest({ shareToken, playerId, month: fillMonth }).catch((error: unknown) =>
-            showToast(fillRestErrorCopy(appErrorOf(error))),
-          );
+          const saving = fillRest({ shareToken, playerId, month: fillMonth });
+          saving.catch((error: unknown) => showToast(fillRestErrorCopy(appErrorOf(error))));
+          return saving;
         }}
         onMonthChange={onMonthChange}
         onNotYou={onNotYou}
