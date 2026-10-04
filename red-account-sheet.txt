@@ -1,0 +1,33 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-18
+
+ ❯ |ui| src/features/account/AccountSheet.test.tsx (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx [ src/features/account/AccountSheet.test.tsx ]
+Error: Failed to resolve import "./AccountSheet" from "src/features/account/AccountSheet.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/coder/dev/ns-worktrees/ticket-18/src/features/account/AccountSheet.test.tsx:7:29
+  4  |  import { ConvexError } from "convex/values";
+  5  |  import { beforeEach, describe, expect, it, vi } from "vitest";
+  6  |  import { AccountSheet } from "./AccountSheet";
+     |                                ^
+  7  |  var _jsxFileName = "/home/coder/dev/ns-worktrees/ticket-18/src/features/account/AccountSheet.test.tsx";
+  8  |  import { jsxDEV as _jsxDEV } from "react/jsx-dev-runtime";
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/node.js:26423:18
+ ❯ node_modules/vite/dist/node/chunks/node.js:26493:30
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/node.js:26459:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/node.js:19988:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  04:10:28
+   Duration  670ms (environment 84%, setup 12%, transform 3%, worker 1%)
+

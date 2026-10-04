@@ -1,0 +1,25 @@
+       98 |   test("a cold load paints a dark canvas", async ({ page }) => {
+       99 |     await page.goto("/");
+    > 100 |     await expect(page.getByRole("button", { name: "Create your link" })).toBeVisible();
+          |                                                                          ^
+      101 |     const canvas = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+      102 |     expect(canvas).toBe("rgb(15, 14, 19)");
+      103 |   });
+        at /home/coder/dev/ns-worktrees/ticket-18/e2e/landing.spec.ts:100:74
+
+    Error Context: test-results/landing-on-a-dark-OS-a-cold-load-paints-a-dark-canvas-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/landing-on-a-dark-OS-a-cold-load-paints-a-dark-canvas-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/landing-on-a-dark-OS-a-cold-load-paints-a-dark-canvas-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    [chromium] › e2e/landing.spec.ts:48:1 › one click puts the link in hand and lands the GM on their Group 
+    [chromium] › e2e/landing.spec.ts:63:1 › saving to a new Account keeps the Share Link, and logging in finds the Group 
+    [chromium] › e2e/landing.spec.ts:83:1 › a wrong password says so and keeps the sheet open ──────
+    [chromium] › e2e/landing.spec.ts:98:3 › on a dark OS › a cold load paints a dark canvas ────────
+  4 skipped

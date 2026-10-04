@@ -1,0 +1,40 @@
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ 04:16:27 Convex functions ready! (2.02s)
+[WebServer] ✔ Successfully set 2 environment variables from stdin (2 updated, 1 unchanged) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-18/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-18/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 395 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://localhost:5173/
+[WebServer]   ➜  Network: use --host to expose
+Running 9 tests using 2 workers
+[WebServer] 4:16:30 AM [vite] (client) dependencies optimized: convex/server, convex/values
+[WebServer] 4:16:30 AM [vite] (client) optimized dependencies changed. reloading
+  ✓  1 [chromium] › e2e/smoke.spec.ts:3:1 › the landing page renders the app shell without errors (1.2s)
+  ✓  2 [chromium] › e2e/landing.spec.ts:48:1 › one click puts the link in hand and lands the GM on their Group (2.3s)
+  ✓  3 [chromium] › e2e/landing.spec.ts:63:1 › saving to a new Account keeps the Share Link, and logging in finds the Group (2.8s)
+[WebServer] 4:16:37 AM [vite] (client) [console.error] [CONVEX A(auth:signIn)] [Request ID: 6297edc66ef0cae6] Server Error
+[WebServer] Uncaught ConvexError: {"code":"INVALID_CREDENTIALS"}
+[WebServer]     at fail (../../convex/model/errors.ts:26:0)
+[WebServer]     at refuseSignIn (../../convex/auth.ts:86:0)
+[WebServer]     at authorize [as authorize] (../../convex/auth.ts:67:4)
+[WebServer]     at async handleCredentials (../../node_modules/@convex-dev/auth/src/server/implementation/signIn.ts:191:6)
+[WebServer]     at async handler (../../node_modules/@convex-dev/auth/src/server/implementation/index.ts:416:26)
+[WebServer] 
+  ✓  4 [chromium] › e2e/landing.spec.ts:83:1 › a wrong password says so and keeps the sheet open (2.8s)
+  ✓  5 [chromium] › e2e/landing.spec.ts:98:3 › on a dark OS › a cold load paints a dark canvas (397ms)
+  -  6 [chromium] › e2e/landing.spec.ts:113:7 › screenshots › 390px light
+  -  7 [chromium] › e2e/landing.spec.ts:113:7 › screenshots › 390px dark
+  -  8 [chromium] › e2e/landing.spec.ts:113:7 › screenshots › 1440px light
+  -  9 [chromium] › e2e/landing.spec.ts:113:7 › screenshots › 1440px dark
+  4 skipped
+  5 passed (13.7s)
