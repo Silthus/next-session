@@ -485,20 +485,20 @@ test.describe("player surface screenshots", () => {
   async function captureEveryVariant(
     page: Page,
     link: string,
-    name: string,
-    ready: () => Promise<void>,
+    capture: (shot: (name: string) => Promise<unknown>) => Promise<void>,
   ) {
     for (const viewport of viewports) {
       for (const colorScheme of schemes) {
         await page.setViewportSize(viewport);
         await page.emulateMedia({ colorScheme });
         await page.goto(link);
-        await ready();
-        await page.screenshot({
-          path: `${screenshotDir}/${name}-${viewport.label}-${colorScheme}.png`,
-          fullPage: true,
-          animations: "disabled",
-        });
+        await capture((name) =>
+          page.screenshot({
+            path: `${screenshotDir}/${name}--${viewport.label}--${colorScheme}.png`,
+            fullPage: true,
+            animations: "disabled",
+          }),
+        );
       }
     }
   }
@@ -507,9 +507,10 @@ test.describe("player surface screenshots", () => {
     const group = await seedGroup(["Ana", "Ben"]);
     await rememberPlayerWithoutHint(page, group, "Ana");
 
-    await captureEveryVariant(page, group.link, "hint", () =>
-      expect(page.getByRole("tooltip")).toBeVisible(),
-    );
+    await captureEveryVariant(page, group.link, async (shot) => {
+      await expect(page.getByRole("tooltip")).toBeVisible();
+      await shot("hint");
+    });
   });
 
   test("the done card at 390 and 1440 px, light and dark", async ({ page }) => {
@@ -521,33 +522,23 @@ test.describe("player surface screenshots", () => {
     });
     await answerAs(page, group, "Ben");
 
-    await captureEveryVariant(page, group.link, "done", () =>
-      expect(page.getByText("Your GM sees it already.")).toBeVisible(),
-    );
+    await captureEveryVariant(page, group.link, async (shot) => {
+      await expect(page.getByText("Your GM sees it already.")).toBeVisible();
+      await shot("done");
+    });
   });
 
   test("the long-Roster join screen at 390 and 1440 px, light and dark", async ({ page }) => {
     const group = await seedGroup(longRoster);
     const filter = page.getByRole("searchbox", { name: "Find your name" });
-    const shot = (name: string, viewport: { label: string }, colorScheme: string) =>
-      page.screenshot({
-        path: `${screenshotDir}/${name}--${viewport.label}--${colorScheme}.png`,
-        fullPage: true,
-        animations: "disabled",
-      });
 
-    for (const viewport of viewports) {
-      for (const colorScheme of schemes) {
-        await page.setViewportSize(viewport);
-        await page.emulateMedia({ colorScheme });
-        await page.goto(group.link);
-        await expect(filter).toBeVisible();
-        await shot("join-long-roster", viewport, colorScheme);
+    await captureEveryVariant(page, group.link, async (shot) => {
+      await expect(filter).toBeVisible();
+      await shot("join-long-roster");
 
-        await filter.fill("an");
-        await expect(page.getByRole("button", { name: "Ana", exact: true })).toBeVisible();
-        await shot("join-long-roster-filtered", viewport, colorScheme);
-      }
-    }
+      await filter.fill("an");
+      await expect(page.getByRole("button", { name: "Ana", exact: true })).toBeVisible();
+      await shot("join-long-roster-filtered");
+    });
   });
 });
