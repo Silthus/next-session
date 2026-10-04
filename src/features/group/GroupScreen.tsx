@@ -1,17 +1,20 @@
 import { Link, Navigate, useNavigate } from "@tanstack/react-router";
-import { useConvexAuth, useQuery } from "convex/react";
-import { useEffect, type ReactNode } from "react";
+import { useQuery } from "convex/react";
+import { useEffect, useState, type ReactNode } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import type { IsoDate, IsoMonth } from "../../../shared/dates";
+import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
 import { summarizeMonth } from "../../../shared/monthSummary";
 import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
 import { LegalFooter } from "../../ui/LegalFooter";
 import { Logo } from "../../ui/Logo";
+import { ShareLinkCard } from "../../ui/ShareLinkCard";
 import { Skeleton } from "../../ui/Skeleton";
 import { Toast } from "../../ui/Toast";
-import { gmStatus } from "../account/useGm";
+import { AccountSheet } from "../account/AccountSheet";
+import type { SaveInput } from "../account/save";
+import { useGm } from "../account/useGm";
 import { visibleDay, visibleMonth } from "./calendar/calendarDates";
 import { focusDay } from "./calendar/dayFocus";
 import { DayPanel } from "./calendar/DayPanel";
@@ -20,19 +23,110 @@ import { MobileDaySheet } from "./calendar/MobileDaySheet";
 import { useSessionActions, type SessionToast } from "./calendar/useSessionActions";
 import { useMonthSchedule } from "./calendar/useMonthSchedule";
 import { useToday } from "./calendar/useToday";
+import { BestNights } from "./rail/BestNights";
+import { GroupRail } from "./rail/GroupRail";
+import { GroupSwitcherContainer } from "./rail/GroupSwitcherContainer";
+import { HeaderAccount } from "./rail/HeaderAccount";
+import { Nudge } from "./rail/Nudge";
+import { showsNudge } from "./rail/nudge";
+import { Players } from "./rail/Players";
+import { dismissNudge, nudgeDismissedAt, rememberLastGroup } from "./rail/railStorage";
+import { Sessions } from "./rail/Sessions";
+import { useRailActions, type RailToast } from "./rail/useRailActions";
+import { useWideLayout } from "./rail/useWideLayout";
 
 export type GroupSearch = { month?: string; day?: string };
 
-export function GroupScreen({ groupId, search }: { groupId: string; search: GroupSearch }) {
-  const auth = useConvexAuth();
-  const status = gmStatus(auth, useQuery(api.account.me));
-  const signedIn = status === "anonymous" || status === "account";
-  const group = useQuery(api.groups.get, signedIn ? { groupId } : "skip");
+type GroupView = { id: Id<"groups">; name: string; shareToken: string };
 
-  if (status === "signedOut") return <Navigate to="/" replace />;
-  if (group === null) return <FirstGroupFallback />;
-  if (group === undefined) return <GroupLoading />;
-  return <GroupSurface key={group.id} groupId={group.id} name={group.name} search={search} />;
+const SAVED_NOTICE_MS = 5000;
+
+export function GroupScreen({ groupId, search }: { groupId: string; search: GroupSearch }) {
+  const gm = useGm();
+  const signedIn = gm.status === "anonymous" || gm.status === "account";
+  const group = useQuery(api.groups.get, signedIn ? { groupId } : "skip");
+  const [saveSheetFor, setSaveSheetFor] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [savedNotice, setSavedNotice] = useState(false);
+
+  const save = async (input: SaveInput) => {
+    setSaving(true);
+    try {
+      await gm.save(input);
+      setSavedNotice(true);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const headerActions = (gm.status === "anonymous" || gm.status === "account") && group && (
+    <HeaderAccount
+      status={gm.status}
+      email={gm.email}
+      onSave={() => setSaveSheetFor(group.name)}
+      onLogOut={() => void gm.signOut()}
+    />
+  );
+
+  return (
+    <>
+      {surfaceFor({
+        status: gm.status,
+        group,
+        saving,
+        search,
+        headerActions,
+        onSave: setSaveSheetFor,
+      })}
+      <AccountSheet
+        open={saveSheetFor !== null}
+        intent="save"
+        groupName={saveSheetFor ?? ""}
+        onSubmit={save}
+        onClose={() => setSaveSheetFor(null)}
+      />
+      {savedNotice && <SavedNotice onDone={() => setSavedNotice(false)} />}
+    </>
+  );
+}
+
+function surfaceFor({
+  status,
+  group,
+  saving,
+  search,
+  headerActions,
+  onSave,
+}: {
+  status: ReturnType<typeof useGm>["status"];
+  group: GroupView | null | undefined;
+  saving: boolean;
+  search: GroupSearch;
+  headerActions: ReactNode;
+  onSave: (groupName: string) => void;
+}) {
+  if (status === "signedOut" && !saving) return <Navigate to="/" replace />;
+  if (group === null && !saving) return <FirstGroupFallback />;
+  if (!group) return <GroupLoading />;
+  return (
+    <GroupSurface
+      key={group.id}
+      group={group}
+      anonymous={status === "anonymous"}
+      saving={saving}
+      search={search}
+      headerActions={headerActions}
+      onSave={() => onSave(group.name)}
+    />
+  );
+}
+
+function SavedNotice({ onDone }: { onDone: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onDone, SAVED_NOTICE_MS);
+    return () => clearTimeout(timer);
+  }, [onDone]);
+  return <Toast>Saved. Open it anywhere with your account.</Toast>;
 }
 
 function FirstGroupFallback() {
@@ -44,27 +138,41 @@ function FirstGroupFallback() {
 }
 
 function GroupSurface({
-  groupId,
-  name,
+  group,
+  anonymous,
+  saving,
   search,
+  headerActions,
+  onSave,
 }: {
-  groupId: Id<"groups">;
-  name: string;
+  group: GroupView;
+  anonymous: boolean;
+  saving: boolean;
   search: GroupSearch;
+  headerActions: ReactNode;
+  onSave: () => void;
 }) {
+  const groupId = group.id;
   const today = useToday();
+  const wide = useWideLayout();
   const requestedMonth = visibleMonth(search.month, today);
   const loaded = useMonthSchedule(groupId, requestedMonth);
   const sessions = useSessionActions(groupId);
+  const rail = useRailActions(groupId);
+  const [nudgeSnoozedAt, setNudgeSnoozedAt] = useState(() => nudgeDismissedAt());
+  const [openedAt] = useState(() => Date.now());
   const navigate = useNavigate({ from: "/g/$groupId" });
   const showMonth = (next: IsoMonth) => void navigate({ search: { month: next } });
   const selectDay = (day: IsoDate | null) =>
     void navigate({ search: (previous) => ({ ...previous, day: day ?? undefined }) });
+  const openDay = (day: IsoDate) => void navigate({ search: { month: monthOf(day), day } });
   const selectedDay = loaded ? visibleDay(search.day, loaded.month) : null;
   const closeDay = () => {
     selectDay(null);
     if (selectedDay) focusDay(selectedDay);
   };
+
+  useEffect(() => rememberLastGroup(groupId), [groupId]);
 
   useEffect(() => {
     if (selectedDay === null) return;
@@ -75,21 +183,40 @@ function GroupSurface({
     return () => window.removeEventListener("keydown", closeOnEscape);
   });
 
-  const undoFrom = (toast: SessionToast | null) => {
+  const undoSession = (toast: SessionToast | null) => {
     if (!toast?.undo) return;
     toast.undo();
     sessions.releaseToast();
     sessions.dismissToast();
     focusDay(toast.date);
   };
+  const undoRail = (toast: RailToast | null) => {
+    if (!toast?.undo) return;
+    toast.undo();
+    rail.releaseToast();
+    rail.dismissToast();
+  };
+  const rotate = () => {
+    sessions.dismissToast();
+    void rail.rotate();
+  };
+  const laterNudge = () => {
+    const now = Date.now();
+    dismissNudge(now);
+    setNudgeSnoozedAt(now);
+  };
 
-  if (loaded === undefined) return <GroupLoading name={name} />;
+  const heading = <GroupSwitcherContainer group={group} />;
+  if (loaded === undefined) return <GroupLoading heading={heading} actions={headerActions} />;
   const { month, schedule } = loaded;
-  if (schedule === null) return <FirstGroupFallback />;
+  if (schedule === null) {
+    return saving ? <GroupLoading heading={heading} /> : <FirstGroupFallback />;
+  }
 
   const summary = summarizeMonth({ month, today, ...schedule });
   const day = summary.days.find((candidate) => candidate.date === selectedDay) ?? null;
-  const dayPanel = (className: string) =>
+  const shareUrl = shareLinkUrl(group.shareToken);
+  const dayPanel = (className?: string) =>
     day && (
       <DayPanel
         key={day.date}
@@ -98,14 +225,35 @@ function GroupSurface({
         today={today}
         pending={sessions.isPending(day.date)}
         onClose={closeDay}
-        onSchedule={() => void sessions.schedule(day.date)}
-        onUnschedule={(session) => void sessions.unschedule(session)}
+        onSchedule={() => {
+          rail.dismissToast();
+          void sessions.schedule(day.date);
+        }}
+        onUnschedule={(session) => {
+          rail.dismissToast();
+          void sessions.unschedule(session);
+        }}
         className={className}
       />
     );
+  const nudging = showsNudge({
+    anonymous,
+    playerCount: schedule.players.length,
+    dismissedAt: nudgeSnoozedAt,
+    now: openedAt,
+  });
+  const toastPosition = day && !wide ? "top" : "bottom";
 
   return (
-    <GroupFrame heading={<GroupName name={name} />}>
+    <GroupFrame heading={heading} actions={headerActions}>
+      {nudging && (
+        <Nudge
+          names={schedule.players.map((player) => player.name)}
+          onSave={onSave}
+          onLater={laterNudge}
+        />
+      )}
+      {!wide && <ShareLinkCard url={shareUrl} compact onRotate={rotate} />}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
         <HeatCalendar
           month={requestedMonth}
@@ -116,43 +264,78 @@ function GroupSurface({
           onSelectDay={selectDay}
           onMonthChange={showMonth}
         />
-        <div className="flex flex-col gap-4">
-          {dayPanel("hidden lg:block")}
-          {!day && <PickANightHint />}
-        </div>
+        <GroupRail
+          wide={wide}
+          shareLink={<ShareLinkCard url={shareUrl} onRotate={rotate} />}
+          dayPanel={dayPanel()}
+          panels={{
+            bestNights: (
+              <BestNights
+                nights={summary.bestNights}
+                playerCount={schedule.players.length}
+                monthOver={month < monthOf(today)}
+                onSelectDay={openDay}
+              />
+            ),
+            sessions: <Sessions sessions={schedule.sessions} today={today} onSelectDay={openDay} />,
+            players: (
+              <Players
+                progress={summary.progress}
+                onAdd={rail.addPlayer}
+                onRename={rail.renamePlayer}
+                onRemove={rail.removePlayer}
+              />
+            ),
+          }}
+        />
       </div>
-      {day && (
+      {day && !wide && (
         <MobileDaySheet date={day.date}>
           {dayPanel("shadow-[0_-8px_32px_-12px_rgb(0_0_0/0.35)]")}
         </MobileDaySheet>
       )}
-      {sessions.toast && (
-        <div onFocus={sessions.holdToast} onBlur={sessions.releaseToast}>
+      {rail.toast ? (
+        <div onFocus={rail.holdToast} onBlur={rail.releaseToast}>
           <Toast
-            key={sessions.toast.id}
-            action={sessions.toast.undo && "Undo"}
-            onAction={() => undoFrom(sessions.toast)}
+            key={`rail-${String(rail.toast.id)}`}
+            position={toastPosition}
+            action={rail.toast.undo && "Undo"}
+            onAction={() => undoRail(rail.toast)}
           >
-            {sessions.toast.message}
+            {rail.toast.message}
           </Toast>
         </div>
+      ) : (
+        sessions.toast && (
+          <div onFocus={sessions.holdToast} onBlur={sessions.releaseToast}>
+            <Toast
+              key={`session-${String(sessions.toast.id)}`}
+              position={toastPosition}
+              action={sessions.toast.undo && "Undo"}
+              onAction={() => undoSession(sessions.toast)}
+            >
+              {sessions.toast.message}
+            </Toast>
+          </div>
+        )
       )}
     </GroupFrame>
   );
 }
 
-function PickANightHint() {
-  return (
-    <Card className="border-dashed bg-transparent shadow-none">
-      <p className="text-sm font-semibold">Pick a night</p>
-      <p className="mt-1 text-sm text-ink-3">
-        Tap a day to see who is free, then schedule your next session.
-      </p>
-    </Card>
-  );
+function shareLinkUrl(shareToken: string) {
+  return `${window.location.origin}/s/${shareToken}`;
 }
 
-function GroupFrame({ heading, children }: { heading: ReactNode; children: ReactNode }) {
+function GroupFrame({
+  heading,
+  actions,
+  children,
+}: {
+  heading: ReactNode;
+  actions?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-20 border-b border-line bg-paper/85 backdrop-blur">
@@ -166,6 +349,7 @@ function GroupFrame({ heading, children }: { heading: ReactNode; children: React
             </span>
           )}
           {heading}
+          {actions && <div className="ml-auto flex shrink-0 items-center gap-2">{actions}</div>}
         </div>
       </header>
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 px-4 py-4 sm:px-6 sm:py-6">
@@ -176,21 +360,16 @@ function GroupFrame({ heading, children }: { heading: ReactNode; children: React
   );
 }
 
-function GroupName({ name }: { name: string }) {
-  return <h1 className="min-w-0 truncate font-display text-lg font-bold sm:text-xl">{name}</h1>;
-}
-
-function GroupLoading({ name }: { name?: string }) {
+function GroupLoading({ heading, actions }: { heading?: ReactNode; actions?: ReactNode }) {
   return (
-    <GroupFrame
-      heading={name === undefined ? <Skeleton className="h-7 w-40" /> : <GroupName name={name} />}
-    >
+    <GroupFrame heading={heading ?? <Skeleton className="h-7 w-40" />} actions={actions}>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]" role="status" aria-busy="true">
         <span className="sr-only">Loading your group</span>
         <Skeleton className="aspect-[7/6] w-full rounded-lg" />
         <div className="flex flex-col gap-4">
           <Skeleton className="h-28 rounded-lg" />
           <Skeleton className="h-40 rounded-lg" />
+          <Skeleton className="h-48 rounded-lg" />
         </div>
       </div>
     </GroupFrame>
