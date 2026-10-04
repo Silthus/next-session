@@ -8,9 +8,15 @@ import {
   useQuery,
 } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { api } from "../../../convex/_generated/api";
-import { finishPendingSave, resumePendingSave, saveGroups, type SaveInput } from "./save";
+import {
+  finishPendingSave,
+  resumePendingSave,
+  saveGroups,
+  type ClaimDeps,
+  type SaveInput,
+} from "./save";
 
 export type GmStatus = "loading" | "signedOut" | "anonymous" | "account";
 
@@ -55,6 +61,16 @@ function confirmIdentity({ client, fetchAccessToken }: LiveSession) {
   });
 }
 
+function useResumeLeftOverSave(status: GmStatus, redeemClaim: ClaimDeps["finishSave"]) {
+  const settledStatus = useRef<GmStatus>("loading");
+  useEffect(() => {
+    if (settledStatus.current !== "loading" || status === "loading") return;
+    settledStatus.current = status;
+    if (status === "account")
+      void resumePendingSave({ finishSave: redeemClaim, storage: sessionStorage });
+  }, [status, redeemClaim]);
+}
+
 export function useGm() {
   const auth = useConvexAuth();
   const me = useQuery(api.account.me);
@@ -74,10 +90,7 @@ export function useGm() {
   const redeemClaim = useMutation(api.account.finishSave);
   const status = gmStatus(auth, me);
 
-  useEffect(() => {
-    if (status === "account")
-      void resumePendingSave({ finishSave: redeemClaim, storage: sessionStorage });
-  }, [status, redeemClaim]);
+  useResumeLeftOverSave(status, redeemClaim);
 
   const actions = useMemo(
     () => ({

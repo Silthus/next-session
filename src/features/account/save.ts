@@ -19,7 +19,7 @@ export type SaveDeps = {
   storage: Pick<Storage, "getItem" | "setItem" | "removeItem">;
 };
 
-type ClaimDeps = Pick<SaveDeps, "finishSave" | "storage">;
+export type ClaimDeps = Pick<SaveDeps, "finishSave" | "storage">;
 
 const FLOWS = { create: "signUp", logIn: "signIn" } as const;
 
