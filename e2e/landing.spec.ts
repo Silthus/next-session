@@ -80,6 +80,26 @@ test("saving to a new Account keeps the Share Link, and logging in finds the Gro
   await elsewhere.close();
 });
 
+test("saving into an Account that has older Groups keeps showing the new Group", async ({
+  page,
+  browser,
+}) => {
+  const { email, groupPath: olderGroupPath } = await seedAccount(browser);
+  const { shareLink, groupPath } = await createLink(page);
+
+  await page.getByRole("button", { name: "save it to an account" }).click();
+  const sheet = page.getByRole("dialog", { name: /^Keep / });
+  await sheet.getByText("I already have one").click();
+  await sheet.getByLabel("Email").fill(email);
+  await sheet.getByLabel("Password").fill(password);
+  await sheet.getByRole("button", { name: "Log in and save" }).click();
+
+  await expect(page.getByText(`Saved to ${email}.`)).toBeVisible();
+  await expect(page.locator("code")).toHaveText(shareLink);
+  await expect(openGroupLink(page)).toHaveAttribute("href", groupPath);
+  expect(groupPath).not.toBe(olderGroupPath);
+});
+
 test("a wrong password says so and keeps the sheet open", async ({ page, browser }) => {
   const { email } = await seedAccount(browser);
 

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import type { MouseEvent } from "react";
+import { useEffect, useRef, type MouseEvent } from "react";
 import { Button, buttonClassName } from "../../ui/Button";
 import { IconCheck } from "../../ui/icons";
 import { LegalFooter } from "../../ui/LegalFooter";
@@ -8,7 +8,8 @@ import { Wordmark } from "../../ui/Wordmark";
 import { DemoStrip } from "./DemoStrip";
 
 export type LandingState =
-  | { phase: "idle" | "creating" | "failed" }
+  | { phase: "idle" | "creating" }
+  | { phase: "failed"; message: string }
   | { phase: "created"; shareUrl: string; groupId: string; savedAs?: string };
 
 type LandingViewProps = {
@@ -56,7 +57,11 @@ export function LandingView({
           {state.phase === "created" ? (
             <LinkInHand {...state} onSave={onSave} onOpenGroup={onOpenGroup} />
           ) : (
-            <CreateLink phase={state.phase} onCreate={onCreate} />
+            <CreateLink
+              busy={state.phase === "creating"}
+              failure={state.phase === "failed" ? state.message : undefined}
+              onCreate={onCreate}
+            />
           )}
           <Steps />
         </section>
@@ -70,10 +75,12 @@ export function LandingView({
 }
 
 function CreateLink({
-  phase,
+  busy,
+  failure,
   onCreate,
 }: {
-  phase: "idle" | "creating" | "failed";
+  busy: boolean;
+  failure?: string;
   onCreate: () => void;
 }) {
   return (
@@ -81,14 +88,14 @@ function CreateLink({
       <Button
         size="lg"
         onClick={onCreate}
-        busy={phase === "creating" && "Making your link…"}
+        busy={busy && "Making your link…"}
         className="w-full text-lg sm:w-auto sm:max-w-sm sm:min-w-64"
       >
         Create your link
       </Button>
-      {phase === "failed" && (
+      {failure && (
         <p role="alert" className="text-sm font-medium text-busy">
-          That didn't work. Try again.
+          {failure}
         </p>
       )}
       <p className="max-w-sm text-xs text-ink-3">
@@ -119,6 +126,9 @@ function LinkInHand({
   onSave: () => void;
   onOpenGroup: (groupId: string) => void;
 }) {
+  const ready = useRef<HTMLParagraphElement>(null);
+  useEffect(() => ready.current?.focus(), []);
+
   const openGroup = (event: MouseEvent<HTMLAnchorElement>) => {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
       return;
@@ -129,7 +139,11 @@ function LinkInHand({
 
   return (
     <div className="flex max-w-lg animate-rise flex-col gap-4">
-      <p className="flex items-center gap-2 text-sm font-semibold text-free">
+      <p
+        ref={ready}
+        tabIndex={-1}
+        className="flex items-center gap-2 text-sm font-semibold text-free outline-none"
+      >
         <span className="inline-flex size-5 items-center justify-center rounded-full bg-free text-white dark:text-paper">
           <IconCheck className="size-3.5" />
         </span>
@@ -144,7 +158,7 @@ function LinkInHand({
         >
           Open your group →
         </a>
-        <p className="text-xs text-ink-3">
+        <p className="min-w-0 text-xs break-all text-ink-3">
           {savedAs ? (
             `Saved to ${savedAs}.`
           ) : (

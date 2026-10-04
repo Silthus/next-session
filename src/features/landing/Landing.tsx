@@ -1,15 +1,18 @@
 import { useRouter } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
+import { ConvexError } from "convex/values";
 import { useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import type { AppErrorData } from "../../../convex/model/errors";
 import { AccountSheet, type AccountIntent } from "../account/AccountSheet";
+import type { SaveInput } from "../account/save";
 import { useGm } from "../account/useGm";
 import { LandingView, type LandingState } from "./LandingView";
 
-const LAST_GROUP_KEY = "next-session.lastGroup";
-
 type Phase = "idle" | "creating" | "created" | "failed";
+
+type CreatedGroup = { id: string; name: string; shareToken: string };
 
 export function Landing() {
   const gm = useGm();
@@ -18,18 +21,24 @@ export function Landing() {
   const groups = useQuery(api.groups.mine, signedIn ? {} : "skip");
   const createGroup = useMutation(api.groups.create);
   const [phase, setPhase] = useState<Phase>("idle");
+  const [failure, setFailure] = useState("");
   const [createdGroupId, setCreatedGroupId] = useState<Id<"groups"> | null>(null);
+  const [created, setCreated] = useState<CreatedGroup | null>(null);
+  const [savedAs, setSavedAs] = useState<string | undefined>();
   const [sheet, setSheet] = useState<AccountIntent | null>(null);
 
-  const groupId = createdGroupId ?? (phase === "created" ? groups?.[0]?.id : undefined);
-  const group = useQuery(api.groups.get, groupId ? { groupId } : "skip");
-  const returningTo = phase === "idle" || phase === "failed" ? returningGroup(groups) : null;
+  const newGroupId = createdGroupId ?? (phase === "created" ? groups?.[0]?.id : undefined);
+  const newGroup = useQuery(
+    api.groups.get,
+    newGroupId && !created ? { groupId: newGroupId } : "skip",
+  );
+  if (newGroup && !created) setCreated(newGroup);
+
+  const returningTo = phase === "idle" || phase === "failed" ? groups?.[0]?.id : undefined;
 
   useEffect(() => {
     if (returningTo) router.history.replace(groupPath(returningTo));
   }, [returningTo, router]);
-
-  const openGroup = (id: string) => router.history.push(groupPath(id));
 
   const create = async () => {
     setPhase("creating");
@@ -37,9 +46,15 @@ export function Landing() {
       if (signedIn) setCreatedGroupId(await createGroup({}));
       else await gm.createLink();
       setPhase("created");
-    } catch {
+    } catch (error) {
+      setFailure(createFailure(error));
       setPhase("failed");
     }
+  };
+
+  const save = async (input: SaveInput) => {
+    await gm.save(input);
+    setSavedAs(input.email);
   };
 
   const resolving = gm.status === "loading" || (signedIn && groups === undefined);
@@ -50,19 +65,19 @@ export function Landing() {
   return (
     <>
       <LandingView
-        state={landingState(phase, group, gm.status === "account" ? gm.email : undefined)}
-        showLogIn={!signedIn}
+        state={landingState(phase, failure, created, savedAs)}
+        showLogIn={!signedIn && phase !== "creating"}
         onCreate={() => void create()}
         onLogIn={() => setSheet("logIn")}
         onSave={() => setSheet("save")}
-        onOpenGroup={openGroup}
+        onOpenGroup={(groupId) => router.history.push(groupPath(groupId))}
       />
-      {sheet === "save" && group ? (
+      {sheet === "save" && created ? (
         <AccountSheet
           open
           intent="save"
-          groupName={group.name}
-          onSubmit={gm.save}
+          groupName={created.name}
+          onSubmit={save}
           onClose={() => setSheet(null)}
         />
       ) : (
@@ -79,17 +94,21 @@ export function Landing() {
 
 function landingState(
   phase: Phase,
-  group: { id: string; shareToken: string } | null | undefined,
+  failure: string,
+  created: CreatedGroup | null,
   savedAs: string | undefined,
 ): LandingState {
+  if (phase === "failed") return { phase, message: failure };
   if (phase !== "created") return { phase };
-  if (!group) return { phase: "creating" };
-  return { phase, groupId: group.id, shareUrl: shareUrl(group.shareToken), savedAs };
+  if (!created) return { phase: "creating" };
+  return { phase, groupId: created.id, shareUrl: shareUrl(created.shareToken), savedAs };
 }
 
-function returningGroup(groups: { id: string }[] | undefined) {
-  const last = localStorage.getItem(LAST_GROUP_KEY);
-  return (groups?.find((group) => group.id === last) ?? groups?.[0])?.id ?? null;
+function createFailure(error: unknown) {
+  const code = error instanceof ConvexError ? (error.data as Partial<AppErrorData>).code : null;
+  return code === "RATE_LIMITED"
+    ? "Slow down a moment, then try again."
+    : "That didn't work. Try again.";
 }
 
 function groupPath(groupId: string) {

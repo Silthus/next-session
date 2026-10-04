@@ -9,7 +9,10 @@ import type { SaveInput, SaveMode } from "./save";
 
 export type AccountIntent = "save" | "logIn";
 
-type Failure = { message: string; offerLogIn?: boolean };
+type Failure = { message: string; offer?: SaveMode };
+
+const MIN_PASSWORD_LENGTH = 8;
+const weakPassword: Failure = { message: "Use at least 8 characters for the password." };
 
 type AccountSheetProps = {
   open: boolean;
@@ -37,19 +40,23 @@ function AccountForm(props: AccountSheetProps) {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (mode === "create" && password.length < MIN_PASSWORD_LENGTH) {
+      setFailure(weakPassword);
+      return;
+    }
     setBusy(true);
     setFailure(null);
     try {
       await onSubmit({ email: email.trim(), password, mode });
       onClose();
     } catch (error) {
-      setFailure(describeFailure(error));
+      setFailure(describeFailure(error, intent));
       setBusy(false);
     }
   };
 
-  const switchToLogIn = () => {
-    setMode("logIn");
+  const switchMode = (next: SaveMode) => {
+    setMode(next);
     setFailure(null);
   };
 
@@ -60,17 +67,9 @@ function AccountForm(props: AccountSheetProps) {
           ? "Open it on any device. The player link stays exactly the same, your players notice nothing."
           : "Open your groups on this device."}
       </p>
-      {intent === "save" && (
-        <ModeSwitch
-          mode={mode}
-          onChange={(next) => {
-            setMode(next);
-            setFailure(null);
-          }}
-        />
-      )}
+      {intent === "save" && <ModeSwitch mode={mode} onChange={switchMode} />}
       <Field label="Email">
-        {(id) => (
+        {({ id }) => (
           <input
             id={id}
             type="email"
@@ -84,9 +83,10 @@ function AccountForm(props: AccountSheetProps) {
         )}
       </Field>
       <Field label="Password" hint={mode === "create" ? "At least 8 characters." : undefined}>
-        {(id) => (
+        {({ id, hintId }) => (
           <input
             id={id}
+            aria-describedby={hintId}
             type="password"
             required
             autoComplete={mode === "create" ? "new-password" : "current-password"}
@@ -101,13 +101,13 @@ function AccountForm(props: AccountSheetProps) {
           <p role="alert" className="font-medium text-busy">
             {failure.message}
           </p>
-          {failure.offerLogIn && (
+          {failure.offer && (
             <button
               type="button"
-              onClick={switchToLogIn}
+              onClick={() => switchMode(failure.offer!)}
               className="font-semibold text-accent-strong underline underline-offset-2"
             >
-              Log in instead
+              {failure.offer === "logIn" ? "Log in instead" : "Create account instead"}
             </button>
           )}
         </div>
@@ -177,28 +177,30 @@ const modes: { mode: SaveMode; label: string }[] = [
 ];
 
 function ModeSwitch({ mode, onChange }: { mode: SaveMode; onChange: (mode: SaveMode) => void }) {
+  const name = useId();
   return (
-    <div
-      role="radiogroup"
-      aria-label="Account"
-      className="grid grid-cols-2 gap-1 rounded-md bg-surface-2 p-1"
-    >
+    <fieldset className="grid grid-cols-2 gap-1 rounded-md bg-surface-2 p-1">
+      <legend className="sr-only">Account</legend>
       {modes.map((option) => (
-        <button
+        <label
           key={option.mode}
-          type="button"
-          role="radio"
-          aria-checked={mode === option.mode}
-          onClick={() => onChange(option.mode)}
           className={cn(
-            "h-9 rounded-sm text-sm font-semibold transition-colors duration-150",
+            "flex h-9 cursor-pointer items-center justify-center rounded-sm text-sm font-semibold transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-accent",
             mode === option.mode ? "bg-surface text-ink shadow-card" : "text-ink-2 hover:text-ink",
           )}
         >
+          <input
+            type="radio"
+            name={name}
+            value={option.mode}
+            checked={mode === option.mode}
+            onChange={() => onChange(option.mode)}
+            className="sr-only"
+          />
           {option.label}
-        </button>
+        </label>
       ))}
-    </div>
+    </fieldset>
   );
 }
 
@@ -212,16 +214,21 @@ function Field({
 }: {
   label: string;
   hint?: string;
-  children: (id: string) => ReactNode;
+  children: (ids: { id: string; hintId?: string }) => ReactNode;
 }) {
   const id = useId();
+  const hintId = hint ? `${id}-hint` : undefined;
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-sm font-semibold text-ink">
         {label}
       </label>
-      {children(id)}
-      {hint && <p className="text-xs text-ink-3">{hint}</p>}
+      {children({ id, hintId })}
+      {hint && (
+        <p id={hintId} className="text-xs text-ink-3">
+          {hint}
+        </p>
+      )}
     </div>
   );
 }
@@ -231,15 +238,18 @@ function submitLabel(intent: AccountIntent, mode: SaveMode) {
   return mode === "create" ? "Save group" : "Log in and save";
 }
 
-function describeFailure(error: unknown): Failure {
+function describeFailure(error: unknown, intent: AccountIntent): Failure {
   const data = error instanceof ConvexError ? (error.data as Partial<AppErrorData>) : {};
   switch (data.code) {
     case "WEAK_PASSWORD":
-      return { message: "Use at least 8 characters for the password." };
+      return weakPassword;
     case "EMAIL_TAKEN":
-      return { message: "That email already has an account.", offerLogIn: true };
+      return { message: "That email already has an account.", offer: "logIn" };
     case "INVALID_CREDENTIALS":
-      return { message: "Wrong email or password." };
+      return {
+        message: "Wrong email or password.",
+        offer: intent === "save" ? "create" : undefined,
+      };
     case "RATE_LIMITED":
       return { message: `Too many tries. Try again in ${waitFor(data.retryAfter)}.` };
     default:

@@ -123,7 +123,37 @@ describe("AccountSheet saving a Group", () => {
     await userEvent.click(screen.getByRole("button", { name: "Save group" }));
 
     expect(screen.getByRole("button", { name: "Saving…" })).toHaveProperty("disabled", true);
+    expect(screen.getByLabelText("Email")).toHaveProperty("value", email);
+    expect(screen.getByLabelText("Password")).toHaveProperty("value", password);
     finish();
+  });
+});
+
+describe("AccountSheet checks before it asks the server", () => {
+  it("refuses a password under 8 characters when creating an Account", async () => {
+    const onSubmit = vi.fn(() => Promise.resolve());
+    renderInRouter(
+      <AccountSheet
+        open
+        intent="save"
+        groupName="My group"
+        onSubmit={onSubmit}
+        onClose={() => {}}
+      />,
+    );
+
+    const passwordField = await screen.findByLabelText("Password");
+    const hint = document.getElementById(passwordField.getAttribute("aria-describedby") ?? "");
+    expect(hint?.textContent).toBe("At least 8 characters.");
+
+    await userEvent.type(screen.getByLabelText("Email"), email);
+    await userEvent.type(passwordField, "short");
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      "Use at least 8 characters for the password.",
+    );
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 });
 
@@ -166,6 +196,32 @@ describe("AccountSheet logging in", () => {
     expect(screen.getByRole("button", { name: "Log in" })).toHaveProperty("disabled", false);
     expect(screen.getByLabelText("Email")).toHaveProperty("value", email);
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("offers to create an Account when logging in to save fails", async () => {
+    const onSubmit = vi
+      .fn()
+      .mockRejectedValueOnce(new ConvexError({ code: "INVALID_CREDENTIALS" }))
+      .mockResolvedValueOnce(undefined);
+    renderInRouter(
+      <AccountSheet
+        open
+        intent="save"
+        groupName="My group"
+        onSubmit={onSubmit}
+        onClose={() => {}}
+      />,
+    );
+
+    await userEvent.click(await screen.findByRole("radio", { name: "I already have one" }));
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Log in and save" }));
+    expect((await screen.findByRole("alert")).textContent).toBe("Wrong email or password.");
+
+    await userEvent.click(screen.getByRole("button", { name: "Create account instead" }));
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+
+    expect(onSubmit).toHaveBeenLastCalledWith({ email, password, mode: "create" });
   });
 
   it("explains a password that is too short when creating an Account", async () => {

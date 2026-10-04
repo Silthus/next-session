@@ -74,9 +74,13 @@ describe("LandingView", () => {
     );
   });
 
-  it("lets the GM try again when making the link failed", async () => {
-    const props = renderLanding({ state: { phase: "failed" } });
-    expect((await screen.findByRole("alert")).textContent).toBe("That didn't work. Try again.");
+  it("says why making the link failed and lets the GM try again", async () => {
+    const props = renderLanding({
+      state: { phase: "failed", message: "Slow down a moment, then try again." },
+    });
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      "Slow down a moment, then try again.",
+    );
     await userEvent.click(screen.getByRole("button", { name: "Create your link" }));
     expect(props.onCreate).toHaveBeenCalledOnce();
   });
@@ -84,7 +88,8 @@ describe("LandingView", () => {
   it("puts the link in hand in place of the button", async () => {
     renderLanding({ state: created });
 
-    expect(await screen.findByText("Your link is ready. Send it to your players.")).toBeTruthy();
+    const ready = await screen.findByText("Your link is ready. Send it to your players.");
+    expect(document.activeElement).toBe(ready);
     expect(screen.getByText("next-session.link/s/k3Qx9Lm2aB")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Copy" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Share via WhatsApp" })).toBeTruthy();
