@@ -35,6 +35,7 @@ export function DayCell({
       disabled={day.past}
       aria-label={dayCellLabel(day, players.length)}
       aria-pressed={selected}
+      aria-current={isToday ? "date" : undefined}
       style={tintOf(day)}
       className={cn(
         "relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2",
@@ -48,11 +49,13 @@ export function DayCell({
       <span
         className={cn(
           "flex items-center gap-1 text-xs font-semibold leading-none sm:text-sm",
-          isToday && !perfect && "text-accent",
+          isToday && isPlain(day) && "text-accent",
         )}
       >
         {Number(day.date.slice(8))}
-        {isToday && <span className="size-1.5 rounded-full bg-current" />}
+        {isToday && (
+          <span className={cn("size-1.5 rounded-full", perfect ? "bg-current" : "bg-accent")} />
+        )}
       </span>
       {day.session && (
         <IconStar className="absolute top-1 right-1 size-3 text-accent sm:top-1.5 sm:right-1.5 sm:size-4" />
@@ -60,6 +63,10 @@ export function DayCell({
       <DayAnswers day={day} players={players} onSolidFree={perfect} />
     </button>
   );
+}
+
+function isPlain(day: CalendarDay) {
+  return day.session === null && !day.perfect && day.heat === 0;
 }
 
 function cellTone(day: CalendarDay) {
@@ -83,7 +90,7 @@ function DayAnswers({
       <span
         className={cn(
           "font-mono text-[10px] leading-none tabular-nums sm:text-[11px]",
-          onSolidFree ? "text-current" : "text-ink-2",
+          onSolidFree ? "text-current" : "text-ink",
         )}
       >
         <span>
@@ -99,16 +106,16 @@ function DayAnswers({
   const answerOf = answersByPlayer(day);
   return (
     <span className="flex flex-wrap gap-0.5">
-      {players.map((player) => (
-        <span
-          key={player._id}
-          data-bar
-          className={cn(
-            "h-2.5 w-1 rounded-full sm:h-3 sm:w-[5px]",
-            barTone(answerOf.get(player._id) ?? null, onSolidFree),
-          )}
-        />
-      ))}
+      {players.map((player) => {
+        const answer = answerOf.get(player._id) ?? null;
+        return (
+          <span
+            key={player._id}
+            data-bar={answer ?? "unanswered"}
+            className={cn("h-2.5 w-1 rounded-full sm:h-3 sm:w-[5px]", barTone(answer, onSolidFree))}
+          />
+        );
+      })}
     </span>
   );
 }

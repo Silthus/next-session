@@ -116,7 +116,7 @@ function Legend({ dense }: { dense: boolean }) {
       {dense ? (
         <span className="flex items-center gap-1.5">
           <span className="font-mono">
-            7/12 <span className="text-busy">✕2</span>
+            7<span className="max-sm:hidden">/12</span> <span className="text-busy">✕2</span>
           </span>
           <span>free of all · busy</span>
         </span>

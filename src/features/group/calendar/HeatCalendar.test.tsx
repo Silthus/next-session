@@ -56,6 +56,34 @@ describe("HeatCalendar", () => {
     expect(screen.getAllByRole("button", { name: /^\w+day, October \d+:/ })).toHaveLength(31);
   });
 
+  it("marks today as the current date", () => {
+    renderCalendar();
+    const today = screen.getByRole("button", { name: /^Friday, October 2:/ });
+    expect(today.getAttribute("aria-current")).toBe("date");
+    expect(
+      screen.getByRole("button", { name: /^Saturday, October 3:/ }).hasAttribute("aria-current"),
+    ).toBe(false);
+  });
+
+  it("colours each Player's bar by their answer and tints a day by its free share", () => {
+    renderCalendar({
+      answers: [
+        { playerId: "p0", date: "2026-10-16", answer: "free" },
+        { playerId: "p1", date: "2026-10-16", answer: "maybe" },
+        { playerId: "p0", date: "2026-10-17", answer: "free" },
+        { playerId: "p1", date: "2026-10-17", answer: "busy" },
+      ],
+    });
+    const friday = screen.getByRole("button", { name: /^Friday, October 16:/ });
+    const saturday = screen.getByRole("button", { name: /^Saturday, October 17:/ });
+    const bars = [...friday.querySelectorAll("[data-bar]")].map((bar) =>
+      bar.getAttribute("data-bar"),
+    );
+    expect(bars).toEqual(["free", "maybe", "unanswered"]);
+    expect(friday.style.background).toContain("color-mix(in oklab, var(--free) 18%");
+    expect(saturday.style.background).toBe("");
+  });
+
   it("names everyone free and a scheduled Session", () => {
     renderCalendar({
       players: rosterOf(2),
