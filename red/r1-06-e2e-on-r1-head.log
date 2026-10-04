@@ -1,0 +1,7 @@
+  ✘  1 [chromium] › e2e/gm-rail.spec.ts:266:1 › an Anonymous GM saves into an Account from the header and stays on the Group (6.3s)
+  ✓  2 [chromium] › e2e/gm-rail.spec.ts:297:1 › on a phone the toast clears the open day sheet (2.0s)
+  ✓  3 [chromium] › e2e/gm-rail.spec.ts:313:1 › deleting the last Group of an Anonymous GM returns to the landing (1.5s)
+    Error: expect(locator).toBeVisible() failed
+    Error: element(s) not found
+  1 failed
+  2 passed (15.9s)

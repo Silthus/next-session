@@ -1,0 +1,11 @@
+     × makes one new Group however often the menu is reopened meanwhile 102ms
+     × keeps a Group's toast to that Group, even when it arrives late 10ms
+     × moves focus to the Roster after a remove while the add form is open 108ms
+     × keeps an IME conversion's Escape for the IME 89ms
+     × explains a rate limit and a bad name the same way for a session 5ms
+     × explains a rate limit and a bad name the same way for a roster 1ms
+     × explains a rate limit and a bad name the same way for a group 1ms
+     × explains a rate limit and a bad name the same way for a shareLink 1ms
+     × forgets Copied when the link changes, keeping focus on Rotate 42ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  9 failed | 196 passed (205)

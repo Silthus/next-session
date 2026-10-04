@@ -1,0 +1,5 @@
+  ✘  1 [chromium] › e2e/gm-rail.spec.ts:81:1 › the GM copies, rotates, and undoes the Share Link from the rail (6.2s)
+  ✘  2 [chromium] › e2e/gm-rail.spec.ts:228:1 › an Anonymous GM is nudged to save once a Player joins, until Later (6.9s)
+    Error: expect(locator).toBeFocused() failed
+    Error: expect(locator).toBeFocused() failed
+  2 failed

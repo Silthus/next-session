@@ -1,0 +1,4 @@
+     × deletes the Group after a confirm that names what is lost 54ms
+     × asks before removing a Player and their answers 81ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 21 passed (23)

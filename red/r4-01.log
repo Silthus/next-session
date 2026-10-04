@@ -1,0 +1,5 @@
+     × still says why a new Group failed after the menu was closed meanwhile 59ms
+ FAIL  |ui| src/features/group/rail/useIsMounted.test.ts [ src/features/group/rail/useIsMounted.test.ts ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > still says why a new Group failed after the menu was closed meanwhile
+      Tests  1 failed | 58 passed (59)

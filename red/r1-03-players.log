@@ -1,0 +1,5 @@
+     × explains self-join on an empty Roster with the add form open 23ms
+     × focuses the name field when the GM opens the form, and hides + Add meanwhile 55ms
+     × keeps the form while a name is on its way, even on Escape 106ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  3 failed | 9 passed (12)

@@ -1,0 +1,5 @@
+     × deletes the Group after a confirm that names what is lost 34ms
+     × stays open when focus drops to the page, and Escape still closes it 21ms
+     × offers delete only once it can name what is lost 16ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  3 failed | 8 passed (11)

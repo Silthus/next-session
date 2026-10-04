@@ -1,0 +1,7 @@
+[WebServer] Uncaught ConvexError: {"code":"NAME_TAKEN","playerId":"k578je72gv6m14kx6z0z6dyht58fmekw"}
+[WebServer] Uncaught ConvexError: {"code":"OUT_OF_WINDOW"}
+[WebServer] Uncaught ConvexError: {"code":"OUT_OF_WINDOW"}
+[WebServer] Uncaught ConvexError: {"code":"INVALID_CREDENTIALS"}
+[WebServer] Uncaught ConvexError: {"code":"NAME_TAKEN","playerId":"k571wypka59yb77xhjmdjx874n8fmv6h"}
+  12 skipped
+  33 passed (25.3s)
