@@ -2,13 +2,13 @@ import { Link } from "@tanstack/react-router";
 import { useId, useState, type FormEvent } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { AppErrorData } from "../../../convex/model/errors";
+import { appErrorMessage, appErrorOf } from "../../lib/errors";
 import { pageTitle } from "../../lib/pageTitle";
 import { Avatar } from "../../ui/Avatar";
 import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
 import { Eyebrow } from "../../ui/Eyebrow";
 import { PageShell } from "../../ui/PageShell";
-import { appErrorOf, joinErrorCopy } from "./playerErrors";
 import { useFocusOnMount } from "./useFocusOnMount";
 
 export type RosterPlayer = { _id: Id<"players">; name: string };
@@ -104,7 +104,7 @@ export function Join({
         </form>
         {refusal !== undefined && (
           <p id={refusalId} role="alert" className="mt-3 text-sm font-medium text-busy">
-            {joinErrorCopy(refusal)}
+            {appErrorMessage(refusal, "join")}
           </p>
         )}
       </section>

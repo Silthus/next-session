@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { fillRestDates, type Answer } from "../../../shared/answers";
 import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
+import { errorMessage } from "../../lib/errors";
 import { Skeleton } from "../../ui/Skeleton";
 import { Toast } from "../../ui/Toast";
 import { Join } from "./Join";
 import { LinkGone } from "./LinkGone";
 import { PlayerCalendar } from "./PlayerCalendar";
-import { answerErrorCopy, appErrorOf, fillRestErrorCopy } from "./playerErrors";
 import {
   browserStorage,
   forgetPlayer,
@@ -169,13 +169,13 @@ function PlayerAnswers({
         onAnswer={(date, answer) => {
           if (hintVisible) dismissHint();
           saveAnswer({ shareToken, playerId, date, answer }).catch((error: unknown) =>
-            showToast(answerErrorCopy(appErrorOf(error))),
+            showToast(errorMessage(error, "answer")),
           );
         }}
         onFillRest={(fillMonth) => {
           if (hintVisible) dismissHint();
           const saving = fillRest({ shareToken, playerId, month: fillMonth });
-          saving.catch((error: unknown) => showToast(fillRestErrorCopy(appErrorOf(error))));
+          saving.catch((error: unknown) => showToast(errorMessage(error, "fillRest")));
           return saving;
         }}
         onMonthChange={onMonthChange}
