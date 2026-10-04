@@ -47,6 +47,7 @@ export function Join({
 
   async function join(event: FormEvent) {
     event.preventDefault();
+    setTypedName(name);
     setJoining(true);
     setRefusal(undefined);
     try {

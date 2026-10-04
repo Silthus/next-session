@@ -221,6 +221,25 @@ describe("Join", () => {
       expect(onJoin).toHaveBeenCalledWith("Dev");
     });
 
+    it("keeps the carried name when the Group refuses it as taken", async () => {
+      renderJoin({
+        players: longRoster(),
+        onJoin: () => Promise.reject(new ConvexError({ code: "NAME_TAKEN", playerId: ana._id })),
+      });
+
+      await userEvent.type(
+        await screen.findByRole("searchbox", { name: "Find your name" }),
+        "A na",
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Join" }));
+
+      expect(await screen.findByRole("button", { name: "Ana" })).toBeTruthy();
+      expect(screen.getByRole("textbox", { name: "Not listed? Your name" })).toHaveProperty(
+        "value",
+        "A na",
+      );
+    });
+
     it("leaves the join field empty while the filter still finds a name", async () => {
       renderJoin({ players: longRoster() });
 
