@@ -9,7 +9,9 @@ import type { SaveInput, SaveMode } from "./save";
 
 export type AccountIntent = "save" | "logIn";
 
-type Failure = { message: string; offer?: SaveMode };
+type Failure = { message: string; offer?: SaveMode; claimExpired?: boolean };
+
+type FinishStep = { email: string; claimExpired: boolean };
 
 const MIN_PASSWORD_LENGTH = 8;
 const weakPassword: Failure = { message: "Use at least 8 characters for the password." };
@@ -31,35 +33,58 @@ type AccountSheetProps = {
 export function AccountSheet(props: AccountSheetProps) {
   const { open, onClose } = props;
   const [busy, setBusy] = useState(false);
+  const [finishStep, setFinishStep] = useState<FinishStep | null>(null);
+  const signedInAs = props.intent === "save" ? props.signedInAs : undefined;
+  if (!open && finishStep !== null) setFinishStep(null);
+  if (open && signedInAs && !busy && finishStep === null) {
+    setFinishStep({ email: signedInAs, claimExpired: false });
+  }
+
+  const dismiss = () => {
+    if (props.intent === "save" && finishStep && !finishStep.claimExpired) {
+      finishInBackground(props.onFinish);
+    }
+    onClose();
+  };
+
   const title = props.intent === "save" ? `Keep ${props.groupName}` : "Log in";
   return (
-    <Sheet
-      open={open}
-      title={title}
-      dismissible={!busy}
-      onClose={() => {
-        if (!busy) onClose();
-      }}
-    >
-      {open && <AccountForm {...props} busy={busy} setBusy={setBusy} />}
+    <Sheet open={open} title={title} dismissible={!busy} onClose={dismiss}>
+      {open && (
+        <AccountForm
+          {...props}
+          busy={busy}
+          setBusy={setBusy}
+          finishStep={finishStep}
+          onClaimExpired={() => setFinishStep((step) => step && { ...step, claimExpired: true })}
+        />
+      )}
     </Sheet>
   );
+}
+
+function finishInBackground(finish: () => Promise<unknown>) {
+  finish().catch(() => undefined);
 }
 
 function AccountForm({
   busy,
   setBusy,
+  finishStep,
+  onClaimExpired,
   ...props
-}: AccountSheetProps & { busy: boolean; setBusy: (busy: boolean) => void }) {
+}: AccountSheetProps & {
+  busy: boolean;
+  setBusy: (busy: boolean) => void;
+  finishStep: FinishStep | null;
+  onClaimExpired: () => void;
+}) {
   const { intent, onSubmit, onClose } = props;
   const [mode, setMode] = useState<SaveMode>(intent === "save" ? "create" : "logIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [failure, setFailure] = useState<Failure | null>(null);
-  const [finishingAs, setFinishingAs] = useState<string | null>(null);
   const passwordField = useRef<HTMLInputElement>(null);
-  const signedInAs = props.intent === "save" ? props.signedInAs : undefined;
-  if (signedInAs && !busy && finishingAs === null) setFinishingAs(signedInAs);
 
   const run = async (action: () => Promise<unknown>) => {
     setBusy(true);
@@ -69,7 +94,9 @@ function AccountForm({
       setBusy(false);
       onClose();
     } catch (error) {
-      setFailure(describeFailure(error, intent));
+      const failed = describeFailure(error, intent);
+      if (failed.claimExpired) onClaimExpired();
+      setFailure(failed);
       setBusy(false);
     }
   };
@@ -95,14 +122,15 @@ function AccountForm({
 
   const offer = failure?.offer;
 
-  if (finishingAs !== null && props.intent === "save") {
+  if (finishStep !== null && props.intent === "save") {
     return (
       <FinishSave
-        email={finishingAs}
+        step={finishStep}
         groupName={props.groupName}
         failure={failure}
         busy={busy}
         onFinish={() => void run(props.onFinish)}
+        onClose={onClose}
       />
     );
   }
@@ -178,26 +206,29 @@ function AccountForm({
 }
 
 function FinishSave({
-  email,
+  step,
   groupName,
   failure,
   busy,
   onFinish,
+  onClose,
 }: {
-  email: string;
+  step: FinishStep;
   groupName: string;
   failure: Failure | null;
   busy: boolean;
   onFinish: () => void;
+  onClose: () => void;
 }) {
   const finish = (event: FormEvent) => {
     event.preventDefault();
-    onFinish();
+    if (step.claimExpired) onClose();
+    else onFinish();
   };
   return (
     <form onSubmit={finish} className="flex flex-col gap-4">
       <p className="min-w-0 break-words text-ink-2">
-        Signed in as <span className="font-semibold break-all text-ink">{email}</span>. Finish
+        Signed in as <span className="font-semibold break-all text-ink">{step.email}</span>. Finish
         moving {groupName} to your account.
       </p>
       {failure && (
@@ -206,7 +237,7 @@ function FinishSave({
         </p>
       )}
       <Button autoFocus type="submit" size="lg" busy={busy && "Saving…"} className="w-full">
-        Finish saving
+        {step.claimExpired ? "Close" : "Finish saving"}
       </Button>
     </form>
   );
@@ -356,6 +387,7 @@ function describeFailure(error: unknown, intent: AccountIntent): Failure {
     case "CLAIM_INVALID":
       return {
         message: "This save expired before the group moved. Close this and create a new link.",
+        claimExpired: true,
       };
     default:
       return { message: "That didn't work. Try again." };

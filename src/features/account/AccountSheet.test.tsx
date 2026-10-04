@@ -253,6 +253,50 @@ describe("AccountSheet finishing a Save after the sign-in went through", () => {
       "This save expired before the group moved. Close this and create a new link.",
     );
   });
+
+  it("finishes in the background when the GM closes it", async () => {
+    const onFinish = vi.fn(() => Promise.reject(new Error("Server Error")));
+    const onClose = vi.fn();
+    renderSheet({
+      open: true,
+      intent: "save",
+      groupName: "My group",
+      signedInAs: email,
+      onSubmit: vi.fn(),
+      onFinish,
+      onClose,
+    });
+
+    await userEvent.click(await screen.findByRole("button", { name: "Close" }));
+
+    expect(onFinish).toHaveBeenCalledOnce();
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("offers only to close once the Save expired", async () => {
+    const onFinish = vi.fn(() => Promise.reject(new ConvexError({ code: "CLAIM_INVALID" })));
+    const onClose = vi.fn();
+    renderSheet({
+      open: true,
+      intent: "save",
+      groupName: "My group",
+      signedInAs: email,
+      onSubmit: vi.fn(),
+      onFinish,
+      onClose,
+    });
+    await userEvent.click(await screen.findByRole("button", { name: "Finish saving" }));
+    await screen.findByRole("alert");
+
+    expect(screen.queryByRole("button", { name: "Finish saving" })).toBeNull();
+    const primaryClose = screen
+      .getAllByRole<HTMLButtonElement>("button", { name: "Close" })
+      .find((button) => button.type === "submit");
+    await userEvent.click(primaryClose!);
+
+    expect(onClose).toHaveBeenCalledOnce();
+    expect(onFinish).toHaveBeenCalledOnce();
+  });
 });
 
 describe("AccountSheet logging in", () => {

@@ -224,6 +224,25 @@ test.describe("a Save whose move fails after the sign-in", () => {
     await expect(page).toHaveURL(new RegExp(`^[^?]*${groupPath}`));
     await expect(page.getByText(shareLink.replace(/^localhost:5173/, ""))).toBeVisible();
   });
+
+  test("still goes through when the GM closes the retry from the Group header", async ({
+    page,
+  }) => {
+    const email = newEmail();
+    await failFirstFinishSave(page);
+    const { shareLink, groupPath } = await createLink(page);
+    await openGroupLink(page).click();
+    await expect(page).toHaveURL(groupPath);
+
+    await page.getByRole("button", { name: "Save your group" }).click();
+    const sheet = await fillSaveSheet(page, email);
+    await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
+    await sheet.getByRole("button", { name: "Close" }).click();
+
+    await expect(page.getByRole("status")).toHaveText("Saved. Open it anywhere with your account.");
+    await expect(page).toHaveURL(new RegExp(`^[^?]*${groupPath}`));
+    await expect(page.getByText(shareLink.replace(/^localhost:5173/, ""))).toBeVisible();
+  });
 });
 
 test("pressing Escape again and again mid-Save keeps the sheet up until it is done", async ({
