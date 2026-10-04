@@ -61,14 +61,12 @@ export function Sheet({
       className="animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-black/40 dark:backdrop:bg-black/70 open:flex sm:items-center"
     >
       {open && (
-        <div className="animate-rise max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl">
-          <div className="flex items-start justify-between gap-3">
-            <h2 id={titleId} className="font-display text-2xl font-bold">
-              {title}
-            </h2>
-            <CloseButton dismissible={dismissible} onClose={onClose} />
-          </div>
+        <div className="animate-rise relative max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl">
+          <h2 id={titleId} className="min-w-0 pr-10 font-display text-2xl font-bold break-words">
+            {title}
+          </h2>
           <div className="mt-4">{children}</div>
+          <CloseButton dismissible={dismissible} onClose={onClose} />
         </div>
       )}
     </dialog>
@@ -84,7 +82,7 @@ function CloseButton({ dismissible, onClose }: { dismissible: boolean; onClose: 
       onClick={() => {
         if (dismissible) onClose();
       }}
-      className="-mt-2 -mr-3 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"
+      className="absolute top-4 right-3 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"
     >
       <IconClose className="size-5" />
     </button>

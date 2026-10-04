@@ -102,10 +102,14 @@ describe("retrying a Save after the sign-in went through", () => {
     expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
   });
 
-  it("succeeds without moving anything once the claim was already redeemed", async () => {
-    const { deps, calls } = fakeDeps({ isAccount: true });
+  it("fails as an invalid claim once the server refused the pending one", async () => {
+    const { deps, calls, storage } = fakeDeps({ isAccount: true, finishSave: claimInvalid });
+    storage.setItem(PENDING_SAVE_KEY, "expired");
+    await expect(saveGroups({ ...input, mode: "create" }, deps)).rejects.toThrow();
 
-    expect(await saveGroups({ ...input, mode: "create" }, deps)).toEqual({ groupIds: [] });
+    await expect(saveGroups({ ...input, mode: "create" }, deps)).rejects.toMatchObject({
+      data: { code: "CLAIM_INVALID" },
+    });
     expect(calls).toEqual([]);
   });
 });

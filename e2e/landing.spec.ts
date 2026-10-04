@@ -1,4 +1,4 @@
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 
@@ -84,6 +84,37 @@ async function fillSaveSheet(page: Page, email: string) {
   return sheet;
 }
 
+function backdropColor(sheet: Locator) {
+  return sheet.evaluate((dialog) => getComputedStyle(dialog, "::backdrop").backgroundColor);
+}
+
+async function holdPasswordSignIn(page: Page) {
+  const held: string[] = [];
+  let release: () => void = () => {};
+  await page.routeWebSocket(/\/api\/.*\/sync/, (client) => {
+    const server = client.connectToServer();
+    client.onMessage((message) => {
+      const text = String(message);
+      if (text.includes('"udfPath":"auth:signIn"') && text.includes('"provider":"password"')) {
+        held.push(text);
+      } else server.send(message);
+    });
+    server.onMessage((message) => client.send(message));
+    release = () => held.splice(0).forEach((text) => server.send(text));
+  });
+  return { heldCount: () => held.length, release: () => release() };
+}
+
+async function logInFromElsewhere(browser: Browser, email: string) {
+  const elsewhere = await browser.newContext();
+  const page = await elsewhere.newPage();
+  const sheet = await openLogIn(page);
+  await sheet.getByLabel("Email").fill(email);
+  await sheet.getByLabel("Password").fill(password);
+  await sheet.getByRole("button", { name: "Log in" }).click();
+  return { page, close: () => elsewhere.close() };
+}
+
 async function openLogIn(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "Log in" }).click();
@@ -115,14 +146,9 @@ test("saving to a new Account keeps the Share Link, and logging in finds the Gro
   await saveToNewAccount(page, email);
   await expect(page.locator("code")).toHaveText(shareLink);
 
-  const elsewhere = await browser.newContext();
-  const otherDevice = await elsewhere.newPage();
-  const sheet = await openLogIn(otherDevice);
-  await sheet.getByLabel("Email").fill(email);
-  await sheet.getByLabel("Password").fill(password);
-  await sheet.getByRole("button", { name: "Log in" }).click();
-  await expect(otherDevice).toHaveURL(groupPath);
-  await elsewhere.close();
+  const otherDevice = await logInFromElsewhere(browser, email);
+  await expect(otherDevice.page).toHaveURL(groupPath);
+  await otherDevice.close();
 });
 
 test("saving into an Account that has older Groups keeps showing the new Group", async ({
@@ -146,18 +172,22 @@ test("saving into an Account that has older Groups keeps showing the new Group",
 });
 
 test.describe("a Save whose move fails after the sign-in", () => {
-  test("goes through on retry from the landing", async ({ page }) => {
+  test("goes through on retry from the landing", async ({ page, browser }) => {
     const email = newEmail();
     await failFirstFinishSave(page);
-    const { shareLink } = await createLink(page);
+    const { shareLink, groupPath } = await createLink(page);
 
     await page.getByRole("button", { name: "save it to an account" }).click();
     const sheet = await fillSaveSheet(page, email);
     await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
-    await sheet.getByRole("button", { name: "Save group" }).click();
+    await expect(sheet.getByText(`You're signed in as ${email}.`)).toBeVisible();
+    await sheet.getByRole("button", { name: "Finish saving" }).click();
 
     await expect(page.getByRole("status").filter({ hasText: `Saved to ${email}.` })).toBeFocused();
     await expect(page.locator("code")).toHaveText(shareLink);
+    const otherDevice = await logInFromElsewhere(browser, email);
+    await expect(otherDevice.page).toHaveURL(groupPath);
+    await otherDevice.close();
   });
 
   test("goes through on retry from the Group header", async ({ page }) => {
@@ -170,12 +200,34 @@ test.describe("a Save whose move fails after the sign-in", () => {
     await page.getByRole("button", { name: "Save your group" }).click();
     const sheet = await fillSaveSheet(page, email);
     await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
-    await sheet.getByRole("button", { name: "Save group" }).click();
+    await sheet.getByRole("button", { name: "Finish saving" }).click();
 
     await expect(page.getByRole("status")).toHaveText("Saved. Open it anywhere with your account.");
     await expect(page).toHaveURL(new RegExp(`^[^?]*${groupPath}`));
     await expect(page.getByText(shareLink.replace(/^localhost:5173/, ""))).toBeVisible();
   });
+});
+
+test("pressing Escape again and again mid-Save keeps the sheet up until it is done", async ({
+  page,
+}) => {
+  const email = newEmail();
+  const signIn = await holdPasswordSignIn(page);
+  await createLink(page);
+  await page.getByRole("button", { name: "save it to an account" }).click();
+  const sheet = await fillSaveSheet(page, email);
+  await expect.poll(signIn.heldCount).toBe(1);
+
+  for (let press = 1; press <= 3; press++) {
+    await page.keyboard.press("Escape");
+    await expect(sheet.getByRole("button", { name: "Saving…" })).toBeVisible();
+  }
+  expect(await sheet.evaluate((dialog) => (dialog as HTMLDialogElement).open)).toBe(true);
+  await expect(sheet.getByLabel("Email")).toHaveValue(email);
+
+  signIn.release();
+  await expect(page.getByRole("status").filter({ hasText: `Saved to ${email}.` })).toBeFocused();
+  await expect(sheet).toBeHidden();
 });
 
 test("logging in to an Account without Groups names it and points to the first link", async ({
@@ -184,6 +236,7 @@ test("logging in to an Account without Groups names it and points to the first l
   const email = await signUpAccountWithoutGroups();
 
   const sheet = await openLogIn(page);
+  await expect(sheet.getByLabel("Email")).toBeFocused();
   await sheet.getByLabel("Email").fill(email);
   await sheet.getByLabel("Password").fill(password);
   await sheet.getByRole("button", { name: "Log in" }).click();
@@ -219,12 +272,12 @@ test.describe("on a dark OS", () => {
   });
 
   test("an open sheet dims the page behind it", async ({ page }) => {
-    const sheet = await openLogIn(page);
-    const backdrop = await sheet.evaluate(
-      (dialog) => getComputedStyle(dialog, "::backdrop").backgroundColor,
-    );
-    expect(backdrop).toBe("oklab(0 0 0 / 0.7)");
+    expect(await backdropColor(await openLogIn(page))).toBe("oklab(0 0 0 / 0.7)");
   });
+});
+
+test("an open sheet dims the page behind it in light mode", async ({ page }) => {
+  expect(await backdropColor(await openLogIn(page))).toBe("oklab(0 0 0 / 0.4)");
 });
 
 const screenshotDir = process.env.E2E_SCREENSHOTS;

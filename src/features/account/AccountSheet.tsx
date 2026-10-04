@@ -18,7 +18,7 @@ type AccountSheetProps = {
   open: boolean;
   onClose: () => void;
   onSubmit: (input: SaveInput) => Promise<unknown>;
-} & ({ intent: "save"; groupName: string } | { intent: "logIn" });
+} & ({ intent: "save"; groupName: string; signedInAs?: string } | { intent: "logIn" });
 
 export function AccountSheet(props: AccountSheetProps) {
   const { open, onClose } = props;
@@ -48,18 +48,25 @@ function AccountForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [failure, setFailure] = useState<Failure | null>(null);
+  const [finishingAs, setFinishingAs] = useState<string | null>(null);
   const passwordField = useRef<HTMLInputElement>(null);
+  const signedInAs = props.intent === "save" ? props.signedInAs : undefined;
+  if (signedInAs && !busy && finishingAs === null) setFinishingAs(signedInAs);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (mode === "create" && password.length < MIN_PASSWORD_LENGTH) {
+    if (finishingAs === null && mode === "create" && password.length < MIN_PASSWORD_LENGTH) {
       setFailure(weakPassword);
       return;
     }
     setBusy(true);
     setFailure(null);
     try {
-      await onSubmit({ email: email.trim(), password, mode });
+      await onSubmit(
+        finishingAs === null
+          ? { email: email.trim(), password, mode }
+          : { email: finishingAs, password: "", mode },
+      );
       setBusy(false);
       onClose();
     } catch (error) {
@@ -79,6 +86,18 @@ function AccountForm({
   };
 
   const offer = failure?.offer;
+
+  if (finishingAs !== null && props.intent === "save") {
+    return (
+      <FinishSave
+        email={finishingAs}
+        groupName={props.groupName}
+        failure={failure}
+        busy={busy}
+        onSubmit={(event) => void submit(event)}
+      />
+    );
+  }
 
   return (
     <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
@@ -146,6 +165,37 @@ function AccountForm({
         {submitLabel(intent, mode)}
       </Button>
       <SheetFooter intent={intent} mode={mode} busy={busy} onClose={onClose} />
+    </form>
+  );
+}
+
+function FinishSave({
+  email,
+  groupName,
+  failure,
+  busy,
+  onSubmit,
+}: {
+  email: string;
+  groupName: string;
+  failure: Failure | null;
+  busy: boolean;
+  onSubmit: (event: FormEvent) => void;
+}) {
+  return (
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <p className="text-ink-2">
+        You're signed in as <span className="font-semibold break-all text-ink">{email}</span>.
+        Finish moving {groupName} to your account.
+      </p>
+      {failure && (
+        <p role="alert" className="text-sm font-medium text-busy">
+          {failure.message}
+        </p>
+      )}
+      <Button autoFocus type="submit" size="lg" busy={busy && "Saving…"} className="w-full">
+        Finish saving
+      </Button>
     </form>
   );
 }
@@ -291,6 +341,10 @@ function describeFailure(error: unknown, intent: AccountIntent): Failure {
       };
     case "RATE_LIMITED":
       return { message: `Too many tries. Try again in ${waitFor(data.retryAfter)}.` };
+    case "CLAIM_INVALID":
+      return {
+        message: "This save expired before the group moved. Close this and create a new link.",
+      };
     default:
       return { message: "That didn't work. Try again." };
   }

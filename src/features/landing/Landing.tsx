@@ -86,6 +86,7 @@ export function Landing() {
           open
           intent="save"
           groupName={created.name}
+          signedInAs={gm.status === "account" ? gm.email : undefined}
           onSubmit={save}
           onClose={() => setSheet(null)}
         />

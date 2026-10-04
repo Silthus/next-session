@@ -90,6 +90,7 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         open={saveSheetFor !== null}
         intent="save"
         groupName={saveSheetFor ?? ""}
+        signedInAs={gm.status === "account" ? gm.email : undefined}
         onSubmit={save}
         onClose={() => setSaveSheetFor(null)}
       />

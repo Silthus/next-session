@@ -4,22 +4,31 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SaveInput } from "./save";
 import { AccountSheet } from "./AccountSheet";
 
 type Submit = (input: SaveInput) => Promise<unknown>;
 
-function renderSheet(props: ComponentProps<typeof AccountSheet>) {
+type SheetProps = ComponentProps<typeof AccountSheet>;
+
+function renderSheet(props: SheetProps) {
+  let replaceProps: (next: SheetProps) => void = () => {};
+  function Harness() {
+    const [current, setCurrent] = useState(props);
+    replaceProps = setCurrent;
+    return <AccountSheet {...current} />;
+  }
   const router = createRouter({
-    routeTree: createRootRoute({ component: () => <AccountSheet {...props} /> }),
+    routeTree: createRootRoute({ component: Harness }),
     history: createMemoryHistory({ initialEntries: ["/"] }),
   });
   render(<RouterProvider router={router} />);
+  return (next: SheetProps) => act(() => replaceProps(next));
 }
 
 function renderSaveSheet(onSubmit: Submit, onClose = vi.fn()) {
@@ -163,6 +172,54 @@ describe("AccountSheet saving a Group", () => {
     await userEvent.click(screen.getByRole("button", { name: "Save group" }));
 
     expect(await alertText()).toBe("Use at least 8 characters for the password.");
+  });
+});
+
+describe("AccountSheet finishing a Save after the sign-in went through", () => {
+  it("asks only to finish, as the signed-in Account, once the move failed", async () => {
+    let failMove: (error: Error) => void = () => {};
+    const onSubmit = vi
+      .fn<Submit>()
+      .mockImplementationOnce(() => new Promise((_, reject) => (failMove = reject)))
+      .mockResolvedValueOnce(undefined);
+    const onClose = vi.fn();
+    const props = { open: true, intent: "save", groupName: "My group", onSubmit, onClose } as const;
+    const replaceProps = renderSheet(props);
+
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+    replaceProps({ ...props, signedInAs: email });
+    expect(screen.getByLabelText("Email")).toHaveProperty("value", email);
+    act(() => failMove(new Error("Server Error")));
+
+    expect(await alertText()).toBe("That didn't work. Try again.");
+    expect(screen.queryByLabelText("Email")).toBeNull();
+    expect(screen.queryByLabelText("Password")).toBeNull();
+    expect(screen.getByText(email).closest("p")?.textContent).toBe(
+      `You're signed in as ${email}. Finish moving My group to your account.`,
+    );
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Finish saving" }));
+    await userEvent.click(screen.getByRole("button", { name: "Finish saving" }));
+
+    expect(onSubmit).toHaveBeenLastCalledWith({ email, password: "", mode: "create" });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("says when the Save expired before the Group moved", async () => {
+    renderSheet({
+      open: true,
+      intent: "save",
+      groupName: "My group",
+      signedInAs: email,
+      onSubmit: () => Promise.reject(new ConvexError({ code: "CLAIM_INVALID" })),
+      onClose: vi.fn(),
+    });
+
+    await userEvent.click(await screen.findByRole("button", { name: "Finish saving" }));
+
+    expect(await alertText()).toBe(
+      "This save expired before the group moved. Close this and create a new link.",
+    );
   });
 });
 

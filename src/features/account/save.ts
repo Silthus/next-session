@@ -22,8 +22,6 @@ export type SaveDeps = {
 
 const FLOWS = { create: "signUp", logIn: "signIn" } as const;
 
-const NOTHING_MOVED: SaveResult = { groupIds: [] };
-
 export async function saveGroups(input: SaveInput, deps: SaveDeps) {
   if (deps.isAccount) return await finishSaveAsAccount(deps);
   return await saveAnonymousGroups(input, deps);
@@ -31,7 +29,7 @@ export async function saveGroups(input: SaveInput, deps: SaveDeps) {
 
 async function finishSaveAsAccount(deps: SaveDeps) {
   const code = deps.storage.getItem(PENDING_SAVE_KEY);
-  if (code === null) return NOTHING_MOVED;
+  if (code === null) throw new ConvexError({ code: "CLAIM_INVALID" });
   return await redeem(code, deps);
 }
 
