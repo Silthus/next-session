@@ -46,6 +46,35 @@ describe("Sheet", () => {
     expect(onClose).toHaveBeenCalledTimes(2);
   });
 
+  it("closes from the Close button in its header", async () => {
+    const onClose = vi.fn();
+    render(
+      <Sheet open title="Keep My group" onClose={onClose}>
+        body
+      </Sheet>,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("holds the Close button, still focusable, while it is not dismissible", async () => {
+    const onClose = vi.fn();
+    render(
+      <Sheet open title="Keep My group" dismissible={false} onClose={onClose}>
+        body
+      </Sheet>,
+    );
+    const closeButton = screen.getByRole("button", { name: "Close" });
+
+    await userEvent.click(closeButton);
+
+    expect(closeButton.getAttribute("aria-disabled")).toBe("true");
+    expect(document.activeElement).toBe(closeButton);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it("stays open when a drag that started inside the panel ends on the backdrop", () => {
     const onClose = vi.fn();
     render(

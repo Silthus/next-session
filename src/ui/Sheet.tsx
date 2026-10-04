@@ -7,15 +7,18 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
+import { IconClose } from "./icons";
 
 export function Sheet({
   open,
   title,
+  dismissible = true,
   onClose,
   children,
 }: {
   open: boolean;
   title: string;
+  dismissible?: boolean;
   onClose: () => void;
   children: ReactNode;
 }) {
@@ -59,13 +62,32 @@ export function Sheet({
     >
       {open && (
         <div className="animate-rise max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl">
-          <h2 id={titleId} className="font-display text-2xl font-bold">
-            {title}
-          </h2>
+          <div className="flex items-start justify-between gap-3">
+            <h2 id={titleId} className="font-display text-2xl font-bold">
+              {title}
+            </h2>
+            <CloseButton dismissible={dismissible} onClose={onClose} />
+          </div>
           <div className="mt-4">{children}</div>
         </div>
       )}
     </dialog>
+  );
+}
+
+function CloseButton({ dismissible, onClose }: { dismissible: boolean; onClose: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-label="Close"
+      aria-disabled={!dismissible || undefined}
+      onClick={() => {
+        if (dismissible) onClose();
+      }}
+      className="-mt-2 -mr-3 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"
+    >
+      <IconClose className="size-5" />
+    </button>
   );
 }
 

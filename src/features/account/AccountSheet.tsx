@@ -28,6 +28,7 @@ export function AccountSheet(props: AccountSheetProps) {
     <Sheet
       open={open}
       title={title}
+      dismissible={!busy}
       onClose={() => {
         if (!busy) onClose();
       }}

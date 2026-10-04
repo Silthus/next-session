@@ -125,8 +125,11 @@ describe("AccountSheet saving a Group", () => {
     await fillIn();
     await userEvent.click(screen.getByRole("button", { name: "Save group" }));
     fireEvent(screen.getByRole("dialog"), new Event("cancel", { cancelable: true }));
+    const closeButton = screen.getByRole("button", { name: "Close" });
+    await userEvent.click(closeButton);
 
     expect(onClose).not.toHaveBeenCalled();
+    expect(closeButton.getAttribute("aria-disabled")).toBe("true");
     expect(screen.getByRole("button", { name: "Saving…" })).toHaveProperty("disabled", true);
     expect(screen.getByRole("radio", { name: "I already have one" }).matches(":disabled")).toBe(
       true,
