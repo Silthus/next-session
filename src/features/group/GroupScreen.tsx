@@ -1,6 +1,6 @@
 import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
@@ -50,6 +50,7 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
   const [saving, setSaving] = useState(false);
   const toasts = useToast(groupId);
   const [focusAfterSave, setFocusAfterSave] = useState(false);
+  const headingFocused = useCallback(() => setFocusAfterSave(false), []);
 
   const save = async (input: SaveInput) => {
     setSaving(true);
@@ -81,7 +82,7 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         headerActions,
         toasts,
         focusHeading: focusAfterSave && saveSheetFor === null,
-        onHeadingFocused: () => setFocusAfterSave(false),
+        onHeadingFocused: headingFocused,
         onSave: setSaveSheetFor,
       })}
       <AccountSheet
@@ -189,8 +190,11 @@ function GroupSurface({
   const monthShown = loaded?.schedule != null;
   useEffect(() => {
     if (!focusHeading || !monthShown) return;
-    focusMonthHeading();
-    onHeadingFocused();
+    const frame = requestAnimationFrame(() => {
+      focusMonthHeading();
+      onHeadingFocused();
+    });
+    return () => cancelAnimationFrame(frame);
   }, [focusHeading, monthShown, onHeadingFocused]);
 
   useEffect(() => {

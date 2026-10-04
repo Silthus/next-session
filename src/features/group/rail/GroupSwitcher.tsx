@@ -78,6 +78,9 @@ export function GroupSwitcher({ group, onRename, ...menu }: GroupSwitcherProps) 
     <Popover
       triggerRef={trigger}
       className="w-72 max-w-[calc(100vw-2rem)]"
+      onClosed={() => {
+        if (pending === null) setFailure(null);
+      }}
       trigger={(props) => (
         <h1 className="min-w-0">
           <button
@@ -195,6 +198,7 @@ function SwitcherMenu({
           name={group.name}
           playerCount={playerCount}
           busy={pending === "deleting"}
+          blocked={pending !== null}
           onDelete={() => void act("deleting", onDelete)}
           onKeep={keepGroup}
         />
@@ -202,7 +206,7 @@ function SwitcherMenu({
         <button
           ref={deleteButton}
           type="button"
-          disabled={groups === undefined}
+          disabled={groups === undefined || pending !== null}
           onClick={() => setConfirmingDelete(true)}
           className={cn(menuItemClassName, "text-busy hover:bg-busy-soft")}
         >
@@ -222,12 +226,14 @@ function DeleteConfirm({
   name,
   playerCount,
   busy,
+  blocked,
   onDelete,
   onKeep,
 }: {
   name: string;
   playerCount: number;
   busy: boolean;
+  blocked: boolean;
   onDelete: () => void;
   onKeep: () => void;
 }) {
@@ -241,7 +247,13 @@ function DeleteConfirm({
       <p id={questionId} className="font-semibold break-words">{`Delete ${name}?`}</p>
       <p className="mt-0.5 text-ink-2">{lossLine(playerCount)}</p>
       <div className="mt-2 flex flex-wrap gap-2">
-        <Button size="sm" variant="danger" busy={busy && "Deleting…"} onClick={onDelete}>
+        <Button
+          size="sm"
+          variant="danger"
+          busy={busy && "Deleting…"}
+          disabled={blocked}
+          onClick={onDelete}
+        >
           <span className="max-w-40 truncate">{`Delete ${name}`}</span>
         </Button>
         <Button size="sm" variant="ghost" onClick={onKeep} disabled={busy} autoFocus>

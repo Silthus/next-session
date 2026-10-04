@@ -31,16 +31,24 @@ export function Popover({
   children,
   align = "start",
   className,
+  onClosed,
 }: {
   triggerRef: RefObject<HTMLButtonElement | null>;
   trigger: (props: PopoverTriggerProps) => ReactNode;
   children: ReactNode;
   align?: "start" | "end";
   className?: string;
+  onClosed?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const wasOpen = useRef(false);
   const panelId = useId();
+
+  useEffect(() => {
+    if (wasOpen.current && !open) onClosed?.();
+    wasOpen.current = open;
+  }, [open, onClosed]);
 
   const close: ClosePopover = ({ refocus } = { refocus: true }) => {
     setOpen(false);

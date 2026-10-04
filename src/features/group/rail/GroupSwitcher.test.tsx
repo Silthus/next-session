@@ -92,6 +92,28 @@ describe("GroupSwitcher", () => {
     expect(screen.getByRole("alert").textContent).toBe("Slow down a moment, then try again.");
   });
 
+  it("forgets a failure the GM has seen once the menu closes", async () => {
+    renderSwitcher({
+      onCreate: () => Promise.reject(new ConvexError({ code: "TOO_MANY_GROUPS" })),
+    });
+    await openMenu();
+    await userEvent.click(screen.getByRole("button", { name: "New group" }));
+    expect(screen.getByRole("alert")).toBeTruthy();
+    await userEvent.keyboard("{Escape}");
+    await openMenu();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("holds Delete while a new Group is on its way", async () => {
+    renderSwitcher({ onCreate: () => new Promise(() => undefined) });
+    await openMenu();
+    await userEvent.click(screen.getByRole("button", { name: "Delete group" }));
+    await userEvent.click(screen.getByRole("button", { name: "New group" }));
+    expect(
+      screen.getByRole("button", { name: "Delete Thursday Crew" }).hasAttribute("disabled"),
+    ).toBe(true);
+  });
+
   it("renames the Group inline with Enter", async () => {
     const { onRename } = renderSwitcher();
     await openMenu();

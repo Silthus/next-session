@@ -154,6 +154,7 @@ test("the GM adds, renames, and removes Players", async ({ page }) => {
   await players
     .getByRole("textbox", { name: "New name for Ben" })
     .dispatchEvent("keydown", { key: "Escape", isComposing: true, bubbles: true });
+  await expect(players.getByRole("textbox", { name: "New name for Ben" })).toBeFocused();
   await expect(page.getByRole("region", { name: /, \w+ 5$/ })).toBeVisible();
   await players.getByRole("textbox", { name: "New name for Ben" }).fill("Benedikt");
   await page.keyboard.press("Enter");
