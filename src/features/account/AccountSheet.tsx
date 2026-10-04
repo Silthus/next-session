@@ -214,7 +214,10 @@ function ModeSwitch({
 }) {
   const name = useId();
   return (
-    <fieldset disabled={disabled} className="grid grid-cols-2 gap-1 rounded-md bg-surface-2 p-1">
+    <fieldset
+      disabled={disabled}
+      className="grid grid-cols-2 gap-1 rounded-md bg-surface-2 p-1 disabled:pointer-events-none disabled:opacity-50"
+    >
       <legend className="sr-only">Account</legend>
       {modes.map((option) => (
         <label
