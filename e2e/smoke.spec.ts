@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 test("the landing page renders the app shell without errors", async ({ page }) => {
   const pageErrors: Error[] = [];
@@ -14,15 +14,20 @@ test("the landing page renders the app shell without errors", async ({ page }) =
 });
 
 test("reduced motion stops pulsing animations after one run", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  expect(await pulseIterationCount(page)).toBe("infinite");
 
-  const iterationCount = await page.evaluate(() => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(await pulseIterationCount(page)).toBe("1");
+});
+
+function pulseIterationCount(page: Page) {
+  return page.evaluate(() => {
     const pulse = document.createElement("div");
     pulse.className = "animate-pulse";
     document.body.append(pulse);
-    return getComputedStyle(pulse).animationIterationCount;
+    const count = getComputedStyle(pulse).animationIterationCount;
+    pulse.remove();
+    return count;
   });
-
-  expect(iterationCount).toBe("1");
-});
+}

@@ -194,6 +194,16 @@ describe("Join", () => {
       expect(filter).toBe(document.activeElement);
     });
 
+    it("keeps the filter focused when Safari confirms an IME conversion with Enter", async () => {
+      renderJoin({ players: longRoster() });
+      const filter = await screen.findByRole("searchbox", { name: "Find your name" });
+      filter.focus();
+
+      fireEvent.keyDown(filter, { key: "Enter", keyCode: 229 });
+
+      expect(filter).toBe(document.activeElement);
+    });
+
     it("announces when no name matches and still lets the Player join", async () => {
       const { onJoin } = renderJoin({ players: longRoster() });
       const filter = await screen.findByRole("searchbox", { name: "Find your name" });

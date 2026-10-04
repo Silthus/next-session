@@ -156,7 +156,7 @@ function NameFilter({
         autoComplete="off"
         enterKeyHint="done"
         onKeyDown={(event) => {
-          if (event.key === "Enter" && !event.nativeEvent.isComposing) event.currentTarget.blur();
+          if (event.key === "Enter" && !isComposing(event.nativeEvent)) event.currentTarget.blur();
         }}
         className="mt-3 h-12 w-full rounded-md border border-line bg-paper px-3.5 text-base outline-none transition-colors placeholder:text-ink-3 focus:border-accent"
       />
@@ -197,6 +197,12 @@ function PlayerChip({
       <span className="min-w-0 wrap-anywhere">{player.name}</span>
     </button>
   );
+}
+
+const IME_PROCESSING_KEY_CODE = 229;
+
+function isComposing(event: KeyboardEvent) {
+  return event.isComposing || event.keyCode === IME_PROCESSING_KEY_CODE;
 }
 
 function nameMatches(name: string, filter: string) {
