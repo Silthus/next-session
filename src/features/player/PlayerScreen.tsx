@@ -5,11 +5,6 @@ import { api } from "../../../convex/_generated/api";
 import { fillRestDates, type Answer } from "../../../shared/answers";
 import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
 import { errorMessage } from "../../lib/errors";
-import { NotFoundScreen } from "../../ui/NotFoundScreen";
-import { Skeleton } from "../../ui/Skeleton";
-import { Toast, type ToastMessage } from "../../ui/Toast";
-import { Join } from "./Join";
-import { PlayerCalendar } from "./PlayerCalendar";
 import {
   browserStorage,
   forgetPlayer,
@@ -19,6 +14,11 @@ import {
   rememberPlayer,
   type PlayerIdentity,
 } from "../../lib/storage";
+import { NotFoundScreen } from "../../ui/NotFoundScreen";
+import { Skeleton } from "../../ui/Skeleton";
+import { Toast, type ToastMessage } from "../../ui/Toast";
+import { Join } from "./Join";
+import { PlayerCalendar } from "./PlayerCalendar";
 import { visibleMonth } from "./playerMonth";
 import { useTodayUtc } from "./useTodayUtc";
 
