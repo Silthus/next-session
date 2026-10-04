@@ -184,22 +184,15 @@ describe("Join", () => {
       expect(onPick).not.toHaveBeenCalled();
     });
 
-    it("keeps the filter focused on an Enter that confirms an IME composition", async () => {
+    it.each([
+      ["an IME composition", { isComposing: true }],
+      ["Safari's IME conversion", { keyCode: 229 }],
+    ])("keeps the filter focused on an Enter that confirms %s", async (_case, composition) => {
       renderJoin({ players: longRoster() });
       const filter = await screen.findByRole("searchbox", { name: "Find your name" });
       filter.focus();
 
-      fireEvent.keyDown(filter, { key: "Enter", isComposing: true });
-
-      expect(filter).toBe(document.activeElement);
-    });
-
-    it("keeps the filter focused when Safari confirms an IME conversion with Enter", async () => {
-      renderJoin({ players: longRoster() });
-      const filter = await screen.findByRole("searchbox", { name: "Find your name" });
-      filter.focus();
-
-      fireEvent.keyDown(filter, { key: "Enter", keyCode: 229 });
+      fireEvent.keyDown(filter, { key: "Enter", ...composition });
 
       expect(filter).toBe(document.activeElement);
     });
@@ -224,19 +217,19 @@ describe("Join", () => {
     it("keeps the carried name when the Group refuses it as taken", async () => {
       renderJoin({
         players: longRoster(),
-        onJoin: () => Promise.reject(new ConvexError({ code: "NAME_TAKEN", playerId: ana._id })),
+        onJoin: () => Promise.reject(new ConvexError({ code: "NAME_TAKEN", playerId: zoe._id })),
       });
 
       await userEvent.type(
         await screen.findByRole("searchbox", { name: "Find your name" }),
-        "A na",
+        "Zoë  Ölund",
       );
       await userEvent.click(screen.getByRole("button", { name: "Join" }));
 
-      expect(await screen.findByRole("button", { name: "Ana" })).toBeTruthy();
+      expect(await screen.findByRole("button", { name: "Zoë Ölund" })).toBeTruthy();
       expect(screen.getByRole("textbox", { name: "Not listed? Your name" })).toHaveProperty(
         "value",
-        "A na",
+        "Zoë  Ölund",
       );
     });
 
