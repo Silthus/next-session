@@ -7,7 +7,6 @@ import { convexAuth, createAccount } from "@convex-dev/auth/server";
 import { HOUR } from "@convex-dev/rate-limiter";
 import { v } from "convex/values";
 import { LEGAL_VERSIONS } from "../shared/legal";
-import { UNSAVED_GROUP_QUIET_DAYS } from "../shared/limits";
 import { internal } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx } from "./_generated/server";
@@ -17,7 +16,7 @@ import { enforceRateLimit } from "./model/rateLimits";
 
 const ANONYMOUS = "anonymous";
 const DAY = 86_400_000;
-const SESSION_TOTAL_DAYS = 365;
+const SESSION_DAYS = 365;
 const MAX_FAILED_SIGN_INS_PER_HOUR = 10;
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -88,15 +87,15 @@ function refuseSignIn(error: unknown): never {
 }
 
 function normalizeEmail(email: unknown) {
-  if (typeof email !== "string" || email.trim() === "") throw new Error("Missing email");
+  if (typeof email !== "string" || email.trim() === "") fail({ code: "INVALID_CREDENTIALS" });
   return email.trim().toLowerCase();
 }
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [Anonymous, AccountPassword],
   session: {
-    totalDurationMs: SESSION_TOTAL_DAYS * DAY,
-    inactiveDurationMs: UNSAVED_GROUP_QUIET_DAYS * DAY,
+    totalDurationMs: SESSION_DAYS * DAY,
+    inactiveDurationMs: SESSION_DAYS * DAY,
   },
   signIn: { maxFailedAttempsPerHour: MAX_FAILED_SIGN_INS_PER_HOUR },
   callbacks: {

@@ -32,6 +32,11 @@ export function isBookable(date: IsoDate, today: IsoDate): boolean {
   return isValidDate(date) && first <= date && date <= last;
 }
 
+export function isBookableMonth(month: string, today: IsoDate): boolean {
+  const { first, last } = bookingWindow(today);
+  return isValidMonth(month) && monthOf(first) <= month && month <= monthOf(last);
+}
+
 export function isValidDate(value: string): boolean {
   if (!DATE_SHAPE.test(value)) return false;
   const month = monthOf(value);

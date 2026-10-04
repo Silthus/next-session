@@ -2,8 +2,9 @@ import { v } from "convex/values";
 import { isBookable, todayUtc } from "../shared/dates";
 import type { Id } from "./_generated/dataModel";
 import { mutation, type QueryCtx } from "./_generated/server";
-import { ownedGroup, requireGm, touchGroup } from "./model/access";
+import { ownedGroup, ownedSession, touchGroup } from "./model/access";
 import { fail } from "./model/errors";
+import { enforceRateLimit } from "./model/rateLimits";
 
 export const schedule = mutation({
   args: { groupId: v.id("groups"), date: v.string() },
@@ -12,11 +13,8 @@ export const schedule = mutation({
     const { gm, group } = await ownedGroup(ctx, groupId);
     ensureBookable(date);
     if ((await sessionOn(ctx, group._id, date)) !== null) fail({ code: "SESSION_EXISTS" });
-    const sessionId = await ctx.db.insert("sessions", {
-      groupId: group._id,
-      date,
-      scheduledBy: gm._id,
-    });
+    await enforceRateLimit(ctx, "gmEdit", gm._id);
+    const sessionId = await ctx.db.insert("sessions", { groupId: group._id, date });
     await touchGroup(ctx, group);
     return sessionId;
   },
@@ -26,10 +24,9 @@ export const unschedule = mutation({
   args: { sessionId: v.id("sessions") },
   returns: v.null(),
   handler: async (ctx, { sessionId }) => {
-    await requireGm(ctx);
-    const session = (await ctx.db.get("sessions", sessionId)) ?? fail({ code: "NOT_FOUND" });
-    const { group } = await ownedGroup(ctx, session.groupId);
+    const { gm, group, session } = await ownedSession(ctx, sessionId);
     ensureBookable(session.date);
+    await enforceRateLimit(ctx, "gmEdit", gm._id);
     await ctx.db.delete("sessions", session._id);
     await touchGroup(ctx, group);
     return null;

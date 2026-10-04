@@ -9,6 +9,7 @@ import {
   type GmClient,
   newBackend,
   signInAccount,
+  spendGmEdits,
   type TestBackend,
 } from "./model/test.setup";
 
@@ -94,7 +95,7 @@ describe("Save", () => {
     expect(await account.as.query(api.groups.mine, {})).toHaveLength(2);
   });
 
-  it("credits the Account with the Sessions the Anonymous GM scheduled", async () => {
+  it("keeps the Sessions the Anonymous GM scheduled on the moved Groups", async () => {
     const anonymous = await createYourLink(t);
     const [group] = await anonymous.as.query(api.groups.mine, {});
     const sessionId = await anonymous.as.mutation(api.sessions.schedule, {
@@ -107,7 +108,7 @@ describe("Save", () => {
     await account.as.mutation(api.account.finishSave, { code });
 
     const session = await t.run(async (ctx) => await ctx.db.get("sessions", sessionId));
-    expect(session?.scheduledBy).toBe(account.userId);
+    expect(session?.groupId).toBe(group!.id);
   });
 
   it("ends the Anonymous GM with its sign-in", async () => {
@@ -233,5 +234,16 @@ describe("who may Save", () => {
     }
 
     await expectErrorCode(anonymous.as.mutation(api.account.startSave, {}), "RATE_LIMITED");
+  });
+
+  it("refuses to finish a Save once the Account's GM edits are spent, and moves nothing", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const anonymous = await createYourLink(t);
+    const { code } = await anonymous.as.mutation(api.account.startSave, {});
+    const account = await signUpAccount(t);
+    await spendGmEdits(t, account.userId);
+
+    await expectErrorCode(account.as.mutation(api.account.finishSave, { code }), "RATE_LIMITED");
+    expect(await account.as.query(api.groups.mine, {})).toEqual([]);
   });
 });

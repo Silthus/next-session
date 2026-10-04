@@ -3,6 +3,7 @@ import {
   addMonths,
   bookingWindow,
   isBookable,
+  isBookableMonth,
   isValidDate,
   isValidMonth,
   monthDays,
@@ -84,6 +85,28 @@ describe("isBookable", () => {
   it("rejects strings that are not real dates", () => {
     expect(isBookable("2026-11-31", today)).toBe(false);
     expect(isBookable("2026-10-5", today)).toBe(false);
+  });
+});
+
+describe("isBookableMonth", () => {
+  it("accepts the current month and the two after it", () => {
+    expect(isBookableMonth("2026-10", "2026-10-31")).toBe(true);
+    expect(isBookableMonth("2026-12", "2026-10-31")).toBe(true);
+  });
+
+  it("rejects the month before and the month after the Booking Window", () => {
+    expect(isBookableMonth("2026-09", "2026-10-03")).toBe(false);
+    expect(isBookableMonth("2027-01", "2026-10-03")).toBe(false);
+  });
+
+  it("follows the Booking Window into the next year", () => {
+    expect(isBookableMonth("2027-02", "2026-12-31")).toBe(true);
+    expect(isBookableMonth("2026-02", "2026-12-31")).toBe(false);
+  });
+
+  it("rejects strings that are not real months", () => {
+    expect(isBookableMonth("2026-13", "2026-10-03")).toBe(false);
+    expect(isBookableMonth("2026-1", "2026-10-03")).toBe(false);
   });
 });
 

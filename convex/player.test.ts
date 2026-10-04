@@ -1,10 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ConvexError } from "convex/values";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
+import type { AppErrorData } from "./model/errors";
 import {
   expectErrorCode,
+  expiryOf,
   type GmClient,
   newBackend,
+  seedSession,
+  signedInGmWithGroup,
   signInAccount,
   signInAnonymousGm,
   type TestBackend,
@@ -17,22 +22,35 @@ const NOW = Date.UTC(2026, 9, 3, 23, 30);
 const TODAY = "2026-10-03";
 const LAST_BOOKABLE_DATE = "2026-12-31";
 
+const LIMITER_SHARD_SEED = 34;
+
 let t: TestBackend;
+
+function seededRandom(seed: number) {
+  let state = seed;
+  return () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let mixed = Math.imul(state ^ (state >>> 15), 1 | state);
+    mixed = (mixed + Math.imul(mixed ^ (mixed >>> 7), 61 | mixed)) ^ mixed;
+    return ((mixed ^ (mixed >>> 14)) >>> 0) / 4_294_967_296;
+  };
+}
 
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(NOW);
+  vi.spyOn(Math, "random").mockImplementation(seededRandom(LIMITER_SHARD_SEED));
   t = newBackend();
 });
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 async function sharedGroup(signInGm = signInAccount) {
-  const gm = await signInGm(t);
-  const groupId = await gm.as.mutation(api.groups.create, {});
-  return { ...gm, groupId, shareToken: await shareTokenOf(groupId) };
+  const gm = await signedInGmWithGroup(t, signInGm);
+  return { ...gm, shareToken: await shareTokenOf(gm.groupId) };
 }
 
 async function shareTokenOf(groupId: Id<"groups">) {
@@ -64,10 +82,6 @@ async function seedAnswer(
   await t.run(async (ctx) => await ctx.db.insert("answers", { groupId, playerId, date, answer }));
 }
 
-async function seedSession(groupId: Id<"groups">, scheduledBy: Id<"users">, date: string) {
-  await t.run(async (ctx) => await ctx.db.insert("sessions", { groupId, date, scheduledBy }));
-}
-
 async function answersOf(playerId: Id<"players">) {
   const rows = await t.run(
     async (ctx) =>
@@ -90,24 +104,35 @@ async function rosterNamesOf(groupId: Id<"groups">) {
   return players.map((player) => player.name);
 }
 
-async function expiryOf(groupId: Id<"groups">) {
-  return await t.run(async (ctx) => (await ctx.db.get("groups", groupId))?.expiresAt);
-}
-
 async function rotatedAway(groupId: Id<"groups">, as: GmClient) {
   const oldShareToken = await shareTokenOf(groupId);
   await as.mutation(api.groups.rotateShareToken, { groupId });
   return oldShareToken;
 }
 
-async function spendGroupAnswerTokens(groupId: Id<"groups">, shareToken: string, count: number) {
-  const tapsPerPlayer = 60;
-  for (let first = 0; first < count; first += tapsPerPlayer) {
-    const playerId = await seedPlayer(groupId, `Tapper ${first}`);
-    for (let tap = first; tap < Math.min(first + tapsPerPlayer, count); tap++) {
-      await t.mutation(api.player.answer, { shareToken, playerId, date: TODAY, answer: "free" });
+const GROUP_ANSWER_BURST = 300;
+const LEAST_SHARDED_GROUP_BURST = 250;
+const PLAYERS_SHARING_THE_BURST = 6;
+
+async function acceptedUntilTheGroupRefuses(
+  groupId: Id<"groups">,
+  act: (playerId: Id<"players">) => Promise<unknown>,
+) {
+  const players: Id<"players">[] = [];
+  for (let index = 0; index < PLAYERS_SHARING_THE_BURST; index++) {
+    players.push(await seedPlayer(groupId, `Tapper ${index}`));
+  }
+  for (let accepted = 0; accepted <= GROUP_ANSWER_BURST; accepted++) {
+    try {
+      await act(players[accepted % players.length]!);
+    } catch (error) {
+      if (error instanceof ConvexError && (error.data as AppErrorData).code === "RATE_LIMITED") {
+        return accepted;
+      }
+      throw error;
     }
   }
+  return Infinity;
 }
 
 function datesFrom(first: number, last: number, month = "2026-10") {
@@ -119,11 +144,11 @@ function datesFrom(first: number, last: number, month = "2026-10") {
 
 describe("player.group", () => {
   it("shows the Group's name, its Roster, and every Session date", async () => {
-    const { groupId, shareToken, userId } = await sharedGroup();
+    const { groupId, shareToken } = await sharedGroup();
     const bo = await seedPlayer(groupId, "Bo");
     const ada = await seedPlayer(groupId, "Ada");
     for (const date of ["2026-10-02", TODAY, "2026-10-17", LAST_BOOKABLE_DATE, "2027-01-01"]) {
-      await seedSession(groupId, userId, date);
+      await seedSession(t, groupId, date);
     }
 
     expect(await t.query(api.player.group, { shareToken })).toEqual({
@@ -141,7 +166,7 @@ describe("player.group", () => {
     const mine = await sharedGroup();
     const other = await sharedGroup();
     await seedPlayer(other.groupId, "Stranger");
-    await seedSession(other.groupId, other.userId, "2026-10-17");
+    await seedSession(t, other.groupId, "2026-10-17");
 
     expect(await t.query(api.player.group, { shareToken: mine.shareToken })).toMatchObject({
       groupId: mine.groupId,
@@ -342,7 +367,7 @@ describe("player.join", () => {
 
     await t.mutation(api.player.join, { shareToken, name: "Ada" });
 
-    expect(await expiryOf(groupId)).toBe(NOW + 32 * DAY);
+    expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
   });
 });
 
@@ -476,17 +501,19 @@ describe("player.answer", () => {
     await expect(tap(ada)).resolves.toBeNull();
   });
 
-  it("rate limits a Group to a burst of 300 Answers across its Players", async () => {
+  it("rate limits a Group to a burst of at most 300 Answers across its Players", async () => {
     const busy = await sharedGroup();
     const quiet = await sharedGroup();
-    await spendGroupAnswerTokens(busy.groupId, busy.shareToken, 300);
-    const latecomer = await seedPlayer(busy.groupId, "Ada");
-    const outsider = await seedPlayer(quiet.groupId, "Ada");
     const tap = (shareToken: string, playerId: Id<"players">) =>
       t.mutation(api.player.answer, { shareToken, playerId, date: TODAY, answer: "free" });
 
-    await expectErrorCode(tap(busy.shareToken, latecomer), "RATE_LIMITED");
-    await expect(tap(quiet.shareToken, outsider)).resolves.toBeNull();
+    const accepted = await acceptedUntilTheGroupRefuses(busy.groupId, (playerId) =>
+      tap(busy.shareToken, playerId),
+    );
+
+    expect(accepted).toBeGreaterThanOrEqual(LEAST_SHARDED_GROUP_BURST);
+    expect(accepted).toBeLessThanOrEqual(GROUP_ANSWER_BURST);
+    await expect(tap(quiet.shareToken, await seedPlayer(quiet.groupId, "Ada"))).resolves.toBeNull();
   });
 
   it("pushes out the Expiry of an Unsaved Group", async () => {
@@ -501,7 +528,7 @@ describe("player.answer", () => {
       answer: "free",
     });
 
-    expect(await expiryOf(groupId)).toBe(NOW + 32 * DAY);
+    expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
   });
 });
 
@@ -632,18 +659,15 @@ describe("player.fillRest", () => {
     expect(Object.keys(await answersOf(ada)).filter((date) => date >= "2026-12")).toEqual([]);
   });
 
-  it("spends one token of the Group's Answer rate limit", async () => {
+  it("spends one token of the Group's Answer rate limit, however many dates it fills", async () => {
     const { groupId, shareToken } = await sharedGroup();
-    await spendGroupAnswerTokens(groupId, shareToken, 299);
-    const ada = await seedPlayer(groupId, "Ada");
-    const bo = await seedPlayer(groupId, "Bo");
-    await t.mutation(api.player.fillRest, { shareToken, playerId: ada, month: "2026-11" });
 
-    await expectErrorCode(
-      t.mutation(api.player.fillRest, { shareToken, playerId: bo, month: "2026-11" }),
-      "RATE_LIMITED",
+    const accepted = await acceptedUntilTheGroupRefuses(groupId, (playerId) =>
+      t.mutation(api.player.fillRest, { shareToken, playerId, month: "2026-11" }),
     );
-    expect(await answersOf(bo)).toEqual({});
+
+    expect(accepted).toBeGreaterThanOrEqual(LEAST_SHARDED_GROUP_BURST);
+    expect(accepted).toBeLessThanOrEqual(GROUP_ANSWER_BURST);
   });
 
   it("pushes out the Expiry of an Unsaved Group", async () => {
@@ -653,6 +677,6 @@ describe("player.fillRest", () => {
 
     await t.mutation(api.player.fillRest, { shareToken, playerId: ada, month: "2026-11" });
 
-    expect(await expiryOf(groupId)).toBe(NOW + 32 * DAY);
+    expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
   });
 });
