@@ -4,7 +4,7 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import { useState, type ComponentProps, type ReactNode } from "react";
@@ -182,6 +182,16 @@ describe("Join", () => {
       expect(filter).not.toBe(document.activeElement);
       expect(onJoin).not.toHaveBeenCalled();
       expect(onPick).not.toHaveBeenCalled();
+    });
+
+    it("keeps the filter focused on an Enter that confirms an IME composition", async () => {
+      renderJoin({ players: longRoster() });
+      const filter = await screen.findByRole("searchbox", { name: "Find your name" });
+      filter.focus();
+
+      fireEvent.keyDown(filter, { key: "Enter", isComposing: true });
+
+      expect(filter).toBe(document.activeElement);
     });
 
     it("announces when no name matches and still lets the Player join", async () => {

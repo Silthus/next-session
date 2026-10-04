@@ -156,7 +156,7 @@ function NameFilter({
         autoComplete="off"
         enterKeyHint="done"
         onKeyDown={(event) => {
-          if (event.key === "Enter") event.currentTarget.blur();
+          if (event.key === "Enter" && !event.nativeEvent.isComposing) event.currentTarget.blur();
         }}
         className="mt-3 h-12 w-full rounded-md border border-line bg-paper px-3.5 text-base outline-none transition-colors placeholder:text-ink-3 focus:border-accent"
       />
