@@ -6,7 +6,7 @@ import { NAME_MAX_LENGTH } from "../../shared/names";
 type Copy = Partial<Record<ErrorCode, string>>;
 
 const shared: Copy = {
-  RATE_LIMITED: "Too many changes at once. Try again in a moment.",
+  RATE_LIMITED: "Slow down a moment, then try again.",
   INVALID_NAME: `Use 1 to ${String(NAME_MAX_LENGTH)} characters.`,
 };
 

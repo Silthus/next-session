@@ -10,6 +10,11 @@ export function useToast(groupId: string) {
   const [toast, setToast] = useState<GroupToast | null>(null);
   const [heldToastId, setHeldToastId] = useState<number | null>(null);
   const lastToastId = useRef(0);
+  const currentGroupId = useRef(groupId);
+
+  useEffect(() => {
+    currentGroupId.current = groupId;
+  }, [groupId]);
 
   useEffect(() => {
     if (toast === null || toast.id === heldToastId) return;
@@ -19,6 +24,7 @@ export function useToast(groupId: string) {
 
   const show: ShowToast = useCallback(
     (message, undo) => {
+      if (groupId !== currentGroupId.current) return;
       lastToastId.current += 1;
       setToast({ id: lastToastId.current, groupId, message, undo });
     },

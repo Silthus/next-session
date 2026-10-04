@@ -18,8 +18,21 @@ type GroupSwitcherProps = {
   onDelete: () => Promise<unknown>;
 };
 
-export function GroupSwitcher({ group, onRename, ...menu }: GroupSwitcherProps) {
+export function GroupSwitcher({ group, onRename, onCreate, ...menu }: GroupSwitcherProps) {
   const [renaming, setRenaming] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const createStarted = useRef(false);
+  const create = async () => {
+    if (createStarted.current) return;
+    createStarted.current = true;
+    setCreating(true);
+    try {
+      await onCreate();
+    } finally {
+      createStarted.current = false;
+      setCreating(false);
+    }
+  };
   const trigger = useRef<HTMLButtonElement>(null);
   const refocusTrigger = useRef(false);
   const stopRenaming = () => {
@@ -68,7 +81,13 @@ export function GroupSwitcher({ group, onRename, ...menu }: GroupSwitcherProps) 
         </h1>
       )}
     >
-      <SwitcherMenu group={group} {...menu} onStartRename={() => setRenaming(true)} />
+      <SwitcherMenu
+        group={group}
+        {...menu}
+        creating={creating}
+        onCreate={create}
+        onStartRename={() => setRenaming(true)}
+      />
     </Popover>
   );
 }
@@ -79,8 +98,9 @@ function SwitcherMenu({
   onOpen,
   onCreate,
   onDelete,
+  creating,
   onStartRename,
-}: Omit<GroupSwitcherProps, "onRename"> & { onStartRename: () => void }) {
+}: Omit<GroupSwitcherProps, "onRename"> & { creating: boolean; onStartRename: () => void }) {
   const close = useClosePopover();
   const [busy, setBusy] = useState<"creating" | "deleting" | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
@@ -148,11 +168,11 @@ function SwitcherMenu({
       )}
       <button
         type="button"
-        disabled={busy !== null}
+        disabled={busy !== null || creating}
         onClick={() => void run("creating", onCreate)}
         className={cn(menuItemClassName, "mt-1 font-semibold text-accent-strong")}
       >
-        {busy === "creating" ? (
+        {creating ? (
           "Making your group…"
         ) : (
           <>

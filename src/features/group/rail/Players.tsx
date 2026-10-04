@@ -25,6 +25,7 @@ export function Players<Player extends PlayerRow>({
 }: PlayersProps<Player>) {
   const [addForm, setAddForm] = useState<AddForm>(progress.length === 0 ? "open" : "closed");
   const addButton = useRef<HTMLButtonElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
   const refocusAdd = useRef(false);
   const closeForm = () => {
     refocusAdd.current = true;
@@ -40,6 +41,7 @@ export function Players<Player extends PlayerRow>({
   return (
     <RailCard
       title={`Players · ${String(progress.length)}`}
+      headingRef={heading}
       action={
         addForm === "closed" && (
           <button
@@ -68,7 +70,7 @@ export function Players<Player extends PlayerRow>({
               onRename={(name) => onRename(entry.player._id, name)}
               onRemove={async () => {
                 await onRemove(entry.player._id);
-                addButton.current?.focus();
+                (addButton.current ?? heading.current)?.focus();
               }}
             />
           ))}

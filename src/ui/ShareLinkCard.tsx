@@ -23,12 +23,14 @@ export function ShareLinkCard({
   compact?: boolean;
   onRotate?: () => void;
 }) {
-  const [copyState, setCopyState] = useState<CopyState>("idle");
+  const [copied, setCopied] = useState<{ url: string; state: CopyState }>({ url, state: "idle" });
+  const copyState = copied.url === url ? copied.state : "idle";
+  const setCopyState = (state: CopyState) => setCopied({ url, state });
   useEffect(() => {
     if (copyState !== "copied") return;
-    const timer = setTimeout(() => setCopyState("idle"), copiedFor);
+    const timer = setTimeout(() => setCopied({ url, state: "idle" }), copiedFor);
     return () => clearTimeout(timer);
-  }, [copyState]);
+  }, [copyState, url]);
 
   const copy = () => {
     void writeToClipboard(url)

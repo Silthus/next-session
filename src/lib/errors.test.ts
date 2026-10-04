@@ -21,7 +21,7 @@ describe("errorMessage", () => {
     "explains a rate limit and a bad name the same way for a %s",
     (topic) => {
       expect(errorMessage(new ConvexError({ code: "RATE_LIMITED", retryAfter: 4000 }), topic)).toBe(
-        "Too many changes at once. Try again in a moment.",
+        "Slow down a moment, then try again.",
       );
       expect(errorMessage(new ConvexError({ code: "INVALID_NAME" }), topic)).toBe(
         "Use 1 to 60 characters.",

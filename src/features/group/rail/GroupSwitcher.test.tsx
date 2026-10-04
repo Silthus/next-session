@@ -56,6 +56,17 @@ describe("GroupSwitcher", () => {
     expect(onCreate).toHaveBeenCalledOnce();
   });
 
+  it("makes one new Group however often the menu is reopened meanwhile", async () => {
+    const { onCreate } = renderSwitcher({ onCreate: vi.fn(() => new Promise(() => undefined)) });
+    await openMenu();
+    await userEvent.click(screen.getByRole("button", { name: "New group" }));
+    await userEvent.keyboard("{Escape}");
+    await openMenu();
+    expect(screen.getByRole("button", { name: "Making your group…" })).toBeTruthy();
+    await userEvent.click(screen.getByRole("button", { name: "Making your group…" }));
+    expect(onCreate).toHaveBeenCalledOnce();
+  });
+
   it("says why a new Group failed", async () => {
     renderSwitcher({
       onCreate: () => Promise.reject(new ConvexError({ code: "TOO_MANY_GROUPS" })),

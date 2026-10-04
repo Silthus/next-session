@@ -1,13 +1,15 @@
-import { useId, type ReactNode } from "react";
+import { useId, type ReactNode, type Ref } from "react";
 import { Card } from "../../../ui/Card";
 
 export function RailCard({
   title,
   action,
+  headingRef,
   children,
 }: {
   title: string;
   action?: ReactNode;
+  headingRef?: Ref<HTMLHeadingElement>;
   children: ReactNode;
 }) {
   const headingId = useId();
@@ -16,7 +18,9 @@ export function RailCard({
       <div className="flex min-h-5 items-center justify-between gap-3">
         <h2
           id={headingId}
-          className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"
+          ref={headingRef}
+          tabIndex={-1}
+          className="font-mono outline-none text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"
         >
           {title}
         </h2>

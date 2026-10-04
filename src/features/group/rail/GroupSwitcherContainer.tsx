@@ -10,12 +10,13 @@ export function GroupSwitcherContainer({ group }: { group: { id: Id<"groups">; n
   const renameGroup = useMutation(api.groups.rename);
   const removeGroup = useMutation(api.groups.remove);
   const navigate = useNavigate();
-  const open = (groupId: string) => void navigate({ to: "/g/$groupId", params: { groupId } });
+  const open = (groupId: string, replace = false) =>
+    void navigate({ to: "/g/$groupId", params: { groupId }, replace });
 
   const deleteGroup = async () => {
     const next = groups?.find((candidate) => candidate.id !== group.id);
     await removeGroup({ groupId: group.id });
-    if (next) open(next.id);
+    if (next) open(next.id, true);
     else void navigate({ to: "/", replace: true });
   };
 

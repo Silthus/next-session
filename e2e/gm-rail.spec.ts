@@ -94,12 +94,15 @@ test("the GM copies, rotates, and undoes the Share Link from the rail", async ({
     `/s/${gm.shareToken}`,
   );
 
-  await rail.getByRole("button", { name: "Rotate" }).click();
+  await rail.getByRole("button", { name: "Rotate" }).focus();
+  await page.keyboard.press("Enter");
   const toast = page.getByRole("status");
   await expect(toast).toContainText("Link rotated. Old links stopped working.");
   await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).not.toBe(gm.shareToken);
   const rotated = await shareTokenOf(gm.client, gm.groupId);
   await expect(rail.getByText(`/s/${rotated}`)).toBeVisible();
+  await expect(rail.getByRole("button", { name: "Copy" })).toBeVisible();
+  await expect(rail.getByRole("button", { name: "Rotate" })).toBeFocused();
 
   await toast.getByRole("button", { name: "Undo" }).focus();
   await page.keyboard.press("Enter");

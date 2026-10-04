@@ -21,7 +21,7 @@ export function Nudge({
       <h2 id={headingId} className="sr-only">
         Save your group
       </h2>
-      <p className="flex-1 text-sm text-ink">
+      <p className="min-w-0 flex-1 text-sm break-words text-ink">
         <span className="font-semibold">{joinedLine(names)}</span>
         {` Save this group to keep it on every device. Unsaved groups vanish after ${String(UNSAVED_GROUP_QUIET_DAYS)} quiet days.`}
       </p>

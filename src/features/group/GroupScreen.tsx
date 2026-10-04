@@ -235,7 +235,7 @@ function GroupSurface({
           onLater={laterNudge}
         />
       )}
-      {!wide && <ShareLinkCard key={shareUrl} url={shareUrl} compact onRotate={rotate} />}
+      {!wide && <ShareLinkCard url={shareUrl} compact onRotate={rotate} />}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
         <HeatCalendar
           month={requestedMonth}
@@ -248,7 +248,7 @@ function GroupSurface({
         />
         <GroupRail
           wide={wide}
-          shareLink={<ShareLinkCard key={shareUrl} url={shareUrl} onRotate={rotate} />}
+          shareLink={<ShareLinkCard url={shareUrl} onRotate={rotate} />}
           dayPanel={dayPanel()}
           panels={{
             bestNights: (

@@ -63,7 +63,7 @@ export function NameForm({
     <form
       onSubmit={(event) => void submit(event)}
       onKeyDown={(event) => {
-        if (event.key !== "Escape") return;
+        if (event.key !== "Escape" || event.nativeEvent.isComposing) return;
         event.stopPropagation();
         if (!busy) onCancel();
       }}

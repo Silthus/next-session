@@ -59,6 +59,7 @@ describe("BestNights", () => {
       name: "Friday, Oct 16, Everyone is free. Free: Ana, Ben, Chiara, Dev, Eli, Fay",
     });
     expect(within(night).getByText("+2")).toBeTruthy();
+    expect(night.textContent).toMatch(/ANBECHDE\+2$/);
   });
 
   it("names no one free on a night of maybes", () => {

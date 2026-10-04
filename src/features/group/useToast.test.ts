@@ -58,6 +58,7 @@ describe("useToast", () => {
     act(() => showForFirstGroup("Session on Thu, Nov 5."));
     expect(result.current.toast).toBeNull();
     act(() => result.current.show("Saved."));
+    act(() => showForFirstGroup("Link rotated."));
     expect(result.current.toast?.message).toBe("Saved.");
   });
 

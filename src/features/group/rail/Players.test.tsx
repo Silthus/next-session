@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import { describe, expect, it, vi } from "vitest";
@@ -106,6 +106,23 @@ describe("Players", () => {
     await userEvent.type(within(card).getByRole("textbox", { name: "Player name" }), "   {Enter}");
     expect(onAdd).not.toHaveBeenCalled();
     expect(within(card).getByRole("alert").textContent).toBe("Use 1 to 60 characters.");
+  });
+
+  it("moves focus to the Roster after a remove while the add form is open", async () => {
+    const { card } = renderPlayers(monthWith({ players: rosterOf("Ana", "Ben") }));
+    await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
+    await userEvent.click(within(card).getByRole("button", { name: "More for Ana" }));
+    await userEvent.click(within(card).getByRole("button", { name: "Remove" }));
+    await userEvent.click(within(card).getByRole("button", { name: "Remove Ana" }));
+    expect(document.activeElement).toBe(within(card).getByRole("heading"));
+  });
+
+  it("keeps an IME conversion's Escape for the IME", async () => {
+    const { card } = renderPlayers();
+    await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
+    const field = within(card).getByRole("textbox", { name: "Player name" });
+    fireEvent.keyDown(field, { key: "Escape", isComposing: true });
+    expect(within(card).getByRole("textbox", { name: "Player name" })).toBe(field);
   });
 
   it("renames a Player inline, and Escape cancels", async () => {
