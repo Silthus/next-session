@@ -429,4 +429,46 @@ test.describe("player surface screenshots", () => {
       }
     }
   });
+
+  test("the first-visit hint and the done card at 390 and 1440 px, light and dark", async ({
+    page,
+  }) => {
+    const group = await seedGroup(["Ana", "Ben"]);
+    const month = monthOf(todayUtc(Date.now()));
+    await group.gm.mutation(api.player.fillRest, {
+      shareToken: group.shareToken,
+      playerId: group.playerIds.Ben!,
+      month,
+    });
+
+    await rememberPlayerWithoutHint(page, group, "Ana");
+    for (const viewport of viewports) {
+      for (const colorScheme of schemes) {
+        await page.setViewportSize(viewport);
+        await page.emulateMedia({ colorScheme });
+        await page.goto(group.link);
+        await expect(page.getByRole("tooltip")).toBeVisible();
+        await page.screenshot({
+          path: `${screenshotDir}/hint-${viewport.label}-${colorScheme}.png`,
+          fullPage: true,
+          animations: "disabled",
+        });
+      }
+    }
+
+    await answerAs(page, group, "Ben");
+    for (const viewport of viewports) {
+      for (const colorScheme of schemes) {
+        await page.setViewportSize(viewport);
+        await page.emulateMedia({ colorScheme });
+        await page.goto(group.link);
+        await expect(page.getByText("Your GM sees it already.")).toBeVisible();
+        await page.screenshot({
+          path: `${screenshotDir}/done-${viewport.label}-${colorScheme}.png`,
+          fullPage: true,
+          animations: "disabled",
+        });
+      }
+    }
+  });
 });

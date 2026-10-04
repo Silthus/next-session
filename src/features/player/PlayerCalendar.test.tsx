@@ -78,6 +78,23 @@ function CalendarWithRefusingBackend() {
   );
 }
 
+function CalendarWithAnswersSaved() {
+  const [answers, setAnswers] = useState<Props["answers"]>(everyDayFrom(4, 31));
+  return (
+    <PlayerCalendar
+      {...calendarProps({
+        answers,
+        onAnswer: (date, answer) => {
+          const next = { ...answers };
+          if (answer === null) delete next[date];
+          else next[date] = answer;
+          setAnswers(next);
+        },
+      })}
+    />
+  );
+}
+
 function CalendarWithBackend() {
   const [month, setMonth] = useState("2026-10");
   const [answers, setAnswers] = useState<Props["answers"]>({ "2026-10-04": "free" });
@@ -193,7 +210,9 @@ describe("PlayerCalendar", () => {
 
     expect(await screen.findByText("All set for now ✓")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /^Fill / })).toBeNull();
-    expect(screen.getByRole("button", { name: "Next month" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("button", { name: "Next month" }).getAttribute("aria-disabled")).toBe(
+      "true",
+    );
   });
 
   it("shows a past month read-only without progress or Fill Rest", async () => {
@@ -261,6 +280,18 @@ describe("PlayerCalendar", () => {
 
     await waitFor(() =>
       expect(screen.getByRole("button", { name: /^Mark the other/ })).toBe(document.activeElement),
+    );
+  });
+
+  it("leaves focus alone when a tap, not a refused Fill Rest, reopens a done month", async () => {
+    renderInRouter(() => <CalendarWithAnswersSaved />);
+    const lastNight = await tile("Saturday, October 31: Busy");
+    (document.activeElement as HTMLElement).blur();
+
+    fireEvent.click(lastNight);
+
+    expect(await screen.findByRole("button", { name: "Mark the other 1 night busy" })).not.toBe(
+      document.activeElement,
     );
   });
 

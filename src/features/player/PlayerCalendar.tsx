@@ -64,17 +64,20 @@ export function PlayerCalendar({
   const doneHeading = useRef<HTMLParagraphElement>(null);
   const fillRestSlot = useRef<HTMLDivElement>(null);
   const focusDoneCardWhenDone = useRef(false);
+  const refocusFillRestIfRefused = useRef(false);
 
   useEffect(() => {
     if (view.done && focusDoneCardWhenDone.current) {
       focusDoneCardWhenDone.current = false;
       doneHeading.current?.focus();
-    } else if (!view.done && document.activeElement === document.body) {
+    } else if (!view.done && refocusFillRestIfRefused.current) {
+      refocusFillRestIfRefused.current = false;
       fillRestSlot.current?.querySelector("button")?.focus();
     }
   }, [view.done]);
 
   function answer(day: PlayerDay) {
+    refocusFillRestIfRefused.current = false;
     vibrate(8);
     setTaps((count) => count + 1);
     onAnswer(day.date, nextAnswer(day.answer));
@@ -85,12 +88,18 @@ export function PlayerCalendar({
     setStagger(new Map(view.fillRest.map((date, index) => [date, index])));
     setTimeout(() => setStagger(new Map()), view.fillRest.length * FILL_STAGGER_MS + 300);
     focusDoneCardWhenDone.current = true;
+    refocusFillRestIfRefused.current = true;
     onFillRest(month);
+  }
+
+  function changeMonth(next: IsoMonth) {
+    refocusFillRestIfRefused.current = false;
+    onMonthChange(next);
   }
 
   function fillNextMonth(next: IsoMonth) {
     monthHeading.current?.focus();
-    onMonthChange(next);
+    changeMonth(next);
   }
 
   return (
@@ -153,7 +162,7 @@ export function PlayerCalendar({
           headingRef={monthHeading}
           stagger={stagger}
           onAnswer={answer}
-          onMonthChange={onMonthChange}
+          onMonthChange={changeMonth}
         />
 
         {!view.readOnly && !loaded && <Skeleton className="h-14 rounded-lg" />}
@@ -171,7 +180,10 @@ export function PlayerCalendar({
               <Button
                 variant={view.progress.answered > 0 ? "secondary" : "ghost"}
                 size="lg"
-                className={cn("w-full", view.progress.answered > 0 && "border-busy/40! text-busy!")}
+                className={cn(
+                  "w-full",
+                  view.progress.answered > 0 && "border-busy/40! text-ink! dark:text-busy!",
+                )}
                 onClick={fillRest}
               >
                 <span className="size-3 rounded-full bg-busy" aria-hidden="true" />
@@ -249,6 +261,7 @@ function MonthCard({
           <h2
             ref={headingRef}
             tabIndex={-1}
+            aria-live="polite"
             className="font-display text-2xl font-bold outline-none"
           >
             {view.label}
@@ -272,9 +285,9 @@ function MonthCard({
           <Button
             variant="ghost"
             size="sm"
-            className="size-11! px-0!"
             aria-label="Next month"
-            disabled={view.nextMonth === null}
+            aria-disabled={view.nextMonth === null}
+            className="size-11! px-0! aria-disabled:pointer-events-none aria-disabled:opacity-50"
             onClick={() => view.nextMonth && onMonthChange(view.nextMonth)}
           >
             <IconChevron direction="right" />

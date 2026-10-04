@@ -10,7 +10,10 @@ export function Progress({ answered, fillable }: { answered: number; fillable: n
           {done ? "All nights set" : `${String(answered)} of ${String(fillable)} nights set`}
         </span>
         <span
-          className={cn("font-mono tabular-nums", done ? "font-semibold text-free" : "text-ink-2")}
+          className={cn(
+            "font-mono tabular-nums",
+            done ? "font-semibold text-ink dark:text-free" : "text-ink-2",
+          )}
         >
           {done ? "✓ done" : `${String(percent)}%`}
         </span>
