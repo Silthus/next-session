@@ -6,3 +6,5 @@
 - `red-filter-to-join.log` / `red-filter-to-join-e2e.log` → `green-filter-to-join.log` / `green-filter-to-join-e2e.log`: the carried name on the long-Roster join screen.
 - `gate-check.log` (`bun run check`, 611 tests) and `gate-e2e.log` (45 passed, 13 opt-in screenshot specs skipped).
 - `screenshots/`: the long-Roster join screen with an unmatched filter, 390 and 1440 px, light and dark.
+- `qa-swarm/ledger.md`: every round, finding, bucket and fix commit. `qa-swarm/r1-red-taken.log` / `r1-green-taken.log`: the round-1 NAME_TAKEN fix, red then green.
+- `prod/`: the anonymous prod check after the merge, on `next-session.silthus.workers.dev` (landing, Create your link, the share link as a Player, join, calendar; no page errors, no Accounts).

@@ -1,0 +1,58 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-51
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/player/Join.test.tsx (24 tests | 1 failed) 986ms
+   ❯ Join (24)
+     ❯ with a long Roster (13)
+       × keeps the carried name when the Group refuses it as taken 51ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/player/Join.test.tsx > Join > with a long Roster > keeps the carried name when the Group refuses it as taken
+AssertionError: expected <input …(6)></input> to have property "value" with value 'A na'
+
+- Expected
++ Received
+
+- A na
+
+ ❯ src/features/player/Join.test.tsx:237:78
+    235|
+    236|       expect(await screen.findByRole("button", { name: "Ana" })).toBeT…
+    237|       expect(screen.getByRole("textbox", { name: "Not listed? Your nam…
+       |                                                                              ^
+    238|         "value",
+    239|         "A na",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 23 passed (24)
+   Start at  10:03:13
+   Duration  1.74s (tests 59%, environment 27%, import 5%, transform 5%, setup 4%)
+
