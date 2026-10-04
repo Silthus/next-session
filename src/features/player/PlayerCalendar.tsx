@@ -7,10 +7,10 @@ import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
 import { LegalFooter } from "../../ui/LegalFooter";
 import { Logo } from "../../ui/Logo";
+import { IconChevron } from "../../ui/icons";
 import { Skeleton } from "../../ui/Skeleton";
-import { IconChevron } from "./IconChevron";
+import { useFocusOnMount } from "../../ui/useFocusOnMount";
 import { Progress } from "./Progress";
-import { useFocusOnMount } from "./useFocusOnMount";
 import { dayLabel, monthName, playerMonth, type PlayerDay, type PlayerMonth } from "./playerMonth";
 
 const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];

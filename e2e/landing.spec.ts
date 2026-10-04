@@ -8,14 +8,9 @@ import {
 } from "@playwright/test";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
+import { convexUrl, newEmail, password, toastRegion } from "./helpers";
 
-const password = "game-night-2026";
-const convexUrl = "http://127.0.0.1:3210";
 const shareLinkPattern = /^localhost:5173\/s\/[A-Za-z0-9_-]{10}$/;
-
-function newEmail() {
-  return `gm-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.test`;
-}
 
 async function createLink(page: Page) {
   await page.goto("/");
@@ -240,7 +235,7 @@ test.describe("a Save whose move fails after the sign-in", () => {
     await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
     await sheet.getByRole("button", { name: "Finish saving" }).click();
 
-    await expect(page.getByRole("status")).toHaveText("Saved. Open it anywhere with your account.");
+    await expect(toastRegion(page)).toHaveText("Saved. Open it anywhere with your account.");
     await expect(page).toHaveURL(new RegExp(`^[^?]*${groupPath}`));
     await expect(page.getByText(shareLink.replace(/^localhost:5173/, ""))).toBeVisible();
   });
@@ -259,7 +254,7 @@ test.describe("a Save whose move fails after the sign-in", () => {
     await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
     await sheet.getByRole("button", { name: "Close" }).click();
 
-    await expect(page.getByRole("status")).toHaveText("Saved. Open it anywhere with your account.");
+    await expect(toastRegion(page)).toHaveText("Saved. Open it anywhere with your account.");
     await expect(page).toHaveURL(new RegExp(`^[^?]*${groupPath}`));
     await expect(page.getByText(shareLink.replace(/^localhost:5173/, ""))).toBeVisible();
   });
