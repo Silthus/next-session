@@ -1,0 +1,40 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-63
+
+stdout | convex/account.test.ts > Save past the Group cap > refuses to give an Account more than 50 Groups and moves nothing
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/account.test.ts > Save past the Group cap > refuses to give an Account more than 50 Groups and moves nothing
+`auth:store` type: signIn
+
+stdout | convex/account.test.ts > Save past the Group cap > refuses to give an Account more than 50 Groups and moves nothing
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/account.test.ts > Save past the Group cap > refuses to give an Account more than 50 Groups and moves nothing
+`auth:store` type: signIn
+
+ ❯ |convex| convex/account.test.ts (19 tests | 1 failed) 1764ms
+   ❯ Save past the Group cap (2)
+     × refuses to give an Account more than 50 Groups and moves nothing 112ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/account.test.ts > Save past the Group cap > refuses to give an Account more than 50 Groups and moves nothing
+AssertionError: expected undefined to be an instance of ConvexError
+ ❯ expectErrorCode convex/model/test.setup.ts:78:17
+     76|     (reason: unknown) => reason,
+     77|   );
+     78|   expect(error).toBeInstanceOf(ConvexError);
+       |                 ^
+     79|   const { data } = error as ConvexError<AppErrorData & { code: Code }>;
+     80|   expect(data.code).toBe(code);
+ ❯ convex/account.test.ts:185:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 18 passed (19)
+   Start at  14:25:21
+   Duration  2.18s (tests 84%, transform 7%, import 6%, environment 2%)
+

@@ -1,0 +1,45 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-63
+
+ ❯ |convex| convex/player.test.ts (56 tests | 1 failed | 55 skipped) 78ms
+   ❯ joining while signed in (1)
+     × claims the new Player for an Account 77ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/player.test.ts > joining while signed in > claims the new Player for an Account
+AssertionError: expected { …(4) } to match object { Object (claimedPlayerId) }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "claimedPlayerId": "0000000000000000000010005players",
++   "groupId": "00000000000000000000010002groups",
++   "name": "My group",
++   "players": [
++     {
++       "_id": "0000000000000000000010005players",
++       "name": "Ada",
++     },
++   ],
++   "sessionDates": [],
+  }
+
+ ❯ convex/player.test.ts:691:69
+    689|     const ada = await player.as.mutation(api.player.join, { shareToken…
+    690|
+    691|     expect(await player.as.query(api.player.group, { shareToken })).to…
+       |                                                                     ^
+    692|       claimedPlayerId: ada,
+    693|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 55 skipped (56)
+   Start at  14:22:04
+   Duration  468ms (transform 37%, import 31%, tests 20%, environment 11%, worker 1%)
+

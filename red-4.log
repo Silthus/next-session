@@ -1,0 +1,235 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-63
+
+ ❯ |convex| convex/me.test.ts (11 tests | 11 failed) 120ms
+   ❯ me.groups (11)
+     × is null for a visitor and an Anonymous GM 15ms
+     × is empty for an Account that runs and plays nowhere 2ms
+     × lists the Groups the Account runs with their next five Sessions from today 50ms
+     × lists the Groups the Account plays in with its Player and the days left to answer 21ms
+     × shows a Group the Account runs and plays in in both lists 3ms
+     × drops a Group once the Account releases its claim there 4ms
+     × drops a Group once the GM removes the Claimed Player 8ms
+     × skips a claim whose Group is deleted while its Players are still being removed 4ms
+     × returns the current Share Token after the GM rotates it 5ms
+     × moves on at midnight without a write 3ms
+     × accepts a client date one day off the server's but no further 3ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > is null for a visitor and an Anonymous GM
+Error: Could not find module for: "me"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:40
+ ❯ query node_modules/convex-test/dist/index.js:2158:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as query] node_modules/convex-test/dist/index.js:1886:56
+ ❯ myGroups convex/me.test.ts:56:6
+ ❯ convex/me.test.ts:62:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > is empty for an Account that runs and plays nowhere
+Error: Could not find module for: "me"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:40
+ ❯ query node_modules/convex-test/dist/index.js:2158:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as query] node_modules/convex-test/dist/index.js:1886:56
+ ❯ myGroups convex/me.test.ts:56:6
+ ❯ convex/me.test.ts:69:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > lists the Groups the Account runs with their next five Sessions from today
+Error: Could not find module for: "me"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:40
+ ❯ query node_modules/convex-test/dist/index.js:2158:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as query] node_modules/convex-test/dist/index.js:1886:56
+ ❯ myGroups convex/me.test.ts:56:6
+ ❯ convex/me.test.ts:81:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > lists the Groups the Account plays in with its Player and the days left to answer
+Error: Could not find module for: "me"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:40
+ ❯ query node_modules/convex-test/dist/index.js:2158:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as query] node_modules/convex-test/dist/index.js:1886:56
+ ❯ myGroups convex/me.test.ts:56:6
+ ❯ convex/me.test.ts:100:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > shows a Group the Account runs and plays in in both lists
+Error: Could not find module for: "me"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:40
+ ❯ query node_modules/convex-test/dist/index.js:2158:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as query] node_modules/convex-test/dist/index.js:1886:56
+ ❯ myGroups convex/me.test.ts:56:6
+ ❯ convex/me.test.ts:120:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > drops a Group once the Account releases its claim there
+Error: Could not find module for: "me"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:40
+ ❯ query node_modules/convex-test/dist/index.js:2158:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as query] node_modules/convex-test/dist/index.js:1886:56
+ ❯ myGroups convex/me.test.ts:56:6
+ ❯ convex/me.test.ts:133:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > drops a Group once the GM removes the Claimed Player
+Error: Could not find module for: "me"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:40
+ ❯ query node_modules/convex-test/dist/index.js:2158:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as query] node_modules/convex-test/dist/index.js:1886:56
+ ❯ myGroups convex/me.test.ts:56:6
+ ❯ convex/me.test.ts:143:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/11]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > skips a claim whose Group is deleted while its Players are still being removed
+Error: Could not find module for: "me"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:40
+ ❯ query node_modules/convex-test/dist/index.js:2158:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as query] node_modules/convex-test/dist/index.js:1886:56
+ ❯ myGroups convex/me.test.ts:56:6
+ ❯ convex/me.test.ts:153:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/11]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > returns the current Share Token after the GM rotates it
+Error: Could not find module for: "me"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:40
+ ❯ query node_modules/convex-test/dist/index.js:2158:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as query] node_modules/convex-test/dist/index.js:1886:56
+ ❯ myGroups convex/me.test.ts:56:6
+ ❯ convex/me.test.ts:165:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/11]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > moves on at midnight without a write
+Error: Could not find module for: "me"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:40
+ ❯ query node_modules/convex-test/dist/index.js:2158:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as query] node_modules/convex-test/dist/index.js:1886:56
+ ❯ myGroups convex/me.test.ts:56:6
+ ❯ convex/me.test.ts:174:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/11]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > accepts a client date one day off the server's but no further
+Error: Could not find module for: "me"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:40
+ ❯ query node_modules/convex-test/dist/index.js:2158:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as query] node_modules/convex-test/dist/index.js:1886:56
+ ❯ myGroups convex/me.test.ts:56:6
+ ❯ upcomingAsOf convex/me.test.ts:191:14
+ ❯ convex/me.test.ts:193:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/11]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  11 failed (11)
+   Start at  14:24:16
+   Duration  516ms (transform 32%, tests 29%, import 28%, environment 10%, worker 1%)
+

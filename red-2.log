@@ -1,0 +1,154 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-63
+
+ ❯ |convex| convex/player.test.ts (65 tests | 9 failed | 56 skipped) 118ms
+   ❯ player.claim (9)
+     × claims a Player picked from the Roster 85ms
+     × leaves the Account's own claim as it is 3ms
+     × moves the Account's claim to another Player of the same Group 3ms
+     × refuses a Player another Account claimed 3ms
+     × refuses a Player of another Group and a rotated-away Share Token 8ms
+     × lets only an Account claim 3ms
+     × caps an Account at 50 Claimed Players but still moves a claim within a Group 5ms
+     × rate limits an Account to a burst of 10 claims 4ms
+     × locks nothing: the Share Link still answers as a Claimed Player 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/player.test.ts > player.claim > claims a Player picked from the Roster
+Error: Expected a Convex function exported from module "player" as `claim`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/player.test.ts:722:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.claim > leaves the Account's own claim as it is
+Error: Expected a Convex function exported from module "player" as `claim`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/player.test.ts:731:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.claim > moves the Account's claim to another Player of the same Group
+Error: Expected a Convex function exported from module "player" as `claim`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/player.test.ts:744:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.claim > refuses a Player another Account claimed
+Error: Expected a Convex function exported from module "player" as `claim`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/player.test.ts:758:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.claim > refuses a Player of another Group and a rotated-away Share Token
+AssertionError: expected Error: Expected a Convex function exporte… to be an instance of ConvexError
+ ❯ expectErrorCode convex/model/test.setup.ts:78:17
+     76|     (reason: unknown) => reason,
+     77|   );
+     78|   expect(error).toBeInstanceOf(ConvexError);
+       |                 ^
+     79|   const { data } = error as ConvexError<AppErrorData & { code: Code }>;
+     80|   expect(data.code).toBe(code);
+ ❯ convex/player.test.ts:776:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.claim > lets only an Account claim
+AssertionError: expected Error: Expected a Convex function exporte… to be an instance of ConvexError
+ ❯ expectErrorCode convex/model/test.setup.ts:78:17
+     76|     (reason: unknown) => reason,
+     77|   );
+     78|   expect(error).toBeInstanceOf(ConvexError);
+       |                 ^
+     79|   const { data } = error as ConvexError<AppErrorData & { code: Code }>;
+     80|   expect(data.code).toBe(code);
+ ❯ convex/player.test.ts:794:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.claim > caps an Account at 50 Claimed Players but still moves a claim within a Group
+Error: Expected a Convex function exported from module "player" as `claim`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/player.test.ts:810:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.claim > rate limits an Account to a burst of 10 claims
+Error: Expected a Convex function exported from module "player" as `claim`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/player.test.ts:829:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.claim > locks nothing: the Share Link still answers as a Claimed Player
+Error: Expected a Convex function exported from module "player" as `claim`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/player.test.ts:844:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  9 failed | 56 skipped (65)
+   Start at  14:22:56
+   Duration  558ms (transform 36%, import 27%, tests 27%, environment 9%, worker 1%)
+

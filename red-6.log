@@ -1,0 +1,67 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-63
+
+ ❯ |ui| src/lib/errors.test.ts (28 tests | 4 failed) 12ms
+   ❯ errorMessage (28)
+     × explains a join { code: 'TOO_MANY_GROUPS' } 5ms
+     × explains a keep { code: 'PLAYER_CLAIMED' } 1ms
+     × explains a keep { code: 'TOO_MANY_GROUPS' } 1ms
+     × explains a keep { code: 'NOT_FOUND' } 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/lib/errors.test.ts > errorMessage > explains a join { code: 'TOO_MANY_GROUPS' }
+ FAIL  |ui| src/lib/errors.test.ts > errorMessage > explains a keep { code: 'TOO_MANY_GROUPS' }
+AssertionError: expected 'That didn\'t work. Try again.' to be 'You keep 50 groups. Remove one from M…' // Object.is equality
+
+Expected: "You keep 50 groups. Remove one from My groups first."
+Received: "That didn't work. Try again."
+
+ ❯ src/lib/errors.test.ts:37:56
+     35|     ["fillRest", { code: "OUT_OF_WINDOW" }, "Those nights are locked n…
+     36|   ] as const)("explains a %s %o", (topic, data, message) => {
+     37|     expect(errorMessage(new ConvexError(data), topic)).toBe(message);
+       |                                                        ^
+     38|   });
+     39|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |ui| src/lib/errors.test.ts > errorMessage > explains a keep { code: 'PLAYER_CLAIMED' }
+AssertionError: expected 'That didn\'t work. Try again.' to be 'Another account keeps this name. Add …' // Object.is equality
+
+Expected: "Another account keeps this name. Add yours with a last initial, or ask your GM."
+Received: "That didn't work. Try again."
+
+ ❯ src/lib/errors.test.ts:37:56
+     35|     ["fillRest", { code: "OUT_OF_WINDOW" }, "Those nights are locked n…
+     36|   ] as const)("explains a %s %o", (topic, data, message) => {
+     37|     expect(errorMessage(new ConvexError(data), topic)).toBe(message);
+       |                                                        ^
+     38|   });
+     39|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |ui| src/lib/errors.test.ts > errorMessage > explains a keep { code: 'NOT_FOUND' }
+AssertionError: expected 'That didn\'t work. Try again.' to be 'That player is gone already.' // Object.is equality
+
+Expected: "That player is gone already."
+Received: "That didn't work. Try again."
+
+ ❯ src/lib/errors.test.ts:37:56
+     35|     ["fillRest", { code: "OUT_OF_WINDOW" }, "Those nights are locked n…
+     36|   ] as const)("explains a %s %o", (topic, data, message) => {
+     37|     expect(errorMessage(new ConvexError(data), topic)).toBe(message);
+       |                                                        ^
+     38|   });
+     39|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 24 passed (28)
+   Start at  14:25:58
+   Duration  663ms (environment 79%, setup 11%, transform 5%, tests 2%, import 2%, worker 1%)
+

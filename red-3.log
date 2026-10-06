@@ -1,0 +1,93 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-63
+
+ ❯ |convex| convex/player.test.ts (73 tests | 5 failed) 803ms
+   ❯ joining while signed in (5)
+     × keeps a joined Player on the Roster until the GM removes it 10ms
+   ❯ player.release (4)
+     × releases the claim and keeps the Player with its Answers 2ms
+     × returns null for a Group without the Account's claim and leaves other claims alone 3ms
+     × lets only an Account release 3ms
+     × shares the claim rate limit with player.claim 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/player.test.ts > joining while signed in > keeps a joined Player on the Roster until the GM removes it
+Error: Expected a Convex function exported from module "player" as `release`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/player.test.ts:738:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.release > releases the claim and keeps the Player with its Answers
+Error: Expected a Convex function exported from module "player" as `release`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/player.test.ts:907:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.release > returns null for a Group without the Account's claim and leaves other claims alone
+Error: Expected a Convex function exported from module "player" as `release`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/player.test.ts:926:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.release > lets only an Account release
+AssertionError: expected Error: Expected a Convex function exporte… to be an instance of ConvexError
+ ❯ expectErrorCode convex/model/test.setup.ts:78:17
+     76|     (reason: unknown) => reason,
+     77|   );
+     78|   expect(error).toBeInstanceOf(ConvexError);
+       |                 ^
+     79|   const { data } = error as ConvexError<AppErrorData & { code: Code }>;
+     80|   expect(data.code).toBe(code);
+ ❯ convex/player.test.ts:936:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.release > shares the claim rate limit with player.claim
+Error: Expected a Convex function exported from module "player" as `release`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/player.test.ts:946:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 68 passed (73)
+   Start at  14:23:31
+   Duration  1.21s (tests 72%, transform 13%, import 11%, environment 4%)
+
