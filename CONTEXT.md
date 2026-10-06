@@ -15,12 +15,24 @@ A GM created by the one click on "Create your link", with no email and no passwo
 _Avoid_: guest, temporary user
 
 **Account**:
-A GM who can sign in again on any device, today with an email and a password.
-_Avoid_: real user, registered user, profile
+A signed-in user who can sign in again on any device, today with an email and a password. One Account can be a GM, a Player, or both: it owns Groups and claims Players.
+_Avoid_: real user, registered user, profile, player account
 
 **Player**:
-A name on a Group's Roster. A Player never signs in; whoever holds the Share Link can answer as any Player.
+A name on a Group's Roster. A Player needs no Account; whoever holds the Share Link can answer as any Player. A Player stays on the Roster until the GM removes them or the Group ends.
 _Avoid_: member, membership, participant, attendee
+
+**Claimed Player**:
+A Player linked to an Account, so the Account opens the Group as that Player on any device and sees the Group on My groups. An Account claims at most one Player per Group. A claim adds no protection: the Share Link still answers as any Player.
+_Avoid_: linked player, player account, membership
+
+**Claim** / **Release**:
+Linking a Player to the signed-in Account, and undoing that link. Joining with a new name while signed in claims; **Keep this group** claims an existing name. **Not you?** and **Remove from my groups** release. Releasing never deletes the Player.
+_Avoid_: adopt, unlink, leave (only the GM removes a Player)
+
+**My groups**:
+The Account's page (`/me`): the Groups it runs and the Groups where it has a Claimed Player, each with its upcoming Sessions.
+_Avoid_: dashboard, home, profile
 
 ### Groups
 
@@ -85,9 +97,11 @@ _Avoid_: consent (that word is reserved for analytics), clickwrap
 - A **GM** owns zero or more **Groups**; an **Anonymous GM** owns at least one.
 - A **Group** has one **Share Link**, one **Roster**, and many **Sessions**.
 - A **Player** belongs to exactly one **Group** and gives at most one **Answer** per date.
+- An **Account** has at most one **Claimed Player** per **Group**; a **Player** is claimed by at most one **Account**.
 - **Save** turns the **Unsaved Groups** of an **Anonymous GM** into Groups of an **Account**, and the Anonymous GM ends.
 
 ## Flagged ambiguities
 
 - Lonir called a roster entry a "Membership" and stored answers as `yes / maybe / no` while the UI said Free / Maybe / Busy. Next Session uses **Player** and **free / maybe / busy** everywhere, in code and in copy.
 - Lonir split "Scheduled Session" (a date) from "Session" (prep content). Next Session has no prep content, so **Session** is the picked date.
+- "Claim" means two things in code. The Save **claim code** (`saveClaims`) moves an Anonymous GM's Groups; a **Claim** links a Player to an Account. In copy, the first is "Save" and the second is "Keep this group".
