@@ -8,15 +8,10 @@ import {
   useQuery,
 } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import { api } from "../../../convex/_generated/api";
-import {
-  finishPendingSave,
-  resumePendingSave,
-  saveGroups,
-  type ClaimDeps,
-  type SaveInput,
-} from "./save";
+import { finishPendingSave, saveGroups, saveThroughGoogle, type SaveInput } from "./save";
+import { useSaveOnReturn } from "./useSaveOnReturn";
 
 export type GmStatus = "loading" | "signedOut" | "anonymous" | "account";
 
@@ -61,16 +56,6 @@ function confirmIdentity({ client, fetchAccessToken }: LiveSession) {
   });
 }
 
-function useResumeLeftOverSave(status: GmStatus, redeemClaim: ClaimDeps["finishSave"]) {
-  const resolved = useRef(false);
-  useEffect(() => {
-    if (resolved.current || status === "loading") return;
-    resolved.current = true;
-    if (status === "account")
-      void resumePendingSave({ finishSave: redeemClaim, storage: sessionStorage });
-  }, [status, redeemClaim]);
-}
-
 export function useGm() {
   const auth = useConvexAuth();
   const me = useQuery(api.account.me);
@@ -89,8 +74,12 @@ export function useGm() {
   const startSave = useMutation(api.account.startSave);
   const redeemClaim = useMutation(api.account.finishSave);
   const status = gmStatus(auth, me);
-
-  useResumeLeftOverSave(status, redeemClaim);
+  const claims = useMemo(
+    () => ({ finishSave: redeemClaim, storage: sessionStorage }),
+    [redeemClaim],
+  );
+  const saveOnReturn = useSaveOnReturn(status, claims);
+  const google = useQuery(api.signInOptions.available)?.google === true;
 
   const actions = useMemo(
     () => ({
@@ -104,11 +93,31 @@ export function useGm() {
           finishSave: redeemClaim,
           storage: sessionStorage,
         }),
-      finishSave: () => finishPendingSave({ finishSave: redeemClaim, storage: sessionStorage }),
+      finishSave: () => finishPendingSave(claims),
       signOut,
     }),
-    [signIn, signOut, startSave, redeemClaim],
+    [signIn, signOut, startSave, redeemClaim, claims],
   );
 
-  return { status, email: me?.email, ...actions };
+  const googleActions = useMemo(() => {
+    if (!google) return { logInWithGoogle: undefined, saveWithGoogle: undefined };
+    const leaveForGoogle = (redirectTo: string) => providerSignIn("google", { redirectTo });
+    return {
+      logInWithGoogle: () => leaveForGoogle("/"),
+      saveWithGoogle: (groupId: string) =>
+        saveThroughGoogle({
+          startSave: () => startSave({}),
+          storage: sessionStorage,
+          continueWithGoogle: () => leaveForGoogle(`/g/${groupId}`),
+        }),
+    };
+  }, [google, providerSignIn, startSave]);
+
+  return {
+    status,
+    email: me?.email,
+    ...saveOnReturn,
+    ...actions,
+    ...googleActions,
+  };
 }

@@ -20,6 +20,7 @@ function renderLanding(overrides: Partial<Props> = {}) {
     onCreate: vi.fn(),
     onLogIn: vi.fn(),
     onSave: vi.fn(),
+    onLogOut: vi.fn(),
     ...overrides,
   };
   const router = createRouter({
@@ -75,6 +76,20 @@ describe("LandingView", () => {
     );
     expect(document.activeElement).toBe(line);
     expect(screen.getByRole("button", { name: "Create your link" })).toBeTruthy();
+  });
+
+  it("lets the Account it names log out, to sign in to another one", async () => {
+    const { props } = renderLanding({ showLogIn: false, loggedInAs: "gm@example.test" });
+
+    await userEvent.click(await screen.findByRole("button", { name: "Log out" }));
+
+    expect(props.onLogOut).toHaveBeenCalled();
+  });
+
+  it("offers no Log out without a signed-in Account", async () => {
+    renderLanding();
+    await screen.findByRole("button", { name: "Create your link" });
+    expect(screen.queryByRole("button", { name: "Log out" })).toBeNull();
   });
 
   it("holds the button while the link is being made", async () => {
