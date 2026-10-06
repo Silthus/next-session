@@ -31,6 +31,21 @@ export async function keepGroup(
   return await claimRemembered(keep, remembered, deps);
 }
 
+export async function keepAfterRedirect(
+  keep: Keep,
+  leaveToSignIn: () => Promise<unknown>,
+  storage: KeyValueStorage,
+) {
+  const remembered = JSON.stringify(keep);
+  storage.setItem(PENDING_KEEP_KEY, remembered);
+  try {
+    await leaveToSignIn();
+  } catch (error) {
+    forgetKeep(storage, remembered);
+    throw error;
+  }
+}
+
 export async function resumePendingKeep(deps: KeepDeps): Promise<KeepOutcome | null> {
   const remembered = deps.storage.getItem(PENDING_KEEP_KEY);
   if (remembered === null) return null;

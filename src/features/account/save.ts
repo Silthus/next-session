@@ -21,6 +21,10 @@ export type SaveDeps = {
 
 export type ClaimDeps = Pick<SaveDeps, "finishSave" | "storage">;
 
+export type GoogleSaveDeps = Pick<SaveDeps, "startSave" | "storage"> & {
+  continueWithGoogle: () => Promise<unknown>;
+};
+
 export const PASSWORD_FLOWS = { create: "signUp", logIn: "signIn" } as const;
 
 export async function saveGroups({ email, password, mode }: SaveInput, deps: SaveDeps) {
@@ -30,14 +34,24 @@ export async function saveGroups({ email, password, mode }: SaveInput, deps: Sav
   return await redeem(code, deps);
 }
 
+export async function saveThroughGoogle({
+  startSave,
+  storage,
+  continueWithGoogle,
+}: GoogleSaveDeps) {
+  const { code } = await startSave();
+  storage.setItem(PENDING_SAVE_KEY, code);
+  await continueWithGoogle();
+}
+
+export function hasPendingSave(storage: ClaimDeps["storage"]) {
+  return storage.getItem(PENDING_SAVE_KEY) !== null;
+}
+
 export async function finishPendingSave(deps: ClaimDeps) {
   const code = deps.storage.getItem(PENDING_SAVE_KEY);
   if (code === null) throw new ConvexError({ code: "CLAIM_INVALID" });
   return await redeem(code, deps);
-}
-
-export function resumePendingSave(deps: ClaimDeps) {
-  return finishPendingSave(deps).catch(() => null);
 }
 
 const redemptions = new Map<string, Promise<SaveResult>>();

@@ -64,6 +64,26 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
     }
   };
   const save = (input: SaveInput) => saveThrough(() => gm.save(input));
+  const { saveWithGoogle, resumingSave, savedOnReturn, refusalOnReturn, acknowledgeReturn } = gm;
+  const [returnRefusal, setReturnRefusal] = useState<unknown>();
+  const showToast = toasts.show;
+
+  useEffect(() => {
+    if (!savedOnReturn) return;
+    showToast("Saved. Open it anywhere with your account.");
+    acknowledgeReturn();
+  }, [savedOnReturn, showToast, acknowledgeReturn]);
+
+  if (refusalOnReturn !== undefined) {
+    acknowledgeReturn();
+    setReturnRefusal(refusalOnReturn);
+    setSaveSheetFor("your group");
+  }
+
+  const closeSaveSheet = () => {
+    setSaveSheetFor(null);
+    setReturnRefusal(undefined);
+  };
   const finish = () => saveThrough(gm.finishSave);
 
   const headerActions = (gm.status === "anonymous" || gm.status === "account") && group && (
@@ -81,7 +101,7 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         status: gm.status,
         group,
         saving,
-        holdingForSave: saving || saveSheetFor !== null,
+        holdingForSave: saving || resumingSave || saveSheetFor !== null,
         search,
         headerActions,
         showToast: toasts.show,
@@ -97,7 +117,9 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         signedInAs={gm.status === "account" ? gm.email : undefined}
         onSubmit={save}
         onFinish={finish}
-        onClose={() => setSaveSheetFor(null)}
+        refusal={returnRefusal}
+        onContinueWithGoogle={saveWithGoogle && (() => saveWithGoogle(groupId))}
+        onClose={closeSaveSheet}
       />
     </>
   );
@@ -183,6 +205,7 @@ function GroupSurface({
   const rail = useRailActions(groupId, showToast);
   const [nudgeSnoozedAt, setNudgeSnoozedAt] = useState(() => nudgeDismissedAt());
   const [openedAt] = useState(() => Date.now());
+  const [addPlayerRequests, setAddPlayerRequests] = useState(0);
   const navigate = useNavigate({ from: "/g/$groupId" });
   const showMonth = (next: IsoMonth) => void navigate({ search: { month: next } });
   const selectDay = (day: IsoDate | null) =>
@@ -278,6 +301,7 @@ function GroupSurface({
         <GroupRail
           wide={wide}
           rosterEmpty={schedule.players.length === 0}
+          onAddPlayer={() => setAddPlayerRequests((requests) => requests + 1)}
           shareLink={<ShareLinkCard url={shareUrl} onRotate={rotate} />}
           dayPanel={dayPanel()}
           panels={{
@@ -293,6 +317,7 @@ function GroupSurface({
             players: (
               <Players
                 progress={summary.progress}
+                addRequest={addPlayerRequests}
                 onAdd={rail.addPlayer}
                 onRename={rail.renamePlayer}
                 onRemove={rail.removePlayer}

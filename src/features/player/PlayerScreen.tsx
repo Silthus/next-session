@@ -2,7 +2,6 @@ import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { useCallback, useEffect, useState, type ComponentProps } from "react";
 import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
 import { fillRestDates, type Answer } from "../../../shared/answers";
 import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
 import { errorMessage } from "../../lib/errors";
@@ -19,6 +18,7 @@ import { Skeleton } from "../../ui/Skeleton";
 import { Button } from "../../ui/Button";
 import { Toast, type ToastMessage } from "../../ui/Toast";
 import { AccountSheet } from "../account/AccountSheet";
+import type { KeepOutcome } from "../account/keep";
 import { useGm } from "../account/useGm";
 import { HeaderAccount } from "../group/rail/HeaderAccount";
 import { Join } from "./Join";
@@ -77,6 +77,7 @@ function PlayerGroup({
   const join = useMutation(api.player.join);
   const release = useMutation(api.player.release);
   const [toast, showToast] = useToast();
+  const { keepWithGoogle, logInWithGoogle } = account;
   const [sheet, setSheet] = useState<"logIn" | "keep" | null>(null);
   const claimed = group.players.find(({ _id }) => _id === group.claimedPlayerId);
   if (claimed && identity?.playerId !== claimed._id) {
@@ -84,7 +85,8 @@ function PlayerGroup({
   }
   const player = claimed ?? group.players.find(({ _id }) => _id === identity?.playerId);
   const removed = identity !== null && player === undefined;
-  const keeper = useKeeper(account, shareToken, player?._id);
+  const keeper = useKeeper(account.keepRefusalOnReturn);
+  const keep = player && { shareToken, playerId: player._id };
 
   useEffect(() => {
     if (removed) forgetPlayer(group.groupId);
@@ -143,27 +145,22 @@ function PlayerGroup({
           keep={player._id === group.claimedPlayerId ? "kept" : keeper.state}
           keepRefusal={keeper.refusal}
           onKeep={() => {
-            if (account.status === "account") keeper.keepNow();
-            else setSheet("keep");
+            if (account.status !== "account") setSheet("keep");
+            else if (keep) keeper.keepThrough(() => account.keepNow(keep)).catch(keeper.refuse);
           }}
           accountControl={accountControl}
         />
       )}
       {player !== undefined && <Toast message={toast} />}
-      {sheet === "keep" && player ? (
+      {sheet === "keep" && player && keep ? (
         <AccountSheet
           open
           intent="keep"
           groupName={group.name}
           playerName={player.name}
           movesGroups={account.status === "anonymous"}
-          onSubmit={(input) =>
-            keeper.keep(() =>
-              account.status === "anonymous"
-                ? account.save(input)
-                : account.signInWithPassword(input),
-            )
-          }
+          onSubmit={(input) => keeper.keepThrough(() => account.keepWithPassword(keep, input))}
+          onContinueWithGoogle={keepWithGoogle && (() => keepWithGoogle(keep))}
           onClose={() => setSheet(null)}
         />
       ) : (
@@ -172,6 +169,7 @@ function PlayerGroup({
           intent="logIn"
           forPlayer
           onSubmit={account.logIn}
+          onContinueWithGoogle={logInWithGoogle && (() => logInWithGoogle(`/s/${shareToken}`))}
           onClose={() => setSheet(null)}
         />
       )}
@@ -179,27 +177,30 @@ function PlayerGroup({
   );
 }
 
-function useKeeper(account: Account, shareToken: string, playerId: Id<"players"> | undefined) {
+function useKeeper(refusalOnReturn: unknown) {
   const [state, setState] = useState<"offer" | "keeping">("offer");
-  const [refusal, setRefusal] = useState<string | null>(null);
+  const [refusal, setRefusal] = useState<unknown>(null);
+  const [tried, setTried] = useState(false);
+  const shownRefusal = tried ? refusal : (refusalOnReturn ?? null);
 
-  async function keep(signInFirst: () => Promise<unknown>) {
-    if (playerId === undefined) return;
+  async function keepThrough(run: () => Promise<KeepOutcome>) {
+    setTried(true);
     setState("keeping");
     setRefusal(null);
     try {
-      const outcome = await account.keepGroup({ shareToken, playerId }, signInFirst);
-      if (!outcome.kept) setRefusal(errorMessage(outcome.error, "keep"));
+      const outcome = await run();
+      if (!outcome.kept) setRefusal(outcome.error);
     } finally {
       setState("offer");
     }
   }
 
-  function keepNow() {
-    keep(noSignIn).catch((error: unknown) => setRefusal(errorMessage(error, "keep")));
-  }
-
-  return { state, refusal, keep, keepNow };
+  return {
+    state,
+    refusal: shownRefusal === null ? null : errorMessage(shownRefusal, "keep"),
+    keepThrough,
+    refuse: setRefusal,
+  };
 }
 
 function AccountControl({
@@ -238,10 +239,6 @@ function useToast() {
   }, []);
 
   return [toast, show] as const;
-}
-
-function noSignIn() {
-  return Promise.resolve();
 }
 
 function noAction() {}

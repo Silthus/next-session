@@ -50,6 +50,15 @@ function renderCalendar({
   return { onSelectDay, onMonthChange };
 }
 
+function countsOf(day: HTMLElement) {
+  return Object.fromEntries(
+    [...day.querySelectorAll("[data-count]")].map((count) => [
+      count.getAttribute("data-count") ?? "",
+      count.textContent,
+    ]),
+  );
+}
+
 function barsOf(day: HTMLElement) {
   return [...day.querySelectorAll("[data-bar]")].map((bar) => bar.getAttribute("data-bar"));
 }
@@ -109,6 +118,7 @@ describe("HeatCalendar", () => {
     const friday = screen.getByRole("button", { name: /^Friday, October 16:/ });
     const saturday = screen.getByRole("button", { name: /^Saturday, October 17:/ });
     expect(barsOf(friday)).toEqual(["free", "maybe", "unanswered"]);
+    expect(friday.querySelector('[data-bar="maybe"]')?.classList).toContain("bg-maybe-bar");
     expect(friday.style.background).toContain("color-mix(in oklab, var(--free) 18%");
     expect(saturday.style.background).toBe("");
   });
@@ -208,7 +218,7 @@ describe("HeatCalendar", () => {
     expect(screen.getByText("one bar per player")).toBeTruthy();
   });
 
-  it("switches to free counts and a busy count above eight Players", () => {
+  it("switches to free, busy and not-answered counts above eight Players", () => {
     const players = rosterOf(12);
     renderCalendar({
       players,
@@ -220,10 +230,25 @@ describe("HeatCalendar", () => {
         { playerId: "p8", date: "2026-10-16", answer: "busy" },
       ],
     });
-    const day = screen.getByRole("button", { name: /^Friday, October 16:/ });
+    const day = screen.getByRole("button", {
+      name: "Friday, October 16: 7 free, 0 maybe, 2 busy, 3 not answered",
+    });
     expect(day.querySelectorAll("[data-bar]")).toHaveLength(0);
-    expect(day.textContent).toBe("167/12✕2");
+    expect(countsOf(day)).toEqual({ free: "7/12", busy: "✕2", unanswered: "3" });
     expect(screen.getByText("free of all · busy")).toBeTruthy();
+    expect(screen.getByText("not answered")).toBeTruthy();
+  });
+
+  it("counts no one as missing on a dense past day or a day everyone answered", () => {
+    const players = rosterOf(9);
+    renderCalendar({
+      players,
+      answers: players.map((p) => ({ playerId: p._id, date: "2026-10-17", answer: "maybe" })),
+    });
+    const past = screen.getByRole("button", { name: /^Thursday, October 1:/ });
+    const answered = screen.getByRole("button", { name: /^Saturday, October 17:/ });
+    expect(countsOf(past)).toEqual({ free: "0/9" });
+    expect(countsOf(answered)).toEqual({ free: "0/9" });
   });
 
   it("shows no bars or counts for a Group without Players", () => {

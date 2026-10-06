@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ConvexError } from "convex/values";
-import { useId, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { AppErrorData } from "../../../convex/model/errors";
 import { MAX_GROUPS_PER_GM } from "../../../shared/limits";
 import { Button } from "../../ui/Button";
@@ -19,11 +19,13 @@ type AccountSheetProps = {
   open: boolean;
   onClose: () => void;
   onSubmit: (input: SaveInput) => Promise<unknown>;
+  onContinueWithGoogle?: () => Promise<unknown>;
 } & (
   | {
       intent: "save";
       groupName: string;
       signedInAs?: string;
+      refusal?: unknown;
       onFinish: () => Promise<unknown>;
     }
   | { intent: "keep"; groupName: string; playerName: string; movesGroups?: boolean }
@@ -69,28 +71,55 @@ function AccountForm({
   setBusy: (busy: boolean) => void;
   finishingAs: string | null;
 }) {
-  const { intent, onSubmit, onClose } = props;
+  const { intent, onSubmit, onClose, onContinueWithGoogle } = props;
   const [mode, setMode] = useState<SaveMode>(intent === "logIn" ? "logIn" : "create");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [failure, setFailure] = useState<Failure | null>(null);
+  const [failure, setFailure] = useState<Failure | null>(() =>
+    props.intent === "save" && props.refusal !== undefined
+      ? describeFailure(props.refusal, intent)
+      : null,
+  );
+  const [leavingForGoogle, setLeavingForGoogle] = useState(false);
   const passwordField = useRef<HTMLInputElement>(null);
 
-  const run = async (action: () => Promise<unknown>) => {
+  const attempt = async (action: () => Promise<unknown>) => {
     setBusy(true);
     setFailure(null);
     try {
       await action();
-      setBusy(false);
-      onClose();
+      return true;
     } catch (error) {
       setFailure(describeFailure(error, intent));
       setBusy(false);
+      return false;
     }
+  };
+
+  const run = async (action: () => Promise<unknown>) => {
+    if (!(await attempt(action))) return;
+    setBusy(false);
+    onClose();
+  };
+
+  useEffect(() => {
+    const wakeUpFromBackForwardCache = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      setLeavingForGoogle(false);
+      setBusy(false);
+    };
+    window.addEventListener("pageshow", wakeUpFromBackForwardCache);
+    return () => window.removeEventListener("pageshow", wakeUpFromBackForwardCache);
+  }, [setBusy]);
+
+  const leaveForGoogle = async (continueWithGoogle: () => Promise<unknown>) => {
+    setLeavingForGoogle(true);
+    if (!(await attempt(continueWithGoogle))) setLeavingForGoogle(false);
   };
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
+    if (busy) return;
     if (mode === "create" && password.length < MIN_PASSWORD_LENGTH) {
       setFailure(weakPassword);
       return;
@@ -126,6 +155,13 @@ function AccountForm({
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
       <Intro {...props} />
+      {onContinueWithGoogle && (
+        <GoogleOption
+          busy={busy}
+          leaving={leavingForGoogle}
+          onContinue={() => void leaveForGoogle(onContinueWithGoogle)}
+        />
+      )}
       <div className="flex flex-col gap-4">
         {intent !== "logIn" && <ModeSwitch mode={mode} disabled={busy} onChange={switchMode} />}
         <Field label="Email">
@@ -176,7 +212,13 @@ function AccountForm({
           )}
         </div>
       )}
-      <Button type="submit" size="lg" busy={busy && busyLabels[intent]} className="w-full">
+      <Button
+        type="submit"
+        size="lg"
+        disabled={busy}
+        busy={busy && !leavingForGoogle && busyLabels[intent]}
+        className="w-full"
+      >
         {submitLabel(intent, mode)}
       </Button>
       <SheetFooter
@@ -218,6 +260,77 @@ function Intro(props: AccountSheetProps) {
         ? "Open the groups you kept on this device."
         : "Open your groups on this device."}
     </p>
+  );
+}
+
+function GoogleOption({
+  busy,
+  leaving,
+  onContinue,
+}: {
+  busy: boolean;
+  leaving: boolean;
+  onContinue: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <Button
+          variant="secondary"
+          size="lg"
+          disabled={busy}
+          busy={leaving && "Opening Google…"}
+          onClick={onContinue}
+          className="w-full"
+        >
+          <GoogleLogo />
+          Continue with Google
+        </Button>
+        <p className="text-xs text-ink-3">
+          By continuing with Google you agree to the <LegalLinks />.
+        </p>
+      </div>
+      <p className="flex items-center gap-3 text-xs text-ink-3 before:h-px before:flex-1 before:bg-line after:h-px after:flex-1 after:bg-line">
+        or with email
+      </p>
+    </div>
+  );
+}
+
+function GoogleLogo() {
+  return (
+    <svg aria-hidden viewBox="0 0 48 48" className="size-5">
+      <path
+        fill="#EA4335"
+        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+      />
+      <path
+        fill="#4285F4"
+        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+      />
+      <path
+        fill="#34A853"
+        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+      />
+    </svg>
+  );
+}
+
+function LegalLinks() {
+  return (
+    <>
+      <Link to="/terms" className="underline underline-offset-2 hover:text-ink">
+        Terms
+      </Link>{" "}
+      and{" "}
+      <Link to="/privacy" className="underline underline-offset-2 hover:text-ink">
+        Privacy Policy
+      </Link>
+    </>
   );
 }
 
@@ -295,15 +408,7 @@ function SheetFooter({
   if (mode === "create") {
     return (
       <p className="text-xs text-ink-3">
-        By creating an account you agree to the{" "}
-        <Link to="/terms" className="underline underline-offset-2 hover:text-ink">
-          Terms
-        </Link>{" "}
-        and{" "}
-        <Link to="/privacy" className="underline underline-offset-2 hover:text-ink">
-          Privacy Policy
-        </Link>
-        .
+        By creating an account you agree to the <LegalLinks />.
       </p>
     );
   }
@@ -414,7 +519,7 @@ function describeFailure(error: unknown, intent: AccountIntent): Failure {
       return { message: `Too many tries. Try again in ${waitFor(data.retryAfter)}.` };
     case "TOO_MANY_GROUPS":
       return {
-        message: `That account would pass ${String(MAX_GROUPS_PER_GM)} groups. Delete one there, then save again.`,
+        message: `An account holds up to ${String(MAX_GROUPS_PER_GM)} groups. Delete some to make room, then finish saving.`,
       };
     case "CLAIM_INVALID":
       return {

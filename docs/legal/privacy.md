@@ -2,7 +2,7 @@
 
 > **Draft, pending review by a qualified German lawyer before publication.** Source text for the `/privacy` page. `{{…}}` placeholders are filled at build time (see `docs/spec.md` §7).
 
-**Version 1.1. Effective: {{EFFECTIVE_DATE}}**
+**Version 1.2. Effective: {{EFFECTIVE_DATE}}**
 
 This policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.
 
@@ -19,7 +19,8 @@ We have not appointed a data protection officer because we are not required to.
 | Data | Purpose | Legal basis (GDPR Art. 6) |
 | --- | --- | --- |
 | For a group created without an account: a random user ID and the time you accepted the Terms | Run your group and prove your acceptance | Contract, 6(1)(b) |
-| For an account: your email address and a hash of your password | Let you sign in on any device | Contract, 6(1)(b) |
+| For an account with a password: your email address and a hash of your password | Let you sign in on any device | Contract, 6(1)(b) |
+| For an account with Google: your email address, whether Google verified it, and your Google account ID, which Google sends us when you continue with Google | Let you sign in on any device | Contract, 6(1)(b) |
 | For a player with an account: which player in which group belongs to your account | Show your groups on any device | Contract, 6(1)(b) |
 | Group names, player names, the days players marked as free, maybe, or busy, and the scheduled dates | Provide the Service to the GM and the group | Contract, 6(1)(b) |
 | Technical connection data (IP address, browser, time) in server logs of our hosting providers | Deliver the site and keep it secure | Legitimate interest, 6(1)(f) |
@@ -36,7 +37,9 @@ The Service stores the following in your browser's local storage. All of it is s
 - which player you are in each group, so you do not have to pick your name again;
 - small display preferences, such as a dismissed hint.
 
-We set no cookies.
+We set cookies only while you continue with Google: short-lived sign-in cookies that protect the round trip to Google and expire within 15 minutes. They are strictly necessary for the sign-in you asked for.
+
+When you continue with Google, Google processes your sign-in under its own privacy policy. We receive only the data listed in section 2.
 
 ## 4. Recipients
 

@@ -10,15 +10,15 @@ import {
 import type { FunctionReturnType } from "convex/server";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
-import { keepGroup, resumePendingKeep, type Keep, type KeepDeps } from "./keep";
+import { keepAfterRedirect, keepGroup, resumePendingKeep, type Keep, type KeepDeps } from "./keep";
 import {
   finishPendingSave,
   PASSWORD_FLOWS,
-  resumePendingSave,
   saveGroups,
-  type ClaimDeps,
+  saveThroughGoogle,
   type SaveInput,
 } from "./save";
+import { useSaveOnReturn } from "./useSaveOnReturn";
 
 export type GmStatus = "loading" | "signedOut" | "anonymous" | "account";
 
@@ -98,19 +98,18 @@ function useAuthGate(isAuthenticated: boolean) {
   return gate;
 }
 
-function useResumeLeftOvers(
-  status: GmStatus,
-  redeemClaim: ClaimDeps["finishSave"],
-  claimPlayer: KeepDeps["claim"],
-) {
+function useKeepOnReturn(status: GmStatus, claimPlayer: KeepDeps["claim"]) {
   const resolved = useRef(false);
+  const [refusal, setRefusal] = useState<unknown>();
   useEffect(() => {
     if (resolved.current || status === "loading") return;
     resolved.current = true;
     if (status !== "account") return;
-    void resumePendingSave({ finishSave: redeemClaim, storage: sessionStorage });
-    void resumePendingKeep({ claim: claimPlayer, storage: sessionStorage });
-  }, [status, redeemClaim, claimPlayer]);
+    void resumePendingKeep({ claim: claimPlayer, storage: sessionStorage }).then((outcome) => {
+      if (outcome?.kept === false) setRefusal(outcome.error);
+    });
+  }, [status, claimPlayer]);
+  return refusal;
 }
 
 export function useGm() {
@@ -130,40 +129,98 @@ export function useGm() {
   );
   const startSave = useMutation(api.account.startSave);
   const redeemClaim = useMutation(api.account.finishSave);
+  const save = useCallback(
+    (input: SaveInput) =>
+      saveGroups(input, {
+        startSave: () => startSave({}),
+        signIn,
+        finishSave: redeemClaim,
+        storage: sessionStorage,
+      }),
+    [signIn, startSave, redeemClaim],
+  );
   const claimPlayer = useMutation(api.player.claim);
   const status = gmStatus(auth, me);
+  const claims = useMemo(
+    () => ({ finishSave: redeemClaim, storage: sessionStorage }),
+    [redeemClaim],
+  );
+  const saveOnReturn = useSaveOnReturn(status, claims);
+  const google = useQuery(api.signInOptions.available)?.google === true;
   const gate = useAuthGate(auth.isAuthenticated);
 
-  useResumeLeftOvers(status, redeemClaim, claimPlayer);
+  const keepRefusalOnReturn = useKeepOnReturn(status, claimPlayer);
 
   const actions = useMemo(
     () => ({
       createLink: () => signIn("anonymous"),
       logIn: ({ email, password }: Omit<SaveInput, "mode">) =>
         signIn("password", { email, password, flow: "signIn" }),
-      signInWithPassword: ({ email, password, mode }: SaveInput) =>
-        signIn("password", { email, password, flow: PASSWORD_FLOWS[mode] }),
-      keepGroup: (keep: Keep, signInFirst: () => Promise<unknown>) =>
-        keepGroup(
-          keep,
-          async () => {
-            await signInFirst();
-            await gate.whenAuthenticated();
-          },
-          { claim: claimPlayer, storage: sessionStorage },
-        ),
-      save: (input: SaveInput) =>
-        saveGroups(input, {
-          startSave: () => startSave({}),
-          signIn,
-          finishSave: redeemClaim,
-          storage: sessionStorage,
-        }),
-      finishSave: () => finishPendingSave({ finishSave: redeemClaim, storage: sessionStorage }),
+      save: (input: SaveInput) => save(input),
+      finishSave: () => finishPendingSave(claims),
       signOut,
     }),
-    [signIn, signOut, startSave, redeemClaim, claimPlayer, gate],
+    [signIn, signOut, save, claims],
   );
 
-  return { status, email: me?.email, ...actions };
+  const keepActions = useMemo(() => {
+    const keepAfter = (keep: Keep, signInFirst: () => Promise<unknown>) =>
+      keepGroup(
+        keep,
+        async () => {
+          await signInFirst();
+          await gate.whenAuthenticated();
+        },
+        { claim: claimPlayer, storage: sessionStorage },
+      );
+    return {
+      keepNow: (keep: Keep) => keepAfter(keep, () => Promise.resolve()),
+      keepWithPassword: (keep: Keep, input: SaveInput) =>
+        keepAfter(keep, () =>
+          status === "anonymous"
+            ? save(input)
+            : signIn("password", {
+                email: input.email,
+                password: input.password,
+                flow: PASSWORD_FLOWS[input.mode],
+              }),
+        ),
+    };
+  }, [status, save, signIn, claimPlayer, gate]);
+
+  const googleActions = useMemo(() => {
+    if (!google) {
+      return { logInWithGoogle: undefined, saveWithGoogle: undefined, keepWithGoogle: undefined };
+    }
+    const leaveForGoogle = (redirectTo: string) => providerSignIn("google", { redirectTo });
+    const saveWithGoogleBackTo = (redirectTo: string) =>
+      saveThroughGoogle({
+        startSave: () => startSave({}),
+        storage: sessionStorage,
+        continueWithGoogle: () => leaveForGoogle(redirectTo),
+      });
+    return {
+      logInWithGoogle: (returnTo = "/") => leaveForGoogle(returnTo),
+      saveWithGoogle: (groupId: string) => saveWithGoogleBackTo(`/g/${groupId}`),
+      keepWithGoogle: (keep: Keep) => {
+        const playerPage = `/s/${keep.shareToken}`;
+        return keepAfterRedirect(
+          keep,
+          () =>
+            status === "anonymous" ? saveWithGoogleBackTo(playerPage) : leaveForGoogle(playerPage),
+          sessionStorage,
+        );
+      },
+    };
+  }, [google, providerSignIn, startSave, status]);
+
+  return {
+    status,
+    email: me?.email,
+    ...saveOnReturn,
+    keepRefusalOnReturn,
+    ...actions,
+    ...keepActions,
+    ...googleActions,
+  };
 }

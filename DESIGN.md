@@ -51,6 +51,7 @@ Gold on paper, ported from Lonir's Next Session (`packages/ui/src/styles.css` in
 | `accent-soft` | `oklch(92% 0.05 88)` | `oklch(26% 0.05 82)` | share-link card, soft buttons, scheduled cell fill |
 | `free` / `free-soft` | `oklch(62.5% 0.145 157)` / `oklch(94.9% 0.031 162)` | `#3DD68C` / `#113826` | answer: free |
 | `maybe` / `maybe-soft` | `oklch(76% 0.15 52)` / `oklch(94% 0.04 55)` | `oklch(82% 0.13 52)` / `oklch(27% 0.045 55)` | answer: maybe, the nudge banner |
+| `maybe-bar` | `oklch(64% 0.16 52)` | `oklch(82% 0.13 52)` | the maybe bar on the GM grid and its legend: the same orange, darker in light so the bar reads on the cream cell |
 | `busy` / `busy-soft` | `oklch(60.5% 0.194 11)` / `oklch(93.4% 0.031 0)` | `#FF6B8B` / `#3F1724` | answer: busy, destructive |
 
 Rules:
@@ -61,7 +62,7 @@ Rules:
 - One exception: the WhatsApp and Telegram share icons in `ShareLinkCard` keep their brand colors (`#25D366` green, `#2AABEE` blue) so people recognize them. The brand colors appear nowhere else.
 - Answer tiles always carry a glyph (✓ ? ✕) in addition to color, for color-blind players.
 - Heat-map intensity on the GM grid is `color-mix(in oklab, var(--free) <0–55>%, var(--surface))` driven by the share of players who are free; a day where everyone is free is solid `free` with white text; a day with any busy answer gets no tint (the busy bar or ✕ count carries the conflict). No day is ever painted red.
-- Contrast, pinned by `src/theme.test.ts`: `ink` on `paper` ≥ 14:1 both themes; `ink-3` on `surface` and `paper` ≥ 4.5:1; `accent-ink` on `accent` and `accent-strong` on `surface`, `paper` and `accent-soft` ≥ 4.5:1; white on `free`/`busy` ≥ 3:1 at ≥ 14 px bold (large-text rule), the glyph adds redundancy; the answer tiles read at least as well as they did before the gold theme. Free and busy are a shade darker in light so their GM-grid bars keep their contrast on the cream `surface`. The maybe bar drops from 2.2:1 to 2.0:1: on cream, one maybe color cannot keep both that bar and the ink-on-maybe tile at 8:1, and the tile text wins.
+- Contrast, pinned by `src/theme.test.ts`: `ink` on `paper` ≥ 14:1 both themes; `ink-3` on `surface` and `paper` ≥ 4.5:1; `accent-ink` on `accent` and `accent-strong` on `surface`, `paper` and `accent-soft` ≥ 4.5:1; white on `free`/`busy` ≥ 3:1 at ≥ 14 px bold (large-text rule), the glyph adds redundancy; the answer tiles read at least as well as they did before the gold theme. Free and busy are a shade darker in light so their GM-grid bars keep their contrast on the cream `surface`. On cream, one maybe color cannot keep both its GM-grid bar at 3:1 and the ink-on-maybe tile at 8:1, so the bar has its own `maybe-bar` token: 3.26:1 on `surface` in light, 10.2:1 in dark (the same value as `maybe`), at the maybe hue. The player tile keeps `maybe`.
 
 ### Type
 
@@ -104,7 +105,7 @@ All presentational; data arrives through props. Prototype equivalents in [`proto
 | `Dot` | 8 px answer dot | yes / maybe / no / null |
 | `ShareLinkCard` | accent-soft card: eyebrow, mono URL, Copy (turns green "Copied" for 1.6 s), WhatsApp / Telegram / Mail / native share, hint line, optional Rotate | `compact` (mobile header version: tighter padding, share row without the hint line) |
 | `GroupSwitcher` | group name as a menu button: lists all groups with player counts, New group, Rename (inline input), Delete (two-step confirm inside the menu) | renaming, confirming delete |
-| `HeatCalendar` | GM month grid; `DayCell` shows day number, today dot, per-player `MiniBars` (≤ 8 players) or `n/N ✕k` counts (> 8), star for scheduled, tint by free share; month nav; legend adapts to density | past day (40 % opacity, disabled), selected (ink ring), scheduled, perfect, tinted, neutral |
+| `HeatCalendar` | GM month grid; `DayCell` shows day number, today dot, per-player `MiniBars` (≤ 8 players, a grey outlined bar for each Player who hasn't answered a bookable day) or `n/N ✕k ▯m` counts (> 8: free, busy in rose, not answered behind the grey outlined bar), star for scheduled, tint by free share; month nav; legend adapts to density and always explains the grey bar | past day (40 % opacity, disabled), selected (ink ring), scheduled, perfect, tinted, neutral |
 | `DayPanel` | per-date roster sorted free → maybe → busy → silent, headline counts, relative date, Schedule / Unschedule | past (button disabled), scheduled |
 | `BestNights` | top three by `yes − 2·no + 0.5·maybe`, only days with no busy answer and positive score; rank badge, who is free as avatars; click selects the day | empty roster, no positive night |
 | `Players` | roster rows: avatar, name, `answered/fillable` or ✓, hover kebab (rename / remove); inline add form | empty (explains self-join), adding |
@@ -149,7 +150,7 @@ Purpose: see which night works and lock it in; keep the link one tap away.
 
 Desktop (≥ lg): sticky header (mark, `/`, `GroupSwitcher`, right: `Save your group` for anonymous GMs, avatar menu with sign-out for signed-in). Below: `Nudge` when it applies. Then a `minmax(0,1fr) 22rem` grid: left the `HeatCalendar`; right a stack of `ShareLinkCard` → `DayPanel` (only when a day is selected, it slides in above the rest) → `BestNights` → `Sessions` → `Players`.
 
-Mobile: header, `Nudge`, compact `ShareLinkCard`, `HeatCalendar`, a segmented control `Best nights | Players | Sessions`, the chosen panel. Selecting a day opens `DayPanel` as a fixed bottom sheet over the page; "Overview" closes it.
+Mobile: header, `Nudge`, compact `ShareLinkCard`, `HeatCalendar`, a full-width soft `+ Add player` button, a segmented control `Best nights | Players | Sessions`, the chosen panel. The rail opens on Players while the Roster is empty, otherwise on Best nights. `+ Add player` stays under the calendar whatever tab is open: it switches to Players and opens the add form focused. Selecting a day opens `DayPanel` as a fixed bottom sheet over the page; "Overview" closes it.
 
 Interactions: tap a day to select (URL `?day=`), tap again to clear; Best nights and Sessions rows select their day; Schedule / Unschedule is optimistic with a toast ("Session on Fri, Oct 16. Players see it on the link.") and an Undo action; month nav is URL-backed `?month=`, forward limit current month + 2; Rotate asks for no confirm but toasts "Link rotated. Old links stopped working." with Undo for 5 s.
 
@@ -159,7 +160,7 @@ States:
 - **loading**: header shows a skeleton name; grid of skeletons matching the real layout; no spinner.
 - **error**: one centered card "We lost the connection. Your answers are safe." with Try again; the shell stays so navigation works.
 - **past month**: "Past month" pill next to the month name, all cells at 40 %, not selectable, Best nights empty, Schedule disabled.
-- **many players** (> 8): cells switch from bars to `n/N` with a rose `✕k` for busy counts; legend follows; Players list scrolls inside its card after 10 rows; Best nights avatars cap at four.
+- **many players** (> 8): cells switch from bars to `n/N` with a rose `✕k` for busy counts and a grey outlined bar with `m` for Players who haven't answered a bookable day; legend follows; Players list scrolls inside its card after 10 rows; Best nights avatars cap at four.
 - **day selected**: see above; the selected cell gets an ink ring offset from the paper.
 - **anonymous vs saved**: anonymous shows `Save your group` in the header and the orange nudge once a player exists (dismiss stored per browser, re-shown after 7 days); saved shows the avatar menu instead and no nudge.
 - **malformed or foreign group id**: fall back to the first group, no error boundary (parity).
@@ -213,6 +214,7 @@ Greyed mark, "This link no longer works", "The GM may have rotated the link or d
 | D13 | **Rotate has no confirm, only an Undo toast.** | Confirm dialog. Undo is faster and safer. |
 | D14 | **Group delete is a two-step confirm inside the menu** naming what is lost. | One-click delete (lonir). |
 | D15 | **No marketing beyond the hero**: no features grid, no testimonials. | A longer landing. The product is one click away; the demo strip does the selling. |
+| D16 | **Phone `+ Add player` is a full-width soft button between the calendar and the segmented control** ([#67](https://github.com/Silthus/next-session/issues/67)). Desktop keeps the Players card's `+ Add`, already in view in the rail. | An icon-only `+` at the end of the segmented control (less obvious, squeezes the tabs at 390 px); a floating action button (covers calendar cells and collides with the toast and the day sheet). |
 
 Variants considered and not built: a "list-first" GM surface (Best nights as hero) and a "week strip" player surface (one week at a time). Both lost on paper to the month grid because the GM needs the whole booking window at once and the player needs to see progress toward "done".
 

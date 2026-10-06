@@ -181,16 +181,6 @@ describe("AccountSheet saving a Group", () => {
     expect(await alertText()).toBe("Use at least 8 characters for the password.");
   });
 
-  it("says when the Save would pass the Account's group cap", async () => {
-    renderSaveSheet(vi.fn().mockRejectedValueOnce(new ConvexError({ code: "TOO_MANY_GROUPS" })));
-
-    await fillIn();
-    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
-
-    expect(await alertText()).toBe(
-      "That account would pass 50 groups. Delete one there, then save again.",
-    );
-  });
 });
 
 describe("AccountSheet keeping a Group as a Player", () => {
@@ -378,6 +368,50 @@ describe("AccountSheet finishing a Save after the sign-in went through", () => {
   });
 });
 
+const roomForGroups =
+  "An account holds up to 50 groups. Delete some to make room, then finish saving.";
+
+describe("AccountSheet with an Account that holds too many Groups", () => {
+  it("says to make room before saving", async () => {
+    renderSaveSheet(() => Promise.reject(new ConvexError({ code: "TOO_MANY_GROUPS" })));
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+
+    expect(await alertText()).toBe(roomForGroups);
+  });
+});
+
+describe("AccountSheet reopened by a Save that failed on the way back from Google", () => {
+  function renderRefusedSave(refusal: unknown) {
+    renderSheet({
+      open: true,
+      intent: "save",
+      groupName: "your group",
+      signedInAs: email,
+      refusal,
+      onSubmit: vi.fn(),
+      onFinish: vi.fn(),
+      onClose: vi.fn(),
+    });
+  }
+
+  it("opens on the reason the move failed, with Finish saving to retry", async () => {
+    renderRefusedSave(new ConvexError({ code: "TOO_MANY_GROUPS" }));
+
+    expect(await alertText()).toBe(roomForGroups);
+    expect(screen.getByRole("button", { name: "Finish saving" })).toBeTruthy();
+  });
+
+  it("opens on an expired Save, offering only to close", async () => {
+    renderRefusedSave(new ConvexError({ code: "CLAIM_INVALID" }));
+
+    expect(await alertText()).toBe(
+      "This save expired before the group moved. Close this and create a new link.",
+    );
+    expect(screen.queryByRole("button", { name: "Finish saving" })).toBeNull();
+  });
+});
+
 describe("AccountSheet logging in", () => {
   it("asks only for the email and the password", async () => {
     const onSubmit = vi.fn(() => Promise.resolve());
@@ -450,5 +484,98 @@ describe("AccountSheet logging in", () => {
     expect(screen.getByRole("button", { name: "Log in" })).toHaveProperty("disabled", false);
     expect(screen.getByLabelText("Email")).toHaveProperty("value", email);
     expect(onClose).not.toHaveBeenCalled();
+  });
+});
+
+describe("AccountSheet with Google", () => {
+  const google = { name: "Continue with Google" };
+
+  it("offers Google only once the deployment has it", async () => {
+    renderSheet({ open: true, intent: "logIn", onSubmit: vi.fn(), onClose: vi.fn() });
+    await screen.findByRole("heading", { name: "Log in" });
+    expect(screen.queryByRole("button", google)).toBeNull();
+  });
+
+  it.each([
+    ["saving a Group", "save"],
+    ["logging in", "logIn"],
+  ] as const)("continues with Google %s, under the legal line", async (_, intent) => {
+    const onContinueWithGoogle = vi.fn(() => new Promise(() => {}));
+    renderSheet({
+      open: true,
+      intent,
+      groupName: "My group",
+      onSubmit: vi.fn(),
+      onFinish: vi.fn(),
+      onClose: vi.fn(),
+      onContinueWithGoogle,
+    });
+
+    await userEvent.click(await screen.findByRole("button", google));
+
+    expect(onContinueWithGoogle).toHaveBeenCalled();
+    expect(screen.getByText(/By continuing with Google/).textContent).toBe(
+      "By continuing with Google you agree to the Terms and Privacy Policy.",
+    );
+    expect(screen.getByRole("button", { name: "Opening Google…" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+    expect(screen.getByLabelText("Email")).toHaveProperty("readOnly", true);
+  });
+
+  it("keeps the email form shut while leaving for Google", async () => {
+    const onSubmit = vi.fn(() => Promise.resolve());
+    renderSheet({
+      open: true,
+      intent: "logIn",
+      onSubmit,
+      onClose: vi.fn(),
+      onContinueWithGoogle: () => new Promise(() => {}),
+    });
+    await fillIn();
+
+    await userEvent.click(screen.getByRole("button", google));
+    await userEvent.type(screen.getByLabelText("Password"), "{Enter}");
+
+    expect(screen.getByRole("button", { name: "Log in" })).toHaveProperty("disabled", true);
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("wakes up again when the browser brings the page back from Google", async () => {
+    renderSheet({
+      open: true,
+      intent: "logIn",
+      onSubmit: vi.fn(),
+      onClose: vi.fn(),
+      onContinueWithGoogle: () => new Promise(() => {}),
+    });
+    await userEvent.click(await screen.findByRole("button", google));
+
+    act(() => {
+      window.dispatchEvent(Object.assign(new Event("pageshow"), { persisted: true }));
+    });
+
+    expect(screen.getByRole("button", google)).toHaveProperty("disabled", false);
+    expect(screen.getByLabelText("Email")).toHaveProperty("readOnly", false);
+  });
+
+  it("stays open and says so when leaving for Google fails", async () => {
+    const onClose = vi.fn();
+    renderSheet({
+      open: true,
+      intent: "save",
+      groupName: "My group",
+      onSubmit: vi.fn(),
+      onFinish: vi.fn(),
+      onClose,
+      onContinueWithGoogle: () => Promise.reject(new ConvexError({ code: "RATE_LIMITED" })),
+    });
+
+    await userEvent.click(await screen.findByRole("button", google));
+
+    expect(await alertText()).toBe("Too many tries. Try again in a minute.");
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", google)).toHaveProperty("disabled", false);
   });
 });

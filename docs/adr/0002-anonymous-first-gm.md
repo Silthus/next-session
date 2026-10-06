@@ -19,3 +19,5 @@ This reverses the hosting research's "no Anonymous provider" call (#4), which as
 ## Amended
 
 [ADR-0010](0010-accounts-claim-players-share-token-still-answers.md) (2026-10-06): Players can now create an Account and claim their Player. One Account type serves both roles. The no-account player path is unchanged.
+
+[#58](https://github.com/Silthus/next-session/issues/58) (2026-10-06): an Account can also come from **Continue with Google**, next to email and password. The button shows only once the deployment has Google's credentials. Accounts never join by email: each Google account is its own Account, apart from any Password Account with the same email, because neither a Password email nor a non-Gmail Google email proves who holds the address today ([spec §5.7](../spec.md#57-continue-with-google)).

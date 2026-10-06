@@ -144,18 +144,16 @@ function Legend({ dense }: { dense: boolean }) {
         <span className="flex items-center gap-1.5">
           <span className="flex gap-0.5">
             <span className="h-3 w-1 rounded-full bg-free" />
-            <span className="h-3 w-1 rounded-full bg-maybe" />
+            <span className="h-3 w-1 rounded-full bg-maybe-bar" />
             <span className="h-3 w-1 rounded-full bg-busy" />
           </span>
           <span>one bar per player</span>
         </span>
       )}
-      {!dense && (
-        <span className="flex items-center gap-1.5">
-          <span className={cn("h-3 w-1 rounded-full", unansweredBarTone)} />
-          <span>not answered</span>
-        </span>
-      )}
+      <span className="flex items-center gap-1.5">
+        <span className={cn("h-3 w-1 rounded-full", unansweredBarTone)} />
+        <span>not answered</span>
+      </span>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { GroupRail } from "./GroupRail";
 
 function renderRail({
@@ -13,10 +13,12 @@ function renderRail({
   dayPanel?: ReactNode;
   rosterEmpty?: boolean;
 }) {
+  const onAddPlayer = vi.fn();
   render(
     <GroupRail
       wide={wide}
       rosterEmpty={rosterEmpty}
+      onAddPlayer={onAddPlayer}
       shareLink={<p>Share link</p>}
       dayPanel={dayPanel}
       panels={{
@@ -26,6 +28,7 @@ function renderRail({
       }}
     />,
   );
+  return { onAddPlayer };
 }
 
 const visibleText = () =>
@@ -61,6 +64,30 @@ describe("GroupRail", () => {
     renderRail({ wide: false, rosterEmpty: true });
     expect(screen.getByRole("tab", { selected: true }).textContent).toBe("Players");
     expect(screen.getByRole("tabpanel").textContent).toBe("Players panel");
+  });
+
+  it.each(["Best nights", "Players", "Sessions"])(
+    "keeps Add player in reach on phones from %s",
+    async (tab) => {
+      const { onAddPlayer } = renderRail({ wide: false });
+      await userEvent.click(screen.getByRole("tab", { name: tab }));
+      await userEvent.click(screen.getByRole("button", { name: "Add player" }));
+      expect(screen.getByRole("tab", { selected: true }).textContent).toBe("Players");
+      expect(screen.getByRole("tabpanel").textContent).toBe("Players panel");
+      expect(onAddPlayer).toHaveBeenCalledOnce();
+    },
+  );
+
+  it("leaves adding to the Players card on wide screens", () => {
+    renderRail({ wide: true });
+    expect(screen.queryByRole("button", { name: "Add player" })).toBeNull();
+  });
+
+  it("keeps each phone panel mounted while another tab shows", async () => {
+    renderRail({ wide: false });
+    await userEvent.click(screen.getByRole("tab", { name: "Sessions" }));
+    expect(screen.getByText("Players panel")).toBeTruthy();
+    expect(screen.getByRole("tabpanel").textContent).toBe("Sessions panel");
   });
 
   it("moves between the phone tabs with the arrow keys", async () => {

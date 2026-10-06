@@ -20,6 +20,7 @@
   --free-soft: oklch(94.9% 0.031 162);
   --maybe: oklch(76% 0.15 52);
   --maybe-soft: oklch(94% 0.04 55);
+  --maybe-bar: oklch(64% 0.16 52);
   --busy: oklch(60.5% 0.194 11);
   --busy-soft: oklch(93.4% 0.031 0);
   --shadow:
@@ -46,6 +47,7 @@
     --free-soft: #113826;
     --maybe: oklch(82% 0.13 52);
     --maybe-soft: oklch(27% 0.045 55);
+    --maybe-bar: oklch(82% 0.13 52);
     --busy: #ff6b8b;
     --busy-soft: #3f1724;
     --shadow:
@@ -72,6 +74,7 @@
   --color-free-soft: var(--free-soft);
   --color-maybe: var(--maybe);
   --color-maybe-soft: var(--maybe-soft);
+  --color-maybe-bar: var(--maybe-bar);
   --color-busy: var(--busy);
   --color-busy-soft: var(--busy-soft);
 

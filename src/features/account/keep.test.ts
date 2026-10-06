@@ -1,7 +1,14 @@
 import { ConvexError } from "convex/values";
 import { describe, expect, it } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { keepGroup, PENDING_KEEP_KEY, resumePendingKeep, type Keep, type KeepDeps } from "./keep";
+import {
+  keepAfterRedirect,
+  keepGroup,
+  PENDING_KEEP_KEY,
+  resumePendingKeep,
+  type Keep,
+  type KeepDeps,
+} from "./keep";
 
 const keep: Keep = { shareToken: "share-token", playerId: "player-1" as Id<"players"> };
 const otherKeep: Keep = { shareToken: "other-token", playerId: "player-2" as Id<"players"> };
@@ -75,6 +82,25 @@ describe("keepGroup", () => {
 
     expect(outcome).toEqual({ kept: false, error: new Error("connection lost") });
     expect(storage.getItem(PENDING_KEEP_KEY)).toBe(JSON.stringify(keep));
+  });
+});
+
+describe("keepAfterRedirect", () => {
+  it("remembers the keep before leaving for the sign-in, and claims nothing yet", async () => {
+    const { calls, storage, signIn } = fakeDeps();
+
+    await keepAfterRedirect(keep, signIn, storage);
+
+    expect(calls).toEqual([`signIn, pending ${JSON.stringify(keep)}`]);
+    expect(storage.getItem(PENDING_KEEP_KEY)).toBe(JSON.stringify(keep));
+  });
+
+  it("forgets the keep when the sign-in never starts", async () => {
+    const { storage } = fakeDeps();
+
+    await expect(keepAfterRedirect(keep, offline, storage)).rejects.toThrow("connection lost");
+
+    expect(storage.getItem(PENDING_KEEP_KEY)).toBeNull();
   });
 });
 
