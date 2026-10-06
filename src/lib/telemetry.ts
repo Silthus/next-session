@@ -24,6 +24,12 @@ export type BrowserEvent =
   | { name: "sign_in_failed"; flow: "signUp" | "signIn"; code: string }
   | { name: "keep_group_started"; group_id: string };
 
+export type ErrorContext = {
+  surface: string;
+  convex_function?: string;
+  convex_request_id?: string;
+};
+
 type LogLevel = "info" | "warn" | "error";
 type LogAttributes = Record<string, string | number | boolean>;
 type EnvSource = Record<string, string | undefined>;
@@ -109,7 +115,7 @@ export function log(level: LogLevel, body: string, attributes?: LogAttributes): 
   withClient((active) => active.logger[level](body, attributes));
 }
 
-export function reportError(error: unknown, context: { surface: string }): void {
+export function reportError(error: unknown, context: ErrorContext): void {
   withClient((active) => active.captureException(error, context));
 }
 

@@ -6,6 +6,7 @@ import {
   MAX_PLAYERS_PER_GROUP,
 } from "../../shared/limits";
 import { NAME_MAX_LENGTH } from "../../shared/names";
+import { reportError, type ErrorContext } from "./telemetry";
 
 type Copy = Partial<Record<ErrorCode, string>>;
 
@@ -88,10 +89,41 @@ export function codeMessage(code: ErrorCode, topic: ErrorTopic): string {
 }
 
 export function appErrorOf(error: unknown): AppErrorData | null {
+  const appError = codedData(error);
+  if (appError === null) reportUnexpected(error);
+  return appError;
+}
+
+function codedData(error: unknown): AppErrorData | null {
   if (!(error instanceof ConvexError)) return null;
   const data: unknown = error.data;
   if (typeof data !== "object" || data === null || !("code" in data)) return null;
   return typeof data.code === "string" ? (data as AppErrorData) : null;
+}
+
+const CONVEX_FAILURE = /^\[CONVEX [QMA?]\((?<path>[^)]+)\)\] (?:\[Request ID: (?<requestId>[^\]]+)\])?/;
+const reported = new WeakSet<Error>();
+
+function reportUnexpected(error: unknown) {
+  if (!(error instanceof Error) || reported.has(error)) return;
+  const failure = CONVEX_FAILURE.exec(error.message)?.groups;
+  if (!failure?.path) return;
+  reported.add(error);
+  reportError(convexServerError(failure.path), convexContext(failure.path, failure.requestId));
+}
+
+function convexServerError(path: string) {
+  const error = new Error(`${path} failed`);
+  error.name = "ConvexServerError";
+  return error;
+}
+
+function convexContext(path: string, requestId: string | undefined): ErrorContext {
+  return {
+    surface: "convex",
+    convex_function: path,
+    ...(requestId && { convex_request_id: requestId }),
+  };
 }
 
 function fallbackFor(topic: ErrorTopic): string {
