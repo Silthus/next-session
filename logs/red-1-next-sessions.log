@@ -1,0 +1,32 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-65
+
+ ❯ |ui| src/features/me/myGroups.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/me/myGroups.test.ts [ src/features/me/myGroups.test.ts ]
+Error: Failed to resolve import "./myGroups" from "src/features/me/myGroups.test.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/coder/dev/ns-worktrees/ticket-65/src/features/me/myGroups.test.ts:3:58
+  1  |  import { describe, expect, it } from "vitest";
+  2  |  import { daysToAnswer, nextSessions } from "./myGroups";
+     |                                              ^
+  3  |  const thursday = "group-thursday";
+  4  |  const sunday = "group-sunday";
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/node.js:26423:18
+ ❯ node_modules/vite/dist/node/chunks/node.js:26493:30
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/node.js:26459:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/node.js:19988:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  16:09:52
+   Duration  648ms (environment 85%, setup 12%, transform 3%, worker 1%)
+
