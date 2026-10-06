@@ -1,0 +1,77 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-67
+
+ ❯ |ui| src/features/group/calendar/HeatCalendar.test.tsx (17 tests | 3 failed) 737ms
+   ❯ HeatCalendar (17)
+     × colours each Player's bar by their answer and tints a day by its free share 43ms
+     × switches to free, busy and not-answered counts above eight Players 26ms
+     × counts no one as missing on a dense past day or a day everyone answered 28ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > colours each Player's bar by their answer and tints a day by its free share
+AssertionError: expected "h-2.5 w-1 rounded-full sm:h-3 sm:w-[5px] bg-maybe" to contain "bg-maybe-bar"
+
+Expected: "h-2.5 w-1 rounded-full sm:h-3 sm:w-[5px] bg-maybe bg-maybe-bar"
+Received: "h-2.5 w-1 rounded-full sm:h-3 sm:w-[5px] bg-maybe"
+
+ ❯ src/features/group/calendar/HeatCalendar.test.tsx:121:67
+    119|     const saturday = screen.getByRole("button", { name: /^Saturday, Oc…
+    120|     expect(barsOf(friday)).toEqual(["free", "maybe", "unanswered"]);
+    121|     expect(friday.querySelector('[data-bar="maybe"]')?.classList).toCo…
+       |                                                                   ^
+    122|     expect(friday.style.background).toContain("color-mix(in oklab, var…
+    123|     expect(saturday.style.background).toBe("");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > switches to free, busy and not-answered counts above eight Players
+AssertionError: expected {} to deeply equal { free: '7/12', busy: '✕2', …(1) }
+
+- Expected
++ Received
+
+- {
+-   "busy": "✕2",
+-   "free": "7/12",
+-   "unanswered": "3",
+- }
++ {}
+
+ ❯ src/features/group/calendar/HeatCalendar.test.tsx:237:27
+    235|     });
+    236|     expect(day.querySelectorAll("[data-bar]")).toHaveLength(0);
+    237|     expect(countsOf(day)).toEqual({ free: "7/12", busy: "✕2", unanswer…
+       |                           ^
+    238|     expect(screen.getByText("free of all · busy")).toBeTruthy();
+    239|     expect(screen.getByText("not answered")).toBeTruthy();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > counts no one as missing on a dense past day or a day everyone answered
+AssertionError: expected {} to deeply equal { free: '0/9' }
+
+- Expected
++ Received
+
+- {
+-   "free": "0/9",
+- }
++ {}
+
+ ❯ src/features/group/calendar/HeatCalendar.test.tsx:250:28
+    248|     const past = screen.getByRole("button", { name: /^Thursday, Octobe…
+    249|     const answered = screen.getByRole("button", { name: /^Saturday, Oc…
+    250|     expect(countsOf(past)).toEqual({ free: "0/9" });
+       |                            ^
+    251|     expect(countsOf(answered)).toEqual({ free: "0/9" });
+    252|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 14 passed (17)
+   Start at  14:36:36
+   Duration  1.41s (tests 56%, environment 32%, transform 5%, setup 5%, import 3%)
+

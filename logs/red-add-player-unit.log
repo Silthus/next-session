@@ -1,0 +1,732 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-67
+
+ ❯ |ui| src/features/group/rail/GroupRail.test.tsx (9 tests | 4 failed) 282ms
+   ❯ GroupRail (9)
+     × keeps Add player in reach on phones from Best nights 34ms
+     × keeps Add player in reach on phones from Players 22ms
+     × keeps Add player in reach on phones from Sessions 19ms
+     × keeps each phone panel mounted while another tab shows 14ms
+ ❯ |ui| src/features/group/rail/Players.test.tsx (18 tests | 2 failed) 858ms
+   ❯ Players (18)
+     × opens the form focused when the GM asks to add a Player from elsewhere 22ms
+     × focuses the open form again on every request, keeping what the GM typed 15ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/group/rail/GroupRail.test.tsx > GroupRail > keeps Add player in reach on phones from Best nights
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Add player"
+
+Here are the accessible roles:
+
+  tablist:
+
+  Name "Group overview":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Group overview"[39m
+    [33mclass[39m=[32m"grid grid-cols-3 rounded-md bg-surface-2 p-1"[39m
+    [33mrole[39m=[32m"tablist"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  tab:
+
+  Name "Best nights":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"_r_2_-panel"[39m
+    [33maria-selected[39m=[32m"true"[39m
+    [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors bg-surface text-ink shadow-card"[39m
+    [33mid[39m=[32m"_r_2_-tab-bestNights"[39m
+    [33mrole[39m=[32m"tab"[39m
+    [33mtabindex[39m=[32m"0"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Players":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"_r_2_-panel"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+    [33mid[39m=[32m"_r_2_-tab-players"[39m
+    [33mrole[39m=[32m"tab"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sessions":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"_r_2_-panel"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+    [33mid[39m=[32m"_r_2_-tab-sessions"[39m
+    [33mrole[39m=[32m"tab"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  tabpanel:
+
+  Name "Best nights":
+  [36m<div[39m
+    [33maria-labelledby[39m=[32m"_r_2_-tab-bestNights"[39m
+    [33mid[39m=[32m"_r_2_-panel"[39m
+    [33mrole[39m=[32m"tabpanel"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p />[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-3"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"Group overview"[39m
+        [33mclass[39m=[32m"grid grid-cols-3 rounded-md bg-surface-2 p-1"[39m
+        [33mrole[39m=[32m"tablist"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_2_-panel"[39m
+          [33maria-selected[39m=[32m"true"[39m
+          [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors bg-surface text-ink shadow-card"[39m
+          [33mid[39m=[32m"_r_2_-tab-bestNights"[39m
+          [33mrole[39m=[32m"tab"[39m
+          [33mtabindex[39m=[32m"0"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mBest nights[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_2_-panel"[39m
+          [33maria-selected[39m=[32m"false"[39m
+          [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+          [33mid[39m=[32m"_r_2_-tab-players"[39m
+          [33mrole[39m=[32m"tab"[39m
+          [33mtabindex[39m=[32m"-1"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPlayers[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_2_-panel"[39m
+          [33maria-selected[39m=[32m"false"[39m
+          [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+          [33mid[39m=[32m"_r_2_-tab-sessions"[39m
+          [33mrole[39m=[32m"tab"[39m
+          [33mtabindex[39m=[32m"-1"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mSessions[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-labelledby[39m=[32m"_r_2_-tab-bestNights"[39m
+        [33mid[39m=[32m"_r_2_-panel"[39m
+        [33mrole[39m=[32m"tabpanel"[39m
+      [36m>[39m
+        [36m<p>[39m
+          [0mBest nights panel[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/group/rail/GroupRail.test.tsx:74:36
+     72|       const { onAddPlayer } = renderRail({ wide: false });
+     73|       await userEvent.click(screen.getByRole("tab", { name: tab }));
+     74|       await userEvent.click(screen.getByRole("button", { name: "Add pl…
+       |                                    ^
+     75|       expect(screen.getByRole("tab", { selected: true }).textContent).…
+     76|       expect(screen.getByRole("tabpanel").textContent).toBe("Players p…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  |ui| src/features/group/rail/GroupRail.test.tsx > GroupRail > keeps Add player in reach on phones from Players
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Add player"
+
+Here are the accessible roles:
+
+  tablist:
+
+  Name "Group overview":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Group overview"[39m
+    [33mclass[39m=[32m"grid grid-cols-3 rounded-md bg-surface-2 p-1"[39m
+    [33mrole[39m=[32m"tablist"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  tab:
+
+  Name "Best nights":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"_r_3_-panel"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+    [33mid[39m=[32m"_r_3_-tab-bestNights"[39m
+    [33mrole[39m=[32m"tab"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Players":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"_r_3_-panel"[39m
+    [33maria-selected[39m=[32m"true"[39m
+    [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors bg-surface text-ink shadow-card"[39m
+    [33mid[39m=[32m"_r_3_-tab-players"[39m
+    [33mrole[39m=[32m"tab"[39m
+    [33mtabindex[39m=[32m"0"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sessions":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"_r_3_-panel"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+    [33mid[39m=[32m"_r_3_-tab-sessions"[39m
+    [33mrole[39m=[32m"tab"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  tabpanel:
+
+  Name "Players":
+  [36m<div[39m
+    [33maria-labelledby[39m=[32m"_r_3_-tab-players"[39m
+    [33mid[39m=[32m"_r_3_-panel"[39m
+    [33mrole[39m=[32m"tabpanel"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p />[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-3"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"Group overview"[39m
+        [33mclass[39m=[32m"grid grid-cols-3 rounded-md bg-surface-2 p-1"[39m
+        [33mrole[39m=[32m"tablist"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_3_-panel"[39m
+          [33maria-selected[39m=[32m"false"[39m
+          [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+          [33mid[39m=[32m"_r_3_-tab-bestNights"[39m
+          [33mrole[39m=[32m"tab"[39m
+          [33mtabindex[39m=[32m"-1"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mBest nights[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_3_-panel"[39m
+          [33maria-selected[39m=[32m"true"[39m
+          [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors bg-surface text-ink shadow-card"[39m
+          [33mid[39m=[32m"_r_3_-tab-players"[39m
+          [33mrole[39m=[32m"tab"[39m
+          [33mtabindex[39m=[32m"0"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPlayers[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_3_-panel"[39m
+          [33maria-selected[39m=[32m"false"[39m
+          [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+          [33mid[39m=[32m"_r_3_-tab-sessions"[39m
+          [33mrole[39m=[32m"tab"[39m
+          [33mtabindex[39m=[32m"-1"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mSessions[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-labelledby[39m=[32m"_r_3_-tab-players"[39m
+        [33mid[39m=[32m"_r_3_-panel"[39m
+        [33mrole[39m=[32m"tabpanel"[39m
+      [36m>[39m
+        [36m<p>[39m
+          [0mPlayers panel[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/group/rail/GroupRail.test.tsx:74:36
+     72|       const { onAddPlayer } = renderRail({ wide: false });
+     73|       await userEvent.click(screen.getByRole("tab", { name: tab }));
+     74|       await userEvent.click(screen.getByRole("button", { name: "Add pl…
+       |                                    ^
+     75|       expect(screen.getByRole("tab", { selected: true }).textContent).…
+     76|       expect(screen.getByRole("tabpanel").textContent).toBe("Players p…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  |ui| src/features/group/rail/GroupRail.test.tsx > GroupRail > keeps Add player in reach on phones from Sessions
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Add player"
+
+Here are the accessible roles:
+
+  tablist:
+
+  Name "Group overview":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Group overview"[39m
+    [33mclass[39m=[32m"grid grid-cols-3 rounded-md bg-surface-2 p-1"[39m
+    [33mrole[39m=[32m"tablist"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  tab:
+
+  Name "Best nights":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"_r_4_-panel"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+    [33mid[39m=[32m"_r_4_-tab-bestNights"[39m
+    [33mrole[39m=[32m"tab"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Players":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"_r_4_-panel"[39m
+    [33maria-selected[39m=[32m"false"[39m
+    [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+    [33mid[39m=[32m"_r_4_-tab-players"[39m
+    [33mrole[39m=[32m"tab"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sessions":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"_r_4_-panel"[39m
+    [33maria-selected[39m=[32m"true"[39m
+    [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors bg-surface text-ink shadow-card"[39m
+    [33mid[39m=[32m"_r_4_-tab-sessions"[39m
+    [33mrole[39m=[32m"tab"[39m
+    [33mtabindex[39m=[32m"0"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  tabpanel:
+
+  Name "Sessions":
+  [36m<div[39m
+    [33maria-labelledby[39m=[32m"_r_4_-tab-sessions"[39m
+    [33mid[39m=[32m"_r_4_-panel"[39m
+    [33mrole[39m=[32m"tabpanel"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p />[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-3"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"Group overview"[39m
+        [33mclass[39m=[32m"grid grid-cols-3 rounded-md bg-surface-2 p-1"[39m
+        [33mrole[39m=[32m"tablist"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_4_-panel"[39m
+          [33maria-selected[39m=[32m"false"[39m
+          [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+          [33mid[39m=[32m"_r_4_-tab-bestNights"[39m
+          [33mrole[39m=[32m"tab"[39m
+          [33mtabindex[39m=[32m"-1"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mBest nights[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_4_-panel"[39m
+          [33maria-selected[39m=[32m"false"[39m
+          [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+          [33mid[39m=[32m"_r_4_-tab-players"[39m
+          [33mrole[39m=[32m"tab"[39m
+          [33mtabindex[39m=[32m"-1"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPlayers[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_4_-panel"[39m
+          [33maria-selected[39m=[32m"true"[39m
+          [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors bg-surface text-ink shadow-card"[39m
+          [33mid[39m=[32m"_r_4_-tab-sessions"[39m
+          [33mrole[39m=[32m"tab"[39m
+          [33mtabindex[39m=[32m"0"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mSessions[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-labelledby[39m=[32m"_r_4_-tab-sessions"[39m
+        [33mid[39m=[32m"_r_4_-panel"[39m
+        [33mrole[39m=[32m"tabpanel"[39m
+      [36m>[39m
+        [36m<p>[39m
+          [0mSessions panel[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/group/rail/GroupRail.test.tsx:74:36
+     72|       const { onAddPlayer } = renderRail({ wide: false });
+     73|       await userEvent.click(screen.getByRole("tab", { name: tab }));
+     74|       await userEvent.click(screen.getByRole("button", { name: "Add pl…
+       |                                    ^
+     75|       expect(screen.getByRole("tab", { selected: true }).textContent).…
+     76|       expect(screen.getByRole("tabpanel").textContent).toBe("Players p…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  |ui| src/features/group/rail/GroupRail.test.tsx > GroupRail > keeps each phone panel mounted while another tab shows
+TestingLibraryElementError: Unable to find an element with the text: Players panel. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-3"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"Group overview"[39m
+        [33mclass[39m=[32m"grid grid-cols-3 rounded-md bg-surface-2 p-1"[39m
+        [33mrole[39m=[32m"tablist"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_5_-panel"[39m
+          [33maria-selected[39m=[32m"false"[39m
+          [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+          [33mid[39m=[32m"_r_5_-tab-bestNights"[39m
+          [33mrole[39m=[32m"tab"[39m
+          [33mtabindex[39m=[32m"-1"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mBest nights[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_5_-panel"[39m
+          [33maria-selected[39m=[32m"false"[39m
+          [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors text-ink-3 hover:text-ink"[39m
+          [33mid[39m=[32m"_r_5_-tab-players"[39m
+          [33mrole[39m=[32m"tab"[39m
+          [33mtabindex[39m=[32m"-1"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mPlayers[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"_r_5_-panel"[39m
+          [33maria-selected[39m=[32m"true"[39m
+          [33mclass[39m=[32m"rounded-sm py-1.5 text-sm font-semibold transition-colors bg-surface text-ink shadow-card"[39m
+          [33mid[39m=[32m"_r_5_-tab-sessions"[39m
+          [33mrole[39m=[32m"tab"[39m
+          [33mtabindex[39m=[32m"0"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mSessions[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-labelledby[39m=[32m"_r_5_-tab-sessions"[39m
+        [33mid[39m=[32m"_r_5_-panel"[39m
+        [33mrole[39m=[32m"tabpanel"[39m
+      [36m>[39m
+        [36m<p>[39m
+          [0mSessions panel[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/group/rail/GroupRail.test.tsx:89:19
+     87|     renderRail({ wide: false });
+     88|     await userEvent.click(screen.getByRole("tab", { name: "Sessions" }…
+     89|     expect(screen.getByText("Players panel")).toBeTruthy();
+       |                   ^
+     90|     expect(screen.getByRole("tabpanel").textContent).toBe("Sessions pa…
+     91|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  |ui| src/features/group/rail/Players.test.tsx > Players > opens the form focused when the GM asks to add a Player from elsewhere
+TestingLibraryElementError: Unable to find an accessible element with the role "textbox" and name "Player name"
+
+Here are the accessible roles:
+
+  heading:
+
+  Name "Players · 1":
+  [36m<h2[39m
+    [33mclass[39m=[32m"font-mono outline-none text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"[39m
+    [33mid[39m=[32m"_r_g_"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Add player":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Add player"[39m
+    [33mclass[39m=[32m"rounded-sm text-xs font-semibold text-accent-strong hover:underline"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------list:
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"mt-3 flex max-h-[26.5rem] flex-col gap-0.5 overflow-y-auto"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  listitem:
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"group flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-surface-2"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "More for Ana":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"More for Ana"[39m
+    [33mclass[39m=[32m"rounded-sm p-1 text-ink-3 transition-opacity hover:text-ink focus-visible:opacity-100 aria-expanded:opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<section[39m
+  [33maria-labelledby[39m=[32m"_r_g_"[39m
+  [33mclass[39m=[32m"rounded-lg border bg-surface p-4 shadow-card border-line"[39m
+[36m>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"flex min-h-5 items-center justify-between gap-3"[39m
+  [36m>[39m
+    [36m<h2[39m
+      [33mclass[39m=[32m"font-mono outline-none text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"[39m
+      [33mid[39m=[32m"_r_g_"[39m
+      [33mtabindex[39m=[32m"-1"[39m
+    [36m>[39m
+      [0mPlayers · 1[0m
+    [36m</h2>[39m
+    [36m<button[39m
+      [33maria-label[39m=[32m"Add player"[39m
+      [33mclass[39m=[32m"rounded-sm text-xs font-semibold text-accent-strong hover:underline"[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0m+ Add[0m
+    [36m</button>[39m
+  [36m</div>[39m
+  [36m<ul[39m
+    [33mclass[39m=[32m"mt-3 flex max-h-[26.5rem] flex-col gap-0.5 overflow-y-auto"[39m
+  [36m>[39m
+    [36m<li[39m
+      [33mclass[39m=[32m"group flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-surface-2"[39m
+    [36m>[39m
+      [36m<span[39m
+        [33maria-hidden[39m=[32m"true"[39m
+        [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px]"[39m
+      [36m>[39m
+        [0mAN[0m
+      [36m</span>[39m
+      [36m<span[39m
+        [33mclass[39m=[32m"min-w-0 flex-1 truncate text-sm font-medium"[39m
+      [36m>[39m
+        [0mAna[0m
+      [36m</span>[39m
+      [36m<span[39m
+        [33mclass[39m=[32m"font-mono text-[11px] tabular-nums text-ink-3"[39m
+      [36m>[39m
+        [0m0/30[0m
+      [36m</span>[39m
+      [36m<button[39m
+        [33maria-expanded[39m=[32m"false"[39m
+        [33maria-label[39m=[32m"More for Ana"[39m
+        [33mclass[39m=[32m"rounded-sm p-1 text-ink-3 transition-opacity hover:text-ink focus-visible:opacity-100 aria-expanded:opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100"[39m
+        [33mtype[39m=[32m"button"[39m
+      [36m>[39m
+        [36m<svg[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"size-4"[39m
+          [33mfill[39m=[32m"currentColor"[39m
+          [33mviewBox[39m=[32m"0 0 20 20"[39m
+        [36m>[39m
+          [36m<circle[39m
+            [33mcx[39m=[32m"10"[39m
+            [33mcy[39m=[32m"4.5"[39m
+            [33mr[39m=[32m"1.6"[39m
+          [36m/>[39m
+          [36m<circle[39m
+            [33mcx[39m=[32m"10"[39m
+            [33mcy[39m=[32m"10"[39m
+            [33mr[39m=[32m"1.6"[39m
+          [36m/>[39m
+          [36m<circle[39m
+            [33mcx[39m=[32m"10"[39m
+            [33mcy[39m=[32m"15.5"[39m
+            [33mr[39m=[32m"1.6"[39m
+          [36m/>[39m
+        [36m</svg>[39m
+      [36m</button>[39m
+    [36m</li>[39m
+  [36m</ul>[39m
+[36m</section>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/group/rail/Players.test.tsx:85:54
+     83|     expect(within(card).queryByRole("textbox")).toBeNull();
+     84|     requestAdd(1);
+     85|     expect(document.activeElement).toBe(within(card).getByRole("textbo…
+       |                                                      ^
+     86|   });
+     87|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  |ui| src/features/group/rail/Players.test.tsx > Players > focuses the open form again on every request, keeping what the GM typed
+AssertionError: expected <body><div>…(1)</div></body> to be <input id="_r_j_" …(5)></input> // Object.is equality
+
+- Expected
++ Received
+
++ <body>
++   <div>
++     <section
++       aria-labelledby="_r_i_"
++       class="rounded-lg border bg-surface p-4 shadow-card border-line"
++     >
++       <div
++         class="flex min-h-5 items-center justify-between gap-3"
++       >
++         <h2
++           class="font-mono outline-none text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"
++           id="_r_i_"
++           tabindex="-1"
++         >
++           Players · 0
++         </h2>
++       </div>
++       <p
++         class="mt-2 text-sm text-ink-3"
++       >
++         Players add themselves when they open your link. You can also add names now.
++       </p>
++       <form
++         class="flex min-w-0 flex-col gap-1.5 mt-3"
++       >
++         <div
++           class="flex min-w-0 items-center gap-2"
++         >
++           <label
++             class="sr-only"
++             for="_r_j_"
++           >
++             Player name
++           </label>
+            <input
+              autocomplete="off"
+              class="h-9 min-w-0 flex-1 rounded-sm border border-line bg-paper px-3 text-sm text-ink outline-none focus:border-accent-strong aria-invalid:border-busy"
+              id="_r_j_"
+              maxlength="120"
+              placeholder="Player name"
+              value=""
+            />
++           <button
++             class="inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-surface text-ink border border-line hover:border-line-strong h-8 px-3 text-sm gap-1.5 rounded-sm"
++             type="submit"
++           >
++             Add
++           </button>
++           <button
++             class="inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm"
++             type="button"
++           >
++             Cancel
++           </button>
++         </div>
++       </form>
++     </section>
++   </div>
++ </body>
+
+ ❯ src/features/group/rail/Players.test.tsx:92:36
+     90|     const field = within(card).getByRole("textbox", { name: "Player na…
+     91|     requestAdd(1);
+     92|     expect(document.activeElement).toBe(field);
+       |                                    ^
+     93|     await userEvent.type(field, "Fa");
+     94|     field.blur();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  6 failed | 21 passed (27)
+   Start at  14:38:27
+   Duration  1.62s (tests 47%, environment 39%, transform 6%, setup 5%, import 3%)
+
