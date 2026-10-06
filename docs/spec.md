@@ -200,7 +200,7 @@ Dropped from Lonir: workspace functions, `gmGetGroupRail` and `gmGetDateAvailabi
 
 | Caller | Can |
 | --- | --- |
-| Anyone | `player.group`, `player.answers`, `player.join`, `player.answer`, `player.fillRest` with a valid Share Token, within rate limits. `auth.signIn` with `anonymous` or a `password` sign-up (both rate limited), or a `password` log in (Convex Auth's throttle) |
+| Anyone | `player.group`, `player.answers`, `player.join`, `player.answer`, `player.fillRest` with a valid Share Token, within rate limits. `auth.signIn` with `anonymous` or a `password` sign-up (both rate limited), a `password` log in (Convex Auth's throttle), or `google` once its credentials are set (§5.7). `signInOptions.available` |
 | Anonymous GM or Account | Everything in `groups`, `schedule`, `roster`, `sessions` for Groups they own. Nothing on Groups they do not own: those look missing |
 | Anonymous GM only | `account.startSave` |
 | Account only | `account.finishSave`, `auth.signOut` from the UI (an Anonymous GM has no sign-out button, because signing out would lose the Group), `player.claim`, `player.release`, `me.groups` |
@@ -272,6 +272,16 @@ A session lasts 1 year from sign-in (`session.totalDurationMs`), and `session.in
 Player answers keep an Unsaved Group alive without refreshing the GM's session. A shorter inactivity limit would lock an Anonymous GM who stays away out of a Group that lives on while the Players keep answering. The year costs no storage, because Expiry still deletes the anonymous user with its last Group (§5.5).
 
 Convex Auth's default is 30 days in total, which would lock out an active Anonymous GM after a month, Groups and all.
+
+### 5.7 Continue with Google
+
+Convex Auth's Google provider sits next to Password and Anonymous, always registered. **Continue with Google** shows in the Save sheet and the Log in sheet only while `signInOptions.available` reports `google: true`, which is when `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` are both set on the deployment. Without them, the provider stays unused and Password and Anonymous sign-in work as before; a test pins that.
+
+- **The OAuth client.** A Google Cloud OAuth client of type Web application, with the JavaScript origin `https://next-session.link` and the redirect URI `https://pleasant-sockeye-672.convex.site/api/auth/callback/google`. `SITE_URL` sends the browser back to the app.
+- **Profile.** Only Google's `sub` (the account id), the email (trimmed and lowercased), and `email_verified` are kept. No name, no picture.
+- **Legal Acceptance.** A new Google Account gets the current stamps in `afterUserCreatedOrUpdated`, because the button sits under "By continuing with Google you agree to the Terms and Privacy Policy."
+- **Save through Google.** The client calls `account.startSave`, keeps the code in `sessionStorage` as in §5.3, and leaves for Google with `redirectTo` set to the Group's page. `sessionStorage` survives the same-tab round trip. Back on the page, Convex Auth exchanges the `code` from the URL, and the GM surface holds the Group on a loading state while the pending claim is redeemed (step 5 of §5.3), then toasts "Saved". A claim that expired on the way leaves the Groups with the anonymous user, as after a dropped connection.
+- **Account linking.** A Google sign-in joins an existing Account only when that Account's email is verified, and only when Google says the email is verified (`email_verified`). Password Accounts never verify their email (§5.3), so Google never signs in to a Password Account, and a Password sign-up never joins a Google Account. The same email through both gives two Accounts. Linking by email alone would let someone register a victim's email with a password, keep that session, and receive the victim's later Google sign-in, Groups and all. The alternative, linking both ways, needs Password email verification first (an email code through Resend), and then the stock rule links them without code changes.
 
 ## 6. Frontend
 

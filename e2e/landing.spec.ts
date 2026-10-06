@@ -25,6 +25,8 @@ function openGroupLink(page: Page) {
 
 async function fillSaveSheet(page: Page, email: string) {
   const sheet = page.getByRole("dialog", { name: /^Keep / });
+  await expect(sheet.getByLabel("Email")).toBeVisible();
+  await expect(sheet.getByRole("button", { name: "Continue with Google" })).toHaveCount(0);
   await sheet.getByLabel("Email").fill(email);
   await sheet.getByLabel("Password").fill(password);
   await sheet.getByRole("button", { name: "Save group" }).click();
