@@ -12,11 +12,9 @@ function convexFailure(path: string, serverMessage: string) {
   return new Error(`[CONVEX M(${path})] ${serverMessage}\n  Called by client`);
 }
 
-function codedFailure(data: Record<string, unknown>) {
-  const error = new ConvexError(
-    `[CONVEX M(player:join)] [Request ID: 1a2b3c] Server Error\nUncaught ConvexError: ${JSON.stringify(data)}`,
-  );
-  (error as ConvexError<unknown>).data = data;
+function codedFailure(data: { code: string; retryAfter?: number }) {
+  const error = new ConvexError(data);
+  error.message = `[CONVEX M(player:join)] [Request ID: 1a2b3c] Server Error\nUncaught ConvexError: ${JSON.stringify(data)}`;
   return error;
 }
 

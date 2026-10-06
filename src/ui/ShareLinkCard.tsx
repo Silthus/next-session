@@ -160,6 +160,15 @@ function shareNatively(text: string, onShared: () => void) {
   }
 }
 
+type ShareTarget = {
+  channel: ShareChannel;
+  label: string;
+  glyph: string;
+  tone: string;
+  href: string;
+  newTab: boolean;
+};
+
 const roundTarget =
   "inline-flex size-10 items-center justify-center rounded-full text-sm font-bold transition-transform hover:scale-105 active:scale-95";
 
@@ -172,7 +181,7 @@ function ShareTargets({
 }) {
   const message = shareMessage(url);
   const encoded = encodeURIComponent(message);
-  const targets = [
+  const targets: ShareTarget[] = [
     {
       channel: "whatsapp",
       label: "WhatsApp",
@@ -197,7 +206,7 @@ function ShareTargets({
       href: `mailto:?subject=${encodeURIComponent("Our next game night")}&body=${encoded}`,
       newTab: false,
     },
-  ] satisfies { channel: ShareChannel }[];
+  ];
   return (
     <div className="flex items-center gap-2">
       {targets.map((target) => (
