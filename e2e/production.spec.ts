@@ -8,6 +8,7 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import { addMonths, monthOf, todayUtc, type IsoDate } from "../shared/dates";
+import { toastRegion } from "./helpers";
 
 const lonirUrl = "https://little-spaniel-709.convex.site";
 const legacyShareLink = "/s/AAAAAAAA";
@@ -174,7 +175,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
     const dayPanel = gm.getByRole("region", { name: dayLabel(dateOf(5)) });
     await expect(dayPanel.getByRole("listitem")).toHaveText([new RegExp(`${playerName}.*Free`)]);
     await dayPanel.getByRole("button", { name: "Schedule session" }).click();
-    await expect(gm.getByRole("status")).toContainText("Players see it on the link.");
+    await expect(toastRegion(gm)).toContainText("Players see it on the link.");
     await expect(night(gm, dateOf(5))).toHaveAccessibleName(
       `${dayLabel(dateOf(5))}: everyone free, Session scheduled`,
     );
@@ -188,7 +189,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
   await test.step("5. The GM saves to a new Account, and a third browser logs in", async () => {
     await gm.getByRole("button", { name: "Save your group" }).click();
     await submitCredentials(gm, `Keep ${groupName}`, "Save group");
-    await expect(gm.getByRole("status")).toHaveText("Saved. Open it anywhere with your account.");
+    await expect(toastRegion(gm)).toHaveText("Saved. Open it anywhere with your account.");
     await expect(gm.getByRole("button", { name: "Your account" })).toBeVisible();
     await shoot(gm, testInfo, "5-gm-saved");
 
