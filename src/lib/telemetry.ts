@@ -22,7 +22,10 @@ export type BrowserEvent =
   | { name: "answers_started"; group_id: string }
   | { name: "save_started" }
   | { name: "sign_in_failed"; flow: "signUp" | "signIn"; code: string }
-  | { name: "keep_group_started"; group_id: string };
+  | { name: "keep_group_started"; group_id: string }
+  | { name: "remove_group_started"; group_id: string }
+  | { name: "remove_group_undone"; group_id: string }
+  | { name: "create_link_started"; surface: "me" };
 
 export type ErrorContext = {
   surface: string;
