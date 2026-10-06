@@ -1,4 +1,4 @@
-import { TIPS_CONSENT_VERSION, TIPS_REQUESTED } from "../../shared/tips";
+import { TIPS_CONFIRM_PARAM, TIPS_CONSENT_VERSION, TIPS_REQUESTED } from "../../shared/tips";
 import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { requestMail } from "../mail";
@@ -20,7 +20,7 @@ export async function tipsConfirmUrlFor(ctx: MutationCtx, account: Doc<"users">)
   const code = newSecretCode();
   await ctx.db.patch("users", account._id, { tipsCodeHash: await hashSecretCode(code) });
   const url = new URL("/tips", process.env.SITE_URL);
-  url.searchParams.set("code", code);
+  url.searchParams.set(TIPS_CONFIRM_PARAM, code);
   return url.toString();
 }
 

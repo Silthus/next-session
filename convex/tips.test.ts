@@ -68,7 +68,7 @@ async function signUpAskingForTips() {
   const [welcome] = await mailRequestsDuring(async () => {
     ({ userId } = await signUpWithTips("yes"));
   });
-  const code = new URL(welcome!.body.tips_confirm_url!).searchParams.get("code")!;
+  const code = new URL(welcome!.body.tips_confirm_url!).searchParams.get("confirm")!;
   return { userId: userId!, code };
 }
 
@@ -149,7 +149,7 @@ describe("asking for Tips at sign-up", () => {
   it("links the confirmation to the app's /tips page", async () => {
     const [welcome] = await mailRequestsDuring(() => signUpWithTips("yes"));
 
-    expect(welcome!.body.tips_confirm_url).toMatch(new RegExp(`^${SITE_URL}/tips\\?code=`));
+    expect(welcome!.body.tips_confirm_url).toMatch(new RegExp(`^${SITE_URL}/tips\\?confirm=`));
   });
 
   it("gives every Account its own code", async () => {

@@ -30,25 +30,26 @@ test("saves to a new Account that asked for Tips", async ({ page }) => {
 test("/tips takes the code out of the address bar and confirms only on the press", async ({
   page,
 }) => {
-  const mutations: string[] = [];
+  const calls: string[] = [];
   page.on("websocket", (socket) =>
     socket.on("framesent", ({ payload }) => {
-      if (String(payload).includes('"type":"Mutation"')) mutations.push(String(payload));
+      if (/"type":"(Mutation|Action)"/.test(String(payload))) calls.push(String(payload));
     }),
   );
 
-  await page.goto("/tips?code=not-a-real-code");
+  await page.goto("/tips?confirm=not-a-real-code");
 
   await expect(page.getByRole("button", yes)).toBeVisible();
   await expect(page).toHaveURL(/\/tips$/);
-  expect(mutations).toEqual([]);
+  expect(calls).toEqual([]);
 
   await page.getByRole("button", yes).click();
 
-  await expect(page.getByRole("status")).toHaveText(
-    "This link has expired. That's fine, you'll just get no tips.",
-  );
-  expect(mutations).toEqual([expect.stringContaining('"udfPath":"account:confirmTips"')]);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "This link has expired" }),
+  ).toBeFocused();
+  await expect(page.getByText("That's fine, you'll just get no tips.")).toBeVisible();
+  expect(calls).toEqual([expect.stringContaining('"udfPath":"account:confirmTips"')]);
 });
 
 const screenshotDir = process.env.E2E_SCREENSHOTS;
@@ -71,11 +72,11 @@ test.describe("screenshots", () => {
         await sheet.getByRole("checkbox", { name: TIPS_CONSENT_WORDING }).check();
         await shot(page, "save-sheet-tips-box");
 
-        await page.goto("/tips?code=not-a-real-code");
+        await page.goto("/tips?confirm=not-a-real-code");
         await expect(page.getByRole("button", yes)).toBeVisible();
         await shot(page, "tips-page");
         await page.getByRole("button", yes).click();
-        await expect(page.getByRole("status")).toBeVisible();
+        await expect(page.getByRole("heading", { name: "This link has expired" })).toBeVisible();
         await shot(page, "tips-page-expired");
       });
     }

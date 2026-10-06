@@ -25,17 +25,17 @@ function renderAt(path: string) {
 
 describe("/tips", () => {
   it("takes the code out of the address bar on load and calls nothing", async () => {
-    const router = renderAt("/tips?code=the-code");
+    const router = renderAt("/tips?confirm=the-code");
 
     await screen.findByRole("button", { name: "Yes, send me the tips" });
 
     expect(router.state.location.href).toBe("/tips");
     expect(confirmTips).not.toHaveBeenCalled();
-    expect(document.title).toBe("Tips · Next Session");
+    expect(document.title).toBe("Two short tips? · Next Session");
   });
 
   it("confirms with the code it took from the address bar", async () => {
-    renderAt("/tips?code=the-code");
+    renderAt("/tips?confirm=the-code");
 
     await userEvent.click(await screen.findByRole("button", { name: "Yes, send me the tips" }));
 

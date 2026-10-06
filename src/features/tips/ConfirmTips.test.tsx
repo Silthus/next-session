@@ -33,14 +33,18 @@ function renderPage(code: string | undefined, confirm: Confirm) {
 
 const yes = { name: "Yes, send me the tips" };
 
+async function headingText() {
+  return (await screen.findByRole("heading", { level: 1 })).textContent;
+}
+
 describe("ConfirmTips", () => {
   it("shows the box's wording and one button, and calls nothing until it is pressed", async () => {
     const confirm = vi.fn<Confirm>();
 
     renderPage("the-code", confirm);
 
-    expect(await screen.findByRole("heading", { level: 1 })).toBeTruthy();
-    expect(screen.getByText(TIPS_CONSENT_WORDING, { exact: false })).toBeTruthy();
+    expect(await headingText()).toBe("Two short tips?");
+    expect(screen.getByText(`You ticked: “${TIPS_CONSENT_WORDING}”.`)).toBeTruthy();
     expect(screen.getAllByRole("button")).toEqual([screen.getByRole("button", yes)]);
     expect(confirm).not.toHaveBeenCalled();
   });
@@ -52,11 +56,10 @@ describe("ConfirmTips", () => {
     await userEvent.click(await screen.findByRole("button", yes));
 
     expect(confirm).toHaveBeenCalledExactlyOnceWith("the-code");
-    expect((await screen.findByRole("status")).textContent).toBe(
-      "Done. The first tip arrives in two days.",
-    );
+    const heading = await screen.findByRole("heading", { level: 1, name: "Done" });
+    expect(screen.getByText("The first tip arrives in two days.")).toBeTruthy();
     expect(screen.queryByRole("button", yes)).toBeNull();
-    expect(document.activeElement).toBe(screen.getByRole("status"));
+    expect(document.activeElement).toBe(heading);
   });
 
   it("says the link expired when the server refuses the code", async () => {
@@ -64,10 +67,13 @@ describe("ConfirmTips", () => {
 
     await userEvent.click(await screen.findByRole("button", yes));
 
-    expect((await screen.findByRole("status")).textContent).toBe(
-      "This link has expired. That's fine, you'll just get no tips.",
-    );
+    const heading = await screen.findByRole("heading", {
+      level: 1,
+      name: "This link has expired",
+    });
+    expect(screen.getByText("That's fine, you'll just get no tips.")).toBeTruthy();
     expect(screen.queryByRole("button", yes)).toBeNull();
+    expect(document.activeElement).toBe(heading);
   });
 
   it("presses once while the confirmation is on its way", async () => {
@@ -93,7 +99,7 @@ describe("ConfirmTips", () => {
     );
     await userEvent.click(screen.getByRole("button", yes));
 
-    expect((await screen.findByRole("status")).textContent).toMatch(/^Done\./);
+    expect(await screen.findByRole("heading", { level: 1, name: "Done" })).toBeTruthy();
   });
 
   it("says what went wrong without the server's words when the press fails unexpectedly", async () => {

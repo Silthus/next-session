@@ -1,39 +1,50 @@
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { TIPS_CONSENT_WORDING } from "../../../shared/tips";
 import { appErrorOf } from "../../lib/errors";
-import { Button } from "../../ui/Button";
-import { Logo } from "../../ui/Logo";
-import { PageShell } from "../../ui/PageShell";
-import { useFocusOnMount } from "../../ui/useFocusOnMount";
+import { Button, buttonClassName } from "../../ui/Button";
+import { StatusScreen } from "../../ui/StatusScreen";
 
 type Confirm = (code: string) => Promise<{ confirmed: boolean }>;
 
 type Outcome = "confirmed" | "expired";
 
-const outcomeLines: Record<Outcome, string> = {
-  confirmed: "Done. The first tip arrives in two days.",
-  expired: "This link has expired. That's fine, you'll just get no tips.",
+const outcomes: Record<Outcome, { headline: string; explanation: string }> = {
+  confirmed: { headline: "Done", explanation: "The first tip arrives in two days." },
+  expired: {
+    headline: "This link has expired",
+    explanation: "That's fine, you'll just get no tips.",
+  },
 };
+
+const ASKING_HEADLINE = "Two short tips?";
 
 export function ConfirmTips({ code, confirm }: { code: string | undefined; confirm: Confirm }) {
   const [outcome, setOutcome] = useState<Outcome | null>(null);
+
+  if (outcome !== null) {
+    return (
+      <StatusScreen key={outcome} {...outcomes[outcome]}>
+        <Link to="/" className={buttonClassName("secondary", "md", "mt-2")}>
+          Open Next Session
+        </Link>
+      </StatusScreen>
+    );
+  }
+  if (code === undefined) {
+    return (
+      <StatusScreen
+        headline={ASKING_HEADLINE}
+        explanation="Open the link in your welcome mail again to confirm."
+      >
+        {null}
+      </StatusScreen>
+    );
+  }
   return (
-    <PageShell
-      maxWidth="md"
-      centerFooter
-      className="flex flex-col items-center gap-5 pt-10 text-center"
-    >
-      <Logo className="size-14" />
-      <h1 className="font-display text-3xl font-extrabold text-balance">Two short tips?</h1>
-      <p className="text-ink-2 text-balance">You ticked: “{TIPS_CONSENT_WORDING}”.</p>
-      {outcome !== null ? (
-        <OutcomeLine outcome={outcome} />
-      ) : code === undefined ? (
-        <p className="text-ink-2">Open the link in your welcome mail again to confirm.</p>
-      ) : (
-        <Confirmation onConfirm={() => confirm(code)} onOutcome={setOutcome} />
-      )}
-    </PageShell>
+    <StatusScreen headline={ASKING_HEADLINE} explanation={`You ticked: “${TIPS_CONSENT_WORDING}”.`}>
+      <Confirmation onConfirm={() => confirm(code)} onOutcome={setOutcome} />
+    </StatusScreen>
   );
 }
 
@@ -78,15 +89,6 @@ function Confirmation({
         Didn't ask for them? Close this page, and nothing gets sent.
       </p>
     </div>
-  );
-}
-
-function OutcomeLine({ outcome }: { outcome: Outcome }) {
-  const line = useFocusOnMount<HTMLParagraphElement>();
-  return (
-    <p ref={line} role="status" tabIndex={-1} className="mt-2 font-semibold text-ink outline-none">
-      {outcomeLines[outcome]}
-    </p>
   );
 }
 
