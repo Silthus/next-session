@@ -6,6 +6,7 @@ import { fail } from "./model/errors";
 import { deleteAnonymousGm } from "./model/gms";
 import { ensureRoomForGroups, groupsOwnedBy } from "./model/groups";
 import { enforceRateLimit } from "./model/rateLimits";
+import { track } from "./model/telemetry";
 
 const CLAIM_CODE_BYTES = 32;
 const CLAIM_TTL_MS = 10 * 60_000;
@@ -48,6 +49,7 @@ export const finishSave = mutation({
     const groupIds = await moveGroups(ctx, anonymousGm, account);
     await copyLegalAcceptance(ctx, anonymousGm, account);
     await deleteAnonymousGm(ctx, anonymousGm);
+    await track(ctx, { name: "groups_saved", actor: account, group_count: groupIds.length });
     return { groupIds };
   },
 });
