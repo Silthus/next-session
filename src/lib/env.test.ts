@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { convexUrl, legalContact, MissingEnvError } from "./env";
+import { convexUrl, legalContact, MissingEnvError, postHogEnv } from "./env";
 
 describe("convexUrl", () => {
   it("returns the Convex URL when it is set", () => {
@@ -29,5 +29,19 @@ describe("legalContact", () => {
         LEGAL_CONTACT_EMAIL: "hello@example.test",
       }),
     ).toEqual({ controllerAddress: "Somewhere 1, 12345 Town", contactEmail: "hello@example.test" });
+  });
+});
+
+describe("postHogEnv", () => {
+  it("is absent without a token, so measurement stays off", () => {
+    expect(postHogEnv({})).toBeNull();
+    expect(postHogEnv({ VITE_POSTHOG_TOKEN: "", VITE_RELEASE: "abc123" })).toBeNull();
+  });
+
+  it("carries the token and the release the build was made from", () => {
+    expect(postHogEnv({ VITE_POSTHOG_TOKEN: "phc_test", VITE_RELEASE: "abc123" })).toEqual({
+      token: "phc_test",
+      release: "abc123",
+    });
   });
 });

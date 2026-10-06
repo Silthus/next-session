@@ -8,6 +8,7 @@ const PLAYERS_KEY = "next-session.players";
 const HINT_KEY_PREFIX = "next-session.playerHint.";
 const LAST_GROUP_KEY = "next-session.lastGroup";
 const NUDGE_DISMISSED_KEY = "next-session.nudgeDismissedAt";
+const MEASUREMENT_OFF_KEY = "next-session.measurementOff";
 
 const noStorage: KeyValueStorage = {
   getItem: () => null,
@@ -70,6 +71,18 @@ export function nudgeDismissedAt(storage = browserStorage()): number | null {
   return Number.isFinite(stored) ? stored : null;
 }
 
+export function rememberMeasurementOff(storage = browserStorage()): boolean {
+  return write(storage, MEASUREMENT_OFF_KEY, "1");
+}
+
+export function forgetMeasurementOff(storage = browserStorage()) {
+  attempt(() => storage.removeItem(MEASUREMENT_OFF_KEY), undefined);
+}
+
+export function measurementTurnedOff(storage = browserStorage()): boolean {
+  return read(storage, MEASUREMENT_OFF_KEY) !== null;
+}
+
 function readPlayers(storage: KeyValueStorage): RememberedPlayers {
   const parsed = attempt(() => JSON.parse(read(storage, PLAYERS_KEY) ?? "{}") as unknown, {});
   return isRecord(parsed) ? (parsed as RememberedPlayers) : {};
@@ -91,8 +104,11 @@ function read(storage: KeyValueStorage, key: string): string | null {
   return attempt(() => storage.getItem(key), null);
 }
 
-function write(storage: KeyValueStorage, key: string, value: string) {
-  attempt(() => storage.setItem(key, value), undefined);
+function write(storage: KeyValueStorage, key: string, value: string): boolean {
+  return attempt(() => {
+    storage.setItem(key, value);
+    return true;
+  }, false);
 }
 
 function attempt<T>(run: () => T, fallback: T): T {

@@ -1,10 +1,8 @@
 import { createRootRoute, HeadContent, Outlet } from "@tanstack/react-router";
 import { pageTitle } from "../lib/pageTitle";
 import { Button } from "../ui/Button";
-import { Logo } from "../ui/Logo";
 import { NotFoundScreen } from "../ui/NotFoundScreen";
-import { PageShell } from "../ui/PageShell";
-import { useFocusOnMount } from "../ui/useFocusOnMount";
+import { StatusScreen } from "../ui/StatusScreen";
 
 export const Route = createRootRoute({
   head: ({ match }) => ({
@@ -25,22 +23,11 @@ function Root() {
 }
 
 function BrokenPageScreen() {
-  const heading = useFocusOnMount<HTMLHeadingElement>();
   return (
-    <PageShell
-      maxWidth="md"
-      centerFooter
-      className="flex flex-col items-center justify-center gap-5 text-center"
-    >
-      <title>{pageTitle("Something broke")}</title>
-      <Logo muted className="size-14" />
-      <h1 ref={heading} tabIndex={-1} className="font-display text-3xl font-extrabold outline-none">
-        Something broke
-      </h1>
-      <p className="text-ink-2">Reload the page.</p>
+    <StatusScreen headline="Something broke" explanation="Reload the page.">
       <Button className="mt-2" onClick={() => window.location.reload()}>
         Reload
       </Button>
-    </PageShell>
+    </StatusScreen>
   );
 }
