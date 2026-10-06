@@ -1,0 +1,7 @@
+/tips url after load: https://next-session.link/tips
+calls on load: []
+calls after press: ["account:confirmTips"]
+Save sheet box checked: false
+removed the probe's groups: 1 ; calls during Save sheet: ["auth:signIn"]
+box checked: false
+removed groups: 1
