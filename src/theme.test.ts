@@ -103,7 +103,7 @@ describe("the bright accent", () => {
   });
 });
 
-const maybeFill = /(?<![\w-])bg-maybe(?![\w-])/g;
+const maybeGraphicColour = /(?<![\w-])(?:bg|fill|stroke)-maybe(?![\w-])/g;
 
 const maybeTileSources = ["./features/player/PlayerCalendar.tsx"];
 
@@ -113,7 +113,7 @@ const maybeGraphicSources = Object.entries(sources).filter(
 
 describe("a maybe graphic on cream", () => {
   it.each(maybeGraphicSources)("is drawn in the maybe bar colour in %s", (_, source) => {
-    expect(source.match(maybeFill) ?? []).toEqual([]);
+    expect(source.match(maybeGraphicColour) ?? []).toEqual([]);
   });
 });
 
