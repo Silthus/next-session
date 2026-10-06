@@ -131,7 +131,7 @@ function Legend({ dense }: { dense: boolean }) {
         some free
       </span>
       <span className="flex items-center gap-1.5">
-        <IconStar className="size-3 text-accent" /> session
+        <IconStar className="size-3 text-accent-strong" /> session
       </span>
       {dense ? (
         <span className="flex items-center gap-1.5">

@@ -53,7 +53,7 @@ jobs:
       group: deploy-production
       cancel-in-progress: false
     env:
-      APP_URL: https://next-session.silthus.workers.dev
+      APP_URL: https://next-session.link
       LONIR_URL: https://little-spaniel-709.convex.site
     steps:
       - uses: actions/checkout@v7
@@ -105,3 +105,4 @@ jobs:
           expect_response "/g/smoke-deep-link?month=2026-01" "200 "
           expect_response /s/AAAAAAAAAA "200 "
           expect_response /s/AAAAAAAA "302 $LONIR_URL/s/AAAAAAAA"
+          expect_response "/groups/smoke?month=2026-01" "302 $LONIR_URL/groups/smoke?month=2026-01"

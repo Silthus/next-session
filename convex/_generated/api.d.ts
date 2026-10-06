@@ -14,6 +14,7 @@ import type * as cleanup from "../cleanup.js";
 import type * as crons from "../crons.js";
 import type * as groups from "../groups.js";
 import type * as http from "../http.js";
+import type * as me from "../me.js";
 import type * as model_access from "../model/access.js";
 import type * as model_errors from "../model/errors.js";
 import type * as model_gms from "../model/gms.js";
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   groups: typeof groups;
   http: typeof http;
+  me: typeof me;
   "model/access": typeof model_access;
   "model/errors": typeof model_errors;
   "model/gms": typeof model_gms;

@@ -30,7 +30,7 @@ export function Sessions({
                 onClick={() => onSelectDay(session.date)}
                 className="flex w-full items-center gap-3 rounded-md border border-accent/40 bg-accent-soft/50 px-3 py-2.5 text-left transition-colors hover:bg-accent-soft"
               >
-                <IconStar className="size-5 shrink-0 text-accent" />
+                <IconStar className="size-5 shrink-0 text-accent-strong" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold">{longDayLabel(session.date)}</span>
                   <span className="block text-xs text-ink-3">

@@ -110,7 +110,7 @@ export function Join({
             placeholder={fieldLabel}
             autoComplete="given-name"
             enterKeyHint="go"
-            className="h-14 min-w-0 flex-1 rounded-md border border-line bg-paper px-3.5 text-base outline-none transition-colors placeholder:text-ink-3 focus:border-accent"
+            className="h-14 min-w-0 flex-1 rounded-md border border-line bg-paper px-3.5 text-base outline-none transition-colors placeholder:text-ink-3 focus:border-accent-strong"
           />
           <Button
             size="lg"
@@ -131,7 +131,7 @@ export function Join({
         Planning your own game?{" "}
         <Link
           to="/"
-          className="-my-3.5 inline-block py-3.5 font-semibold text-accent hover:underline"
+          className="-my-3.5 inline-block py-3.5 font-semibold text-accent-strong hover:underline"
         >
           Create your link
         </Link>
@@ -163,7 +163,7 @@ function NameFilter({
           if (event.key !== "Enter" || isImeComposing(event.nativeEvent)) return;
           event.currentTarget.blur();
         }}
-        className="mt-3 h-12 w-full rounded-md border border-line bg-paper px-3.5 text-base outline-none transition-colors placeholder:text-ink-3 focus:border-accent"
+        className="mt-3 h-12 w-full rounded-md border border-line bg-paper px-3.5 text-base outline-none transition-colors placeholder:text-ink-3 focus:border-accent-strong"
       />
       <p role="status" aria-live="polite" className="mt-3 text-sm text-ink-2 empty:mt-0">
         {noMatch ? "No names match. Add yours below." : ""}
@@ -221,7 +221,11 @@ const LETTERS_WITHOUT_DECOMPOSITION: Record<string, string> = {
 };
 
 function searchable(text: string) {
-  const unaccented = text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
+  const unaccented = text
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/\s+/g, " ")
+    .toLocaleLowerCase();
   return Array.from(unaccented, (letter) => LETTERS_WITHOUT_DECOMPOSITION[letter] ?? letter).join(
     "",
   );

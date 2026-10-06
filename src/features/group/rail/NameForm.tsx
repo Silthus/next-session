@@ -86,7 +86,7 @@ export function NameForm({
           aria-describedby={failure ? failureId : undefined}
           onChange={(event) => setName(event.target.value)}
           className={cn(
-            "h-9 min-w-0 flex-1 rounded-sm border border-line bg-paper px-3 text-sm text-ink outline-none focus:border-accent aria-invalid:border-busy",
+            "h-9 min-w-0 flex-1 rounded-sm border border-line bg-paper px-3 text-sm text-ink outline-none focus:border-accent-strong aria-invalid:border-busy",
             inputClassName,
           )}
         />

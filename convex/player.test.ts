@@ -159,7 +159,28 @@ describe("player.group", () => {
         { _id: bo, name: "Bo" },
       ],
       sessionDates: ["2026-10-02", TODAY, "2026-10-17", LAST_BOOKABLE_DATE, "2027-01-01"],
+      claimedPlayerId: null,
     });
+  });
+
+  it("shows the Account's Claimed Player on its other devices and to no one else", async () => {
+    const { as: gm, shareToken } = await sharedGroup();
+    const player = await signInAccount(t);
+    const ada = await player.as.mutation(api.player.join, { shareToken, name: "Ada" });
+    const otherSessionId = await t.run(
+      async (ctx) =>
+        await ctx.db.insert("authSessions", {
+          userId: player.userId,
+          expirationTime: Date.now() + DAY,
+        }),
+    );
+    const otherDevice = t.withIdentity({ subject: `${player.userId}|${otherSessionId}` });
+    const anonymousGm = await signInAnonymousGm(t);
+
+    expect(await claimedPlayerIdIn(otherDevice, shareToken)).toBe(ada);
+    for (const stranger of [t, gm, anonymousGm.as, (await signInAccount(t)).as]) {
+      expect(await claimedPlayerIdIn(stranger, shareToken)).toBeNull();
+    }
   });
 
   it("shows only the Group behind the Share Token", async () => {
@@ -678,5 +699,295 @@ describe("player.fillRest", () => {
     await t.mutation(api.player.fillRest, { shareToken, playerId: ada, month: "2026-11" });
 
     expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
+  });
+});
+
+describe("joining while signed in", () => {
+  it("claims the new Player for an Account", async () => {
+    const { shareToken } = await sharedGroup();
+    const player = await signInAccount(t);
+
+    const ada = await player.as.mutation(api.player.join, { shareToken, name: "Ada" });
+
+    expect(await player.as.query(api.player.group, { shareToken })).toMatchObject({
+      claimedPlayerId: ada,
+    });
+  });
+
+  it("claims nothing for a visitor or an Anonymous GM", async () => {
+    const { shareToken } = await sharedGroup();
+    const anonymousGm = await signInAnonymousGm(t);
+
+    await t.mutation(api.player.join, { shareToken, name: "Ada" });
+    await anonymousGm.as.mutation(api.player.join, { shareToken, name: "Bo" });
+
+    expect(await claimedPlayerIdIn(t, shareToken)).toBeNull();
+    expect(await claimedPlayerIdIn(anonymousGm.as, shareToken)).toBeNull();
+    const players = await t.run(async (ctx) => await ctx.db.query("players").collect());
+    expect(players.map(({ userId }) => userId)).toEqual([undefined, undefined]);
+  });
+
+  it("moves the Account's claim in the Group to the new name", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const ada = await seedPlayer(groupId, "Ada");
+    const player = await signInAccount(t);
+    await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+
+    const bo = await player.as.mutation(api.player.join, { shareToken, name: "Bo" });
+
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBe(bo);
+    expect(await rosterNamesOf(groupId)).toEqual(["Ada", "Bo"]);
+  });
+
+  it("joins no one when the Account already claims 50 Players", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const player = await signInAccount(t);
+    await seedClaimsInOtherGroups(player.userId, 50);
+
+    await expectErrorCode(
+      player.as.mutation(api.player.join, { shareToken, name: "Ada" }),
+      "TOO_MANY_GROUPS",
+    );
+    expect(await rosterNamesOf(groupId)).toEqual([]);
+  });
+
+  it("keeps a joined Player on the Roster until the GM removes it", async () => {
+    const { as, groupId, shareToken } = await sharedGroup();
+    const player = await signInAccount(t);
+    const ada = await player.as.mutation(api.player.join, { shareToken, name: "Ada" });
+    await player.as.mutation(api.player.release, { groupId });
+    expect(await rosterNamesOf(groupId)).toEqual(["Ada"]);
+
+    await as.mutation(api.roster.removePlayer, { playerId: ada });
+
+    expect(await rosterNamesOf(groupId)).toEqual([]);
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBeNull();
+  });
+});
+
+async function claimedPlayerIdIn(as: GmClient, shareToken: string) {
+  return (await as.query(api.player.group, { shareToken }))?.claimedPlayerId;
+}
+
+async function seedClaimsInOtherGroups(accountId: Id<"users">, count: number) {
+  const owner = await signInAccount(t);
+  await t.run(async (ctx) => {
+    for (let index = 0; index < count; index++) {
+      const groupId = await ctx.db.insert("groups", {
+        ownerId: owner.userId,
+        name: `Table ${index}`,
+        shareToken: `table${String(index).padStart(5, "0")}`,
+      });
+      await ctx.db.insert("players", { groupId, name: "Ada", nameKey: "ada", userId: accountId });
+    }
+  });
+}
+
+describe("player.claim", () => {
+  it("claims a Player picked from the Roster", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const ada = await seedPlayer(groupId, "Ada");
+    const player = await signInAccount(t);
+
+    await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBe(ada);
+  });
+
+  it("leaves the Account's own claim as it is", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const ada = await seedPlayer(groupId, "Ada");
+    const player = await signInAccount(t);
+    await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+
+    await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBe(ada);
+  });
+
+  it("moves the Account's claim to another Player of the same Group", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const ada = await seedPlayer(groupId, "Ada");
+    const bo = await seedPlayer(groupId, "Bo");
+    const player = await signInAccount(t);
+    const other = await signInAccount(t);
+    await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+
+    await player.as.mutation(api.player.claim, { shareToken, playerId: bo });
+
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBe(bo);
+    await other.as.mutation(api.player.claim, { shareToken, playerId: ada });
+    expect(await claimedPlayerIdIn(other.as, shareToken)).toBe(ada);
+  });
+
+  it("refuses a Player another Account claimed", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const ada = await seedPlayer(groupId, "Ada");
+    const first = await signInAccount(t);
+    const second = await signInAccount(t);
+    await first.as.mutation(api.player.claim, { shareToken, playerId: ada });
+
+    await expectErrorCode(
+      second.as.mutation(api.player.claim, { shareToken, playerId: ada }),
+      "PLAYER_CLAIMED",
+    );
+    expect(await claimedPlayerIdIn(first.as, shareToken)).toBe(ada);
+    expect(await claimedPlayerIdIn(second.as, shareToken)).toBeNull();
+  });
+
+  it("refuses a Player of another Group and a rotated-away Share Token", async () => {
+    const mine = await sharedGroup();
+    const other = await sharedGroup();
+    const ada = await seedPlayer(mine.groupId, "Ada");
+    const oldShareToken = await rotatedAway(mine.groupId, mine.as);
+    const player = await signInAccount(t);
+
+    await expectErrorCode(
+      player.as.mutation(api.player.claim, { shareToken: other.shareToken, playerId: ada }),
+      "NOT_FOUND",
+    );
+    await expectErrorCode(
+      player.as.mutation(api.player.claim, { shareToken: oldShareToken, playerId: ada }),
+      "NOT_FOUND",
+    );
+    expect(await claimedPlayerIdIn(player.as, await shareTokenOf(mine.groupId))).toBeNull();
+  });
+
+  it("lets only an Account claim", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const ada = await seedPlayer(groupId, "Ada");
+    const anonymousGm = await signInAnonymousGm(t);
+
+    for (const caller of [t, anonymousGm.as]) {
+      await expectErrorCode(
+        caller.mutation(api.player.claim, { shareToken, playerId: ada }),
+        "UNAUTHENTICATED",
+      );
+    }
+    const player = await signInAccount(t);
+    await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBe(ada);
+  });
+
+  it("caps an Account at 50 Claimed Players but still moves a claim within a Group", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const ada = await seedPlayer(groupId, "Ada");
+    const bo = await seedPlayer(groupId, "Bo");
+    const player = await signInAccount(t);
+    await seedClaimsInOtherGroups(player.userId, 49);
+    await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+    const full = await sharedGroup();
+    const cy = await seedPlayer(full.groupId, "Cy");
+
+    await expectErrorCode(
+      player.as.mutation(api.player.claim, { shareToken: full.shareToken, playerId: cy }),
+      "TOO_MANY_GROUPS",
+    );
+
+    await player.as.mutation(api.player.claim, { shareToken, playerId: bo });
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBe(bo);
+  });
+
+  it("rate limits an Account to a burst of 10 claims", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const ada = await seedPlayer(groupId, "Ada");
+    const bo = await seedPlayer(groupId, "Bo");
+    const player = await signInAccount(t);
+    for (let index = 0; index < 10; index++) {
+      await player.as.mutation(api.player.claim, { shareToken, playerId: index % 2 ? ada : bo });
+    }
+
+    const error = await expectErrorCode(
+      player.as.mutation(api.player.claim, { shareToken, playerId: ada }),
+      "RATE_LIMITED",
+    );
+    expect(error.retryAfter).toBeGreaterThan(0);
+    expect(error.retryAfter).toBeLessThanOrEqual(MINUTE);
+  });
+
+  it("pushes out the Expiry of an Unsaved Group", async () => {
+    const { groupId, shareToken } = await sharedGroup(signInAnonymousGm);
+    const ada = await seedPlayer(groupId, "Ada");
+    const player = await signInAccount(t);
+    vi.setSystemTime(NOW + 2 * DAY);
+
+    await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+
+    expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
+  });
+
+  it("locks nothing: the Share Link still answers as a Claimed Player", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const ada = await seedPlayer(groupId, "Ada");
+    const player = await signInAccount(t);
+    await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+
+    await t.mutation(api.player.answer, { shareToken, playerId: ada, date: TODAY, answer: "free" });
+
+    expect(await answersOf(ada)).toEqual({ [TODAY]: "free" });
+  });
+});
+
+describe("player.release", () => {
+  it("releases the claim and keeps the Player with its Answers", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const player = await signInAccount(t);
+    const ada = await player.as.mutation(api.player.join, { shareToken, name: "Ada" });
+    await t.mutation(api.player.answer, { shareToken, playerId: ada, date: TODAY, answer: "free" });
+
+    expect(await player.as.mutation(api.player.release, { groupId })).toBeNull();
+
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBeNull();
+    expect(await rosterNamesOf(groupId)).toEqual(["Ada"]);
+    expect(await answersOf(ada)).toEqual({ [TODAY]: "free" });
+    const other = await signInAccount(t);
+    await other.as.mutation(api.player.claim, { shareToken, playerId: ada });
+    expect(await claimedPlayerIdIn(other.as, shareToken)).toBe(ada);
+  });
+
+  it("returns null for a Group without the Account's claim and leaves other claims alone", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const owner = await signedInGmWithGroup(t);
+    const someoneElse = await signInAccount(t);
+    const ada = await someoneElse.as.mutation(api.player.join, { shareToken, name: "Ada" });
+    const player = await signInAccount(t);
+    await owner.as.mutation(api.groups.remove, { groupId: owner.groupId });
+
+    for (const anyGroupId of [groupId, owner.groupId]) {
+      expect(await player.as.mutation(api.player.release, { groupId: anyGroupId })).toBeNull();
+    }
+    expect(await claimedPlayerIdIn(someoneElse.as, shareToken)).toBe(ada);
+  });
+
+  it("pushes out the Expiry of an Unsaved Group", async () => {
+    const { groupId, shareToken } = await sharedGroup(signInAnonymousGm);
+    const player = await signInAccount(t);
+    await player.as.mutation(api.player.join, { shareToken, name: "Ada" });
+    vi.setSystemTime(NOW + 2 * DAY);
+
+    await player.as.mutation(api.player.release, { groupId });
+
+    expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
+  });
+
+  it("lets only an Account release", async () => {
+    const { groupId } = await sharedGroup();
+    const anonymousGm = await signInAnonymousGm(t);
+
+    for (const caller of [t, anonymousGm.as]) {
+      await expectErrorCode(caller.mutation(api.player.release, { groupId }), "UNAUTHENTICATED");
+    }
+  });
+
+  it("shares the claim rate limit with player.claim", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const ada = await seedPlayer(groupId, "Ada");
+    const player = await signInAccount(t);
+    for (let index = 0; index < 5; index++) {
+      await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+      await player.as.mutation(api.player.release, { groupId });
+    }
+
+    await expectErrorCode(player.as.mutation(api.player.release, { groupId }), "RATE_LIMITED");
   });
 });

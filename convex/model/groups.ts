@@ -39,11 +39,15 @@ export async function groupsOwnedBy(ctx: QueryCtx, ownerId: Id<"users">) {
 }
 
 export async function ensureRoomForAnotherGroup(ctx: QueryCtx, gm: Doc<"users">) {
+  await ensureRoomForGroups(ctx, gm, 1);
+}
+
+export async function ensureRoomForGroups(ctx: QueryCtx, gm: Doc<"users">, count: number) {
   const owned = await ctx.db
     .query("groups")
     .withIndex("by_ownerId", (q) => q.eq("ownerId", gm._id))
     .take(MAX_GROUPS_PER_GM);
-  if (owned.length >= MAX_GROUPS_PER_GM) fail({ code: "TOO_MANY_GROUPS" });
+  if (owned.length + count > MAX_GROUPS_PER_GM) fail({ code: "TOO_MANY_GROUPS" });
 }
 
 export function canUndoRotate(group: Doc<"groups">) {

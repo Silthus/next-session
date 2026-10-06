@@ -13,13 +13,22 @@ import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import {
+  currentAccount,
   findPlayerOnShareLink,
   groupByShareToken,
   playerOnShareLink,
+  requireAccount,
   touchGroup,
 } from "./model/access";
 import { fail } from "./model/errors";
-import { ensureNameIsFree, ensureRosterHasRoom, validName } from "./model/players";
+import {
+  claimedPlayerIn,
+  claimPlayer,
+  ensureNameIsFree,
+  releaseClaim,
+  ensureRosterHasRoom,
+  validName,
+} from "./model/players";
 import { enforceRateLimit } from "./model/rateLimits";
 import { answerValue } from "./schema";
 
@@ -28,6 +37,7 @@ const playerGroupView = v.object({
   name: v.string(),
   players: v.array(v.object({ _id: v.id("players"), name: v.string() })),
   sessionDates: v.array(v.string()),
+  claimedPlayerId: v.union(v.id("players"), v.null()),
 });
 
 export const group = query({
@@ -36,11 +46,12 @@ export const group = query({
   handler: async (ctx, { shareToken }) => {
     const group = await groupByShareToken(ctx, shareToken);
     if (group === null) return null;
-    const [players, sessionDates] = await Promise.all([
+    const [players, sessionDates, claimedPlayerId] = await Promise.all([
       rosterOf(ctx, group._id),
       sessionDatesOf(ctx, group._id),
+      claimedPlayerIdOfCaller(ctx, group._id),
     ]);
-    return { groupId: group._id, name: group.name, players, sessionDates };
+    return { groupId: group._id, name: group.name, players, sessionDates, claimedPlayerId };
   },
 });
 
@@ -65,8 +76,34 @@ export const join = mutation({
     await ensureRosterHasRoom(ctx, group._id);
     await enforceRateLimit(ctx, "joinGroup", group._id);
     const playerId = await ctx.db.insert("players", { groupId: group._id, ...normalized });
+    await claimForAccountCaller(ctx, playerId);
     await touchGroup(ctx, group);
     return playerId;
+  },
+});
+
+export const claim = mutation({
+  args: { shareToken: v.string(), playerId: v.id("players") },
+  returns: v.null(),
+  handler: async (ctx, { shareToken, playerId }) => {
+    const account = await requireAccount(ctx);
+    const { group, player } = await playerOnShareLink(ctx, shareToken, playerId);
+    await enforceRateLimit(ctx, "claimPlayer", account._id);
+    await claimPlayer(ctx, account, player);
+    await touchGroup(ctx, group);
+    return null;
+  },
+});
+
+export const release = mutation({
+  args: { groupId: v.id("groups") },
+  returns: v.null(),
+  handler: async (ctx, { groupId }) => {
+    const account = await requireAccount(ctx);
+    await enforceRateLimit(ctx, "claimPlayer", account._id);
+    const released = await releaseClaim(ctx, account, groupId);
+    if (released !== null) await touchGroupOf(ctx, released);
+    return null;
   },
 });
 
@@ -109,6 +146,24 @@ export const fillRest = mutation({
     return null;
   },
 });
+
+async function claimedPlayerIdOfCaller(ctx: QueryCtx, groupId: Id<"groups">) {
+  const account = await currentAccount(ctx);
+  const claimed = account === null ? null : await claimedPlayerIn(ctx, account._id, groupId);
+  return claimed?._id ?? null;
+}
+
+async function claimForAccountCaller(ctx: MutationCtx, playerId: Id<"players">) {
+  const account = await currentAccount(ctx);
+  if (account === null) return;
+  const player = await ctx.db.get("players", playerId);
+  if (player !== null) await claimPlayer(ctx, account, player);
+}
+
+async function touchGroupOf(ctx: MutationCtx, player: Doc<"players">) {
+  const group = await ctx.db.get("groups", player.groupId);
+  if (group !== null) await touchGroup(ctx, group);
+}
 
 async function rosterOf(ctx: QueryCtx, groupId: Id<"groups">) {
   const players = await ctx.db

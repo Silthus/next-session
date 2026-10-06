@@ -387,7 +387,7 @@ function ModeSwitch({
         <label
           key={option.mode}
           className={cn(
-            "flex h-9 cursor-pointer items-center justify-center rounded-sm text-sm font-semibold transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-accent",
+            "flex h-9 cursor-pointer items-center justify-center rounded-sm text-sm font-semibold transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-accent-strong",
             mode === option.mode ? "bg-surface text-ink shadow-card" : "text-ink-2 hover:text-ink",
           )}
         >
@@ -407,7 +407,7 @@ function ModeSwitch({
 }
 
 const inputClassName =
-  "h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30";
+  "h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent-strong focus:outline-none focus:ring-2 focus:ring-accent-strong/30";
 
 function Field({
   label,

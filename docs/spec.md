@@ -382,7 +382,7 @@ The same workflow runs on `push` to `main`; a `deploy` job `needs: [check, e2e]`
 
 1. `bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL` with `CONVEX_DEPLOY_KEY`.
 2. `bunx wrangler deploy` with `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
-3. Smoke: `curl` the app URL and a deep link, both 200.
+3. Smoke: `curl https://next-session.link`. The app, a deep link and a new Share Link answer 200; a legacy `/s/<8 chars>` and a `/groups/...` link answer 302 to the same path on Lonir.
 
 Secrets, set once with `gh secret set` by the deploy ticket from the env files on Michael's machine (never echoed): `CONVEX_DEPLOY_KEY` (from `CONVEX_PROD_DEPLOY_KEY` in `~/.config/next-session/deploy-keys.env`), `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` (from `~/.config/next-session/cloudflare.env`). Convex env on prod: `SITE_URL=https://next-session.link`, `JWT_PRIVATE_KEY`, `JWKS`. On dev `helpful-mastiff-82`: the same keys with `SITE_URL=http://localhost:5173`.
 
@@ -395,10 +395,10 @@ The dev deployment is shared, and Convex preview deployments are not on the Free
 Today a Cloudflare Single Redirect rule 301s every path to Lonir's `little-spaniel-709.convex.site`.
 
 1. **Before:** every feature ticket is merged, the deploy is green, and the production spec passes against `https://next-session.silthus.workers.dev`.
-2. **Attach:** add `routes: [{ pattern: "next-session.link", custom_domain: true }]` to `wrangler.jsonc` and deploy. The scoped token has Workers Routes and DNS edit on the zone; if an existing apex record blocks the custom domain, the ticket replaces it. The redirect rule runs before Workers, so visitors see no change yet.
+2. **Attach:** add `routes: [{ pattern: "next-session.link", custom_domain: true }]` to `wrangler.jsonc` and deploy. The scoped token has Workers Routes and DNS edit on the zone. Delete the existing apex record first: wrangler's `override_existing_dns_record` does not replace a record it doesn't manage. The redirect rule runs before Workers, so visitors see no change yet.
 3. **Michael:** delete the Single Redirect rule in the Cloudflare dashboard (Rules → Redirect Rules). The token cannot edit rulesets on purpose. This is the one step that parks.
 4. **Verify:** `/` serves the new app; `/s/<new token>` opens a Group; `/s/<8-char legacy token>` and `/groups/...` answer 302 to the same path on `little-spaniel-709.convex.site`, so Lonir's existing groups keep working; the Resend records (`send`, `resend._domainkey`) are untouched.
-5. **Rollback:** Michael re-creates the redirect rule, or the agent removes the custom domain route.
+5. **Rollback:** Michael re-creates the Single Redirect rule: all incoming requests, a dynamic 301 to `concat("https://little-spaniel-709.convex.site", http.request.uri.path)`, query string preserved. It runs before the Worker, so it takes effect within seconds. The token cannot edit rulesets, so the agent's fallback keeps the custom domain and deploys a redirect-only `next-session` Worker that 301s every path and query to `little-spaniel-709.convex.site`, then curls the apex to confirm. The next deploy from `main` replaces that Worker, so hold merges until the rule is back. Two things look like a rollback and are not: removing `routes` from `wrangler.jsonc` does not detach the domain, and deleting the custom domain to restore the apex `CNAME → convex.domains` without the redirect rule takes the apex down, because Convex answers the apex Host with a 403 ([ADR-0001](adr/0001-spa-on-cloudflare-workers-backend-on-convex-free.md)). While rolled back, point the deploy smoke's `APP_URL` in `ci.yml` at `https://next-session.silthus.workers.dev`, or every deploy fails its smoke.
 
 Old links ([ADR-0005](adr/0005-legacy-share-links-redirect-to-lonir.md)): the Worker runs first only on `/s/*` and `/groups*` (`assets.run_worker_first`), so static requests stay free and unmetered.
 

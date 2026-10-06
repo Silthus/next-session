@@ -164,6 +164,22 @@ describe("Join", () => {
       expect(screen.getByRole("button", { name: "Zoë Ölund" })).toBeTruthy();
     });
 
+    it("finds a listed name through a filter with doubled spaces", async () => {
+      renderJoin({ players: longRoster() });
+
+      await userEvent.type(
+        await screen.findByRole("searchbox", { name: "Find your name" }),
+        "Zoë  Ölund",
+      );
+
+      expect(screen.getAllByRole("listitem")).toHaveLength(1);
+      expect(screen.getByRole("button", { name: "Zoë Ölund" })).toBeTruthy();
+      expect(screen.getByRole("textbox", { name: "Not listed? Your name" })).toHaveProperty(
+        "value",
+        "",
+      );
+    });
+
     it("answers as the one name left after filtering", async () => {
       const { onPick } = renderJoin({ players: longRoster() });
 
@@ -214,22 +230,31 @@ describe("Join", () => {
       expect(onJoin).toHaveBeenCalledWith("Dev");
     });
 
-    it("keeps the carried name when the Group refuses it as taken", async () => {
-      renderJoin({
-        players: longRoster(),
-        onJoin: () => Promise.reject(new ConvexError({ code: "NAME_TAKEN", playerId: zoe._id })),
-      });
+    it("keeps the carried name when someone just joined under it", async () => {
+      const dev = { _id: "player-dev" as Id<"players">, name: "Dev" };
+      function GrowingRoster() {
+        const [players, setPlayers] = useState(longRoster());
+        return (
+          <Join
+            groupName="Thursday Crew"
+            players={players}
+            onPick={vi.fn()}
+            onJoin={() => {
+              setPlayers((current) => [...current, dev]);
+              return Promise.reject(new ConvexError({ code: "NAME_TAKEN", playerId: dev._id }));
+            }}
+          />
+        );
+      }
+      renderInRouter(GrowingRoster);
 
-      await userEvent.type(
-        await screen.findByRole("searchbox", { name: "Find your name" }),
-        "Zoë  Ölund",
-      );
+      await userEvent.type(await screen.findByRole("searchbox", { name: "Find your name" }), "Dev");
       await userEvent.click(screen.getByRole("button", { name: "Join" }));
 
-      expect(await screen.findByRole("button", { name: "Zoë Ölund" })).toBeTruthy();
+      expect(await screen.findByRole("button", { name: "Dev" })).toBeTruthy();
       expect(screen.getByRole("textbox", { name: "Not listed? Your name" })).toHaveProperty(
         "value",
-        "Zoë  Ölund",
+        "Dev",
       );
     });
 

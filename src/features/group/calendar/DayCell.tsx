@@ -42,15 +42,15 @@ export function DayCell({
         "relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2",
         cellTone(day),
         selected
-          ? "z-10 outline-2 outline-offset-2 outline-ink focus-visible:outline-offset-4 focus-visible:outline-accent"
-          : "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+          ? "z-10 outline-2 outline-offset-2 outline-ink focus-visible:outline-offset-4 focus-visible:outline-accent-strong"
+          : "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong",
         day.past ? "cursor-default opacity-40" : "active:scale-[0.97]",
       )}
     >
       <span
         className={cn(
           "flex items-center gap-1 text-xs font-semibold leading-none sm:text-sm",
-          isToday && isPlain(day) && "text-accent",
+          isToday && isPlain(day) && "text-accent-strong",
         )}
       >
         {Number(day.date.slice(8))}
@@ -59,7 +59,7 @@ export function DayCell({
         )}
       </span>
       {day.session && (
-        <IconStar className="absolute top-1 right-1 size-3 text-accent sm:top-1.5 sm:right-1.5 sm:size-4" />
+        <IconStar className="absolute top-1 right-1 size-3 text-accent-strong sm:top-1.5 sm:right-1.5 sm:size-4" />
       )}
       <DayAnswers day={day} players={players} onSolidFree={perfect} />
     </button>
