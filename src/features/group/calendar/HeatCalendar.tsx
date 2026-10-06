@@ -4,7 +4,7 @@ import { Button } from "../../../ui/Button";
 import { Card } from "../../../ui/Card";
 import { cn } from "../../../ui/cn";
 import { lastVisibleMonth, leadingBlanks, monthLabel, WEEKDAYS } from "./calendarDates";
-import { DayCell, MAX_PLAYERS_WITH_BARS, type CalendarDay } from "./DayCell";
+import { DayCell, MAX_PLAYERS_WITH_BARS, unansweredBarTone, type CalendarDay } from "./DayCell";
 import { IconChevron, IconStar } from "../../../ui/icons";
 
 export function HeatCalendar({
@@ -131,7 +131,7 @@ function Legend({ dense }: { dense: boolean }) {
         some free
       </span>
       <span className="flex items-center gap-1.5">
-        <IconStar className="size-3 text-accent" /> session
+        <IconStar className="size-3 text-accent-strong" /> session
       </span>
       {dense ? (
         <span className="flex items-center gap-1.5">
@@ -148,6 +148,12 @@ function Legend({ dense }: { dense: boolean }) {
             <span className="h-3 w-1 rounded-full bg-busy" />
           </span>
           <span>one bar per player</span>
+        </span>
+      )}
+      {!dense && (
+        <span className="flex items-center gap-1.5">
+          <span className={cn("h-3 w-1 rounded-full", unansweredBarTone)} />
+          <span>not answered</span>
         </span>
       )}
     </div>

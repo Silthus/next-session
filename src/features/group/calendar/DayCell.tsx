@@ -42,15 +42,15 @@ export function DayCell({
         "relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2",
         cellTone(day),
         selected
-          ? "z-10 outline-2 outline-offset-2 outline-ink focus-visible:outline-offset-4 focus-visible:outline-accent"
-          : "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+          ? "z-10 outline-2 outline-offset-2 outline-ink focus-visible:outline-offset-4 focus-visible:outline-accent-strong"
+          : "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong",
         day.past ? "cursor-default opacity-40" : "active:scale-[0.97]",
       )}
     >
       <span
         className={cn(
           "flex items-center gap-1 text-xs font-semibold leading-none sm:text-sm",
-          isToday && isPlain(day) && "text-accent",
+          isToday && isPlain(day) && "text-accent-strong",
         )}
       >
         {Number(day.date.slice(8))}
@@ -59,7 +59,7 @@ export function DayCell({
         )}
       </span>
       {day.session && (
-        <IconStar className="absolute top-1 right-1 size-3 text-accent sm:top-1.5 sm:right-1.5 sm:size-4" />
+        <IconStar className="absolute top-1 right-1 size-3 text-accent-strong sm:top-1.5 sm:right-1.5 sm:size-4" />
       )}
       <DayAnswers day={day} players={players} onSolidFree={perfect} />
     </button>
@@ -109,11 +109,12 @@ function DayAnswers({
     <span className="flex flex-wrap gap-0.5">
       {players.map((player) => {
         const answer = answerOf.get(player._id) ?? null;
+        if (answer === null && !day.bookable) return null;
         return (
           <span
             key={player._id}
             data-bar={answer ?? "unanswered"}
-            className={cn("h-2.5 w-1 rounded-full sm:h-3 sm:w-[5px]", barTone(answer, onSolidFree))}
+            className={cn(barShape, barTone(answer, onSolidFree))}
           />
         );
       })}
@@ -121,11 +122,15 @@ function DayAnswers({
   );
 }
 
+const barShape = "h-2.5 w-1 rounded-full sm:h-3 sm:w-[5px]";
+
 const barTones: Record<Answer, string> = { free: "bg-free", maybe: "bg-maybe", busy: "bg-busy" };
+
+export const unansweredBarTone = "border border-ink-3";
 
 function barTone(answer: Answer | null, onSolidFree: boolean) {
   if (onSolidFree) return "bg-white/85 dark:bg-paper/70";
-  return answer ? barTones[answer] : "bg-line-strong/70";
+  return answer ? barTones[answer] : unansweredBarTone;
 }
 
 function answersByPlayer(day: CalendarDay) {
@@ -153,5 +158,7 @@ export function dayCellLabel(day: CalendarDay, playerCount: number): string {
 function answerSummary(day: CalendarDay, playerCount: number) {
   if (playerCount === 0) return null;
   if (day.perfect) return "everyone free";
-  return `${String(day.free.length)} free, ${String(day.maybe.length)} maybe, ${String(day.busy.length)} busy`;
+  const answered = `${String(day.free.length)} free, ${String(day.maybe.length)} maybe, ${String(day.busy.length)} busy`;
+  const missing = day.bookable ? day.unanswered.length : 0;
+  return missing === 0 ? answered : `${answered}, ${String(missing)} not answered`;
 }
