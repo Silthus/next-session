@@ -49,9 +49,9 @@ Gold on paper, ported from Lonir's Next Session (`packages/ui/src/styles.css` in
 | `accent-strong` | `oklch(48% 0.13 80)` | `oklch(80% 0.11 84)` | gold that reads: links, stars, today, focus rings |
 | `accent-ink` | `oklch(22% 0.02 60)` | `oklch(18% 0.02 70)` | text on accent |
 | `accent-soft` | `oklch(92% 0.05 88)` | `oklch(26% 0.05 82)` | share-link card, soft buttons, scheduled cell fill |
-| `free` / `free-soft` | `#1FA96B` / `#DDF5E8` | `#3DD68C` / `#113826` | answer: free |
-| `maybe` / `maybe-soft` | `oklch(77% 0.15 52)` / `oklch(94% 0.04 55)` | `oklch(82% 0.13 52)` / `oklch(27% 0.045 55)` | answer: maybe, the nudge banner |
-| `busy` / `busy-soft` | `#E4466A` / `#FCE1E8` | `#FF6B8B` / `#3F1724` | answer: busy, destructive |
+| `free` / `free-soft` | `oklch(62.5% 0.145 157)` / `oklch(94.9% 0.031 162)` | `#3DD68C` / `#113826` | answer: free |
+| `maybe` / `maybe-soft` | `oklch(76% 0.15 52)` / `oklch(94% 0.04 55)` | `oklch(82% 0.13 52)` / `oklch(27% 0.045 55)` | answer: maybe, the nudge banner |
+| `busy` / `busy-soft` | `oklch(60.5% 0.194 11)` / `oklch(93.4% 0.031 0)` | `#FF6B8B` / `#3F1724` | answer: busy, destructive |
 
 Rules:
 
@@ -61,7 +61,7 @@ Rules:
 - One exception: the WhatsApp and Telegram share icons in `ShareLinkCard` keep their brand colors (`#25D366` green, `#2AABEE` blue) so people recognize them. The brand colors appear nowhere else.
 - Answer tiles always carry a glyph (✓ ? ✕) in addition to color, for color-blind players.
 - Heat-map intensity on the GM grid is `color-mix(in oklab, var(--free) <0–55>%, var(--surface))` driven by the share of players who are free; a day where everyone is free is solid `free` with white text; a day with any busy answer gets no tint (the busy bar or ✕ count carries the conflict). No day is ever painted red.
-- Contrast, pinned by `src/theme.test.ts`: `ink` on `paper` ≥ 14:1 both themes; `ink-3` on `surface` and `paper` ≥ 4.5:1; `accent-ink` on `accent` and `accent-strong` on `surface`, `paper` and `accent-soft` ≥ 4.5:1; white on `free`/`busy` ≥ 3:1 at ≥ 14 px bold (large-text rule), the glyph adds redundancy; the answer tiles read at least as well as they did before the gold theme.
+- Contrast, pinned by `src/theme.test.ts`: `ink` on `paper` ≥ 14:1 both themes; `ink-3` on `surface` and `paper` ≥ 4.5:1; `accent-ink` on `accent` and `accent-strong` on `surface`, `paper` and `accent-soft` ≥ 4.5:1; white on `free`/`busy` ≥ 3:1 at ≥ 14 px bold (large-text rule), the glyph adds redundancy; the answer tiles read at least as well as they did before the gold theme. Free and busy are a shade darker in light so their GM-grid bars keep their contrast on the cream `surface`. The maybe bar drops from 2.2:1 to 2.0:1: on cream, one maybe color cannot keep both that bar and the ink-on-maybe tile at 8:1, and the tile text wins.
 
 ### Type
 

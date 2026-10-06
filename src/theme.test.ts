@@ -23,6 +23,11 @@ const answerTileFloors = {
   },
 };
 
+const answerBarFloors = {
+  light: { free: 3, maybe: 2, busy: 3.9 },
+  dark: { free: 9.5, maybe: 9.8, busy: 6.6 },
+};
+
 const sources = import.meta.glob<string>(["./**/*.tsx", "!./**/*.test.tsx"], {
   query: "?raw",
   import: "default",
@@ -69,10 +74,19 @@ describe.each(["light", "dark"] as const)("the %s theme", (theme) => {
       expect(contrast(tileText, token(answer))).toBeGreaterThanOrEqual(floor[answer]);
     },
   );
+
+  it.each(["free", "maybe", "busy"] as const)(
+    "keeps the %s bar visible on a calendar cell",
+    (answer) => {
+      expect(contrast(token(answer), token("surface"))).toBeGreaterThanOrEqual(
+        answerBarFloors[theme][answer],
+      );
+    },
+  );
 });
 
 const brightAccentOnTextOrFocus =
-  /(?<![\w-])text-accent(?![\w-])|focus[\w-]*:(?:ring|border)-accent(?![\w-])/g;
+  /(?<![\w-])text-accent(?![\w-])|focus[\w-]*:(?:ring|border|outline)-accent(?![\w-])/g;
 
 describe("the bright accent", () => {
   it.each(Object.entries(sources))("never colours text or focus in %s", (_, source) => {

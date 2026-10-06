@@ -16,12 +16,12 @@
   --accent-strong: oklch(48% 0.13 80);
   --accent-ink: oklch(22% 0.02 60);
   --accent-soft: oklch(92% 0.05 88);
-  --free: #1fa96b;
-  --free-soft: #ddf5e8;
-  --maybe: oklch(77% 0.15 52);
+  --free: oklch(62.5% 0.145 157);
+  --free-soft: oklch(94.9% 0.031 162);
+  --maybe: oklch(76% 0.15 52);
   --maybe-soft: oklch(94% 0.04 55);
-  --busy: #e4466a;
-  --busy-soft: #fce1e8;
+  --busy: oklch(60.5% 0.194 11);
+  --busy-soft: oklch(93.4% 0.031 0);
   --shadow:
     inset 0 1px 0 oklch(100% 0 0 / 0.6), 0 1px 0 oklch(20% 0.005 80 / 0.04),
     0 6px 18px oklch(20% 0.005 80 / 0.08);
