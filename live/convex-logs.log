@@ -1,0 +1,25 @@
+10/6/2026, 6:57:03 PM [CONVEX H(GET /api/auth/signin/*)] Function executed in 35 ms
+10/6/2026, 6:57:06 PM [CONVEX M(groups:remove)] Function executed in 39 ms
+10/6/2026, 6:57:06 PM [CONVEX Q(account:me)] Function executed in 8 ms
+10/6/2026, 6:57:06 PM [CONVEX M(groups:deleteChildren)] Function executed in 9 ms
+10/6/2026, 6:57:06 PM [CONVEX M(groups:deleteChildren)] Function executed in 14 ms
+10/6/2026, 6:57:06 PM [CONVEX M(groups:deleteChildren)] Function executed in 28 ms
+10/6/2026, 6:57:30 PM [CONVEX Q(signInOptions:available)] Function executed in 6 ms
+10/6/2026, 6:57:31 PM [CONVEX Q(signInOptions:available)] Function executed in 1 ms
+10/6/2026, 7:17:28 PM [CONVEX M(auth:admitAnonymousSignUp)] Function executed in 119 ms
+10/6/2026, 7:17:28 PM [CONVEX M(auth:store)] [INFO] '`auth:store` type: createAccountFromCredentials'
+10/6/2026, 7:17:28 PM [CONVEX M(auth:store)] Function executed in 28 ms
+10/6/2026, 7:17:28 PM [CONVEX M(auth:store)] [INFO] '`auth:store` type: signIn'
+10/6/2026, 7:17:28 PM [CONVEX M(auth:store)] Function executed in 12 ms
+10/6/2026, 7:17:28 PM [CONVEX A(auth:signIn)] Function executed in 259 ms
+10/6/2026, 7:17:28 PM [CONVEX H(GET /.well-known/openid-configuration)] Function executed in 13 ms
+10/6/2026, 7:17:28 PM [CONVEX H(GET /.well-known/jwks.json)] Function executed in 11 ms
+10/6/2026, 7:17:28 PM [CONVEX Q(groups:mine)] Function executed in 17 ms
+10/6/2026, 7:17:28 PM [CONVEX Q(groups:get)] Function executed in 10 ms
+10/6/2026, 7:17:29 PM [CONVEX M(player:join)] Function executed in 46 ms
+10/6/2026, 7:17:29 PM [CONVEX M(sessions:schedule)] Function executed in 37 ms
+10/6/2026, 7:17:29 PM [CONVEX M(sessions:unschedule)] Function executed in 33 ms
+10/6/2026, 7:17:29 PM [CONVEX A(telemetry:send)] Function executed in 323 ms
+10/6/2026, 7:17:29 PM [CONVEX A(telemetry:send)] Function executed in 131 ms
+10/6/2026, 7:17:29 PM [CONVEX A(telemetry:send)] Function executed in 127 ms
+10/6/2026, 7:17:29 PM [CONVEX A(telemetry:send)] Function executed in 141 ms

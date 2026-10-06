@@ -1,0 +1,10 @@
+POST /ingest/e/ -> 200
+  $pageview https://next-session.link/ product=next-session clean
+POST /ingest/e/ -> 200
+  $pageview https://next-session.link/privacy product=next-session clean
+POST /ingest/e/ -> 200
+  $pageview https://next-session.link/s/:shareToken product=next-session clean
+POST /ingest/e/ -> 200
+  $pageview https://next-session.link/privacy product=next-session clean
+localStorage keys: []
+cookies: 0
