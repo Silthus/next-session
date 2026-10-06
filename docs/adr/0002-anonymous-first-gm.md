@@ -15,3 +15,7 @@ This reverses the hosting research's "no Anonymous provider" call (#4), which as
 - Anonymous sign-up is a public write with no credential, so it is rate limited (ADR-0007) and Unsaved Groups expire (ADR-0006).
 - An Anonymous GM exists only while it owns a Group.
 - The anonymous provider is our own `ConvexCredentials` provider, modelled on Convex Auth's `Anonymous`, because the stock one cannot await a rate-limit check.
+
+## Amended
+
+[ADR-0010](0010-accounts-claim-players-share-token-still-answers.md) (2026-10-06): Players can now create an Account and claim their Player. One Account type serves both roles. The no-account player path is unchanged.

@@ -33,7 +33,7 @@ export function ShareLinkCard({
   }, [copyState, url]);
 
   const copy = () => {
-    void writeToClipboard(url)
+    void copyText(url)
       .then(() => setCopyState("copied"))
       .catch(() => setCopyState("blocked"));
   };
@@ -88,6 +88,35 @@ export function ShareLinkCard({
       </div>
     </div>
   );
+}
+
+function copyText(text: string): Promise<void> {
+  return writeToClipboard(text).catch(() => {
+    if (!copyThroughSelection(text)) throw new Error("Copy refused");
+  });
+}
+
+function copyThroughSelection(text: string) {
+  const focused = document.activeElement;
+  const field = document.createElement("textarea");
+  field.value = text;
+  field.readOnly = true;
+  field.className = "fixed top-0 left-0 text-base opacity-0";
+  document.body.append(field);
+  field.select();
+  field.setSelectionRange(0, text.length);
+  const copied = runCopyCommand();
+  field.remove();
+  if (focused instanceof HTMLElement) focused.focus();
+  return copied;
+}
+
+function runCopyCommand() {
+  try {
+    return typeof document.execCommand === "function" && document.execCommand("copy");
+  } catch {
+    return false;
+  }
 }
 
 function writeToClipboard(text: string): Promise<void> {
