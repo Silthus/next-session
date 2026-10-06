@@ -1,0 +1,9 @@
+
+ RUN  v5.0.3 ticket-79
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  19:04:04
+   Duration  111ms (transform 60%, import 24%, worker 8%, tests 8%)
+
