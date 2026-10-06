@@ -149,7 +149,7 @@ function PlayerGroup({
           accountControl={accountControl}
         />
       )}
-      <Toast message={toast} />
+      {player !== undefined && <Toast message={toast} />}
       {sheet === "keep" && player ? (
         <AccountSheet
           open
