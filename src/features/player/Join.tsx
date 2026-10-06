@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useId, useState, type FormEvent } from "react";
+import { useId, useState, type FormEvent, type ReactNode } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { AppErrorData } from "../../../convex/model/errors";
 import { appErrorMessage, appErrorOf } from "../../lib/errors";
@@ -22,12 +22,14 @@ export function Join({
   removed = false,
   onPick,
   onJoin,
+  accountControl,
 }: {
   groupName: string;
   players: RosterPlayer[];
   removed?: boolean;
   onPick: (player: RosterPlayer) => void;
   onJoin: (name: string) => Promise<unknown>;
+  accountControl?: ReactNode;
 }) {
   const [ownedName, setOwnedName] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
@@ -62,6 +64,7 @@ export function Join({
   return (
     <PageShell
       maxWidth="md"
+      headerEnd={accountControl}
       centerFooter
       className={cn("flex flex-col gap-6", !filterable && "justify-center")}
     >

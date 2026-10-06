@@ -2,7 +2,7 @@
 
 > **Draft, pending review by a qualified German lawyer before publication.** Source text for the `/privacy` page. `{{…}}` placeholders are filled at build time (see `docs/spec.md` §7).
 
-**Version 1.0. Effective: {{EFFECTIVE_DATE}}**
+**Version 1.1. Effective: {{EFFECTIVE_DATE}}**
 
 This policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.
 
@@ -20,6 +20,7 @@ We have not appointed a data protection officer because we are not required to.
 | --- | --- | --- |
 | For a group created without an account: a random user ID and the time you accepted the Terms | Run your group and prove your acceptance | Contract, 6(1)(b) |
 | For an account: your email address and a hash of your password | Let you sign in on any device | Contract, 6(1)(b) |
+| For a player with an account: which player in which group belongs to your account | Show your groups on any device | Contract, 6(1)(b) |
 | Group names, player names, the days players marked as free, maybe, or busy, and the scheduled dates | Provide the Service to the GM and the group | Contract, 6(1)(b) |
 | Technical connection data (IP address, browser, time) in server logs of our hosting providers | Deliver the site and keep it secure | Legitimate interest, 6(1)(f) |
 

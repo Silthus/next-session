@@ -10,8 +10,10 @@ import {
 import type { FunctionReturnType } from "convex/server";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { api } from "../../../convex/_generated/api";
+import { keepGroup, resumePendingKeep, type Keep, type KeepDeps } from "./keep";
 import {
   finishPendingSave,
+  PASSWORD_FLOWS,
   resumePendingSave,
   saveGroups,
   type ClaimDeps,
@@ -61,14 +63,19 @@ function confirmIdentity({ client, fetchAccessToken }: LiveSession) {
   });
 }
 
-function useResumeLeftOverSave(status: GmStatus, redeemClaim: ClaimDeps["finishSave"]) {
+function useResumeLeftOvers(
+  status: GmStatus,
+  redeemClaim: ClaimDeps["finishSave"],
+  claimPlayer: KeepDeps["claim"],
+) {
   const resolved = useRef(false);
   useEffect(() => {
     if (resolved.current || status === "loading") return;
     resolved.current = true;
-    if (status === "account")
-      void resumePendingSave({ finishSave: redeemClaim, storage: sessionStorage });
-  }, [status, redeemClaim]);
+    if (status !== "account") return;
+    void resumePendingSave({ finishSave: redeemClaim, storage: sessionStorage });
+    void resumePendingKeep({ claim: claimPlayer, storage: sessionStorage });
+  }, [status, redeemClaim, claimPlayer]);
 }
 
 export function useGm() {
@@ -88,15 +95,20 @@ export function useGm() {
   );
   const startSave = useMutation(api.account.startSave);
   const redeemClaim = useMutation(api.account.finishSave);
+  const claimPlayer = useMutation(api.player.claim);
   const status = gmStatus(auth, me);
 
-  useResumeLeftOverSave(status, redeemClaim);
+  useResumeLeftOvers(status, redeemClaim, claimPlayer);
 
   const actions = useMemo(
     () => ({
       createLink: () => signIn("anonymous"),
       logIn: ({ email, password }: Omit<SaveInput, "mode">) =>
         signIn("password", { email, password, flow: "signIn" }),
+      signInWithPassword: ({ email, password, mode }: SaveInput) =>
+        signIn("password", { email, password, flow: PASSWORD_FLOWS[mode] }),
+      keepGroup: (keep: Keep, signInFirst: () => Promise<unknown>) =>
+        keepGroup(keep, signInFirst, { claim: claimPlayer, storage: sessionStorage }),
       save: (input: SaveInput) =>
         saveGroups(input, {
           startSave: () => startSave({}),
@@ -107,7 +119,7 @@ export function useGm() {
       finishSave: () => finishPendingSave({ finishSave: redeemClaim, storage: sessionStorage }),
       signOut,
     }),
-    [signIn, signOut, startSave, redeemClaim],
+    [signIn, signOut, startSave, redeemClaim, claimPlayer],
   );
 
   return { status, email: me?.email, ...actions };

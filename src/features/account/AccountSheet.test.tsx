@@ -180,6 +180,78 @@ describe("AccountSheet saving a Group", () => {
 
     expect(await alertText()).toBe("Use at least 8 characters for the password.");
   });
+
+  it("says when the Save would pass the Account's group cap", async () => {
+    renderSaveSheet(vi.fn().mockRejectedValueOnce(new ConvexError({ code: "TOO_MANY_GROUPS" })));
+
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+
+    expect(await alertText()).toBe(
+      "That account would pass 50 groups. Delete one there, then save again.",
+    );
+  });
+});
+
+describe("AccountSheet keeping a Group as a Player", () => {
+  function renderKeepSheet(onSubmit: Submit, movesGroups = false, onClose = vi.fn()) {
+    renderSheet({
+      open: true,
+      intent: "keep",
+      groupName: "Thursday Crew",
+      playerName: "Ana",
+      movesGroups,
+      onSubmit,
+      onClose,
+    });
+    return onClose;
+  }
+
+  it("creates an Account first, with the legal line, and closes once kept", async () => {
+    const onSubmit = vi.fn(() => Promise.resolve());
+    const onClose = renderKeepSheet(onSubmit);
+
+    expect(await screen.findByRole("heading", { name: "Keep Thursday Crew" })).toBeTruthy();
+    expect(screen.getByText("Open it as Ana on any device.")).toBeTruthy();
+    expect(
+      screen.getAllByRole("radio").map((radio) => radio.closest("label")?.textContent),
+    ).toEqual(["Create account", "I already have one"]);
+    expect(screen.getByRole("link", { name: "Privacy Policy" })).toHaveProperty(
+      "pathname",
+      "/privacy",
+    );
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Keep group" }));
+
+    expect(onSubmit).toHaveBeenCalledWith({ email, password, mode: "create" });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("logs in to an existing Account second", async () => {
+    const onSubmit = vi.fn(() => Promise.resolve());
+    renderKeepSheet(onSubmit);
+
+    await userEvent.click(await screen.findByRole("radio", { name: "I already have one" }));
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Log in and keep" }));
+
+    expect(onSubmit).toHaveBeenCalledWith({ email, password, mode: "logIn" });
+  });
+
+  it("tells an Anonymous GM that their own groups move to the Account too", async () => {
+    let finish: () => void = () => {};
+    renderKeepSheet(
+      vi.fn(() => new Promise<void>((resolve) => (finish = resolve))),
+      true,
+    );
+
+    expect(await screen.findByText("Your own groups move to the account too.")).toBeTruthy();
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Keep group" }));
+
+    expect(screen.getByRole("button", { name: "Keeping…" })).toHaveProperty("disabled", true);
+    finish();
+  });
 });
 
 describe("AccountSheet finishing a Save after the sign-in went through", () => {
@@ -328,6 +400,22 @@ describe("AccountSheet logging in", () => {
       "No account yet? Go back and create your link.",
     );
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("tells a Player they can answer without an Account", async () => {
+    renderSheet({
+      open: true,
+      intent: "logIn",
+      forPlayer: true,
+      onSubmit: vi.fn(),
+      onClose: vi.fn(),
+    });
+
+    expect(await screen.findByText("Open the groups you kept on this device.")).toBeTruthy();
+    expect(screen.getByText(/No account yet\?/).textContent).toBe(
+      "No account yet? You can answer without one.",
+    );
+    expect(screen.queryByRole("button", { name: "Go back" })).toBeNull();
   });
 
   it("cannot be sent back while logging in", async () => {

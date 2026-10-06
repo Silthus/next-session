@@ -21,12 +21,12 @@ export type SaveDeps = {
 
 export type ClaimDeps = Pick<SaveDeps, "finishSave" | "storage">;
 
-const FLOWS = { create: "signUp", logIn: "signIn" } as const;
+export const PASSWORD_FLOWS = { create: "signUp", logIn: "signIn" } as const;
 
 export async function saveGroups({ email, password, mode }: SaveInput, deps: SaveDeps) {
   const { code } = await deps.startSave();
   deps.storage.setItem(PENDING_SAVE_KEY, code);
-  await deps.signIn("password", { email, password, flow: FLOWS[mode] });
+  await deps.signIn("password", { email, password, flow: PASSWORD_FLOWS[mode] });
   return await redeem(code, deps);
 }
 
