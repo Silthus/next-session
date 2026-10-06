@@ -1,0 +1,4 @@
+webhook listening on 3499
+2026-10-06T17:59:19.121Z POST /welcome -> 503 auth=ok body={"distinct_id":"next-session:kh764ymear1j0rj3mhtjbdt5858frebr","email":"tips-proof-1791309558924@example.com","product":"next-session","tips_confirm_url":"http://localhost:5173/tips?confirm=i36uj1RwrPaLaC83GbMeuMebFpqcW59fi-Y5AZNzaIc"}
+2026-10-06T17:59:31.166Z POST /welcome -> 200 auth=ok body={"distinct_id":"next-session:kh764ymear1j0rj3mhtjbdt5858frebr","email":"tips-proof-1791309558924@example.com","product":"next-session","tips_confirm_url":"http://localhost:5173/tips?confirm=i36uj1RwrPaLaC83GbMeuMebFpqcW59fi-Y5AZNzaIc"}
+2026-10-06T17:59:32.175Z POST /tips -> 200 auth=ok body={"distinct_id":"next-session:kh764ymear1j0rj3mhtjbdt5858frebr","email":"tips-proof-1791309558924@example.com","product":"next-session"}

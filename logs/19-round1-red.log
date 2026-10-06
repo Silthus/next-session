@@ -1,0 +1,8 @@
+     × scrubs the Tips confirmation code out of an exception on /tips 5ms
+     × answers a second press as confirmed and requests nothing more 106ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 82 passed (84)
+      Tests  8 passed (8)
+     × gives focus back to the button when the press fails 36ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 7 passed (8)

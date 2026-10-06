@@ -1,0 +1,17 @@
+sign up with tips tips-proof-1791309558924@example.com
+welcome delivered on retry; link carries a confirm code of 43 chars
+first press {
+  confirmed: true,
+}
+second press {
+  confirmed: true,
+}
+unknown code {
+  confirmed: false,
+}
+webhook log:
+webhook listening on 3499
+2026-10-06T17:59:19.121Z POST /welcome -> 503 auth=ok body={"distinct_id":"next-session:kh764ymear1j0rj3mhtjbdt5858frebr","email":"tips-proof-1791309558924@example.com","product":"next-session","tips_confirm_url":"http://localhost:5173/tips?confirm=<code>"}
+2026-10-06T17:59:31.166Z POST /welcome -> 200 auth=ok body={"distinct_id":"next-session:kh764ymear1j0rj3mhtjbdt5858frebr","email":"tips-proof-1791309558924@example.com","product":"next-session","tips_confirm_url":"http://localhost:5173/tips?confirm=<code>"}
+2026-10-06T17:59:32.175Z POST /tips -> 200 auth=ok body={"distinct_id":"next-session:kh764ymear1j0rj3mhtjbdt5858frebr","email":"tips-proof-1791309558924@example.com","product":"next-session"}
+
