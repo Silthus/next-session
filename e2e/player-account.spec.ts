@@ -8,7 +8,6 @@ import {
   openAsGm,
   password,
   signInAnonymousGm,
-  signUpAccount,
   toastRegion,
   type Gm,
 } from "./helpers";
@@ -83,79 +82,71 @@ async function accountClaiming(gm: Gm, name: string) {
   return email;
 }
 
-test("a visitor answers, keeps the Group with a new Account, and opens it as the same Player elsewhere", async ({
+test("a visitor keeps the Group with a new Account and plays as that Account on any device", async ({
   page,
   browser,
 }) => {
-  const { link } = await seedGroup("Thursday Crew");
+  const first = await seedGroup("Thursday Crew");
+  const second = await seedGroup("Sunday Table");
   const email = newEmail();
-
-  await page.goto(link);
-  await join(page, "Ana");
-  await expect(page.getByRole("button", { name: "Keep this group" })).toBeHidden();
-  await answerToday(page);
-  await expect(page.getByText("Keep this group on all your devices.")).toBeVisible();
-  await keepByCreatingAccount(page, email);
-  await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
-
   const elsewhere = await freshPage(browser);
-  await elsewhere.goto(link);
-  await expect(elsewhere.getByRole("heading", { name: "Who are you?" })).toBeVisible();
-  await logIn(elsewhere, email);
-  await expect(elsewhere.getByText("Answering as")).toContainText("Ana");
-  await expect(todayTile(elsewhere)).toHaveAccessibleName(/: Free$/);
-  await expect(elsewhere.getByRole("main").getByText("Kept in My groups")).toBeVisible();
+
+  await test.step("the visitor answers, then keeps the Group by creating an Account", async () => {
+    await page.goto(first.link);
+    await join(page, "Ana");
+    await expect(page.getByRole("button", { name: "Keep this group" })).toBeHidden();
+    await answerToday(page);
+    await expect(page.getByText("Keep this group on all your devices.")).toBeVisible();
+    await keepByCreatingAccount(page, email);
+    await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
+  });
+
+  await test.step("a second browser that logs in opens the Group as the same Player", async () => {
+    await elsewhere.goto(first.link);
+    await expect(elsewhere.getByRole("heading", { name: "Who are you?" })).toBeVisible();
+    await logIn(elsewhere, email);
+    await expect(elsewhere.getByText("Answering as")).toContainText("Ana");
+    await expect(todayTile(elsewhere)).toHaveAccessibleName(/: Free$/);
+    await expect(elsewhere.getByRole("main").getByText("Kept in My groups")).toBeVisible();
+  });
+
+  await test.step("joining a second Group with a new name keeps it at once", async () => {
+    await elsewhere.goto(second.link);
+    await join(elsewhere, "Bea");
+    await expect(toastRegion(elsewhere)).toContainText("Kept in My groups");
+    await expect(elsewhere.getByRole("main").getByText("Kept in My groups")).toBeVisible();
+    await page.goto(second.link);
+    await expect(page.getByText("Answering as")).toContainText("Bea");
+  });
+
+  await test.step("Not you? releases the claim and shows Join, and the Player stays", async () => {
+    await page.getByRole("button", { name: "Not you?" }).click();
+    await expect(page.getByRole("heading", { name: "Who are you?" })).toBeVisible();
+    await elsewhere.reload();
+    await expect(elsewhere.getByRole("heading", { name: "Who are you?" })).toBeVisible();
+    const roster = await second.gm.client.query(api.player.group, {
+      shareToken: second.gm.shareToken,
+    });
+    expect(roster?.players.map(({ name }) => name)).toEqual(["Bea"]);
+  });
 });
 
-test("an Account that joins a second Group with a new name keeps it at once", async ({
-  page,
-  browser,
-}) => {
-  const { link } = await seedGroup("Sunday Table");
-  const { email } = await signUpAccount();
-
-  await page.goto(link);
-  await logIn(page, email);
-  await join(page, "Bea");
-  await expect(toastRegion(page)).toContainText("Kept in My groups");
-  await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
-
-  const elsewhere = await freshPage(browser);
-  await elsewhere.goto(link);
-  await logIn(elsewhere, email);
-  await expect(elsewhere.getByText("Answering as")).toContainText("Bea");
-});
-
-test("Not you? releases the claim, keeps the Player, and shows Join", async ({ page }) => {
-  const { gm, link } = await seedGroup("Friday Crew");
-  const { email } = await signUpAccount();
-
-  await page.goto(link);
-  await logIn(page, email);
-  await join(page, "Cleo");
-  await page.getByRole("button", { name: "Not you?" }).click();
-
-  await expect(page.getByRole("heading", { name: "Who are you?" })).toBeVisible();
-  await page.reload();
-  await expect(page.getByRole("button", { name: "Cleo" })).toBeVisible();
-  const roster = await gm.client.query(api.player.group, { shareToken: gm.shareToken });
-  expect(roster?.players.map(({ name }) => name)).toEqual(["Cleo"]);
-});
-
-test("another Account's Player cannot be kept", async ({ page }) => {
+test("keeping another Account's Player says so after the sign-in", async ({ page }) => {
   const { gm, link } = await seedGroup("Crowded Table");
   await accountClaiming(gm, "Dana");
-  const { email } = await signUpAccount();
 
   await page.goto(link);
-  await logIn(page, email);
   await page.getByRole("button", { name: "Dana" }).click();
   await answerToday(page);
   await page.getByRole("button", { name: "Keep this group" }).click();
+  const sheet = await fillAccount(page, newEmail());
+  await sheet.getByRole("button", { name: "Keep group" }).click();
 
+  await expect(page.getByRole("dialog")).toBeHidden();
   await expect(page.getByRole("alert")).toHaveText(
     "Another account keeps this name. Add yours with a last initial, or ask your GM.",
   );
+  await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
 });
 
 test("an Anonymous GM keeping their own link saves first, then keeps the Player", async ({
