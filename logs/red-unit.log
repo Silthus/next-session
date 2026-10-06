@@ -1,0 +1,502 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-56
+
+ ❯ |ui| src/features/group/rail/GroupRail.test.tsx (4 tests | 1 failed) 187ms
+   ❯ GroupRail (4)
+     × opens on Players on phones while the Roster is empty 11ms
+ ❯ |ui| src/features/group/calendar/HeatCalendar.test.tsx (16 tests | 1 failed) 786ms
+   ❯ HeatCalendar (16)
+     × draws a grey bar for each Player who hasn't answered a bookable day 127ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > draws a grey bar for each Player who hasn't answered a bookable day
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Friday, October 16: 1 free, 0 maybe, 0 busy, 2 not answered"
+
+Here are the accessible roles:
+
+  heading:
+
+  Name "October 2026":
+  [36m<h2[39m
+    [33mclass[39m=[32m"font-display text-xl font-bold outline-none sm:text-2xl"[39m
+    [33mdata-month-heading[39m=[32m"true"[39m
+    [33mtabindex[39m=[32m"-1"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Previous month":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Previous month"[39m
+    [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Next month":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Next month"[39m
+    [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2 aria-disabled:active:scale-100"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Thursday, October 1: 1 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Thursday, October 1: 1 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent cursor-default opacity-40"[39m
+    [33mdata-date[39m=[32m"2026-10-01"[39m
+    [33mdisabled[39m=[32m""[39m
+    [33mstyle[39m=[32m"background: color-mix(in oklab, var(--free) 18%, var(--surface));"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Friday, October 2: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-current[39m=[32m"date"[39m
+    [33maria-label[39m=[32m"Friday, October 2: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-02"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Saturday, October 3: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Saturday, October 3: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-03"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sunday, October 4: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sunday, October 4: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-04"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Monday, October 5: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Monday, October 5: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-05"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Tuesday, October 6: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Tuesday, October 6: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-06"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Wednesday, October 7: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Wednesday, October 7: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-07"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Thursday, October 8: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Thursday, October 8: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-08"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Friday, October 9: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Friday, October 9: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-09"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Saturday, October 10: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Saturday, October 10: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-10"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sunday, October 11: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sunday, October 11: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-11"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Monday, October 12: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Monday, October 12: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-12"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Tuesday, October 13: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Tuesday, October 13: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-13"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Wednesday, October 14: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Wednesday, October 14: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-14"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Thursday, October 15: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Thursday, October 15: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-15"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Friday, October 16: 1 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Friday, October 16: 1 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-16"[39m
+    [33mstyle[39m=[32m"background: color-mix(in oklab, var(--free) 18%, var(--surface));"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Saturday, October 17: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Saturday, October 17: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-17"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sunday, October 18: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sunday, October 18: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-18"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Monday, October 19: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Monday, October 19: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-19"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Tuesday, October 20: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Tuesday, October 20: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-20"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Wednesday, October 21: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Wednesday, October 21: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-21"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Thursday, October 22: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Thursday, October 22: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-22"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Friday, October 23: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Friday, October 23: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-23"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Saturday, October 24: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Saturday, October 24: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-24"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sunday, October 25: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Sunday, October 25: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-25"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Monday, October 26: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Monday, October 26: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-26"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Tuesday, October 27: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Tuesday, October 27: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-27"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Wednesday, October 28: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Wednesday, October 28: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-28"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Thursday, October 29: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Thursday, October 29: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-29"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Friday, October 30: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Friday, October 30: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-30"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Saturday, October 31: 0 free, 0 maybe, 0 busy":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Saturday, October 31: 0 free, 0 maybe, 0 busy"[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:scale-[0.97]"[39m
+    [33mdata-date[39m=[32m"2026-10-31"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33mclass[39m=[32m"rounded-lg border bg-surface p-4 shadow-card border-line p-3 sm:p-5"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mb-3 flex items-center justify-between gap-2"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex min-w-0 items-center gap-2"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"font-display text-xl font-bold outline-none sm:text-2xl"[39m
+            [33mdata-month-heading[39m=[32m"true"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m>[39m
+            [0mOctober 2026[0m
+          [36m</h2>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-1"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33maria-label[39m=[32m"Previous month"[39m
+            [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"size-4 rotate-90"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 20 20"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M5 7.5l5 5 5-5"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33maria-label[39m=[32m"Next month"[39m
+            [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2 aria-disabled:active:scale-100"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"size-4 -rotate-90"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 20 20"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M5 7.5l5 5 5-5"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"grid grid-cols-7 gap-1 transition-opacity duration-150 sm:gap-1.5"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"[39m
+        [36m>[39m
+          [0mMo[0m
+        [36m</span>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"[39m
+        [36m>[39m
+          [0mTu[0m
+        [36m</span>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"[39m
+        [36m>[39m
+          [0mWe[0m
+        [36m</span>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"[39m
+        [36m>[39m
+          [0mTh[0m
+        [36m</span>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"[39m
+        [36m>[39m
+          [0mFr[0m
+        [36m</span>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"[39m
+        [36m>[39m
+          [0mSa[0m
+        [36m</span>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"[39m
+        [36m>[39m
+          [0mSu[0m
+        [36m</span>[39m
+        [36m<span />[39m
+        [36m<span />[39m
+        [36m<span />[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Thursday, October 1: 1 free, 0 maybe, 0 busy"[39m
+          [33maria-pressed[39m=[32m"false"[39m
+          [33mclass[39m=[32m"relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2 border-line bg-surface hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent cursor-default opacity-40"[39m
+          [33mdata-date[39m=[32m"2026-10-01"[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mstyle[39m=[32m"background: color-mix(in oklab, var(--free) 18%, var(--surface));"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"flex items-center gap-1 text-xs font-semibold leading-none sm:text-sm"[39m
+          [36m>[39m
+            [0m1[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"flex flex-wrap gap-0.5"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"h-2.5 w-1 rounded-full sm:h-3 sm:w-[5px] bg-free"[39m
+              [33mdata-bar[39m=[32m"free"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"h-2.5 w-1 rounded-full sm:h-3 sm:w-[5px] bg-line-strong/70"[39m
+              [33mdata-bar[39m=[32m"unanswered"[39m
+            [36m/...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/group/calendar/HeatCalendar.test.tsx:123:29
+    121|       ],
+    122|     });
+    123|     const bookable = screen.getByRole("button", {
+       |                             ^
+    124|       name: "Friday, October 16: 1 free, 0 maybe, 0 busy, 2 not answer…
+    125|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/features/group/rail/GroupRail.test.tsx > GroupRail > opens on Players on phones while the Roster is empty
+AssertionError: expected 'Best nights' to be 'Players' // Object.is equality
+
+Expected: "Players"
+Received: "Best nights"
+
+ ❯ src/features/group/rail/GroupRail.test.tsx:62:69
+     60|   it("opens on Players on phones while the Roster is empty", () => {
+     61|     renderRail({ wide: false, rosterEmpty: true });
+     62|     expect(screen.getByRole("tab", { selected: true }).textContent).to…
+       |                                                                     ^
+     63|     expect(screen.getByRole("tabpanel").textContent).toBe("Players pan…
+     64|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 18 passed (20)
+   Start at  14:10:53
+   Duration  1.46s (tests 46%, environment 41%, setup 6%, transform 5%, import 3%)
+

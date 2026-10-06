@@ -1,0 +1,148 @@
+[WebServer] CONVEX_AGENT_MODE=anonymous mode is in beta, functionality may change in the future.
+[WebServer] ✔ Configured a local deployment for http://127.0.0.1:3210 and saved its:
+[WebServer]     name as CONVEX_DEPLOYMENT
+[WebServer]     client URL as VITE_CONVEX_URL
+[WebServer]     HTTP actions URL as VITE_CONVEX_SITE_URL
+[WebServer]  to .env.local
+[WebServer] 
+[WebServer] Write your Convex functions in convex/
+[WebServer] Give us feedback at https://convex.dev/community or support@convex.dev
+[WebServer] View the Convex dashboard at http://127.0.0.1:6790/
+[WebServer] 
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 3210 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:3210
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ 14:10:58 Convex functions ready! (2.01s)
+[WebServer] ✔ Successfully set 2 environment variables from stdin (2 updated, 1 unchanged) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-56/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-56/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 397 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://localhost:5173/
+[WebServer]   ➜  Network: use --host to expose
+
+Running 3 tests using 2 workers
+
+  ✘  2 [chromium] › e2e/gm-rail.spec.ts:247:1 › on a phone a fresh Group opens on Players, so the GM adds one under the calendar (5.8s)
+  ✘  1 [chromium] › e2e/gm-calendar.spec.ts:23:1 › the GM reads the heat-map and sees who is free on a night (6.1s)
+  ✘  3 [chromium] › e2e/gm-rail.spec.ts:262:1 › a Player who joins with a new name stays on the Roster as grey bars until the GM removes them (5.9s)
+
+
+  1) [chromium] › e2e/gm-calendar.spec.ts:23:1 › the GM reads the heat-map and sees who is free on a night 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: /, \w+ 7: 0 free, 0 maybe, 1 busy, 2 not answered$/ })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: /, \w+ 7: 0 free, 0 maybe, 1 busy, 2 not answered$/ }) with timeout 5000ms
+      - waiting for getByRole('button', { name: /, \w+ 7: 0 free, 0 maybe, 1 busy, 2 not answered$/ })
+
+
+      28 |   await expect(page.getByRole("heading", { level: 1, name: "My group" })).toBeVisible();
+      29 |   await expect(dayCell(page, /, \w+ 5: everyone free$/)).toBeVisible();
+    > 30 |   await expect(dayCell(page, /, \w+ 7: 0 free, 0 maybe, 1 busy, 2 not answered$/)).toBeVisible();
+         |                                                                                    ^
+      31 |
+      32 |   await dayCell(page, /, \w+ 6: /).click();
+      33 |   await expect(page).toHaveURL(new RegExp(`day=${night(6)}`));
+        at /home/coder/dev/ns-worktrees/ticket-56/e2e/gm-calendar.spec.ts:30:84
+
+    Error Context: test-results/gm-calendar-the-GM-reads-t-4b918-sees-who-is-free-on-a-night-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/gm-calendar-the-GM-reads-t-4b918-sees-who-is-free-on-a-night-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/gm-calendar-the-GM-reads-t-4b918-sees-who-is-free-on-a-night-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › e2e/gm-rail.spec.ts:247:1 › on a phone a fresh Group opens on Players, so the GM adds one under the calendar 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  getByRole('tablist', { name: 'Group overview' }).getByRole('tab', { selected: true })
+    Expected: "Players"
+    Received: "Best nights"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" getByRole('tablist', { name: 'Group overview' }).getByRole('tab', { selected: true }) with timeout 5000ms
+      - waiting for getByRole('tablist', { name: 'Group overview' }).getByRole('tab', { selected: true })
+        11 × locator resolved to <button role="tab" tabindex="0" type="button" aria-selected="true" id="_r_3_-tab-bestNights" aria-controls="_r_3_-panel" class="rounded-sm py-1.5 text-sm font-semibold transition-colors bg-surface text-ink shadow-card">Best nights</button>
+           - unexpected value "Best nights"
+
+
+      253 |
+      254 |   const tabs = page.getByRole("tablist", { name: "Group overview" });
+    > 255 |   await expect(tabs.getByRole("tab", { selected: true })).toHaveText("Players");
+          |                                                           ^
+      256 |   await playersCard(page).getByRole("textbox", { name: "Player name" }).fill("Ana");
+      257 |   await page.keyboard.press("Enter");
+      258 |   await expect(playersCard(page).getByRole("listitem")).toHaveText([/Ana/]);
+        at /home/coder/dev/ns-worktrees/ticket-56/e2e/gm-rail.spec.ts:255:59
+
+    Error Context: test-results/gm-rail-on-a-phone-a-fresh-de56a-adds-one-under-the-calendar-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/gm-rail-on-a-phone-a-fresh-de56a-adds-one-under-the-calendar-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/gm-rail-on-a-phone-a-fresh-de56a-adds-one-under-the-calendar-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › e2e/gm-rail.spec.ts:262:1 › a Player who joins with a new name stays on the Roster as grey bars until the GM removes them 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('button', { name: /, \w+ 5: .*1 not answered$/ }).locator('[data-bar="unanswered"]')
+    Expected: 1
+    Received: 0
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('button', { name: /, \w+ 5: .*1 not answered$/ }).locator('[data-bar="unanswered"]') with timeout 5000ms
+      - waiting for getByRole('button', { name: /, \w+ 5: .*1 not answered$/ }).locator('[data-bar="unanswered"]')
+        14 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      269 |   const notAnswered = page.getByRole("button", { name: /, \w+ 5: .*1 not answered$/ });
+      270 |   await expect(playersCard(page).getByRole("listitem")).toHaveText([/Dana/]);
+    > 271 |   await expect(notAnswered.locator('[data-bar="unanswered"]')).toHaveCount(1);
+          |                                                                ^
+      272 |   await page.reload();
+      273 |   await expect(playersCard(page).getByRole("listitem")).toHaveText([/Dana/]);
+      274 |   await expect.poll(() => rosterNames(gm)).toEqual(["Dana"]);
+        at /home/coder/dev/ns-worktrees/ticket-56/e2e/gm-rail.spec.ts:271:64
+
+    Error Context: test-results/gm-rail-a-Player-who-joins-3efa2-s-until-the-GM-removes-them-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/gm-rail-a-Player-who-joins-3efa2-s-until-the-GM-removes-them-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/gm-rail-a-Player-who-joins-3efa2-s-until-the-GM-removes-them-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › e2e/gm-calendar.spec.ts:23:1 › the GM reads the heat-map and sees who is free on a night 
+    [chromium] › e2e/gm-rail.spec.ts:247:1 › on a phone a fresh Group opens on Players, so the GM adds one under the calendar 
+    [chromium] › e2e/gm-rail.spec.ts:262:1 › a Player who joins with a new name stays on the Roster as grey bars until the GM removes them 
