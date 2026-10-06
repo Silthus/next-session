@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
 import { newBackend, type TestBackend } from "./model/test.setup";
 import { toPostHogEvent, type LogRecord } from "./model/telemetry";
@@ -8,7 +9,11 @@ const NOW = Date.UTC(2026, 9, 6, 15, 0);
 
 const event = JSON.stringify(
   toPostHogEvent(
-    { name: "group_created", actor: { _id: "user1" as never }, group_id: "group1" },
+    {
+      name: "group_created",
+      actor: { _id: "user1" as Id<"users">, _creationTime: NOW },
+      group_id: "group1",
+    },
     NOW,
   ),
 );
@@ -99,6 +104,27 @@ describe("telemetry.send", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(consoleError).toHaveBeenCalledTimes(2);
+    expect(JSON.stringify(consoleError.mock.calls)).toContain("next_session:group_created");
     expect(JSON.stringify(consoleError.mock.calls)).not.toContain(TOKEN);
+  });
+
+  it("gives up on a PostHog that never answers after 10 seconds", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    fetchMock.mockImplementation(
+      (_, init) =>
+        new Promise((_, reject) =>
+          init!.signal!.addEventListener("abort", () => reject(new Error("aborted"))),
+        ),
+    );
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const sending = t.action(internal.telemetry.send, { events: [event], logs: [] });
+    await vi.advanceTimersByTimeAsync(9_999);
+    expect(consoleError).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    await sending;
+
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
   });
 });

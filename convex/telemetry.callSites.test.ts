@@ -323,6 +323,16 @@ describe("Player mutations", () => {
     ]);
   });
 
+  it("tracks nothing for a claim of a Player the Account already holds", async () => {
+    const { shareToken, playerId } = await groupWithPlayer();
+    const { as } = await signInAccount(t);
+    await as.mutation(api.player.claim, { shareToken, playerId });
+
+    expect(
+      await eventsDuring(() => as.mutation(api.player.claim, { shareToken, playerId })),
+    ).toEqual([]);
+  });
+
   it("tracks nothing for a release without a claim", async () => {
     const { groupId } = await signedInGmWithGroup(t);
     const { as } = await signInAccount(t);

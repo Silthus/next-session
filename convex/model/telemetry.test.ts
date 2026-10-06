@@ -5,8 +5,8 @@ import { toOtlpLogs, toPostHogEvent, type ServerEvent } from "./telemetry";
 const NOW = Date.UTC(2026, 9, 6, 15, 0);
 const ACCOUNT_EMAIL = "ada@example.com";
 
-const account = { _id: "account1" as Id<"users">, email: ACCOUNT_EMAIL };
-const anonymousGm = { _id: "anonymous1" as Id<"users">, isAnonymous: true };
+const account = { _id: "account1" as Id<"users">, _creationTime: NOW, email: ACCOUNT_EMAIL };
+const anonymousGm = { _id: "anonymous1" as Id<"users">, _creationTime: NOW, isAnonymous: true };
 const player = { playerId: "player1" as Id<"players"> };
 
 const everyEvent: ServerEvent[] = [

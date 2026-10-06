@@ -18,7 +18,7 @@ export const schedule = mutation({
     await enforceRateLimit(ctx, "gmEdit", gm._id);
     const sessionId = await ctx.db.insert("sessions", { groupId: group._id, date });
     await touchGroup(ctx, group);
-    await track(ctx, await sessionScheduled(ctx, gm, group._id));
+    await track(ctx, () => sessionScheduled(ctx, gm, group._id));
     return sessionId;
   },
 });

@@ -9,9 +9,9 @@ const PRODUCT = "next-session";
 const SERVICE_NAME = "next-session-convex";
 const EVENT_PREFIX = "next_session:";
 
-type UserActor = Pick<Doc<"users">, "_id" | "email" | "isAnonymous" | "analyticsObjectedAt">;
+type UserActor = Doc<"users">;
 type PlayerActor = { playerId: Id<"players"> };
-export type Actor = UserActor | PlayerActor;
+type Actor = UserActor | PlayerActor;
 
 export type ServerEvent =
   | { name: "link_created"; actor: Actor; group_id: string }
@@ -52,8 +52,13 @@ export const logRecord = v.object({
 export type LogRecord = Infer<typeof logRecord>;
 type LogLevel = LogRecord["level"];
 
-export async function track(ctx: MutationCtx, event: ServerEvent) {
-  if (!telemetryEnabled() || hasObjected(event.actor)) return;
+export async function track(
+  ctx: MutationCtx,
+  eventOrBuilder: ServerEvent | (() => Promise<ServerEvent>),
+) {
+  if (!telemetryEnabled()) return;
+  const event = typeof eventOrBuilder === "function" ? await eventOrBuilder() : eventOrBuilder;
+  if (hasObjected(event.actor)) return;
   await ctx.scheduler.runAfter(0, internal.telemetry.send, {
     events: [JSON.stringify(toPostHogEvent(event, Date.now()))],
     logs: [],

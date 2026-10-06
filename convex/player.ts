@@ -96,6 +96,7 @@ export const claim = mutation({
     const account = await requireAccount(ctx);
     const { group, player } = await playerOnShareLink(ctx, shareToken, playerId);
     await enforceRateLimit(ctx, "claimPlayer", account._id);
+    if (player.userId === account._id) return null;
     await claimPlayer(ctx, account, player);
     await touchGroup(ctx, group);
     await track(ctx, { name: "player_claimed", actor: account, group_id: group._id });
