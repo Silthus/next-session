@@ -633,7 +633,7 @@ The operator is in Germany, so two laws apply: § 25 TDDDG for anything read fro
 - §4 gains the processor row: "PostHog Inc. | Usage measurement, error reports, logs, and sending the account emails | EU (Frankfurt) hosting, US company".
 - §5 gains: usage events and error reports for the event retention of the PostHog plan (#77 reads it from the billing page and writes the number); logs 14 days; the email address in PostHog until the account is deleted.
 - §6 names the objection right for usage measurement and the withdrawal of Tips consent.
-- `LEGAL_VERSIONS.privacy` goes up one minor version (1.2 if #64's 1.1 lands first, else 1.1, and #64 takes the next) with a new effective date.
+- `LEGAL_VERSIONS.privacy` goes up one minor version past whatever has landed (Google sign-in took 1.1 and §12's row takes 1.2, so 1.3 if both land first) with a new effective date.
 
 ### 13.4 Browser
 
