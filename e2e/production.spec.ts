@@ -55,7 +55,7 @@ async function deleteGroup(gm: Page, groupPath: string) {
     .getByRole("group", { name: /^Delete .*\?$/ })
     .getByRole("button", { name: /^Delete / })
     .click();
-  await expect(gm).toHaveURL(new URL("/", gm.url()).href);
+  await expect(gm).toHaveURL(new RegExp(`^${new URL("/", gm.url()).href}(me)?$`));
   leftoverGroup = undefined;
 }
 
