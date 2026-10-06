@@ -41,6 +41,7 @@ function fakePostHog() {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
 function event(name: string, properties: Record<string, unknown>): CaptureResult {
@@ -330,6 +331,16 @@ describe("initTelemetry", () => {
       record: CaptureLogOptions,
     ) => CaptureLogOptions | null;
     expect(beforeSendLog({ body: "after opt-out" })).toBeNull();
+  });
+
+  it("keeps the opt-out for this visit and says so when the browser refuses localStorage", async () => {
+    const telemetry = await freshTelemetry();
+    vi.spyOn(window, "localStorage", "get").mockImplementation(() => {
+      throw new DOMException("The operation is insecure.", "SecurityError");
+    });
+
+    expect(telemetry.turnMeasurementOff()).toEqual({ remembered: false });
+    expect(telemetry.measurementIsOn()).toBe(false);
   });
 
   it("honours an opt-out made in another tab after this one turned measurement back on", async () => {

@@ -2,13 +2,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "../../convex/_generated/dataModel";
 import {
   dismissNudge,
+  forgetMeasurementOff,
   forgetPlayer,
   hasSeenHint,
   lastGroupId,
   markHintSeen,
+  measurementTurnedOff,
   nudgeDismissedAt,
   recallPlayer,
   rememberLastGroup,
+  rememberMeasurementOff,
   rememberPlayer,
   returningGroupId,
   type KeyValueStorage,
@@ -130,6 +133,24 @@ describe("nudge dismissal", () => {
   it("ignores a value it cannot read", () => {
     storage.setItem("next-session.nudgeDismissedAt", "soon");
     expect(nudgeDismissedAt(storage)).toBeNull();
+  });
+});
+
+describe("measurement opt-out", () => {
+  it("remembers the choice under next-session.measurementOff until forgotten", () => {
+    expect(rememberMeasurementOff(storage)).toBe(true);
+    expect(storage.items.get("next-session.measurementOff")).toBe("1");
+    expect(measurementTurnedOff(storage)).toBe(true);
+
+    forgetMeasurementOff(storage);
+
+    expect(measurementTurnedOff(storage)).toBe(false);
+  });
+
+  it("says it could not remember the choice when the browser blocks storage", () => {
+    expect(rememberMeasurementOff(blockedStorage())).toBe(false);
+    expect(measurementTurnedOff(blockedStorage())).toBe(false);
+    expect(() => forgetMeasurementOff(blockedStorage())).not.toThrow();
   });
 });
 

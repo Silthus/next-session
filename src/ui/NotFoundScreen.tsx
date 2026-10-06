@@ -1,9 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { pageTitle } from "../lib/pageTitle";
 import { buttonClassName, type ButtonSize } from "./Button";
-import { Logo } from "./Logo";
-import { PageShell } from "./PageShell";
-import { useFocusOnMount } from "./useFocusOnMount";
+import { StatusScreen } from "./StatusScreen";
 
 export type NotFoundKind = "page" | "link";
 
@@ -29,25 +26,14 @@ const copies: Record<NotFoundKind, NotFoundCopy> = {
 
 export function NotFoundScreen({ kind }: { kind: NotFoundKind }) {
   const { headline, explanation, ctaSize } = copies[kind];
-  const heading = useFocusOnMount<HTMLHeadingElement>();
   return (
-    <PageShell
-      maxWidth="md"
-      centerFooter
-      className="flex flex-col items-center justify-center gap-5 text-center"
-    >
-      <title>{pageTitle(headline)}</title>
-      <Logo muted className="size-14" />
-      <h1 ref={heading} tabIndex={-1} className="font-display text-3xl font-extrabold outline-none">
-        {headline}
-      </h1>
-      <p className="text-ink-2">{explanation}</p>
+    <StatusScreen headline={headline} explanation={explanation}>
       <div className="mt-2 flex flex-col items-center gap-2">
         <Link to="/" className={buttonClassName("secondary", ctaSize)}>
           Plan your own game
         </Link>
         <span className="text-xs text-ink-3">One click, no sign-up.</span>
       </div>
-    </PageShell>
+    </StatusScreen>
   );
 }
