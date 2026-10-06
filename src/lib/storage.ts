@@ -10,14 +10,16 @@ const LAST_GROUP_KEY = "next-session.lastGroup";
 const NUDGE_DISMISSED_KEY = "next-session.nudgeDismissedAt";
 const MEASUREMENT_OFF_KEY = "next-session.measurementOff";
 
-const noStorage: KeyValueStorage = {
+const refusedStorage: KeyValueStorage = {
   getItem: () => null,
-  setItem: () => undefined,
+  setItem: () => {
+    throw new DOMException("The browser refuses localStorage.", "SecurityError");
+  },
   removeItem: () => undefined,
 };
 
 function browserStorage(): KeyValueStorage {
-  return attempt(() => window.localStorage, noStorage);
+  return attempt(() => window.localStorage, refusedStorage);
 }
 
 export function rememberPlayer(
