@@ -97,10 +97,10 @@ Not implemented: Window's scrollTo() method
 
  Test Files  54 passed (54)
       Tests  614 passed (614)
-   Start at  14:11:19
-   Duration  4.14s (tests 43%, environment 38%, transform 8%, import 6%, setup 5%)
+   Start at  14:17:05
+   Duration  5.09s (tests 45%, environment 35%, transform 9%, import 6%, setup 4%)
 
-Environment  |ui| jsdom was created 36 times · 19.04s total, 47% of tracked time
+Environment  |ui| jsdom was created 36 times · 22.41s total, 45% of tracked time
              create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
              learn more: https://vitest.dev/guide/improving-performance#test-environments
 
@@ -159,7 +159,7 @@ dist/assets/GroupScreen-B7g-8zba.js                                     40.52 kB
 dist/assets/Button-BNcRTEks.js                                          71.50 kB │ gzip: 20.34 kB
 dist/assets/index-C0E3otPp.js                                          295.02 kB │ gzip: 94.57 kB
 
-✓ built in 243ms
+✓ built in 260ms
 
  ⛅️ wrangler 4.147.0
 ────────────────────
