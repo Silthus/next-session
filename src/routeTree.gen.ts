@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ImprintRouteImport } from './routes/imprint'
+import { Route as MeRouteImport } from './routes/me'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as GGroupIdRouteImport } from './routes/g.$groupId'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const ImprintRoute = ImprintRouteImport.update({
   id: '/imprint',
   path: '/imprint',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeRoute = MeRouteImport.update({
+  id: '/me',
+  path: '/me',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -50,6 +56,7 @@ const SShareTokenRoute = SShareTokenRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/imprint': typeof ImprintRoute
+  '/me': typeof MeRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/g/$groupId': typeof GGroupIdRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/imprint': typeof ImprintRoute
+  '/me': typeof MeRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/g/$groupId': typeof GGroupIdRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/imprint': typeof ImprintRoute
+  '/me': typeof MeRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/g/$groupId': typeof GGroupIdRoute
@@ -75,14 +84,27 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/imprint' | '/privacy' | '/terms' | '/g/$groupId' | '/s/$shareToken'
+    | '/'
+    | '/imprint'
+    | '/me'
+    | '/privacy'
+    | '/terms'
+    | '/g/$groupId'
+    | '/s/$shareToken'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/imprint' | '/privacy' | '/terms' | '/g/$groupId' | '/s/$shareToken'
+    | '/'
+    | '/imprint'
+    | '/me'
+    | '/privacy'
+    | '/terms'
+    | '/g/$groupId'
+    | '/s/$shareToken'
   id:
     | '__root__'
     | '/'
     | '/imprint'
+    | '/me'
     | '/privacy'
     | '/terms'
     | '/g/$groupId'
@@ -92,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ImprintRoute: typeof ImprintRoute
+  MeRoute: typeof MeRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   GGroupIdRoute: typeof GGroupIdRoute
@@ -112,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/imprint'
       fullPath: '/imprint'
       preLoaderRoute: typeof ImprintRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/me': {
+      id: '/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof MeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -148,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ImprintRoute: ImprintRoute,
+  MeRoute: MeRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   GGroupIdRoute: GGroupIdRoute,

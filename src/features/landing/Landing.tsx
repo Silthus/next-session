@@ -36,13 +36,15 @@ export function Landing() {
   if (newGroup && !created) setCreated(newGroup);
   if (claimExpired && !saved && sheet === null) startOver();
 
-  const returningTo =
-    phase === "idle" || phase === "failed" ? returningGroupId(groups, lastGroupId()) : undefined;
+  const settled = phase === "idle" || phase === "failed";
+  const returningTo = settled ? returningGroupId(groups, lastGroupId()) : undefined;
+  const toMyGroups = settled && gm.status === "account" && groups?.length === 0;
 
   useEffect(() => {
     if (returningTo)
       void navigate({ to: "/g/$groupId", params: { groupId: returningTo }, replace: true });
-  }, [returningTo, navigate]);
+    else if (toMyGroups) void navigate({ to: "/me", replace: true });
+  }, [returningTo, toMyGroups, navigate]);
 
   const create = async () => {
     setPhase("creating");
@@ -78,9 +80,8 @@ export function Landing() {
 
   const sheetClosed = sheet === null;
   const account = gm.status === "account";
-  const accountWithoutGroups = account && groups?.length === 0;
   const resolving = gm.status === "loading" || (signedIn && groups === undefined);
-  if ((phase === "idle" && resolving) || returningTo) {
+  if ((phase === "idle" && resolving) || returningTo || toMyGroups) {
     return <div className="min-h-dvh" />;
   }
 
@@ -94,11 +95,9 @@ export function Landing() {
           sheetClosed && account && saved ? gm.email : undefined,
         )}
         showLogIn={gm.status === "signedOut" && (phase === "idle" || phase === "failed")}
-        loggedInAs={sheetClosed && accountWithoutGroups ? gm.email : undefined}
         onCreate={() => void create()}
         onLogIn={() => setSheet("logIn")}
         onSave={() => setSheet("save")}
-        onLogOut={() => void gm.signOut()}
       />
       {sheet === "save" && created ? (
         <AccountSheet

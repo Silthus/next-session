@@ -20,7 +20,6 @@ function renderLanding(overrides: Partial<Props> = {}) {
     onCreate: vi.fn(),
     onLogIn: vi.fn(),
     onSave: vi.fn(),
-    onLogOut: vi.fn(),
     ...overrides,
   };
   const router = createRouter({
@@ -65,31 +64,6 @@ describe("LandingView", () => {
     renderLanding({ showLogIn: false });
     await screen.findByRole("button", { name: "Create your link" });
     expect(screen.queryByRole("button", { name: "Log in" })).toBeNull();
-  });
-
-  it("names the account a GM just logged in to and nudges them to their first link", async () => {
-    renderLanding({ showLogIn: false, loggedInAs: "gm@example.test" });
-
-    const line = await screen.findByRole("status");
-    expect(line.textContent).toBe(
-      "Signed in as gm@example.test. No groups here yet, so create your first link.",
-    );
-    expect(document.activeElement).toBe(line);
-    expect(screen.getByRole("button", { name: "Create your link" })).toBeTruthy();
-  });
-
-  it("lets the Account it names log out, to sign in to another one", async () => {
-    const { props } = renderLanding({ showLogIn: false, loggedInAs: "gm@example.test" });
-
-    await userEvent.click(await screen.findByRole("button", { name: "Log out" }));
-
-    expect(props.onLogOut).toHaveBeenCalled();
-  });
-
-  it("offers no Log out without a signed-in Account", async () => {
-    renderLanding();
-    await screen.findByRole("button", { name: "Create your link" });
-    expect(screen.queryByRole("button", { name: "Log out" })).toBeNull();
   });
 
   it("holds the button while the link is being made", async () => {

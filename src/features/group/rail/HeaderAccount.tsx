@@ -1,27 +1,26 @@
+import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { Button } from "../../../ui/Button";
-import { MenuButton, Popover } from "./Popover";
+import { menuItemClassName, MenuButton, Popover, useClosePopover } from "./Popover";
 
-export function HeaderAccount({
-  status,
-  email,
-  onSave,
-  onLogOut,
-}: {
-  status: "anonymous" | "account";
-  email?: string;
-  onSave: () => void;
-  onLogOut: () => void;
-}) {
-  const trigger = useRef<HTMLButtonElement>(null);
-  if (status === "anonymous") {
+type HeaderAccountProps =
+  | { status: "anonymous"; onSave: () => void }
+  | { status: "account"; email: string | undefined; onLogOut: () => void };
+
+export function HeaderAccount(props: HeaderAccountProps) {
+  if (props.status === "anonymous") {
     return (
-      <Button variant="soft" size="sm" onClick={onSave} aria-label="Save your group">
+      <Button variant="soft" size="sm" onClick={props.onSave} aria-label="Save your group">
         <span className="sm:hidden">Save</span>
         <span className="hidden sm:inline">Save your group</span>
       </Button>
     );
   }
+  return <AccountMenu email={props.email} onLogOut={props.onLogOut} />;
+}
+
+function AccountMenu({ email, onLogOut }: { email: string | undefined; onLogOut: () => void }) {
+  const trigger = useRef<HTMLButtonElement>(null);
   return (
     <Popover
       triggerRef={trigger}
@@ -41,7 +40,17 @@ export function HeaderAccount({
       <p className="px-2 pt-1 text-xs text-ink-3">Signed in as</p>
       <p className="truncate px-2 pb-2 text-sm font-semibold">{email}</p>
       <div className="mb-1.5 border-t border-line" />
+      <MyGroupsLink />
       <MenuButton onSelect={onLogOut}>Log out</MenuButton>
     </Popover>
+  );
+}
+
+function MyGroupsLink() {
+  const close = useClosePopover();
+  return (
+    <Link to="/me" className={menuItemClassName} onClick={() => close({ refocus: false })}>
+      My groups
+    </Link>
   );
 }
