@@ -73,6 +73,24 @@ jobs:
           bun-version-file: package.json
       - if: steps.head.outputs.current == 'true'
         run: bun install --frozen-lockfile
+      - name: Install posthog-cli pinned by checksum
+        if: steps.head.outputs.current == 'true'
+        run: |
+          version="$(jq -r .version node_modules/@posthog/cli/package.json)"
+          if [ "$version" != "$POSTHOG_CLI_VERSION" ]; then
+            echo "::error::@posthog/cli is $version, but this step pins $POSTHOG_CLI_VERSION. Update both the version and its release checksum."
+            exit 1
+          fi
+          archive="$RUNNER_TEMP/posthog-cli.tar.gz"
+          curl --fail --silent --show-error --location --output "$archive" \
+            "https://github.com/PostHog/posthog/releases/download/posthog-cli/v$POSTHOG_CLI_VERSION/posthog-cli-x86_64-unknown-linux-gnu.tar.gz"
+          echo "$POSTHOG_CLI_SHA256  $archive" | sha256sum --check --strict
+          install_dir=node_modules/@posthog/cli/node_modules/.bin_real
+          mkdir -p "$install_dir"
+          tar xzf "$archive" --strip-components 1 -C "$install_dir"
+        env:
+          POSTHOG_CLI_VERSION: 0.16.2
+          POSTHOG_CLI_SHA256: e3c849583b62bd81dba5be1bf4d832221fffe916badffcc416baea294009c1c7
       - name: Deploy Convex and build the SPA against it
         if: steps.head.outputs.current == 'true'
         run: |
