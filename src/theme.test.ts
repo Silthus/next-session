@@ -1,26 +1,24 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-
-const css = readFileSync("src/index.css", "utf8");
+import css from "./index.css?raw";
 
 type Lab = { L: number; a: number; b: number };
 type Tokens = Record<string, string>;
 
 const [light, dark] = [...css.matchAll(/:root\s*\{([^}]*)\}/g)].map(([, block]) =>
-  Object.fromEntries(
-    [...(block ?? "").matchAll(/--([\w-]+):\s*([^;]+);/g)].map(([, n, v]) => [n, v]),
-  ),
+  tokensIn(block ?? ""),
 ) as [Tokens, Tokens];
 
 const themes = { light, dark };
 
+const white = "#ffffff";
+
 const answerTileFloors = {
   light: {
-    text: { free: "#ffffff", busy: "#ffffff", maybe: light.ink },
+    text: { free: white, busy: white, maybe: "ink" },
     floor: { free: 3, busy: 3.9, maybe: 8 },
   },
   dark: {
-    text: { free: dark.paper, busy: dark.paper, maybe: dark.paper },
+    text: { free: "paper", busy: "paper", maybe: "paper" },
     floor: { free: 10.2, busy: 7, maybe: 10.4 },
   },
 };
@@ -67,7 +65,8 @@ describe.each(["light", "dark"] as const)("the %s theme", (theme) => {
     "keeps the %s tile at least as readable as before the gold theme",
     (answer) => {
       const { text, floor } = answerTileFloors[theme];
-      expect(contrast(text[answer], token(answer))).toBeGreaterThanOrEqual(floor[answer]);
+      const tileText = text[answer] === white ? white : token(text[answer]);
+      expect(contrast(tileText, token(answer))).toBeGreaterThanOrEqual(floor[answer]);
     },
   );
 });
@@ -80,6 +79,14 @@ describe("the bright accent", () => {
     expect(source.match(brightAccentOnTextOrFocus) ?? []).toEqual([]);
   });
 });
+
+function tokensIn(block: string) {
+  const tokens: Tokens = {};
+  for (const [, name, value] of block.matchAll(/--([\w-]+):\s*([^;]+);/g)) {
+    if (name && value) tokens[name] = value.trim();
+  }
+  return tokens;
+}
 
 function contrast(first: string, second: string) {
   const [lighter, darker] = [first, second]
