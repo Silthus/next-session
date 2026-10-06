@@ -1,0 +1,7 @@
+     × takes the code out of the address bar on load and calls nothing 1024ms
+     × confirms with the code it took from the address bar 1005ms
+     × confirms with the code on the press and says when the first tip arrives 1036ms
+     × says the link expired when the server refuses the code 1022ms
+     × keeps the button for another try when the press fails 1038ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  5 failed | 4 passed (9)

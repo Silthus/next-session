@@ -1,0 +1,6 @@
+  ✓  3 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 390 px, light (1.7s)
+  ✓  4 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 390 px, dark (1.7s)
+  ✓  5 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 1440 px, light (1.8s)
+  ✓  6 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 1440 px, dark (1.8s)
+
+  6 passed (14.9s)

@@ -1,0 +1,15 @@
+      1| import { afterEach, beforeEach, describe, expect, it, vi } from "vites…
+      2| import type { Doc } from "./_generated/dataModel";
+      3| import { requestMail, type MailRequest } from "./mail";
+       | ^
+      4| import { newBackend, type TestBackend } from "./model/test.setup";
+      5|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  17:20:49
+   Duration  162ms (environment 93%, worker 7%)
+

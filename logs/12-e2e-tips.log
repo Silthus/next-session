@@ -1,0 +1,12 @@
+
+        npx playwright show-trace test-results/tips-screenshots-the-Tips-box-and-tips-at-1440-px-dark-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5 failed
+    [chromium] › e2e/tips.spec.ts:30:1 › /tips takes the code out of the address bar and confirms only on the press 
+    [chromium] › e2e/tips.spec.ts:66:7 › screenshots › the Tips box and /tips at 390 px, light ─────
+    [chromium] › e2e/tips.spec.ts:66:7 › screenshots › the Tips box and /tips at 390 px, dark ──────
+    [chromium] › e2e/tips.spec.ts:66:7 › screenshots › the Tips box and /tips at 1440 px, light ────
+    [chromium] › e2e/tips.spec.ts:66:7 › screenshots › the Tips box and /tips at 1440 px, dark ─────
+  1 passed (41.7s)

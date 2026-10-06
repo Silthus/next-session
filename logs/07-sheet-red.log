@@ -1,0 +1,7 @@
+     × passes tips: yes with a sign-up for a ticked box 6ms
+     × offers the box unticked under the password when saving 1006ms
+     × asks for Tips with the sign-up when the box is ticked 108ms
+     × drops the box for a log in, and asks for nothing even if it was ticked 1003ms
+     × locks the box while saving 117ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  5 failed | 61 passed (66)

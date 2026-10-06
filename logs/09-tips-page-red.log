@@ -1,0 +1,7 @@
+     × takes the code out of the address bar on load and calls nothing 1022ms
+     × confirms with the code it took from the address bar 1004ms
+Error: Failed to resolve import "./ConfirmTips" from "src/features/tips/ConfirmTips.test.tsx". Does the file exist?
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+TestingLibraryElementError: Unable to find role="button" and name "Yes, send me the tips"
+TestingLibraryElementError: Unable to find role="button" and name "Yes, send me the tips"
+      Tests  2 failed (2)

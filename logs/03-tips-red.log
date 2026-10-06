@@ -1,0 +1,40 @@
+     × is requested for a new Password Account, to its own address 178ms
+     × is requested for a new Google Account, without a Tips link 21ms
+     × records the consent and its wording's version on the Account 98ms
+     × puts a confirmation link into the Welcome Mail and keeps only its code's hash 96ms
+     × links the confirmation to the app's /tips page 97ms
+     × gives every Account its own code 96ms
+     × records nothing for tips: undefined and sends a Welcome Mail without the link 108ms
+     × records nothing for tips: no and sends a Welcome Mail without the link 99ms
+     × records nothing for tips: true and sends a Welcome Mail without the link 96ms
+     × records nothing for tips: true and sends a Welcome Mail without the link 101ms
+     × confirms with the code from the Welcome Mail, without a session 98ms
+     × requests the Tips mail for the confirmed Account 95ms
+     × confirms a minute before the 3 days are up 100ms
+     × refuses a late code and requests nothing 99ms
+     × refuses a used code and requests nothing more 101ms
+     × refuses the unknown code "" and requests nothing 101ms
+     × refuses the unknown code "not-a-code" and requests nothing 101ms
+     × refuses the unknown code "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" and requests nothing 100ms
+     × refuses with RATE_LIMITED once the global burst of 60 is spent 98ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 19 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  |convex| convex/tips.test.ts > the Welcome Mail > is requested for a new Password Account, to its own address
+AssertionError: expected [] to deeply equal [ { …(2) } ]
+ FAIL  |convex| convex/tips.test.ts > the Welcome Mail > is requested for a new Google Account, without a Tips link
+AssertionError: expected [] to deeply equal [ { …(2) } ]
+ FAIL  |convex| convex/tips.test.ts > asking for Tips at sign-up > records the consent and its wording's version on the Account
+TypeError: Cannot read properties of undefined (reading 'body')
+ FAIL  |convex| convex/tips.test.ts > asking for Tips at sign-up > puts a confirmation link into the Welcome Mail and keeps only its code's hash
+TypeError: Cannot read properties of undefined (reading 'body')
+ FAIL  |convex| convex/tips.test.ts > asking for Tips at sign-up > links the confirmation to the app's /tips page
+TypeError: Cannot read properties of undefined (reading 'body')
+ FAIL  |convex| convex/tips.test.ts > asking for Tips at sign-up > gives every Account its own code
+TypeError: Cannot read properties of undefined (reading 'body')
+ FAIL  |convex| convex/tips.test.ts > asking for Tips at sign-up > records nothing for tips: undefined and sends a Welcome Mail without the link
+ FAIL  |convex| convex/tips.test.ts > asking for Tips at sign-up > records nothing for tips: no and sends a Welcome Mail without the link
+ FAIL  |convex| convex/tips.test.ts > asking for Tips at sign-up > records nothing for tips: true and sends a Welcome Mail without the link
+ FAIL  |convex| convex/tips.test.ts > asking for Tips at sign-up > records nothing for tips: true and sends a Welcome Mail without the link
+TypeError: Cannot read properties of undefined (reading 'body')
+ FAIL  |convex| convex/tips.test.ts > account.confirmTips > confirms with the code from the Welcome Mail, without a session
+TypeError: Cannot read properties of undefined (reading 'body')
+ FAIL  |convex| convex/tips.test.ts > account.confirmTips > requests the Tips mail for the confirmed Account
