@@ -243,7 +243,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
 
   await test.step("8. The GM deletes the Group", async () => {
     await deleteGroup(gm, groupPath);
-    await player.reload();
+    await player.goto(`https://${shareLinkShown}`);
     await expect(player.getByRole("heading", { name: "This link no longer works" })).toBeVisible();
     await shoot(player, testInfo, "8-link-gone");
   });
