@@ -1,0 +1,1012 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-58
+
+ ❯ |ui| src/features/account/useSaveOnReturn.test.ts (0 test)
+ ❯ |ui| src/features/account/save.test.ts (15 tests | 2 failed) 12ms
+   ❯ saveThroughGoogle (2)
+     × claims before leaving for Google, so the way back can move the Groups 3ms
+     × stays on the page when the claim fails 1ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/account/AccountSheet.test.tsx (23 tests | 3 failed) 4881ms
+   ❯ AccountSheet with Google (4)
+     × continues with Google saving a Group, under the legal line 1005ms
+     × continues with Google logging in, under the legal line 1003ms
+     × stays open and says so when leaving for Google fails 1004ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/useSaveOnReturn.test.ts [ src/features/account/useSaveOnReturn.test.ts ]
+Error: Failed to resolve import "./useSaveOnReturn" from "src/features/account/useSaveOnReturn.test.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/coder/dev/ns-worktrees/ticket-58/src/features/account/useSaveOnReturn.test.ts:6:32
+  3  |  import { describe, expect, it } from "vitest";
+  4  |  import { PENDING_SAVE_KEY } from "./save";
+  5  |  import { useSaveOnReturn } from "./useSaveOnReturn";
+     |                                   ^
+  6  |  const groupIds = ["group-1"];
+  7  |  class MemoryStorage {
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/node.js:26423:18
+ ❯ node_modules/vite/dist/node/chunks/node.js:26493:30
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/node.js:26459:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/node.js:19988:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet with Google > continues with Google saving a Group, under the legal line
+TestingLibraryElementError: Unable to find role="button" and name "Continue with Google"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<dialog[39m
+      [33maria-labelledby[39m=[32m"_r_1v_"[39m
+      [33mclass[39m=[32m"animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-black/40 dark:backdrop:bg-black/70 open:flex sm:items-center"[39m
+      [33mopen[39m=[32m""[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"animate-rise relative max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"min-w-0 pr-10 font-display text-2xl font-bold break-words"[39m
+          [33mid[39m=[32m"_r_1v_"[39m
+        [36m>[39m
+          [0mKeep My group[0m
+        [36m</h2>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-4"[39m
+        [36m>[39m
+          [36m<form[39m
+            [33mclass[39m=[32m"flex flex-col gap-4"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-ink-2"[39m
+            [36m>[39m
+              [0mOpen it on any device. The player link stays exactly the same, your players notice nothing.[0m
+            [36m</p>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-4"[39m
+            [36m>[39m
+              [36m<fieldset[39m
+                [33mclass[39m=[32m"grid grid-cols-2 gap-1 rounded-md bg-surface-2 p-1 disabled:pointer-events-none disabled:opacity-50"[39m
+              [36m>[39m
+                [36m<legend[39m
+                  [33mclass[39m=[32m"sr-only"[39m
+                [36m>[39m
+                  [0mAccount[0m
+                [36m</legend>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"flex h-9 cursor-pointer items-center justify-center rounded-sm text-sm font-semibold transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-accent bg-surface text-ink shadow-card"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mchecked[39m=[32m""[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                    [33mname[39m=[32m"_r_20_"[39m
+                    [33mtype[39m=[32m"radio"[39m
+                    [33mvalue[39m=[32m"create"[39m
+                  [36m/>[39m
+                  [0mCreate account[0m
+                [36m</label>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"flex h-9 cursor-pointer items-center justify-center rounded-sm text-sm font-semibold transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-accent text-ink-2 hover:text-ink"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                    [33mname[39m=[32m"_r_20_"[39m
+                    [33mtype[39m=[32m"radio"[39m
+                    [33mvalue[39m=[32m"logIn"[39m
+                  [36m/>[39m
+                  [0mI already have one[0m
+                [36m</label>[39m
+              [36m</fieldset>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_21_"[39m
+                [36m>[39m
+                  [0mEmail[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33mautocomplete[39m=[32m"email"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"[39m
+                  [33mid[39m=[32m"_r_21_"[39m
+                  [33mplaceholder[39m=[32m"you@example.com"[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"email"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_22_"[39m
+                [36m>[39m
+                  [0mPassword[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33maria-describedby[39m=[32m"_r_22_-hint"[39m
+                  [33mautocomplete[39m=[32m"new-password"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"[39m
+                  [33mid[39m=[32m"_r_22_"[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"password"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-xs text-ink-3"[39m
+                  [33mid[39m=[32m"_r_22_-hint"[39m
+                [36m>[39m
+                  [0mAt least 8 characters.[0m
+                [36m</p>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink hover:bg-accent-strong shadow-card h-14 px-6 text-base gap-2.5 rounded-lg w-full"[39m
+              [33mtype[39m=[32m"submit"[39m
+            [36m>[39m
+              [0mSave group[0m
+            [36m</button>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mBy creating an account you agree to the[0m
+              [0m [0m
+              [36m<a[39m
+                [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                [33mhref[39m=[32m"/terms"[39m
+              [36m>[39m
+                [0mTerms[0m
+              [36m</a>[39m
+              [0m [0m
+              [0mand[0m
+              [0m [0m
+              [36m<a[39m
+                [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                [33mhref[39m=[32m"/privacy"[39m
+              [36m>[39m
+                [0mPrivacy Policy[0m
+              [36m</a>[39m
+              [0m.[0m
+            [36m</p>[39m
+          [36m</form>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Close"[39m
+          [33mclass[39m=[32m"absolute top-4 right-3 inline-flex size-11 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-4 size-5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 20 20"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M5 5l10 10M15 5L5 15"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</dialog>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<dialog[39m
+      [33maria-labelledby[39m=[32m"_r_1v_"[39m
+      [33mclass[39m=[32m"animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-black/40 dark:backdrop:bg-black/70 open:flex sm:items-center"[39m
+      [33mopen[39m=[32m""[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"animate-rise relative max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"min-w-0 pr-10 font-display text-2xl font-bold break-words"[39m
+          [33mid[39m=[32m"_r_1v_"[39m
+        [36m>[39m
+          [0mKeep My group[0m
+        [36m</h2>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-4"[39m
+        [36m>[39m
+          [36m<form[39m
+            [33mclass[39m=[32m"flex flex-col gap-4"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-ink-2"[39m
+            [36m>[39m
+              [0mOpen it on any device. The player link stays exactly the same, your players notice nothing.[0m
+            [36m</p>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-4"[39m
+            [36m>[39m
+              [36m<fieldset[39m
+                [33mclass[39m=[32m"grid grid-cols-2 gap-1 rounded-md bg-surface-2 p-1 disabled:pointer-events-none disabled:opacity-50"[39m
+              [36m>[39m
+                [36m<legend[39m
+                  [33mclass[39m=[32m"sr-only"[39m
+                [36m>[39m
+                  [0mAccount[0m
+                [36m</legend>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"flex h-9 cursor-pointer items-center justify-center rounded-sm text-sm font-semibold transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-accent bg-surface text-ink shadow-card"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mchecked[39m=[32m""[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                    [33mname[39m=[32m"_r_20_"[39m
+                    [33mtype[39m=[32m"radio"[39m
+                    [33mvalue[39m=[32m"create"[39m
+                  [36m/>[39m
+                  [0mCreate account[0m
+                [36m</label>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"flex h-9 cursor-pointer items-center justify-center rounded-sm text-sm font-semibold transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-accent text-ink-2 hover:text-ink"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                    [33mname[39m=[32m"_r_20_"[39m
+                    [33mtype[39m=[32m"radio"[39m
+                    [33mvalue[39m=[32m"logIn"[39m
+                  [36m/>[39m
+                  [0mI already have one[0m
+                [36m</label>[39m
+              [36m</fieldset>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_21_"[39m
+                [36m>[39m
+                  [0mEmail[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33mautocomplete[39m=[32m"email"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"[39m
+                  [33mid[39m=[32m"_r_21_"[39m
+                  [33mplaceholder[39m=[32m"you@example.com"[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"email"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_22_"[39m
+                [36m>[39m
+                  [0mPassword[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33maria-describedby[39m=[32m"_r_22_-hint"[39m
+                  [33mautocomplete[39m=[32m"new-password"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"[39m
+                  [33mid[39m=[32m"_r_22_"[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"password"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-xs text-ink-3"[39m
+                  [33mid[39m=[32m"_r_22_-hint"[39m
+                [36m>[39m
+                  [0mAt least 8 characters.[0m
+                [36m</p>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink hover:bg-accent-strong shadow-card h-14 px-6 text-base gap-2.5 rounded-lg w-full"[39m
+              [33mtype[39m=[32m"submit"[39m
+            [36m>[39m
+              [0mSave group[0m
+            [36m</button>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mBy creating an account you agree to the[0m
+              [0m [0m
+              [36m<a[39m
+                [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                [33mhref[39m=[32m"/terms"[39m
+              [36m>[39m
+                [0mTerms[0m
+              [36m</a>[39m
+              [0m [0m
+              [0mand[0m
+              [0m [0m
+              [36m<a[39m
+                [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                [33mhref[39m=[32m"/privacy"[39m
+              [36m>[39m
+                [0mPrivacy Policy[0m
+              [36m</a>[39m
+              [0m.[0m
+            [36m</p>[39m
+          [36m</form>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Close"[39m
+          [33mclass[39m=[32m"absolute top-4 right-3 inline-flex size-11 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-4 size-5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 20 20"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M5 5l10 10M15 5L5 15"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</dialog>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/account/AccountSheet.test.tsx:392:40
+    390|     } as SheetProps);
+    391|
+    392|     await userEvent.click(await screen.findByRole("button", google));
+       |                                        ^
+    393|
+    394|     expect(onContinueWithGoogle).toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet with Google > continues with Google logging in, under the legal line
+TestingLibraryElementError: Unable to find role="button" and name "Continue with Google"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<dialog[39m
+      [33maria-labelledby[39m=[32m"_r_23_"[39m
+      [33mclass[39m=[32m"animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-black/40 dark:backdrop:bg-black/70 open:flex sm:items-center"[39m
+      [33mopen[39m=[32m""[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"animate-rise relative max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"min-w-0 pr-10 font-display text-2xl font-bold break-words"[39m
+          [33mid[39m=[32m"_r_23_"[39m
+        [36m>[39m
+          [0mLog in[0m
+        [36m</h2>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-4"[39m
+        [36m>[39m
+          [36m<form[39m
+            [33mclass[39m=[32m"flex flex-col gap-4"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-ink-2"[39m
+            [36m>[39m
+              [0mOpen your groups on this device.[0m
+            [36m</p>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-4"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_24_"[39m
+                [36m>[39m
+                  [0mEmail[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33mautocomplete[39m=[32m"email"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"[39m
+                  [33mid[39m=[32m"_r_24_"[39m
+                  [33mplaceholder[39m=[32m"you@example.com"[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"email"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_25_"[39m
+                [36m>[39m
+                  [0mPassword[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33mautocomplete[39m=[32m"current-password"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"[39m
+                  [33mid[39m=[32m"_r_25_"[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"password"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink hover:bg-accent-strong shadow-card h-14 px-6 text-base gap-2.5 rounded-lg w-full"[39m
+              [33mtype[39m=[32m"submit"[39m
+            [36m>[39m
+              [0mLog in[0m
+            [36m</button>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mNo account yet?[0m
+              [0m [0m
+              [36m<button[39m
+                [33mclass[39m=[32m"font-semibold text-ink-2 underline underline-offset-2 hover:text-ink disabled:opacity-50"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mGo back[0m
+              [36m</button>[39m
+              [0m [0m
+              [0mand create your link.[0m
+            [36m</p>[39m
+          [36m</form>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Close"[39m
+          [33mclass[39m=[32m"absolute top-4 right-3 inline-flex size-11 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-4 size-5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 20 20"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M5 5l10 10M15 5L5 15"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</dialog>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<dialog[39m
+      [33maria-labelledby[39m=[32m"_r_23_"[39m
+      [33mclass[39m=[32m"animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-black/40 dark:backdrop:bg-black/70 open:flex sm:items-center"[39m
+      [33mopen[39m=[32m""[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"animate-rise relative max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"min-w-0 pr-10 font-display text-2xl font-bold break-words"[39m
+          [33mid[39m=[32m"_r_23_"[39m
+        [36m>[39m
+          [0mLog in[0m
+        [36m</h2>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-4"[39m
+        [36m>[39m
+          [36m<form[39m
+            [33mclass[39m=[32m"flex flex-col gap-4"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-ink-2"[39m
+            [36m>[39m
+              [0mOpen your groups on this device.[0m
+            [36m</p>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-4"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_24_"[39m
+                [36m>[39m
+                  [0mEmail[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33mautocomplete[39m=[32m"email"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"[39m
+                  [33mid[39m=[32m"_r_24_"[39m
+                  [33mplaceholder[39m=[32m"you@example.com"[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"email"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_25_"[39m
+                [36m>[39m
+                  [0mPassword[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33mautocomplete[39m=[32m"current-password"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"[39m
+                  [33mid[39m=[32m"_r_25_"[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"password"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink hover:bg-accent-strong shadow-card h-14 px-6 text-base gap-2.5 rounded-lg w-full"[39m
+              [33mtype[39m=[32m"submit"[39m
+            [36m>[39m
+              [0mLog in[0m
+            [36m</button>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mNo account yet?[0m
+              [0m [0m
+              [36m<button[39m
+                [33mclass[39m=[32m"font-semibold text-ink-2 underline underline-offset-2 hover:text-ink disabled:opacity-50"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mGo back[0m
+              [36m</button>[39m
+              [0m [0m
+              [0mand create your link.[0m
+            [36m</p>[39m
+          [36m</form>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Close"[39m
+          [33mclass[39m=[32m"absolute top-4 right-3 inline-flex size-11 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-4 size-5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 20 20"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M5 5l10 10M15 5L5 15"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</dialog>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/account/AccountSheet.test.tsx:392:40
+    390|     } as SheetProps);
+    391|
+    392|     await userEvent.click(await screen.findByRole("button", google));
+       |                                        ^
+    393|
+    394|     expect(onContinueWithGoogle).toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet with Google > stays open and says so when leaving for Google fails
+TestingLibraryElementError: Unable to find role="button" and name "Continue with Google"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<dialog[39m
+      [33maria-labelledby[39m=[32m"_r_26_"[39m
+      [33mclass[39m=[32m"animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-black/40 dark:backdrop:bg-black/70 open:flex sm:items-center"[39m
+      [33mopen[39m=[32m""[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"animate-rise relative max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"min-w-0 pr-10 font-display text-2xl font-bold break-words"[39m
+          [33mid[39m=[32m"_r_26_"[39m
+        [36m>[39m
+          [0mKeep My group[0m
+        [36m</h2>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-4"[39m
+        [36m>[39m
+          [36m<form[39m
+            [33mclass[39m=[32m"flex flex-col gap-4"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-ink-2"[39m
+            [36m>[39m
+              [0mOpen it on any device. The player link stays exactly the same, your players notice nothing.[0m
+            [36m</p>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-4"[39m
+            [36m>[39m
+              [36m<fieldset[39m
+                [33mclass[39m=[32m"grid grid-cols-2 gap-1 rounded-md bg-surface-2 p-1 disabled:pointer-events-none disabled:opacity-50"[39m
+              [36m>[39m
+                [36m<legend[39m
+                  [33mclass[39m=[32m"sr-only"[39m
+                [36m>[39m
+                  [0mAccount[0m
+                [36m</legend>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"flex h-9 cursor-pointer items-center justify-center rounded-sm text-sm font-semibold transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-accent bg-surface text-ink shadow-card"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mchecked[39m=[32m""[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                    [33mname[39m=[32m"_r_27_"[39m
+                    [33mtype[39m=[32m"radio"[39m
+                    [33mvalue[39m=[32m"create"[39m
+                  [36m/>[39m
+                  [0mCreate account[0m
+                [36m</label>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"flex h-9 cursor-pointer items-center justify-center rounded-sm text-sm font-semibold transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-accent text-ink-2 hover:text-ink"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                    [33mname[39m=[32m"_r_27_"[39m
+                    [33mtype[39m=[32m"radio"[39m
+                    [33mvalue[39m=[32m"logIn"[39m
+                  [36m/>[39m
+                  [0mI already have one[0m
+                [36m</label>[39m
+              [36m</fieldset>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_28_"[39m
+                [36m>[39m
+                  [0mEmail[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33mautocomplete[39m=[32m"email"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"[39m
+                  [33mid[39m=[32m"_r_28_"[39m
+                  [33mplaceholder[39m=[32m"you@example.com"[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"email"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_29_"[39m
+                [36m>[39m
+                  [0mPassword[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33maria-describedby[39m=[32m"_r_29_-hint"[39m
+                  [33mautocomplete[39m=[32m"new-password"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"[39m
+                  [33mid[39m=[32m"_r_29_"[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"password"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-xs text-ink-3"[39m
+                  [33mid[39m=[32m"_r_29_-hint"[39m
+                [36m>[39m
+                  [0mAt least 8 characters.[0m
+                [36m</p>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink hover:bg-accent-strong shadow-card h-14 px-6 text-base gap-2.5 rounded-lg w-full"[39m
+              [33mtype[39m=[32m"submit"[39m
+            [36m>[39m
+              [0mSave group[0m
+            [36m</button>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mBy creating an account you agree to the[0m
+              [0m [0m
+              [36m<a[39m
+                [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                [33mhref[39m=[32m"/terms"[39m
+              [36m>[39m
+                [0mTerms[0m
+              [36m</a>[39m
+              [0m [0m
+              [0mand[0m
+              [0m [0m
+              [36m<a[39m
+                [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                [33mhref[39m=[32m"/privacy"[39m
+              [36m>[39m
+                [0mPrivacy Policy[0m
+              [36m</a>[39m
+              [0m.[0m
+            [36m</p>[39m
+          [36m</form>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Close"[39m
+          [33mclass[39m=[32m"absolute top-4 right-3 inline-flex size-11 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-4 size-5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 20 20"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M5 5l10 10M15 5L5 15"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</dialog>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<dialog[39m
+      [33maria-labelledby[39m=[32m"_r_26_"[39m
+      [33mclass[39m=[32m"animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-black/40 dark:backdrop:bg-black/70 open:flex sm:items-center"[39m
+      [33mopen[39m=[32m""[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"animate-rise relative max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"min-w-0 pr-10 font-display text-2xl font-bold break-words"[39m
+          [33mid[39m=[32m"_r_26_"[39m
+        [36m>[39m
+          [0mKeep My group[0m
+        [36m</h2>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-4"[39m
+        [36m>[39m
+          [36m<form[39m
+            [33mclass[39m=[32m"flex flex-col gap-4"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-ink-2"[39m
+            [36m>[39m
+              [0mOpen it on any device. The player link stays exactly the same, your players notice nothing.[0m
+            [36m</p>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-4"[39m
+            [36m>[39m
+              [36m<fieldset[39m
+                [33mclass[39m=[32m"grid grid-cols-2 gap-1 rounded-md bg-surface-2 p-1 disabled:pointer-events-none disabled:opacity-50"[39m
+              [36m>[39m
+                [36m<legend[39m
+                  [33mclass[39m=[32m"sr-only"[39m
+                [36m>[39m
+                  [0mAccount[0m
+                [36m</legend>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"flex h-9 cursor-pointer items-center justify-center rounded-sm text-sm font-semibold transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-accent bg-surface text-ink shadow-card"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mchecked[39m=[32m""[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                    [33mname[39m=[32m"_r_27_"[39m
+                    [33mtype[39m=[32m"radio"[39m
+                    [33mvalue[39m=[32m"create"[39m
+                  [36m/>[39m
+                  [0mCreate account[0m
+                [36m</label>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"flex h-9 cursor-pointer items-center justify-center rounded-sm text-sm font-semibold transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-accent text-ink-2 hover:text-ink"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                    [33mname[39m=[32m"_r_27_"[39m
+                    [33mtype[39m=[32m"radio"[39m
+                    [33mvalue[39m=[32m"logIn"[39m
+                  [36m/>[39m
+                  [0mI already have one[0m
+                [36m</label>[39m
+              [36m</fieldset>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_28_"[39m
+                [36m>[39m
+                  [0mEmail[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33mautocomplete[39m=[32m"email"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"[39m
+                  [33mid[39m=[32m"_r_28_"[39m
+                  [33mplaceholder[39m=[32m"you@example.com"[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"email"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_29_"[39m
+                [36m>[39m
+                  [0mPassword[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33maria-describedby[39m=[32m"_r_29_-hint"[39m
+                  [33mautocomplete[39m=[32m"new-password"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"[39m
+                  [33mid[39m=[32m"_r_29_"[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"password"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-xs text-ink-3"[39m
+                  [33mid[39m=[32m"_r_29_-hint"[39m
+                [36m>[39m
+                  [0mAt least 8 characters.[0m
+                [36m</p>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink hover:bg-accent-strong shadow-card h-14 px-6 text-base gap-2.5 rounded-lg w-full"[39m
+              [33mtype[39m=[32m"submit"[39m
+            [36m>[39m
+              [0mSave group[0m
+            [36m</button>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mBy creating an account you agree to the[0m
+              [0m [0m
+              [36m<a[39m
+                [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                [33mhref[39m=[32m"/terms"[39m
+              [36m>[39m
+                [0mTerms[0m
+              [36m</a>[39m
+              [0m [0m
+              [0mand[0m
+              [0m [0m
+              [36m<a[39m
+                [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                [33mhref[39m=[32m"/privacy"[39m
+              [36m>[39m
+                [0mPrivacy Policy[0m
+              [36m</a>[39m
+              [0m.[0m
+            [36m</p>[39m
+          [36m</form>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Close"[39m
+          [33mclass[39m=[32m"absolute top-4 right-3 inline-flex size-11 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-4 size-5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 20 20"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M5 5l10 10M15 5L5 15"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</dialog>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/account/AccountSheet.test.tsx:414:40
+    412|     });
+    413|
+    414|     await userEvent.click(await screen.findByRole("button", google));
+       |                                        ^
+    415|
+    416|     expect(await alertText()).toBe("Too many tries. Try again in a min…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  |ui| src/features/account/save.test.ts > saveThroughGoogle > claims before leaving for Google, so the way back can move the Groups
+TypeError: saveThroughGoogle is not a function
+ ❯ src/features/account/save.test.ts:200:11
+    198|     };
+    199|
+    200|     await saveThroughGoogle({ ...deps, continueWithGoogle });
+       |           ^
+    201|     const onReturn = await resumePendingSave(deps);
+    202|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  |ui| src/features/account/save.test.ts > saveThroughGoogle > stays on the page when the claim fails
+TypeError: saveThroughGoogle is not a function
+ ❯ src/features/account/save.test.ts:215:18
+    213|     const continueWithGoogle = vi.fn(() => Promise.resolve());
+    214|
+    215|     await expect(saveThroughGoogle({ ...deps, continueWithGoogle })).r…
+       |                  ^
+    216|     expect(continueWithGoogle).not.toHaveBeenCalled();
+    217|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  3 failed | 1 passed (4)
+      Tests  5 failed | 41 passed (46)
+   Start at  14:32:04
+   Duration  5.67s (tests 68%, environment 23%, transform 4%, setup 3%, import 2%)
+
