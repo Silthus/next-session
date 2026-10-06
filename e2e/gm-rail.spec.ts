@@ -20,6 +20,14 @@ async function rosterNames(gm: Gm) {
   return schedule?.players.map((player) => player.name) ?? [];
 }
 
+async function sessionDates(gm: Gm) {
+  const schedule = await gm.client.query(api.schedule.month, {
+    groupId: gm.groupId,
+    month: nextMonth,
+  });
+  return schedule?.sessions.map((session) => session.date) ?? [];
+}
+
 let nextMonth = addMonths(monthOf(todayUtc(Date.now())), 1);
 
 test.beforeEach(() => {
@@ -149,6 +157,7 @@ test("Best Nights and Sessions open their day", async ({ page }) => {
   const sessions = page.getByRole("region", { name: "Sessions" });
   await expect(sessions.getByRole("button", { name: /5/ })).toBeVisible();
   await dayPanel.getByRole("button", { name: "Overview" }).click();
+  await expect.poll(() => sessionDates(gm)).toEqual([night(5)]);
   await page.goto(`/g/${gm.groupId}`);
   await sessions.getByRole("button", { name: /5/ }).click();
   await expect(page).toHaveURL(new RegExp(`month=${nextMonth}&day=${night(5)}`));
