@@ -2,6 +2,7 @@ import { ConvexError } from "convex/values";
 import { describe, expect, it } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
 import {
+  forgetPendingKeep,
   keepAfterRedirect,
   keepGroup,
   PENDING_KEEP_KEY,
@@ -63,6 +64,14 @@ describe("keepGroup", () => {
     expect(storage.getItem(PENDING_KEEP_KEY)).toBe(JSON.stringify(keep));
   });
 
+  it("forgets the keep when the server refused the sign-in, since it cannot have gone through", async () => {
+    const { deps, storage } = fakeDeps();
+
+    await expect(keepGroup(keep, refusedWith("INVALID_CREDENTIALS"), deps)).rejects.toThrow();
+
+    expect(storage.getItem(PENDING_KEEP_KEY)).toBeNull();
+  });
+
   it.each(["PLAYER_CLAIMED", "NOT_FOUND", "TOO_MANY_GROUPS"])(
     "returns a %s refusal and forgets the keep, since a retry cannot succeed",
     async (code) => {
@@ -104,6 +113,17 @@ describe("keepAfterRedirect", () => {
   });
 });
 
+describe("forgetPendingKeep", () => {
+  it("drops a keep someone left behind before saying Not you?", () => {
+    const { storage } = fakeDeps();
+    storage.setItem(PENDING_KEEP_KEY, JSON.stringify(keep));
+
+    forgetPendingKeep(storage);
+
+    expect(storage.getItem(PENDING_KEEP_KEY)).toBeNull();
+  });
+});
+
 describe("resumePendingKeep", () => {
   it("does nothing without a keep left over", async () => {
     const { deps, calls } = fakeDeps();
@@ -117,7 +137,7 @@ describe("resumePendingKeep", () => {
     const { deps, calls, storage } = fakeDeps();
     storage.setItem(PENDING_KEEP_KEY, JSON.stringify(keep));
 
-    expect(await resumePendingKeep(deps)).toEqual({ kept: true });
+    expect(await resumePendingKeep(deps)).toEqual({ keep, outcome: { kept: true } });
 
     expect(calls).toEqual(["claim share-token player-1"]);
     expect(storage.getItem(PENDING_KEEP_KEY)).toBeNull();

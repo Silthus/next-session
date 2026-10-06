@@ -2,6 +2,7 @@ import { ConvexError } from "convex/values";
 import { describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
 import {
+  finishLeftOverSave,
   finishPendingSave,
   PENDING_SAVE_KEY,
   saveGroups,
@@ -115,6 +116,25 @@ describe("finishPendingSave", () => {
     await expect(finishPendingSave(deps)).rejects.toMatchObject({
       data: { code: "CLAIM_INVALID" },
     });
+    expect(calls).toEqual([]);
+  });
+});
+
+describe("finishLeftOverSave", () => {
+  it("moves the Groups of a Save the sign-in already went through for", async () => {
+    const { deps, calls, storage } = fakeDeps();
+    storage.setItem(PENDING_SAVE_KEY, "left-over");
+
+    await finishLeftOverSave(deps);
+
+    expect(calls).toEqual(["finishSave left-over"]);
+  });
+
+  it("does nothing without a Save left over", async () => {
+    const { deps, calls } = fakeDeps();
+
+    await finishLeftOverSave(deps);
+
     expect(calls).toEqual([]);
   });
 });

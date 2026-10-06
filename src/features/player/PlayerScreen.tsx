@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { useCallback, useEffect, useState, type ComponentProps } from "react";
 import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { fillRestDates, type Answer } from "../../../shared/answers";
 import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
 import { errorMessage } from "../../lib/errors";
@@ -79,18 +80,26 @@ function PlayerGroup({
   const [toast, showToast] = useToast();
   const { keepWithGoogle, logInWithGoogle } = account;
   const [sheet, setSheet] = useState<"logIn" | "keep" | null>(null);
-  const claimed = group.players.find(({ _id }) => _id === group.claimedPlayerId);
+  const [releasedId, setReleasedId] = useState<Id<"players"> | null>(null);
+  const claimed = group.players.find(
+    ({ _id }) => _id === group.claimedPlayerId && _id !== releasedId,
+  );
   if (claimed && identity?.playerId !== claimed._id) {
     setIdentity({ playerId: claimed._id, name: claimed.name });
   }
   const player = claimed ?? group.players.find(({ _id }) => _id === identity?.playerId);
   const removed = identity !== null && player === undefined;
-  const keeper = useKeeper(account.keepRefusalOnReturn);
+  const keeper = useKeeper(refusalOnReturn(account, shareToken), () => showToast(KEPT));
+  const { keepOnReturn } = account;
   const keep = player && { shareToken, playerId: player._id };
 
   useEffect(() => {
     if (removed) forgetPlayer(group.groupId);
   }, [removed, group.groupId]);
+
+  useEffect(() => {
+    if (keepOnReturn?.outcome.kept && keepOnReturn.keep.shareToken === shareToken) showToast(KEPT);
+  }, [keepOnReturn, shareToken, showToast]);
 
   useEffect(() => {
     if (claimed) rememberPlayer(group.groupId, { playerId: claimed._id, name: claimed.name });
@@ -102,9 +111,15 @@ function PlayerGroup({
     setIdentity(next);
   }
 
-  async function notYou() {
-    if (claimed) await release({ groupId: group.groupId });
+  function notYou() {
+    account.forgetPendingKeep();
     answerAs(null);
+    if (!claimed) return;
+    setReleasedId(claimed._id);
+    release({ groupId: group.groupId }).catch((error: unknown) => {
+      setReleasedId(null);
+      showToast(errorMessage(error, "keep"));
+    });
   }
 
   const accountControl = (
@@ -138,15 +153,13 @@ function PlayerGroup({
           player={{ playerId: player._id, name: player.name }}
           requestedMonth={requestedMonth}
           onMonthChange={onMonthChange}
-          onNotYou={() =>
-            void notYou().catch((error: unknown) => showToast(errorMessage(error, "keep")))
-          }
+          onNotYou={notYou}
           showToast={showToast}
           keep={player._id === group.claimedPlayerId ? "kept" : keeper.state}
           keepRefusal={keeper.refusal}
           onKeep={() => {
             if (account.status !== "account") setSheet("keep");
-            else if (keep) keeper.keepThrough(() => account.keepNow(keep)).catch(keeper.refuse);
+            else if (keep) keeper.keepThrough(() => account.keepNow(keep)).catch(keeper.refuseSave);
           }}
           accountControl={accountControl}
         />
@@ -177,11 +190,10 @@ function PlayerGroup({
   );
 }
 
-function useKeeper(refusalOnReturn: unknown) {
+function useKeeper(refusalOnReturn: string | null, onKept: () => void) {
   const [state, setState] = useState<"offer" | "keeping">("offer");
-  const [refusal, setRefusal] = useState<unknown>(null);
+  const [refusal, setRefusal] = useState<string | null>(null);
   const [tried, setTried] = useState(false);
-  const shownRefusal = tried ? refusal : (refusalOnReturn ?? null);
 
   async function keepThrough(run: () => Promise<KeepOutcome>) {
     setTried(true);
@@ -189,7 +201,8 @@ function useKeeper(refusalOnReturn: unknown) {
     setRefusal(null);
     try {
       const outcome = await run();
-      if (!outcome.kept) setRefusal(outcome.error);
+      if (outcome.kept) onKept();
+      else setRefusal(errorMessage(outcome.error, "keep"));
     } finally {
       setState("offer");
     }
@@ -197,10 +210,17 @@ function useKeeper(refusalOnReturn: unknown) {
 
   return {
     state,
-    refusal: shownRefusal === null ? null : errorMessage(shownRefusal, "keep"),
+    refusal: tried ? refusal : refusalOnReturn,
     keepThrough,
-    refuse: setRefusal,
+    refuseSave: (error: unknown) => setRefusal(errorMessage(error, "save")),
   };
+}
+
+function refusalOnReturn(account: Account, shareToken: string) {
+  if (account.refusalOnReturn !== undefined) return errorMessage(account.refusalOnReturn, "save");
+  const returned = account.keepOnReturn;
+  if (returned?.keep.shareToken !== shareToken || returned.outcome.kept) return null;
+  return errorMessage(returned.outcome.error, "keep");
 }
 
 function AccountControl({
@@ -264,6 +284,7 @@ function PlayerAnswers({
   ComponentProps<typeof PlayerCalendar>,
   "keep" | "keepRefusal" | "onKeep" | "accountControl"
 >) {
+  const [answered, setAnswered] = useState(false);
   const today = useTodayUtc();
   const month = visibleMonth(requestedMonth, today);
   const { playerId } = player;
@@ -286,6 +307,8 @@ function PlayerAnswers({
     markHintSeen(group.groupId);
     setHintVisible(false);
   }
+
+  if (!answered && answers && Object.keys(answers).length > 0) setAnswered(true);
 
   if (answers === null) return <NotFoundScreen kind="link" />;
 
@@ -313,6 +336,7 @@ function PlayerAnswers({
       }}
       onMonthChange={onMonthChange}
       onNotYou={onNotYou}
+      keepOffered={answered}
       {...keepLine}
     />
   );

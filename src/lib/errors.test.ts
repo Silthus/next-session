@@ -28,6 +28,16 @@ describe("errorMessage", () => {
       "Another account keeps this name. Add yours with a last initial, or ask your GM.",
     ],
     ["keep", { code: "TOO_MANY_GROUPS" }, "You keep 50 groups. Remove one from My groups first."],
+    [
+      "save",
+      { code: "TOO_MANY_GROUPS" },
+      "Your groups didn't move: an account holds up to 50. Delete some, then keep this group again.",
+    ],
+    [
+      "save",
+      { code: "CLAIM_INVALID" },
+      "Your groups didn't move: the save expired. Keep this group again to keep just this one.",
+    ],
     ["keep", { code: "NOT_FOUND" }, "That player is gone already."],
     ["answer", { code: "RATE_LIMITED", retryAfter: 4000 }, "Slow down a moment."],
     ["answer", { code: "OUT_OF_WINDOW" }, "That night is locked now."],

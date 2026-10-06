@@ -48,6 +48,10 @@ export function hasPendingSave(storage: ClaimDeps["storage"]) {
   return storage.getItem(PENDING_SAVE_KEY) !== null;
 }
 
+export async function finishLeftOverSave(deps: ClaimDeps) {
+  if (hasPendingSave(deps.storage)) await finishPendingSave(deps);
+}
+
 export async function finishPendingSave(deps: ClaimDeps) {
   const code = deps.storage.getItem(PENDING_SAVE_KEY);
   if (code === null) throw new ConvexError({ code: "CLAIM_INVALID" });

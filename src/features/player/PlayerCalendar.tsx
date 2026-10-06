@@ -52,6 +52,7 @@ export function PlayerCalendar({
   onNotYou,
   onHintToggle,
   keep,
+  keepOffered,
   keepRefusal,
   onKeep,
   accountControl,
@@ -69,6 +70,7 @@ export function PlayerCalendar({
   onNotYou: () => void;
   onHintToggle: () => void;
   keep: KeepState;
+  keepOffered: boolean;
   keepRefusal: string | null;
   onKeep: () => void;
   accountControl?: ReactNode;
@@ -227,7 +229,7 @@ export function PlayerCalendar({
         <p className="text-center text-xs text-ink-3">
           {view.readOnly ? LOCK_TIP : TIPS[Math.floor(taps / 3) % TIPS.length]}
         </p>
-        {(keep !== "offer" || keepRefusal !== null || Object.keys(answers ?? {}).length > 0) && (
+        {(keepOffered || keep !== "offer" || keepRefusal !== null) && (
           <KeepLine keep={keep} refusal={keepRefusal} onKeep={onKeep} />
         )}
       </main>
@@ -462,13 +464,8 @@ function KeepLine({
   refusal: string | null;
   onKeep: () => void;
 }) {
-  if (keep === "kept") {
-    return (
-      <p className="text-center text-sm text-ink-3 before:mr-1.5 before:text-free before:content-['✓']">
-        Kept in My groups
-      </p>
-    );
-  }
+  const [offeredHere] = useState(keep !== "kept");
+  if (keep === "kept") return <KeptLine focusOnMount={offeredHere} />;
   return (
     <div className="flex flex-col items-center gap-1 text-center text-sm">
       <p className="text-ink-2">
@@ -488,6 +485,22 @@ function KeepLine({
         </p>
       )}
     </div>
+  );
+}
+
+function KeptLine({ focusOnMount }: { focusOnMount: boolean }) {
+  const line = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (focusOnMount) line.current?.focus();
+  }, [focusOnMount]);
+  return (
+    <p
+      ref={line}
+      tabIndex={-1}
+      className="text-center text-sm text-ink-3 outline-none before:mr-1.5 before:text-free before:content-['✓']"
+    >
+      Kept in My groups
+    </p>
   );
 }
 

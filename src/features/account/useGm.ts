@@ -10,8 +10,17 @@ import {
 import type { FunctionReturnType } from "convex/server";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
-import { keepAfterRedirect, keepGroup, resumePendingKeep, type Keep, type KeepDeps } from "./keep";
 import {
+  forgetPendingKeep,
+  keepAfterRedirect,
+  keepGroup,
+  resumePendingKeep,
+  type Keep,
+  type KeepDeps,
+  type KeepOutcome,
+} from "./keep";
+import {
+  finishLeftOverSave,
   finishPendingSave,
   PASSWORD_FLOWS,
   saveGroups,
@@ -98,18 +107,18 @@ function useAuthGate(isAuthenticated: boolean) {
   return gate;
 }
 
+export type KeepOnReturn = { keep: Keep; outcome: KeepOutcome };
+
 function useKeepOnReturn(status: GmStatus, claimPlayer: KeepDeps["claim"]) {
   const resolved = useRef(false);
-  const [refusal, setRefusal] = useState<unknown>();
+  const [keepOnReturn, setKeepOnReturn] = useState<KeepOnReturn | null>(null);
   useEffect(() => {
     if (resolved.current || status === "loading") return;
     resolved.current = true;
     if (status !== "account") return;
-    void resumePendingKeep({ claim: claimPlayer, storage: sessionStorage }).then((outcome) => {
-      if (outcome?.kept === false) setRefusal(outcome.error);
-    });
+    void resumePendingKeep({ claim: claimPlayer, storage: sessionStorage }).then(setKeepOnReturn);
   }, [status, claimPlayer]);
-  return refusal;
+  return keepOnReturn;
 }
 
 export function useGm() {
@@ -149,14 +158,14 @@ export function useGm() {
   const google = useQuery(api.signInOptions.available)?.google === true;
   const gate = useAuthGate(auth.isAuthenticated);
 
-  const keepRefusalOnReturn = useKeepOnReturn(status, claimPlayer);
+  const keepOnReturn = useKeepOnReturn(status, claimPlayer);
 
   const actions = useMemo(
     () => ({
       createLink: () => signIn("anonymous"),
       logIn: ({ email, password }: Omit<SaveInput, "mode">) =>
         signIn("password", { email, password, flow: "signIn" }),
-      save: (input: SaveInput) => save(input),
+      save,
       finishSave: () => finishPendingSave(claims),
       signOut,
     }),
@@ -173,20 +182,22 @@ export function useGm() {
         },
         { claim: claimPlayer, storage: sessionStorage },
       );
-    return {
-      keepNow: (keep: Keep) => keepAfter(keep, () => Promise.resolve()),
-      keepWithPassword: (keep: Keep, input: SaveInput) =>
-        keepAfter(keep, () =>
-          status === "anonymous"
-            ? save(input)
-            : signIn("password", {
-                email: input.email,
-                password: input.password,
-                flow: PASSWORD_FLOWS[input.mode],
-              }),
-        ),
+    const finishLeftOver = () => finishLeftOverSave(claims);
+    const signInFor = (input: SaveInput) => {
+      if (status === "account") return finishLeftOver();
+      if (status === "anonymous") return save(input);
+      return signIn("password", {
+        email: input.email,
+        password: input.password,
+        flow: PASSWORD_FLOWS[input.mode],
+      });
     };
-  }, [status, save, signIn, claimPlayer, gate]);
+    return {
+      keepNow: (keep: Keep) => keepAfter(keep, finishLeftOver),
+      keepWithPassword: (keep: Keep, input: SaveInput) => keepAfter(keep, () => signInFor(input)),
+      forgetPendingKeep: () => forgetPendingKeep(sessionStorage),
+    };
+  }, [status, save, signIn, claims, claimPlayer, gate]);
 
   const googleActions = useMemo(() => {
     if (!google) {
@@ -218,7 +229,7 @@ export function useGm() {
     status,
     email: me?.email,
     ...saveOnReturn,
-    keepRefusalOnReturn,
+    keepOnReturn,
     ...actions,
     ...keepActions,
     ...googleActions,

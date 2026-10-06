@@ -1,13 +1,12 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "../convex/_generated/api";
 import { todayUtc, type IsoDate } from "../shared/dates";
 import {
-  convexUrl,
   newEmail,
   openAsGm,
   password,
   signInAnonymousGm,
+  signUpAccount,
   toastRegion,
   type Gm,
 } from "./helpers";
@@ -71,15 +70,8 @@ async function freshPage(browser: Browser) {
 }
 
 async function accountClaiming(gm: Gm, name: string) {
-  const email = newEmail();
-  const client = new ConvexHttpClient(convexUrl);
-  const { tokens } = await client.action(api.auth.signIn, {
-    provider: "password",
-    params: { email, password, flow: "signUp" },
-  });
-  client.setAuth(tokens!.token);
+  const { client } = await signUpAccount();
   await client.mutation(api.player.join, { shareToken: gm.shareToken, name });
-  return email;
 }
 
 test("a visitor keeps the Group with a new Account and plays as that Account on any device", async ({

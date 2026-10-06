@@ -27,8 +27,17 @@ export async function keepGroup(
 ): Promise<KeepOutcome> {
   const remembered = JSON.stringify(keep);
   deps.storage.setItem(PENDING_KEEP_KEY, remembered);
-  await signIn();
+  try {
+    await signIn();
+  } catch (error) {
+    if (appErrorOf(error) !== null) forgetKeep(deps.storage, remembered);
+    throw error;
+  }
   return await claimRemembered(keep, remembered, deps);
+}
+
+export function forgetPendingKeep(storage: KeyValueStorage) {
+  storage.removeItem(PENDING_KEEP_KEY);
 }
 
 export async function keepAfterRedirect(
@@ -46,15 +55,17 @@ export async function keepAfterRedirect(
   }
 }
 
-export async function resumePendingKeep(deps: KeepDeps): Promise<KeepOutcome | null> {
+export async function resumePendingKeep(
+  deps: KeepDeps,
+): Promise<{ keep: Keep; outcome: KeepOutcome } | null> {
   const remembered = deps.storage.getItem(PENDING_KEEP_KEY);
   if (remembered === null) return null;
   const keep = parseKeep(remembered);
   if (keep === null) {
-    deps.storage.removeItem(PENDING_KEEP_KEY);
+    forgetPendingKeep(deps.storage);
     return null;
   }
-  return await claimRemembered(keep, remembered, deps);
+  return { keep, outcome: await claimRemembered(keep, remembered, deps) };
 }
 
 async function claimRemembered(
