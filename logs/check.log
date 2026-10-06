@@ -97,10 +97,10 @@ Not implemented: Window's scrollTo() method
 
  Test Files  55 passed (55)
       Tests  706 passed (706)
-   Start at  14:43:34
-   Duration  4.59s (tests 44%, environment 36%, transform 9%, import 6%, setup 5%)
+   Start at  14:50:58
+   Duration  5.07s (tests 45%, environment 37%, transform 7%, import 5%, setup 5%)
 
-Environment  |ui| jsdom was created 37 times · 20.75s total, 46% of tracked time
+Environment  |ui| jsdom was created 37 times · 23.73s total, 46% of tracked time
              create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
              learn more: https://vitest.dev/guide/improving-performance#test-environments
 
@@ -118,7 +118,7 @@ transforming...
 ✓ 269 modules transformed.
 rendering chunks...
 computing gzip size...
-dist/index.html                                                          0.85 kB │ gzip:  0.39 kB
+dist/index.html                                                          0.85 kB │ gzip:  0.38 kB
 dist/assets/jetbrains-mono-greek-500-normal-JpySY46c.woff2               4.28 kB
 dist/assets/jetbrains-mono-cyrillic-500-normal-DmUKJPL_.woff2            5.35 kB
 dist/assets/jetbrains-mono-vietnamese-500-normal-DNRqzVM1.woff           5.47 kB
@@ -139,27 +139,27 @@ dist/assets/inter-latin-wght-normal-Dx4kXJAl.woff2                      48.25 kB
 dist/assets/bricolage-grotesque-latin-opsz-normal-Cre6nC2_.woff2        76.88 kB
 dist/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2                  85.06 kB
 dist/assets/index-BPDImRlz.css                                          58.70 kB │ gzip: 17.88 kB
-dist/assets/terms-B9EsWmCv.js                                            0.15 kB │ gzip:  0.14 kB
-dist/assets/imprint-NSvFlJCj.js                                          0.15 kB │ gzip:  0.14 kB
-dist/assets/privacy-eG078KLL.js                                          0.15 kB │ gzip:  0.15 kB
-dist/assets/g._groupId-KS3FR_rh.js                                       0.22 kB │ gzip:  0.19 kB
+dist/assets/terms-BeUmoSZ3.js                                            0.15 kB │ gzip:  0.14 kB
+dist/assets/imprint-CQkKNe1B.js                                          0.15 kB │ gzip:  0.15 kB
+dist/assets/privacy-CE_Bbssg.js                                          0.15 kB │ gzip:  0.15 kB
+dist/assets/g._groupId-Bq2bDAkp.js                                       0.22 kB │ gzip:  0.19 kB
 dist/assets/Eyebrow-D_m4go3Z.js                                          0.22 kB │ gzip:  0.19 kB
-dist/assets/g._groupId-DLqfUUt4.js                                       0.25 kB │ gzip:  0.20 kB
+dist/assets/g._groupId-BsjYNnIa.js                                       0.25 kB │ gzip:  0.20 kB
 dist/assets/Wordmark-frXmAMSk.js                                         0.43 kB │ gzip:  0.30 kB
 dist/assets/PageShell-B6Vk_MO9.js                                        0.59 kB │ gzip:  0.37 kB
 dist/assets/icons-z8HM-1Jl.js                                            3.38 kB │ gzip:  1.31 kB
 dist/assets/errors-VF_JnrQx.js                                           4.67 kB │ gzip:  2.19 kB
 dist/assets/preload-helper-DtTQaCIO.js                                   5.72 kB │ gzip:  2.25 kB
-dist/assets/routes-DYQ_qLAF.js                                           7.85 kB │ gzip:  2.93 kB
-dist/assets/LegalPage-CI2eRgVF.js                                       12.19 kB │ gzip:  5.04 kB
-dist/assets/useGm-DHZ5_H-m.js                                           13.72 kB │ gzip:  5.16 kB
-dist/assets/s._shareToken-qWASrC6B.js                                   19.47 kB │ gzip:  6.80 kB
+dist/assets/routes-CCGQbjyv.js                                           7.85 kB │ gzip:  2.93 kB
+dist/assets/LegalPage-Bq9oG8nC.js                                       12.19 kB │ gzip:  5.04 kB
+dist/assets/useGm-vO--8zdF.js                                           13.72 kB │ gzip:  5.16 kB
+dist/assets/s._shareToken--ZdzXBdY.js                                   19.47 kB │ gzip:  6.80 kB
 dist/assets/LegalFooter-CF_k4Rjp.js                                     20.85 kB │ gzip:  8.41 kB
-dist/assets/GroupScreen-_-RyoyzE.js                                     41.90 kB │ gzip: 12.75 kB
+dist/assets/GroupScreen-CSM0Jqk3.js                                     41.88 kB │ gzip: 12.74 kB
 dist/assets/Button-2QuX5tji.js                                          71.50 kB │ gzip: 20.34 kB
-dist/assets/index-CfB5U1S5.js                                          295.02 kB │ gzip: 94.57 kB
+dist/assets/index-BIukTCn6.js                                          295.02 kB │ gzip: 94.57 kB
 
-✓ built in 246ms
+✓ built in 303ms
 
  ⛅️ wrangler 4.147.0
 ────────────────────
