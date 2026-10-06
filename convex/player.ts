@@ -87,9 +87,10 @@ export const claim = mutation({
   returns: v.null(),
   handler: async (ctx, { shareToken, playerId }) => {
     const account = await requireAccount(ctx);
-    const { player } = await playerOnShareLink(ctx, shareToken, playerId);
+    const { group, player } = await playerOnShareLink(ctx, shareToken, playerId);
     await enforceRateLimit(ctx, "claimPlayer", account._id);
     await claimPlayer(ctx, account, player);
+    await touchGroup(ctx, group);
     return null;
   },
 });
@@ -100,7 +101,8 @@ export const release = mutation({
   handler: async (ctx, { groupId }) => {
     const account = await requireAccount(ctx);
     await enforceRateLimit(ctx, "claimPlayer", account._id);
-    await releaseClaim(ctx, account, groupId);
+    const released = await releaseClaim(ctx, account, groupId);
+    if (released !== null) await touchGroupOf(ctx, released);
     return null;
   },
 });
@@ -153,8 +155,14 @@ async function claimedPlayerIdOfCaller(ctx: QueryCtx, groupId: Id<"groups">) {
 
 async function claimForAccountCaller(ctx: MutationCtx, playerId: Id<"players">) {
   const account = await currentAccount(ctx);
+  if (account === null) return;
   const player = await ctx.db.get("players", playerId);
-  if (account !== null && player !== null) await claimPlayer(ctx, account, player);
+  if (player !== null) await claimPlayer(ctx, account, player);
+}
+
+async function touchGroupOf(ctx: MutationCtx, player: Doc<"players">) {
+  const group = await ctx.db.get("groups", player.groupId);
+  if (group !== null) await touchGroup(ctx, group);
 }
 
 async function rosterOf(ctx: QueryCtx, groupId: Id<"groups">) {

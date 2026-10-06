@@ -55,6 +55,7 @@ export async function claimPlayer(ctx: MutationCtx, account: Doc<"users">, playe
 export async function releaseClaim(ctx: MutationCtx, account: Doc<"users">, groupId: Id<"groups">) {
   const claimed = await claimedPlayerIn(ctx, account._id, groupId);
   if (claimed !== null) await unclaim(ctx, claimed);
+  return claimed;
 }
 
 async function unclaim(ctx: MutationCtx, player: Doc<"players">) {

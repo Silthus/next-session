@@ -905,6 +905,17 @@ describe("player.claim", () => {
     expect(error.retryAfter).toBeLessThanOrEqual(MINUTE);
   });
 
+  it("pushes out the Expiry of an Unsaved Group", async () => {
+    const { groupId, shareToken } = await sharedGroup(signInAnonymousGm);
+    const ada = await seedPlayer(groupId, "Ada");
+    const player = await signInAccount(t);
+    vi.setSystemTime(NOW + 2 * DAY);
+
+    await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+
+    expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
+  });
+
   it("locks nothing: the Share Link still answers as a Claimed Player", async () => {
     const { groupId, shareToken } = await sharedGroup();
     const ada = await seedPlayer(groupId, "Ada");
@@ -946,6 +957,17 @@ describe("player.release", () => {
       expect(await player.as.mutation(api.player.release, { groupId: anyGroupId })).toBeNull();
     }
     expect(await claimedPlayerIdIn(someoneElse.as, shareToken)).toBe(ada);
+  });
+
+  it("pushes out the Expiry of an Unsaved Group", async () => {
+    const { groupId, shareToken } = await sharedGroup(signInAnonymousGm);
+    const player = await signInAccount(t);
+    await player.as.mutation(api.player.join, { shareToken, name: "Ada" });
+    vi.setSystemTime(NOW + 2 * DAY);
+
+    await player.as.mutation(api.player.release, { groupId });
+
+    expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
   });
 
   it("lets only an Account release", async () => {
