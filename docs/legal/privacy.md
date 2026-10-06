@@ -45,7 +45,7 @@ The Service stores the following in your browser's local storage and session sto
 - small display preferences, such as a dismissed hint;
 - that you turned off usage measurement in this browser, if you did.
 
-Apart from remembering that you turned it off, usage measurement stores nothing on your device and sets no cookies, so the list above is complete. It sends only the page address, the page you came from, and your browser's name and version, operating system, and device type. The script also looks at your screen size, time zone, and language, and drops them before anything is sent.
+Apart from remembering that you turned it off, usage measurement stores nothing on your device and sets no cookies, so the list above is complete. From your device, it sends only the page address, the page you came from, and your browser's user agent, which names your browser and its version, your operating system, and your device. The script also looks at your screen size, time zone, and language, and drops them before anything is sent.
 
 We set cookies only while you continue with Google: short-lived sign-in cookies that protect the round trip to Google and expire within 15 minutes. They are strictly necessary for the sign-in you asked for.
 
@@ -83,7 +83,7 @@ When you save a group to an account, the group moves to the account and the temp
 
 You have the right of access (Art. 15), rectification (Art. 16), erasure (Art. 17), restriction (Art. 18), data portability (Art. 20), and objection (Art. 21). Write to {{CONTACT_EMAIL}}; we answer within one month.
 
-**You may object to usage measurement at any time.** While usage measurement runs in your browser, this page ends with a **Turn off usage measurement in this browser** button. Press it, and the Service sends no usage events, error reports, or technical logs from that browser. Steps such as creating a link, joining, or scheduling are recorded on our servers, so the button does not cover them. To object to those, write to {{CONTACT_EMAIL}}; for an account, we then stop them for good.
+**You may object to usage measurement at any time.** While usage measurement runs in your browser, this page ends with a **Turn off usage measurement in this browser** button. Press it, and the Service sends no usage events, error reports, or technical logs from that browser. If your browser does not let the Service remember the choice, it lasts until you reload the page or leave the site. Steps such as creating a link, joining, or scheduling are recorded on our servers, so the button does not cover them. To object to those, write to {{CONTACT_EMAIL}}; for an account, we then stop them for good.
 
 You may withdraw your consent to the tips at any time, with the unsubscribe link in every tip or by replying to it. Mails sent before you withdraw stay lawful.
 
