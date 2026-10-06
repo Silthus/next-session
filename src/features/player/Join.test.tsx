@@ -53,6 +53,16 @@ describe("Join", () => {
     expect(screen.getByRole("link", { name: "Create your link" })).toHaveProperty("pathname", "/");
   });
 
+  it("shows the account control in the header and asks for nothing new", async () => {
+    renderJoin({ accountControl: <button type="button">Log in</button> });
+
+    const header = await screen.findByRole("banner");
+    expect(header.querySelector("button")?.textContent).toBe("Log in");
+    expect(screen.getAllByRole("textbox").map((field) => field.getAttribute("aria-label"))).toEqual(
+      ["Not listed? Your name"],
+    );
+  });
+
   it("answers as a listed Player with one tap", async () => {
     const { onPick } = renderJoin();
 

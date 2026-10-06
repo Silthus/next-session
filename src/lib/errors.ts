@@ -52,6 +52,10 @@ const byTopic = {
     TOO_MANY_GROUPS: claimCap,
     NOT_FOUND: "That player is gone already.",
   },
+  save: {
+    TOO_MANY_GROUPS: `Your own groups didn't move: an account holds up to ${String(MAX_GROUPS_PER_GM)}. Delete some to make room.`,
+    CLAIM_INVALID: "Your own groups didn't move: the save expired.",
+  },
   answer,
   fillRest: { ...answer, OUT_OF_WINDOW: "Those nights are locked now." },
 } satisfies Record<string, Copy>;
