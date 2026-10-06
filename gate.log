@@ -1,0 +1,326 @@
+$ tsc -p tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p convex/tsconfig.json && eslint . && prettier --check . && vitest run && vite build && wrangler deploy --dry-run
+Checking formatting...
+All matched files use Prettier code style!
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-88
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/globals.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/config.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/types.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/string-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/type-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/bot-detection.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/number-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/user-agent-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/webview-app-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/index.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/featureFlagUtils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/gzip.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/logger.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/general-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/cookie-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/uuidv7.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/autocapture-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/request-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/event-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/types/compression.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/types/surveys.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/disposable.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/setup-pnpm/node_modules/.bin/store/v11/links/@/fflate/0.4.8/3d6bb6f51514b78f73eff8bf58c4fef7e18a9483e0eef595f39f3a49c6c31e1d/node_modules/fflate/esm/browser.js"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/encode-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/retry-after.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/simple-event-emitter.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/device-model-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/surveys/events.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/property-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/extension-runtime.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/surveys/keys.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/blocked-uas.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/types.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/string-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/type-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/bot-detection.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/number-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/bucketed-rate-limiter.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/user-agent-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/json-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/retry-after.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/chunk-ids.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/index.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/error-properties-builder.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/parsers/base.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/parsers/safari.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/parsers/chrome.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/parsers/gecko.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/parsers/index.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/coercers/dom-exception-coercer.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/coercers/error-coercer.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/coercers/error-event-coercer.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/coercers/string-coercer.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/types.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/coercers/utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/coercers/object-coercer.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/coercers/event-coercer.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/coercers/primitive-coercer.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/coercers/promise-rejection-event.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/exception-steps.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/featureFlagUtils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/privacy.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/otlp-any-value.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/otlp-resource.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/logs/logs-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/flush-timer.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/utils/backoff.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/logs/index.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/metrics/metrics-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/metrics/index.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/config.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/globals.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/logger.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/general-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/url-targeting-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/element-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/autocapture-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/request-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/event-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/promise-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/types/surveys.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/surveys/activation.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/surveys/property-matching.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/surveys/keys.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/simple-event-emitter.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/elements-chain-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/error-tracking/release.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/constants.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/cookie-utils.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/browser-common/dist/utils/blocked-uas.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to a source file outside its package: "/home/coder/dev/ns-worktrees/ticket-88/node_modules/core/dist/metrics/config.mjs"
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/module.slim.js" points to missing source files
+Sourcemap for "/home/coder/dev/ns-worktrees/ticket-88/node_modules/posthog-js/dist/extension-bundles.js" points to missing source files
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+
+ Test Files  70 passed (70)
+      Tests  1047 passed (1047)
+   Start at  17:20:01
+   Duration  9.33s (tests 48%, environment 33%, transform 9%, import 6%, setup 4%)
+
+Environment  |ui| jsdom was created 46 times · 25.01s total, 41% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+Warning: Route file "/home/coder/dev/ns-worktrees/ticket-88/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+
+If this file is not intended to be a route, you can exclude it using one of these options:
+  1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-88/src/routes/-routes.test.tsx" (prefix with "-")
+  2. Use 'routeFileIgnorePattern' in your config to match this file
+
+Current configuration:
+  routeFileIgnorePrefix: "-"
+  routeFileIgnorePattern: undefined
+vite v8.3.2 building client environment for production...
+transforming...
+✓ 282 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                          0.85 kB │ gzip:  0.38 kB
+dist/assets/jetbrains-mono-greek-500-normal-JpySY46c.woff2               4.28 kB
+dist/assets/jetbrains-mono-cyrillic-500-normal-DmUKJPL_.woff2            5.35 kB
+dist/assets/jetbrains-mono-vietnamese-500-normal-DNRqzVM1.woff           5.47 kB
+dist/assets/jetbrains-mono-greek-500-normal-D7SFKleX.woff                5.72 kB
+dist/assets/jetbrains-mono-cyrillic-500-normal-DJqRU3vO.woff             7.02 kB
+dist/assets/jetbrains-mono-latin-ext-500-normal-Cut-4mMH.woff2           7.52 kB
+dist/assets/inter-vietnamese-wght-normal-CBcvBZtf.woff2                 10.25 kB
+dist/assets/jetbrains-mono-latin-ext-500-normal-ckzbgY84.woff           10.33 kB
+dist/assets/inter-greek-ext-wght-normal-DlzME5K_.woff2                  11.23 kB
+dist/assets/bricolage-grotesque-vietnamese-opsz-normal-D9N6E8K1.woff2   12.98 kB
+dist/assets/inter-cyrillic-wght-normal-DqGufNeO.woff2                   18.74 kB
+dist/assets/inter-greek-wght-normal-CkhJZR-_.woff2                      18.99 kB
+dist/assets/jetbrains-mono-latin-500-normal-BWZEU5yA.woff2              21.83 kB
+dist/assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2               25.96 kB
+dist/assets/jetbrains-mono-latin-500-normal-CJOVTJB7.woff               28.20 kB
+dist/assets/bricolage-grotesque-latin-ext-opsz-normal-IcJDqblK.woff2    30.73 kB
+dist/assets/inter-latin-wght-normal-Dx4kXJAl.woff2                      48.25 kB
+dist/assets/bricolage-grotesque-latin-opsz-normal-Cre6nC2_.woff2        76.88 kB
+dist/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2                  85.06 kB
+dist/assets/index-BRT-t7Di.css                                          60.28 kB │ gzip: 18.19 kB
+dist/assets/terms-C29zz4An.js                                            0.15 kB │ gzip:  0.14 kB
+dist/assets/imprint-qd-YRc_R.js                                          0.15 kB │ gzip:  0.15 kB
+dist/assets/privacy-gDpsiJZM.js                                          0.15 kB │ gzip:  0.15 kB
+dist/assets/g._groupId-Banr7o7d.js                                       0.22 kB │ gzip:  0.19 kB
+dist/assets/Eyebrow-DxWJqXdH.js                                          0.22 kB │ gzip:  0.19 kB
+dist/assets/g._groupId-C1MvG3I7.js                                       0.25 kB │ gzip:  0.20 kB
+dist/assets/Wordmark-Ca5F1wVk.js                                         0.44 kB │ gzip:  0.30 kB
+dist/assets/useTodayUtc-CNZSZyWF.js                                      0.47 kB │ gzip:  0.28 kB
+dist/assets/PageShell-DciLWA_4.js                                        0.59 kB │ gzip:  0.37 kB
+dist/assets/useToast-DeN0tWZ6.js                                         1.56 kB │ gzip:  0.78 kB
+dist/assets/HeaderAccount-C-EYxEnh.js                                    2.27 kB │ gzip:  1.08 kB
+dist/assets/Popover-Bid5WF21.js                                          3.32 kB │ gzip:  1.54 kB
+dist/assets/ShareLinkCard-BtxTOGgY.js                                    4.14 kB │ gzip:  1.90 kB
+dist/assets/pageTitle-C-g-XnC_.js                                        4.35 kB │ gzip:  1.63 kB
+dist/assets/routes-IKCyz87D.js                                           7.62 kB │ gzip:  2.91 kB
+dist/assets/me-ei0C1App.js                                               8.26 kB │ gzip:  2.94 kB
+dist/assets/useGm-DIFTcCWw.js                                           10.71 kB │ gzip:  4.18 kB
+dist/assets/AccountSheet-DfxxyQki.js                                    11.11 kB │ gzip:  4.28 kB
+dist/assets/LegalPage-DKSvCMW-.js                                       16.67 kB │ gzip:  6.57 kB
+dist/assets/s._shareToken-j4KRlcUE.js                                   23.18 kB │ gzip:  8.13 kB
+dist/assets/LegalFooter--yGSDaZx.js                                     29.32 kB │ gzip: 11.88 kB
+dist/assets/GroupScreen-CMWrSxRf.js                                     38.75 kB │ gzip: 11.97 kB
+dist/assets/useNavigate-BDd-rpjM.js                                     84.70 kB │ gzip: 23.78 kB
+dist/assets/module.slim-ChG__E8X.js                                    146.43 kB │ gzip: 51.24 kB
+dist/assets/extension-bundles-C1Hp9JeO.js                              172.90 kB │ gzip: 56.97 kB
+dist/assets/index-fhC7pWE8.js                                          280.76 kB │ gzip: 90.07 kB
+
+✓ built in 274ms
+
+ ⛅️ wrangler 4.147.0
+────────────────────
+✨ Read 48 files from the assets directory /home/coder/dev/ns-worktrees/ticket-88/dist
+Total Upload: 2.99 KiB / gzip: 1.15 KiB
+Your Worker has access to the following bindings:
+Binding            Resource      
+env.ASSETS         Assets        
+
+--dry-run: exiting now.

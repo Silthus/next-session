@@ -1,0 +1,138 @@
+[WebServer] CONVEX_AGENT_MODE=anonymous mode is in beta, functionality may change in the future.
+[WebServer] Could not find project with name anonymous-agent!
+[WebServer] ✔ Configured a local deployment for http://127.0.0.1:3210 and saved its:
+[WebServer]     name as CONVEX_DEPLOYMENT
+[WebServer]     client URL as VITE_CONVEX_URL
+[WebServer]     HTTP actions URL as VITE_CONVEX_SITE_URL
+[WebServer]  to .env.local
+[WebServer] 
+[WebServer] Write your Convex functions in convex/
+[WebServer] Give us feedback at https://convex.dev/community or support@convex.dev
+[WebServer] View the Convex dashboard at null
+[WebServer] 
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 3210 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:3210
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ Added table indexes:
+[WebServer]   [+] answers.by_groupId_and_date   groupId, date, _creationTime
+[WebServer]   [+] answers.by_playerId_and_date   playerId, date, _creationTime
+[WebServer]   [+] authAccounts.providerAndAccountId   provider, providerAccountId, _creationTime
+[WebServer]   [+] authAccounts.userIdAndProvider   userId, provider, _creationTime
+[WebServer]   [+] authRateLimits.identifier   identifier, _creationTime
+[WebServer]   [+] authRefreshTokens.sessionId   sessionId, _creationTime
+[WebServer]   [+] authRefreshTokens.sessionIdAndParentRefreshTokenId   sessionId, parentRefreshTokenId, _creationTime
+[WebServer]   [+] authSessions.userId   userId, _creationTime
+[WebServer]   [+] authVerificationCodes.accountId   accountId, _creationTime
+[WebServer]   [+] authVerificationCodes.code   code, _creationTime
+[WebServer]   [+] authVerifiers.signature   signature, _creationTime
+[WebServer]   [+] groups.by_expiresAt   expiresAt, _creationTime
+[WebServer]   [+] groups.by_ownerId   ownerId, _creationTime
+[WebServer]   [+] groups.by_shareToken   shareToken, _creationTime
+[WebServer]   [+] players.by_groupId_and_nameKey   groupId, nameKey, _creationTime
+[WebServer]   [+] players.by_userId_and_groupId   userId, groupId, _creationTime
+[WebServer]   [+] saveClaims.by_anonymousUserId   anonymousUserId, _creationTime
+[WebServer]   [+] saveClaims.by_codeHash   codeHash, _creationTime
+[WebServer]   [+] sessions.by_groupId_and_date   groupId, date, _creationTime
+[WebServer]   [+] users.email   email, _creationTime
+[WebServer]   [+] users.phone   phone, _creationTime
+[WebServer] ✔ Installed component rateLimiter.
+[WebServer] ✔ Installed component rateLimiter/batchWorker.
+[WebServer] ✔ 17:20:32 Convex functions ready! (2.27s)
+[WebServer] ✔ Successfully set 3 environment variables from stdin (3 new) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-88/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-88/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 440 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://localhost:5173/
+[WebServer]   ➜  Network: use --host to expose
+
+Running 40 tests using 3 workers
+
+  ✓   1 [chromium] › e2e/smoke.spec.ts:3:1 › the landing page renders the app shell without errors (541ms)
+  ✓   4 [chromium] › e2e/smoke.spec.ts:16:1 › reduced motion stops pulsing animations after one run (351ms)
+  ✓   2 [chromium] › e2e/landing.spec.ts:155:1 › one click puts the link in hand and lands the GM on their Group (1.5s)
+  ✓   3 [chromium] › e2e/player.spec.ts:151:3 › the player surface › a new player joins by name, answers, fills the rest, and comes back (2.7s)
+  ✓   6 [chromium] › e2e/player.spec.ts:205:3 › the player surface › taps and Fill Rest show at once, before the backend answers (1.0s)
+  ✓   5 [chromium] › e2e/landing.spec.ts:170:1 › saving to a new Account keeps the Share Link, and logging in finds the Group (2.9s)
+  ✓   7 [chromium] › e2e/player.spec.ts:231:3 › the player surface › a first Fill Rest dismisses the first-visit hint (1.2s)
+[WebServer] 5:20:39 PM [vite] (client) [console.error] [CONVEX M(player:answer)] [Request ID: 8f25b08dae2c13f8] Server Error
+[WebServer] Uncaught ConvexError: {"code":"OUT_OF_WINDOW"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at handler (../convex/player.ts:128:11)
+[WebServer] 
+  ✓   9 [chromium] › e2e/player.spec.ts:247:3 › the player surface › a tap the backend refuses rolls back and says why (777ms)
+  ✓  10 [chromium] › e2e/player.spec.ts:261:3 › the player surface › tapping a night back to not set clears its Answer (1.9s)
+  ✓   8 [chromium] › e2e/landing.spec.ts:186:1 › saving into an Account that has older Groups keeps showing the new Group (3.3s)
+[WebServer] 5:20:42 PM [vite] (client) [console.error] [CONVEX M(player:fillRest)] [Request ID: 3a0ec0d75ff67ced] Server Error
+[WebServer] Uncaught ConvexError: {"code":"OUT_OF_WINDOW"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at handler (../convex/player.ts:145:27)
+[WebServer] 
+  ✓  11 [chromium] › e2e/player.spec.ts:279:3 › the player surface › a Fill Rest the backend refuses rolls back and says why (823ms)
+[WebServer] 5:20:43 PM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓  13 [chromium] › e2e/player.spec.ts:297:3 › the player surface › a listed player answers with one tap and can switch with Not you? (1.4s)
+  ✓  12 [chromium] › e2e/landing.spec.ts:207:3 › a Save whose move fails after the sign-in › goes through on retry from the landing (3.0s)
+[WebServer] 5:20:45 PM [vite] (client) [console.error] [CONVEX M(player:join)] [Request ID: 91c6a67790ed1cd6] Server Error
+[WebServer] Uncaught ConvexError: {"code":"NAME_TAKEN","playerId":"k571rabp27g75bsjv2zym9jxmx8fsqcy"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at ensureNameIsFree (../../convex/model/players.ts:24:0)
+[WebServer]     at async handler (../convex/player.ts:78:4)
+[WebServer] 
+  ✓  14 [chromium] › e2e/player.spec.ts:313:3 › the player surface › a taken name points at the existing chip (1.0s)
+  ✓  16 [chromium] › e2e/player.spec.ts:328:3 › the player surface › a player on a long Roster finds their name with the filter (1.7s)
+[WebServer] 5:20:46 PM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓  15 [chromium] › e2e/landing.spec.ts:225:3 › a Save whose move fails after the sign-in › goes through on retry from the Group header (2.2s)
+  ✓  17 [chromium] › e2e/player.spec.ts:350:3 › the player surface › a player the GM removed lands on the join screen (658ms)
+  ✓  19 [chromium] › e2e/player.spec.ts:364:3 › the player surface › a past month is read-only (1.2s)
+[WebServer] 5:20:49 PM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓  20 [chromium] › e2e/player.spec.ts:382:3 › the player surface › an unknown link says it no longer works (434ms)
+  -  21 [chromium] › e2e/player.spec.ts:419:3 › player surface screenshots › every player screen at 390 and 1440 px, light and dark
+  -  22 [chromium] › e2e/player.spec.ts:466:3 › player surface screenshots › the past month at 390 and 1440 px, light and dark
+  -  23 [chromium] › e2e/player.spec.ts:509:3 › player surface screenshots › the first-visit hint at 390 and 1440 px, light and dark
+  -  24 [chromium] › e2e/player.spec.ts:519:3 › player surface screenshots › the done card at 390 and 1440 px, light and dark
+  -  25 [chromium] › e2e/player.spec.ts:534:3 › player surface screenshots › the long-Roster join screen at 390 and 1440 px, light and dark
+  ✓  18 [chromium] › e2e/landing.spec.ts:242:3 › a Save whose move fails after the sign-in › still goes through when the GM closes the retry from the Group header (2.1s)
+[WebServer] 5:20:51 PM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓  26 [chromium] › e2e/landing.spec.ts:274:3 › a Group page that opens on a pending Save, as after Google's redirect › moves the Group, says Saved once, and stays on it (2.3s)
+[WebServer] 5:20:53 PM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 5:20:53 PM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓  27 [chromium] › e2e/landing.spec.ts:285:3 › a Group page that opens on a pending Save, as after Google's redirect › offers to finish when the move fails again (2.8s)
+[WebServer] 5:20:56 PM [vite] (client) [console.error] [CONVEX M(account:finishSave)] 
+  ✓  28 [chromium] › e2e/landing.spec.ts:299:3 › a Save that expires › starts the landing over once its sheet is closed (1.9s)
+[WebServer] 5:20:58 PM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 5:20:58 PM [vite] (client) [console.error] [CONVEX M(account:finishSave)] 
+  ✓  29 [chromium] › e2e/landing.spec.ts:315:3 › a Save that expires › starts the landing over when it expires after the GM dismissed the retry (2.0s)
+[WebServer] 5:21:00 PM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓  30 [chromium] › e2e/landing.spec.ts:332:1 › a retry dismissed, reopened, then finished in the background keeps the Save (2.0s)
+  ✓  31 [chromium] › e2e/landing.spec.ts:355:1 › pressing Escape again and again mid-Save keeps the sheet up until it is done (1.8s)
+  ✓  32 [chromium] › e2e/landing.spec.ts:377:1 › logging in to an Account without Groups lands on My groups (1.5s)
+[WebServer] 5:21:05 PM [vite] (client) [console.error] [CONVEX A(auth:signIn)] [Request ID: 908b0d112ae8a003] Server Error
+[WebServer] Uncaught ConvexError: {"code":"INVALID_CREDENTIALS"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at refuseSignIn (../../convex/auth.ts:95:0)
+[WebServer]     at authorize [as authorize] (../../convex/auth.ts:69:4)
+[WebServer]     at async handleCredentials (../../node_modules/@convex-dev/auth/src/server/implementation/signIn.ts:191:6)
+[WebServer]     at async handler (../../node_modules/@convex-dev/auth/src/server/implementation/index.ts:416:26)
+[WebServer] 
+  ✓  33 [chromium] › e2e/landing.spec.ts:392:1 › a wrong password says so and keeps the sheet open (2.4s)
+  ✓  34 [chromium] › e2e/landing.spec.ts:408:3 › on a dark OS › a cold load paints a dark canvas (439ms)
+  ✓  35 [chromium] › e2e/landing.spec.ts:415:3 › on a dark OS › an open sheet dims the page behind it (482ms)
+  ✓  36 [chromium] › e2e/landing.spec.ts:420:1 › an open sheet dims the page behind it in light mode (477ms)
+  -  37 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 390px light
+  -  38 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 390px dark
+  -  39 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 1440px light
+  -  40 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 1440px dark
+
+  9 skipped
+  31 passed (38.8s)

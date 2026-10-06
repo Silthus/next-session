@@ -1,0 +1,6 @@
+broken-dark.png identical
+broken-light.png identical
+link-dark.png identical
+link-light.png identical
+page-dark.png identical
+page-light.png identical

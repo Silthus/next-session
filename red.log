@@ -1,0 +1,68 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-88
+
+ ❯ |ui| src/lib/env.test.ts (6 tests | 2 failed) 7ms
+   ❯ postHogEnv (2)
+     × is absent without a token, so measurement stays off 2ms
+     × carries the token and the release the build was made from 1ms
+ ❯ |ui| src/lib/storage.test.ts (17 tests | 2 failed) 12ms
+   ❯ measurement opt-out (2)
+     × remembers the choice under next-session.measurementOff until forgotten 3ms
+     × says it could not remember the choice when the browser blocks storage 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/lib/env.test.ts > postHogEnv > is absent without a token, so measurement stays off
+TypeError: postHogEnv is not a function
+ ❯ src/lib/env.test.ts:37:12
+     35| describe("postHogEnv", () => {
+     36|   it("is absent without a token, so measurement stays off", () => {
+     37|     expect(postHogEnv({})).toBeNull();
+       |            ^
+     38|     expect(postHogEnv({ VITE_POSTHOG_TOKEN: "", VITE_RELEASE: "abc123"…
+     39|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |ui| src/lib/env.test.ts > postHogEnv > carries the token and the release the build was made from
+TypeError: postHogEnv is not a function
+ ❯ src/lib/env.test.ts:42:12
+     40|
+     41|   it("carries the token and the release the build was made from", () =…
+     42|     expect(postHogEnv({ VITE_POSTHOG_TOKEN: "phc_test", VITE_RELEASE: …
+       |            ^
+     43|       token: "phc_test",
+     44|       release: "abc123",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |ui| src/lib/storage.test.ts > measurement opt-out > remembers the choice under next-session.measurementOff until forgotten
+TypeError: rememberMeasurementOff is not a function
+ ❯ src/lib/storage.test.ts:141:12
+    139| describe("measurement opt-out", () => {
+    140|   it("remembers the choice under next-session.measurementOff until for…
+    141|     expect(rememberMeasurementOff(storage)).toBe(true);
+       |            ^
+    142|     expect(storage.items.get("next-session.measurementOff")).toBe("1");
+    143|     expect(measurementTurnedOff(storage)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |ui| src/lib/storage.test.ts > measurement opt-out > says it could not remember the choice when the browser blocks storage
+TypeError: rememberMeasurementOff is not a function
+ ❯ src/lib/storage.test.ts:151:12
+    149|
+    150|   it("says it could not remember the choice when the browser blocks st…
+    151|     expect(rememberMeasurementOff(blockedStorage())).toBe(false);
+       |            ^
+    152|     expect(measurementTurnedOff(blockedStorage())).toBe(false);
+    153|     expect(() => forgetMeasurementOff(blockedStorage())).not.toThrow();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 19 passed (23)
+   Start at  17:18:46
+   Duration  715ms (environment 79%, setup 12%, transform 6%, tests 2%, import 1%, worker 1%)
+
