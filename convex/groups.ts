@@ -17,6 +17,7 @@ import {
   undoRotateShareToken as undoRotate,
 } from "./model/groups";
 import { enforceRateLimit } from "./model/rateLimits";
+import { track } from "./model/telemetry";
 
 const groupListItem = v.object({
   id: v.id("groups"),
@@ -74,7 +75,9 @@ export const create = mutation({
     const gm = await requireGm(ctx);
     await ensureRoomForAnotherGroup(ctx, gm);
     await enforceRateLimit(ctx, "createGroup", gm._id);
-    return await insertGroup(ctx, gm);
+    const groupId = await insertGroup(ctx, gm);
+    await track(ctx, { name: "group_created", actor: gm, group_id: groupId });
+    return groupId;
   },
 });
 
@@ -111,6 +114,7 @@ export const rotateShareToken = mutation({
     await enforceRateLimit(ctx, "gmEdit", gm._id);
     await rotate(ctx, group);
     await touchGroup(ctx, group);
+    await track(ctx, { name: "share_link_rotated", actor: gm, group_id: group._id });
     return null;
   },
 });

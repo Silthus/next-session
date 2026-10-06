@@ -30,6 +30,7 @@ import {
   validName,
 } from "./model/players";
 import { enforceRateLimit } from "./model/rateLimits";
+import { track } from "./model/telemetry";
 import { answerValue } from "./schema";
 
 const playerGroupView = v.object({
@@ -76,8 +77,14 @@ export const join = mutation({
     await ensureRosterHasRoom(ctx, group._id);
     await enforceRateLimit(ctx, "joinGroup", group._id);
     const playerId = await ctx.db.insert("players", { groupId: group._id, ...normalized });
-    await claimForAccountCaller(ctx, playerId);
+    const account = await claimForAccountCaller(ctx, playerId);
     await touchGroup(ctx, group);
+    await track(ctx, {
+      name: "player_joined",
+      actor: account ?? { playerId },
+      group_id: group._id,
+      claimed: account !== null,
+    });
     return playerId;
   },
 });
@@ -89,8 +96,10 @@ export const claim = mutation({
     const account = await requireAccount(ctx);
     const { group, player } = await playerOnShareLink(ctx, shareToken, playerId);
     await enforceRateLimit(ctx, "claimPlayer", account._id);
+    if (player.userId === account._id) return null;
     await claimPlayer(ctx, account, player);
     await touchGroup(ctx, group);
+    await track(ctx, { name: "player_claimed", actor: account, group_id: group._id });
     return null;
   },
 });
@@ -102,7 +111,9 @@ export const release = mutation({
     const account = await requireAccount(ctx);
     await enforceRateLimit(ctx, "claimPlayer", account._id);
     const released = await releaseClaim(ctx, account, groupId);
-    if (released !== null) await touchGroupOf(ctx, released);
+    if (released === null) return null;
+    await touchGroupOf(ctx, released);
+    await track(ctx, { name: "player_released", actor: account, group_id: released.groupId });
     return null;
   },
 });
@@ -155,9 +166,10 @@ async function claimedPlayerIdOfCaller(ctx: QueryCtx, groupId: Id<"groups">) {
 
 async function claimForAccountCaller(ctx: MutationCtx, playerId: Id<"players">) {
   const account = await currentAccount(ctx);
-  if (account === null) return;
+  if (account === null) return null;
   const player = await ctx.db.get("players", playerId);
   if (player !== null) await claimPlayer(ctx, account, player);
+  return account;
 }
 
 async function touchGroupOf(ctx: MutationCtx, player: Doc<"players">) {

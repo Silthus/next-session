@@ -17,6 +17,7 @@ export default defineSchema({
     acceptedTermsVersion: v.optional(v.string()),
     acceptedPrivacyVersion: v.optional(v.string()),
     acceptedLegalAt: v.optional(v.number()),
+    analyticsObjectedAt: v.optional(v.number()),
   })
     .index("email", ["email"])
     .index("phone", ["phone"]),
