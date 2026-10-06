@@ -24,6 +24,7 @@ import type * as player from "../player.js";
 import type * as roster from "../roster.js";
 import type * as schedule from "../schedule.js";
 import type * as sessions from "../sessions.js";
+import type * as signInOptions from "../signInOptions.js";
 
 import type {
   ApiFromModules,
@@ -48,6 +49,7 @@ declare const fullApi: ApiFromModules<{
   roster: typeof roster;
   schedule: typeof schedule;
   sessions: typeof sessions;
+  signInOptions: typeof signInOptions;
 }>;
 
 /**

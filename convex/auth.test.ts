@@ -190,6 +190,17 @@ describe("Accounts", () => {
   );
 });
 
+describe("a deployment without Google's credentials", () => {
+  it("reports Google off, and Anonymous and Password still sign in", async () => {
+    expect(await t.query(api.signInOptions.available, {})).toEqual({ google: false });
+
+    await createYourLink(t);
+    const credentials = newCredentials();
+    await signUpAccount(t, credentials);
+    await logInAccount(t, credentials);
+  });
+});
+
 describe("the Account sign-up limit", () => {
   const BURST = 20;
   const REFILL_MS = 12_000;
