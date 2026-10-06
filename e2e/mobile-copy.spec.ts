@@ -5,12 +5,17 @@ test.use({ ...devices["Pixel 7"] });
 
 test.beforeEach(async ({ context }) => {
   await context.grantPermissions(["clipboard-read"]);
+  await context.addInitScript(() => {
+    navigator.clipboard.writeText = () =>
+      Promise.reject(new DOMException("Write permission denied.", "NotAllowedError"));
+  });
 });
 
 async function expectTapToCopy(page: Page, shareToken: string) {
   await page.getByRole("button", { name: "Copy" }).tap();
   await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
   await expect(page.getByText("Long-press the link to copy it.")).toBeHidden();
+  await expect(page.locator("textarea")).toHaveCount(0);
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
     `http://localhost:5173/s/${shareToken}`,
   );
