@@ -1,6 +1,7 @@
 import { ConvexError } from "convex/values";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { log, track } from "../../lib/telemetry";
 import {
   finishLeftOverSave,
   finishPendingSave,
@@ -9,6 +10,17 @@ import {
   saveThroughGoogle,
   type SaveDeps,
 } from "./save";
+
+vi.mock(import("../../lib/telemetry"), async (original) => ({
+  ...(await original()),
+  track: vi.fn(),
+  log: vi.fn(),
+}));
+
+beforeEach(() => {
+  vi.mocked(track).mockReset();
+  vi.mocked(log).mockReset();
+});
 
 const groupId = "group-1" as Id<"groups">;
 
@@ -199,5 +211,65 @@ describe("saveThroughGoogle", () => {
 
     await expect(saveThroughGoogle({ ...deps, continueWithGoogle })).rejects.toThrow();
     expect(continueWithGoogle).not.toHaveBeenCalled();
+  });
+});
+
+describe("save telemetry", () => {
+  it("tracks the start of a password Save once, even when it fails", async () => {
+    const { deps } = fakeDeps({ finishSave: offline });
+
+    await expect(saveGroups({ ...input, mode: "create" }, deps)).rejects.toThrow();
+
+    expect(track).toHaveBeenCalledExactlyOnceWith({ name: "save_started" });
+  });
+
+  it("tracks the start of a Save through Google", async () => {
+    const { deps } = fakeDeps();
+
+    await saveThroughGoogle({ ...deps, continueWithGoogle: () => Promise.resolve() });
+
+    expect(track).toHaveBeenCalledExactlyOnceWith({ name: "save_started" });
+  });
+
+  it("logs a recovered Save once, without its claim code", async () => {
+    const { deps, storage } = fakeDeps();
+    storage.setItem(PENDING_SAVE_KEY, "claim-code");
+
+    await Promise.all([finishPendingSave(deps), finishPendingSave(deps)]);
+
+    expect(log).toHaveBeenCalledExactlyOnceWith("info", "Pending save finished", {
+      outcome: "saved",
+    });
+    expect(JSON.stringify(vi.mocked(log).mock.calls)).not.toContain("claim-code");
+  });
+
+  it("logs a recovery the server refused with its code", async () => {
+    const { deps, storage } = fakeDeps({ finishSave: claimInvalid });
+    storage.setItem(PENDING_SAVE_KEY, "claim-code");
+
+    await expect(finishPendingSave(deps)).rejects.toThrow();
+
+    expect(log).toHaveBeenCalledExactlyOnceWith("warn", "Pending save refused", {
+      outcome: "CLAIM_INVALID",
+    });
+  });
+
+  it("logs a recovery that failed without a code as unexpected", async () => {
+    const { deps, storage } = fakeDeps({ finishSave: offline });
+    storage.setItem(PENDING_SAVE_KEY, "claim-code");
+
+    await expect(finishPendingSave(deps)).rejects.toThrow();
+
+    expect(log).toHaveBeenCalledExactlyOnceWith("warn", "Pending save refused", {
+      outcome: "unexpected",
+    });
+  });
+
+  it("logs nothing for a Save that needed no recovery", async () => {
+    const { deps } = fakeDeps();
+
+    await saveGroups({ ...input, mode: "logIn" }, deps);
+
+    expect(log).not.toHaveBeenCalled();
   });
 });

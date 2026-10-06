@@ -101,7 +101,8 @@ function codedData(error: unknown): AppErrorData | null {
   return typeof data.code === "string" ? (data as AppErrorData) : null;
 }
 
-const CONVEX_FAILURE = /^\[CONVEX [QMA?]\((?<path>[^)]+)\)\] (?:\[Request ID: (?<requestId>[^\]]+)\])?/;
+const CONVEX_FAILURE =
+  /^\[CONVEX [QMA?]\((?<path>[^)]+)\)\] (?:\[Request ID: (?<requestId>[^\]]+)\])?/;
 const reported = new WeakSet<Error>();
 
 function reportUnexpected(error: unknown) {

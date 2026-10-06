@@ -1,6 +1,7 @@
 import { ConvexError } from "convex/values";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { log } from "../../lib/telemetry";
 import {
   keepAfterRedirect,
   keepGroup,
@@ -9,6 +10,15 @@ import {
   type Keep,
   type KeepDeps,
 } from "./keep";
+
+vi.mock(import("../../lib/telemetry"), async (original) => ({
+  ...(await original()),
+  log: vi.fn(),
+}));
+
+beforeEach(() => {
+  vi.mocked(log).mockReset();
+});
 
 const keep: Keep = { shareToken: "share-token", playerId: "player-1" as Id<"players"> };
 const otherKeep: Keep = { shareToken: "other-token", playerId: "player-2" as Id<"players"> };
@@ -160,5 +170,44 @@ describe("resumePendingKeep", () => {
     await resumePendingKeep(deps);
 
     expect(storage.getItem(PENDING_KEEP_KEY)).toBe(JSON.stringify(otherKeep));
+  });
+});
+
+describe("leftover keep logs", () => {
+  it("logs a leftover keep that went through, without its token or Player", async () => {
+    const { deps, storage, signIn } = fakeDeps(offline);
+    await keepGroup(keep, signIn, deps);
+    deps.claim = () => Promise.resolve(null);
+    expect(storage.getItem(PENDING_KEEP_KEY)).not.toBeNull();
+
+    await resumePendingKeep(deps);
+
+    expect(log).toHaveBeenCalledExactlyOnceWith("info", "Pending keep finished", {
+      outcome: "kept",
+    });
+    const logged = JSON.stringify(vi.mocked(log).mock.calls);
+    expect(logged).not.toContain(keep.shareToken);
+    expect(logged).not.toContain(keep.playerId);
+  });
+
+  it.each([
+    ["PLAYER_CLAIMED", refusedWith("PLAYER_CLAIMED")],
+    ["unexpected", offline],
+  ] as const)("logs a leftover keep refused as %s", async (outcome, claim) => {
+    const { deps, storage } = fakeDeps(claim);
+    storage.setItem(PENDING_KEEP_KEY, JSON.stringify(keep));
+
+    await resumePendingKeep(deps);
+
+    expect(log).toHaveBeenCalledExactlyOnceWith("warn", "Pending keep refused", { outcome });
+  });
+
+  it("logs nothing without a leftover keep, or for a keep the visitor started now", async () => {
+    const { deps, signIn } = fakeDeps();
+
+    await resumePendingKeep(deps);
+    await keepGroup(keep, signIn, deps);
+
+    expect(log).not.toHaveBeenCalled();
   });
 });
