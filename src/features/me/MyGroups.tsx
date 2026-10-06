@@ -76,7 +76,7 @@ export function MyGroups({
 function AccountLine({ email, onLogOut }: { email: string | undefined; onLogOut: () => void }) {
   return (
     <div className="flex min-w-0 items-center gap-2">
-      <span className="max-w-[45vw] truncate text-sm text-ink-3">{email}</span>
+      <span className="max-w-[7.5rem] truncate text-sm text-ink-3 sm:max-w-xs">{email}</span>
       <Button variant="ghost" size="sm" onClick={onLogOut}>
         Log out
       </Button>
