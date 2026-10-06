@@ -25,6 +25,7 @@ import {
   claimedPlayerIn,
   claimPlayer,
   ensureNameIsFree,
+  releaseClaim,
   ensureRosterHasRoom,
   validName,
 } from "./model/players";
@@ -89,6 +90,17 @@ export const claim = mutation({
     const { player } = await playerOnShareLink(ctx, shareToken, playerId);
     await enforceRateLimit(ctx, "claimPlayer", account._id);
     await claimPlayer(ctx, account, player);
+    return null;
+  },
+});
+
+export const release = mutation({
+  args: { groupId: v.id("groups") },
+  returns: v.null(),
+  handler: async (ctx, { groupId }) => {
+    const account = await requireAccount(ctx);
+    await enforceRateLimit(ctx, "claimPlayer", account._id);
+    await releaseClaim(ctx, account, groupId);
     return null;
   },
 });

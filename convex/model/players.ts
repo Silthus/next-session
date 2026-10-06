@@ -48,8 +48,21 @@ export async function claimPlayer(ctx: MutationCtx, account: Doc<"users">, playe
   if (player.userId !== undefined) fail({ code: "PLAYER_CLAIMED" });
   const earlier = await claimedPlayerIn(ctx, account._id, player.groupId);
   if (earlier === null) await ensureRoomForAnotherClaim(ctx, account._id);
-  else await ctx.db.patch("players", earlier._id, { userId: undefined });
+  else await unclaim(ctx, earlier);
   await ctx.db.patch("players", player._id, { userId: account._id });
+}
+
+export async function releaseClaim(
+  ctx: MutationCtx,
+  account: Doc<"users">,
+  groupId: Id<"groups">,
+) {
+  const claimed = await claimedPlayerIn(ctx, account._id, groupId);
+  if (claimed !== null) await unclaim(ctx, claimed);
+}
+
+async function unclaim(ctx: MutationCtx, player: Doc<"players">) {
+  await ctx.db.patch("players", player._id, { userId: undefined });
 }
 
 async function ensureRoomForAnotherClaim(ctx: QueryCtx, accountId: Id<"users">) {
