@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+import actionRetrierTest from "@convex-dev/action-retrier/test";
 import rateLimiterTest from "@convex-dev/rate-limiter/test";
 import { convexTest } from "convex-test";
 import { ConvexError } from "convex/values";
@@ -16,6 +17,7 @@ export type TestBackend = ReturnType<typeof newBackend>;
 export function newBackend() {
   const t = convexTest(schema, modules);
   rateLimiterTest.register(t);
+  actionRetrierTest.register(t);
   return t;
 }
 
