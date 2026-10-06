@@ -1,0 +1,77 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-55
+
+ ❯ |ui| src/theme.test.ts (79 tests | 4 failed) 17ms
+   ❯ the light theme (15)
+     × keeps the free bar visible on a calendar cell 3ms
+     × keeps the maybe bar visible on a calendar cell 1ms
+     × keeps the busy bar visible on a calendar cell 0ms
+   ❯ the bright accent (49)
+     × never colours text or focus in ./features/group/calendar/DayCell.tsx 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/theme.test.ts > the light theme > keeps the free bar visible on a calendar cell
+AssertionError: expected 2.7729958736047515 to be greater than or equal to 3
+ ❯ src/theme.test.ts:81:57
+     79|     "keeps the %s bar visible on a calendar cell",
+     80|     (answer) => {
+     81|       expect(contrast(token(answer), token("surface"))).toBeGreaterTha…
+       |                                                         ^
+     82|         answerBarFloors[theme][answer],
+     83|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |ui| src/theme.test.ts > the light theme > keeps the maybe bar visible on a calendar cell
+AssertionError: expected 1.9867327060711437 to be greater than or equal to 2
+ ❯ src/theme.test.ts:81:57
+     79|     "keeps the %s bar visible on a calendar cell",
+     80|     (answer) => {
+     81|       expect(contrast(token(answer), token("surface"))).toBeGreaterTha…
+       |                                                         ^
+     82|         answerBarFloors[theme][answer],
+     83|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |ui| src/theme.test.ts > the light theme > keeps the busy bar visible on a calendar cell
+AssertionError: expected 3.578045469890533 to be greater than or equal to 3.9
+ ❯ src/theme.test.ts:81:57
+     79|     "keeps the %s bar visible on a calendar cell",
+     80|     (answer) => {
+     81|       expect(contrast(token(answer), token("surface"))).toBeGreaterTha…
+       |                                                         ^
+     82|         answerBarFloors[theme][answer],
+     83|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |ui| src/theme.test.ts > the bright accent > never colours text or focus in ./features/group/calendar/DayCell.tsx
+AssertionError: expected [ Array(2) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "focus-visible:outline-accent",
++   "focus-visible:outline-accent",
++ ]
+
+ ❯ src/theme.test.ts:93:59
+     91| describe("the bright accent", () => {
+     92|   it.each(Object.entries(sources))("never colours text or focus in %s"…
+     93|     expect(source.match(brightAccentOnTextOrFocus) ?? []).toEqual([]);
+       |                                                           ^
+     94|   });
+     95| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 75 passed (79)
+   Start at  14:22:47
+   Duration  824ms (environment 66%, transform 18%, setup 10%, import 3%, tests 2%, worker 1%)
+
