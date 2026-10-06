@@ -306,6 +306,16 @@ describe("AccountSheet finishing a Save after the sign-in went through", () => {
   });
 });
 
+describe("AccountSheet with an Account that holds too many Groups", () => {
+  it("says to make room before saving", async () => {
+    renderSaveSheet(() => Promise.reject(new ConvexError({ code: "TOO_MANY_GROUPS" })));
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+
+    expect(await alertText()).toBe("You have 50 groups. Delete one to make room, then save.");
+  });
+});
+
 describe("AccountSheet logging in", () => {
   it("asks only for the email and the password", async () => {
     const onSubmit = vi.fn(() => Promise.resolve());
@@ -400,6 +410,42 @@ describe("AccountSheet with Google", () => {
       true,
     );
     expect(screen.getByLabelText("Email")).toHaveProperty("readOnly", true);
+  });
+
+  it("keeps the email form shut while leaving for Google", async () => {
+    const onSubmit = vi.fn(() => Promise.resolve());
+    renderSheet({
+      open: true,
+      intent: "logIn",
+      onSubmit,
+      onClose: vi.fn(),
+      onContinueWithGoogle: () => new Promise(() => {}),
+    });
+    await fillIn();
+
+    await userEvent.click(screen.getByRole("button", google));
+    await userEvent.type(screen.getByLabelText("Password"), "{Enter}");
+
+    expect(screen.getByRole("button", { name: "Log in" })).toHaveProperty("disabled", true);
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("wakes up again when the browser brings the page back from Google", async () => {
+    renderSheet({
+      open: true,
+      intent: "logIn",
+      onSubmit: vi.fn(),
+      onClose: vi.fn(),
+      onContinueWithGoogle: () => new Promise(() => {}),
+    });
+    await userEvent.click(await screen.findByRole("button", google));
+
+    act(() => {
+      window.dispatchEvent(Object.assign(new Event("pageshow"), { persisted: true }));
+    });
+
+    expect(screen.getByRole("button", google)).toHaveProperty("disabled", false);
+    expect(screen.getByLabelText("Email")).toHaveProperty("readOnly", false);
   });
 
   it("stays open and says so when leaving for Google fails", async () => {

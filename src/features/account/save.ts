@@ -54,10 +54,6 @@ export async function finishPendingSave(deps: ClaimDeps) {
   return await redeem(code, deps);
 }
 
-export function resumePendingSave(deps: ClaimDeps) {
-  return finishPendingSave(deps).catch(() => null);
-}
-
 const redemptions = new Map<string, Promise<SaveResult>>();
 
 function redeem(code: string, deps: ClaimDeps) {

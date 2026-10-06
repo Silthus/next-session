@@ -264,6 +264,41 @@ test.describe("a Save whose move fails after the sign-in", () => {
   });
 });
 
+test.describe("a Group page that opens on a pending Save, as after Google's redirect", () => {
+  async function leaveSavePending(page: Page, failures: object[]) {
+    await failFinishSaves(page, failures);
+    const { shareLink, groupPath } = await createLink(page);
+    await openGroupLink(page).click();
+    await expect(page).toHaveURL(groupPath);
+    await page.getByRole("button", { name: "Save your group" }).click();
+    const sheet = await fillSaveSheet(page, newEmail());
+    await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
+    return { shareLink, groupPath };
+  }
+
+  test("moves the Group, says Saved once, and stays on it", async ({ page }) => {
+    const { shareLink, groupPath } = await leaveSavePending(page, [serverError]);
+
+    await page.reload();
+
+    await expect(toastRegion(page)).toHaveText("Saved. Open it anywhere with your account.");
+    await expect(page).toHaveURL(new RegExp(`^[^?]*${groupPath}`));
+    await expect(page.getByText(shareLink.replace(/^localhost:5173/, ""))).toBeVisible();
+    await expect(page.getByRole("button", { name: "Save your group" })).toBeHidden();
+  });
+
+  test("offers to finish when the move fails again", async ({ page }) => {
+    const { groupPath } = await leaveSavePending(page, [serverError, serverError]);
+
+    await page.reload();
+    const sheet = page.getByRole("dialog", { name: "Keep your group" });
+    await sheet.getByRole("button", { name: "Finish saving" }).click();
+
+    await expect(toastRegion(page)).toHaveText("Saved. Open it anywhere with your account.");
+    await expect(page).toHaveURL(new RegExp(`^[^?]*${groupPath}`));
+  });
+});
+
 test.describe("a Save that expires", () => {
   test("starts the landing over once its sheet is closed", async ({ page }) => {
     await failFinishSaves(page, [claimInvalid]);
@@ -360,6 +395,11 @@ test("logging in to an Account without Groups names it and points to the first l
   await expect(page.getByRole("status")).toBeFocused();
   await expect(page.getByRole("button", { name: "Create your link" })).toBeVisible();
   expect(await noGroupsLines()).toBe(1);
+
+  await page.reload();
+  await expect(page.getByRole("status")).toHaveText(
+    `Signed in as ${email}. No groups here yet, so create your first link.`,
+  );
 });
 
 test("a wrong password says so and keeps the sheet open", async ({ page, browser }) => {

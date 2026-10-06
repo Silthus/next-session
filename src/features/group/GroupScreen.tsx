@@ -64,12 +64,19 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
     }
   };
   const save = (input: SaveInput) => saveThrough(() => gm.save(input));
-  const { saveWithGoogle, savedOnReturn, resumingSave } = gm;
+  const { saveWithGoogle, resumingSave, savedOnReturn, saveFailedOnReturn, acknowledgeReturn } = gm;
   const showToast = toasts.show;
 
   useEffect(() => {
-    if (savedOnReturn) showToast("Saved. Open it anywhere with your account.");
-  }, [savedOnReturn, showToast]);
+    if (!savedOnReturn) return;
+    showToast("Saved. Open it anywhere with your account.");
+    acknowledgeReturn();
+  }, [savedOnReturn, showToast, acknowledgeReturn]);
+
+  if (saveFailedOnReturn) {
+    acknowledgeReturn();
+    setSaveSheetFor(group?.name ?? "your group");
+  }
   const finish = () => saveThrough(gm.finishSave);
 
   const headerActions = (gm.status === "anonymous" || gm.status === "account") && group && (

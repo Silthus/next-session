@@ -61,7 +61,7 @@ export function withGoogleCredentials() {
   });
 }
 
-export type GoogleIdentity = { sub: string; email: string; emailVerified: boolean };
+export type GoogleIdentity = { sub: string; email: string };
 
 const GOOGLE_ISSUER = "https://accounts.google.com";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
@@ -70,14 +70,14 @@ function base64urlJson(value: object) {
   return btoa(JSON.stringify(value)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function googleIdToken({ sub, email, emailVerified }: GoogleIdentity) {
+function googleIdToken({ sub, email }: GoogleIdentity) {
   const now = Math.floor(Date.now() / 1000);
   const claims = {
     iss: GOOGLE_ISSUER,
     aud: GOOGLE_CLIENT_ID,
     sub,
     email,
-    email_verified: emailVerified,
+    email_verified: true,
     iat: now,
     exp: now + 3600,
   };

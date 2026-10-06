@@ -4,7 +4,6 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import {
   finishPendingSave,
   PENDING_SAVE_KEY,
-  resumePendingSave,
   saveGroups,
   saveThroughGoogle,
   type SaveDeps,
@@ -129,7 +128,7 @@ describe("a Save and the resume racing on one claim", () => {
         ++redemptions === 1 ? Promise.resolve({ groupIds: [groupId] }) : claimInvalid(),
     });
     deps.signIn = () => {
-      resumed = resumePendingSave(deps);
+      resumed = finishPendingSave(deps);
       return Promise.resolve();
     };
 
@@ -155,40 +154,6 @@ describe("overlapping Saves", () => {
   });
 });
 
-describe("resumePendingSave", () => {
-  it("finishes a Save the last session left pending", async () => {
-    const { deps, calls, storage } = fakeDeps();
-    storage.setItem(PENDING_SAVE_KEY, "left-over");
-
-    expect(await resumePendingSave(deps)).toEqual({ groupIds: [groupId] });
-    expect(calls).toEqual(["finishSave left-over"]);
-    expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
-  });
-
-  it("does nothing without a pending Save", async () => {
-    const { deps, calls } = fakeDeps();
-
-    expect(await resumePendingSave(deps)).toBeNull();
-    expect(calls).toEqual([]);
-  });
-
-  it("drops a pending claim that was already used or expired", async () => {
-    const { deps, storage } = fakeDeps({ finishSave: claimInvalid });
-    storage.setItem(PENDING_SAVE_KEY, "used");
-
-    expect(await resumePendingSave(deps)).toBeNull();
-    expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
-  });
-
-  it("keeps the pending claim for another try while offline", async () => {
-    const { deps, storage } = fakeDeps({ finishSave: offline });
-    storage.setItem(PENDING_SAVE_KEY, "left-over");
-
-    expect(await resumePendingSave(deps)).toBeNull();
-    expect(storage.getItem(PENDING_SAVE_KEY)).toBe("left-over");
-  });
-});
-
 describe("saveThroughGoogle", () => {
   it("claims before leaving for Google, so the way back can move the Groups", async () => {
     const { deps, calls, storage } = fakeDeps();
@@ -198,7 +163,7 @@ describe("saveThroughGoogle", () => {
     };
 
     await saveThroughGoogle({ ...deps, continueWithGoogle });
-    const onReturn = await resumePendingSave(deps);
+    const onReturn = await finishPendingSave(deps);
 
     expect(calls).toEqual([
       "startSave",

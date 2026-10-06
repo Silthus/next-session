@@ -78,7 +78,7 @@ export function useGm() {
     () => ({ finishSave: redeemClaim, storage: sessionStorage }),
     [redeemClaim],
   );
-  const { resumingSave, savedOnReturn } = useSaveOnReturn(status, claims);
+  const saveOnReturn = useSaveOnReturn(status, claims);
   const google = useQuery(api.signInOptions.available)?.google === true;
 
   const actions = useMemo(
@@ -116,8 +116,7 @@ export function useGm() {
   return {
     status,
     email: me?.email,
-    resumingSave,
-    savedOnReturn,
+    ...saveOnReturn,
     ...actions,
     ...googleActions,
   };

@@ -73,11 +73,8 @@ const AccountPassword = ConvexCredentials<DataModel>({
 const GOOGLE = "google";
 
 const AccountGoogle = Google({
-  profile: (google) => ({
-    id: google.sub,
-    email: normalizeEmail(google.email),
-    emailVerified: google.email_verified === true,
-  }),
+  allowDangerousEmailAccountLinking: false,
+  profile: (google) => ({ id: google.sub, email: normalizeEmail(google.email) }),
 });
 
 function requireStrongPassword(password: unknown) {

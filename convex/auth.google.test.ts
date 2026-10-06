@@ -25,7 +25,7 @@ beforeEach(() => {
 let googleCount = 0;
 
 function newGoogleIdentity(email = `google-${++googleCount}@example.com`) {
-  return { sub: `google-sub-${++googleCount}`, email, emailVerified: true };
+  return { sub: `google-sub-${++googleCount}`, email };
 }
 
 async function userOf(userId: Id<"users">) {
@@ -96,19 +96,14 @@ describe("Google and Password on one email", () => {
     expect(await password.as.query(api.groups.mine, {})).toEqual([]);
   });
 
-  it("links a second Google identity only when Google verified the same email", async () => {
+  it("never joins two Google identities by their email, verified or not", async () => {
     const email = "shared@example.com";
-    const verified = await signInWithGoogle(t, newGoogleIdentity(email));
+    const first = await signInWithGoogle(t, newGoogleIdentity(email));
 
-    const unverified = await signInWithGoogle(t, {
-      ...newGoogleIdentity(email),
-      emailVerified: false,
-    });
-    const alsoVerified = await signInWithGoogle(t, newGoogleIdentity(email));
+    const second = await signInWithGoogle(t, newGoogleIdentity(email));
 
-    expect(unverified.userId).not.toBe(verified.userId);
-    expect((await userOf(unverified.userId))?.emailVerificationTime).toBeUndefined();
-    expect(alsoVerified.userId).toBe(verified.userId);
+    expect(second.userId).not.toBe(first.userId);
+    expect((await userOf(first.userId))?.emailVerificationTime).toBeUndefined();
   });
 });
 

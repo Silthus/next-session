@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { hasPendingSave, resumePendingSave, type ClaimDeps } from "./save";
+import { useCallback, useEffect, useState } from "react";
+import { finishPendingSave, hasPendingSave, type ClaimDeps } from "./save";
 import type { GmStatus } from "./useGm";
 
-type Resume = "unresolved" | "resuming" | "saved" | "settled";
+type Resume = "unresolved" | "resuming" | "saved" | "failed" | "settled";
 
 export function useSaveOnReturn(status: GmStatus, deps: ClaimDeps) {
   const [resume, setResume] = useState<Resume>("unresolved");
@@ -12,8 +12,18 @@ export function useSaveOnReturn(status: GmStatus, deps: ClaimDeps) {
 
   useEffect(() => {
     if (resume !== "resuming") return;
-    void resumePendingSave(deps).then((saved) => setResume(saved ? "saved" : "settled"));
+    finishPendingSave(deps).then(
+      () => setResume("saved"),
+      () => setResume("failed"),
+    );
   }, [resume, deps]);
 
-  return { resumingSave: resume === "resuming", savedOnReturn: resume === "saved" };
+  const acknowledgeReturn = useCallback(() => setResume("settled"), []);
+
+  return {
+    resumingSave: resume === "resuming",
+    savedOnReturn: resume === "saved",
+    saveFailedOnReturn: resume === "failed",
+    acknowledgeReturn,
+  };
 }

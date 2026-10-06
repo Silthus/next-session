@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ConvexError } from "convex/values";
-import { useId, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { AppErrorData } from "../../../convex/model/errors";
+import { MAX_GROUPS_PER_GM } from "../../../shared/limits";
 import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
 import { Sheet } from "../../ui/Sheet";
@@ -95,6 +96,16 @@ function AccountForm({
     onClose();
   };
 
+  useEffect(() => {
+    const wakeUpFromBackForwardCache = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      setLeavingForGoogle(false);
+      setBusy(false);
+    };
+    window.addEventListener("pageshow", wakeUpFromBackForwardCache);
+    return () => window.removeEventListener("pageshow", wakeUpFromBackForwardCache);
+  }, [setBusy]);
+
   const leaveForGoogle = async (continueWithGoogle: () => Promise<unknown>) => {
     setLeavingForGoogle(true);
     if (!(await attempt(continueWithGoogle))) setLeavingForGoogle(false);
@@ -102,6 +113,7 @@ function AccountForm({
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
+    if (busy) return;
     if (mode === "create" && password.length < MIN_PASSWORD_LENGTH) {
       setFailure(weakPassword);
       return;
@@ -201,6 +213,7 @@ function AccountForm({
       <Button
         type="submit"
         size="lg"
+        disabled={busy}
         busy={busy && !leavingForGoogle && (intent === "save" ? "Saving…" : "Logging in…")}
         className="w-full"
       >
@@ -454,6 +467,10 @@ function describeFailure(error: unknown, intent: AccountIntent): Failure {
       };
     case "RATE_LIMITED":
       return { message: `Too many tries. Try again in ${waitFor(data.retryAfter)}.` };
+    case "TOO_MANY_GROUPS":
+      return {
+        message: `You have ${String(MAX_GROUPS_PER_GM)} groups. Delete one to make room, then save.`,
+      };
     case "CLAIM_INVALID":
       return {
         message: "This save expired before the group moved. Close this and create a new link.",

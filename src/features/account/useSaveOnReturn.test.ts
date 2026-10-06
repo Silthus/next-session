@@ -15,20 +15,28 @@ class MemoryStorage {
   removeItem = (key: string) => void this.items.delete(key);
 }
 
+type Outcome = "moved" | "expired" | "tooManyGroups";
+
+const refusals = {
+  expired: new ConvexError({ code: "CLAIM_INVALID" }),
+  tooManyGroups: new ConvexError({ code: "TOO_MANY_GROUPS" }),
+};
+
 function deferredFinishSave() {
   const redeemed: string[] = [];
-  let settle: (outcome: "moved" | "refused") => void = () => {};
+  let settle: (outcome: Outcome) => void = () => {};
   const finishSave: ClaimDeps["finishSave"] = ({ code }) => {
     redeemed.push(code);
     return new Promise((resolve, reject) => {
       settle = (outcome) =>
-        outcome === "moved"
-          ? resolve({ groupIds })
-          : reject(new ConvexError({ code: "CLAIM_INVALID" }));
+        outcome === "moved" ? resolve({ groupIds }) : reject(refusals[outcome]);
     });
   };
-  return { finishSave, redeemed, settle: (outcome: "moved" | "refused") => settle(outcome) };
+  return { finishSave, redeemed, settle: (outcome: Outcome) => settle(outcome) };
 }
+
+const holding = { resumingSave: true, savedOnReturn: false, saveFailedOnReturn: false };
+const idle = { resumingSave: false, savedOnReturn: false, saveFailedOnReturn: false };
 
 function renderOnReturn(
   status: GmStatus,
@@ -48,34 +56,51 @@ function renderOnReturn(
 describe("useSaveOnReturn", () => {
   it("holds an Account back from Google until its pending Save moved the Groups", async () => {
     const { result, rerender, redeemed, settle } = renderOnReturn("loading");
-    expect(result.current).toEqual({ resumingSave: false, savedOnReturn: false });
+    expect(result.current).toMatchObject(idle);
 
     rerender({ status: "account" });
-    expect(result.current).toEqual({ resumingSave: true, savedOnReturn: false });
+    expect(result.current).toMatchObject(holding);
     expect(redeemed).toEqual(["claim-code"]);
 
     act(() => settle("moved"));
-    await waitFor(() =>
-      expect(result.current).toEqual({ resumingSave: false, savedOnReturn: true }),
-    );
+    await waitFor(() => expect(result.current).toMatchObject({ ...idle, savedOnReturn: true }));
   });
 
-  it("lets go without a toast when the claim expired on the way", async () => {
+  it("reports Saved once, until it is acknowledged", async () => {
     const { result, settle } = renderOnReturn("account");
+    act(() => settle("moved"));
+    await waitFor(() => expect(result.current.savedOnReturn).toBe(true));
 
-    act(() => settle("refused"));
+    act(() => result.current.acknowledgeReturn());
 
-    await waitFor(() =>
-      expect(result.current).toEqual({ resumingSave: false, savedOnReturn: false }),
-    );
+    expect(result.current).toMatchObject(idle);
   });
+
+  it.each([
+    ["the claim expired on the way", "expired", null],
+    ["the move was refused", "tooManyGroups", "claim-code"],
+  ] as const)(
+    "reports a failed Save when %s, keeping only a live claim",
+    async (_, outcome, kept) => {
+      const { result, settle, storage } = renderOnReturn("account");
+
+      act(() => settle(outcome));
+
+      await waitFor(() =>
+        expect(result.current).toMatchObject({ ...idle, saveFailedOnReturn: true }),
+      );
+      expect(storage.getItem(PENDING_SAVE_KEY)).toBe(kept);
+      act(() => result.current.acknowledgeReturn());
+      expect(result.current).toMatchObject(idle);
+    },
+  );
 
   it("leaves an Anonymous GM's pending Save alone, as Google never signed it in", () => {
     const { result, rerender, redeemed, storage } = renderOnReturn("anonymous");
 
     rerender({ status: "account" });
 
-    expect(result.current).toEqual({ resumingSave: false, savedOnReturn: false });
+    expect(result.current).toMatchObject(idle);
     expect(redeemed).toEqual([]);
     expect(storage.getItem(PENDING_SAVE_KEY)).toBe("claim-code");
   });
@@ -83,7 +108,7 @@ describe("useSaveOnReturn", () => {
   it("holds nothing without a pending Save", () => {
     const { result, redeemed } = renderOnReturn("account", { pending: null });
 
-    expect(result.current).toEqual({ resumingSave: false, savedOnReturn: false });
+    expect(result.current).toMatchObject(idle);
     expect(redeemed).toEqual([]);
   });
 });

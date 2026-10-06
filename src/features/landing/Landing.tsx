@@ -25,7 +25,6 @@ export function Landing() {
   const [createdGroupId, setCreatedGroupId] = useState<Id<"groups"> | null>(null);
   const [created, setCreated] = useState<CreatedGroup | null>(null);
   const [saved, setSaved] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
   const [claimExpired, setClaimExpired] = useState(false);
   const [sheet, setSheet] = useState<AccountIntent | null>(null);
 
@@ -75,10 +74,7 @@ export function Landing() {
     setCreatedGroupId(null);
   }
 
-  const logIn = async (input: Omit<SaveInput, "mode">) => {
-    await gm.logIn(input);
-    setLoggedIn(true);
-  };
+  const logIn = (input: Omit<SaveInput, "mode">) => gm.logIn(input);
 
   const sheetClosed = sheet === null;
   const account = gm.status === "account";
@@ -98,7 +94,7 @@ export function Landing() {
           sheetClosed && account && saved ? gm.email : undefined,
         )}
         showLogIn={gm.status === "signedOut" && (phase === "idle" || phase === "failed")}
-        loggedInAs={sheetClosed && accountWithoutGroups && loggedIn ? gm.email : undefined}
+        loggedInAs={sheetClosed && accountWithoutGroups ? gm.email : undefined}
         onCreate={() => void create()}
         onLogIn={() => setSheet("logIn")}
         onSave={() => setSheet("save")}
