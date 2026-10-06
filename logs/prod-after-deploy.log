@@ -1,0 +1,5 @@
+signInOptions.available: {"google":false}
+password log in, unknown email: {"code":"INVALID_CREDENTIALS"}
+anonymous sign in, me: {"isAnonymous":true}
+cleaned up its Group; me now: null
+Continue with Google buttons on prod: 0
