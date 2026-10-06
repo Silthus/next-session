@@ -24,6 +24,7 @@ export default defineConfig({
         plugins: [react()],
         test: {
           name: "ui",
+          css: { include: [/index\.css/] },
           environment: "jsdom",
           include: ["src/**/*.test.{ts,tsx}"],
           setupFiles: ["vitest.ui-setup.ts"],
