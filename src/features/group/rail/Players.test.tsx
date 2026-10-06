@@ -5,15 +5,17 @@ import { describe, expect, it, vi } from "vitest";
 import { Players } from "./Players";
 import { monthWith, rosterOf } from "./railFixtures";
 
-function renderPlayers(summary = monthWith({}), handlers: Partial<Handlers> = {}) {
+function renderPlayers(summary = monthWith({}), handlers: Partial<Handlers> = {}, addRequest = 0) {
   const all: Handlers = {
     onAdd: vi.fn(() => Promise.resolve()),
     onRename: vi.fn(() => Promise.resolve()),
     onRemove: vi.fn(() => Promise.resolve()),
     ...handlers,
   };
-  render(<Players progress={summary.progress} {...all} />);
-  return { ...all, card: screen.getByRole("region", { name: /^Players/ }) };
+  const view = render(<Players progress={summary.progress} addRequest={addRequest} {...all} />);
+  const requestAdd = (request: number) =>
+    view.rerender(<Players progress={summary.progress} addRequest={request} {...all} />);
+  return { ...all, requestAdd, card: screen.getByRole("region", { name: /^Players/ }) };
 }
 
 type Handlers = {
@@ -70,6 +72,30 @@ describe("Players", () => {
     await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
     expect(document.activeElement).toBe(within(card).getByRole("textbox", { name: "Player name" }));
     expect(within(card).queryByRole("button", { name: "Add player" })).toBeNull();
+  });
+
+  it("opens the form focused when the GM asks to add a Player from elsewhere", () => {
+    const { card, requestAdd } = renderPlayers(monthWith({ players: rosterOf("Ana") }));
+    expect(within(card).queryByRole("textbox")).toBeNull();
+    requestAdd(1);
+    expect(document.activeElement).toBe(within(card).getByRole("textbox", { name: "Player name" }));
+  });
+
+  it("focuses the open form again on every request, keeping what the GM typed", async () => {
+    const { card, requestAdd } = renderPlayers(monthWith({ players: [] }));
+    const field = within(card).getByRole("textbox", { name: "Player name" });
+    requestAdd(1);
+    expect(document.activeElement).toBe(field);
+    await userEvent.type(field, "Fa");
+    field.blur();
+    requestAdd(2);
+    expect(document.activeElement).toBe(field);
+    expect((field as HTMLInputElement).value).toBe("Fa");
+  });
+
+  it("keeps the form closed for a request it already handled", () => {
+    renderPlayers(monthWith({ players: rosterOf("Ana") }), {}, 3);
+    expect(screen.queryByRole("textbox")).toBeNull();
   });
 
   it("keeps the form while a name is on its way, even on Escape", async () => {

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { api } from "../convex/_generated/api";
+import type { Answer } from "../shared/answers";
 import { addMonths, monthOf, todayUtc } from "../shared/dates";
 import {
   openAsGm,
@@ -269,6 +270,38 @@ test("on a phone a fresh Group opens on Players, so the GM adds one under the ca
   await expect(tabs.getByRole("tab", { selected: true })).toHaveText("Players");
 });
 
+test("on a phone Add player stays in reach under the calendar whatever tab is open", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const gm = await signInAnonymousGm();
+  await seedCrew(gm);
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+  await page
+    .getByRole("region", { name: "Save your group" })
+    .getByRole("button", { name: "Later" })
+    .click();
+
+  const tabs = page.getByRole("tablist", { name: "Group overview" });
+  const addPlayer = page.getByRole("button", { name: "Add player" });
+  await expect(tabs.getByRole("tab", { selected: true })).toHaveText("Best nights");
+  await expect(addPlayer).toBeInViewport();
+
+  await addPlayer.click();
+  await expect(tabs.getByRole("tab", { selected: true })).toHaveText("Players");
+  const field = playersCard(page).getByRole("textbox", { name: "Player name" });
+  await expect(field).toBeFocused();
+  await expect(field).toBeInViewport();
+  await field.fill("Dev");
+  await page.keyboard.press("Enter");
+  await expect(playersCard(page).getByRole("listitem")).toHaveText([/Ana/, /Ben/, /Chiara/, /Dev/]);
+
+  await tabs.getByRole("tab", { name: "Sessions" }).click();
+  await page.getByRole("button", { name: "Add player" }).click();
+  await expect(playersCard(page).getByRole("textbox", { name: "Player name" })).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+});
+
 test("a Player who joins with a new name stays on the Roster as grey bars until the GM removes them", async ({
   page,
 }) => {
@@ -402,6 +435,82 @@ test.describe("screenshots", () => {
         await expect(page.getByRole("link", { name: /My group/ })).toBeVisible();
         await shot("switcher", false);
         await context.close();
+      });
+
+      test(`${String(width)}px ${colorScheme}: Add player in reach, the maybe bar and a dense day`, async ({
+        browser,
+      }) => {
+        const crew = await signInAnonymousGm();
+        await seedCrew(crew);
+        const dense = await signInAnonymousGm();
+        const denseAnswers: Answer[] = [
+          "free",
+          "free",
+          "free",
+          "free",
+          "free",
+          "free",
+          "free",
+          "busy",
+          "busy",
+        ];
+        for (const [index, name] of "Ana Ben Chiara Dev Eli Fay Gus Hal Ivo Jo Kai Lu"
+          .split(" ")
+          .entries()) {
+          const answer = denseAnswers[index];
+          await seedPlayer(dense, name, answer ? { [night(5)]: answer, [night(6)]: "free" } : {});
+        }
+
+        const context = await browser.newContext({
+          viewport: { width, height: width < 640 ? 844 : 1000 },
+          colorScheme,
+        });
+        const page = await context.newPage();
+        const shot = (name: string) =>
+          page.screenshot({
+            path: `${screenshotDir ?? ""}/${name}--${String(width)}--${colorScheme}.png`,
+            animations: "disabled",
+          });
+        const later = () =>
+          page
+            .getByRole("region", { name: "Save your group" })
+            .getByRole("button", { name: "Later" })
+            .click();
+
+        await openAsGm(page, crew, `/g/${crew.groupId}?month=${nextMonth}`);
+        await later();
+        await expect(page.locator('[data-bar="maybe"]').first()).toBeVisible();
+        await shot("add-player-in-reach");
+        await page
+          .locator("section")
+          .filter({ has: page.locator("[data-month-heading]") })
+          .screenshot({
+            path: `${screenshotDir ?? ""}/maybe-bar--${String(width)}--${colorScheme}.png`,
+            animations: "disabled",
+          });
+        if (width < 640) {
+          await page.getByRole("button", { name: "Add player" }).click();
+          await expect(
+            playersCard(page).getByRole("textbox", { name: "Player name" }),
+          ).toBeFocused();
+          await shot("add-player-opened");
+        }
+
+        await context.close();
+
+        const denseContext = await browser.newContext({
+          viewport: { width, height: width < 640 ? 844 : 1000 },
+          colorScheme,
+        });
+        const densePage = await denseContext.newPage();
+        await openAsGm(densePage, dense, `/g/${dense.groupId}?month=${nextMonth}`);
+        await expect(densePage.locator('[data-count="unanswered"]').first()).toBeVisible();
+        await densePage.screenshot({
+          path: `${screenshotDir ?? ""}/dense-day--${String(width)}--${colorScheme}.png`,
+          fullPage: true,
+          animations: "disabled",
+        });
+        await denseContext.close();
       });
 
       test(`${String(width)}px ${colorScheme}: a fresh Group and grey bars`, async ({

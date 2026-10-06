@@ -39,7 +39,7 @@ export function DayCell({
       data-date={day.date}
       style={tintOf(day)}
       className={cn(
-        "relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2",
+        "relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2",
         cellTone(day),
         selected
           ? "z-10 outline-2 outline-offset-2 outline-ink focus-visible:outline-offset-4 focus-visible:outline-accent-strong"
@@ -87,22 +87,7 @@ function DayAnswers({
 }) {
   if (players.length === 0) return null;
   if (players.length > MAX_PLAYERS_WITH_BARS) {
-    return (
-      <span
-        className={cn(
-          "font-mono text-[10px] leading-none tabular-nums sm:text-[11px]",
-          onSolidFree ? "text-current" : "text-ink",
-        )}
-      >
-        <span>
-          {day.free.length}
-          <span className="max-sm:hidden">{`/${String(players.length)}`}</span>
-        </span>
-        {day.busy.length > 0 && (
-          <span className="ml-1 text-busy">{`✕${String(day.busy.length)}`}</span>
-        )}
-      </span>
-    );
+    return <DayCounts day={day} playerCount={players.length} onSolidFree={onSolidFree} />;
   }
   const answerOf = answersByPlayer(day);
   return (
@@ -122,9 +107,53 @@ function DayAnswers({
   );
 }
 
+function DayCounts({
+  day,
+  playerCount,
+  onSolidFree,
+}: {
+  day: CalendarDay;
+  playerCount: number;
+  onSolidFree: boolean;
+}) {
+  const missing = missingCount(day);
+  return (
+    <span
+      className={cn(
+        "flex flex-wrap items-center gap-x-1 gap-y-0.5 font-mono text-[10px] leading-none tabular-nums sm:text-[11px]",
+        onSolidFree ? "text-current" : "text-ink",
+      )}
+    >
+      <span data-count="free">
+        {day.free.length}
+        <span className="max-sm:hidden">{`/${String(playerCount)}`}</span>
+      </span>
+      {day.busy.length > 0 && (
+        <span data-count="busy" className="text-busy">{`✕${String(day.busy.length)}`}</span>
+      )}
+      {missing > 0 && (
+        <span data-count="unanswered" className="flex items-center gap-px">
+          <UnansweredMark />
+          {missing}
+        </span>
+      )}
+    </span>
+  );
+}
+
+export function UnansweredMark() {
+  return (
+    <span aria-hidden="true" className={cn("h-2 w-1 shrink-0 rounded-full", unansweredBarTone)} />
+  );
+}
+
 const barShape = "h-2.5 w-1 rounded-full sm:h-3 sm:w-[5px]";
 
-const barTones: Record<Answer, string> = { free: "bg-free", maybe: "bg-maybe", busy: "bg-busy" };
+const barTones: Record<Answer, string> = {
+  free: "bg-free",
+  maybe: "bg-maybe-bar",
+  busy: "bg-busy",
+};
 
 export const unansweredBarTone = "border border-ink-3";
 
@@ -139,6 +168,10 @@ function answersByPlayer(day: CalendarDay) {
     for (const player of day[answer]) answers.set(player._id, answer);
   }
   return answers;
+}
+
+function missingCount(day: CalendarDay) {
+  return day.bookable ? day.unanswered.length : 0;
 }
 
 function tintOf(day: CalendarDay): CSSProperties | undefined {
@@ -159,6 +192,6 @@ function answerSummary(day: CalendarDay, playerCount: number) {
   if (playerCount === 0) return null;
   if (day.perfect) return "everyone free";
   const answered = `${String(day.free.length)} free, ${String(day.maybe.length)} maybe, ${String(day.busy.length)} busy`;
-  const missing = day.bookable ? day.unanswered.length : 0;
+  const missing = missingCount(day);
   return missing === 0 ? answered : `${answered}, ${String(missing)} not answered`;
 }
