@@ -8,7 +8,7 @@ import {
   useQuery,
 } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { keepGroup, resumePendingKeep, type Keep, type KeepDeps } from "./keep";
 import {
@@ -63,6 +63,41 @@ function confirmIdentity({ client, fetchAccessToken }: LiveSession) {
   });
 }
 
+const AUTH_CONFIRM_TIMEOUT_MS = 15_000;
+
+export function authGate(initiallyAuthenticated: boolean) {
+  let authenticated = initiallyAuthenticated;
+  const waiting = new Set<() => void>();
+  return {
+    update(isAuthenticated: boolean) {
+      authenticated = isAuthenticated;
+      if (!isAuthenticated) return;
+      for (const letThrough of waiting) letThrough();
+      waiting.clear();
+    },
+    whenAuthenticated() {
+      if (authenticated) return Promise.resolve();
+      return new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(() => {
+          waiting.delete(letThrough);
+          reject(new Error("The server did not confirm the sign-in"));
+        }, AUTH_CONFIRM_TIMEOUT_MS);
+        const letThrough = () => {
+          clearTimeout(timer);
+          resolve();
+        };
+        waiting.add(letThrough);
+      });
+    },
+  };
+}
+
+function useAuthGate(isAuthenticated: boolean) {
+  const [gate] = useState(() => authGate(isAuthenticated));
+  useEffect(() => gate.update(isAuthenticated), [gate, isAuthenticated]);
+  return gate;
+}
+
 function useResumeLeftOvers(
   status: GmStatus,
   redeemClaim: ClaimDeps["finishSave"],
@@ -97,6 +132,7 @@ export function useGm() {
   const redeemClaim = useMutation(api.account.finishSave);
   const claimPlayer = useMutation(api.player.claim);
   const status = gmStatus(auth, me);
+  const gate = useAuthGate(auth.isAuthenticated);
 
   useResumeLeftOvers(status, redeemClaim, claimPlayer);
 
@@ -108,7 +144,14 @@ export function useGm() {
       signInWithPassword: ({ email, password, mode }: SaveInput) =>
         signIn("password", { email, password, flow: PASSWORD_FLOWS[mode] }),
       keepGroup: (keep: Keep, signInFirst: () => Promise<unknown>) =>
-        keepGroup(keep, signInFirst, { claim: claimPlayer, storage: sessionStorage }),
+        keepGroup(
+          keep,
+          async () => {
+            await signInFirst();
+            await gate.whenAuthenticated();
+          },
+          { claim: claimPlayer, storage: sessionStorage },
+        ),
       save: (input: SaveInput) =>
         saveGroups(input, {
           startSave: () => startSave({}),
@@ -119,7 +162,7 @@ export function useGm() {
       finishSave: () => finishPendingSave({ finishSave: redeemClaim, storage: sessionStorage }),
       signOut,
     }),
-    [signIn, signOut, startSave, redeemClaim, claimPlayer],
+    [signIn, signOut, startSave, redeemClaim, claimPlayer, gate],
   );
 
   return { status, email: me?.email, ...actions };
