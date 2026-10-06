@@ -1,0 +1,3 @@
+ok   trigger_node -> wait_before_tip_1 -> email_tip_1
+ok   trigger_node -> wait_before_tip_1 -> email_tip_1 -> wait_before_tip_2 -> email_tip_2
+PASS
