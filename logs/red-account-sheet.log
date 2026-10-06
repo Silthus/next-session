@@ -1,0 +1,95 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-76
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/account/AccountSheet.test.tsx (36 tests | 3 failed) 2924ms
+   ❯ AccountSheet telemetry (4)
+     × tracks a refused log-in with its flow and code 92ms
+     × tracks a refused sign-up while saving 97ms
+     × reports a failure without a code that came from Convex 90ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet telemetry > tracks a refused log-in with its flow and code
+AssertionError: expected "vi.fn()" to be called once with arguments: [ { name: 'sign_in_failed', …(2) } ]
+
+Number of calls: 0
+
+ ❯ src/features/account/AccountSheet.test.tsx:601:19
+    599|     await alertText();
+    600|
+    601|     expect(track).toHaveBeenCalledExactlyOnceWith({
+       |                   ^
+    602|       name: "sign_in_failed",
+    603|       flow: "signIn",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet telemetry > tracks a refused sign-up while saving
+AssertionError: expected "vi.fn()" to be called once with arguments: [ { name: 'sign_in_failed', …(2) } ]
+
+Number of calls: 0
+
+ ❯ src/features/account/AccountSheet.test.tsx:614:19
+    612|     await alertText();
+    613|
+    614|     expect(track).toHaveBeenCalledExactlyOnceWith({
+       |                   ^
+    615|       name: "sign_in_failed",
+    616|       flow: "signUp",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet telemetry > reports a failure without a code that came from Convex
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/features/account/AccountSheet.test.tsx:643:25
+    641|
+    642|     expect(await alertText()).toBe("That didn't work. Try again.");
+    643|     expect(reportError).toHaveBeenCalledOnce();
+       |                         ^
+    644|     expect(vi.mocked(reportError).mock.calls[0]![1]).toMatchObject({
+    645|       convex_function: "auth:signIn",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 33 passed (36)
+   Start at  17:00:14
+   Duration  3.69s (tests 81%, environment 12%, transform 3%, import 2%, setup 2%)
+

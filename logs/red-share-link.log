@@ -1,0 +1,90 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-76
+
+ ❯ |ui| src/ui/ShareLinkCard.test.tsx (15 tests | 7 failed) 3027ms
+   ❯ ShareLinkCard (15)
+     ❯ telemetry (7)
+       × tracks a copy through the clipboard once, with its surface 21ms
+       × tracks and logs a copy through the selection when the clipboard refuses 20ms
+       × tracks and logs a copy the browser refused every way 15ms
+       × tracks Share via WhatsApp by its channel 19ms
+       × tracks Share via Telegram by its channel 18ms
+       × tracks Share via Mail by its channel 15ms
+       × tracks the native share sheet only once it shared 1021ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks a copy through the clipboard once, with its surface
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/ui/ShareLinkCard.test.tsx:158:21
+    156|       await screen.findByRole("button", { name: "Copied" });
+    157|
+    158|       expect(track).toHaveBeenCalledOnce();
+       |                     ^
+    159|       expect(track).toHaveBeenCalledWith({
+    160|         name: "share_link_copied",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks and logs a copy through the selection when the clipboard refuses
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/ui/ShareLinkCard.test.tsx:177:21
+    175|       await screen.findByRole("button", { name: "Copied" });
+    176|
+    177|       expect(track).toHaveBeenCalledOnce();
+       |                     ^
+    178|       expect(track).toHaveBeenCalledWith({
+    179|         name: "share_link_copied",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks and logs a copy the browser refused every way
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/ui/ShareLinkCard.test.tsx:198:21
+    196|       await screen.findByText("Long-press the link to copy it.");
+    197|
+    198|       expect(track).toHaveBeenCalledOnce();
+       |                     ^
+    199|       expect(track).toHaveBeenCalledWith({
+    200|         name: "share_link_copied",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks Share via WhatsApp by its channel
+ FAIL  |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks Share via Telegram by its channel
+ FAIL  |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks Share via Mail by its channel
+AssertionError: expected "vi.fn()" to be called once with arguments: [ { name: 'share_link_shared', …(2) } ]
+
+Number of calls: 0
+
+ ❯ src/ui/ShareLinkCard.test.tsx:222:21
+    220|       await userEvent.click(target);
+    221|
+    222|       expect(track).toHaveBeenCalledExactlyOnceWith({
+       |                     ^
+    223|         name: "share_link_shared",
+    224|         surface: "landing",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks the native share sheet only once it shared
+AssertionError: expected "vi.fn()" to be called once with arguments: [ { name: 'share_link_shared', …(2) } ]
+
+Number of calls: 0
+
+ ❯ src/ui/ShareLinkCard.test.tsx:248:23
+    246|       finish(true);
+    247|       await vi.waitFor(() =>
+    248|         expect(track).toHaveBeenCalledExactlyOnceWith({
+       |                       ^
+    249|           name: "share_link_shared",
+    250|           surface: "rail",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 8 passed (15)
+   Start at  16:58:15
+   Duration  3.81s (tests 82%, environment 13%, transform 2%, setup 2%, import 1%)
+

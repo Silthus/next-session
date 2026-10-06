@@ -1,0 +1,880 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-76
+
+ ❯ |ui| src/features/me/useRemoval.test.tsx (0 test)
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/me/MyGroups.test.tsx (13 tests | 2 failed) 1380ms
+   ❯ MyGroups telemetry (2)
+     × tracks Create your link on /me with Groups of its own 1006ms
+     × tracks Create your link on /me empty 18ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/me/useRemoval.test.tsx [ src/features/me/useRemoval.test.tsx ]
+Error: Failed to resolve import "./useRemoval" from "src/features/me/useRemoval.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/coder/dev/ns-worktrees/ticket-76/src/features/me/useRemoval.test.tsx:7:0
+  15 |  const __vi_import_1__ = await import("convex/server");
+  16 |  const __vi_import_2__ = await import("../../lib/telemetry");
+  17 |  const __vi_import_3__ = await import("./useRemoval");
+     |                                       ^
+  18 |  
+  19 |  
+ ❯ TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl node_modules/vite/dist/node/chunks/node.js:26423:18
+ ❯ node_modules/vite/dist/node/chunks/node.js:26493:30
+ ❯ TransformPluginContext.transform node_modules/vite/dist/node/chunks/node.js:26459:4
+ ❯ EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform node_modules/vite/dist/node/chunks/node.js:19988:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/me/MyGroups.test.tsx > MyGroups telemetry > tracks Create your link on /me with Groups of its own
+TestingLibraryElementError: Unable to find role="button" and name "Create your link"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="flex min-h-dvh flex-col"
+    >
+      <header
+        class="mx-auto w-full px-4 sm:px-6 max-w-2xl flex items-center justify-between py-5"
+      >
+        <a
+          aria-label="Next Session home"
+          class="inline-flex items-center gap-2.5 text-ink"
+          href="/"
+        >
+          <svg
+            aria-hidden="true"
+            class="size-8 size-7"
+            viewBox="0 0 32 32"
+          >
+            <rect
+              class="fill-accent"
+              height="28"
+              rx="9"
+              width="28"
+              x="2"
+              y="2"
+            />
+            <path
+              class="fill-accent-strong"
+              d="M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"
+            />
+            <circle
+              class="fill-accent-ink"
+              cx="16"
+              cy="20"
+              r="5"
+            />
+          </svg>
+          <span
+            class="font-display font-bold text-lg"
+          >
+            Next Session
+          </span>
+        </a>
+        <div
+          class="flex min-w-0 items-center gap-2"
+        >
+          <span
+            class="max-w-[7.5rem] truncate text-sm text-ink-3 sm:max-w-xs"
+          >
+            robin@example.test
+          </span>
+          <button
+            class="inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm"
+            type="button"
+          >
+            Log out
+          </button>
+        </div>
+      </header>
+      <main
+        class="mx-auto w-full px-4 sm:px-6 max-w-2xl flex-1 pb-16 flex flex-col gap-8 pt-4"
+      >
+        <h1
+          class="font-display text-4xl font-extrabold tracking-tight outline-none"
+          tabindex="-1"
+        >
+          My groups
+        </h1>
+        <section
+          aria-labelledby="_r_16_"
+          class="flex flex-col gap-3"
+        >
+          <h2
+            class="font-mono text-[11px] font-medium tracking-[0.18em] text-ink-3 uppercase"
+            id="_r_16_"
+          >
+            Next sessions
+          </h2>
+          <ul
+            class="flex flex-col gap-2"
+          >
+            <li>
+              <a
+                class="flex items-center gap-3 rounded-md border border-accent/40 bg-accent-soft/50 px-3 py-2.5 transition-colors hover:bg-accent-soft"
+                href="/s/thursdayTk"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="size-4 size-5 shrink-0 text-accent-strong"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M10 1.8l2.5 5.3 5.8.7-4.3 4 1.1 5.8L10 14.8l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"
+                  />
+                </svg>
+                <span
+                  class="min-w-0 flex-1"
+                >
+                  <span
+                    class="block text-sm font-semibold"
+                  >
+                    Thursday, October 8
+                  </span>
+                  <span
+                    class="block text-xs text-ink-3"
+                  >
+                    in 2 days
+                  </span>
+                </span>
+                <span
+                  class="max-w-[45%] truncate text-sm font-medium text-ink-2"
+                >
+                  Thursday Crew
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                class="flex items-center gap-3 rounded-md border border-accent/40 bg-accent-soft/50 px-3 py-2.5 transition-colors hover:bg-accent-soft"
+                href="/g/group-own"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="size-4 size-5 shrink-0 text-accent-strong"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M10 1.8l2.5 5.3 5.8.7-4.3 4 1.1 5.8L10 14.8l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"
+                  />
+                </svg>
+                <span
+                  class="min-w-0 flex-1"
+                >
+                  <span
+                    class="block text-sm font-semibold"
+                  >
+                    Saturday, October 10
+                  </span>
+                  <span
+                    class="block text-xs text-ink-3"
+                  >
+                    in 4 days
+                  </span>
+                </span>
+                <span
+                  class="max-w-[45%] truncate text-sm font-medium text-ink-2"
+                >
+                  Dragon Heist
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                class="flex items-center gap-3 rounded-md border border-accent/40 bg-accent-soft/50 px-3 py-2.5 transition-colors hover:bg-accent-soft"
+                href="/s/thursdayTk"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="size-4 size-5 shrink-0 text-accent-strong"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M10 1.8l2.5 5.3 5.8.7-4.3 4 1.1 5.8L10 14.8l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"
+                  />
+                </svg>
+                <span
+                  class="min-w-0 flex-1"
+                >
+                  <span
+                    class="block text-sm font-semibold"
+                  >
+                    Thursday, October 22
+                  </span>
+                  <span
+                    class="block text-xs text-ink-3"
+                  >
+                    in 16 days
+                  </span>
+                </span>
+                <span
+                  class="max-w-[45%] truncate text-sm font-medium text-ink-2"
+                >
+                  Thursday Crew
+                </span>
+              </a>
+            </li>
+          </ul>
+        </section>
+        <section
+          aria-labelledby="_r_17_"
+          class="flex flex-col gap-3"
+        >
+          <h2
+            class="font-mono text-[11px] font-medium tracking-[0.18em] text-ink-3 uppercase"
+            id="_r_17_"
+          >
+            You play in
+          </h2>
+          <ul
+            class="grid gap-3 sm:grid-cols-2"
+          >
+            <li
+              class="rounded-lg border border-line bg-surface shadow-card transition-colors hover:border-line-strong relative"
+            >
+              <a
+                class="flex flex-col gap-1 p-4 pr-14"
+                href="/s/thursdayTk"
+              >
+                <span
+                  class="font-display text-lg font-bold break-words"
+                >
+                  Thursday Crew
+                </span>
+                <span
+                  class="text-sm text-ink-2"
+                >
+                  as 
+                  Robin
+                </span>
+                <span
+                  class="text-sm text-ink-3"
+                >
+                  Next session Thu, Oct 8
+                </span>
+                <span
+                  class="mt-1 self-start rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-semibold text-accent-strong"
+                >
+                  12 days to answer
+                </span>
+              </a>
+              <div
+                class="absolute top-1.5 right-1.5"
+              >
+                <div
+                  class="relative min-w-0"
+                >
+                  <button
+                    aria-controls="_r_18_"
+                    aria-expanded="false"
+                    aria-label="Options for Thursday Crew"
+                    class="rounded-md p-2.5 text-ink-3 hover:bg-surface-2 hover:text-ink"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="size-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <circle
+                        cx="10"
+                        cy="4.5"
+                        r="1.6"
+                      />
+                      <circle
+                        cx="10"
+                        cy="10"
+                        r="1.6"
+                      />
+                      <circle
+                        cx="10"
+                        cy="15.5"
+                        r="1.6"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </li>
+            <li
+              class="rounded-lg border border-line bg-surface shadow-card transition-colors hover:border-line-strong relative"
+            >
+              <a
+                class="flex flex-col gap-1 p-4 pr-14"
+                href="/s/sundaySaga"
+              >
+                <span
+                  class="font-display text-lg font-bold break-words"
+                >
+                  Sunday Saga
+                </span>
+                <span
+                  class="text-sm text-ink-2"
+                >
+                  as 
+                  Rob
+                </span>
+                <span
+                  class="text-sm text-ink-3"
+                >
+                  No session yet
+                </span>
+              </a>
+              <div
+                class="absolute top-1.5 right-1.5"
+              >
+                <div
+                  class="relative min-w-0"
+                >
+                  <button
+                    aria-controls="_r_19_"
+                    aria-expanded="false"
+                    aria-label="Options for Sunday Saga"
+                    class="rounded-md p-2.5 text-ink-3 hover:bg-surface-2 hover:text-ink"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="size-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <circle
+                        cx="10"
+                        cy="4.5"
+                        r="1.6"
+                      />
+                      <circle
+                        cx="10"
+                        cy="10"
+                        r="1.6"
+                      />
+                      <circle
+                        cx="10"
+                        cy="15.5"
+                        r="1.6"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </section>
+        <section
+          aria-labelledby="_r_1a_"
+          class="flex flex-col gap-3"
+        >
+          <h2
+            class="font-mono text-[11px] font-medium tracking-[0.18em] text-ink-3 uppercase"
+            id="_r_1a_"
+          >
+            You run
+          </h2>
+          <ul
+            class="grid gap-3 sm:grid-cols-2"
+          >
+            <li
+              class="rounded-lg border border-line bg-surface shadow-card transition-colors hover:border-line-strong"
+            >
+              <a
+                class="flex flex-col gap-1 p-4"
+                href="/g/group-own"
+              >
+                <span
+                  class="font-display text-lg font-bold break-words"
+                >
+                  Dragon Heist
+                </span>
+                <span
+                  class="text-sm text-ink-3"
+                >
+                  Next session Sat, Oct 10
+                </span>
+              </a>
+            </li>
+          </ul>
+        </section>
+      </main>
+      <footer
+        class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3 mx-auto w-full px-4 sm:px-6 max-w-2xl pb-6"
+      >
+        <a
+          class="transition-colors hover:text-ink"
+          href="/terms"
+        >
+          Terms
+        </a>
+        <a
+          class="transition-colors hover:text-ink"
+          href="/privacy"
+        >
+          Privacy
+        </a>
+        <a
+          class="transition-colors hover:text-ink"
+          href="/imprint"
+        >
+          Imprint
+        </a>
+      </footer>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="flex min-h-dvh flex-col"
+    >
+      <header
+        class="mx-auto w-full px-4 sm:px-6 max-w-2xl flex items-center justify-between py-5"
+      >
+        <a
+          aria-label="Next Session home"
+          class="inline-flex items-center gap-2.5 text-ink"
+          href="/"
+        >
+          <svg
+            aria-hidden="true"
+            class="size-8 size-7"
+            viewBox="0 0 32 32"
+          >
+            <rect
+              class="fill-accent"
+              height="28"
+              rx="9"
+              width="28"
+              x="2"
+              y="2"
+            />
+            <path
+              class="fill-accent-strong"
+              d="M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"
+            />
+            <circle
+              class="fill-accent-ink"
+              cx="16"
+              cy="20"
+              r="5"
+            />
+          </svg>
+          <span
+            class="font-display font-bold text-lg"
+          >
+            Next Session
+          </span>
+        </a>
+        <div
+          class="flex min-w-0 items-center gap-2"
+        >
+          <span
+            class="max-w-[7.5rem] truncate text-sm text-ink-3 sm:max-w-xs"
+          >
+            robin@example.test
+          </span>
+          <button
+            class="inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 text-ink-2 hover:bg-surface-2 hover:text-ink h-8 px-3 text-sm gap-1.5 rounded-sm"
+            type="button"
+          >
+            Log out
+          </button>
+        </div>
+      </header>
+      <main
+        class="mx-auto w-full px-4 sm:px-6 max-w-2xl flex-1 pb-16 flex flex-col gap-8 pt-4"
+      >
+        <h1
+          class="font-display text-4xl font-extrabold tracking-tight outline-none"
+          tabindex="-1"
+        >
+          My groups
+        </h1>
+        <section
+          aria-labelledby="_r_16_"
+          class="flex flex-col gap-3"
+        >
+          <h2
+            class="font-mono text-[11px] font-medium tracking-[0.18em] text-ink-3 uppercase"
+            id="_r_16_"
+          >
+            Next sessions
+          </h2>
+          <ul
+            class="flex flex-col gap-2"
+          >
+            <li>
+              <a
+                class="flex items-center gap-3 rounded-md border border-accent/40 bg-accent-soft/50 px-3 py-2.5 transition-colors hover:bg-accent-soft"
+                href="/s/thursdayTk"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="size-4 size-5 shrink-0 text-accent-strong"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M10 1.8l2.5 5.3 5.8.7-4.3 4 1.1 5.8L10 14.8l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"
+                  />
+                </svg>
+                <span
+                  class="min-w-0 flex-1"
+                >
+                  <span
+                    class="block text-sm font-semibold"
+                  >
+                    Thursday, October 8
+                  </span>
+                  <span
+                    class="block text-xs text-ink-3"
+                  >
+                    in 2 days
+                  </span>
+                </span>
+                <span
+                  class="max-w-[45%] truncate text-sm font-medium text-ink-2"
+                >
+                  Thursday Crew
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                class="flex items-center gap-3 rounded-md border border-accent/40 bg-accent-soft/50 px-3 py-2.5 transition-colors hover:bg-accent-soft"
+                href="/g/group-own"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="size-4 size-5 shrink-0 text-accent-strong"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M10 1.8l2.5 5.3 5.8.7-4.3 4 1.1 5.8L10 14.8l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"
+                  />
+                </svg>
+                <span
+                  class="min-w-0 flex-1"
+                >
+                  <span
+                    class="block text-sm font-semibold"
+                  >
+                    Saturday, October 10
+                  </span>
+                  <span
+                    class="block text-xs text-ink-3"
+                  >
+                    in 4 days
+                  </span>
+                </span>
+                <span
+                  class="max-w-[45%] truncate text-sm font-medium text-ink-2"
+                >
+                  Dragon Heist
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                class="flex items-center gap-3 rounded-md border border-accent/40 bg-accent-soft/50 px-3 py-2.5 transition-colors hover:bg-accent-soft"
+                href="/s/thursdayTk"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="size-4 size-5 shrink-0 text-accent-strong"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M10 1.8l2.5 5.3 5.8.7-4.3 4 1.1 5.8L10 14.8l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"
+                  />
+                </svg>
+                <span
+                  class="min-w-0 flex-1"
+                >
+                  <span
+                    class="block text-sm font-semibold"
+                  >
+                    Thursday, October 22
+                  </span>
+                  <span
+                    class="block text-xs text-ink-3"
+                  >
+                    in 16 days
+                  </span>
+                </span>
+                <span
+                  class="max-w-[45%] truncate text-sm font-medium text-ink-2"
+                >
+                  Thursday Crew
+                </span>
+              </a>
+            </li>
+          </ul>
+        </section>
+        <section
+          aria-labelledby="_r_17_"
+          class="flex flex-col gap-3"
+        >
+          <h2
+            class="font-mono text-[11px] font-medium tracking-[0.18em] text-ink-3 uppercase"
+            id="_r_17_"
+          >
+            You play in
+          </h2>
+          <ul
+            class="grid gap-3 sm:grid-cols-2"
+          >
+            <li
+              class="rounded-lg border border-line bg-surface shadow-card transition-colors hover:border-line-strong relative"
+            >
+              <a
+                class="flex flex-col gap-1 p-4 pr-14"
+                href="/s/thursdayTk"
+              >
+                <span
+                  class="font-display text-lg font-bold break-words"
+                >
+                  Thursday Crew
+                </span>
+                <span
+                  class="text-sm text-ink-2"
+                >
+                  as 
+                  Robin
+                </span>
+                <span
+                  class="text-sm text-ink-3"
+                >
+                  Next session Thu, Oct 8
+                </span>
+                <span
+                  class="mt-1 self-start rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-semibold text-accent-strong"
+                >
+                  12 days to answer
+                </span>
+              </a>
+              <div
+                class="absolute top-1.5 right-1.5"
+              >
+                <div
+                  class="relative min-w-0"
+                >
+                  <button
+                    aria-controls="_r_18_"
+                    aria-expanded="false"
+                    aria-label="Options for Thursday Crew"
+                    class="rounded-md p-2.5 text-ink-3 hover:bg-surface-2 hover:text-ink"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="size-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <circle
+                        cx="10"
+                        cy="4.5"
+                        r="1.6"
+                      />
+                      <circle
+                        cx="10"
+                        cy="10"
+                        r="1.6"
+                      />
+                      <circle
+                        cx="10"
+                        cy="15.5"
+                        r="1.6"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </li>
+            <li
+              class="rounded-lg border border-line bg-surface shadow-card transition-colors hover:border-line-strong relative"
+            >
+              <a
+                class="flex flex-col gap-1 p-4 pr-14"
+                href="/s/sundaySaga"
+              >
+                <span
+                  class="font-display text-lg font-bold break-words"
+                >
+                  Sunday Saga
+                </span>
+                <span
+                  class="text-sm text-ink-2"
+                >
+                  as 
+                  Rob
+                </span>
+                <span
+                  class="text-sm text-ink-3"
+                >
+                  No session yet
+                </span>
+              </a>
+              <div
+                class="absolute top-1.5 right-1.5"
+              >
+                <div
+                  class="relative min-w-0"
+                >
+                  <button
+                    aria-controls="_r_19_"
+                    aria-expanded="false"
+                    aria-label="Options for Sunday Saga"
+                    class="rounded-md p-2.5 text-ink-3 hover:bg-surface-2 hover:text-ink"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="size-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <circle
+                        cx="10"
+                        cy="4.5"
+                        r="1.6"
+                      />
+                      <circle
+                        cx="10"
+                        cy="10"
+                        r="1.6"
+                      />
+                      <circle
+                        cx="10"
+                        cy="15.5"
+                        r="1.6"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </section>
+        <section
+          aria-labelledby="_r_1a_"
+          class="flex flex-col gap-3"
+        >
+          <h2
+            class="font-mono text-[11px] font-medium tracking-[0.18em] text-ink-3 uppercase"
+            id="_r_1a_"
+          >
+            You run
+          </h2>
+          <ul
+            class="grid gap-3 sm:grid-cols-2"
+          >
+            <li
+              class="rounded-lg border border-line bg-surface shadow-card transition-colors hover:border-line-strong"
+            >
+              <a
+                class="flex flex-col gap-1 p-4"
+                href="/g/group-own"
+              >
+                <span
+                  class="font-display text-lg font-bold break-words"
+                >
+                  Dragon Heist
+                </span>
+                <span
+                  class="text-sm text-ink-3"
+                >
+                  Next session Sat, Oct 10
+                </span>
+              </a>
+            </li>
+          </ul>
+        </section>
+      </main>
+      <footer
+        class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3 mx-auto w-full px-4 sm:px-6 max-w-2xl pb-6"
+      >
+        <a
+          class="transition-colors hover:text-ink"
+          href="/terms"
+        >
+          Terms
+        </a>
+        <a
+          class="transition-colors hover:text-ink"
+          href="/privacy"
+        >
+          Privacy
+        </a>
+        <a
+          class="transition-colors hover:text-ink"
+          href="/imprint"
+        >
+          Imprint
+        </a>
+      </footer>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/features/me/MyGroups.test.tsx:199:40
+    197|     const { onCreate } = renderMyGroups({ groups });
+    198|
+    199|     await userEvent.click(await screen.findByRole("button", { name: "C…
+       |                                        ^
+    200|
+    201|     expect(onCreate).toHaveBeenCalledOnce();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |ui| src/features/me/MyGroups.test.tsx > MyGroups telemetry > tracks Create your link on /me empty
+AssertionError: expected "vi.fn()" to be called once with arguments: [ { …(2) } ]
+
+Number of calls: 0
+
+ ❯ src/features/me/MyGroups.test.tsx:202:19
+    200|
+    201|     expect(onCreate).toHaveBeenCalledOnce();
+    202|     expect(track).toHaveBeenCalledExactlyOnceWith({ name: "create_link…
+       |                   ^
+    203|   });
+    204| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  2 failed | 19 passed (21)
+   Start at  17:02:44
+   Duration  2.20s (tests 43%, environment 40%, transform 6%, setup 6%, import 5%)
+

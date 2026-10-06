@@ -1,0 +1,233 @@
+$ tsc -p tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p convex/tsconfig.json && eslint . && prettier --check . && vitest run && vite build && wrangler deploy --dry-run
+Checking formatting...
+All matched files use Prettier code style!
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-76
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+
+ Test Files  70 passed (70)
+      Tests  1040 passed (1040)
+   Start at  17:05:00
+   Duration  10.94s (tests 49%, environment 33%, transform 7%, import 6%, setup 4%)
+
+Environment  |ui| jsdom was created 46 times · 24.51s total, 41% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+Warning: Route file "/home/coder/dev/ns-worktrees/ticket-76/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+
+If this file is not intended to be a route, you can exclude it using one of these options:
+  1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-76/src/routes/-routes.test.tsx" (prefix with "-")
+  2. Use 'routeFileIgnorePattern' in your config to match this file
+
+Current configuration:
+  routeFileIgnorePrefix: "-"
+  routeFileIgnorePattern: undefined
+vite v8.3.2 building client environment for production...
+transforming...
+✓ 281 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                          0.85 kB │ gzip:  0.38 kB
+dist/assets/jetbrains-mono-greek-500-normal-JpySY46c.woff2               4.28 kB
+dist/assets/jetbrains-mono-cyrillic-500-normal-DmUKJPL_.woff2            5.35 kB
+dist/assets/jetbrains-mono-vietnamese-500-normal-DNRqzVM1.woff           5.47 kB
+dist/assets/jetbrains-mono-greek-500-normal-D7SFKleX.woff                5.72 kB
+dist/assets/jetbrains-mono-cyrillic-500-normal-DJqRU3vO.woff             7.02 kB
+dist/assets/jetbrains-mono-latin-ext-500-normal-Cut-4mMH.woff2           7.52 kB
+dist/assets/inter-vietnamese-wght-normal-CBcvBZtf.woff2                 10.25 kB
+dist/assets/jetbrains-mono-latin-ext-500-normal-ckzbgY84.woff           10.33 kB
+dist/assets/inter-greek-ext-wght-normal-DlzME5K_.woff2                  11.23 kB
+dist/assets/bricolage-grotesque-vietnamese-opsz-normal-D9N6E8K1.woff2   12.98 kB
+dist/assets/inter-cyrillic-wght-normal-DqGufNeO.woff2                   18.74 kB
+dist/assets/inter-greek-wght-normal-CkhJZR-_.woff2                      18.99 kB
+dist/assets/jetbrains-mono-latin-500-normal-BWZEU5yA.woff2              21.83 kB
+dist/assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2               25.96 kB
+dist/assets/jetbrains-mono-latin-500-normal-CJOVTJB7.woff               28.20 kB
+dist/assets/bricolage-grotesque-latin-ext-opsz-normal-IcJDqblK.woff2    30.73 kB
+dist/assets/inter-latin-wght-normal-Dx4kXJAl.woff2                      48.25 kB
+dist/assets/bricolage-grotesque-latin-opsz-normal-Cre6nC2_.woff2        76.88 kB
+dist/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2                  85.06 kB
+dist/assets/index-BRT-t7Di.css                                          60.28 kB │ gzip: 18.19 kB
+dist/assets/terms-DXbRoDX1.js                                            0.15 kB │ gzip:  0.14 kB
+dist/assets/imprint-DrAnQn96.js                                          0.15 kB │ gzip:  0.15 kB
+dist/assets/privacy-C54BOF5B.js                                          0.15 kB │ gzip:  0.15 kB
+dist/assets/g._groupId-CFdckw6g.js                                       0.22 kB │ gzip:  0.19 kB
+dist/assets/Eyebrow-BqiAMQYN.js                                          0.22 kB │ gzip:  0.20 kB
+dist/assets/g._groupId-DRYHMfxB.js                                       0.25 kB │ gzip:  0.20 kB
+dist/assets/Wordmark-CUXEhQN4.js                                         0.44 kB │ gzip:  0.30 kB
+dist/assets/useTodayUtc--zRtac-e.js                                      0.46 kB │ gzip:  0.28 kB
+dist/assets/PageShell-B8M8wmIg.js                                        0.59 kB │ gzip:  0.37 kB
+dist/assets/useToast-d7YtJHkP.js                                         1.55 kB │ gzip:  0.78 kB
+dist/assets/HeaderAccount-DRyPkJIP.js                                    2.26 kB │ gzip:  1.07 kB
+dist/assets/Popover-Ih5hWyOg.js                                          3.31 kB │ gzip:  1.54 kB
+dist/assets/ShareLinkCard-BPzey3t6.js                                    4.13 kB │ gzip:  1.90 kB
+dist/assets/pageTitle-Cnl4CnB-.js                                        4.35 kB │ gzip:  1.64 kB
+dist/assets/routes-B87VjD0V.js                                           7.62 kB │ gzip:  2.92 kB
+dist/assets/me-NZOkjl6t.js                                               8.26 kB │ gzip:  2.92 kB
+dist/assets/useGm-CCnrb_uW.js                                           10.70 kB │ gzip:  4.18 kB
+dist/assets/AccountSheet-EZ77LqF3.js                                    12.30 kB │ gzip:  4.76 kB
+dist/assets/LegalPage-D91WkYNU.js                                       16.70 kB │ gzip:  6.58 kB
+dist/assets/s._shareToken-CRGSHY8A.js                                   23.17 kB │ gzip:  8.10 kB
+dist/assets/LegalFooter-BCZQTDFP.js                                     27.59 kB │ gzip: 11.23 kB
+dist/assets/GroupScreen-TLvGHkj_.js                                     38.75 kB │ gzip: 11.96 kB
+dist/assets/useNavigate-B4UlgtDG.js                                     84.70 kB │ gzip: 23.77 kB
+dist/assets/module.slim-ChG__E8X.js                                    146.43 kB │ gzip: 51.24 kB
+dist/assets/extension-bundles-C1Hp9JeO.js                              172.90 kB │ gzip: 56.97 kB
+dist/assets/index-3DYi0lve.js                                          281.54 kB │ gzip: 90.38 kB
+
+✓ built in 286ms
+
+ ⛅️ wrangler 4.147.0
+────────────────────
+✨ Read 48 files from the assets directory /home/coder/dev/ns-worktrees/ticket-76/dist
+Total Upload: 2.99 KiB / gzip: 1.15 KiB
+Your Worker has access to the following bindings:
+Binding            Resource      
+env.ASSETS         Assets        
+
+--dry-run: exiting now.

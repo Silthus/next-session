@@ -1,0 +1,113 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-76
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/player/PlayerCalendar.test.tsx (38 tests | 4 failed) 5174ms
+   ❯ PlayerCalendar telemetry (4)
+     × tracks answers_started at the first saved tap, once per page load 1090ms
+     × does not track answers_started again when the calendar mounts again 1052ms
+     × tracks fill_rest_used once the nights are saved, and not when refused 1089ms
+     × tracks keep_group_started when the Player taps Keep this group 45ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar telemetry > tracks answers_started at the first saved tap, once per page load
+AssertionError: expected "vi.fn()" to be called once with arguments: [ { name: 'answers_started', …(1) } ]
+
+Number of calls: 0
+
+ ❯ src/features/player/PlayerCalendar.test.tsx:538:21
+    536|     saves[1]!.resolve();
+    537|     await vi.waitFor(() =>
+    538|       expect(track).toHaveBeenCalledExactlyOnceWith({
+       |                     ^
+    539|         name: "answers_started",
+    540|         group_id: "group-first-tap",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar telemetry > does not track answers_started again when the calendar mounts again
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/features/player/PlayerCalendar.test.tsx:553:42
+    551|     renderCalendar({ groupId: "group-remount" });
+    552|     await userEvent.click(await tile(/^Sunday, October 4/));
+    553|     await vi.waitFor(() => expect(track).toHaveBeenCalledOnce());
+       |                                          ^
+    554|     vi.mocked(track).mockReset();
+    555|     document.body.innerHTML = "";
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar telemetry > tracks fill_rest_used once the nights are saved, and not when refused
+AssertionError: expected "vi.fn()" to be called with arguments: [ { name: 'fill_rest_used', …(1) } ]
+
+Number of calls: 0
+
+ ❯ src/features/player/PlayerCalendar.test.tsx:581:21
+    579|
+    580|     await vi.waitFor(() =>
+    581|       expect(track).toHaveBeenCalledWith({ name: "fill_rest_used", gro…
+       |                     ^
+    582|     );
+    583|     expect(track).toHaveBeenCalledWith({ name: "answers_started", grou…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar telemetry > tracks keep_group_started when the Player taps Keep this group
+AssertionError: expected "vi.fn()" to be called once with arguments: [ Array(1) ]
+
+Number of calls: 0
+
+ ❯ src/features/player/PlayerCalendar.test.tsx:592:19
+    590|
+    591|     expect(onKeep).toHaveBeenCalledOnce();
+    592|     expect(track).toHaveBeenCalledExactlyOnceWith({
+       |                   ^
+    593|       name: "keep_group_started",
+    594|       group_id: "group-keep",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 34 passed (38)
+   Start at  17:01:44
+   Duration  5.99s (tests 88%, environment 8%, transform 2%, import 1%, setup 1%)
+

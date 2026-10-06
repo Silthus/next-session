@@ -1,0 +1,130 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-76
+
+ ❯ |ui| src/features/account/save.test.ts (19 tests | 5 failed) 14ms
+   ❯ save telemetry (6)
+     × tracks the start of a password Save once, even when it fails 3ms
+     × tracks the start of a Save through Google 1ms
+     × logs a recovered Save once, without its claim code 0ms
+     × logs a recovery the server refused with its code 1ms
+     × logs a recovery that failed without a code as unexpected 0ms
+ ❯ |ui| src/features/account/keep.test.ts (18 tests | 3 failed) 11ms
+   ❯ leftover keep logs (4)
+     × logs a leftover keep that went through, without its token or Player 3ms
+     × logs a leftover keep refused as PLAYER_CLAIMED 1ms
+     × logs a leftover keep refused as unexpected 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/keep.test.ts > leftover keep logs > logs a leftover keep that went through, without its token or Player
+AssertionError: expected "vi.fn()" to be called once with arguments: [ 'info', …(2) ]
+
+Number of calls: 0
+
+ ❯ src/features/account/keep.test.ts:185:17
+    183|     await resumePendingKeep(deps);
+    184|
+    185|     expect(log).toHaveBeenCalledExactlyOnceWith("info", "Pending keep …
+       |                 ^
+    186|       outcome: "kept",
+    187|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  |ui| src/features/account/keep.test.ts > leftover keep logs > logs a leftover keep refused as PLAYER_CLAIMED
+ FAIL  |ui| src/features/account/keep.test.ts > leftover keep logs > logs a leftover keep refused as unexpected
+AssertionError: expected "vi.fn()" to be called once with arguments: [ Array(3) ]
+
+Number of calls: 0
+
+ ❯ src/features/account/keep.test.ts:202:17
+    200|     await resumePendingKeep(deps);
+    201|
+    202|     expect(log).toHaveBeenCalledExactlyOnceWith("warn", "Pending keep …
+       |                 ^
+    203|   });
+    204|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  |ui| src/features/account/save.test.ts > save telemetry > tracks the start of a password Save once, even when it fails
+AssertionError: expected "vi.fn()" to be called once with arguments: [ { name: 'save_started' } ]
+
+Number of calls: 0
+
+ ❯ src/features/account/save.test.ts:223:19
+    221|     await expect(saveGroups({ ...input, mode: "create" }, deps)).rejec…
+    222|
+    223|     expect(track).toHaveBeenCalledExactlyOnceWith({ name: "save_starte…
+       |                   ^
+    224|   });
+    225|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  |ui| src/features/account/save.test.ts > save telemetry > tracks the start of a Save through Google
+AssertionError: expected "vi.fn()" to be called once with arguments: [ { name: 'save_started' } ]
+
+Number of calls: 0
+
+ ❯ src/features/account/save.test.ts:231:19
+    229|     await saveThroughGoogle({ ...deps, continueWithGoogle: () => Promi…
+    230|
+    231|     expect(track).toHaveBeenCalledExactlyOnceWith({ name: "save_starte…
+       |                   ^
+    232|   });
+    233|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  |ui| src/features/account/save.test.ts > save telemetry > logs a recovered Save once, without its claim code
+AssertionError: expected "vi.fn()" to be called once with arguments: [ 'info', …(2) ]
+
+Number of calls: 0
+
+ ❯ src/features/account/save.test.ts:240:17
+    238|     await Promise.all([finishPendingSave(deps), finishPendingSave(deps…
+    239|
+    240|     expect(log).toHaveBeenCalledExactlyOnceWith("info", "Pending save …
+       |                 ^
+    241|       outcome: "saved",
+    242|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  |ui| src/features/account/save.test.ts > save telemetry > logs a recovery the server refused with its code
+AssertionError: expected "vi.fn()" to be called once with arguments: [ Array(3) ]
+
+Number of calls: 0
+
+ ❯ src/features/account/save.test.ts:252:17
+    250|     await expect(finishPendingSave(deps)).rejects.toThrow();
+    251|
+    252|     expect(log).toHaveBeenCalledExactlyOnceWith("warn", "Pending save …
+       |                 ^
+    253|       outcome: "CLAIM_INVALID",
+    254|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  |ui| src/features/account/save.test.ts > save telemetry > logs a recovery that failed without a code as unexpected
+AssertionError: expected "vi.fn()" to be called once with arguments: [ Array(3) ]
+
+Number of calls: 0
+
+ ❯ src/features/account/save.test.ts:263:17
+    261|     await expect(finishPendingSave(deps)).rejects.toThrow();
+    262|
+    263|     expect(log).toHaveBeenCalledExactlyOnceWith("warn", "Pending save …
+       |                 ^
+    264|       outcome: "unexpected",
+    265|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  8 failed | 29 passed (37)
+   Start at  16:59:33
+   Duration  704ms (environment 74%, transform 10%, setup 10%, import 2%, tests 2%, worker 1%)
+

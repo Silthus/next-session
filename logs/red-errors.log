@@ -1,0 +1,66 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-76
+
+ ❯ |ui| src/lib/errors.test.ts (39 tests | 4 failed) 13ms
+   ❯ reporting unexpected Convex failures (6)
+     × reports a failure without an ErrorCode with its function name and request ID 3ms
+     × reports nothing of the server's message, which can carry names 1ms
+     × reports a failure without a request ID by its function name 1ms
+     × reports the same failure once, however often it is read 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > reports a failure without an ErrorCode with its function name and request ID
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/lib/errors.test.ts:116:25
+    114|     errorMessage(convexFailure("player:answer", "[Request ID: 7f3e9a01…
+    115|
+    116|     expect(reportError).toHaveBeenCalledOnce();
+       |                         ^
+    117|     const [reported, context] = vi.mocked(reportError).mock.calls[0]!;
+    118|     expect(context).toEqual({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > reports nothing of the server's message, which can carry names
+TypeError: undefined is not iterable (cannot read property Symbol(Symbol.iterator))
+ ❯ src/lib/errors.test.ts:136:24
+    134|
+    135|     expect(JSON.stringify(vi.mocked(reportError).mock.calls)).not.toCo…
+    136|     const [reported] = vi.mocked(reportError).mock.calls[0]!;
+       |                        ^
+    137|     expect((reported as Error).stack).not.toContain("Robin");
+    138|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > reports a failure without a request ID by its function name
+TypeError: Cannot read properties of undefined (reading '1')
+ ❯ src/lib/errors.test.ts:143:48
+    141|     errorMessage(convexFailure("groups:create", "Server Error"), "grou…
+    142|
+    143|     expect(vi.mocked(reportError).mock.calls[0]![1]).toEqual({
+       |                                                ^
+    144|       surface: "convex",
+    145|       convex_function: "groups:create",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > reports the same failure once, however often it is read
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/lib/errors.test.ts:169:25
+    167|     errorMessage(failure, "keep");
+    168|
+    169|     expect(reportError).toHaveBeenCalledOnce();
+       |                         ^
+    170|   });
+    171| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 35 passed (39)
+   Start at  16:57:35
+   Duration  797ms (environment 74%, setup 10%, transform 10%, import 3%, tests 2%, worker 1%)
+

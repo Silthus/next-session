@@ -1,0 +1,56 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-76
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/landing/LandingView.test.tsx (11 tests | 1 failed) 380ms
+   ❯ LandingView (11)
+     × counts a copy of the new link as the landing's 32ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/landing/LandingView.test.tsx > LandingView > counts a copy of the new link as the landing's
+AssertionError: expected "vi.fn()" to be called once with arguments: [ { name: 'share_link_copied', …(2) } ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+    {
+      "method": "clipboard",
+      "name": "share_link_copied",
+-     "surface": "landing",
++     "surface": "rail",
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/features/landing/LandingView.test.tsx:136:19
+    134|     await screen.findByRole("button", { name: "Copied" });
+    135|
+    136|     expect(track).toHaveBeenCalledExactlyOnceWith({
+       |                   ^
+    137|       name: "share_link_copied",
+    138|       surface: "landing",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 10 passed (11)
+   Start at  16:58:58
+   Duration  1.12s (environment 41%, tests 37%, transform 8%, import 8%, setup 6%)
+
