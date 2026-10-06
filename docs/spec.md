@@ -413,7 +413,8 @@ Old links ([ADR-0005](adr/0005-legacy-share-links-redirect-to-lonir.md)): the Wo
 4. The GM sees the Player's bars, selects a free date, schedules a Session; the Player context shows it.
 5. The GM saves the Group with a fresh email and password. A third context logs in with them and sees the Group with the same Share Link.
 6. `GET /s/AAAAAAAA` answers 302 to Lonir.
-7. The GM deletes the Group (test data cleanup).
+7. My groups (§12.8): the Player context logs in to the same Account and taps **Keep this group**. **My groups** in the account menu opens `/me`, which shows the Session under Next sessions and the Group under both "You play in" and "You run". **Remove from my groups** releases the claim, and Undo claims the Player again. The run creates no second Account.
+8. The GM deletes the Group (test data cleanup), and the Player context sees the link gone. An Account without Groups then lands on `/me`. The `afterEach` deletes the Group too when an earlier step failed.
 
 Evidence goes on the proof ticket: the run log, the Playwright HTML report summary, and screenshots. The account stays; deleting Accounts is not a v1 feature (Surfaced).
 
@@ -518,7 +519,7 @@ Unchanged: `roster.removePlayer` deletes the Player with its Answers, so the cla
   - An Account: one tap calls `player.claim`.
   - A visitor: the Account sheet opens with **Create account** first and **Log in** second, with the legal line. After sign-in, the client claims.
   - An Anonymous GM: the sheet runs Save (§5.3), then claims.
-  - The client writes `next-session.pendingKeep` (`{shareToken, playerId}`) to `sessionStorage` before signing in and clears it after the claim, or on `PLAYER_CLAIMED` or `NOT_FOUND`. App start retries a leftover keep once an Account is signed in, which covers a dropped connection and Google's OAuth redirect (#58) alike.
+  - The client writes `next-session.pendingKeep` (`{shareToken, playerId}`) to `sessionStorage` before signing in and clears it after the claim. It also clears it on `PLAYER_CLAIMED`, `NOT_FOUND`, `TOO_MANY_GROUPS`, a sign-in the server refused, and **Not you?**. App start retries a leftover keep once an Account is signed in, which covers a dropped connection and Google's OAuth redirect (#58) alike.
 - **Join while signed in** claims the new name and confirms with a toast: "Kept in My groups".
 - **Not you?** on a Claimed Player calls `player.release`, then shows Join.
 - **`PLAYER_CLAIMED`** reads "Another account keeps this name. Add yours with a last initial, or ask your GM."
