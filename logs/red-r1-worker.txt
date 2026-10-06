@@ -1,0 +1,162 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-74
+
+ ❯ |shared| worker/index.test.ts (38 tests | 7 failed) 38ms
+   ❯ ingestTarget (18)
+     × has no PostHog target for /ingest/api/projects/1/insights/ 4ms
+     × has no PostHog target for /ingest/flags/?v=2 1ms
+     × has no PostHog target for /ingest/decide/ 0ms
+     × has no PostHog target for /ingest/s/ 1ms
+     × has no PostHog target for /ingest/E/ 0ms
+   ❯ the /ingest proxy (6)
+     × forwards to PostHog with the visitor's IP and without cookies or credentials 4ms
+     × answers /ingest/api/projects/1/insights/ with 204 and forwards nothing 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| worker/index.test.ts > ingestTarget > has no PostHog target for /ingest/api/projects/1/insights/
+AssertionError: expected 'https://eu.i.posthog.com/api/projects…' to be null
+
+- Expected:
+null
+
++ Received:
+"https://eu.i.posthog.com/api/projects/1/insights/"
+
+ ❯ worker/index.test.ts:106:52
+    104|     "/ingest/E/",
+    105|   ])("has no PostHog target for %s", (path) => {
+    106|     expect(ingestTarget(new URL(`${app}${path}`))).toBeNull();
+       |                                                    ^
+    107|   });
+    108| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  |shared| worker/index.test.ts > ingestTarget > has no PostHog target for /ingest/flags/?v=2
+AssertionError: expected 'https://eu.i.posthog.com/flags/?v=2' to be null
+
+- Expected:
+null
+
++ Received:
+"https://eu.i.posthog.com/flags/?v=2"
+
+ ❯ worker/index.test.ts:106:52
+    104|     "/ingest/E/",
+    105|   ])("has no PostHog target for %s", (path) => {
+    106|     expect(ingestTarget(new URL(`${app}${path}`))).toBeNull();
+       |                                                    ^
+    107|   });
+    108| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  |shared| worker/index.test.ts > ingestTarget > has no PostHog target for /ingest/decide/
+AssertionError: expected 'https://eu.i.posthog.com/decide/' to be null
+
+- Expected:
+null
+
++ Received:
+"https://eu.i.posthog.com/decide/"
+
+ ❯ worker/index.test.ts:106:52
+    104|     "/ingest/E/",
+    105|   ])("has no PostHog target for %s", (path) => {
+    106|     expect(ingestTarget(new URL(`${app}${path}`))).toBeNull();
+       |                                                    ^
+    107|   });
+    108| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  |shared| worker/index.test.ts > ingestTarget > has no PostHog target for /ingest/s/
+AssertionError: expected 'https://eu.i.posthog.com/s/' to be null
+
+- Expected:
+null
+
++ Received:
+"https://eu.i.posthog.com/s/"
+
+ ❯ worker/index.test.ts:106:52
+    104|     "/ingest/E/",
+    105|   ])("has no PostHog target for %s", (path) => {
+    106|     expect(ingestTarget(new URL(`${app}${path}`))).toBeNull();
+       |                                                    ^
+    107|   });
+    108| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  |shared| worker/index.test.ts > ingestTarget > has no PostHog target for /ingest/E/
+AssertionError: expected 'https://eu.i.posthog.com/E/' to be null
+
+- Expected:
+null
+
++ Received:
+"https://eu.i.posthog.com/E/"
+
+ ❯ worker/index.test.ts:106:52
+    104|     "/ingest/E/",
+    105|   ])("has no PostHog target for %s", (path) => {
+    106|     expect(ingestTarget(new URL(`${app}${path}`))).toBeNull();
+       |                                                    ^
+    107|   });
+    108| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  |shared| worker/index.test.ts > the /ingest proxy > forwards to PostHog with the visitor's IP and without cookies or credentials
+AssertionError: expected { 'accept-language': 'de-DE', …(6) } to deeply equal { …(3) }
+
+- Expected
++ Received
+
+  {
++   "accept-language": "de-DE",
++   "cf-connecting-ip": "203.0.113.7",
+    "content-type": "application/json",
++   "referer": "https://next-session.link/s/AbC9_-xZ12?code=SECRETCODE1",
++   "sec-ch-ua-platform": "\"Android\"",
+    "user-agent": "Mozilla/5.0 Firefox/140.0",
+    "x-forwarded-for": "203.0.113.7",
+  }
+
+ ❯ worker/index.test.ts:138:50
+    136|     expect(upstream.method).toBe("POST");
+    137|     expect(await upstream.text()).toBe('{"batch":[]}');
+    138|     expect(Object.fromEntries(upstream.headers)).toEqual({
+       |                                                  ^
+    139|       "content-type": "application/json",
+    140|       "user-agent": "Mozilla/5.0 Firefox/140.0",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  |shared| worker/index.test.ts > the /ingest proxy > answers /ingest/api/projects/1/insights/ with 204 and forwards nothing
+AssertionError: expected 200 to be 204 // Object.is equality
+
+- Expected
++ Received
+
+- 204
++ 200
+
+ ❯ worker/index.test.ts:174:31
+    172|       const { response, requested } = await visit(path);
+    173|
+    174|       expect(response.status).toBe(204);
+       |                               ^
+    175|       expect(forwarded).toEqual([]);
+    176|       expect(requested).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 31 passed (38)
+   Start at  16:01:04
+   Duration  179ms (tests 52%, transform 31%, import 13%, worker 4%)
+

@@ -22,6 +22,9 @@
   "containsProductMarker": true,
   "containsDeviceReads": false,
   "storageAfterOptOut": {
+    "scripts": [
+      "http://127.0.0.1:8787/assets/index-D0yi8JyT.js"
+    ],
     "localStorage": [
       "next-session.measurementOff",
       "next-session.players"

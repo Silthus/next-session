@@ -1,0 +1,104 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-74
+
+ ❯ |ui| src/lib/telemetry.sdk.test.ts (3 tests | 2 failed) 3100ms
+   ❯ a real posthog-js on a Player page (3)
+     × neither stores nor reads anything of its own on the device, even from a toolbar link 4ms
+     × sends nothing while the visitor has measurement off, and keeps only that choice 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/lib/telemetry.sdk.test.ts > a real posthog-js on a Player page > neither stores nor reads anything of its own on the device, even from a toolbar link
+AssertionError: expected [ '__mplssupport__', …(46) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "__mplssupport__",
++   "__mplssupport__",
++   "__mplssupport__",
++   "__ph_opt_in_out_",
++   "__ph_opt_in_out_",
++   "__ph_opt_in_out_",
++   "__ph_opt_in_out_",
++   "__ph_opt_in_out_",
++   "__ph_opt_in_out_",
++   "ph_debug",
++   "ph_debug",
++   "ph_debug",
++   "ph_phc_throwaway_posthog",
++   "ph_phc_throwaway_posthog__flags",
++   "ph_phc_throwaway_posthog__flags",
++   "ph_phc_throwaway_posthog__flags",
++   "ph_phc_throwaway_posthog__flags",
++   "ph_phc_throwaway_posthog__flags",
++   "ph_phc_throwaway_posthog__flags",
++   "ph_phc_throwaway_posthog__flags",
++   "ph_phc_throwaway_posthog",
++   "ph_phc_throwaway_posthog",
++   "ph_phc_throwaway_posthog__flags",
++   "ph_phc_throwaway_posthog__surveys",
++   "ph_phc_throwaway_posthog",
++   "ph_phc_throwaway_posthog",
++   "ph_phc_throwaway_posthog",
++   "ph_phc_throwaway_posthog",
++   "__support__",
++   "__support__",
++   "__support__",
++   "ph_phc_throwaway_posthog",
++   "ph_phc_throwaway_posthog",
++   "ph_phc_throwaway_posthog",
++   "ph_phc_throwaway_posthog",
++   "ph_phc_throwaway_posthog",
++   "ph_phc_throwaway_posthog",
++   "ph_phc_throwaway_session_registered_properties",
++   "test",
++   "test",
++   "_postHogToolbarParams",
++   "ph_phc_throwaway_posthog_cookie_identity_change_pending",
++   "ph_phc_throwaway_session_registered_properties",
++   "ph_phc_throwaway_posthog_cookie_identity_change_pending",
++   "ph_phc_throwaway_posthog_cookie_identity_change_pending",
++   "ph_phc_throwaway_posthog_cookie_identity_change_pending",
++   "ph_phc_throwaway_posthog_cookie_identity_change_pending",
++ ]
+
+ ❯ src/lib/telemetry.sdk.test.ts:119:82
+    117|     await startedTelemetry();
+    118|
+    119|     expect(device.storageKeys.filter((key) => !key.startsWith("next-se…
+       |                                                                                  ^
+    120|     expect(device.cookieWrites).toEqual([]);
+    121|     expect(loadedScripts().filter((src) => /toolbar|\/array\//.test(sr…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/lib/telemetry.sdk.test.ts > a real posthog-js on a Player page > sends nothing while the visitor has measurement off, and keeps only that choice
+AssertionError: expected [ '_postHogToolbarParams', …(1) ] to deeply equal [ 'next-session.measurementOff' ]
+
+- Expected
++ Received
+
+  [
++   "_postHogToolbarParams",
+    "next-session.measurementOff",
+  ]
+
+ ❯ src/lib/telemetry.sdk.test.ts:134:39
+    132|     window.history.pushState(null, "", "/privacy");
+    133|     expect(telemetry.measurementIsOn()).toBe(false);
+    134|     expect(Object.keys(localStorage)).toEqual(["next-session.measureme…
+       |                                       ^
+    135|
+    136|     await telemetry.turnMeasurementOn();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  16:02:35
+   Duration  3.71s (tests 85%, environment 12%, setup 2%, transform 1%)
+

@@ -1,0 +1,57 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-74
+
+ ❯ |ui| src/lib/telemetry.test.ts (39 tests | 1 failed) 22ms
+   ❯ initTelemetry (7)
+     × honours an opt-out made in another tab after this one turned measurement back on 5ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/legal/MeasurementSwitch.test.tsx (3 tests | 1 failed) 690ms
+   ❯ the usage measurement switch on /privacy (3)
+     × stays off for the visit when the browser refuses to store the choice 48ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > initTelemetry > honours an opt-out made in another tab after this one turned measurement back on
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/lib/telemetry.test.ts:337:54
+    335|     sharedStorage.setItem("next-session.measurementOff", "1");
+    336|
+    337|     expect(telemetry.measurementIsOn(sharedStorage)).toBe(false);
+       |                                                      ^
+    338|     vi.unstubAllGlobals();
+    339|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/features/legal/MeasurementSwitch.test.tsx > the usage measurement switch on /privacy > stays off for the visit when the browser refuses to store the choice
+AssertionError: expected 'Usage measurement is off in this brow…' to be 'Usage measurement is off for this vis…' // Object.is equality
+
+Expected: "Usage measurement is off for this visit. This browser doesn't let Next Session remember the choice."
+Received: "Usage measurement is off in this browser."
+
+ ❯ src/features/legal/MeasurementSwitch.test.tsx:88:52
+     86|     const telemetry = await import("../../lib/telemetry");
+     87|     expect(telemetry.measurementIsOn()).toBe(false);
+     88|     expect(screen.getByRole("status").textContent).toBe(
+       |                                                    ^
+     89|       "Usage measurement is off for this visit. This browser doesn't l…
+     90|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 2 passed (4)
+      Tests  2 failed | 54 passed (56)
+   Start at  16:17:39
+   Duration  1.46s (environment 58%, tests 23%, setup 8%, transform 7%, import 3%)
+
