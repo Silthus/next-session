@@ -14,6 +14,7 @@ import { internalMutation, type MutationCtx } from "./_generated/server";
 import { fail } from "./model/errors";
 import { insertGroup } from "./model/groups";
 import { enforceRateLimit } from "./model/rateLimits";
+import { track } from "./model/telemetry";
 
 const ANONYMOUS = "anonymous";
 const DAY = 86_400_000;
@@ -112,13 +113,27 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       const gmCtx = ctx as unknown as MutationCtx;
       if (provider.id === ANONYMOUS) await insertFirstGroup(gmCtx, userId);
       if (provider.id === GOOGLE) await gmCtx.db.patch("users", userId, legalAcceptance());
+      if (provider.id === PASSWORD || provider.id === GOOGLE) {
+        await trackNewAccount(gmCtx, userId, provider.id);
+      }
     },
   },
 });
 
 async function insertFirstGroup(ctx: MutationCtx, userId: Id<"users">) {
   const gm = await ctx.db.get("users", userId);
-  if (gm !== null) await insertGroup(ctx, gm);
+  if (gm === null) return;
+  const groupId = await insertGroup(ctx, gm);
+  await track(ctx, { name: "link_created", actor: gm, group_id: groupId });
+}
+
+async function trackNewAccount(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  method: typeof PASSWORD | typeof GOOGLE,
+) {
+  const account = await ctx.db.get("users", userId);
+  if (account !== null) await track(ctx, { name: "account_created", actor: account, method });
 }
 
 export const admitAnonymousSignUp = internalMutation({
