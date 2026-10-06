@@ -1,0 +1,5 @@
+CNAME | next-session.link | convex.domains | proxied
+CNAME | rsend.next-session.link | rsend-euw1.forge.rmta.net | dns-only
+CNAME | send.next-session.link | send.forge.rmta.net | dns-only
+TXT | _convex_domains.next-session.link | "little-spaniel-709" | dns-only
+TXT | resend._domainkey.next-session.link | "p=MIGfMA0GCSqGS… | dns-only

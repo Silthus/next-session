@@ -1,0 +1,361 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-22
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/routes/routes.test.tsx (6 tests | 1 failed) 1282ms
+   ❯ /privacy (1)
+     × renders the effective date, the processor table, the storage list and the authority link 1007ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/routes/routes.test.tsx > /privacy > renders the effective date, the processor table, the storage list and the authority link
+TestingLibraryElementError: Unable to find an element with the text: Updated Oct 4, 2026. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-2xl flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-2xl flex-1 pb-16"[39m
+      [36m>[39m
+        [36m<article>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"[39m
+          [36m>[39m
+            [0mUpdated [0m
+            [0mOct 3, 2026[0m
+          [36m</p>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"mt-2 font-display text-4xl font-extrabold"[39m
+          [36m>[39m
+            [0mPrivacy Policy[0m
+          [36m</h1>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-6 flex flex-col gap-4"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"leading-relaxed text-ink-2"[39m
+            [36m>[39m
+              [0mThis policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-8 flex flex-col gap-8"[39m
+          [36m>[39m
+            [36m<section[39m
+              [33mclass[39m=[32m"flex flex-col gap-3"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33mclass[39m=[32m"font-display text-xl font-bold"[39m
+              [36m>[39m
+                [0m1. Controller[0m
+              [36m</h2>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"leading-relaxed text-ink-2"[39m
+              [36m>[39m
+                [0mMichael Reichenbach[0m
+                [36m<br />[39m
+                [0mSomewhere 1, 12345 Town[0m
+                [36m<br />[39m
+                [36m<a[39m
+                  [33mclass[39m=[32m"text-accent underline underline-offset-2 hover:text-accent-strong"[39m
+                  [33mhref[39m=[32m"mailto:hello@example.test"[39m
+                [36m>[39m
+                  [0mhello@example.test[0m
+                [36m</a>[39m
+              [36m</p>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"leading-relaxed text-ink-2"[39m
+              [36m>[39m
+                [0mWe have not appointed a data protection officer because we are not required to.[0m
+              [36m</p>[39m
+            [36m</section>[39m
+            [36m<section[39m
+              [33mclass[39m=[32m"flex flex-col gap-3"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33mclass[39m=[32m"font-display text-xl font-bold"[39m
+              [36m>[39m
+                [0m2. What we process[0m
+              [36m</h2>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"overflow-x-auto rounded-lg border border-line"[39m
+              [36m>[39m
+                [36m<table[39m
+                  [33mclass[39m=[32m"w-full text-left text-sm"[39m
+                [36m>[39m
+                  [36m<thead[39m
+                    [33mclass[39m=[32m"bg-surface-2"[39m
+                  [36m>[39m
+                    [36m<tr>[39m
+                      [36m<th[39m
+                        [33mclass[39m=[32m"px-3 py-2 font-semibold text-ink"[39m
+                        [33mscope[39m=[32m"col"[39m
+                      [36m>[39m
+                        [0mData[0m
+                      [36m</th>[39m
+                      [36m<th[39m
+                        [33mclass[39m=[32m"px-3 py-2 font-semibold text-ink"[39m
+                        [33mscope[39m=[32m"col"[39m
+                      [36m>[39m
+                        [0mPurpose[0m
+                      [36m</th>[39m
+                      [36m<th[39m
+                        [33mclass[39m=[32m"px-3 py-2 font-semibold text-ink"[39m
+                        [33mscope[39m=[32m"col"[39m
+                      [36m>[39m
+                        [0mLegal basis (GDPR Art. 6)[0m
+                      [36m</th>[39m
+                    [36m</tr>[39m
+                  [36m</thead>[39m
+                  [36m<tbody>[39m
+                    [36m<tr[39m
+                      [33mclass[39m=[32m"border-t border-line align-top"[39m
+                    [36m>[39m
+                      [36m<td[39m
+                        [33mclass[39m=[32m"px-3 py-2 leading-relaxed text-ink-2"[39m
+                      [36m>[39m
+                        [0mFor a group created without an account: a random user ID and the time you accepted the Terms[0m
+                      [36m</td>[39m
+                      [36m<td[39m
+                        [33mclass[39m=[32m"px-3 py-2 leading-relaxed text-ink-2"[39m
+                      [36m>[39m
+                        [0mRun your group and prove your acceptance[0m
+                      [36m</td>[39m
+                      [36m<td[39m
+                        [33mclass[39m=[32m"px-3 py-2 leading-relaxed text-ink-2"[39m
+                      [36m>[39m
+                        [0mContract, 6(1)(b)[0m
+                      [36m</td>[39m
+                    [36m</tr>[39m
+                    [36m<tr[39m
+                      [33mclass[39m=[32m"border-t border-line align-top"[39m
+                    [36m>[39m
+       ...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-dvh flex-col"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-2xl flex items-center justify-between py-5"[39m
+      [36m>[39m
+        [36m<a[39m
+          [33maria-label[39m=[32m"Next Session home"[39m
+          [33mclass[39m=[32m"inline-flex items-center gap-2.5 text-ink"[39m
+          [33mhref[39m=[32m"/"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-8 size-7"[39m
+            [33mviewBox[39m=[32m"0 0 32 32"[39m
+          [36m>[39m
+            [36m<rect[39m
+              [33mclass[39m=[32m"fill-accent"[39m
+              [33mheight[39m=[32m"28"[39m
+              [33mrx[39m=[32m"9"[39m
+              [33mwidth[39m=[32m"28"[39m
+              [33mx[39m=[32m"2"[39m
+              [33my[39m=[32m"2"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33mclass[39m=[32m"fill-accent-strong"[39m
+              [33md[39m=[32m"M11 2h10a9 9 0 0 1 9 9H2a9 9 0 0 1 9-9z"[39m
+            [36m/>[39m
+            [36m<circle[39m
+              [33mclass[39m=[32m"fill-accent-ink"[39m
+              [33mcx[39m=[32m"16"[39m
+              [33mcy[39m=[32m"20"[39m
+              [33mr[39m=[32m"5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"font-display font-bold text-lg"[39m
+          [36m>[39m
+            [0mNext Session[0m
+          [36m</span>[39m
+        [36m</a>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full px-4 sm:px-6 max-w-2xl flex-1 pb-16"[39m
+      [36m>[39m
+        [36m<article>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"[39m
+          [36m>[39m
+            [0mUpdated [0m
+            [0mOct 3, 2026[0m
+          [36m</p>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"mt-2 font-display text-4xl font-extrabold"[39m
+          [36m>[39m
+            [0mPrivacy Policy[0m
+          [36m</h1>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-6 flex flex-col gap-4"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"leading-relaxed text-ink-2"[39m
+            [36m>[39m
+              [0mThis policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-8 flex flex-col gap-8"[39m
+          [36m>[39m
+            [36m<section[39m
+              [33mclass[39m=[32m"flex flex-col gap-3"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33mclass[39m=[32m"font-display text-xl font-bold"[39m
+              [36m>[39m
+                [0m1. Controller[0m
+              [36m</h2>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"leading-relaxed text-ink-2"[39m
+              [36m>[39m
+                [0mMichael Reichenbach[0m
+                [36m<br />[39m
+                [0mSomewhere 1, 12345 Town[0m
+                [36m<br />[39m
+                [36m<a[39m
+                  [33mclass[39m=[32m"text-accent underline underline-offset-2 hover:text-accent-strong"[39m
+                  [33mhref[39m=[32m"mailto:hello@example.test"[39m
+                [36m>[39m
+                  [0mhello@example.test[0m
+                [36m</a>[39m
+              [36m</p>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"leading-relaxed text-ink-2"[39m
+              [36m>[39m
+                [0mWe have not appointed a data protection officer because we are not required to.[0m
+              [36m</p>[39m
+            [36m</section>[39m
+            [36m<section[39m
+              [33mclass[39m=[32m"flex flex-col gap-3"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33mclass[39m=[32m"font-display text-xl font-bold"[39m
+              [36m>[39m
+                [0m2. What we process[0m
+              [36m</h2>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"overflow-x-auto rounded-lg border border-line"[39m
+              [36m>[39m
+                [36m<table[39m
+                  [33mclass[39m=[32m"w-full text-left text-sm"[39m
+                [36m>[39m
+                  [36m<thead[39m
+                    [33mclass[39m=[32m"bg-surface-2"[39m
+                  [36m>[39m
+                    [36m<tr>[39m
+                      [36m<th[39m
+                        [33mclass[39m=[32m"px-3 py-2 font-semibold text-ink"[39m
+                        [33mscope[39m=[32m"col"[39m
+                      [36m>[39m
+                        [0mData[0m
+                      [36m</th>[39m
+                      [36m<th[39m
+                        [33mclass[39m=[32m"px-3 py-2 font-semibold text-ink"[39m
+                        [33mscope[39m=[32m"col"[39m
+                      [36m>[39m
+                        [0mPurpose[0m
+                      [36m</th>[39m
+                      [36m<th[39m
+                        [33mclass[39m=[32m"px-3 py-2 font-semibold text-ink"[39m
+                        [33mscope[39m=[32m"col"[39m
+                      [36m>[39m
+                        [0mLegal basis (GDPR Art. 6)[0m
+                      [36m</th>[39m
+                    [36m</tr>[39m
+                  [36m</thead>[39m
+                  [36m<tbody>[39m
+                    [36m<tr[39m
+                      [33mclass[39m=[32m"border-t border-line align-top"[39m
+                    [36m>[39m
+                      [36m<td[39m
+                        [33mclass[39m=[32m"px-3 py-2 leading-relaxed text-ink-2"[39m
+                      [36m>[39m
+                        [0mFor a group created without an account: a random user ID and the time you accepted the Terms[0m
+                      [36m</td>[39m
+                      [36m<td[39m
+                        [33mclass[39m=[32m"px-3 py-2 leading-relaxed text-ink-2"[39m
+                      [36m>[39m
+                        [0mRun your group and prove your acceptance[0m
+                      [36m</td>[39m
+                      [36m<td[39m
+                        [33mclass[39m=[32m"px-3 py-2 leading-relaxed text-ink-2"[39m
+                      [36m>[39m
+                        [0mContract, 6(1)(b)[0m
+                      [36m</td>[39m
+                    [36m</tr>[39m
+                    [36m<tr[39m
+                      [33mclass[39m=[32m"border-t border-line align-top"[39m
+                    [36m>[39m
+       ...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/routes/routes.test.tsx:72:25
+     70|   it("renders the effective date, the processor table, the storage lis…
+     71|     renderAt("/privacy");
+     72|     expect(await screen.findByText("Updated Oct 4, 2026")).toBeTruthy(…
+       |                         ^
+     73|     expect(screen.getByRole("cell", { name: "Convex, Inc." })).toBeTru…
+     74|     expect(screen.getAllByRole("listitem").length).toBeGreaterThanOrEq…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  07:48:22
+   Duration  2.24s (tests 59%, environment 21%, transform 12%, import 5%, setup 3%)
+
