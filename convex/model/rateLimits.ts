@@ -12,6 +12,7 @@ const limits = {
   answerPerGroup: { kind: "token bucket", rate: 600, period: MINUTE, capacity: 300, shards: 10 },
   startSave: { kind: "fixed window", rate: 10, period: HOUR },
   gmEdit: { kind: "token bucket", rate: 120, period: MINUTE, capacity: 60 },
+  claimPlayer: { kind: "token bucket", rate: 30, period: MINUTE, capacity: 10 },
 } as const;
 
 export const rateLimiter = new RateLimiter(components.rateLimiter, limits);

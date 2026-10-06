@@ -221,7 +221,11 @@ const LETTERS_WITHOUT_DECOMPOSITION: Record<string, string> = {
 };
 
 function searchable(text: string) {
-  const unaccented = text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
+  const unaccented = text
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/\s+/g, " ")
+    .toLocaleLowerCase();
   return Array.from(unaccented, (letter) => LETTERS_WITHOUT_DECOMPOSITION[letter] ?? letter).join(
     "",
   );

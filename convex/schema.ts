@@ -37,7 +37,10 @@ export default defineSchema({
     groupId: v.id("groups"),
     name: v.string(),
     nameKey: v.string(),
-  }).index("by_groupId_and_nameKey", ["groupId", "nameKey"]),
+    userId: v.optional(v.id("users")),
+  })
+    .index("by_groupId_and_nameKey", ["groupId", "nameKey"])
+    .index("by_userId_and_groupId", ["userId", "groupId"]),
 
   answers: defineTable({
     groupId: v.id("groups"),
