@@ -2,6 +2,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import type { ErrorCode } from "../../../convex/model/errors";
 import { appErrorOf } from "../../lib/errors";
 import type { KeyValueStorage } from "../../lib/storage";
+import { log } from "../../lib/telemetry";
 
 export const PENDING_KEEP_KEY = "next-session.pendingKeep";
 
@@ -65,7 +66,17 @@ export async function resumePendingKeep(deps: KeepDeps): Promise<ResumedKeep | n
     forgetPendingKeep(deps.storage);
     return null;
   }
-  return { keep, outcome: await claimRemembered(keep, remembered, deps) };
+  const outcome = await claimRemembered(keep, remembered, deps);
+  logResumedKeep(outcome);
+  return { keep, outcome };
+}
+
+function logResumedKeep(outcome: KeepOutcome) {
+  if (outcome.kept) log("info", "Pending keep finished", { outcome: "kept" });
+  else
+    log("warn", "Pending keep refused", {
+      outcome: appErrorOf(outcome.error)?.code ?? "unexpected",
+    });
 }
 
 async function claimRemembered(

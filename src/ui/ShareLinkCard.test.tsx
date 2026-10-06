@@ -1,7 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { log, track } from "../lib/telemetry";
 import { ShareLinkCard } from "./ShareLinkCard";
+
+vi.mock(import("../lib/telemetry"), async (original) => ({
+  ...(await original()),
+  track: vi.fn(),
+  log: vi.fn(),
+}));
+
+beforeEach(() => {
+  vi.mocked(track).mockReset();
+  vi.mocked(log).mockReset();
+});
 
 const url = "https://next-session.link/s/k3Qx9Lm2aB";
 const message = `Help me find our next game night. Tap the days you can play, it takes 30 seconds: ${url}`;
@@ -133,5 +145,112 @@ describe("ShareLinkCard", () => {
     expect(screen.queryByText("Anyone with the link can answer. Keep it in the group.")).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "Rotate" }));
     expect(onRotate).toHaveBeenCalledOnce();
+  });
+
+  describe("telemetry", () => {
+    it("tracks a copy through the clipboard once, with its surface", async () => {
+      stubClipboard(() => Promise.resolve());
+      render(<ShareLinkCard url={url} surface="landing" />);
+
+      await userEvent.click(screen.getByRole("button", { name: "Copy" }));
+      await screen.findByRole("button", { name: "Copied" });
+
+      expect(track).toHaveBeenCalledOnce();
+      expect(track).toHaveBeenCalledWith({
+        name: "share_link_copied",
+        surface: "landing",
+        method: "clipboard",
+      });
+      expect(log).not.toHaveBeenCalled();
+    });
+
+    it("tracks and logs a copy through the selection when the clipboard refuses", async () => {
+      stubClipboard(() =>
+        Promise.reject(new DOMException("Write permission denied.", "NotAllowedError")),
+      );
+      stubLegacyCopy(true);
+      render(<ShareLinkCard url={url} />);
+
+      await userEvent.click(screen.getByRole("button", { name: "Copy" }));
+      await screen.findByRole("button", { name: "Copied" });
+
+      expect(track).toHaveBeenCalledOnce();
+      expect(track).toHaveBeenCalledWith({
+        name: "share_link_copied",
+        surface: "rail",
+        method: "fallback",
+      });
+      expect(log).toHaveBeenCalledOnce();
+      expect(log).toHaveBeenCalledWith("warn", "Copy fell back to the selection", {
+        surface: "rail",
+        reason: "NotAllowedError",
+      });
+    });
+
+    it("tracks and logs a copy the browser refused every way", async () => {
+      stubClipboard(() => Promise.reject(new Error("blocked")));
+      stubLegacyCopy(false);
+      render(<ShareLinkCard url={url} compact />);
+
+      await userEvent.click(screen.getByRole("button", { name: "Copy" }));
+      await screen.findByText("Long-press the link to copy it.");
+
+      expect(track).toHaveBeenCalledOnce();
+      expect(track).toHaveBeenCalledWith({
+        name: "share_link_copied",
+        surface: "compact",
+        method: "failed",
+      });
+      expect(log).toHaveBeenCalledOnce();
+      expect(log).toHaveBeenCalledWith("error", "Copy failed", {
+        surface: "compact",
+        reason: "Error",
+      });
+    });
+
+    it.each([
+      ["Share via WhatsApp", "whatsapp"],
+      ["Share via Telegram", "telegram"],
+      ["Share via Mail", "mail"],
+    ] as const)("tracks %s by its channel", async (label, channel) => {
+      render(<ShareLinkCard url={url} surface="landing" />);
+      const target = screen.getByRole("link", { name: label });
+      target.addEventListener("click", (event) => event.preventDefault());
+
+      await userEvent.click(target);
+
+      expect(track).toHaveBeenCalledExactlyOnceWith({
+        name: "share_link_shared",
+        surface: "landing",
+        channel,
+      });
+    });
+
+    it("tracks the native share sheet only once it shared", async () => {
+      let finish: (shared: boolean) => void = () => undefined;
+      const share = vi.fn(
+        () =>
+          new Promise<void>((resolve, reject) => {
+            finish = (shared) => (shared ? resolve() : reject(new DOMException("", "AbortError")));
+          }),
+      );
+      vi.stubGlobal("navigator", { ...navigator, share });
+      render(<ShareLinkCard url={url} />);
+
+      await userEvent.click(screen.getByRole("button", { name: "Share" }));
+      finish(false);
+      await Promise.resolve();
+      expect(track).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByRole("button", { name: "Share" }));
+      finish(true);
+      await vi.waitFor(() =>
+        expect(track).toHaveBeenCalledExactlyOnceWith({
+          name: "share_link_shared",
+          surface: "rail",
+          channel: "native",
+        }),
+      );
+    });
   });
 });

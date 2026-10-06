@@ -7,10 +7,20 @@ import {
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ComponentProps } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { track } from "../../lib/telemetry";
 import { MyGroups } from "./MyGroups";
 import type { MyGroups as MyGroupsData, PlayingGroup } from "./myGroups";
+
+vi.mock(import("../../lib/telemetry"), async (original) => ({
+  ...(await original()),
+  track: vi.fn(),
+}));
+
+beforeEach(() => {
+  vi.mocked(track).mockReset();
+});
 
 const today = "2026-10-06";
 
@@ -176,5 +186,19 @@ describe("MyGroups", () => {
 
     expect(await screen.findByText("Loading your groups")).toBeTruthy();
     expect(screen.queryByRole("region", { name: "You play in" })).toBeNull();
+  });
+});
+
+describe("MyGroups telemetry", () => {
+  it.each([
+    ["for a Player who runs nothing", { running: [], playing: [thursday] }],
+    ["empty", { running: [], playing: [] }],
+  ])("tracks Create your link on /me %s", async (_, groups) => {
+    const { onCreate } = renderMyGroups({ groups });
+
+    await userEvent.click(await screen.findByRole("button", { name: "Create your link" }));
+
+    expect(onCreate).toHaveBeenCalledOnce();
+    expect(track).toHaveBeenCalledExactlyOnceWith({ name: "create_link_started", surface: "me" });
   });
 });

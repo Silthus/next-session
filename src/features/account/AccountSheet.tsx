@@ -1,12 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { ConvexError } from "convex/values";
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
-import type { AppErrorData } from "../../../convex/model/errors";
+import type { AppErrorData, ErrorCode } from "../../../convex/model/errors";
 import { MAX_GROUPS_PER_GM } from "../../../shared/limits";
+import { appErrorOf } from "../../lib/errors";
+import { track } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
 import { Sheet } from "../../ui/Sheet";
-import type { SaveInput, SaveMode } from "./save";
+import { PASSWORD_FLOWS, type SaveInput, type SaveMode } from "./save";
 
 export type AccountIntent = "save" | "keep" | "logIn";
 
@@ -14,6 +15,12 @@ type Failure = { message: string; offer?: SaveMode; claimExpired?: boolean };
 
 const MIN_PASSWORD_LENGTH = 8;
 const weakPassword: Failure = { message: "Use at least 8 characters for the password." };
+const SIGN_IN_REFUSALS: ReadonlySet<ErrorCode> = new Set([
+  "WEAK_PASSWORD",
+  "EMAIL_TAKEN",
+  "INVALID_CREDENTIALS",
+  "RATE_LIMITED",
+]);
 
 type AccountSheetProps = {
   open: boolean;
@@ -124,7 +131,12 @@ function AccountForm({
       setFailure(weakPassword);
       return;
     }
-    void run(() => onSubmit({ email: email.trim(), password, mode }));
+    void run(() =>
+      onSubmit({ email: email.trim(), password, mode }).catch((error: unknown) => {
+        trackRefusedSignIn(error, mode);
+        throw error;
+      }),
+    );
   };
 
   const switchMode = (next: SaveMode) => {
@@ -503,8 +515,14 @@ function submitLabel(intent: AccountIntent, mode: SaveMode) {
   return submitLabels[intent][mode];
 }
 
+function trackRefusedSignIn(error: unknown, mode: SaveMode) {
+  const code = appErrorOf(error)?.code;
+  if (code === undefined || !SIGN_IN_REFUSALS.has(code)) return;
+  track({ name: "sign_in_failed", flow: PASSWORD_FLOWS[mode], code });
+}
+
 function describeFailure(error: unknown, intent: AccountIntent): Failure {
-  const data = error instanceof ConvexError ? (error.data as Partial<AppErrorData>) : {};
+  const data: Partial<AppErrorData> = appErrorOf(error) ?? {};
   switch (data.code) {
     case "WEAK_PASSWORD":
       return weakPassword;

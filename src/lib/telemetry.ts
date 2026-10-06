@@ -22,7 +22,16 @@ export type BrowserEvent =
   | { name: "answers_started"; group_id: string }
   | { name: "save_started" }
   | { name: "sign_in_failed"; flow: "signUp" | "signIn"; code: string }
-  | { name: "keep_group_started"; group_id: string };
+  | { name: "keep_group_started"; group_id: string }
+  | { name: "remove_group_started"; group_id: string }
+  | { name: "remove_group_undone"; group_id: string }
+  | { name: "create_link_started"; surface: "me" };
+
+export type ErrorContext = {
+  surface: string;
+  convex_function?: string;
+  convex_request_id?: string;
+};
 
 type LogLevel = "info" | "warn" | "error";
 type LogAttributes = Record<string, string | number | boolean>;
@@ -109,7 +118,7 @@ export function log(level: LogLevel, body: string, attributes?: LogAttributes): 
   withClient((active) => active.logger[level](body, attributes));
 }
 
-export function reportError(error: unknown, context: { surface: string }): void {
+export function reportError(error: unknown, context: ErrorContext): void {
   withClient((active) => active.captureException(error, context));
 }
 

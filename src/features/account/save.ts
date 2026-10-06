@@ -1,5 +1,7 @@
 import { ConvexError } from "convex/values";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { appErrorOf } from "../../lib/errors";
+import { log, track } from "../../lib/telemetry";
 
 export const PENDING_SAVE_KEY = "next-session.pendingSave";
 
@@ -28,6 +30,7 @@ export type GoogleSaveDeps = Pick<SaveDeps, "startSave" | "storage"> & {
 export const PASSWORD_FLOWS = { create: "signUp", logIn: "signIn" } as const;
 
 export async function saveGroups({ email, password, mode }: SaveInput, deps: SaveDeps) {
+  track({ name: "save_started" });
   const { code } = await deps.startSave();
   deps.storage.setItem(PENDING_SAVE_KEY, code);
   await deps.signIn("password", { email, password, flow: PASSWORD_FLOWS[mode] });
@@ -39,6 +42,7 @@ export async function saveThroughGoogle({
   storage,
   continueWithGoogle,
 }: GoogleSaveDeps) {
+  track({ name: "save_started" });
   const { code } = await startSave();
   storage.setItem(PENDING_SAVE_KEY, code);
   await continueWithGoogle();
@@ -55,16 +59,30 @@ export async function finishLeftOverSave(deps: ClaimDeps) {
 export async function finishPendingSave(deps: ClaimDeps) {
   const code = deps.storage.getItem(PENDING_SAVE_KEY);
   if (code === null) throw new ConvexError({ code: "CLAIM_INVALID" });
-  return await redeem(code, deps);
+  return await redeem(code, deps, logRecovery);
 }
 
 const redemptions = new Map<string, Promise<SaveResult>>();
 
-function redeem(code: string, deps: ClaimDeps) {
-  const inFlight =
-    redemptions.get(code) ?? redeemOnce(code, deps).finally(() => redemptions.delete(code));
-  redemptions.set(code, inFlight);
-  return inFlight;
+function redeem(
+  code: string,
+  deps: ClaimDeps,
+  observe: (redemption: Promise<SaveResult>) => void = () => undefined,
+) {
+  const inFlight = redemptions.get(code);
+  if (inFlight) return inFlight;
+  const redemption = redeemOnce(code, deps).finally(() => redemptions.delete(code));
+  redemptions.set(code, redemption);
+  observe(redemption);
+  return redemption;
+}
+
+function logRecovery(redemption: Promise<SaveResult>) {
+  redemption.then(
+    () => log("info", "Pending save finished", { outcome: "saved" }),
+    (error: unknown) =>
+      log("warn", "Pending save refused", { outcome: appErrorOf(error)?.code ?? "unexpected" }),
+  );
 }
 
 async function redeemOnce(code: string, { finishSave, storage }: ClaimDeps) {

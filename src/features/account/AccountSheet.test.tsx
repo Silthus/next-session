@@ -9,8 +9,15 @@ import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import { useState, type ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { reportError, track } from "../../lib/telemetry";
 import type { SaveInput } from "./save";
 import { AccountSheet } from "./AccountSheet";
+
+vi.mock(import("../../lib/telemetry"), async (original) => ({
+  ...(await original()),
+  track: vi.fn(),
+  reportError: vi.fn(),
+}));
 
 type Submit = (input: SaveInput) => Promise<unknown>;
 
@@ -61,6 +68,8 @@ async function alertText() {
 }
 
 beforeEach(() => {
+  vi.mocked(track).mockReset();
+  vi.mocked(reportError).mockReset();
   HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
     this.open = true;
   };
@@ -576,5 +585,66 @@ describe("AccountSheet with Google", () => {
     expect(await alertText()).toBe("Too many tries. Try again in a minute.");
     expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByRole("button", google)).toHaveProperty("disabled", false);
+  });
+});
+
+describe("AccountSheet telemetry", () => {
+  const refusedWith = (data: { code: string }) => () => Promise.reject(new ConvexError(data));
+
+  it("tracks a refused log-in with its flow and code", async () => {
+    renderLogInSheet(refusedWith({ code: "INVALID_CREDENTIALS" }));
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Log in" }));
+    await alertText();
+
+    expect(track).toHaveBeenCalledExactlyOnceWith({
+      name: "sign_in_failed",
+      flow: "signIn",
+      code: "INVALID_CREDENTIALS",
+    });
+  });
+
+  it("tracks a refused sign-up while saving", async () => {
+    renderSaveSheet(refusedWith({ code: "EMAIL_TAKEN" }));
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+    await alertText();
+
+    expect(track).toHaveBeenCalledExactlyOnceWith({
+      name: "sign_in_failed",
+      flow: "signUp",
+      code: "EMAIL_TAKEN",
+    });
+  });
+
+  it("does not count a refusal after the sign-in, or a password the sheet refused itself", async () => {
+    renderSaveSheet(refusedWith({ code: "TOO_MANY_GROUPS" }));
+    await fillIn("short");
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+    await alertText();
+    await userEvent.type(screen.getByLabelText("Password"), " and long enough");
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+    await screen.findByText(/An account holds up to/);
+
+    expect(track).not.toHaveBeenCalled();
+  });
+
+  it("reports a failure without a code that came from Convex", async () => {
+    renderLogInSheet(() =>
+      Promise.reject(
+        new Error(
+          "[CONVEX A(auth:signIn)] [Request ID: 5e5e5e5e] Server Error\n  Called by client",
+        ),
+      ),
+    );
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Log in" }));
+
+    expect(await alertText()).toBe("That didn't work. Try again.");
+    expect(reportError).toHaveBeenCalledOnce();
+    expect(vi.mocked(reportError).mock.calls[0]![1]).toMatchObject({
+      convex_function: "auth:signIn",
+      convex_request_id: "5e5e5e5e",
+    });
   });
 });

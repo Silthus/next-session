@@ -9,7 +9,13 @@ import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
+import { track } from "../../lib/telemetry";
 import { LandingView } from "./LandingView";
+
+vi.mock(import("../../lib/telemetry"), async (original) => ({
+  ...(await original()),
+  track: vi.fn(),
+}));
 
 type Props = ComponentProps<typeof LandingView>;
 
@@ -118,5 +124,20 @@ describe("LandingView", () => {
     renderLanding({ state: { ...created, savedAs: "gm@example.test" } });
     expect((await screen.findByRole("status")).textContent).toBe("Saved to gm@example.test.");
     expect(screen.queryByRole("button", { name: "save it to an account" })).toBeNull();
+  });
+
+  it("counts a copy of the new link as the landing's", async () => {
+    vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText: () => Promise.resolve() } });
+    renderLanding({ state: created });
+
+    await userEvent.click(await screen.findByRole("button", { name: "Copy" }));
+    await screen.findByRole("button", { name: "Copied" });
+
+    expect(track).toHaveBeenCalledExactlyOnceWith({
+      name: "share_link_copied",
+      surface: "landing",
+      method: "clipboard",
+    });
+    vi.unstubAllGlobals();
   });
 });

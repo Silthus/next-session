@@ -1,6 +1,26 @@
 import { ConvexError } from "convex/values";
-import { describe, expect, it } from "vitest";
-import { errorMessage } from "./errors";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { appErrorOf, errorMessage } from "./errors";
+import { reportError } from "./telemetry";
+
+vi.mock(import("./telemetry"), async (original) => ({
+  ...(await original()),
+  reportError: vi.fn(),
+}));
+
+function convexFailure(path: string, serverMessage: string) {
+  return new Error(`[CONVEX M(${path})] ${serverMessage}\n  Called by client`);
+}
+
+function codedFailure(data: { code: string; retryAfter?: number }) {
+  const error = new ConvexError(data);
+  error.message = `[CONVEX M(player:join)] [Request ID: 1a2b3c] Server Error\nUncaught ConvexError: ${JSON.stringify(data)}`;
+  return error;
+}
+
+beforeEach(() => {
+  vi.mocked(reportError).mockReset();
+});
 
 describe("errorMessage", () => {
   it.each([
@@ -84,5 +104,66 @@ describe("errorMessage", () => {
     expect(errorMessage(new ConvexError({ code: "NOT_FOUND" }), topic)).toBe(
       "That didn't save. Try again.",
     );
+  });
+});
+
+describe("reporting unexpected Convex failures", () => {
+  it("reports a failure without an ErrorCode with its function name and request ID", () => {
+    errorMessage(convexFailure("player:answer", "[Request ID: 7f3e9a01] Server Error"), "answer");
+
+    expect(reportError).toHaveBeenCalledOnce();
+    const [reported, context] = vi.mocked(reportError).mock.calls[0]!;
+    expect(context).toEqual({
+      surface: "convex",
+      convex_function: "player:answer",
+      convex_request_id: "7f3e9a01",
+    });
+    expect(reported).toBeInstanceOf(Error);
+    expect((reported as Error).name).toBe("ConvexServerError");
+    expect((reported as Error).message).toBe("player:answer failed");
+  });
+
+  it("reports nothing of the server's message, which can carry names", () => {
+    const failure = convexFailure(
+      "player:join",
+      '[Request ID: 7f3e9a01] Server Error\nArgumentValidationError: Value "Robin" does not match',
+    );
+    errorMessage(failure, "join");
+
+    expect(JSON.stringify(vi.mocked(reportError).mock.calls)).not.toContain("Robin");
+    const [reported] = vi.mocked(reportError).mock.calls[0]!;
+    expect((reported as Error).stack).not.toContain("Robin");
+  });
+
+  it("reports a failure without a request ID by its function name", () => {
+    errorMessage(convexFailure("groups:create", "Server Error"), "group");
+
+    expect(vi.mocked(reportError).mock.calls[0]![1]).toEqual({
+      surface: "convex",
+      convex_function: "groups:create",
+    });
+  });
+
+  it("does not report a coded error: it is product flow", () => {
+    errorMessage(codedFailure({ code: "RATE_LIMITED", retryAfter: 1000 }), "answer");
+    appErrorOf(codedFailure({ code: "PLAYER_CLAIMED" }));
+
+    expect(reportError).not.toHaveBeenCalled();
+  });
+
+  it("does not report an error that did not come from a Convex call", () => {
+    errorMessage(new Error("The server refused the new sign-in"), "keep");
+    errorMessage("offline", "keep");
+
+    expect(reportError).not.toHaveBeenCalled();
+  });
+
+  it("reports the same failure once, however often it is read", () => {
+    const failure = convexFailure("player:claim", "[Request ID: 0c0ffee1] Server Error");
+    appErrorOf(failure);
+    errorMessage(failure, "keep");
+    errorMessage(failure, "keep");
+
+    expect(reportError).toHaveBeenCalledOnce();
   });
 });

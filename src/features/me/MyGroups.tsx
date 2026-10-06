@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react";
 import type { IsoDate } from "../../../shared/dates";
+import { track } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
 import { IconMore, IconStar } from "../../ui/icons";
 import { PageShell } from "../../ui/PageShell";
@@ -246,8 +247,12 @@ function CreateLink({
   onCreate: () => void;
   variant: "primary" | "secondary";
 }) {
+  const create = () => {
+    track({ name: "create_link_started", surface: "me" });
+    onCreate();
+  };
   return (
-    <Button variant={variant} onClick={onCreate} busy={creating && "Making your link…"}>
+    <Button variant={variant} onClick={create} busy={creating && "Making your link…"}>
       Create your link
     </Button>
   );
