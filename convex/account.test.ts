@@ -162,6 +162,44 @@ describe("Save", () => {
   });
 });
 
+describe("Save past the Group cap", () => {
+  async function seedGroups(ownerId: Id<"users">, count: number) {
+    await t.run(async (ctx) => {
+      for (let index = 0; index < count; index++) {
+        await ctx.db.insert("groups", {
+          ownerId,
+          name: `Table ${index}`,
+          shareToken: `table${String(index).padStart(5, "0")}`,
+        });
+      }
+    });
+  }
+
+  it("refuses to give an Account more than 50 Groups and moves nothing", async () => {
+    const anonymous = await createYourLink(t);
+    await anonymous.as.mutation(api.groups.create, {});
+    const { code } = await anonymous.as.mutation(api.account.startSave, {});
+    const account = await signUpAccount(t);
+    await seedGroups(account.userId, 49);
+
+    await expectErrorCode(account.as.mutation(api.account.finishSave, { code }), "TOO_MANY_GROUPS");
+
+    expect(await account.as.query(api.groups.mine, {})).toHaveLength(49);
+    expect(await anonymous.as.query(api.groups.mine, {})).toHaveLength(2);
+  });
+
+  it("saves up to exactly 50 Groups", async () => {
+    const anonymous = await createYourLink(t);
+    const { code } = await anonymous.as.mutation(api.account.startSave, {});
+    const account = await signUpAccount(t);
+    await seedGroups(account.userId, 49);
+
+    await account.as.mutation(api.account.finishSave, { code });
+
+    expect(await account.as.query(api.groups.mine, {})).toHaveLength(50);
+  });
+});
+
 describe("claim upkeep", () => {
   it("clears the Anonymous GM's expired claims when it starts another Save", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });

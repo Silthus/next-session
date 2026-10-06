@@ -1,6 +1,10 @@
 import { ConvexError } from "convex/values";
 import type { AppErrorData, ErrorCode } from "../../convex/model/errors";
-import { MAX_GROUPS_PER_GM, MAX_PLAYERS_PER_GROUP } from "../../shared/limits";
+import {
+  MAX_CLAIMED_PLAYERS_PER_ACCOUNT,
+  MAX_GROUPS_PER_GM,
+  MAX_PLAYERS_PER_GROUP,
+} from "../../shared/limits";
 import { NAME_MAX_LENGTH } from "../../shared/names";
 
 type Copy = Partial<Record<ErrorCode, string>>;
@@ -9,6 +13,8 @@ const shared: Copy = {
   RATE_LIMITED: "Slow down a moment, then try again.",
   INVALID_NAME: `Use 1 to ${String(NAME_MAX_LENGTH)} characters.`,
 };
+
+const claimCap = `You keep ${String(MAX_CLAIMED_PLAYERS_PER_ACCOUNT)} groups. Remove one from My groups first.`;
 
 const answer: Copy = {
   RATE_LIMITED: "Slow down a moment.",
@@ -38,6 +44,12 @@ const byTopic = {
     NAME_TAKEN: "That name exists. Tap it, or add a last initial.",
     ROSTER_FULL: "This group is full. Ask your GM to make room.",
     INVALID_NAME: `Use a name of up to ${String(NAME_MAX_LENGTH)} characters.`,
+    TOO_MANY_GROUPS: claimCap,
+  },
+  keep: {
+    PLAYER_CLAIMED: "Another account keeps this name. Add yours with a last initial, or ask your GM.",
+    TOO_MANY_GROUPS: claimCap,
+    NOT_FOUND: "That player is gone already.",
   },
   answer,
   fillRest: { ...answer, OUT_OF_WINDOW: "Those nights are locked now." },
