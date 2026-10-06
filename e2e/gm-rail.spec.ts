@@ -20,6 +20,14 @@ async function rosterNames(gm: Gm) {
   return schedule?.players.map((player) => player.name) ?? [];
 }
 
+async function sessionDates(gm: Gm) {
+  const schedule = await gm.client.query(api.schedule.month, {
+    groupId: gm.groupId,
+    month: nextMonth,
+  });
+  return schedule?.sessions.map((session) => session.date) ?? [];
+}
+
 let nextMonth = addMonths(monthOf(todayUtc(Date.now())), 1);
 
 test.beforeEach(() => {
@@ -149,6 +157,7 @@ test("Best Nights and Sessions open their day", async ({ page }) => {
   const sessions = page.getByRole("region", { name: "Sessions" });
   await expect(sessions.getByRole("button", { name: /5/ })).toBeVisible();
   await dayPanel.getByRole("button", { name: "Overview" }).click();
+  await expect.poll(() => sessionDates(gm)).toEqual([night(5)]);
   await page.goto(`/g/${gm.groupId}`);
   await sessions.getByRole("button", { name: /5/ }).click();
   await expect(page).toHaveURL(new RegExp(`month=${nextMonth}&day=${night(5)}`));
@@ -242,6 +251,44 @@ test("on a phone the rail sits under the calendar behind a segmented control", a
   await page.keyboard.press("ArrowRight");
   await expect(tabs.getByRole("tab", { name: "Sessions" })).toBeFocused();
   await expect(page.getByRole("region", { name: "Sessions" })).toBeVisible();
+});
+
+test("on a phone a fresh Group opens on Players, so the GM adds one under the calendar", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const gm = await signInAnonymousGm();
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+
+  const tabs = page.getByRole("tablist", { name: "Group overview" });
+  await expect(tabs.getByRole("tab", { selected: true })).toHaveText("Players");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+  await playersCard(page).getByRole("textbox", { name: "Player name" }).fill("Ana");
+  await page.keyboard.press("Enter");
+  await expect(playersCard(page).getByRole("listitem")).toHaveText([/Ana/]);
+  await expect(tabs.getByRole("tab", { selected: true })).toHaveText("Players");
+});
+
+test("a Player who joins with a new name stays on the Roster as grey bars until the GM removes them", async ({
+  page,
+}) => {
+  const gm = await signInAnonymousGm();
+  await seedPlayer(gm, "Dana");
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+
+  const notAnswered = page.getByRole("button", { name: /, \w+ 5: .*1 not answered$/ });
+  await expect(playersCard(page).getByRole("listitem")).toHaveText([/Dana/]);
+  await expect(notAnswered.locator('[data-bar="unanswered"]')).toHaveCount(1);
+  await page.reload();
+  await expect(playersCard(page).getByRole("listitem")).toHaveText([/Dana/]);
+  await expect.poll(() => rosterNames(gm)).toEqual(["Dana"]);
+
+  await playersCard(page).getByRole("button", { name: "More for Dana" }).click();
+  await playersCard(page).getByRole("button", { name: "Remove" }).click();
+  await playersCard(page).getByRole("button", { name: "Remove Dana" }).click();
+  await expect(playersCard(page).getByRole("listitem")).toHaveCount(0);
+  await expect(notAnswered).toHaveCount(0);
+  await expect.poll(() => rosterNames(gm)).toEqual([]);
 });
 
 test("an Anonymous GM saves into an Account from the header and stays on the Group", async ({
@@ -354,6 +401,37 @@ test.describe("screenshots", () => {
         await switcher(page, "Thursday Crew").click();
         await expect(page.getByRole("link", { name: /My group/ })).toBeVisible();
         await shot("switcher", false);
+        await context.close();
+      });
+
+      test(`${String(width)}px ${colorScheme}: a fresh Group and grey bars`, async ({
+        browser,
+      }) => {
+        const gm = await signInAnonymousGm();
+        const context = await browser.newContext({
+          viewport: { width, height: width < 640 ? 844 : 1000 },
+          colorScheme,
+        });
+        const page = await context.newPage();
+        const shot = (name: string) =>
+          page.screenshot({
+            path: `${screenshotDir ?? ""}/${name}--${String(width)}--${colorScheme}.png`,
+            fullPage: true,
+            animations: "disabled",
+          });
+
+        await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+        await expect(playersCard(page).getByRole("textbox", { name: "Player name" })).toBeVisible();
+        await shot("fresh-group");
+
+        await seedCrew(gm);
+        await seedPlayer(gm, "Dev");
+        await expect(playersCard(page).getByRole("listitem")).toHaveCount(4);
+        await page
+          .getByRole("region", { name: "Save your group" })
+          .getByRole("button", { name: "Later" })
+          .click();
+        await shot("grey-bars");
         await context.close();
       });
     }

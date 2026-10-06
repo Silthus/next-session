@@ -265,7 +265,7 @@ function GroupSurface({
         />
       )}
       {!wide && <ShareLinkCard url={shareUrl} compact onRotate={rotate} />}
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
         <HeatCalendar
           month={requestedMonth}
           today={today}
@@ -277,6 +277,7 @@ function GroupSurface({
         />
         <GroupRail
           wide={wide}
+          rosterEmpty={schedule.players.length === 0}
           shareLink={<ShareLinkCard url={shareUrl} onRotate={rotate} />}
           dayPanel={dayPanel()}
           panels={{

@@ -50,6 +50,10 @@ function renderCalendar({
   return { onSelectDay, onMonthChange };
 }
 
+function barsOf(day: HTMLElement) {
+  return [...day.querySelectorAll("[data-bar]")].map((bar) => bar.getAttribute("data-bar"));
+}
+
 describe("HeatCalendar", () => {
   it("steps from the requested month and holds the old grid while the next month loads", async () => {
     const { onMonthChange } = renderCalendar({ month: "2026-11", loadedMonth: "2026-10" });
@@ -104,12 +108,27 @@ describe("HeatCalendar", () => {
     });
     const friday = screen.getByRole("button", { name: /^Friday, October 16:/ });
     const saturday = screen.getByRole("button", { name: /^Saturday, October 17:/ });
-    const bars = [...friday.querySelectorAll("[data-bar]")].map((bar) =>
-      bar.getAttribute("data-bar"),
-    );
-    expect(bars).toEqual(["free", "maybe", "unanswered"]);
+    expect(barsOf(friday)).toEqual(["free", "maybe", "unanswered"]);
     expect(friday.style.background).toContain("color-mix(in oklab, var(--free) 18%");
     expect(saturday.style.background).toBe("");
+  });
+
+  it("draws a grey bar for each Player who hasn't answered a bookable day", () => {
+    renderCalendar({
+      answers: [
+        { playerId: "p0", date: "2026-10-01", answer: "free" },
+        { playerId: "p0", date: "2026-10-16", answer: "free" },
+      ],
+    });
+    const bookable = screen.getByRole("button", {
+      name: "Friday, October 16: 1 free, 0 maybe, 0 busy, 2 not answered",
+    });
+    const past = screen.getByRole("button", {
+      name: "Thursday, October 1: 1 free, 0 maybe, 0 busy",
+    });
+    expect(barsOf(bookable)).toEqual(["free", "unanswered", "unanswered"]);
+    expect(barsOf(past)).toEqual(["free"]);
+    expect(screen.getByText("not answered")).toBeTruthy();
   });
 
   it("names everyone free and a scheduled Session", () => {

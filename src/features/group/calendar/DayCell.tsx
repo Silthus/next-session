@@ -109,11 +109,12 @@ function DayAnswers({
     <span className="flex flex-wrap gap-0.5">
       {players.map((player) => {
         const answer = answerOf.get(player._id) ?? null;
+        if (answer === null && !day.bookable) return null;
         return (
           <span
             key={player._id}
             data-bar={answer ?? "unanswered"}
-            className={cn("h-2.5 w-1 rounded-full sm:h-3 sm:w-[5px]", barTone(answer, onSolidFree))}
+            className={cn(barShape, barTone(answer, onSolidFree))}
           />
         );
       })}
@@ -121,11 +122,15 @@ function DayAnswers({
   );
 }
 
+const barShape = "h-2.5 w-1 rounded-full sm:h-3 sm:w-[5px]";
+
 const barTones: Record<Answer, string> = { free: "bg-free", maybe: "bg-maybe", busy: "bg-busy" };
+
+export const unansweredBarTone = "border border-ink-3";
 
 function barTone(answer: Answer | null, onSolidFree: boolean) {
   if (onSolidFree) return "bg-white/85 dark:bg-paper/70";
-  return answer ? barTones[answer] : "bg-line-strong/70";
+  return answer ? barTones[answer] : unansweredBarTone;
 }
 
 function answersByPlayer(day: CalendarDay) {
@@ -153,5 +158,7 @@ export function dayCellLabel(day: CalendarDay, playerCount: number): string {
 function answerSummary(day: CalendarDay, playerCount: number) {
   if (playerCount === 0) return null;
   if (day.perfect) return "everyone free";
-  return `${String(day.free.length)} free, ${String(day.maybe.length)} maybe, ${String(day.busy.length)} busy`;
+  const answered = `${String(day.free.length)} free, ${String(day.maybe.length)} maybe, ${String(day.busy.length)} busy`;
+  const missing = day.bookable ? day.unanswered.length : 0;
+  return missing === 0 ? answered : `${answered}, ${String(missing)} not answered`;
 }

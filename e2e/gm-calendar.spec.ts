@@ -27,7 +27,7 @@ test("the GM reads the heat-map and sees who is free on a night", async ({ page 
 
   await expect(page.getByRole("heading", { level: 1, name: "My group" })).toBeVisible();
   await expect(dayCell(page, /, \w+ 5: everyone free$/)).toBeVisible();
-  await expect(dayCell(page, /, \w+ 7: 0 free, 0 maybe, 1 busy$/)).toBeVisible();
+  await expect(dayCell(page, /, \w+ 7: 0 free, 0 maybe, 1 busy, 2 not answered$/)).toBeVisible();
 
   await dayCell(page, /, \w+ 6: /).click();
   await expect(page).toHaveURL(new RegExp(`day=${night(6)}`));
