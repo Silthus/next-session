@@ -143,7 +143,7 @@ function PlayerGroup({
           keep={player._id === group.claimedPlayerId ? "kept" : keeper.state}
           keepRefusal={keeper.refusal}
           onKeep={() => {
-            if (account.status === "account") void keeper.keep(noSignIn);
+            if (account.status === "account") keeper.keepNow();
             else setSheet("keep");
           }}
           accountControl={accountControl}
@@ -195,7 +195,11 @@ function useKeeper(account: Account, shareToken: string, playerId: Id<"players">
     }
   }
 
-  return { state, refusal, keep };
+  function keepNow() {
+    keep(noSignIn).catch((error: unknown) => setRefusal(errorMessage(error, "keep")));
+  }
+
+  return { state, refusal, keep, keepNow };
 }
 
 function AccountControl({
