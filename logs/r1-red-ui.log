@@ -1,0 +1,487 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-58
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/account/useSaveOnReturn.test.ts (6 tests | 6 failed) 2091ms
+   ❯ useSaveOnReturn (6)
+     × holds an Account back from Google until its pending Save moved the Groups 17ms
+     × reports Saved once, until it is acknowledged 56ms
+     × reports a failed Save when the claim expired on the way, keeping only a live claim 1010ms
+     × reports a failed Save when the move was refused, keeping only a live claim 1003ms
+     × leaves an Anonymous GM's pending Save alone, as Google never signed it in 2ms
+     × holds nothing without a pending Save 2ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/features/account/AccountSheet.test.tsx (26 tests | 3 failed) 2446ms
+   ❯ AccountSheet with an Account that holds too many Groups (1)
+     × says to make room before saving 116ms
+   ❯ AccountSheet with Google (6)
+     × keeps the email form shut while leaving for Google 128ms
+     × wakes up again when the browser brings the page back from Google 39ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet with an Account that holds too many Groups > says to make room before saving
+AssertionError: expected 'That didn\'t work. Try again.' to be 'You have 50 groups. Delete one to mak…' // Object.is equality
+
+Expected: "You have 50 groups. Delete one to make room, then save."
+Received: "That didn't work. Try again."
+
+ ❯ src/features/account/AccountSheet.test.tsx:315:31
+    313|     await userEvent.click(screen.getByRole("button", { name: "Save gro…
+    314|
+    315|     expect(await alertText()).toBe("You have 50 groups. Delete one to …
+       |                               ^
+    316|   });
+    317| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet with Google > keeps the email form shut while leaving for Google
+AssertionError: expected <button type="submit" …(1)></button> to have property "disabled" with value true
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/features/account/AccountSheet.test.tsx:429:60
+    427|     await userEvent.type(screen.getByLabelText("Password"), "{Enter}");
+    428|
+    429|     expect(screen.getByRole("button", { name: "Log in" })).toHavePrope…
+       |                                                            ^
+    430|     expect(onSubmit).not.toHaveBeenCalled();
+    431|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet with Google > wakes up again when the browser brings the page back from Google
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Continue with Google"
+
+Here are the accessible roles:
+
+  dialog:
+
+  Name "Log in":
+  [36m<dialog[39m
+    [33maria-labelledby[39m=[32m"_r_2d_"[39m
+    [33mclass[39m=[32m"animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-black/40 dark:backdrop:bg-black/70 open:flex sm:items-center"[39m
+    [33mopen[39m=[32m""[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  heading:
+
+  Name "Log in":
+  [36m<h2[39m
+    [33mclass[39m=[32m"min-w-0 pr-10 font-display text-2xl font-bold break-words"[39m
+    [33mid[39m=[32m"_r_2d_"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"text-ink-2"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"text-xs text-ink-3"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"flex items-center gap-3 text-xs text-ink-3 before:h-px before:flex-1 before:bg-line after:h-px after:flex-1 after:bg-line"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"text-xs text-ink-3"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Opening Google…":
+  [36m<button[39m
+    [33maria-busy[39m=[32m"true"[39m
+    [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-surface text-ink border border-line hover:border-line-strong h-14 px-6 text-base gap-2.5 rounded-lg w-full"[39m
+    [33mdisabled[39m=[32m""[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Log in":
+  [36m<button[39m
+    [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink shadow-card hover:brightness-105 h-14 px-6 text-base gap-2.5 rounded-lg w-full"[39m
+    [33mtype[39m=[32m"submit"[39m
+  [36m/>[39m
+
+  Name "Go back":
+  [36m<button[39m
+    [33mclass[39m=[32m"font-semibold text-ink-2 underline underline-offset-2 hover:text-ink disabled:opacity-50"[39m
+    [33mdisabled[39m=[32m""[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Close":
+  [36m<button[39m
+    [33maria-disabled[39m=[32m"true"[39m
+    [33maria-label[39m=[32m"Close"[39m
+    [33mclass[39m=[32m"absolute top-4 right-3 inline-flex size-11 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent-strong focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  link:
+
+  Name "Terms":
+  [36m<a[39m
+    [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+    [33mhref[39m=[32m"/terms"[39m
+  [36m/>[39m
+
+  Name "Privacy Policy":
+  [36m<a[39m
+    [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+    [33mhref[39m=[32m"/privacy"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  textbox:
+
+  Name "Email":
+  [36m<input[39m
+    [33mautocomplete[39m=[32m"email"[39m
+    [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent-strong focus:outline-none focus:ring-2 focus:ring-accent-strong/30"[39m
+    [33mid[39m=[32m"_r_2e_"[39m
+    [33mplaceholder[39m=[32m"you@example.com"[39m
+    [33mreadonly[39m=[32m""[39m
+    [33mrequired[39m=[32m""[39m
+    [33mtype[39m=[32m"email"[39m
+    [33mvalue[39m=[32m""[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<dialog[39m
+      [33maria-labelledby[39m=[32m"_r_2d_"[39m
+      [33mclass[39m=[32m"animate-fade fixed inset-0 m-0 hidden h-dvh max-h-none w-full max-w-none items-end justify-center overflow-hidden overscroll-contain bg-transparent p-0 backdrop:bg-black/40 dark:backdrop:bg-black/70 open:flex sm:items-center"[39m
+      [33mopen[39m=[32m""[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"animate-rise relative max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"min-w-0 pr-10 font-display text-2xl font-bold break-words"[39m
+          [33mid[39m=[32m"_r_2d_"[39m
+        [36m>[39m
+          [0mLog in[0m
+        [36m</h2>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-4"[39m
+        [36m>[39m
+          [36m<form[39m
+            [33mclass[39m=[32m"flex flex-col gap-4"[39m
+          [36m>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-ink-2"[39m
+            [36m>[39m
+              [0mOpen your groups on this device.[0m
+            [36m</p>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-4"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33maria-busy[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-surface text-ink border border-line hover:border-line-strong h-14 px-6 text-base gap-2.5 rounded-lg w-full"[39m
+                  [33mdisabled[39m=[32m""[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [0mOpening Google…[0m
+                [36m</button>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-xs text-ink-3"[39m
+                [36m>[39m
+                  [0mBy continuing with Google you agree to the [0m
+                  [36m<a[39m
+                    [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                    [33mhref[39m=[32m"/terms"[39m
+                  [36m>[39m
+                    [0mTerms[0m
+                  [36m</a>[39m
+                  [0m [0m
+                  [0mand[0m
+                  [0m [0m
+                  [36m<a[39m
+                    [33mclass[39m=[32m"underline underline-offset-2 hover:text-ink"[39m
+                    [33mhref[39m=[32m"/privacy"[39m
+                  [36m>[39m
+                    [0mPrivacy Policy[0m
+                  [36m</a>[39m
+                  [0m.[0m
+                [36m</p>[39m
+              [36m</div>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"flex items-center gap-3 text-xs text-ink-3 before:h-px before:flex-1 before:bg-line after:h-px after:flex-1 after:bg-line"[39m
+              [36m>[39m
+                [0mor with email[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-4"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_2e_"[39m
+                [36m>[39m
+                  [0mEmail[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33mautocomplete[39m=[32m"email"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent-strong focus:outline-none focus:ring-2 focus:ring-accent-strong/30"[39m
+                  [33mid[39m=[32m"_r_2e_"[39m
+                  [33mplaceholder[39m=[32m"you@example.com"[39m
+                  [33mreadonly[39m=[32m""[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"email"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-sm font-semibold text-ink"[39m
+                  [33mfor[39m=[32m"_r_2f_"[39m
+                [36m>[39m
+                  [0mPassword[0m
+                [36m</label>[39m
+                [36m<input[39m
+                  [33mautocomplete[39m=[32m"current-password"[39m
+                  [33mclass[39m=[32m"h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent-strong focus:outline-none focus:ring-2 focus:ring-accent-strong/30"[39m
+                  [33mid[39m=[32m"_r_2f_"[39m
+                  [33mreadonly[39m=[32m""[39m
+                  [33mrequired[39m=[32m""[39m
+                  [33mtype[39m=[32m"password"[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center font-semibold transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-ink shadow-card hover:brightness-105 h-14 px-6 text-base gap-2.5 rounded-lg w-full"[39m
+              [33mtype[39m=[32m"submit"[39m
+            [36m>[39m
+              [0mLog in[0m
+            [36m</button>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-ink-3"[39m
+            [36m>[39m
+              [0mNo account yet?[0m
+              [0m [0m
+              [36m<button[39m
+                [33mclass[39m=[32m"font-semibold text-ink-2 underline underline-offset-2 hover:text-ink disabled:opacity-50"[39m
+                [33mdisabled[39m=[32m""[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mGo back[0m
+              [36m</button>[39m
+              [0m [0m
+              [0mand create your link.[0m
+            [36m</p>[39m
+          [36m</form>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-disabled[39m=[32m"true"[39m
+          [33maria-label[39m=[32m"Close"[39m
+          [33mclass[39m=[32m"absolute top-4 right-3 inline-flex size-11 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent-strong focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"size-4 size-5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 20 20"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M5 5l10 10M15 5L5 15"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+    [36m</dialog>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/account/AccountSheet.test.tsx:447:19
+    445|     });
+    446|
+    447|     expect(screen.getByRole("button", google)).toHaveProperty("disable…
+       |                   ^
+    448|     expect(screen.getByLabelText("Email")).toHaveProperty("readOnly", …
+    449|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  |ui| src/features/account/useSaveOnReturn.test.ts > useSaveOnReturn > holds an Account back from Google until its pending Save moved the Groups
+AssertionError: expected { resumingSave: false, …(1) } to match object { resumingSave: false, …(2) }
+
+- Expected
++ Received
+
+  {
+    "resumingSave": false,
+-   "saveFailedOnReturn": false,
+    "savedOnReturn": false,
+  }
+
+ ❯ src/features/account/useSaveOnReturn.test.ts:59:28
+     57|   it("holds an Account back from Google until its pending Save moved t…
+     58|     const { result, rerender, redeemed, settle } = renderOnReturn("loa…
+     59|     expect(result.current).toMatchObject(idle);
+       |                            ^
+     60|
+     61|     rerender({ status: "account" });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  |ui| src/features/account/useSaveOnReturn.test.ts > useSaveOnReturn > reports Saved once, until it is acknowledged
+TypeError: result.current.acknowledgeReturn is not a function
+ ❯ src/features/account/useSaveOnReturn.test.ts:74:30
+     72|     await waitFor(() => expect(result.current.savedOnReturn).toBe(true…
+     73|
+     74|     act(() => result.current.acknowledgeReturn());
+       |                              ^
+     75|
+     76|     expect(result.current).toMatchObject(idle);
+ ❯ node_modules/@testing-library/react/dist/act-compat.js:47:24
+ ❯ process.env.NODE_ENV.exports.act node_modules/react/cjs/react.development.js:890:22
+ ❯ node_modules/@testing-library/react/dist/act-compat.js:46:25
+ ❯ src/features/account/useSaveOnReturn.test.ts:74:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  |ui| src/features/account/useSaveOnReturn.test.ts > useSaveOnReturn > reports a failed Save when the claim expired on the way, keeping only a live claim
+ FAIL  |ui| src/features/account/useSaveOnReturn.test.ts > useSaveOnReturn > reports a failed Save when the move was refused, keeping only a live claim
+AssertionError: expected { resumingSave: false, …(1) } to match object { resumingSave: false, …(2) }
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div />[39m
+  [36m</body>[39m
+[36m</html>[39m
+
+- Expected
++ Received
+
+  {
+    "resumingSave": false,
+-   "saveFailedOnReturn": true,
+    "savedOnReturn": false,
+  }
+
+ ❯ src/features/account/useSaveOnReturn.test.ts:90:32
+     88|
+     89|       await waitFor(() =>
+     90|         expect(result.current).toMatchObject({ ...idle, saveFailedOnRe…
+       |                                ^
+     91|       );
+     92|       expect(storage.getItem(PENDING_SAVE_KEY)).toBe(kept);
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  |ui| src/features/account/useSaveOnReturn.test.ts > useSaveOnReturn > leaves an Anonymous GM's pending Save alone, as Google never signed it in
+AssertionError: expected { resumingSave: false, …(1) } to match object { resumingSave: false, …(2) }
+
+- Expected
++ Received
+
+  {
+    "resumingSave": false,
+-   "saveFailedOnReturn": false,
+    "savedOnReturn": false,
+  }
+
+ ❯ src/features/account/useSaveOnReturn.test.ts:103:28
+    101|     rerender({ status: "account" });
+    102|
+    103|     expect(result.current).toMatchObject(idle);
+       |                            ^
+    104|     expect(redeemed).toEqual([]);
+    105|     expect(storage.getItem(PENDING_SAVE_KEY)).toBe("claim-code");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  |ui| src/features/account/useSaveOnReturn.test.ts > useSaveOnReturn > holds nothing without a pending Save
+AssertionError: expected { resumingSave: false, …(1) } to match object { resumingSave: false, …(2) }
+
+- Expected
++ Received
+
+  {
+    "resumingSave": false,
+-   "saveFailedOnReturn": false,
+    "savedOnReturn": false,
+  }
+
+ ❯ src/features/account/useSaveOnReturn.test.ts:111:28
+    109|     const { result, redeemed } = renderOnReturn("account", { pending: …
+    110|
+    111|     expect(result.current).toMatchObject(idle);
+       |                            ^
+    112|     expect(redeemed).toEqual([]);
+    113|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+
+ Test Files  2 failed | 2 passed (4)
+      Tests  9 failed | 46 passed (55)
+   Start at  14:51:43
+   Duration  3.22s (tests 66%, environment 25%, setup 4%, transform 3%, import 2%)
+
