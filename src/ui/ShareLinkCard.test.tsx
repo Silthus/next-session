@@ -6,9 +6,29 @@ import { ShareLinkCard } from "./ShareLinkCard";
 const url = "https://next-session.link/s/k3Qx9Lm2aB";
 const message = `Help me find our next game night. Tap the days you can play, it takes 30 seconds: ${url}`;
 
+function stubClipboard(writeText: (text: string) => Promise<void>) {
+  vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText } });
+}
+
+function stubLegacyCopy(succeeds: boolean) {
+  const copied: string[] = [];
+  Object.defineProperty(document, "execCommand", {
+    configurable: true,
+    value: (command: string) => {
+      const field = document.querySelector("textarea");
+      if (command === "copy" && succeeds && field) {
+        copied.push(field.value.slice(field.selectionStart, field.selectionEnd));
+      }
+      return succeeds;
+    },
+  });
+  return copied;
+}
+
 describe("ShareLinkCard", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    Reflect.deleteProperty(document, "execCommand");
   });
 
   it("shows the link without its scheme and copies the full URL", async () => {
@@ -37,21 +57,42 @@ describe("ShareLinkCard", () => {
     expect(document.activeElement).toBe(rotate);
   });
 
-  it("falls back to a long-press hint when the clipboard is blocked", async () => {
-    vi.stubGlobal("navigator", {
-      ...navigator,
-      clipboard: { writeText: () => Promise.reject(new Error("blocked")) },
-    });
+  it("copies the selected link when the clipboard API refuses, keeping focus on the button", async () => {
+    stubClipboard(() =>
+      Promise.reject(new DOMException("Write permission denied.", "NotAllowedError")),
+    );
+    const copied = stubLegacyCopy(true);
     render(<ShareLinkCard url={url} />);
+
     await userEvent.click(screen.getByRole("button", { name: "Copy" }));
-    expect(await screen.findByText("Long-press the link to copy it.")).toBeTruthy();
+
+    expect(await screen.findByRole("button", { name: "Copied" })).toBe(document.activeElement);
+    expect(copied).toEqual([url]);
+    expect(document.querySelector("textarea")).toBeNull();
+    expect(screen.queryByText("Long-press the link to copy it.")).toBeNull();
   });
 
-  it("shows the long-press hint when the browser has no clipboard API at all", async () => {
+  it("copies the selected link when the browser has no clipboard API at all", async () => {
     vi.stubGlobal("navigator", { ...navigator, clipboard: undefined });
+    const copied = stubLegacyCopy(true);
     render(<ShareLinkCard url={url} />);
+
     await userEvent.click(screen.getByRole("button", { name: "Copy" }));
+
+    expect(await screen.findByRole("button", { name: "Copied" })).toBeTruthy();
+    expect(copied).toEqual([url]);
+  });
+
+  it("falls back to a long-press hint when the browser refuses every way to copy", async () => {
+    stubClipboard(() => Promise.reject(new Error("blocked")));
+    stubLegacyCopy(false);
+    render(<ShareLinkCard url={url} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Copy" }));
+
     expect(await screen.findByText("Long-press the link to copy it.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Copy" })).toBeTruthy();
+    expect(document.querySelector("textarea")).toBeNull();
   });
 
   it("prefills the share message for WhatsApp, Telegram and Mail", () => {
