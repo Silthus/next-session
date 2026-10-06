@@ -39,7 +39,7 @@ export function DayCell({
       data-date={day.date}
       style={tintOf(day)}
       className={cn(
-        "relative flex aspect-square min-w-0 flex-col justify-between overflow-hidden rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2",
+        "relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2",
         cellTone(day),
         selected
           ? "z-10 outline-2 outline-offset-2 outline-ink focus-visible:outline-offset-4 focus-visible:outline-accent-strong"
