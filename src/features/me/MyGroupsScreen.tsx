@@ -23,15 +23,14 @@ export function MyGroupsScreen() {
   const { remove } = useRemoval(today, toasts.show, () => heading.current?.focus());
   const { creating, create } = useCreateLink(toasts.show);
 
-  if (gm.status !== "loading" && (!account || groups === null)) {
-    return <Navigate to="/" replace />;
-  }
+  if (gm.status === "loading") return <div className="min-h-dvh" />;
+  if (!account || groups === null) return <Navigate to="/" replace />;
 
   return (
     <>
       <MyGroups
         email={gm.email}
-        groups={groups ?? undefined}
+        groups={groups}
         today={today}
         creating={creating}
         headingRef={heading}
@@ -65,7 +64,7 @@ function useRemoval(
       await claim({ shareToken: group.shareToken, playerId: group.playerId });
       show(`${group.name} is back in My groups.`);
     } catch (error) {
-      show(errorMessage(error, "keep"));
+      show(errorMessage(error, "undoRemove"));
     }
   }
 

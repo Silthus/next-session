@@ -52,6 +52,11 @@ const byTopic = {
     TOO_MANY_GROUPS: claimCap,
     NOT_FOUND: "That player is gone already.",
   },
+  undoRemove: {
+    PLAYER_CLAIMED: "Another account keeps that player now. Ask your GM.",
+    TOO_MANY_GROUPS: claimCap,
+    NOT_FOUND: "Couldn't put it back. Open the group's link and tap Keep this group.",
+  },
   save: {
     TOO_MANY_GROUPS: `Your own groups didn't move: an account holds up to ${String(MAX_GROUPS_PER_GM)}. Delete some to make room.`,
     CLAIM_INVALID: "Your own groups didn't move: the save expired.",

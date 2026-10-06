@@ -164,6 +164,13 @@ describe("MyGroups", () => {
     expect(onLogOut).toHaveBeenCalledOnce();
   });
 
+  it("puts focus on its heading when it opens, so a redirect lands somewhere", async () => {
+    renderMyGroups();
+
+    const heading = await screen.findByRole("heading", { level: 1, name: "My groups" });
+    expect(document.activeElement).toBe(heading);
+  });
+
   it("shows a skeleton while the Groups load", async () => {
     renderMyGroups({ groups: undefined });
 

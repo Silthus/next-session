@@ -51,7 +51,6 @@ export function Landing() {
     try {
       if (signedIn) setCreatedGroupId(await createGroup({}));
       else await gm.createLink();
-      if (gm.status === "account") setSaved(true);
       setPhase("created");
     } catch (error) {
       setFailure(error);

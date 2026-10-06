@@ -55,7 +55,7 @@ async function deleteGroup(gm: Page, groupPath: string) {
     .getByRole("group", { name: /^Delete .*\?$/ })
     .getByRole("button", { name: /^Delete / })
     .click();
-  await expect(gm).toHaveURL(new RegExp(`^${new URL("/", gm.url()).href}(me)?$`));
+  await expect(gm).toHaveURL((url) => url.pathname === "/" || url.pathname === "/me");
   leftoverGroup = undefined;
 }
 
@@ -243,6 +243,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
 
   await test.step("8. The GM deletes the Group", async () => {
     await deleteGroup(gm, groupPath);
+    await expect(gm).toHaveURL(new URL("/me", appOrigin).href);
     await player.goto(`https://${shareLinkShown}`);
     await expect(player.getByRole("heading", { name: "This link no longer works" })).toBeVisible();
     await shoot(player, testInfo, "8-link-gone");

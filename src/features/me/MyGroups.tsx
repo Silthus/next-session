@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useId, useRef, type ReactNode, type Ref } from "react";
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react";
 import type { IsoDate } from "../../../shared/dates";
 import { Button } from "../../ui/Button";
 import { IconMore, IconStar } from "../../ui/icons";
@@ -21,7 +21,7 @@ type MyGroupsProps = {
   groups: MyGroupsData | undefined;
   today: IsoDate;
   creating: boolean;
-  headingRef?: Ref<HTMLHeadingElement>;
+  headingRef?: RefObject<HTMLHeadingElement | null>;
   onCreate: () => void;
   onRemove: (group: PlayingGroup) => void;
   onLogOut: () => void;
@@ -40,13 +40,17 @@ export function MyGroups({
   onRemove,
   onLogOut,
 }: MyGroupsProps) {
+  const ownHeading = useRef<HTMLHeadingElement>(null);
+  const heading = headingRef ?? ownHeading;
+  useEffect(() => heading.current?.focus(), [heading]);
+
   return (
     <PageShell
       headerEnd={<AccountLine email={email} onLogOut={onLogOut} />}
       className="flex flex-col gap-8 pt-4"
     >
       <h1
-        ref={headingRef}
+        ref={heading}
         tabIndex={-1}
         className="font-display text-4xl font-extrabold tracking-tight outline-none"
       >
@@ -72,7 +76,7 @@ export function MyGroups({
 function AccountLine({ email, onLogOut }: { email: string | undefined; onLogOut: () => void }) {
   return (
     <div className="flex min-w-0 items-center gap-2">
-      <span className="hidden truncate text-sm text-ink-3 sm:inline">{email}</span>
+      <span className="max-w-[45vw] truncate text-sm text-ink-3">{email}</span>
       <Button variant="ghost" size="sm" onClick={onLogOut}>
         Log out
       </Button>
@@ -142,14 +146,14 @@ function PlayingGroups({
           <li key={group.groupId} className={`${cardClassName} relative`}>
             <GroupPageLink
               to={{ kind: "player", shareToken: group.shareToken }}
-              className="flex flex-col gap-1 p-4 pr-12"
+              className="flex flex-col gap-1 p-4 pr-14"
             >
               <GroupName name={group.name} />
               <span className="text-sm text-ink-2">as {group.playerName}</span>
               <NextSession dates={group.upcomingSessions} />
               <OpenDates openDates={group.openDates} />
             </GroupPageLink>
-            <div className="absolute top-3 right-3">
+            <div className="absolute top-1.5 right-1.5">
               <GroupMenu group={group} onRemove={onRemove} />
             </div>
           </li>
@@ -177,7 +181,7 @@ function GroupMenu({
           {...props}
           type="button"
           aria-label={`Options for ${group.name}`}
-          className="rounded-sm p-1 text-ink-3 hover:text-ink"
+          className="rounded-md p-2.5 text-ink-3 hover:bg-surface-2 hover:text-ink"
         >
           <IconMore />
         </button>

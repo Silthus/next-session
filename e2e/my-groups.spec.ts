@@ -108,6 +108,12 @@ test("an Account sees every Group it plays in and the Sessions across them on /m
 
     await removeFromMyGroups(page, "Thursday Crew");
     await expect(playingCard(page, "Thursday Crew")).toHaveCount(0);
+    await expect
+      .poll(async () => {
+        const groups = await account.client.query(api.me.groups, { today });
+        return groups?.playing.map(({ name }) => name);
+      })
+      .toEqual(["Sunday Table"]);
     await page.reload();
     await expect(playingCard(page, "Sunday Table")).toHaveCount(1);
     await expect(playingCard(page, "Thursday Crew")).toHaveCount(0);
@@ -125,12 +131,28 @@ test("an Account sees every Group it plays in and the Sessions across them on /m
   });
 });
 
-test("/me sends anyone but an Account away", async ({ page }) => {
+async function watchForMyGroupsPage(page: Page) {
+  await page.addInitScript(() => {
+    const record = window as unknown as { sawMyGroupsPage: boolean };
+    record.sawMyGroupsPage = false;
+    new MutationObserver(() => {
+      if (document.querySelector("h1")?.textContent === "My groups") record.sawMyGroupsPage = true;
+    }).observe(document, { childList: true, subtree: true, characterData: true });
+  });
+  return () =>
+    page.evaluate(() => (window as unknown as { sawMyGroupsPage: boolean }).sawMyGroupsPage);
+}
+
+test("/me sends anyone but an Account away without showing them the page", async ({ page }) => {
+  const sawMyGroupsPage = await watchForMyGroupsPage(page);
+
   await page.goto("/me");
   await expect(page).toHaveURL("/");
   await expect(page.getByRole("button", { name: "Create your link" })).toBeVisible();
+  expect(await sawMyGroupsPage()).toBe(false);
 
   const gm = await signInAnonymousGm();
   await openAsGm(page, gm, "/me");
   await expect(page).toHaveURL(`/g/${gm.groupId}`);
+  expect(await sawMyGroupsPage()).toBe(false);
 });
