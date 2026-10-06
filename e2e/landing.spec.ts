@@ -25,9 +25,9 @@ function openGroupLink(page: Page) {
 
 async function fillSaveSheet(page: Page, email: string) {
   const sheet = page.getByRole("dialog", { name: /^Keep / });
-  await expect(sheet.getByLabel("Email")).toBeVisible();
+  await expect(sheet.getByLabel("Email", { exact: true })).toBeVisible();
   await expect(sheet.getByRole("button", { name: "Continue with Google" })).toHaveCount(0);
-  await sheet.getByLabel("Email").fill(email);
+  await sheet.getByLabel("Email", { exact: true }).fill(email);
   await sheet.getByLabel("Password").fill(password);
   await sheet.getByRole("button", { name: "Save group" }).click();
   return sheet;
@@ -147,7 +147,7 @@ async function openLogIn(page: Page) {
 }
 
 async function logIn(sheet: Locator, email: string) {
-  await sheet.getByLabel("Email").fill(email);
+  await sheet.getByLabel("Email", { exact: true }).fill(email);
   await sheet.getByLabel("Password").fill(password);
   await sheet.getByRole("button", { name: "Log in" }).click();
 }
@@ -193,7 +193,7 @@ test("saving into an Account that has older Groups keeps showing the new Group",
   await page.getByRole("button", { name: "save it to an account" }).click();
   const sheet = page.getByRole("dialog", { name: /^Keep / });
   await sheet.getByText("I already have one").click();
-  await sheet.getByLabel("Email").fill(email);
+  await sheet.getByLabel("Email", { exact: true }).fill(email);
   await sheet.getByLabel("Password").fill(password);
   await sheet.getByRole("button", { name: "Log in and save" }).click();
 
@@ -367,7 +367,7 @@ test("pressing Escape again and again mid-Save keeps the sheet up until it is do
     await expect(sheet.getByRole("button", { name: "Saving…" })).toBeVisible();
   }
   expect(await sheet.evaluate((dialog) => (dialog as HTMLDialogElement).open)).toBe(true);
-  await expect(sheet.getByLabel("Email")).toHaveValue(email);
+  await expect(sheet.getByLabel("Email", { exact: true })).toHaveValue(email);
 
   signIn.release();
   await expect(page.getByRole("status").filter({ hasText: `Saved to ${email}.` })).toBeFocused();
@@ -378,7 +378,7 @@ test("logging in to an Account without Groups lands on My groups", async ({ page
   const { email } = await signUpAccount();
 
   const sheet = await openLogIn(page);
-  await expect(sheet.getByLabel("Email")).toBeFocused();
+  await expect(sheet.getByLabel("Email", { exact: true })).toBeFocused();
   await logIn(sheet, email.replace(/^gm/, "GM"));
 
   await expect(page).toHaveURL("/me");
@@ -393,12 +393,12 @@ test("a wrong password says so and keeps the sheet open", async ({ page, browser
   const { email } = await seedAccount(browser);
 
   const sheet = await openLogIn(page);
-  await sheet.getByLabel("Email").fill(email);
+  await sheet.getByLabel("Email", { exact: true }).fill(email);
   await sheet.getByLabel("Password").fill("not-the-password");
   await sheet.getByLabel("Password").press("Enter");
 
   await expect(sheet.getByRole("alert")).toHaveText("Wrong email or password.");
-  await expect(sheet.getByLabel("Email")).toHaveValue(email);
+  await expect(sheet.getByLabel("Email", { exact: true })).toHaveValue(email);
   await expect(sheet.getByLabel("Password")).toBeFocused();
 });
 
@@ -447,7 +447,7 @@ test.describe("screenshots", () => {
         await shot("landing");
 
         const sheet = await openLogIn(page);
-        await sheet.getByLabel("Email").fill(email);
+        await sheet.getByLabel("Email", { exact: true }).fill(email);
         await sheet.getByLabel("Password").fill("not-the-password");
         await sheet.getByRole("button", { name: "Log in" }).click();
         await expect(sheet.getByRole("alert")).toBeVisible();

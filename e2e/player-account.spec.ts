@@ -43,7 +43,7 @@ async function answerToday(page: Page) {
 
 async function fillAccount(page: Page, email: string) {
   const sheet = page.getByRole("dialog");
-  await sheet.getByLabel("Email").fill(email);
+  await sheet.getByLabel("Email", { exact: true }).fill(email);
   await sheet.getByLabel("Password").fill(password);
   return sheet;
 }

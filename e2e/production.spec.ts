@@ -99,7 +99,7 @@ async function clearPasswordsLeftOnScreen(field: Locator) {
 
 async function submitCredentials(page: Page, dialogName: string, submitLabel: string) {
   const sheet = page.getByRole("dialog", { name: dialogName });
-  await sheet.getByLabel("Email").fill(email);
+  await sheet.getByLabel("Email", { exact: true }).fill(email);
   await enterPasswordUnrecorded(sheet.getByLabel("Password"));
   await sheet.getByRole("button", { name: submitLabel }).click();
   await clearPasswordsLeftOnScreen(sheet.getByLabel("Password"));
