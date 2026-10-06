@@ -180,7 +180,6 @@ describe("AccountSheet saving a Group", () => {
 
     expect(await alertText()).toBe("Use at least 8 characters for the password.");
   });
-
 });
 
 describe("AccountSheet keeping a Group as a Player", () => {

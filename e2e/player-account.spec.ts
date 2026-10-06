@@ -119,11 +119,12 @@ test("a visitor keeps the Group with a new Account and plays as that Account on 
     await expect(page.getByText("Answering as")).toContainText("Bea");
   });
 
-  await test.step("Not you? releases the claim and shows Join, and the Player stays", async () => {
+  await test.step("Not you? releases the claim and shows Join, and the Player stays on the Roster", async () => {
     await page.getByRole("button", { name: "Not you?" }).click();
     await expect(page.getByRole("heading", { name: "Who are you?" })).toBeVisible();
     await elsewhere.reload();
-    await expect(elsewhere.getByRole("heading", { name: "Who are you?" })).toBeVisible();
+    await expect(elsewhere.getByText("Answering as")).toContainText("Bea");
+    await expect(elsewhere.getByRole("main").getByText("Kept in My groups")).toBeHidden();
     const roster = await second.gm.client.query(api.player.group, {
       shareToken: second.gm.shareToken,
     });
