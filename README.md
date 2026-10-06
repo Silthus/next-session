@@ -5,3 +5,7 @@
 - `screenshots/`: `/me` at 390 and 1440 px, light and dark, filled and empty. Also the card menu, Remove with Undo, and **My groups** in the GM header's account menu.
 - `logs/e2e-full.log`: the full local e2e on the final tree (59 passed, 25 opt-in screenshot tests skipped).
 - `logs/codex-review-*.log`: the Codex adversarial review, which returned 429 twice. One Opus fresh-eyes review ran instead (results in the PR).
+
+## Production
+
+`prod/prod-proof.log` and `prod/*.png`: `BASE_URL=https://next-session.link bun run e2e:prod` from merged `main` (`9c24913`) after the green deploy run 37498486305. All 8 steps passed. Step 7 claims, releases and claims again on prod with the run's one Account. Step 8 deletes the Group.
