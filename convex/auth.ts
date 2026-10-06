@@ -3,12 +3,13 @@ import {
   type ConvexCredentialsUserConfig,
 } from "@convex-dev/auth/providers/ConvexCredentials";
 import { Password } from "@convex-dev/auth/providers/Password";
+import Google from "@auth/core/providers/google";
 import { convexAuth, createAccount } from "@convex-dev/auth/server";
 import { HOUR } from "@convex-dev/rate-limiter";
 import { v } from "convex/values";
 import { LEGAL_VERSIONS } from "../shared/legal";
 import { internal } from "./_generated/api";
-import type { DataModel } from "./_generated/dataModel";
+import type { DataModel, Id } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx } from "./_generated/server";
 import { fail } from "./model/errors";
 import { insertGroup } from "./model/groups";
@@ -69,6 +70,13 @@ const AccountPassword = ConvexCredentials<DataModel>({
   },
 });
 
+const GOOGLE = "google";
+
+const AccountGoogle = Google({
+  allowDangerousEmailAccountLinking: false,
+  profile: (google) => ({ id: google.sub, email: normalizeEmail(google.email) }),
+});
+
 function requireStrongPassword(password: unknown) {
   if (typeof password !== "string" || password.length < MIN_PASSWORD_LENGTH) {
     fail({ code: "WEAK_PASSWORD" });
@@ -92,7 +100,7 @@ function normalizeEmail(email: unknown) {
 }
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [Anonymous, AccountPassword],
+  providers: [Anonymous, AccountPassword, AccountGoogle],
   session: {
     totalDurationMs: SESSION_DAYS * DAY,
     inactiveDurationMs: SESSION_DAYS * DAY,
@@ -100,13 +108,18 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   signIn: { maxFailedAttempsPerHour: MAX_FAILED_SIGN_INS_PER_HOUR },
   callbacks: {
     async afterUserCreatedOrUpdated(ctx, { userId, existingUserId, provider }) {
-      if (existingUserId !== null || provider.id !== ANONYMOUS) return;
+      if (existingUserId !== null) return;
       const gmCtx = ctx as unknown as MutationCtx;
-      const gm = await gmCtx.db.get("users", userId);
-      if (gm !== null) await insertGroup(gmCtx, gm);
+      if (provider.id === ANONYMOUS) await insertFirstGroup(gmCtx, userId);
+      if (provider.id === GOOGLE) await gmCtx.db.patch("users", userId, legalAcceptance());
     },
   },
 });
+
+async function insertFirstGroup(ctx: MutationCtx, userId: Id<"users">) {
+  const gm = await ctx.db.get("users", userId);
+  if (gm !== null) await insertGroup(ctx, gm);
+}
 
 export const admitAnonymousSignUp = internalMutation({
   args: {},

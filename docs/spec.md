@@ -200,7 +200,7 @@ Dropped from Lonir: workspace functions, `gmGetGroupRail` and `gmGetDateAvailabi
 
 | Caller | Can |
 | --- | --- |
-| Anyone | `player.group`, `player.answers`, `player.join`, `player.answer`, `player.fillRest` with a valid Share Token, within rate limits. `auth.signIn` with `anonymous` or a `password` sign-up (both rate limited), or a `password` log in (Convex Auth's throttle) |
+| Anyone | `player.group`, `player.answers`, `player.join`, `player.answer`, `player.fillRest` with a valid Share Token, within rate limits. `auth.signIn` with `anonymous` or a `password` sign-up (both rate limited), a `password` log in (Convex Auth's throttle), or `google` once its credentials are set (§5.7). `signInOptions.available` |
 | Anonymous GM or Account | Everything in `groups`, `schedule`, `roster`, `sessions` for Groups they own. Nothing on Groups they do not own: those look missing |
 | Anonymous GM only | `account.startSave` |
 | Account only | `account.finishSave`, `auth.signOut` from the UI (an Anonymous GM has no sign-out button, because signing out would lose the Group), `player.claim`, `player.release`, `me.groups` |
@@ -273,6 +273,16 @@ Player answers keep an Unsaved Group alive without refreshing the GM's session. 
 
 Convex Auth's default is 30 days in total, which would lock out an active Anonymous GM after a month, Groups and all.
 
+### 5.7 Continue with Google
+
+Convex Auth's Google provider sits next to Password and Anonymous, always registered. **Continue with Google** shows in the Save sheet and the Log in sheet only while `signInOptions.available` reports `google: true`, which is when `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` are both set on the deployment. Without them, the provider stays unused and Password and Anonymous sign-in work as before; a test pins that.
+
+- **The OAuth client.** A Google Cloud OAuth client of type Web application, with the JavaScript origin `https://next-session.link` and the redirect URI `https://pleasant-sockeye-672.convex.site/api/auth/callback/google`. `SITE_URL` sends the browser back to the app.
+- **Profile.** Only Google's `sub` (the account id) and the email (trimmed and lowercased) are kept. No name, no picture, no verification flag.
+- **Legal Acceptance.** A new Google Account gets the current stamps in `afterUserCreatedOrUpdated`, because the button sits under "By continuing with Google you agree to the Terms and Privacy Policy."
+- **Save through Google.** The client calls `account.startSave`, keeps the code in `sessionStorage` as in §5.3, and leaves for Google with `redirectTo` set to the Group's page. `sessionStorage` survives the same-tab round trip. Back on the page, Convex Auth exchanges the `code` from the URL, and the GM surface holds the Group on a loading state while the pending claim is redeemed (step 5 of §5.3), then toasts "Saved" once. When the redeem fails, the Save sheet opens on **Finish saving** for a retry, which also explains an expired claim or the 50-Group cap.
+- **No linking by email.** Every Google account (`sub`) is its own Account, and a Google sign-in never joins an existing Account by email (`allowDangerousEmailAccountLinking: false`). Password Accounts never verify their email (§5.3), and Google's `email_verified` is only authoritative for Gmail and Workspace addresses: a re-registered domain or a changed Google login lets a new Google account claim an old address. Linking by email would hand that address's Account, Groups and all, to whoever holds it now. So one email through Password and Google, or through two Google accounts, gives separate Accounts. The alternative, linking a Google identity into a Password Account, needs Password email verification first (an email code through Resend) and a rule that trusts Google's flag only for Gmail and Workspace (`hd`) addresses.
+
 ## 6. Frontend
 
 ### 6.1 Routes
@@ -340,7 +350,8 @@ Storage keys: `next-session.players` (Player identity), `next-session.lastGroup`
 | `shared/answers.ts` | `nextAnswer(answer)`, `fillRestDates(month, today, answered)` | Vitest |
 | `shared/names.ts` | `normalizeName(raw) → {name, nameKey} \| INVALID_NAME`, `playerInitials(name) → string` | Vitest; used by backend, forms, and `Avatar` |
 | Backend public API | The functions in §4 | `convex-test` through `api.*`, with `t.withIdentity` for GMs. Every invariant in §3 and every row in §5.1 has a test |
-| `src/features/account/save.ts` | `saveGroups({email, password, mode}, deps)` and `resumePendingSave(deps)` | Vitest with a fake `deps` (`startSave`, `signIn`, `finishSave`, storage). The real adapter wraps Convex |
+| `src/features/account/save.ts` | `saveGroups({email, password, mode}, deps)`, `saveThroughGoogle(deps)`, and `finishPendingSave(deps)` | Vitest with a fake `deps` (`startSave`, `signIn`, `continueWithGoogle`, `finishSave`, storage). The real adapter wraps Convex |
+| `src/features/account/useSaveOnReturn.ts` | `useSaveOnReturn(status, deps) → {resumingSave, savedOnReturn, saveFailedOnReturn, acknowledgeReturn}` | Testing Library's `renderHook` with fake `deps` |
 | `src/features/account/keep.ts` | `keepGroup({shareToken, playerId, account}, deps)` and `resumePendingKeep(deps)` (§12.4) | Vitest with a fake `deps` (`claim`, `signIn`, `saveGroups`, storage), like `save.ts` |
 | `src/lib/storage.ts` | `rememberPlayer`, `recallPlayer`, `forgetPlayer`, the hint, last Group and nudge keys; each takes the storage last, defaulting to the browser's | Vitest over a fake `Storage` |
 | `src/ui/*` and feature views | Props in, callbacks out | Testing Library (render, user events, accessible names) |
@@ -454,7 +465,7 @@ Each call is a reversible default. Michael can redirect any of them in one line.
 | 11 | My groups lists Groups and Sessions. Answering stays on the existing player page, reached through `/s/<token>` | An inline multi-Group calendar on `/me` |
 | 12 | The landing sends an Account without Groups of its own to `/me`. A GM still lands on their last Group, with a **My groups** link in the header | Every Account lands on `/me` |
 | 13 | A Player's name stays per Group. There is no Account display name | An Account name prefilled into Join |
-| 14 | The Privacy Policy gains one row and becomes 1.1. No re-acceptance gate: the new processing happens only when someone keeps a Group, and creating the Account stamps 1.1 | Build the re-acceptance gate first |
+| 14 | The Privacy Policy gains one row and becomes 1.2. No re-acceptance gate: the new processing happens only when someone keeps a Group, and creating the Account stamps 1.2 | Build the re-acceptance gate first |
 | 15 | Email notifications are specified as a hook (§12.6) and not built | Build Resend sending now |
 
 ### 12.2 Who sees what
@@ -532,7 +543,7 @@ Resend's DNS records are already on the zone. When this is built:
 
 ### 12.7 Legal
 
-`docs/legal/privacy.md` gains one row in the data table: "For a player with an account: which player in which group belongs to your account, to show your groups on any device", and `LEGAL_VERSIONS.privacy` becomes `"1.1"` with a new effective date. The Terms already say Players need no account and need no change.
+`docs/legal/privacy.md` gains one row in the data table: "For a player with an account: which player in which group belongs to your account, to show your groups on any device", and `LEGAL_VERSIONS.privacy` becomes `"1.2"` (1.1 added Google sign-in, §5.7) with a new effective date. The Terms already say Players need no account and need no change.
 
 ### 12.8 Test seams
 
@@ -622,7 +633,7 @@ The operator is in Germany, so two laws apply: § 25 TDDDG for anything read fro
 - §4 gains the processor row: "PostHog Inc. | Usage measurement, error reports, logs, and sending the account emails | EU (Frankfurt) hosting, US company".
 - §5 gains: usage events and error reports for the event retention of the PostHog plan (#77 reads it from the billing page and writes the number); logs 14 days; the email address in PostHog until the account is deleted.
 - §6 names the objection right for usage measurement and the withdrawal of Tips consent.
-- `LEGAL_VERSIONS.privacy` goes up one minor version (1.2 if #64's 1.1 lands first, else 1.1, and #64 takes the next) with a new effective date.
+- `LEGAL_VERSIONS.privacy` goes up one minor version past whatever has landed (Google sign-in took 1.1 and §12's row takes 1.2, so 1.3 if both land first) with a new effective date.
 
 ### 13.4 Browser
 
