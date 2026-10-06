@@ -35,8 +35,8 @@ function deferredFinishSave() {
   return { finishSave, redeemed, settle: (outcome: Outcome) => settle(outcome) };
 }
 
-const holding = { resumingSave: true, savedOnReturn: false, saveFailedOnReturn: false };
-const idle = { resumingSave: false, savedOnReturn: false, saveFailedOnReturn: false };
+const holding = { resumingSave: true, savedOnReturn: false, refusalOnReturn: undefined };
+const idle = { resumingSave: false, savedOnReturn: false, refusalOnReturn: undefined };
 
 function renderOnReturn(
   status: GmStatus,
@@ -80,14 +80,14 @@ describe("useSaveOnReturn", () => {
     ["the claim expired on the way", "expired", null],
     ["the move was refused", "tooManyGroups", "claim-code"],
   ] as const)(
-    "reports a failed Save when %s, keeping only a live claim",
+    "reports why the Save failed when %s, keeping only a live claim",
     async (_, outcome, kept) => {
       const { result, settle, storage } = renderOnReturn("account");
 
       act(() => settle(outcome));
 
       await waitFor(() =>
-        expect(result.current).toMatchObject({ ...idle, saveFailedOnReturn: true }),
+        expect(result.current).toMatchObject({ ...idle, refusalOnReturn: refusals[outcome] }),
       );
       expect(storage.getItem(PENDING_SAVE_KEY)).toBe(kept);
       act(() => result.current.acknowledgeReturn());

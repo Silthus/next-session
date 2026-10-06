@@ -64,7 +64,8 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
     }
   };
   const save = (input: SaveInput) => saveThrough(() => gm.save(input));
-  const { saveWithGoogle, resumingSave, savedOnReturn, saveFailedOnReturn, acknowledgeReturn } = gm;
+  const { saveWithGoogle, resumingSave, savedOnReturn, refusalOnReturn, acknowledgeReturn } = gm;
+  const [returnRefusal, setReturnRefusal] = useState<unknown>();
   const showToast = toasts.show;
 
   useEffect(() => {
@@ -73,10 +74,16 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
     acknowledgeReturn();
   }, [savedOnReturn, showToast, acknowledgeReturn]);
 
-  if (saveFailedOnReturn) {
+  if (refusalOnReturn !== undefined) {
     acknowledgeReturn();
-    setSaveSheetFor(group?.name ?? "your group");
+    setReturnRefusal(refusalOnReturn);
+    setSaveSheetFor("your group");
   }
+
+  const closeSaveSheet = () => {
+    setSaveSheetFor(null);
+    setReturnRefusal(undefined);
+  };
   const finish = () => saveThrough(gm.finishSave);
 
   const headerActions = (gm.status === "anonymous" || gm.status === "account") && group && (
@@ -110,8 +117,9 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         signedInAs={gm.status === "account" ? gm.email : undefined}
         onSubmit={save}
         onFinish={finish}
+        refusal={returnRefusal}
         onContinueWithGoogle={saveWithGoogle && (() => saveWithGoogle(groupId))}
-        onClose={() => setSaveSheetFor(null)}
+        onClose={closeSaveSheet}
       />
     </>
   );

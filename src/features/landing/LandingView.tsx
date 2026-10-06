@@ -21,6 +21,7 @@ type LandingViewProps = {
   onCreate: () => void;
   onLogIn: () => void;
   onSave: () => void;
+  onLogOut: () => void;
 };
 
 const column = "mx-auto w-full max-w-5xl px-4 sm:px-6";
@@ -33,6 +34,7 @@ export function LandingView({
   onCreate,
   onLogIn,
   onSave,
+  onLogOut,
 }: LandingViewProps) {
   return (
     <div className="flex min-h-dvh flex-col">
@@ -41,6 +43,11 @@ export function LandingView({
         {showLogIn && (
           <Button variant="ghost" size="sm" onClick={onLogIn}>
             Log in
+          </Button>
+        )}
+        {loggedInAs && (
+          <Button variant="ghost" size="sm" onClick={onLogOut}>
+            Log out
           </Button>
         )}
       </header>

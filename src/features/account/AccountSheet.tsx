@@ -25,6 +25,7 @@ type AccountSheetProps = {
       intent: "save";
       groupName: string;
       signedInAs?: string;
+      refusal?: unknown;
       onFinish: () => Promise<unknown>;
     }
   | { intent: "logIn" }
@@ -73,7 +74,11 @@ function AccountForm({
   const [mode, setMode] = useState<SaveMode>(intent === "save" ? "create" : "logIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [failure, setFailure] = useState<Failure | null>(null);
+  const [failure, setFailure] = useState<Failure | null>(() =>
+    props.intent === "save" && props.refusal !== undefined
+      ? describeFailure(props.refusal, intent)
+      : null,
+  );
   const [leavingForGoogle, setLeavingForGoogle] = useState(false);
   const passwordField = useRef<HTMLInputElement>(null);
 
@@ -469,7 +474,7 @@ function describeFailure(error: unknown, intent: AccountIntent): Failure {
       return { message: `Too many tries. Try again in ${waitFor(data.retryAfter)}.` };
     case "TOO_MANY_GROUPS":
       return {
-        message: `You have ${String(MAX_GROUPS_PER_GM)} groups. Delete one to make room, then save.`,
+        message: `An account holds up to ${String(MAX_GROUPS_PER_GM)} groups. Delete some to make room, then finish saving.`,
       };
     case "CLAIM_INVALID":
       return {

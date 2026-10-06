@@ -96,7 +96,7 @@ describe("Google and Password on one email", () => {
     expect(await password.as.query(api.groups.mine, {})).toEqual([]);
   });
 
-  it("never joins two Google identities by their email, verified or not", async () => {
+  it("never joins two Google identities by their email", async () => {
     const email = "shared@example.com";
     const first = await signInWithGoogle(t, newGoogleIdentity(email));
 

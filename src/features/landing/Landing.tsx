@@ -98,6 +98,7 @@ export function Landing() {
         onCreate={() => void create()}
         onLogIn={() => setSheet("logIn")}
         onSave={() => setSheet("save")}
+        onLogOut={() => void gm.signOut()}
       />
       {sheet === "save" && created ? (
         <AccountSheet

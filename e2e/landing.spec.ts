@@ -292,6 +292,7 @@ test.describe("a Group page that opens on a pending Save, as after Google's redi
 
     await page.reload();
     const sheet = page.getByRole("dialog", { name: "Keep your group" });
+    await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
     await sheet.getByRole("button", { name: "Finish saving" }).click();
 
     await expect(toastRegion(page)).toHaveText("Saved. Open it anywhere with your account.");

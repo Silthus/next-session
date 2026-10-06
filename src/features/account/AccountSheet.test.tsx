@@ -306,13 +306,47 @@ describe("AccountSheet finishing a Save after the sign-in went through", () => {
   });
 });
 
+const roomForGroups =
+  "An account holds up to 50 groups. Delete some to make room, then finish saving.";
+
 describe("AccountSheet with an Account that holds too many Groups", () => {
   it("says to make room before saving", async () => {
     renderSaveSheet(() => Promise.reject(new ConvexError({ code: "TOO_MANY_GROUPS" })));
     await fillIn();
     await userEvent.click(screen.getByRole("button", { name: "Save group" }));
 
-    expect(await alertText()).toBe("You have 50 groups. Delete one to make room, then save.");
+    expect(await alertText()).toBe(roomForGroups);
+  });
+});
+
+describe("AccountSheet reopened by a Save that failed on the way back from Google", () => {
+  function renderRefusedSave(refusal: unknown) {
+    renderSheet({
+      open: true,
+      intent: "save",
+      groupName: "your group",
+      signedInAs: email,
+      refusal,
+      onSubmit: vi.fn(),
+      onFinish: vi.fn(),
+      onClose: vi.fn(),
+    });
+  }
+
+  it("opens on the reason the move failed, with Finish saving to retry", async () => {
+    renderRefusedSave(new ConvexError({ code: "TOO_MANY_GROUPS" }));
+
+    expect(await alertText()).toBe(roomForGroups);
+    expect(screen.getByRole("button", { name: "Finish saving" })).toBeTruthy();
+  });
+
+  it("opens on an expired Save, offering only to close", async () => {
+    renderRefusedSave(new ConvexError({ code: "CLAIM_INVALID" }));
+
+    expect(await alertText()).toBe(
+      "This save expired before the group moved. Close this and create a new link.",
+    );
+    expect(screen.queryByRole("button", { name: "Finish saving" })).toBeNull();
   });
 });
 
