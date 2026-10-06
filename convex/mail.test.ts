@@ -76,7 +76,7 @@ describe("requestMail", () => {
 
   it("carries the Tips confirmation link in the Welcome Mail request", async () => {
     const account = await newAccount();
-    const tipsConfirmUrl = "https://next-session.link/tips?code=abc";
+    const tipsConfirmUrl = "https://next-session.link/tips?confirm=abc";
 
     await request({ kind: "welcome", tipsConfirmUrl }, account);
 

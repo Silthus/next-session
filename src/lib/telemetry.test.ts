@@ -151,6 +151,18 @@ describe("redactEvent", () => {
     expect(serialized).toContain('Value: \\":shareToken\\" with code :redacted at /s/:shareToken');
   });
 
+  it("scrubs the Tips confirmation code out of an exception on /tips", () => {
+    const exception = event("$exception", {
+      $exception_list: [{ value: "failed with TIPSCODE123" }],
+    });
+
+    const serialized = JSON.stringify(
+      redactEvent(exception, "https://next-session.link/tips?confirm=TIPSCODE123"),
+    );
+
+    expect(serialized).not.toContain("TIPSCODE123");
+  });
+
   it("scrubs a Share Token typed with a capital S", () => {
     const exception = event("$exception", {
       $exception_list: [{ value: "failed at /S/AbC9_-xZ12" }],

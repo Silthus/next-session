@@ -33,6 +33,12 @@ function renderPage(code: string | undefined, confirm: Confirm) {
 
 const yes = { name: "Yes, send me the tips" };
 
+function dropFocusLikeABrowserOnADisabledButton() {
+  const elsewhere = document.body.appendChild(document.createElement("input"));
+  elsewhere.focus();
+  elsewhere.remove();
+}
+
 async function headingText() {
   return (await screen.findByRole("heading", { level: 1 })).textContent;
 }
@@ -100,6 +106,18 @@ describe("ConfirmTips", () => {
     await userEvent.click(screen.getByRole("button", yes));
 
     expect(await screen.findByRole("heading", { level: 1, name: "Done" })).toBeTruthy();
+  });
+
+  it("gives focus back to the button when the press fails", async () => {
+    let fail: (error: Error) => void = () => {};
+    renderPage("the-code", () => new Promise((_, reject) => (fail = reject)));
+
+    await userEvent.click(await screen.findByRole("button", yes));
+    dropFocusLikeABrowserOnADisabledButton();
+    fail(new Error("connection lost"));
+
+    await screen.findByRole("alert");
+    expect(document.activeElement).toBe(screen.getByRole("button", yes));
   });
 
   it("says what went wrong without the server's words when the press fails unexpectedly", async () => {

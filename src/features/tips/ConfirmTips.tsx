@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TIPS_CONSENT_WORDING } from "../../../shared/tips";
 import { appErrorOf } from "../../lib/errors";
 import { Button, buttonClassName } from "../../ui/Button";
@@ -57,6 +57,10 @@ function Confirmation({
 }) {
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (failure !== null) button.current?.focus();
+  }, [failure]);
 
   const press = async () => {
     setBusy(true);
@@ -73,6 +77,7 @@ function Confirmation({
   return (
     <div className="mt-2 flex w-full flex-col items-center gap-3">
       <Button
+        ref={button}
         size="lg"
         busy={busy && "Confirming…"}
         onClick={() => void press()}

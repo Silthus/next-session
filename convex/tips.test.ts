@@ -65,9 +65,11 @@ async function accountOf(userId: Id<"users">) {
 
 async function signUpAskingForTips() {
   let userId: Id<"users"> | undefined;
-  const [welcome] = await mailRequestsDuring(async () => {
+  const requests = await mailRequestsDuring(async () => {
     ({ userId } = await signUpWithTips("yes"));
   });
+  expect(requests.map(({ url }) => url)).toEqual([WELCOME_URL]);
+  const [welcome] = requests;
   const code = new URL(welcome!.body.tips_confirm_url!).searchParams.get("confirm")!;
   return { userId: userId!, code };
 }
@@ -194,7 +196,6 @@ describe("account.confirmTips", () => {
 
     const account = await accountOf(userId);
     expect(account.tipsConfirmedAt).toBe(NOW + DAY);
-    expect(account).not.toHaveProperty("tipsCodeHash");
   });
 
   it("requests the Tips mail for the confirmed Account", async () => {
@@ -233,14 +234,14 @@ describe("account.confirmTips", () => {
     expect(await accountOf(userId)).not.toHaveProperty("tipsConfirmedAt");
   });
 
-  it("refuses a used code and requests nothing more", async () => {
+  it("answers a second press as confirmed and requests nothing more", async () => {
     const { userId, code } = await signUpAskingForTips();
     await mailRequestsDuring(() => confirmTips(code));
     const { tipsConfirmedAt } = await accountOf(userId);
-    vi.setSystemTime(NOW + MINUTE);
+    vi.setSystemTime(NOW + 5 * DAY);
 
     const requests = await mailRequestsDuring(async () => {
-      expect(await confirmTips(code)).toEqual({ confirmed: false });
+      expect(await confirmTips(code)).toEqual({ confirmed: true });
     });
 
     expect(requests).toEqual([]);

@@ -26,24 +26,23 @@ export async function tipsConfirmUrlFor(ctx: MutationCtx, account: Doc<"users">)
 
 export async function confirmTipsWith(ctx: MutationCtx, code: string) {
   await enforceRateLimit(ctx, "confirmTips");
-  const account = await accountAwaitingConfirmation(ctx, code);
-  if (account === null) return false;
-  await ctx.db.patch("users", account._id, {
-    tipsConfirmedAt: Date.now(),
-    tipsCodeHash: undefined,
-  });
+  const account = await accountWithCode(ctx, code);
+  if (account?.tipsConfirmedAt !== undefined) return true;
+  if (account === null || !withinConfirmationWindow(account)) return false;
+  await ctx.db.patch("users", account._id, { tipsConfirmedAt: Date.now() });
   await track(ctx, { name: "tips_confirmed", actor: account });
   await requestMail(ctx, { kind: "tips", user: account });
   return true;
 }
 
-async function accountAwaitingConfirmation(ctx: MutationCtx, code: string) {
+async function accountWithCode(ctx: MutationCtx, code: string) {
   const tipsCodeHash = await hashSecretCode(code);
-  const account = await ctx.db
+  return await ctx.db
     .query("users")
     .withIndex("by_tipsCodeHash", (q) => q.eq("tipsCodeHash", tipsCodeHash))
     .unique();
-  const requestedAt = account?.tipsRequestedAt;
-  if (requestedAt === undefined || Date.now() >= requestedAt + CONFIRMATION_WINDOW_MS) return null;
-  return account;
+}
+
+function withinConfirmationWindow({ tipsRequestedAt }: Doc<"users">) {
+  return tipsRequestedAt !== undefined && Date.now() < tipsRequestedAt + CONFIRMATION_WINDOW_MS;
 }
