@@ -589,8 +589,7 @@ describe("AccountSheet with Google", () => {
 });
 
 describe("AccountSheet telemetry", () => {
-  const refusedWith = (data: { code: string }) => () =>
-    Promise.reject(new ConvexError(data));
+  const refusedWith = (data: { code: string }) => () => Promise.reject(new ConvexError(data));
 
   it("tracks a refused log-in with its flow and code", async () => {
     renderLogInSheet(refusedWith({ code: "INVALID_CREDENTIALS" }));
