@@ -7,14 +7,22 @@ type Lab = { L: number; a: number; b: number };
 type Tokens = Record<string, string>;
 
 const [light, dark] = [...css.matchAll(/:root\s*\{([^}]*)\}/g)].map(([, block]) =>
-  Object.fromEntries([...(block ?? "").matchAll(/--([\w-]+):\s*([^;]+);/g)].map(([, n, v]) => [n, v])),
+  Object.fromEntries(
+    [...(block ?? "").matchAll(/--([\w-]+):\s*([^;]+);/g)].map(([, n, v]) => [n, v]),
+  ),
 ) as [Tokens, Tokens];
 
 const themes = { light, dark };
 
 const answerTileFloors = {
-  light: { text: { free: "#ffffff", busy: "#ffffff", maybe: light.ink }, floor: { free: 3, busy: 3.9, maybe: 8 } },
-  dark: { text: { free: dark.paper, busy: dark.paper, maybe: dark.paper }, floor: { free: 10.2, busy: 7, maybe: 10.4 } },
+  light: {
+    text: { free: "#ffffff", busy: "#ffffff", maybe: light.ink },
+    floor: { free: 3, busy: 3.9, maybe: 8 },
+  },
+  dark: {
+    text: { free: dark.paper, busy: dark.paper, maybe: dark.paper },
+    floor: { free: 10.2, busy: 7, maybe: 10.4 },
+  },
 };
 
 const sources = import.meta.glob<string>(["./**/*.tsx", "!./**/*.test.tsx"], {
@@ -64,21 +72,25 @@ describe.each(["light", "dark"] as const)("the %s theme", (theme) => {
   );
 });
 
+const brightAccentOnTextOrFocus =
+  /(?<![\w-])text-accent(?![\w-])|focus[\w-]*:(?:ring|border)-accent(?![\w-])/g;
+
 describe("the bright accent", () => {
   it.each(Object.entries(sources))("never colours text or focus in %s", (_, source) => {
-    expect(source).not.toMatch(/(?<![\w-])text-accent(?![\w-])/);
-    expect(source).not.toMatch(/focus[\w-]*:(ring|border)-accent(?![\w-])/);
+    expect(source.match(brightAccentOnTextOrFocus) ?? []).toEqual([]);
   });
 });
 
 function contrast(first: string, second: string) {
-  const [lighter, darker] = [first, second].map((color) => luminance(lab(color))).sort((x, y) => y - x);
+  const [lighter, darker] = [first, second]
+    .map((color) => luminance(lab(color)))
+    .sort((x, y) => y - x);
   return (lighter! + 0.05) / (darker! + 0.05);
 }
 
 function polar(color: string) {
   const { a, b } = lab(color);
-  return { chroma: Math.hypot(a, b), hue: (((Math.atan2(b, a) * 180) / Math.PI) + 360) % 360 };
+  return { chroma: Math.hypot(a, b), hue: ((Math.atan2(b, a) * 180) / Math.PI + 360) % 360 };
 }
 
 function hueGap(first: string, second: string) {
