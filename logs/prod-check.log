@@ -1,0 +1,10 @@
+
+Running 1 test using 1 worker
+
+deleted /g/k177rzwcwj7fpy2ggtq84y282d8frxw7
+light: created, added Ana and Ben, Add player in reach, deleted /g/k177rzwcwj7fpy2ggtq84y282d8frxw7
+deleted /g/k170fbqf76n459acynh0z7nf118fs9ws
+dark: created, added Ana and Ben, Add player in reach, deleted /g/k170fbqf76n459acynh0z7nf118fs9ws
+  ✓  1 [prod] › prodcheck67/prod67.spec.ts:5:1 › prod: Add player stays in reach at 390 px (9.9s)
+
+  1 passed (10.4s)
