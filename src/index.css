@@ -4,49 +4,53 @@
 @import "@fontsource/jetbrains-mono/500.css";
 
 :root {
-  --paper: #fbfaf7;
-  --surface: #ffffff;
-  --surface-2: #f3f1ec;
-  --line: #e6e2d9;
-  --line-strong: #cfc9bd;
-  --ink: #17161a;
-  --ink-2: #5b5862;
-  --ink-3: #716d7a;
-  --accent: #6d5df6;
-  --accent-strong: #5646e6;
-  --accent-ink: #ffffff;
-  --accent-soft: #ece9fe;
-  --free: #1fa96b;
-  --free-soft: #ddf5e8;
-  --maybe: #e5a11a;
-  --maybe-soft: #fcf0d2;
-  --busy: #e4466a;
-  --busy-soft: #fce1e8;
-  --shadow: 0 1px 2px rgb(23 22 26 / 0.06), 0 8px 24px -12px rgb(23 22 26 / 0.18);
+  --paper: oklch(93% 0.035 88);
+  --surface: oklch(97% 0.022 88);
+  --surface-2: oklch(95% 0.018 88);
+  --line: oklch(89% 0.022 88);
+  --line-strong: oklch(82% 0.026 88);
+  --ink: oklch(20% 0.012 60);
+  --ink-2: oklch(40% 0.018 60);
+  --ink-3: oklch(50% 0.02 60);
+  --accent: oklch(70% 0.12 80);
+  --accent-strong: oklch(48% 0.13 80);
+  --accent-ink: oklch(22% 0.02 60);
+  --accent-soft: oklch(92% 0.05 88);
+  --free: oklch(62.5% 0.145 157);
+  --free-soft: oklch(94.9% 0.031 162);
+  --maybe: oklch(76% 0.15 52);
+  --maybe-soft: oklch(94% 0.04 55);
+  --busy: oklch(60.5% 0.194 11);
+  --busy-soft: oklch(93.4% 0.031 0);
+  --shadow:
+    inset 0 1px 0 oklch(100% 0 0 / 0.6), 0 1px 0 oklch(20% 0.005 80 / 0.04),
+    0 6px 18px oklch(20% 0.005 80 / 0.08);
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #0f0e13;
-    --surface: #17161d;
-    --surface-2: #1f1e27;
-    --line: #2b2a35;
-    --line-strong: #3b3947;
-    --ink: #f4f2f7;
-    --ink-2: #b3afbd;
-    --ink-3: #8a8695;
-    --accent: #8b7dff;
-    --accent-strong: #a398ff;
-    --accent-ink: #0f0e13;
-    --accent-soft: #2a2650;
+    --paper: oklch(15% 0.022 75);
+    --surface: oklch(18% 0.028 75);
+    --surface-2: oklch(21% 0.026 75);
+    --line: oklch(27% 0.016 80);
+    --line-strong: oklch(35% 0.02 80);
+    --ink: oklch(96% 0.006 85);
+    --ink-2: oklch(76% 0.018 85);
+    --ink-3: oklch(62% 0.02 85);
+    --accent: oklch(74% 0.12 82);
+    --accent-strong: oklch(80% 0.11 84);
+    --accent-ink: oklch(18% 0.02 70);
+    --accent-soft: oklch(26% 0.05 82);
     --free: #3dd68c;
     --free-soft: #113826;
-    --maybe: #f2b544;
-    --maybe-soft: #3a2e10;
+    --maybe: oklch(82% 0.13 52);
+    --maybe-soft: oklch(27% 0.045 55);
     --busy: #ff6b8b;
     --busy-soft: #3f1724;
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px -12px rgb(0 0 0 / 0.6);
+    --shadow:
+      inset 0 1px 0 oklch(96% 0.02 80 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.4),
+      0 12px 32px -12px oklch(0% 0 0 / 0.6);
     color-scheme: dark;
   }
 }

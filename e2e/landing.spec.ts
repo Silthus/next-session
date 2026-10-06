@@ -380,7 +380,7 @@ test.describe("on a dark OS", () => {
     await page.goto("/");
     await expect(page.getByRole("button", { name: "Create your link" })).toBeVisible();
     const canvas = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    expect(canvas).toBe("rgb(15, 14, 19)");
+    expect(canvas).toBe("oklch(0.15 0.022 75)");
   });
 
   test("an open sheet dims the page behind it", async ({ page }) => {

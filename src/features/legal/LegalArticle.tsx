@@ -75,7 +75,7 @@ function renderBlock(block: Block, index: number) {
   }
 }
 
-const linkClassName = "text-accent underline underline-offset-2 hover:text-accent-strong";
+const linkClassName = "text-accent-strong underline underline-offset-2 hover:decoration-2";
 
 function renderInlines(inlines: Inline[]) {
   return inlines.map((inline, index) => {

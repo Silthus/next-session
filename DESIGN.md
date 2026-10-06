@@ -7,7 +7,7 @@ Prototype (on branch `prototype/ui-direction`, `git checkout prototype/ui-direct
 
 ## The direction in one paragraph
 
-Next Session is **the calendar that answers itself**. Every screen is built around one month grid, and the grid carries the whole product: the GM reads a heat-map where each day shows one tiny bar per player, the player taps big colored tiles. There is one brand accent (violet) for actions and scheduled sessions, and three fixed answer colors (green free, amber maybe, rose busy) that mean the same thing on every surface. Copy is short and warm. Nothing asks for an account until the group is worth keeping. Dark mode is a first-class peer, not an inversion, because game nights happen at night.
+Next Session is **the calendar that answers itself**. Every screen is built around one month grid, and the grid carries the whole product: the GM reads a heat-map where each day shows one tiny bar per player, the player taps big colored tiles. The page is warm paper with one gold brand accent for actions and scheduled sessions, and three fixed answer colors (green free, orange maybe, rose busy) that mean the same thing on every surface. Copy is short and warm. Nothing asks for an account until the group is worth keeping. Dark mode is a first-class peer, not an inversion, because game nights happen at night.
 
 ## 1. Brand
 
@@ -26,7 +26,7 @@ Voice rules:
 
 - Product name: **Next Session**. Domain: `next-session.link`. The share link reads `next-session.link/s/<token>` and is itself a brand asset: short, lowercase, obviously a link.
 - Wordmark: "Next Session" set in Bricolage Grotesque Bold, tight tracking, next to the mark.
-- Mark: a rounded day tile (the calendar cell) with a darker header band and one bright dot inside, "the one night that works". It is one shape, reads at 16 px as a favicon, and recolors with the theme (violet tile, paper dot). `prototype/src/ui.tsx` → `Logo`.
+- Mark: a rounded day tile (the calendar cell) with a darker header band and one bright dot inside, "the one night that works". It is one shape, reads at 16 px as a favicon, and recolors with the theme (gold tile, ink dot). `prototype/src/ui.tsx` → `Logo`.
 
 Alternatives considered: a chevron-in-a-tile ("next") read as a media player button; a three-tile stack lost legibility at favicon size.
 
@@ -36,27 +36,32 @@ Tokens are CSS custom properties switched by `prefers-color-scheme` (D7: the the
 
 ### Color
 
+Gold on paper, ported from Lonir's Next Session (`packages/ui/src/styles.css` in `Omni-GM/lonir`). Michael redirected the violet build to it on 2026-10-06 ([#55](https://github.com/Silthus/next-session/issues/55)). Lonir's role names differ: its `canvas` is our `paper`, its `paper` is our `surface`, its `chrome` is our `surface-2`.
+
 | Token | Light | Dark | Role |
 | --- | --- | --- | --- |
-| `paper` | `#FBFAF7` | `#0F0E13` | page background (warm off-white, near-black violet) |
-| `surface` | `#FFFFFF` | `#17161D` | cards, calendar cells |
-| `surface-2` | `#F3F1EC` | `#1F1E27` | sunken areas, segmented controls, skeletons |
-| `line` / `line-strong` | `#E6E2D9` / `#CFC9BD` | `#2B2A35` / `#3B3947` | borders, unanswered bars |
-| `ink` / `ink-2` / `ink-3` | `#17161A` / `#5B5862` / `#716D7A` | `#F4F2F7` / `#B3AFBD` / `#8A8695` | text: primary, secondary, muted |
-| `accent` / `accent-strong` | `#6D5DF6` / `#5646E6` | `#8B7DFF` / `#A398FF` | primary actions, scheduled session, today |
-| `accent-ink` | `#FFFFFF` | `#0F0E13` | text on accent |
-| `accent-soft` | `#ECE9FE` | `#2A2650` | share-link card, soft buttons, scheduled cell fill |
-| `free` / `free-soft` | `#1FA96B` / `#DDF5E8` | `#3DD68C` / `#113826` | answer: free |
-| `maybe` / `maybe-soft` | `#E5A11A` / `#FCF0D2` | `#F2B544` / `#3A2E10` | answer: maybe, the nudge banner |
-| `busy` / `busy-soft` | `#E4466A` / `#FCE1E8` | `#FF6B8B` / `#3F1724` | answer: busy, destructive |
+| `paper` | `oklch(93% 0.035 88)` | `oklch(15% 0.022 75)` | page background (cream, warm near-black) |
+| `surface` | `oklch(97% 0.022 88)` | `oklch(18% 0.028 75)` | cards, calendar cells: the lighter sheet on the page |
+| `surface-2` | `oklch(95% 0.018 88)` | `oklch(21% 0.026 75)` | sunken areas, segmented controls, skeletons |
+| `line` / `line-strong` | `oklch(89% 0.022 88)` / `oklch(82% 0.026 88)` | `oklch(27% 0.016 80)` / `oklch(35% 0.02 80)` | quiet borders, unanswered bars |
+| `ink` / `ink-2` / `ink-3` | `oklch(20% 0.012 60)` / `oklch(40% 0.018 60)` / `oklch(50% 0.02 60)` | `oklch(96% 0.006 85)` / `oklch(76% 0.018 85)` / `oklch(62% 0.02 85)` | text: primary, secondary, muted |
+| `accent` | `oklch(70% 0.12 80)` | `oklch(74% 0.12 82)` | honey gold: primary buttons, the logo, session tiles and badges. A fill, never text |
+| `accent-strong` | `oklch(48% 0.13 80)` | `oklch(80% 0.11 84)` | gold that reads: links, stars, today, focus rings |
+| `accent-ink` | `oklch(22% 0.02 60)` | `oklch(18% 0.02 70)` | text on accent |
+| `accent-soft` | `oklch(92% 0.05 88)` | `oklch(26% 0.05 82)` | share-link card, soft buttons, scheduled cell fill |
+| `free` / `free-soft` | `oklch(62.5% 0.145 157)` / `oklch(94.9% 0.031 162)` | `#3DD68C` / `#113826` | answer: free |
+| `maybe` / `maybe-soft` | `oklch(76% 0.15 52)` / `oklch(94% 0.04 55)` | `oklch(82% 0.13 52)` / `oklch(27% 0.045 55)` | answer: maybe, the nudge banner |
+| `busy` / `busy-soft` | `oklch(60.5% 0.194 11)` / `oklch(93.4% 0.031 0)` | `#FF6B8B` / `#3F1724` | answer: busy, destructive |
 
 Rules:
 
-- The three answer colors are never used for anything else, and nothing else uses green, amber or rose. Violet is the only other hue.
+- The three answer colors are never used for anything else, and nothing else uses green, orange or rose. Gold is the only other hue.
+- Maybe sits at hue 52, at least 25° from the gold accent (80), so a maybe tile never reads as a session.
+- `accent` is a fill. Text, icons and focus indicators use `accent-strong`.
 - One exception: the WhatsApp and Telegram share icons in `ShareLinkCard` keep their brand colors (`#25D366` green, `#2AABEE` blue) so people recognize them. The brand colors appear nowhere else.
 - Answer tiles always carry a glyph (✓ ? ✕) in addition to color, for color-blind players.
 - Heat-map intensity on the GM grid is `color-mix(in oklab, var(--free) <0–55>%, var(--surface))` driven by the share of players who are free; a day where everyone is free is solid `free` with white text; a day with any busy answer gets no tint (the busy bar or ✕ count carries the conflict). No day is ever painted red.
-- Contrast: `ink` on `paper` ≥ 14:1 both themes; `ink-3` on `surface` ≥ 4.5:1; white on `free`/`busy` ≥ 3:1 at ≥ 14 px bold (large-text rule), the glyph adds redundancy.
+- Contrast, pinned by `src/theme.test.ts`: `ink` on `paper` ≥ 14:1 both themes; `ink-3` on `surface` and `paper` ≥ 4.5:1; `accent-ink` on `accent` and `accent-strong` on `surface`, `paper` and `accent-soft` ≥ 4.5:1; white on `free`/`busy` ≥ 3:1 at ≥ 14 px bold (large-text rule), the glyph adds redundancy; the answer tiles read at least as well as they did before the gold theme. Free and busy are a shade darker in light so their GM-grid bars keep their contrast on the cream `surface`. The maybe bar drops from 2.2:1 to 2.0:1: on cream, one maybe color cannot keep both that bar and the ink-on-maybe tile at 8:1, and the tile text wins.
 
 ### Type
 
@@ -74,7 +79,7 @@ Fonts are loaded from Google Fonts with `display=swap`; the system stack is the 
 
 - Spacing: Tailwind's 4 px scale. Page gutters 16 px (mobile) / 24 px (desktop). Card padding 16 px, calendar card 12/20 px. Grid gaps 4–8 px between cells.
 - Radius: `sm` 8 (inputs, small buttons, cells on mobile), `md` 12 (buttons, cells, menus), `lg` 16 (cards), `xl` 24 (hero cards, sheets), full (avatars, pills, share icons).
-- Elevation: one shadow token (`shadow-card`), soft and warm in light, deeper in dark. Borders do the structural work; shadow only lifts cards and the primary button.
+- Elevation: one shadow token (`shadow-card`): a paper sheet with a one-pixel top highlight and a soft warm drop in light, a deeper drop in dark. Borders do the structural work; shadow only lifts cards and the primary button.
 - Layout widths: landing 64 rem, GM surface 72 rem with a `minmax(0,1fr) 22rem` split at `lg`, player surface 36 rem single column, legal 42 rem.
 
 ### Motion
@@ -104,7 +109,7 @@ All presentational; data arrives through props. Prototype equivalents in [`proto
 | `BestNights` | top three by `yes − 2·no + 0.5·maybe`, only days with no busy answer and positive score; rank badge, who is free as avatars; click selects the day | empty roster, no positive night |
 | `Players` | roster rows: avatar, name, `answered/fillable` or ✓, hover kebab (rename / remove); inline add form | empty (explains self-join), adding |
 | `Sessions` | upcoming as accent cards with relative date; history collapsed as "n played" | none scheduled |
-| `Nudge` | amber banner after the first player joins: Save group / Later | dismissed (per browser) |
+| `Nudge` | orange banner after the first player joins: Save group / Later | dismissed (per browser) |
 | `SaveSheet` | bottom sheet (mobile) / centered dialog (desktop): Google, email code, merge reassurance | — |
 | `PlayerCalendar` | tap-cycle grid of big tiles with glyphs, month nav, progress bar, fill-rest button, done card, legend, cycling tip | read-only past month, done, scheduled tile (accent ring + ★ badge) |
 | `Progress` | "16 of 30 nights set · 53 %" bar, turns green at 100 % | done |
@@ -156,7 +161,7 @@ States:
 - **past month**: "Past month" pill next to the month name, all cells at 40 %, not selectable, Best nights empty, Schedule disabled.
 - **many players** (> 8): cells switch from bars to `n/N` with a rose `✕k` for busy counts; legend follows; Players list scrolls inside its card after 10 rows; Best nights avatars cap at four.
 - **day selected**: see above; the selected cell gets an ink ring offset from the paper.
-- **anonymous vs saved**: anonymous shows `Save your group` in the header and the amber nudge once a player exists (dismiss stored per browser, re-shown after 7 days); saved shows the avatar menu instead and no nudge.
+- **anonymous vs saved**: anonymous shows `Save your group` in the header and the orange nudge once a player exists (dismiss stored per browser, re-shown after 7 days); saved shows the avatar menu instead and no nudge.
 - **malformed or foreign group id**: fall back to the first group, no error boundary (parity).
 - **multiple groups**: the switcher lists them with player counts; `+ New group` creates "My group" and navigates; the last visited group is remembered.
 - **rename / delete**: rename is inline in the header (Enter saves, Esc cancels, trimmed, 1–60 chars); delete is a two-step confirm inside the menu that names what is lost.
@@ -196,13 +201,13 @@ Greyed mark, "This link no longer works", "The GM may have rotated the link or d
 | D1 | **Calendar-first GM layout**: the heat-map is the primary surface, panels are a 22 rem rail on the right, tabs on mobile. | lonir's panels-left split, or a list-first layout (Best nights as the hero, calendar secondary). Rejected: the grid is what makes the product legible at a glance. |
 | D2 | **Per-player mini bars in GM cells** (≤ 8 players), counts above that. | Count chips only (lonir). Bars show *who* without a hover and make the "everyone free" day pop. |
 | D3 | **Never paint a day red** on the GM grid; conflicts show as a rose bar or ✕ count on a neutral cell. | Red tint for conflict days. Rejected: red grids read as alarm. |
-| D4 | **Three answer colors are fixed and exclusive** (green/amber/rose), brand accent is violet. | Brand accent as "free" color. Rejected: it muddles the action color with an answer. |
+| D4 | **Three answer colors are fixed and exclusive** (green/orange/rose); the brand is gold on warm paper, ported from Lonir's Next Session. Michael's redirect on 2026-10-06 ([#55](https://github.com/Silthus/next-session/issues/55)) replaced the violet accent, and maybe moved from amber to orange to stay clear of the gold. | Brand accent as "free" color. Rejected: it muddles the action color with an answer. Violet accent (the first build). Replaced: it lost the Lonir look players know. |
 | D5 | **Glyphs on player tiles** (✓ ? ✕) in addition to color. | Color only (lonir). Rejected for color-blind players. |
 | D6 | **Bricolage Grotesque + Inter + JetBrains Mono** from Google Fonts with system fallback. | System-only stack (zero network). Reversible by removing one `<link>`. |
 | D7 | **Dark theme follows the OS**, with a manual toggle in the avatar menu later; no toggle in v1. | Toggle in the header. Parity says OS only. |
 | D8 | **Share link lives in the GM header rail, always visible**; the GM tutorial dialog is dropped because the created moment on the landing covers it. | Keep a first-run dialog. One fewer modal. |
 | D9 | **Save group is a sheet**, not a route. | A `/save` page. The sheet keeps the group in view and the merge story believable. |
-| D10 | **Nudge is an amber banner, dismissible, after the first player joins**; the permanent `Save your group` button stays in the header. | Nudge only (OmniGM) or button only. Both, because the banner explains why. |
+| D10 | **Nudge is an orange banner, dismissible, after the first player joins**; the permanent `Save your group` button stays in the header. | Nudge only (OmniGM) or button only. Both, because the banner explains why. |
 | D11 | **Day panel on mobile is a bottom sheet** over the calendar. | Swap the tab panel. The sheet keeps the tapped cell visible. |
 | D12 | **Best nights hides any day with a busy answer** and shows who is free as avatars. | Pure score ranking (lonir shows days with conflicts if the score is positive). The GM wants nights that work, not nights that score. |
 | D13 | **Rotate has no confirm, only an Undo toast.** | Confirm dialog. Undo is faster and safer. |

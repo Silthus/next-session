@@ -211,7 +211,7 @@ export function PlayerCalendar({
       <footer className="mx-auto flex w-full max-w-xl flex-col items-center gap-2 px-4 pb-6 sm:px-5">
         <Link
           to="/"
-          className="inline-flex min-h-11 items-center text-xs font-semibold text-accent hover:underline"
+          className="inline-flex min-h-11 items-center text-xs font-semibold text-accent-strong hover:underline"
         >
           Plan your own game →
         </Link>
@@ -381,7 +381,7 @@ function DayTile({
       <span
         className={cn(
           "text-sm leading-none font-bold sm:text-base",
-          day.isToday && !day.answer && "text-accent",
+          day.isToday && !day.answer && "text-accent-strong",
         )}
       >
         {day.dayOfMonth}
