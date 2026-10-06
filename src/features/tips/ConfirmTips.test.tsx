@@ -21,7 +21,7 @@ beforeEach(() => {
   vi.mocked(reportError).mockReset();
 });
 
-type Confirm = (code: string) => Promise<{ confirmed: boolean }>;
+type Confirm = (code: string) => Promise<{ confirmed: boolean; alreadyConfirmed: boolean }>;
 
 function renderPage(code: string | undefined, confirm: Confirm) {
   const router = createRouter({
@@ -56,7 +56,9 @@ describe("ConfirmTips", () => {
   });
 
   it("confirms with the code on the press and says when the first tip arrives", async () => {
-    const confirm = vi.fn<Confirm>(() => Promise.resolve({ confirmed: true }));
+    const confirm = vi.fn<Confirm>(() =>
+      Promise.resolve({ confirmed: true, alreadyConfirmed: false }),
+    );
     renderPage("the-code", confirm);
 
     await userEvent.click(await screen.findByRole("button", yes));
@@ -69,7 +71,7 @@ describe("ConfirmTips", () => {
   });
 
   it("says the link expired when the server refuses the code", async () => {
-    renderPage("the-code", () => Promise.resolve({ confirmed: false }));
+    renderPage("the-code", () => Promise.resolve({ confirmed: false, alreadyConfirmed: false }));
 
     await userEvent.click(await screen.findByRole("button", yes));
 
@@ -79,6 +81,16 @@ describe("ConfirmTips", () => {
     });
     expect(screen.getByText("That's fine, you'll just get no tips.")).toBeTruthy();
     expect(screen.queryByRole("button", yes)).toBeNull();
+    expect(document.activeElement).toBe(heading);
+  });
+
+  it("says the tips were already confirmed on a second press, without promising a new tip", async () => {
+    renderPage("the-code", () => Promise.resolve({ confirmed: true, alreadyConfirmed: true }));
+
+    await userEvent.click(await screen.findByRole("button", yes));
+
+    const heading = await screen.findByRole("heading", { level: 1, name: "Already confirmed" });
+    expect(screen.getByText("You asked for the tips already. Nothing more to do.")).toBeTruthy();
     expect(document.activeElement).toBe(heading);
   });
 
@@ -96,7 +108,7 @@ describe("ConfirmTips", () => {
     const confirm = vi
       .fn<Confirm>()
       .mockRejectedValueOnce(new ConvexError({ code: "RATE_LIMITED", retryAfter: 2_000 }))
-      .mockResolvedValueOnce({ confirmed: true });
+      .mockResolvedValueOnce({ confirmed: true, alreadyConfirmed: false });
     renderPage("the-code", confirm);
 
     await userEvent.click(await screen.findByRole("button", yes));

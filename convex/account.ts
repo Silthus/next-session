@@ -57,8 +57,8 @@ export const finishSave = mutation({
 
 export const confirmTips = mutation({
   args: { code: v.string() },
-  returns: v.object({ confirmed: v.boolean() }),
-  handler: async (ctx, { code }) => ({ confirmed: await confirmTipsWith(ctx, code) }),
+  returns: v.object({ confirmed: v.boolean(), alreadyConfirmed: v.boolean() }),
+  handler: async (ctx, { code }) => await confirmTipsWith(ctx, code),
 });
 
 async function deleteExpiredClaims(ctx: MutationCtx, gm: Doc<"users">) {

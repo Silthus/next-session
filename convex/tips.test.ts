@@ -192,7 +192,7 @@ describe("account.confirmTips", () => {
     const { userId, code } = await signUpAskingForTips();
     vi.setSystemTime(NOW + DAY);
 
-    expect(await confirmTips(code)).toEqual({ confirmed: true });
+    expect(await confirmTips(code)).toEqual({ confirmed: true, alreadyConfirmed: false });
 
     const account = await accountOf(userId);
     expect(account.tipsConfirmedAt).toBe(NOW + DAY);
@@ -219,7 +219,7 @@ describe("account.confirmTips", () => {
     const { code } = await signUpAskingForTips();
     vi.setSystemTime(NOW + 3 * DAY - MINUTE);
 
-    expect(await confirmTips(code)).toEqual({ confirmed: true });
+    expect(await confirmTips(code)).toEqual({ confirmed: true, alreadyConfirmed: false });
   });
 
   it("refuses a late code and requests nothing", async () => {
@@ -227,21 +227,21 @@ describe("account.confirmTips", () => {
     vi.setSystemTime(NOW + 3 * DAY);
 
     const requests = await mailRequestsDuring(async () => {
-      expect(await confirmTips(code)).toEqual({ confirmed: false });
+      expect(await confirmTips(code)).toEqual({ confirmed: false, alreadyConfirmed: false });
     });
 
     expect(requests).toEqual([]);
     expect(await accountOf(userId)).not.toHaveProperty("tipsConfirmedAt");
   });
 
-  it("answers a second press as confirmed and requests nothing more", async () => {
+  it("answers a second press as already confirmed and requests nothing more", async () => {
     const { userId, code } = await signUpAskingForTips();
     await mailRequestsDuring(() => confirmTips(code));
     const { tipsConfirmedAt } = await accountOf(userId);
     vi.setSystemTime(NOW + 5 * DAY);
 
     const requests = await mailRequestsDuring(async () => {
-      expect(await confirmTips(code)).toEqual({ confirmed: true });
+      expect(await confirmTips(code)).toEqual({ confirmed: true, alreadyConfirmed: true });
     });
 
     expect(requests).toEqual([]);
@@ -254,7 +254,7 @@ describe("account.confirmTips", () => {
       await signUpAskingForTips();
 
       const requests = await mailRequestsDuring(async () => {
-        expect(await confirmTips(code)).toEqual({ confirmed: false });
+        expect(await confirmTips(code)).toEqual({ confirmed: false, alreadyConfirmed: false });
       });
 
       expect(requests).toEqual([]);

@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { routeTree } from "../../routeTree.gen";
 
-const confirmTips = vi.fn(() => Promise.resolve({ confirmed: true }));
+const confirmTips = vi.fn(() => Promise.resolve({ confirmed: true, alreadyConfirmed: false }));
 
 vi.mock("convex/react", () => ({
   useMutation: () => confirmTips,

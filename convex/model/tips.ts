@@ -24,15 +24,21 @@ export async function tipsConfirmUrlFor(ctx: MutationCtx, account: Doc<"users">)
   return url.toString();
 }
 
-export async function confirmTipsWith(ctx: MutationCtx, code: string) {
+export type TipsConfirmation = { confirmed: boolean; alreadyConfirmed: boolean };
+
+const CONFIRMED = { confirmed: true, alreadyConfirmed: false };
+const ALREADY_CONFIRMED = { confirmed: true, alreadyConfirmed: true };
+const REFUSED = { confirmed: false, alreadyConfirmed: false };
+
+export async function confirmTipsWith(ctx: MutationCtx, code: string): Promise<TipsConfirmation> {
   await enforceRateLimit(ctx, "confirmTips");
   const account = await accountWithCode(ctx, code);
-  if (account?.tipsConfirmedAt !== undefined) return true;
-  if (account === null || !withinConfirmationWindow(account)) return false;
+  if (account?.tipsConfirmedAt !== undefined) return ALREADY_CONFIRMED;
+  if (account === null || !withinConfirmationWindow(account)) return REFUSED;
   await ctx.db.patch("users", account._id, { tipsConfirmedAt: Date.now() });
   await track(ctx, { name: "tips_confirmed", actor: account });
   await requestMail(ctx, { kind: "tips", user: account });
-  return true;
+  return CONFIRMED;
 }
 
 async function accountWithCode(ctx: MutationCtx, code: string) {

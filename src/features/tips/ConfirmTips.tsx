@@ -3,14 +3,19 @@ import { useEffect, useRef, useState } from "react";
 import { TIPS_CONSENT_WORDING } from "../../../shared/tips";
 import { appErrorOf } from "../../lib/errors";
 import { Button, buttonClassName } from "../../ui/Button";
+import type { TipsConfirmation } from "../../../convex/model/tips";
 import { StatusScreen } from "../../ui/StatusScreen";
 
-type Confirm = (code: string) => Promise<{ confirmed: boolean }>;
+type Confirm = (code: string) => Promise<TipsConfirmation>;
 
-type Outcome = "confirmed" | "expired";
+type Outcome = "confirmed" | "alreadyConfirmed" | "expired";
 
 const outcomes: Record<Outcome, { headline: string; explanation: string }> = {
   confirmed: { headline: "Done", explanation: "The first tip arrives in two days." },
+  alreadyConfirmed: {
+    headline: "Already confirmed",
+    explanation: "You asked for the tips already. Nothing more to do.",
+  },
   expired: {
     headline: "This link has expired",
     explanation: "That's fine, you'll just get no tips.",
@@ -52,7 +57,7 @@ function Confirmation({
   onConfirm,
   onOutcome,
 }: {
-  onConfirm: () => Promise<{ confirmed: boolean }>;
+  onConfirm: () => Promise<TipsConfirmation>;
   onOutcome: (outcome: Outcome) => void;
 }) {
   const [busy, setBusy] = useState(false);
@@ -66,8 +71,7 @@ function Confirmation({
     setBusy(true);
     setFailure(null);
     try {
-      const { confirmed } = await onConfirm();
-      onOutcome(confirmed ? "confirmed" : "expired");
+      onOutcome(outcomeOf(await onConfirm()));
     } catch (error) {
       setFailure(failureMessage(error));
       setBusy(false);
@@ -95,6 +99,11 @@ function Confirmation({
       </p>
     </div>
   );
+}
+
+function outcomeOf({ confirmed, alreadyConfirmed }: TipsConfirmation): Outcome {
+  if (alreadyConfirmed) return "alreadyConfirmed";
+  return confirmed ? "confirmed" : "expired";
 }
 
 function failureMessage(error: unknown) {
