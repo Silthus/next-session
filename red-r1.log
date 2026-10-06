@@ -1,0 +1,55 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-63
+
+ ❯ |convex| convex/player.test.ts (76 tests | 2 failed | 71 skipped) 94ms
+   ❯ player.claim (10)
+     × pushes out the Expiry of an Unsaved Group 8ms
+   ❯ player.release (5)
+     × pushes out the Expiry of an Unsaved Group 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/player.test.ts > player.claim > pushes out the Expiry of an Unsaved Group
+AssertionError: expected 1793662200000 to be 1793835000000 // Object.is equality
+
+- Expected
++ Received
+
+- 1793835000000
++ 1793662200000
+
+ ❯ convex/player.test.ts:916:40
+    914|     await player.as.mutation(api.player.claim, { shareToken, playerId:…
+    915|
+    916|     expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
+       |                                        ^
+    917|   });
+    918|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.release > pushes out the Expiry of an Unsaved Group
+AssertionError: expected 1793662200000 to be 1793835000000 // Object.is equality
+
+- Expected
++ Received
+
+- 1793835000000
++ 1793662200000
+
+ ❯ convex/player.test.ts:970:40
+    968|     await player.as.mutation(api.player.release, { groupId });
+    969|
+    970|     expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
+       |                                        ^
+    971|   });
+    972|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 passed | 71 skipped (76)
+   Start at  14:34:44
+   Duration  491ms (transform 37%, import 29%, tests 23%, environment 10%, worker 1%)
+
