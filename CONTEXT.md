@@ -90,7 +90,21 @@ _Avoid_: mark all, bulk no
 
 **Legal Acceptance**:
 The record that a GM agreed to the Terms and the Privacy Policy: both document versions and a timestamp. The click on "Create your link", or creating an Account, is the act.
-_Avoid_: consent (that word is reserved for analytics), clickwrap
+_Avoid_: consent (that word is reserved for Tips), clickwrap
+
+### Mail and measurement
+
+**Welcome Mail**:
+The one email every new Account gets right after it is created, confirming the Account and linking My groups. It is part of the Service, not advertising.
+_Avoid_: onboarding email, confirmation email
+
+**Tips**:
+Two short emails on getting the first game night scheduled, sent only to an Account that ticked the box in the Save sheet and confirmed from the Welcome Mail. Unsubscribing stops them.
+_Avoid_: drip, newsletter, marketing (in copy)
+
+**Product Marker**:
+The `product: "next-session"` property on every event, exception and log Next Session sends to PostHog, which shares its project with Lonir.
+_Avoid_: app tag, source
 
 ## Relationships
 
