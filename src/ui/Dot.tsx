@@ -4,7 +4,7 @@ export type DotAnswer = "free" | "maybe" | "busy" | null;
 
 const colors: Record<Exclude<DotAnswer, null>, string> = {
   free: "bg-free",
-  maybe: "bg-maybe",
+  maybe: "bg-maybe-bar",
   busy: "bg-busy",
 };
 

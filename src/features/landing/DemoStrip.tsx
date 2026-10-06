@@ -12,7 +12,7 @@ const week: { day: string; answers: DemoAnswer[] }[] = [
   { day: "Su", answers: ["busy", "maybe", "free", "busy", "busy"] },
 ];
 
-const bar: Record<DemoAnswer, string> = { free: "bg-free", maybe: "bg-maybe", busy: "bg-busy" };
+const bar: Record<DemoAnswer, string> = { free: "bg-free", maybe: "bg-maybe-bar", busy: "bg-busy" };
 
 export function DemoStrip() {
   return (
