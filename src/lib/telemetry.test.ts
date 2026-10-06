@@ -102,7 +102,7 @@ describe("redactEvent", () => {
     });
   });
 
-  it("drops what the SDK reads from the device and the page title", () => {
+  it("drops what the SDK reads from the device, the page title and the search keyword", () => {
     const deviceReads = {
       $screen_height: 800,
       $screen_width: 400,
@@ -113,6 +113,7 @@ describe("redactEvent", () => {
       $browser_language: "de-DE",
       $browser_language_prefix: "de",
       title: "Tuesday crew · Next Session",
+      ph_keyword: "tuesday crew dnd",
     };
     const pageview: CaptureResult = {
       ...event("$pageview", { ...deviceReads, $browser: "Firefox", $os: "Android" }),
@@ -263,6 +264,7 @@ describe("initTelemetry", () => {
       disable_session_recording: true,
       disable_surveys: true,
       disable_scroll_properties: true,
+      save_campaign_params: false,
       persistence: "memory",
       advanced_disable_flags: true,
       logs: {
