@@ -40,7 +40,7 @@ export async function signUpAccount() {
   });
   if (!tokens) throw new Error("The sign-up returned no tokens");
   client.setAuth(tokens.token);
-  return { email, client };
+  return { email, client, tokens };
 }
 
 export async function signUpAccountWithGroup() {
@@ -68,7 +68,7 @@ export async function seedPlayer(gm: Gm, name: string, answers: Record<string, A
   }
 }
 
-export async function openAsGm(page: Page, gm: Gm, path: string) {
+export async function openAsGm(page: Page, gm: Pick<Gm, "tokens">, path: string) {
   await page.goto("/terms");
   await page.evaluate(
     ([suffix, tokens]) => {
