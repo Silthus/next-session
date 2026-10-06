@@ -116,7 +116,9 @@ function NextSessions({ groups, today }: { groups: MyGroupsData; today: IsoDate 
                     {relativeDay(session.date, today)}
                   </span>
                 </span>
-                <span className="truncate text-sm font-medium text-ink-2">{session.groupName}</span>
+                <span className="max-w-[45%] truncate text-sm font-medium text-ink-2">
+                  {session.groupName}
+                </span>
               </GroupPageLink>
             </li>
           ))}
