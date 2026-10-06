@@ -24,9 +24,11 @@ const answerTileFloors = {
 };
 
 const answerBarFloors = {
-  light: { free: 3, maybe: 2, busy: 3.9 },
+  light: { free: 3, maybe: 3, busy: 3.9 },
   dark: { free: 9.5, maybe: 9.8, busy: 6.6 },
 };
+
+const answerBarTokens = { free: "free", maybe: "maybe-bar", busy: "busy" };
 
 const sources = import.meta.glob<string>(["./**/*.tsx", "!./**/*.test.tsx"], {
   query: "?raw",
@@ -78,11 +80,18 @@ describe.each(["light", "dark"] as const)("the %s theme", (theme) => {
   it.each(["free", "maybe", "busy"] as const)(
     "keeps the %s bar visible on a calendar cell",
     (answer) => {
-      expect(contrast(token(answer), token("surface"))).toBeGreaterThanOrEqual(
+      expect(contrast(token(answerBarTokens[answer]), token("surface"))).toBeGreaterThanOrEqual(
         answerBarFloors[theme][answer],
       );
     },
   );
+
+  it("draws the maybe bar in the maybe orange", () => {
+    const bar = polar(token("maybe-bar"));
+    expect(Math.abs(bar.hue - polar(token("maybe")).hue)).toBeLessThanOrEqual(5);
+    expect(bar.chroma).toBeGreaterThanOrEqual(0.12);
+    expect(hueGap(token("maybe-bar"), token("accent"))).toBeGreaterThanOrEqual(25);
+  });
 });
 
 const brightAccentOnTextOrFocus =
