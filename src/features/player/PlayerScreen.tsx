@@ -313,6 +313,7 @@ function PlayerAnswers({
 
   return (
     <PlayerCalendar
+      groupId={group.groupId}
       groupName={group.name}
       playerName={player.name}
       month={month}
@@ -323,9 +324,9 @@ function PlayerAnswers({
       onHintToggle={() => (hintVisible ? dismissHint() : setHintVisible(true))}
       onAnswer={(date, answer) => {
         if (hintVisible) dismissHint();
-        saveAnswer({ shareToken, playerId, date, answer }).catch((error: unknown) =>
-          showToast(errorMessage(error, "answer")),
-        );
+        const saving = saveAnswer({ shareToken, playerId, date, answer });
+        saving.catch((error: unknown) => showToast(errorMessage(error, "answer")));
+        return saving;
       }}
       onFillRest={(fillMonth) => {
         if (hintVisible) dismissHint();

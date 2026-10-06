@@ -11,6 +11,7 @@ import {
 import { ANSWERS, nextAnswer, type Answer } from "../../../shared/answers";
 import type { IsoDate, IsoMonth } from "../../../shared/dates";
 import { pageTitle } from "../../lib/pageTitle";
+import { track } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
 import { LegalFooter } from "../../ui/LegalFooter";
@@ -26,6 +27,13 @@ const FILL_STAGGER_MS = 26;
 const SWIPE_MIN_PX = 50;
 const LOCK_TIP = "Past nights lock. Future months unlock two ahead.";
 const TIPS = ["Tap again to cycle: free, maybe, busy.", LOCK_TIP];
+const groupsAnsweredThisPageLoad = new Set<string>();
+
+function answerSaved(groupId: string) {
+  if (groupsAnsweredThisPageLoad.has(groupId)) return;
+  groupsAnsweredThisPageLoad.add(groupId);
+  track({ name: "answers_started", group_id: groupId });
+}
 
 const answerLabels: Record<Answer, string> = { free: "Free", maybe: "Maybe", busy: "Busy" };
 const answerGlyphs: Record<Answer, string> = { free: "✓", maybe: "?", busy: "✕" };
@@ -39,6 +47,7 @@ const answerTiles: Record<Answer | "none", string> = {
 export type KeepState = "offer" | "keeping" | "kept";
 
 export function PlayerCalendar({
+  groupId,
   groupName,
   playerName,
   month,
@@ -57,6 +66,7 @@ export function PlayerCalendar({
   onKeep,
   accountControl,
 }: {
+  groupId: string;
   groupName: string;
   playerName: string;
   month: IsoMonth;
@@ -64,7 +74,7 @@ export function PlayerCalendar({
   answers: Record<IsoDate, Answer> | undefined;
   sessionDates: IsoDate[];
   hintVisible: boolean;
-  onAnswer: (date: IsoDate, answer: Answer | null) => void;
+  onAnswer: (date: IsoDate, answer: Answer | null) => Promise<unknown>;
   onFillRest: (month: IsoMonth) => Promise<unknown>;
   onMonthChange: (month: IsoMonth) => void;
   onNotYou: () => void;
@@ -112,7 +122,10 @@ export function PlayerCalendar({
   function answer(day: PlayerDay) {
     vibrate(8);
     setTaps((count) => count + 1);
-    onAnswer(day.date, nextAnswer(day.answer));
+    onAnswer(day.date, nextAnswer(day.answer)).then(
+      () => answerSaved(groupId),
+      () => undefined,
+    );
   }
 
   function fillRest() {
@@ -120,10 +133,21 @@ export function PlayerCalendar({
     setStagger(new Map(view.fillRest.map((date, index) => [date, index])));
     setTimeout(() => setStagger(new Map()), view.fillRest.length * FILL_STAGGER_MS + 300);
     focusDoneCardWhenDone.current = true;
-    onFillRest(month).catch(() => {
-      refusedFillRestMonth.current = month;
-      setRefusedFillRests((count) => count + 1);
-    });
+    onFillRest(month).then(
+      () => {
+        track({ name: "fill_rest_used", group_id: groupId });
+        answerSaved(groupId);
+      },
+      () => {
+        refusedFillRestMonth.current = month;
+        setRefusedFillRests((count) => count + 1);
+      },
+    );
+  }
+
+  function keepGroup() {
+    track({ name: "keep_group_started", group_id: groupId });
+    onKeep();
   }
 
   function fillNextMonth(next: IsoMonth) {
@@ -230,7 +254,7 @@ export function PlayerCalendar({
           {view.readOnly ? LOCK_TIP : TIPS[Math.floor(taps / 3) % TIPS.length]}
         </p>
         {(keepOffered || keep !== "offer" || keepRefusal !== null) && (
-          <KeepLine keep={keep} refusal={keepRefusal} onKeep={onKeep} />
+          <KeepLine keep={keep} refusal={keepRefusal} onKeep={keepGroup} />
         )}
       </main>
 

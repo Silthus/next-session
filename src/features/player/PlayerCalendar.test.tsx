@@ -7,9 +7,19 @@ import {
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState, type ComponentProps, type ReactNode } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Answer } from "../../../shared/answers";
+import { track } from "../../lib/telemetry";
 import { PlayerCalendar } from "./PlayerCalendar";
+
+vi.mock(import("../../lib/telemetry"), async (original) => ({
+  ...(await original()),
+  track: vi.fn(),
+}));
+
+beforeEach(() => {
+  vi.mocked(track).mockReset();
+});
 
 type Props = ComponentProps<typeof PlayerCalendar>;
 
@@ -41,6 +51,7 @@ function renderInRouter(node: () => ReactNode) {
 
 function calendarProps(props: Partial<Props> = {}): Props {
   return {
+    groupId: "group-thursday",
     groupName: "Thursday Crew",
     playerName: "Ana",
     month: "2026-10",
@@ -48,7 +59,7 @@ function calendarProps(props: Partial<Props> = {}): Props {
     answers: {},
     sessionDates: [],
     hintVisible: false,
-    onAnswer: vi.fn(),
+    onAnswer: vi.fn(() => Promise.resolve(null)),
     onFillRest: vi.fn(() => Promise.resolve(null)),
     onMonthChange: vi.fn(),
     onNotYou: vi.fn(),
@@ -63,7 +74,7 @@ function calendarProps(props: Partial<Props> = {}): Props {
 
 function renderCalendar(overrides: Partial<Props> = {}) {
   const handlers = {
-    onAnswer: vi.fn<Props["onAnswer"]>(),
+    onAnswer: vi.fn<Props["onAnswer"]>(() => Promise.resolve(null)),
     onFillRest: vi.fn<Props["onFillRest"]>(() => Promise.resolve(null)),
     onMonthChange: vi.fn<Props["onMonthChange"]>(),
     onNotYou: vi.fn<Props["onNotYou"]>(),
@@ -120,7 +131,10 @@ function CalendarWithBackend() {
       {...calendarProps({
         month,
         answers,
-        onAnswer: (date, answer) => setAnswers(withAnswer(answers ?? {}, date, answer)),
+        onAnswer: (date, answer) => {
+          setAnswers(withAnswer(answers ?? {}, date, answer));
+          return Promise.resolve(null);
+        },
         onFillRest: () => {
           setAnswers(everyDayFrom(4, 31));
           return Promise.resolve(null);
@@ -494,5 +508,90 @@ describe("PlayerCalendar keeping the Group", () => {
     expect(
       within(await screen.findByRole("banner")).getByRole("button", { name: "Log in" }),
     ).toBeTruthy();
+  });
+});
+
+describe("PlayerCalendar telemetry", () => {
+  function deferred() {
+    let settle: { resolve: () => void; reject: () => void } = {
+      resolve: () => undefined,
+      reject: () => undefined,
+    };
+    const promise = new Promise<null>((resolve, reject) => {
+      settle = { resolve: () => resolve(null), reject: () => reject(new Error("offline")) };
+    });
+    return { promise, ...settle };
+  }
+
+  it("tracks answers_started at the first saved tap, once per page load", async () => {
+    const saves = [deferred(), deferred(), deferred()];
+    const onAnswer = vi.fn(() => saves[onAnswer.mock.calls.length - 1]!.promise);
+    renderCalendar({ groupId: "group-first-tap", onAnswer });
+
+    await userEvent.click(await tile(/^Sunday, October 4/));
+    saves[0]!.reject();
+    await userEvent.click(await tile(/^Monday, October 5/));
+    expect(track).not.toHaveBeenCalled();
+
+    saves[1]!.resolve();
+    await vi.waitFor(() =>
+      expect(track).toHaveBeenCalledExactlyOnceWith({
+        name: "answers_started",
+        group_id: "group-first-tap",
+      }),
+    );
+
+    await userEvent.click(await tile(/^Tuesday, October 6/));
+    saves[2]!.resolve();
+    await act(() => Promise.resolve());
+    expect(track).toHaveBeenCalledOnce();
+  });
+
+  it("does not track answers_started again when the calendar mounts again", async () => {
+    renderCalendar({ groupId: "group-remount" });
+    await userEvent.click(await tile(/^Sunday, October 4/));
+    await vi.waitFor(() => expect(track).toHaveBeenCalledOnce());
+    vi.mocked(track).mockReset();
+    document.body.innerHTML = "";
+
+    renderCalendar({ groupId: "group-remount" });
+    await userEvent.click(await tile(/^Monday, October 5/));
+    await act(() => Promise.resolve());
+
+    expect(track).not.toHaveBeenCalled();
+  });
+
+  it("tracks fill_rest_used once the nights are saved, and not when refused", async () => {
+    const refused = deferred();
+    const onFillRest = vi.fn<Props["onFillRest"]>(() => refused.promise);
+    renderCalendar({
+      groupId: "group-fill-rest",
+      answers: { "2026-10-04": "free" },
+      onFillRest,
+    });
+    await userEvent.click(await screen.findByRole("button", { name: /^Mark the other/ }));
+    refused.reject();
+    await act(() => Promise.resolve());
+    expect(track).not.toHaveBeenCalledWith(expect.objectContaining({ name: "fill_rest_used" }));
+
+    onFillRest.mockImplementation(() => Promise.resolve(null));
+    await userEvent.click(await screen.findByRole("button", { name: /^Mark the other/ }));
+
+    await vi.waitFor(() =>
+      expect(track).toHaveBeenCalledWith({ name: "fill_rest_used", group_id: "group-fill-rest" }),
+    );
+    expect(track).toHaveBeenCalledWith({ name: "answers_started", group_id: "group-fill-rest" });
+  });
+
+  it("tracks keep_group_started when the Player taps Keep this group", async () => {
+    const { onKeep } = renderCalendar({ groupId: "group-keep", keepOffered: true });
+
+    await userEvent.click(await screen.findByRole("button", { name: "Keep this group" }));
+
+    expect(onKeep).toHaveBeenCalledOnce();
+    expect(track).toHaveBeenCalledExactlyOnceWith({
+      name: "keep_group_started",
+      group_id: "group-keep",
+    });
   });
 });
