@@ -1,11 +1,12 @@
 import { ConvexError } from "convex/values";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
 import {
   finishPendingSave,
   PENDING_SAVE_KEY,
   resumePendingSave,
   saveGroups,
+  saveThroughGoogle,
   type SaveDeps,
 } from "./save";
 
@@ -185,5 +186,33 @@ describe("resumePendingSave", () => {
 
     expect(await resumePendingSave(deps)).toBeNull();
     expect(storage.getItem(PENDING_SAVE_KEY)).toBe("left-over");
+  });
+});
+
+describe("saveThroughGoogle", () => {
+  it("claims before leaving for Google, so the way back can move the Groups", async () => {
+    const { deps, calls, storage } = fakeDeps();
+    const continueWithGoogle = () => {
+      calls.push(`leave for Google, pending ${storage.getItem(PENDING_SAVE_KEY)}`);
+      return Promise.resolve();
+    };
+
+    await saveThroughGoogle({ ...deps, continueWithGoogle });
+    const onReturn = await resumePendingSave(deps);
+
+    expect(calls).toEqual([
+      "startSave",
+      "leave for Google, pending claim-code",
+      "finishSave claim-code",
+    ]);
+    expect(onReturn).toEqual({ groupIds: [groupId] });
+  });
+
+  it("stays on the page when the claim fails", async () => {
+    const { deps } = fakeDeps({ startSave: offline });
+    const continueWithGoogle = vi.fn(() => Promise.resolve());
+
+    await expect(saveThroughGoogle({ ...deps, continueWithGoogle })).rejects.toThrow();
+    expect(continueWithGoogle).not.toHaveBeenCalled();
   });
 });

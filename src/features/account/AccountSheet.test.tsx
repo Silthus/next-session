@@ -364,3 +364,60 @@ describe("AccountSheet logging in", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 });
+
+describe("AccountSheet with Google", () => {
+  const google = { name: "Continue with Google" };
+
+  it("offers Google only once the deployment has it", async () => {
+    renderSheet({ open: true, intent: "logIn", onSubmit: vi.fn(), onClose: vi.fn() });
+    await screen.findByRole("heading", { name: "Log in" });
+    expect(screen.queryByRole("button", google)).toBeNull();
+  });
+
+  it.each([
+    ["saving a Group", "save"],
+    ["logging in", "logIn"],
+  ] as const)("continues with Google %s, under the legal line", async (_, intent) => {
+    const onContinueWithGoogle = vi.fn(() => new Promise(() => {}));
+    renderSheet({
+      open: true,
+      intent,
+      groupName: "My group",
+      onSubmit: vi.fn(),
+      onFinish: vi.fn(),
+      onClose: vi.fn(),
+      onContinueWithGoogle,
+    });
+
+    await userEvent.click(await screen.findByRole("button", google));
+
+    expect(onContinueWithGoogle).toHaveBeenCalled();
+    expect(screen.getByText(/By continuing with Google/).textContent).toBe(
+      "By continuing with Google you agree to the Terms and Privacy Policy.",
+    );
+    expect(screen.getByRole("button", { name: "Opening Google…" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+    expect(screen.getByLabelText("Email")).toHaveProperty("readOnly", true);
+  });
+
+  it("stays open and says so when leaving for Google fails", async () => {
+    const onClose = vi.fn();
+    renderSheet({
+      open: true,
+      intent: "save",
+      groupName: "My group",
+      onSubmit: vi.fn(),
+      onFinish: vi.fn(),
+      onClose,
+      onContinueWithGoogle: () => Promise.reject(new ConvexError({ code: "RATE_LIMITED" })),
+    });
+
+    await userEvent.click(await screen.findByRole("button", google));
+
+    expect(await alertText()).toBe("Too many tries. Try again in a minute.");
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", google)).toHaveProperty("disabled", false);
+  });
+});

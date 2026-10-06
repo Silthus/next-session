@@ -64,6 +64,12 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
     }
   };
   const save = (input: SaveInput) => saveThrough(() => gm.save(input));
+  const { saveWithGoogle, savedOnReturn, resumingSave } = gm;
+  const showToast = toasts.show;
+
+  useEffect(() => {
+    if (savedOnReturn) showToast("Saved. Open it anywhere with your account.");
+  }, [savedOnReturn, showToast]);
   const finish = () => saveThrough(gm.finishSave);
 
   const headerActions = (gm.status === "anonymous" || gm.status === "account") && group && (
@@ -81,7 +87,7 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         status: gm.status,
         group,
         saving,
-        holdingForSave: saving || saveSheetFor !== null,
+        holdingForSave: saving || resumingSave || saveSheetFor !== null,
         search,
         headerActions,
         showToast: toasts.show,
@@ -97,6 +103,7 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         signedInAs={gm.status === "account" ? gm.email : undefined}
         onSubmit={save}
         onFinish={finish}
+        onContinueWithGoogle={saveWithGoogle && (() => saveWithGoogle(groupId))}
         onClose={() => setSaveSheetFor(null)}
       />
     </>

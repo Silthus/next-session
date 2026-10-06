@@ -15,6 +15,7 @@ type CreatedGroup = { id: string; name: string; shareToken: string };
 
 export function Landing() {
   const gm = useGm();
+  const { saveWithGoogle } = gm;
   const navigate = useNavigate();
   const signedIn = gm.status === "anonymous" || gm.status === "account";
   const groups = useQuery(api.groups.mine, signedIn ? {} : "skip");
@@ -110,6 +111,7 @@ export function Landing() {
           signedInAs={account ? gm.email : undefined}
           onSubmit={(input) => saveWith(() => gm.save(input))}
           onFinish={() => (saved ? Promise.resolve() : saveWith(gm.finishSave))}
+          onContinueWithGoogle={saveWithGoogle && (() => saveWithGoogle(created.id))}
           onClose={() => setSheet(null)}
         />
       ) : (
@@ -117,6 +119,7 @@ export function Landing() {
           open={sheet === "logIn"}
           intent="logIn"
           onSubmit={logIn}
+          onContinueWithGoogle={gm.logInWithGoogle}
           onClose={() => setSheet(null)}
         />
       )}

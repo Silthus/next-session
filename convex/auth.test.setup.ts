@@ -85,26 +85,30 @@ function googleIdToken({ sub, email, emailVerified }: GoogleIdentity) {
 }
 
 function fakeGoogle(identity: GoogleIdentity) {
-  return async (input: RequestInfo | URL) => {
-    const url = input instanceof Request ? input.url : input.toString();
-    if (url === `${GOOGLE_ISSUER}/.well-known/openid-configuration`) {
-      return Response.json({
-        issuer: GOOGLE_ISSUER,
-        authorization_endpoint: `${GOOGLE_ISSUER}/o/oauth2/v2/auth`,
-        token_endpoint: GOOGLE_TOKEN_ENDPOINT,
-        code_challenge_methods_supported: ["S256"],
-      });
-    }
-    if (url === GOOGLE_TOKEN_ENDPOINT) {
-      return Response.json({
-        access_token: "google-access-token",
-        token_type: "Bearer",
-        expires_in: 3600,
-        id_token: googleIdToken(identity),
-      });
-    }
-    throw new Error(`The fake Google does not answer ${url}`);
-  };
+  return (input: RequestInfo | URL) =>
+    Promise.resolve().then(() =>
+      googleAnswer(identity, input instanceof Request ? input.url : input.toString()),
+    );
+}
+
+function googleAnswer(identity: GoogleIdentity, url: string) {
+  if (url === `${GOOGLE_ISSUER}/.well-known/openid-configuration`) {
+    return Response.json({
+      issuer: GOOGLE_ISSUER,
+      authorization_endpoint: `${GOOGLE_ISSUER}/o/oauth2/v2/auth`,
+      token_endpoint: GOOGLE_TOKEN_ENDPOINT,
+      code_challenge_methods_supported: ["S256"],
+    });
+  }
+  if (url === GOOGLE_TOKEN_ENDPOINT) {
+    return Response.json({
+      access_token: "google-access-token",
+      token_type: "Bearer",
+      expires_in: 3600,
+      id_token: googleIdToken(identity),
+    });
+  }
+  throw new Error(`The fake Google does not answer ${url}`);
 }
 
 function cookiesFrom(response: Response) {
@@ -126,9 +130,12 @@ export async function signInWithGoogle(
       provider: "google",
       params: { redirectTo },
     });
-    const toGoogle = await t.fetch(new URL(started.redirect!).pathname + new URL(started.redirect!).search, {
-      redirect: "manual",
-    });
+    const toGoogle = await t.fetch(
+      new URL(started.redirect!).pathname + new URL(started.redirect!).search,
+      {
+        redirect: "manual",
+      },
+    );
     const fromGoogle = await t.fetch("/api/auth/callback/google?code=google-auth-code", {
       headers: { Cookie: cookiesFrom(toGoogle) },
       redirect: "manual",
