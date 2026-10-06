@@ -1,0 +1,106 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-75
+
+ ❯ |convex| convex/telemetry.test.ts (6 tests | 3 failed) 27ms
+   ❯ telemetry.send (6)
+     × logs an error answer to the Convex console without the token and drops it 7ms
+     × logs a network failure to the Convex console without the token and drops it 2ms
+     × gives up on a PostHog that never answers after 10 seconds 3ms
+ ❯ |convex| convex/telemetry.callSites.test.ts (25 tests | 1 failed) 1043ms
+   ❯ Player mutations (6)
+     × tracks nothing for a claim of a Player the Account already holds 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks nothing for a claim of a Player the Account already holds
+AssertionError: expected [ { …(4) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "distinct_id": "next-session:000000000000000000000010006users",
++     "event": "next_session:player_claimed",
++     "properties": {
++       "group_id": "00000000000000000000010002groups",
++       "product": "next-session",
++     },
++     "timestamp": "2026-10-06T15:00:00.000Z",
++   },
++ ]
+
+ ❯ convex/telemetry.callSites.test.ts:333:7
+    331|     expect(
+    332|       await eventsDuring(() => as.mutation(api.player.claim, { shareTo…
+    333|     ).toEqual([]);
+       |       ^
+    334|   });
+    335|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |convex| convex/telemetry.test.ts > telemetry.send > logs an error answer to the Convex console without the token and drops it
+AssertionError: expected '[["PostHog refused events: HTTP 503, …' to contain 'next_session:group_created'
+
+Expected: "next_session:group_created"
+Received: "[["PostHog refused events: HTTP 503, dropped"],["PostHog refused logs: HTTP 503, dropped"]]"
+
+ ❯ convex/telemetry.test.ts:102:53
+    100|     expect(fetchMock).toHaveBeenCalledTimes(2);
+    101|     expect(consoleError).toHaveBeenCalledTimes(2);
+    102|     expect(JSON.stringify(consoleError.mock.calls)).toContain("next_se…
+       |                                                     ^
+    103|     expect(JSON.stringify(consoleError.mock.calls)).not.toContain(TOKE…
+    104|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |convex| convex/telemetry.test.ts > telemetry.send > logs a network failure to the Convex console without the token and drops it
+AssertionError: expected '[["PostHog unreachable for events, dr…' to contain 'next_session:group_created'
+
+Expected: "next_session:group_created"
+Received: "[["PostHog unreachable for events, dropped:","fetch failed"],["PostHog unreachable for logs, dropped:","fetch failed"]]"
+
+ ❯ convex/telemetry.test.ts:102:53
+    100|     expect(fetchMock).toHaveBeenCalledTimes(2);
+    101|     expect(consoleError).toHaveBeenCalledTimes(2);
+    102|     expect(JSON.stringify(consoleError.mock.calls)).toContain("next_se…
+       |                                                     ^
+    103|     expect(JSON.stringify(consoleError.mock.calls)).not.toContain(TOKE…
+    104|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |convex| convex/telemetry.test.ts > telemetry.send > gives up on a PostHog that never answers after 10 seconds
+AssertionError: expected "error" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st error call:
+
+    Array [
+      "PostHog unreachable for events, dropped:",
+      "Cannot read properties of undefined (reading 'addEventListener')",
+    ]
+
+
+Number of calls: 1
+
+ ❯ convex/telemetry.test.ts:118:30
+    116|     const sending = t.action(internal.telemetry.send, { events: [event…
+    117|     await vi.advanceTimersByTimeAsync(9_999);
+    118|     expect(consoleError).not.toHaveBeenCalled();
+       |                              ^
+    119|     await vi.advanceTimersByTimeAsync(1);
+    120|     await sending;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 27 passed (31)
+   Start at  15:43:25
+   Duration  1.42s (tests 64%, transform 17%, import 14%, environment 5%)
+

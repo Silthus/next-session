@@ -1,0 +1,25 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-75
+
+ ❯ |convex| convex/model/telemetry.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/model/telemetry.test.ts [ convex/model/telemetry.test.ts ]
+Error: Cannot find module './telemetry' imported from /home/coder/dev/ns-worktrees/ticket-75/convex/model/telemetry.test.ts
+ ❯ convex/model/telemetry.test.ts:3:1
+      1| import { describe, expect, it } from "vitest";
+      2| import type { Id } from "../_generated/dataModel";
+      3| import { toOtlpLogs, toPostHogEvent, type ServerEvent } from "./teleme…
+       | ^
+      4|
+      5| const NOW = Date.UTC(2026, 9, 6, 15, 0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  15:17:56
+   Duration  158ms (environment 93%, worker 7%)
+

@@ -1,0 +1,9 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-75
+
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  15:19:50
+   Duration  377ms (transform 42%, import 38%, environment 13%, tests 6%, worker 1%)
+

@@ -1,0 +1,535 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-75
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks link_created with the first Group for Create your link
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks link_created with the first Group for Create your link
+`auth:store` type: signIn
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Password Account and nothing for its next log in
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Password Account and nothing for its next log in
+`auth:store` type: signIn
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Password Account and nothing for its next log in
+`auth:store` type: retrieveAccountWithCredentials
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Password Account and nothing for its next log in
+`auth:store` type: signIn
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: verifier
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: verifierSignature
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: userOAuth
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: verifyCodeAndSignIn
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: verifier
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: verifierSignature
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: userOAuth
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: verifyCodeAndSignIn
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > flags a production proof Account under .test as a test account
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/telemetry.callSites.test.ts > sign-in > flags a production proof Account under .test as a test account
+`auth:store` type: signIn
+
+stdout | convex/telemetry.callSites.test.ts > GM mutations > tracks groups_saved with the number of Groups the Save moved
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/telemetry.callSites.test.ts > GM mutations > tracks groups_saved with the number of Groups the Save moved
+`auth:store` type: signIn
+
+stdout | convex/telemetry.callSites.test.ts > GM mutations > tracks groups_saved with the number of Groups the Save moved
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/telemetry.callSites.test.ts > GM mutations > tracks groups_saved with the number of Groups the Save moved
+`auth:store` type: signIn
+
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code or email in any event or log
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code or email in any event or log
+`auth:store` type: signIn
+
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code or email in any event or log
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code or email in any event or log
+`auth:store` type: signIn
+
+ ❯ |convex| convex/telemetry.callSites.test.ts (24 tests | 15 failed) 1044ms
+   ❯ sign-in (4)
+     × tracks link_created with the first Group for Create your link 11ms
+     × tracks account_created for a new Password Account and nothing for its next log in 199ms
+     × tracks account_created for a new Google Account and nothing for its next sign-in 24ms
+     × flags a production proof Account under .test as a test account 113ms
+   ❯ GM mutations (5)
+     × tracks group_created 2ms
+     × tracks share_link_rotated 3ms
+     × tracks session_scheduled with the Roster size and whether it is the Group's first 4ms
+     × tracks session_unscheduled 3ms
+     × tracks groups_saved with the number of Groups the Save moved 107ms
+   ❯ Player mutations (5)
+     × tracks player_joined as the new Player for a visitor 2ms
+     × tracks player_joined as the Account, claimed, when an Account joins 3ms
+     × tracks player_claimed and player_released 3ms
+   ❯ the redaction contract (1)
+     × sends no Group name, Player name, Share Token, claim code or email in any event or log 104ms
+   ❯ the Expiry sweep (2)
+     × logs once per run with the number of Groups it expired, across pages 37ms
+     × logs a run that found nothing 1ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > sign-in > tracks link_created with the first Group for Create your link
+AssertionError: expected [] to deeply equal [ { …(4) } ]
+
+- Expected
++ Received
+
+- [
+-   {
+-     "distinct_id": "next-session:000000000000000000000010000users",
+-     "event": "next_session:link_created",
+-     "properties": {
+-       "$process_person_profile": false,
+-       "group_id": "00000000000000000000010001groups",
+-       "product": "next-session",
+-     },
+-     "timestamp": "2026-10-06T15:00:00.000Z",
+-   },
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:112:20
+    110|           .unique())!._id,
+    111|     );
+    112|     expect(events).toEqual([
+       |                    ^
+    113|       {
+    114|         event: "next_session:link_created",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Password Account and nothing for its next log in
+AssertionError: expected [] to deeply equal [ ObjectContaining{…} ]
+
+- Expected
++ Received
+
+- [
+-   ObjectContaining {
+-     "distinct_id": "next-session:000000000000000000000010000users",
+-     "event": "next_session:account_created",
+-     "properties": {
+-       "$set": {
+-         "next_session_account": true,
+-       },
+-       "method": "password",
+-       "product": "next-session",
+-     },
+-   },
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:134:21
+    132|     const loggedIn = await eventsDuring(() => logInAccount(t, credenti…
+    133|
+    134|     expect(created).toEqual([
+       |                     ^
+    135|       expect.objectContaining({
+    136|         event: "next_session:account_created",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+AssertionError: expected [] to deeply equal [ ObjectContaining{…} ]
+
+- Expected
++ Received
+
+- [
+-   ObjectContaining {
+-     "distinct_id": "next-session:000000000000000000000010001users",
+-     "event": "next_session:account_created",
+-     "properties": ObjectContaining {
+-       "method": "google",
+-     },
+-   },
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:156:21
+    154|     const signedInAgain = await eventsDuring(() => signInWithGoogle(t,…
+    155|
+    156|     expect(created).toEqual([
+       |                     ^
+    157|       expect.objectContaining({
+    158|         event: "next_session:account_created",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > sign-in > flags a production proof Account under .test as a test account
+AssertionError: expected undefined to match object { is_test_account: true }
+
+- Expected:
+{
+  "is_test_account": true,
+}
+
++ Received:
+undefined
+
+ ❯ convex/telemetry.callSites.test.ts:171:35
+    169|     );
+    170|
+    171|     expect(events[0]?.properties).toMatchObject({ is_test_account: tru…
+       |                                   ^
+    172|   });
+    173| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks group_created
+AssertionError: expected [] to deeply equal [ ObjectContaining{…} ]
+
+- Expected
++ Received
+
+- [
+-   ObjectContaining {
+-     "distinct_id": "next-session:000000000000000000000010000users",
+-     "event": "next_session:group_created",
+-     "properties": {
+-       "group_id": "00000000000000000000010002groups",
+-       "product": "next-session",
+-     },
+-   },
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:184:20
+    182|     });
+    183|
+    184|     expect(events).toEqual([
+       |                    ^
+    185|       expect.objectContaining({
+    186|         event: "next_session:group_created",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks share_link_rotated
+AssertionError: expected [] to deeply equal [ ObjectContaining{…} ]
+
+- Expected
++ Received
+
+- [
+-   ObjectContaining {
+-     "event": "next_session:share_link_rotated",
+-     "properties": {
+-       "group_id": "00000000000000000000010002groups",
+-       "product": "next-session",
+-     },
+-   },
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:198:20
+    196|     const events = await eventsDuring(() => as.mutation(api.groups.rot…
+    197|
+    198|     expect(events).toEqual([
+       |                    ^
+    199|       expect.objectContaining({
+    200|         event: "next_session:share_link_rotated",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks session_scheduled with the Roster size and whether it is the Group's first
+AssertionError: expected [] to deeply equal [ { …(2) } ]
+
+- Expected
++ Received
+
+- [
+-   {
+-     "event": "next_session:session_scheduled",
+-     "properties": {
+-       "group_id": "00000000000000000000010002groups",
+-       "is_first_for_group": true,
+-       "player_count": 1,
+-       "product": "next-session",
+-     },
+-   },
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:216:75
+    214|     );
+    215|
+    216|     expect(first.map(({ event, properties }) => ({ event, properties }…
+       |                                                                           ^
+    217|       {
+    218|         event: "next_session:session_scheduled",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks session_unscheduled
+AssertionError: expected [] to deeply equal [ ObjectContaining{…} ]
+
+- Expected
++ Received
+
+- [
+-   ObjectContaining {
+-     "event": "next_session:session_unscheduled",
+-     "properties": {
+-       "group_id": "00000000000000000000010002groups",
+-       "product": "next-session",
+-     },
+-   },
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:236:20
+    234|     const events = await eventsDuring(() => as.mutation(api.sessions.u…
+    235|
+    236|     expect(events).toEqual([
+       |                    ^
+    237|       expect.objectContaining({
+    238|         event: "next_session:session_unscheduled",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks groups_saved with the number of Groups the Save moved
+AssertionError: expected [] to deeply equal [ ObjectContaining{…} ]
+
+- Expected
++ Received
+
+- [
+-   ObjectContaining {
+-     "distinct_id": "next-session:000000000000000000000010007users",
+-     "event": "next_session:groups_saved",
+-     "properties": {
+-       "group_count": 2,
+-       "product": "next-session",
+-     },
+-   },
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:252:20
+    250|     const events = await eventsDuring(() => account.as.mutation(api.ac…
+    251|
+    252|     expect(events).toEqual([
+       |                    ^
+    253|       expect.objectContaining({
+    254|         event: "next_session:groups_saved",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks player_joined as the new Player for a visitor
+AssertionError: expected [] to deeply equal [ ObjectContaining{…} ]
+
+- Expected
++ Received
+
+- [
+-   ObjectContaining {
+-     "distinct_id": "next-session:player:0000000000000000000010003players",
+-     "event": "next_session:player_joined",
+-     "properties": {
+-       "$process_person_profile": false,
+-       "claimed": false,
+-       "group_id": "00000000000000000000010002groups",
+-       "product": "next-session",
+-     },
+-   },
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:272:20
+    270|     });
+    271|
+    272|     expect(events).toEqual([
+       |                    ^
+    273|       expect.objectContaining({
+    274|         event: "next_session:player_joined",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks player_joined as the Account, claimed, when an Account joins
+AssertionError: expected [] to deeply equal [ ObjectContaining{…} ]
+
+- Expected
++ Received
+
+- [
+-   ObjectContaining {
+-     "distinct_id": "next-session:000000000000000000000010003users",
+-     "properties": {
+-       "claimed": true,
+-       "group_id": "00000000000000000000010002groups",
+-       "product": "next-session",
+-     },
+-   },
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:295:20
+    293|     );
+    294|
+    295|     expect(events).toEqual([
+       |                    ^
+    296|       expect.objectContaining({
+    297|         distinct_id: `next-session:${userId}`,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks player_claimed and player_released
+AssertionError: expected [] to deeply equal [ ObjectContaining{…}, …(1) ]
+
+- Expected
++ Received
+
+- [
+-   ObjectContaining {
+-     "distinct_id": "next-session:000000000000000000000010004users",
+-     "event": "next_session:player_claimed",
+-     "properties": {
+-       "group_id": "00000000000000000000010002groups",
+-       "product": "next-session",
+-     },
+-   },
+-   ObjectContaining {
+-     "distinct_id": "next-session:000000000000000000000010004users",
+-     "event": "next_session:player_released",
+-     "properties": {
+-       "group_id": "00000000000000000000010002groups",
+-       "product": "next-session",
+-     },
+-   },
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:312:39
+    310|     const released = await eventsDuring(() => as.mutation(api.player.r…
+    311|
+    312|     expect([...claimed, ...released]).toEqual([
+       |                                       ^
+    313|       expect.objectContaining({
+    314|         event: "next_session:player_claimed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code or email in any event or log
+AssertionError: expected [] to deeply equal [ 'next_session:link_created', …(9) ]
+
+- Expected
++ Received
+
+- [
+-   "next_session:link_created",
+-   "next_session:share_link_rotated",
+-   "next_session:player_joined",
+-   "next_session:session_scheduled",
+-   "next_session:account_created",
+-   "next_session:groups_saved",
+-   "next_session:player_claimed",
+-   "next_session:player_released",
+-   "next_session:player_joined",
+-   "next_session:group_created",
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:444:7
+    442|         events.map((event) => JSON.parse(event) as PostHogEvent).map((…
+    443|       ),
+    444|     ).toEqual([
+       |       ^
+    445|       "next_session:link_created",
+    446|       "next_session:share_link_rotated",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > the Expiry sweep > logs once per run with the number of Groups it expired, across pages
+AssertionError: expected [] to deeply equal [ { events: [], logs: [ { …(4) } ] } ]
+
+- Expected
++ Received
+
+- [
+-   {
+-     "events": [],
+-     "logs": [
+-       {
+-         "attributes": {
+-           "groups_expired": 51,
+-         },
+-         "body": "Expiry sweep finished",
+-         "level": "info",
+-         "time": 1791298800000,
+-       },
+-     ],
+-   },
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:484:19
+    482|     });
+    483|
+    484|     expect(sends).toEqual([
+       |                   ^
+    485|       {
+    486|         events: [],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/15]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > the Expiry sweep > logs a run that found nothing
+AssertionError: expected [] to deeply equal [ ObjectContaining{…} ]
+
+- Expected
++ Received
+
+- [
+-   ObjectContaining {
+-     "attributes": {
+-       "groups_expired": 0,
+-     },
+-   },
+- ]
++ []
+
+ ❯ convex/telemetry.callSites.test.ts:502:47
+    500|     const sends = await sendsDuring(() => t.mutation(internal.cleanup.…
+    501|
+    502|     expect(sends.flatMap(({ logs }) => logs)).toEqual([
+       |                                               ^
+    503|       expect.objectContaining({ attributes: { groups_expired: 0 } }),
+    504|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/15]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  15 failed | 9 passed (24)
+   Start at  15:22:05
+   Duration  1.42s (tests 78%, transform 10%, import 9%, environment 3%)
+

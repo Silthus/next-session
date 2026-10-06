@@ -1,0 +1,92 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-75
+
+ ❯ |convex| convex/telemetry.test.ts (5 tests | 5 failed) 17ms
+   ❯ telemetry.send (5)
+     × posts events to PostHog's EU batch endpoint with the project token 13ms
+     × posts logs as OTLP/JSON to PostHog Logs, authorized by the project token 1ms
+     × sends nothing when the deployment has no project token 1ms
+     × logs an error answer to the Convex console without the token and drops it 1ms
+     × logs a network failure to the Convex console without the token and drops it 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/telemetry.test.ts > telemetry.send > posts events to PostHog's EU batch endpoint with the project token
+Error: Could not find module for: "telemetry"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.actionFromPath node_modules/convex-test/dist/index.js:2130:36
+ ❯ action node_modules/convex-test/dist/index.js:2174:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as action] node_modules/convex-test/dist/index.js:1886:56
+ ❯ convex/telemetry.test.ts:51:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  |convex| convex/telemetry.test.ts > telemetry.send > posts logs as OTLP/JSON to PostHog Logs, authorized by the project token
+Error: Could not find module for: "telemetry"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.actionFromPath node_modules/convex-test/dist/index.js:2130:36
+ ❯ action node_modules/convex-test/dist/index.js:2174:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as action] node_modules/convex-test/dist/index.js:1886:56
+ ❯ convex/telemetry.test.ts:61:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  |convex| convex/telemetry.test.ts > telemetry.send > sends nothing when the deployment has no project token
+Error: Could not find module for: "telemetry"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.actionFromPath node_modules/convex-test/dist/index.js:2130:36
+ ❯ action node_modules/convex-test/dist/index.js:2174:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as action] node_modules/convex-test/dist/index.js:1886:56
+ ❯ convex/telemetry.test.ts:86:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  |convex| convex/telemetry.test.ts > telemetry.send > logs an error answer to the Convex console without the token and drops it
+ FAIL  |convex| convex/telemetry.test.ts > telemetry.send > logs a network failure to the Convex console without the token and drops it
+Error: Could not find module for: "telemetry"
+ ❯ node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.actionFromPath node_modules/convex-test/dist/index.js:2130:36
+ ❯ action node_modules/convex-test/dist/index.js:2174:41
+ ❯ node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as action] node_modules/convex-test/dist/index.js:1886:56
+ ❯ convex/telemetry.test.ts:98:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed (5)
+   Start at  15:19:39
+   Duration  432ms (transform 42%, import 37%, environment 14%, tests 5%, worker 1%)
+
