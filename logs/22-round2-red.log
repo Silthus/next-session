@@ -1,0 +1,10 @@
+     × says the tips were already confirmed on a second press, without promising a new tip 1021ms
+     × confirms with the code from the Welcome Mail, without a session 113ms
+     × confirms a minute before the 3 days are up 102ms
+     × refuses a late code and requests nothing 99ms
+     × answers a second press as already confirmed and requests nothing more 104ms
+     × refuses the unknown code "" and requests nothing 99ms
+     × refuses the unknown code "not-a-code" and requests nothing 99ms
+     × refuses the unknown code "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" and requests nothing 97ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  8 failed | 25 passed (33)
