@@ -1,0 +1,7 @@
+[WebServer] Uncaught ConvexError: {"code":"UNAUTHENTICATED"}
+  ✘  1 [chromium] › e2e/player-account.spec.ts:86:1 › a visitor answers, keeps the Group with a new Account, and opens it as the same Player elsewhere (6.9s)
+    Error: expect(locator).toBeVisible() failed
+    Locator: getByRole('main').getByText('Kept in My groups')
+    Expected: visible
+    Error: element(s) not found
+  1 failed

@@ -1,0 +1,4 @@
+     × remembers the keep before leaving for the sign-in, and claims nothing yet 3ms
+     × forgets the keep when the sign-in never starts 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+TypeError: keepAfterRedirect is not a function

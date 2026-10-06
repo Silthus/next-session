@@ -1,0 +1,66 @@
+[WebServer] CONVEX_AGENT_MODE=anonymous mode is in beta, functionality may change in the future.
+[WebServer] ✔ Configured a local deployment for http://127.0.0.1:3210 and saved its:
+[WebServer]     name as CONVEX_DEPLOYMENT
+[WebServer]     client URL as VITE_CONVEX_URL
+[WebServer]     HTTP actions URL as VITE_CONVEX_SITE_URL
+[WebServer]  to .env.local
+[WebServer] 
+[WebServer] Write your Convex functions in convex/
+[WebServer] Give us feedback at https://convex.dev/community or support@convex.dev
+[WebServer] View the Convex dashboard at http://127.0.0.1:6790/
+[WebServer] 
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 3210 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:3210
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ 15:56:23 Convex functions ready! (2.11s)
+[WebServer] ✔ Successfully set 2 environment variables from stdin (2 updated, 1 unchanged) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-64/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-64/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 391 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://localhost:5173/
+[WebServer]   ➜  Network: use --host to expose
+
+Running 4 tests using 1 worker
+
+[WebServer] 3:56:32 PM [vite] (client) [console.error] [CONVEX M(player:claim)] [Request ID: 19612e51b2a41b3e] Server Error
+[WebServer] Uncaught ConvexError: {"code":"PLAYER_CLAIMED"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at claimPlayer (../../convex/model/players.ts:48:53)
+[WebServer]     at handler (../convex/player.ts:87:11)
+[WebServer] 
+  ✓  1 [chromium] › e2e/player-account.spec.ts:201:7 › screenshots › 390px light (7.1s)
+[WebServer] 3:56:39 PM [vite] (client) [console.error] [CONVEX M(player:claim)] [Request ID: aaf340305234655a] Server Error
+[WebServer] Uncaught ConvexError: {"code":"PLAYER_CLAIMED"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at claimPlayer (../../convex/model/players.ts:48:53)
+[WebServer]     at handler (../convex/player.ts:87:11)
+[WebServer] 
+  ✓  2 [chromium] › e2e/player-account.spec.ts:201:7 › screenshots › 390px dark (7.0s)
+[WebServer] 3:56:46 PM [vite] (client) [console.error] [CONVEX M(player:claim)] [Request ID: 4f5f5399bf019c31] Server Error
+[WebServer] Uncaught ConvexError: {"code":"PLAYER_CLAIMED"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at claimPlayer (../../convex/model/players.ts:48:53)
+[WebServer]     at handler (../convex/player.ts:87:11)
+[WebServer] 
+  ✓  3 [chromium] › e2e/player-account.spec.ts:201:7 › screenshots › 1440px light (7.1s)
+[WebServer] 3:56:53 PM [vite] (client) [console.error] [CONVEX M(player:claim)] [Request ID: 93ac4002cd910fd2] Server Error
+[WebServer] Uncaught ConvexError: {"code":"PLAYER_CLAIMED"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at claimPlayer (../../convex/model/players.ts:48:53)
+[WebServer]     at handler (../convex/player.ts:87:11)
+[WebServer] 
+  ✓  4 [chromium] › e2e/player-account.spec.ts:201:7 › screenshots › 1440px dark (7.0s)
+
+  4 passed (32.7s)

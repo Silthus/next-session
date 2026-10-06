@@ -1,0 +1,11 @@
+     × moves the Groups of a Save the sign-in already went through for 3ms
+     × does nothing without a Save left over 1ms
+     × forgets the keep when the server refused the sign-in, since it cannot have gone through 5ms
+     × drops a keep someone left behind before saying Not you? 1ms
+     × claims a keep left over from a dropped connection or a sign-in redirect 3ms
+     × explains a save { code: 'TOO_MANY_GROUPS' } 6ms
+     × explains a save { code: 'CLAIM_INVALID' } 1ms
+     × offers a quiet line under the calendar once the Player answered 1013ms
+     × moves focus to the kept line once the keep goes through 1006ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  9 failed | 335 passed (344)

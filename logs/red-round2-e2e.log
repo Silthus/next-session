@@ -1,0 +1,6 @@
+  ✘  1 [chromium] › e2e/player-account.spec.ts:77:1 › a visitor keeps the Group with a new Account and plays as that Account on any device (10.3s)
+  1) [chromium] › e2e/player-account.spec.ts:77:1 › a visitor keeps the Group with a new Account and plays as that Account on any device › keeping the same Player again and saying Not you? again releases again 
+    Error: expect(locator).toBeVisible() failed
+    Error: element(s) not found
+  1 failed
+    [chromium] › e2e/player-account.spec.ts:77:1 › a visitor keeps the Group with a new Account and plays as that Account on any device 

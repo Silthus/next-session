@@ -1,0 +1,13 @@
+ ❯ |ui| src/features/account/AccountSheet.test.tsx (24 tests | 5 failed) 6177ms
+     × says when the Save would pass the Account's group cap 114ms
+     × creates an Account first, with the legal line, and closes once kept 1007ms
+     × logs in to an existing Account second 1004ms
+     × tells an Anonymous GM that their own groups move to the Account too 1003ms
+     × tells a Player they can answer without an Account 1003ms
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet saving a Group > says when the Save would pass the Account's group cap
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet keeping a Group as a Player > creates an Account first, with the legal line, and closes once kept
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet keeping a Group as a Player > logs in to an existing Account second
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet keeping a Group as a Player > tells an Anonymous GM that their own groups move to the Account too
+ FAIL  |ui| src/features/account/AccountSheet.test.tsx > AccountSheet logging in > tells a Player they can answer without an Account
+ Test Files  1 failed (1)
+      Tests  5 failed | 19 passed (24)

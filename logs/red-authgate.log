@@ -1,0 +1,8 @@
+     × lets a caller through at once while the server confirms the session 3ms
+     × holds a caller until the server confirms a first sign-in 1ms
+     × gives up when the server never confirms the session 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+TypeError: authGate is not a function
+TypeError: authGate is not a function
+TypeError: authGate is not a function
+      Tests  3 failed | 8 passed (11)
