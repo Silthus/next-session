@@ -451,6 +451,37 @@ describe("PlayerCalendar keeping the Group", () => {
     expect(document.activeElement?.textContent).toBe("Kept in My groups");
   });
 
+  it("moves focus to the kept line once the sheet the keep went through closes", async () => {
+    const sheet = document.body.appendChild(document.createElement("dialog"));
+    sheet.setAttribute("open", "");
+    function KeptBehindSheet() {
+      const [keep, setKeep] = useState<Props["keep"]>("offer");
+      return (
+        <PlayerCalendar
+          {...calendarProps({ keepOffered: true, keep, onKeep: () => setKeep("kept") })}
+        />
+      );
+    }
+    renderInRouter(() => <KeptBehindSheet />);
+    await userEvent.click(await screen.findByRole("button", { name: "Keep this group" }));
+    expect(document.activeElement?.textContent).not.toBe("Kept in My groups");
+
+    sheet.removeAttribute("open");
+    sheet.dispatchEvent(new Event("close"));
+
+    expect(document.activeElement?.textContent).toBe("Kept in My groups");
+    sheet.remove();
+  });
+
+  it("explains a refusal under the kept line too", async () => {
+    renderCalendar({ keep: "kept", keepRefusal: "Your own groups didn't move: the save expired." });
+
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      "Your own groups didn't move: the save expired.",
+    );
+    expect(screen.getByText("Kept in My groups")).toBeTruthy();
+  });
+
   it("explains a refused keep", async () => {
     renderCalendar({ keepOffered: true, keepRefusal: "Another account keeps this name." });
 

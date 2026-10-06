@@ -17,7 +17,7 @@ import {
   resumePendingKeep,
   type Keep,
   type KeepDeps,
-  type KeepOutcome,
+  type ResumedKeep,
 } from "./keep";
 import {
   finishLeftOverSave,
@@ -107,11 +107,9 @@ function useAuthGate(isAuthenticated: boolean) {
   return gate;
 }
 
-export type KeepOnReturn = { keep: Keep; outcome: KeepOutcome };
-
 function useKeepOnReturn(status: GmStatus, claimPlayer: KeepDeps["claim"]) {
   const resolved = useRef(false);
-  const [keepOnReturn, setKeepOnReturn] = useState<KeepOnReturn | null>(null);
+  const [keepOnReturn, setKeepOnReturn] = useState<ResumedKeep | null>(null);
   useEffect(() => {
     if (resolved.current || status === "loading") return;
     resolved.current = true;

@@ -34,7 +34,7 @@ We do not use analytics, advertising, or tracking, and we do not sell data or us
 The Service stores the following in your browser's local storage and session storage. All of it is strictly necessary for a function you asked for, so no consent is needed:
 
 - your sign-in tokens, once you sign in;
-- a save or a kept group you started, until the sign-in for it finishes;
+- a save or a group you asked to keep, until it goes through or you close the tab;
 - which player you are in each group, so you do not have to pick your name again;
 - small display preferences, such as a dismissed hint.
 

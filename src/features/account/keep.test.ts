@@ -2,7 +2,6 @@ import { ConvexError } from "convex/values";
 import { describe, expect, it } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
 import {
-  forgetPendingKeep,
   keepAfterRedirect,
   keepGroup,
   PENDING_KEEP_KEY,
@@ -108,17 +107,6 @@ describe("keepAfterRedirect", () => {
     const { storage } = fakeDeps();
 
     await expect(keepAfterRedirect(keep, offline, storage)).rejects.toThrow("connection lost");
-
-    expect(storage.getItem(PENDING_KEEP_KEY)).toBeNull();
-  });
-});
-
-describe("forgetPendingKeep", () => {
-  it("drops a keep someone left behind before saying Not you?", () => {
-    const { storage } = fakeDeps();
-    storage.setItem(PENDING_KEEP_KEY, JSON.stringify(keep));
-
-    forgetPendingKeep(storage);
 
     expect(storage.getItem(PENDING_KEEP_KEY)).toBeNull();
   });

@@ -9,6 +9,8 @@ export type Keep = { shareToken: string; playerId: Id<"players"> };
 
 export type KeepOutcome = { kept: true } | { kept: false; error: unknown };
 
+export type ResumedKeep = { keep: Keep; outcome: KeepOutcome };
+
 export type KeepDeps = {
   claim: (keep: Keep) => Promise<unknown>;
   storage: KeyValueStorage;
@@ -55,9 +57,7 @@ export async function keepAfterRedirect(
   }
 }
 
-export async function resumePendingKeep(
-  deps: KeepDeps,
-): Promise<{ keep: Keep; outcome: KeepOutcome } | null> {
+export async function resumePendingKeep(deps: KeepDeps): Promise<ResumedKeep | null> {
   const remembered = deps.storage.getItem(PENDING_KEEP_KEY);
   if (remembered === null) return null;
   const keep = parseKeep(remembered);

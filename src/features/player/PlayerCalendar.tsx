@@ -465,20 +465,23 @@ function KeepLine({
   onKeep: () => void;
 }) {
   const [offeredHere] = useState(keep !== "kept");
-  if (keep === "kept") return <KeptLine focusOnMount={offeredHere} />;
   return (
     <div className="flex flex-col items-center gap-1 text-center text-sm">
-      <p className="text-ink-2">
-        <button
-          type="button"
-          onClick={onKeep}
-          disabled={keep === "keeping"}
-          className="-my-3.5 py-3.5 font-semibold text-accent-strong underline underline-offset-2 hover:text-ink disabled:opacity-60"
-        >
-          {keep === "keeping" ? "Keeping…" : "Keep this group"}
-        </button>{" "}
-        on all your devices.
-      </p>
+      {keep === "kept" ? (
+        <KeptLine focusOnMount={offeredHere} />
+      ) : (
+        <p className="text-ink-2">
+          <button
+            type="button"
+            onClick={onKeep}
+            disabled={keep === "keeping"}
+            className="-my-3.5 py-3.5 font-semibold text-accent-strong underline underline-offset-2 hover:text-ink disabled:opacity-60"
+          >
+            {keep === "keeping" ? "Keeping…" : "Keep this group"}
+          </button>{" "}
+          on all your devices.
+        </p>
+      )}
       {refusal !== null && (
         <p role="alert" className="max-w-sm font-medium text-busy">
           {refusal}
@@ -491,13 +494,21 @@ function KeepLine({
 function KeptLine({ focusOnMount }: { focusOnMount: boolean }) {
   const line = useRef<HTMLParagraphElement>(null);
   useEffect(() => {
-    if (focusOnMount) line.current?.focus();
+    if (!focusOnMount) return;
+    const focusLine = () => line.current?.focus();
+    const openSheet = document.querySelector("dialog[open]");
+    if (openSheet === null) {
+      focusLine();
+      return;
+    }
+    openSheet.addEventListener("close", focusLine, { once: true });
+    return () => openSheet.removeEventListener("close", focusLine);
   }, [focusOnMount]);
   return (
     <p
       ref={line}
       tabIndex={-1}
-      className="text-center text-sm text-ink-3 outline-none before:mr-1.5 before:text-free before:content-['✓']"
+      className="text-ink-3 outline-none before:mr-1.5 before:text-free before:content-['✓']"
     >
       Kept in My groups
     </p>

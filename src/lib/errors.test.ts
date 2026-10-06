@@ -31,13 +31,9 @@ describe("errorMessage", () => {
     [
       "save",
       { code: "TOO_MANY_GROUPS" },
-      "Your groups didn't move: an account holds up to 50. Delete some, then keep this group again.",
+      "Your own groups didn't move: an account holds up to 50. Delete some to make room.",
     ],
-    [
-      "save",
-      { code: "CLAIM_INVALID" },
-      "Your groups didn't move: the save expired. Keep this group again to keep just this one.",
-    ],
+    ["save", { code: "CLAIM_INVALID" }, "Your own groups didn't move: the save expired."],
     ["keep", { code: "NOT_FOUND" }, "That player is gone already."],
     ["answer", { code: "RATE_LIMITED", retryAfter: 4000 }, "Slow down a moment."],
     ["answer", { code: "OUT_OF_WINDOW" }, "That night is locked now."],

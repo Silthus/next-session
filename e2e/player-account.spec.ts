@@ -89,6 +89,9 @@ test("a visitor keeps the Group with a new Account and plays as that Account on 
     await expect(page.getByRole("button", { name: "Keep this group" })).toBeHidden();
     await answerToday(page);
     await expect(page.getByText("Keep this group on all your devices.")).toBeVisible();
+    await page.getByRole("button", { name: "Next month" }).click();
+    await expect(page.getByText("Keep this group on all your devices.")).toBeVisible();
+    await page.getByRole("button", { name: "Previous month" }).click();
     await keepByCreatingAccount(page, email);
     await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
   });
@@ -121,6 +124,17 @@ test("a visitor keeps the Group with a new Account and plays as that Account on 
       shareToken: second.gm.shareToken,
     });
     expect(roster?.players.map(({ name }) => name)).toEqual(["Bea"]);
+  });
+
+  await test.step("keeping the same Player again and saying Not you? again releases again", async () => {
+    await page.getByRole("button", { name: "Bea" }).click();
+    await answerToday(page);
+    await page.getByRole("button", { name: "Keep this group" }).click();
+    await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
+    await page.getByRole("button", { name: "Not you?" }).click();
+    await expect(page.getByRole("heading", { name: "Who are you?" })).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Who are you?" })).toBeVisible();
   });
 });
 

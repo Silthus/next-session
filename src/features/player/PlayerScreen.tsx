@@ -81,6 +81,7 @@ function PlayerGroup({
   const { keepWithGoogle, logInWithGoogle } = account;
   const [sheet, setSheet] = useState<"logIn" | "keep" | null>(null);
   const [releasedId, setReleasedId] = useState<Id<"players"> | null>(null);
+  if (releasedId !== null && group.claimedPlayerId !== releasedId) setReleasedId(null);
   const claimed = group.players.find(
     ({ _id }) => _id === group.claimedPlayerId && _id !== releasedId,
   );
@@ -217,10 +218,10 @@ function useKeeper(refusalOnReturn: string | null, onKept: () => void) {
 }
 
 function refusalOnReturn(account: Account, shareToken: string) {
-  if (account.refusalOnReturn !== undefined) return errorMessage(account.refusalOnReturn, "save");
   const returned = account.keepOnReturn;
-  if (returned?.keep.shareToken !== shareToken || returned.outcome.kept) return null;
-  return errorMessage(returned.outcome.error, "keep");
+  if (returned?.keep.shareToken !== shareToken) return null;
+  if (account.refusalOnReturn !== undefined) return errorMessage(account.refusalOnReturn, "save");
+  return returned.outcome.kept ? null : errorMessage(returned.outcome.error, "keep");
 }
 
 function AccountControl({
