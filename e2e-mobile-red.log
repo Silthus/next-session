@@ -1,0 +1,135 @@
+[WebServer] CONVEX_AGENT_MODE=anonymous mode is in beta, functionality may change in the future.
+[WebServer] Could not find project with name anonymous-agent!
+[WebServer] ✔ Configured a local deployment for http://127.0.0.1:3210 and saved its:
+[WebServer]     name as CONVEX_DEPLOYMENT
+[WebServer]     client URL as VITE_CONVEX_URL
+[WebServer]     HTTP actions URL as VITE_CONVEX_SITE_URL
+[WebServer]  to .env.local
+[WebServer] 
+[WebServer] Write your Convex functions in convex/
+[WebServer] Give us feedback at https://convex.dev/community or support@convex.dev
+[WebServer] View the Convex dashboard at null
+[WebServer] 
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 3210 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:3210
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ Added table indexes:
+[WebServer]   [+] answers.by_groupId_and_date   groupId, date, _creationTime
+[WebServer]   [+] answers.by_playerId_and_date   playerId, date, _creationTime
+[WebServer]   [+] authAccounts.providerAndAccountId   provider, providerAccountId, _creationTime
+[WebServer]   [+] authAccounts.userIdAndProvider   userId, provider, _creationTime
+[WebServer]   [+] authRateLimits.identifier   identifier, _creationTime
+[WebServer]   [+] authRefreshTokens.sessionId   sessionId, _creationTime
+[WebServer]   [+] authRefreshTokens.sessionIdAndParentRefreshTokenId   sessionId, parentRefreshTokenId, _creationTime
+[WebServer]   [+] authSessions.userId   userId, _creationTime
+[WebServer]   [+] authVerificationCodes.accountId   accountId, _creationTime
+[WebServer]   [+] authVerificationCodes.code   code, _creationTime
+[WebServer]   [+] authVerifiers.signature   signature, _creationTime
+[WebServer]   [+] groups.by_expiresAt   expiresAt, _creationTime
+[WebServer]   [+] groups.by_ownerId   ownerId, _creationTime
+[WebServer]   [+] groups.by_shareToken   shareToken, _creationTime
+[WebServer]   [+] players.by_groupId_and_nameKey   groupId, nameKey, _creationTime
+[WebServer]   [+] saveClaims.by_anonymousUserId   anonymousUserId, _creationTime
+[WebServer]   [+] saveClaims.by_codeHash   codeHash, _creationTime
+[WebServer]   [+] sessions.by_groupId_and_date   groupId, date, _creationTime
+[WebServer]   [+] users.email   email, _creationTime
+[WebServer]   [+] users.phone   phone, _creationTime
+[WebServer] ✔ Installed component rateLimiter.
+[WebServer] ✔ Installed component rateLimiter/batchWorker.
+[WebServer] ✔ 14:10:29 Convex functions ready! (2.11s)
+[WebServer] ✔ Successfully set 3 environment variables from stdin (3 new) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-54/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-54/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 478 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://localhost:5173/
+[WebServer]   ➜  Network: use --host to expose
+
+Running 2 tests using 1 worker
+
+  ✘  1 [chromium] › e2e/mobile-copy.spec.ts:19:1 › a phone that refuses clipboard writes still copies the new link on the landing (6.0s)
+  ✘  2 [chromium] › e2e/mobile-copy.spec.ts:30:1 › a phone that refuses clipboard writes still copies the link from the group (5.8s)
+
+
+  1) [chromium] › e2e/mobile-copy.spec.ts:19:1 › a phone that refuses clipboard writes still copies the new link on the landing 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: 'Copied' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: 'Copied' }) with timeout 5000ms
+      - waiting for getByRole('button', { name: 'Copied' })
+
+
+      10 | async function expectTapToCopy(page: Page, shareToken: string) {
+      11 |   await page.getByRole("button", { name: "Copy" }).tap();
+    > 12 |   await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
+         |                                                              ^
+      13 |   await expect(page.getByText("Long-press the link to copy it.")).toBeHidden();
+      14 |   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      15 |     `http://localhost:5173/s/${shareToken}`,
+        at expectTapToCopy (/home/coder/dev/ns-worktrees/ticket-54/e2e/mobile-copy.spec.ts:12:62)
+        at /home/coder/dev/ns-worktrees/ticket-54/e2e/mobile-copy.spec.ts:27:3
+
+    Error Context: test-results/mobile-copy-a-phone-that-r-a60ed-the-new-link-on-the-landing-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/mobile-copy-a-phone-that-r-a60ed-the-new-link-on-the-landing-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/mobile-copy-a-phone-that-r-a60ed-the-new-link-on-the-landing-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › e2e/mobile-copy.spec.ts:30:1 › a phone that refuses clipboard writes still copies the link from the group 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: 'Copied' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: 'Copied' }) with timeout 5000ms
+      - waiting for getByRole('button', { name: 'Copied' })
+
+
+      10 | async function expectTapToCopy(page: Page, shareToken: string) {
+      11 |   await page.getByRole("button", { name: "Copy" }).tap();
+    > 12 |   await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
+         |                                                              ^
+      13 |   await expect(page.getByText("Long-press the link to copy it.")).toBeHidden();
+      14 |   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      15 |     `http://localhost:5173/s/${shareToken}`,
+        at expectTapToCopy (/home/coder/dev/ns-worktrees/ticket-54/e2e/mobile-copy.spec.ts:12:62)
+        at /home/coder/dev/ns-worktrees/ticket-54/e2e/mobile-copy.spec.ts:37:3
+
+    Error Context: test-results/mobile-copy-a-phone-that-r-082c1-ies-the-link-from-the-group-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/mobile-copy-a-phone-that-r-082c1-ies-the-link-from-the-group-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/mobile-copy-a-phone-that-r-082c1-ies-the-link-from-the-group-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [chromium] › e2e/mobile-copy.spec.ts:19:1 › a phone that refuses clipboard writes still copies the new link on the landing 
+    [chromium] › e2e/mobile-copy.spec.ts:30:1 › a phone that refuses clipboard writes still copies the link from the group 
