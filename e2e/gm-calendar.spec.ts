@@ -70,6 +70,33 @@ async function expectAboveSheet(cell: Locator, sheet: Locator) {
     .toBe(true);
 }
 
+test("on a phone a dense day keeps two-digit counts inside its cell", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const gm = await signInAnonymousGm();
+  for (let index = 0; index < 30; index++) {
+    const answer = index < 10 ? "free" : index < 20 ? "busy" : null;
+    await seedPlayer(gm, `Player ${String(index)}`, answer ? { [night(5)]: answer } : {});
+  }
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+
+  const day = dayCell(page, /, \w+ 5: 10 free, 0 maybe, 10 busy, 10 not answered$/);
+  await expect(day.locator("[data-count]")).toHaveText(["10/30", "✕10", "10"]);
+  for (const count of await day.locator("[data-count]").all()) {
+    expect(await isInside(count, day)).toBe(true);
+  }
+});
+
+async function isInside(inner: Locator, outer: Locator) {
+  const [box, frame] = await Promise.all([inner.boundingBox(), outer.boundingBox()]);
+  if (!box || !frame) return false;
+  return (
+    box.x >= frame.x &&
+    box.y >= frame.y &&
+    box.x + box.width <= frame.x + frame.width &&
+    box.y + box.height <= frame.y + frame.height
+  );
+}
+
 test("the GM schedules a Session, unschedules it, and undoes that", async ({ page }) => {
   const gm = await signInAnonymousGm();
   await seedThreePlayers(gm);

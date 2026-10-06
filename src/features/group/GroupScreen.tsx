@@ -205,6 +205,7 @@ function GroupSurface({
   const rail = useRailActions(groupId, showToast);
   const [nudgeSnoozedAt, setNudgeSnoozedAt] = useState(() => nudgeDismissedAt());
   const [openedAt] = useState(() => Date.now());
+  const [addPlayerRequests, setAddPlayerRequests] = useState(0);
   const navigate = useNavigate({ from: "/g/$groupId" });
   const showMonth = (next: IsoMonth) => void navigate({ search: { month: next } });
   const selectDay = (day: IsoDate | null) =>
@@ -300,6 +301,7 @@ function GroupSurface({
         <GroupRail
           wide={wide}
           rosterEmpty={schedule.players.length === 0}
+          onAddPlayer={() => setAddPlayerRequests((requests) => requests + 1)}
           shareLink={<ShareLinkCard url={shareUrl} onRotate={rotate} />}
           dayPanel={dayPanel()}
           panels={{
@@ -315,6 +317,7 @@ function GroupSurface({
             players: (
               <Players
                 progress={summary.progress}
+                addRequest={addPlayerRequests}
                 onAdd={rail.addPlayer}
                 onRename={rail.renamePlayer}
                 onRemove={rail.removePlayer}

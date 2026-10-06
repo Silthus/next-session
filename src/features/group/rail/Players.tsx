@@ -10,6 +10,7 @@ import { EmptyLine, RailCard } from "./RailCard";
 
 type PlayersProps<Player extends PlayerRow> = {
   progress: readonly PlayerProgress<Player>[];
+  addRequest?: number;
   onAdd: (name: string) => Promise<unknown>;
   onRename: (playerId: Player["_id"], name: string) => Promise<unknown>;
   onRemove: (playerId: Player["_id"]) => Promise<unknown>;
@@ -19,11 +20,17 @@ type AddForm = "closed" | "open" | "openedByGm";
 
 export function Players<Player extends PlayerRow>({
   progress,
+  addRequest = 0,
   onAdd,
   onRename,
   onRemove,
 }: PlayersProps<Player>) {
   const [addForm, setAddForm] = useState<AddForm>(progress.length === 0 ? "open" : "closed");
+  const [handledAddRequest, setHandledAddRequest] = useState(addRequest);
+  if (addRequest !== handledAddRequest) {
+    setHandledAddRequest(addRequest);
+    setAddForm("openedByGm");
+  }
   const addButton = useRef<HTMLButtonElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const refocusAdd = useRef(false);
@@ -80,6 +87,7 @@ export function Players<Player extends PlayerRow>({
         <NameForm
           label="Player name"
           autoFocus={addForm === "openedByGm"}
+          focusRequest={addRequest}
           placeholder="Player name"
           submitLabel="Add"
           topic="roster"

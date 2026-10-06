@@ -16,7 +16,7 @@ Next Session is one Vite SPA plus one Convex backend.
 - The GM can **Save** at any time with an email and a password. Signing in to an Account that already has Groups adds the new ones and replaces nothing.
 - Unsaved Groups expire after 30 days without activity.
 
-Out of scope, per the map: workspaces, worlds, prep, debriefs, milestones, chats, cues, analytics, the early-access gate, the hand-off, Lonir branding, and migrating Lonir data.
+Out of scope, per the map: workspaces, worlds, prep, debriefs, milestones, chats, cues, the early-access gate, the hand-off, Lonir branding, and migrating Lonir data.
 
 ## 2. Architecture
 
@@ -367,7 +367,7 @@ Drafts for Terms, Privacy Policy, and Imprint are in [docs/legal/](legal/), writ
 - Version stamps: `shared/legal.ts` exports `LEGAL_VERSIONS = { terms: "1.0", privacy: "1.0", effective: "<launch date>" }`. `{{EFFECTIVE_DATE}}` comes from there.
 - Michael's postal address and the contact email are not committed to this public repo. The texts carry `{{CONTROLLER_ADDRESS}}` and `{{CONTACT_EMAIL}}`; `vite build` fills them from the `LEGAL_CONTROLLER_ADDRESS` and `LEGAL_CONTACT_EMAIL` GitHub Actions variables. The deploy ticket sets those variables to the values in Lonir's imprint (the same controller), read from the local clone, never echoed into a log or comment. Local builds show "address on request".
 - The drafts drop Lonir's EU ODR-platform paragraph: the platform closed in July 2025.
-- No analytics, so no consent banner. Everything stored on the device is strictly necessary or user-requested (§ 25 (2) TDDDG).
+- No consent banner. Everything stored on the device is strictly necessary or user-requested (§ 25 (2) TDDDG). PostHog runs cookieless and stores nothing on the device (§13.3).
 - Players see no legal gate. Every page footer links the three documents.
 
 ## 8. CI, deploy, and previews
@@ -563,3 +563,319 @@ Resend's DNS records are already on the zone. When this is built:
 | C | UI: My groups at `/me` | A, B, and the Roster ticket #56 (shared `src/features/group/**`) | `src/routes/me.tsx`, `src/features/me/**`, `src/features/landing/Landing.tsx`, the header of `src/features/group/GroupScreen.tsx`, the account control in `src/features/player/**`, `e2e/my-groups.spec.ts`, step 8 of `e2e/production.spec.ts` |
 
 Google sign-in (#58) also edits `src/features/account/**`. Whichever of #58 and ticket B lands second rebases onto the other; neither blocks the other, because #58 parks on Michael's OAuth client.
+
+## 13. Observability and lifecycle mail with PostHog
+
+Status: accepted (self-accepted under the map's autonomy note, 2026-10-06). Resolves [#70](https://github.com/Silthus/next-session/issues/70). Decision record: [ADR-0011](adr/0011-posthog-cookieless-analytics-and-workflows-mail.md).
+
+Michael on 2026-10-06: "Instrument the whole app with PostHog analytics, error tracking, logging, and tracing, using OTEL and the new endpoint (the full shenanigans). Check if we can use PostHog workflows to set up a welcome mail and [drip] campaign."
+
+Sources, read on 2026-10-06: PostHog docs for [Logs](https://posthog.com/docs/logs/installation/other), [JavaScript web logs](https://posthog.com/docs/logs/installation/javascript), [distributed tracing](https://posthog.com/docs/distributed-tracing/start-here), [cookieless tracking](https://posthog.com/docs/privacy/data-collection#cookieless-tracking), [IP data capture](https://posthog.com/docs/privacy/data-collection#ip-data-capture), [Vite source maps](https://posthog.com/docs/error-tracking/upload-source-maps/vite), [Workflows channels](https://posthog.com/docs/workflows/configure-channels), [opt-outs](https://posthog.com/docs/workflows/opt-outs), [sending reputation](https://posthog.com/docs/workflows/sending-reputation) and the [Cloudflare proxy](https://posthog.com/docs/advanced/proxy/cloudflare); Convex [runtimes](https://docs.convex.dev/functions/runtimes), [log streams](https://docs.convex.dev/production/integrations/log-streams), [exception reporting](https://docs.convex.dev/production/integrations/exception-reporting) and [pricing](https://www.convex.dev/pricing); Cloudflare [OpenTelemetry export to PostHog](https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/posthog/). Lonir's own PostHog setup (`Omni-GM/lonir`: ADR-0004, `docs/agents/observability.md`, `convex/lib/posthogEvents.ts`, `convex/posthogProxy.ts`) shaped the shared-project rules.
+
+### 13.1 What is feasible, and what is not
+
+| Signal | Where it can come from | Verdict |
+| --- | --- | --- |
+| Product analytics | `posthog-js` in the SPA; PostHog's capture API from a Convex action | Built. Queries and mutations cannot call `fetch`; a mutation schedules an internal action that sends |
+| Error tracking, browser | `posthog-js` exception autocapture, React's root error callbacks, the router's error component | Built, with source maps uploaded by the deploy job |
+| Error tracking, Convex functions | Convex exception reporting has a PostHog Error Tracking integration | **Not on Convex Free.** Exception reporting is Pro only ($25 per developer per month). Until then the browser reports the unexpected Convex errors it receives, with the function name and Convex's request ID, and the full server error stays in the Convex dashboard |
+| Logs, browser | `posthog.logger` (`posthog-js` 1.368+), which ships OTLP log records to PostHog Logs | Built for a few named events, not `console.*` |
+| Logs, Convex | Convex log streams have a native PostHog destination over OTLP | **Not on Convex Free.** Log streams are Pro only. A Convex action can still `POST` OTLP/JSON log records to `/i/v1/logs` with `fetch`, no SDK needed. Used for the server facts the browser never sees (the Expiry sweep) |
+| Logs, Cloudflare Worker | Workers Logs export over OTLP to `/i/v1/logs` | Possible, not built: the Worker only redirects legacy links and proxies `/ingest` (§13.4), so its logs would be noise |
+| Traces | PostHog accepts OTLP spans at `/i/v1/traces` | **Not feasible end to end.** Convex emits no spans on any plan, and calls travel over one WebSocket with no per-call headers, so a W3C `traceparent` cannot reach a function. `posthog-js` has no span exporter. Cloudflare's PostHog guide says Workers Traces do not export to PostHog. An OTEL SDK fits only a `"use node"` action, and this app has none worth tracing |
+
+So: OTLP is used where it runs (PostHog Logs from the browser and from Convex actions). No OTEL SDK goes into Convex: the default runtime cannot hold an exporter across calls, and Node actions would add a cold start to every telemetry send for no span worth having. The upgrade path is one switch: on Convex Pro, turn on the PostHog log stream and PostHog exception reporting in the Convex dashboard, and they cover every function's logs and errors with no code change.
+
+### 13.2 Calls
+
+Each call is a reversible default unless marked as Michael's. He can redirect any of them in one line.
+
+| # | Call | Alternative |
+| --- | --- | --- |
+| 1 | **Michael's call (2026-10-06): share Lonir's PostHog project** on EU Cloud. Region EU was settled by the token: it authenticates on `eu.i.posthog.com` | A dedicated Next Session project. The switch is one config value per surface (§13.9) |
+| 2 | Every event, exception and log carries the Product Marker `product: "next-session"`; logs carry `service.name` `next-session-web` or `next-session-convex`. Event names use PostHog's `category:object_action` shape with the category `next_session`, so no Lonir insight or workflow that matches by name (`session_scheduled`, `sign_in_started`) ever sees ours | Lonir's names plus the marker, which continues Lonir's `session_scheduled` activation insight but leaks into every Lonir insight that does not filter |
+| 3 | Next Session reads no feature flag: `advanced_disable_flags: true` in the browser, and the server never evaluates flags | Read flags for rollouts later, under a `next-session-` key prefix |
+| 4 | Browser analytics run in `cookieless_mode: "always"` with `person_profiles: "never"`: no cookie, no `localStorage`, no person in the browser, so no consent banner. The analysis is in §13.3 | A consent banner with `cookieless_mode: "on_reject"`, the way Lonir does it. One init option plus a banner component |
+| 5 | The core loop is measured from the server: committed facts (link created, Player joined, Session scheduled) are captured by Convex, where ad blockers cannot drop them and the numbers match the database | Capture everything in the browser, which is simpler but lossy |
+| 6 | An Account is identified as `next-session:<users._id>`. Its email reaches PostHog only inside a mail request (§13.6), never as a person property. Persons are never joined with Lonir by email | Identify by email to see one person across Lonir and Next Session. That combines data across two products, which the Privacy Policy would have to disclose and justify |
+| 7 | Anonymous GMs and Players without an Account get no person profile (`$process_person_profile: false`); their events carry `group_id` instead | Person profiles for everyone, which costs more and keeps more |
+| 8 | No session replay and no autocapture. Replay needs consent under German law, and autocapture would send Player names, which are the text of the buttons | Replay with masking behind the banner of call 4 |
+| 9 | Group analytics stays off; events carry `group_id` as a plain property | A `next_session_group` group type, which needs the paid add-on and one of the shared project's five group-type slots |
+| 10 | Browser traffic goes through the Worker at `next-session.link/ingest`, the PostHog Cloudflare proxy pattern | Send straight to `eu.i.posthog.com`, which ad blockers drop |
+| 11 | Everything ships disabled: the browser initialises PostHog only when the build has `VITE_POSTHOG_TOKEN`, and Convex sends only when the deployment has `POSTHOG_PROJECT_TOKEN`. Only the production deploy sets them, so dev, CI, e2e and the local backend send nothing | A runtime kill switch through a flag, which would contradict call 3 |
+| 12 | PostHog Workflows sends the mail. It can: a webhook trigger guarded by a secret `Authorization` header, delays up to 30 days per step, email steps, message categories with a hosted unsubscribe page, and a verified sender domain. Only Convex starts a mail workflow: the project token is public, so a workflow triggered by a captured event would mail any address anyone posts | Resend from Convex scheduled functions, the §12.6 hook. Kept for Session notifications, which fan out to many recipients (§13.7) |
+| 13 | Every new Account gets one **Welcome Mail** (transactional, no promotion) | No mail at all until notifications ship |
+| 14 | The drip is **Tips**: two mails, only for Accounts that tick an unticked box in the Save sheet and then press **Yes, send me the tips** on the page the Welcome Mail links to (double opt-in). Opening the link alone confirms nothing, so a mail scanner cannot subscribe anyone | Single opt-in, or treat the tips as service messages without consent. German law (§ 7 UWG) reads usage tips as advertising, and double opt-in is how consent is proven |
+| 15 | Email open and click tracking are off on every step (`tracking_enabled: false`) | Turn them on, which puts a tracking pixel in a mail and needs consent of its own |
+| 16 | Test Accounts never get mail: Convex requests no mail for a `.test` address, their events carry `is_test_account: true`, and the production spec signs up with `@example.test` instead of `@next-session.link` (whose mail would bounce and cost sender reputation) | Rely on the project's test-account filter, which Lonir owns |
+| 18 | Mail requests are durable: Convex sends them through `@convex-dev/action-retrier`, which retries network errors and 5xx answers with backoff. Analytics events stay best-effort and are dropped on failure | Retry analytics too, which costs function calls for numbers nobody misses |
+| 19 | An objection is enforced, not just promised: `users.analyticsObjectedAt` stops every server event for that Account, and `/privacy` gets **Turn off usage measurement in this browser**, which calls `posthog.opt_out_capturing()` | Promise objection by email and handle it by hand in PostHog, where deleted persons come back with the next event |
+| 17 | The Privacy Policy gains the analytics, error and mail sections and bumps its minor version. No re-acceptance gate: analytics run on legitimate interest, and Tips need their own consent anyway | Build the re-acceptance gate first (§6.3) |
+
+### 13.3 Consent and privacy
+
+The operator is in Germany, so two laws apply: § 25 TDDDG for anything read from or stored on the device, and the GDPR for every personal datum.
+
+- **No device storage, minimal device reads.** `cookieless_mode: "always"` never writes PostHog state to a cookie, `localStorage` or `sessionStorage`. § 25 TDDDG also covers reading from the device, so `before_send` drops what the SDK reads through JavaScript beyond what every HTTP request already carries: `$screen_height`, `$screen_width`, `$viewport_height`, `$viewport_width`, `$timezone`, `$timezone_offset`, `$browser_language` and `$browser_language_prefix`. What remains is the URL, the referrer and what PostHog derives from the user agent. PostHog counts unique visitors with a daily-salted server-side hash of IP and user agent, which it does not store. Michael enables "Cookieless server hash mode" in the shared project's web analytics settings once; it changes nothing for Lonir's SDK, which does not use cookieless mode.
+- **Legal basis.** Pseudonymous, first-party product analytics and error reports on legitimate interest (Art. 6(1)(f) GDPR): keep the Service working and find out which steps people use. No cross-site tracking, no profiling across products (call 6), no advertising, and an objection stops it: the button on `/privacy` for the browser, and `users.analyticsObjectedAt` (set on an emailed objection) for an Account's server events.
+- **IP addresses.** The project's "IP data capture" setting must read "discard". EU organizations default to it; the switch-on ticket checks it and asks Michael before changing a setting Lonir shares.
+- **What the browser never sends.** `before_send` (events) and `logs.beforeSend` (log records, which carry `url.full` on their own pipeline) pass every string value that is a URL or a path on the app's origin through one pure function, `redactUrl`, so `$current_url`, `$pathname`, `$referrer`, `$session_entry_url`, `$initial_*` and `url.full` are all covered without a list to keep current: a Share Token path becomes `/s/:shareToken`, and the query keeps only `month` and `day`. That also drops the OAuth `code` (#58) and the Tips `code`. Autocapture is off, so no element text (Player and Group names) leaves the page. Exception messages from our code carry codes, not names.
+- **This is an assessment, not a settled answer.** The EDPB's Guidelines 2/2023 read Art. 5(3) ePrivacy broadly enough that a script sending any device data to a third party may need consent even without storage, and German authorities have not ruled on cookieless analytics. The minimization above lowers the risk; it does not remove it. So browser measurement switches on only after Michael, as the controller, accepts this position in the switch-on ticket (#79), or picks call 4's alternative: one init option and a banner component. Server-side events and mail do not read the device and do not wait on that decision. The drafts already await a lawyer (§7). Lonir chose a banner; Next Session's one-click landing is the reason to try without one.
+- **Email.** The Welcome Mail goes to an Account's own address as part of the contract (Art. 6(1)(b)). Tips go only after consent (Art. 6(1)(a), § 7(2) UWG), proven by double opt-in: the tick, then the press of **Yes, send me the tips** on the page linked from the mail sent to that address. `users` keeps both timestamps and the version of the box's wording. Withdrawal is PostHog's hosted unsubscribe page, linked in every Tip, or a reply.
+
+#### What changes in the Privacy Policy
+
+`docs/legal/privacy.md`:
+
+- §2 gains rows: "Pseudonymous usage events (pages viewed, steps such as creating a link, joining, scheduling), with your account ID for an account | Learn which parts of the Service are used, fix problems | Legitimate interest, 6(1)(f)"; "Error reports and technical logs (error message, browser, page) | Keep the Service working | Legitimate interest, 6(1)(f)"; "For an account: your email address, to send the welcome mail | Contract, 6(1)(b)"; "If you ask for tips: your email address and your confirmation | Send the two tip mails | Consent, 6(1)(a)".
+- The sentence "We do not use analytics, advertising, or tracking" becomes: "We measure use without cookies and without storing anything on your device. We do not use advertising or cross-site tracking, and we do not sell data."
+- §3 states that the usage measurement stores nothing on the device, so the list stays complete and the Service still sets no cookies.
+- §4 gains the processor row: "PostHog Inc. | Usage measurement, error reports, logs, and sending the account emails | EU (Frankfurt) hosting, US company".
+- §5 gains: usage events and error reports for the event retention of the PostHog plan (#77 reads it from the billing page and writes the number); logs 14 days; the email address in PostHog until the account is deleted.
+- §6 names the objection right for usage measurement and the withdrawal of Tips consent.
+- `LEGAL_VERSIONS.privacy` goes up one minor version (1.2 if #64's 1.1 lands first, else 1.1, and #64 takes the next) with a new effective date.
+
+### 13.4 Browser
+
+`src/lib/telemetry.ts` is the only module that imports `posthog-js`. Everything else calls it.
+
+```ts
+// src/lib/telemetry.ts (interface)
+export type BrowserEvent =
+  | { name: "share_link_copied"; surface: "landing" | "rail" | "compact"; method: "clipboard" | "fallback" | "failed" }
+  | { name: "share_link_shared"; surface: "landing" | "rail" | "compact"; channel: "whatsapp" | "telegram" | "mail" | "native" }
+  | { name: "fill_rest_used"; group_id: string }
+  | { name: "answers_started"; group_id: string } // once per page load, at the first saved tap
+  | { name: "save_started" }
+  | { name: "sign_in_failed"; flow: "signUp" | "signIn"; code: string }
+  | { name: "keep_group_started"; group_id: string };
+
+export function initTelemetry(source?: EnvSource): void; // no-op without VITE_POSTHOG_TOKEN
+export function track(event: BrowserEvent): void; // sends `next_session:<name>`
+export function log(level: "info" | "warn" | "error", body: string, attributes?: Record<string, string | number | boolean>): void;
+export function reportError(error: unknown, context: { surface: string }): void;
+export function redactUrl(url: string): string; // pure
+```
+
+Init, called from `src/main.tsx` before the router renders:
+
+```ts
+posthog.init(token, {
+  api_host: `${window.location.origin}/ingest`,
+  ui_host: "https://eu.posthog.com",
+  defaults: "2026-08-29", // strips URL fragments too
+  cookieless_mode: "always",
+  person_profiles: "never",
+  autocapture: false,
+  capture_pageview: "history_change",
+  capture_pageleave: false,
+  capture_exceptions: true,
+  disable_session_recording: true,
+  disable_surveys: true,
+  advanced_disable_flags: true,
+  logs: {
+    serviceName: "next-session-web",
+    environment: "production",
+    serviceVersion: release,
+    resourceAttributes: { product: "next-session" },
+    beforeSend: redactLog, // redactUrl on url.full and every attribute
+  },
+  before_send: redactEvent, // redactUrl on every URL-valued property, drops device reads (§13.3)
+});
+posthog.register({ product: "next-session" });
+```
+
+`release` is the commit SHA, passed as `VITE_RELEASE` by the deploy job, so exceptions, logs and source maps share a version. Pin `posthog-js` (1.438.1 today) like every other dependency.
+
+- **Errors.** `capture_exceptions` covers uncaught errors and unhandled rejections. `createRoot` gets `onUncaughtError` and `onCaughtError`, which call `reportError`, and the root route gets an `errorComponent` that reports and renders the not-found card's sibling ("Something broke. Reload the page."). `src/lib/errors.ts` reports a Convex failure only when it has no `ErrorCode`: expected codes like `RATE_LIMITED` are product flow, not errors. The report carries the function name and the `[Request ID: …]` Convex puts in the message, which finds the server log in the Convex dashboard.
+- **Source maps.** `@posthog/rollup-plugin` in `vite.config.ts`, active only when `POSTHOG_PERSONAL_API_KEY` and `POSTHOG_PROJECT_ID` are set, with `releaseName: "next-session-web"`, `releaseVersion` the commit SHA, and `deleteAfterUpload: true`, so no map reaches `dist/`. The deploy job sets them; `bun run check` and local builds do not, and build without maps as today.
+- **Objection.** The `/privacy` page renders **Turn off usage measurement in this browser** (or **Turn it back on**) while telemetry is enabled; it calls `posthog.opt_out_capturing()` / `opt_in_capturing()`, which PostHog keeps in `localStorage` at the visitor's request.
+- **Logs.** `log()` wraps `posthog.logger`. First uses: Save recovery on app start (§5.3 step 5: resumed, `CLAIM_INVALID`), a leftover Keep this group retry (§12.4), and the Copy fallback (#54: clipboard refused, `execCommand` used, both failed). Console capture stays off: `console.*` carries whatever a library prints.
+- **Proxy.** `worker/index.ts` adds `ingestTarget(url) → string | null`: `/ingest/static/*` and `/ingest/array/*` go to `eu-assets.i.posthog.com`, the rest of `/ingest/*` to `eu.i.posthog.com`. The Worker strips `cookie` and `set-cookie`, sets `X-Forwarded-For` from `CF-Connecting-IP` (else every visitor hashes to one Cloudflare IP), and returns 204 without forwarding when the request carries no PostHog path. `wrangler.jsonc` adds `/ingest/*` to `assets.run_worker_first`. Worker requests count toward the free 100,000 per day; posthog-js batches, so a visit costs a handful.
+
+### 13.5 Convex
+
+`convex/model/telemetry.ts` is the server seam; `convex/telemetry.ts` holds the one internal action that talks to PostHog.
+
+```ts
+// convex/model/telemetry.ts (interface)
+export type ServerEvent =
+  | { name: "link_created"; actor: Actor; group_id: string } // Create your link: Anonymous GM and first Group
+  | { name: "group_created"; actor: Actor; group_id: string }
+  | { name: "account_created"; actor: Actor; method: "password" | "google"; tips_requested: boolean }
+  | { name: "groups_saved"; actor: Actor; group_count: number }
+  | { name: "player_joined"; actor: Actor; group_id: string; claimed: boolean }
+  | { name: "player_claimed"; actor: Actor; group_id: string }
+  | { name: "player_released"; actor: Actor; group_id: string }
+  | { name: "session_scheduled"; actor: Actor; group_id: string; player_count: number; is_first_for_group: boolean }
+  | { name: "session_unscheduled"; actor: Actor; group_id: string }
+  | { name: "share_link_rotated"; actor: Actor; group_id: string }
+  | { name: "tips_confirmed"; actor: Actor };
+
+type Actor = Doc<"users"> | { playerId: Id<"players"> };
+
+export async function track(ctx: MutationCtx, event: ServerEvent): Promise<void>;
+export async function serverLog(ctx: MutationCtx, level: "info" | "warn" | "error", body: string, attributes: Record<string, string | number | boolean>): Promise<void>;
+```
+
+- `track` returns at once when `process.env.POSTHOG_PROJECT_TOKEN` is unset or the actor is an Account with `analyticsObjectedAt`, so tests and the local backend schedule nothing. Otherwise it builds the PostHog payload and calls `ctx.scheduler.runAfter(0, internal.telemetry.send, { events, logs })`. The scheduled call commits with the mutation, so a refused mutation sends nothing and a committed fact is sent once.
+- The payload, built in one pure function `toPostHogEvent(event, now)` that the tests pin: event name `next_session:<name>`; `distinct_id` `next-session:<users._id>` for a user, `next-session:player:<playerId>` for a Player without an Account; properties `product: "next-session"`, the event's fields, `$process_person_profile: false` unless the actor is an Account, and `is_test_account: true` for an email under `.test`. No event carries an email address, and no event sets person properties beyond `next_session_account: true` on `account_created`.
+- `internal.telemetry.send` is a default-runtime action: one `fetch` to `https://eu.i.posthog.com/batch/` for events, one to `https://eu.i.posthog.com/i/v1/logs` with an OTLP/JSON body for logs (`resource.attributes` `service.name: next-session-convex`, `product: next-session`), both with the project token. A failed send is logged to the Convex console and dropped; telemetry never retries into a user's mutation.
+- Call sites, one line each, after the write succeeds: `auth.ts` `afterUserCreatedOrUpdated` (`link_created` for a new Anonymous GM; `account_created` for a new Account, any provider), `groups.create`, `account.finishSave`, `player.join` / `claim` / `release`, `sessions.schedule` / `unschedule`, `groups.rotateShareToken`. The Expiry sweep (§5.5) calls `serverLog` once per run with the number of Groups deleted. Answers are not tracked on the server: taps are the high-volume path, and each `track` costs one action call out of Convex Free's 1M a month.
+- Redaction contract, as in Lonir: no Group name, no Player name, no Share Token, no claim code, no email. `group_id` and user ids are pseudonymous and stay.
+
+Schema: `users` gains an optional `analyticsObjectedAt`. Michael sets it in the Convex dashboard when an Account objects by email; there is no UI for it.
+
+### 13.6 Welcome Mail and Tips in PostHog Workflows
+
+PostHog Workflows can do all of it (verified against the docs above, the workflow graph schema, and the webhook source in `PostHog/posthog` `nodejs/src/cdp/templates/_sources/webhook/incoming_webhook.template.ts`):
+
+- **Trigger** with a `webhook` trigger. Its `auth_header` input makes PostHog refuse any request whose `Authorization` header does not match a secret, so only Convex can start a mail workflow. An `event` trigger would be the obvious choice, and it fails: the project token ships in the SPA, so anyone could post `account_created` with any address and use the shared project's sender to mail strangers.
+- **Send** through the built-in email channel: a sender `Michael from Next Session <hello@next-session.link>`, with SPF and DKIM records PostHog generates. The agent adds them to the zone with the scoped Cloudflare token; they sit next to Resend's records on `send.next-session.link` and `resend._domainkey` and do not replace them. Reply-to is the contact email. The recipient comes from the trigger, `{event.properties.email}`, so PostHog holds no email on a person profile.
+- **Wait** with `delay` steps (at most 30 days each) and `wait_until_condition` on an event.
+- **Opt-out**: two message categories, "Next Session account" (transactional, Welcome Mail) and "Next Session tips" (marketing, Tips). Tips carry `{{ unsubscribe_url }}`; unsubscribing writes `$workflows_email_unsubscribed`, and PostHog skips the category from then on. Hard bounces land on the suppression list.
+- **Volume**: a new sending project starts at tier 0, 100 mails a day, and climbs over about five weeks. Next Session's sign-ups fit inside it; mails over the cap wait, they are not lost.
+
+Two workflows, in the shape `workflows-create` takes (#79 fills in template UUIDs, the sender id and the secret):
+
+```
+"Next Session: Welcome Mail"
+trigger  webhook POST, auth_header = Bearer <POSTHOG_MAIL_WEBHOOK_SECRET>
+         event next_session:welcome_requested, distinct_id {request.body.distinct_id}
+         properties { product, email, tips_confirm_url } from the body
+  → email "Welcome"  to {event.properties.email}  category: account (transactional), tracking off
+  → exit
+
+"Next Session: Tips"
+trigger  webhook POST, same auth_header
+         event next_session:tips_requested, distinct_id {request.body.distinct_id}, properties { product, email }
+  → delay 2d
+  → email "Tip 1: get your players in"  to {event.properties.email}  category: tips (marketing), tracking off
+  → wait_until_condition  event next_session:session_scheduled [product = next-session]  max 5d
+      matched → exit                                         (they already did it)
+      timeout → email "Tip 2: pick the date" → exit
+```
+
+A forged `session_scheduled` for someone's distinct id could only skip their second Tip; that is the whole blast radius of a public event in this design.
+
+`convex/mail.ts` holds `requestMail(ctx, {kind: "welcome" | "tips", user, tipsConfirmUrl?})`. It returns at once when `POSTHOG_MAIL_WEBHOOK_SECRET` is unset or the address is under `.test`, and otherwise starts an internal action through `@convex-dev/action-retrier` (at most 4 attempts, exponential backoff, retrying network errors and 5xx) that posts `{distinct_id, product, email, tips_confirm_url}` to the workflow's webhook URL (`POSTHOG_WELCOME_WEBHOOK_URL`, `POSTHOG_TIPS_WEBHOOK_URL`). A timeout after PostHog accepted a request can send a mail twice; that is the accepted cost of not losing one.
+
+Double opt-in, end to end:
+
+1. The Save sheet shows an unticked box under the password: "Email me two short tips for getting the first game night on the calendar". Only the Save sheet: the GM path is where the tips fit. Keep this group and Log in show no box.
+2. Sign-up passes `tips: "yes"` in the Password params. The profile stores `tipsRequestedAt` and `tipsConsentVersion: "1"` (the box's wording, kept in `shared/tips.ts`). `afterUserCreatedOrUpdated` requests the Welcome Mail for every new Account; for a ticked box it first mints a 32-byte code, stores its SHA-256 as `tipsCodeHash` (the `saveClaims` pattern), and passes `tipsConfirmUrl: https://next-session.link/tips?code=<code>`. Google sign-up (#58) has no box.
+3. The Welcome Mail shows the confirmation block only when the trigger event has `tips_confirm_url`. #79 checks with `workflows-test-run` that the email step's Liquid reads the trigger event.
+4. `/tips?code=…` reads nothing on load except the code from the URL, then removes it from the address bar. It shows the box's wording and one button, **Yes, send me the tips**. Only the press calls `account.confirmTips({code})`: it finds the user by hash within 3 days of `tipsRequestedAt`, sets `tipsConfirmedAt`, clears the hash, tracks `tips_confirmed`, and requests the Tips workflow. It returns `{confirmed: boolean}` and needs no session, because the code proves the inbox. A new global rate limit `confirmTips` (token bucket, 30 per minute, capacity 60) keeps it from being used to guess codes, on top of the 256-bit code. After the press the page says "Done. The first tip arrives in two days." or "This link has expired. That's fine, you'll just get no tips."
+
+Schema: `users` gains `tipsRequestedAt`, `tipsConsentVersion`, `tipsCodeHash` (indexed `by_tipsCodeHash`) and `tipsConfirmedAt`, all optional. Nothing to migrate.
+
+#### Copy
+
+In Michael's voice, plain text first (every template carries a real `text` part), then the same words in the design. Sender "Michael from Next Session".
+
+**Welcome Mail.** Subject: `Welcome to Next Session`
+
+> Hi there 👋,
+>
+> thanks for creating your Next Session account!
+>
+> Your groups now follow you to every device. Log in on next-session.link with this email address, and My groups shows every group you run or play in.
+>
+> [Open My groups](https://next-session.link/me)
+>
+> {% if event.properties.tips_confirm_url %}You asked for two short tips on getting your first game night on the calendar. Please confirm it was you, so I don't mail a stranger:
+>
+> [Yes, send me the tips]({{ event.properties.tips_confirm_url }})
+>
+> {% endif %}Didn't create this account? Just reply and I'll delete it.
+>
+> Thanks!
+> Michael
+
+**Tip 1, two days after confirming.** Subject: `Get your players in`
+
+> Hey 👋,
+>
+> Next Session works best when everyone answers. The fastest way there:
+>
+> - Open your group and tap **Copy** or **WhatsApp** on the Share Link. Your players tap the days they can play: no account, about 30 seconds.
+> - Missing someone? Add their name under **Players**, so they only have to tap.
+> - The grey bars show who hasn't answered yet. A friendly nudge in your group chat does the rest.
+>
+> [Open My groups](https://next-session.link/me)
+>
+> Thanks!
+> Michael
+>
+> You get this because you asked for tips. [Unsubscribe]({{ unsubscribe_url }})
+
+**Tip 2, five days later, unless a Session was scheduled.** Subject: `Pick the date`
+
+> Hey again,
+>
+> once a few answers are in, the calendar does the math for you:
+>
+> - **Best Nights** shows the top three dates nobody marked busy.
+> - Tap a day, then **Schedule**. Your players see the date right away.
+> - Plans changed? **Unschedule** it, and Undo is there if you slip.
+>
+> That's the last tip from me. Have a great game night 🎲
+>
+> [Open My groups](https://next-session.link/me)
+>
+> Thanks!
+> Michael
+>
+> You get this because you asked for tips. [Unsubscribe]({{ unsubscribe_url }})
+
+### 13.7 How this fits the §12.6 email hook
+
+Session notifications stay on the §12.6 plan: Resend from a Convex action. A Session change mails every Claimed Player's Account except the one who made it, and a PostHog workflow runs per person and per event, so it would need one event per recipient and would put every Player's email into PostHog. The two paths share the sending domain (`next-session.link`) and the opt-out rule: when notifications ship, their opt-out lives on `users`, not in PostHog.
+
+### 13.8 Credentials and switch-on
+
+Michael already provided the project token (`~/.config/next-session/posthog.env`, `POSTHOG_PROJECT_TOKEN`, EU). Never printed, never committed.
+
+| Value | Who | Where it goes |
+| --- | --- | --- |
+| Project token (have it) | Agent | Repo variable `VITE_POSTHOG_TOKEN` (the deploy job passes it to `bun run build`); Convex prod env `POSTHOG_PROJECT_TOKEN`. It is public by design (it ships in the bundle), but stays out of issues and logs |
+| Project ID | Agent, read with the personal API key | Repo variable `POSTHOG_PROJECT_ID` |
+| Personal API key, scopes `error_tracking:write` (source maps) and `hog_flow:write` (workflows, templates, categories) | **Michael** | `~/.config/next-session/posthog.env` as `POSTHOG_PERSONAL_API_KEY`; repo secret `POSTHOG_PERSONAL_API_KEY` for the deploy job |
+| "Cookieless server hash mode" on, "IP data capture" reads discard | **Michael** (shared project settings) | PostHog project settings |
+| Accept the no-banner browser measurement (§13.3), or pick the banner | **Michael**, as the controller | A comment on the switch-on ticket. Until then `VITE_POSTHOG_TOKEN` stays unset and only the server side runs |
+| Mail webhook secret | Agent generates it | Convex prod env `POSTHOG_MAIL_WEBHOOK_SECRET`, and the `auth_header` of both workflows; the two webhook URLs go to `POSTHOG_WELCOME_WEBHOOK_URL` and `POSTHOG_TIPS_WEBHOOK_URL` |
+| Email channel `hello@next-session.link` | **Michael** creates it in Workflows → Channels; the agent adds the DNS records PostHog shows | PostHog, Cloudflare zone |
+
+The CI `check` and `e2e` jobs set none of these, so they build and test with telemetry off, as dev does.
+
+### 13.9 Moving to a dedicated project later
+
+If Michael redirects call 1: create the project in EU Cloud, then change the repo variables `VITE_POSTHOG_TOKEN` and `POSTHOG_PROJECT_ID`, the Convex env `POSTHOG_PROJECT_TOKEN`, re-create the email channel, categories, templates and workflow there (the ticket keeps their definitions in `docs/posthog/`), and redeploy. The Product Marker and the `next_session:` prefix stay; they cost nothing in a project of its own.
+
+### 13.10 Test seams
+
+| Seam | Tested through |
+| --- | --- |
+| `redactUrl`, `redactEvent`, `redactLog` in `src/lib/telemetry.ts` | Vitest on plain strings, event objects and log records: Share Token paths, `code`, `month` and `day`, referrers, `$initial_*`, `$session_entry_url`, `url.full`, and the dropped device properties. One test serializes a real `posthog-js` request (captured with a fake transport) on `/s/<token>?code=x` and finds neither value |
+| `initTelemetry` | Vitest with a fake `posthog`: no token means no `init`; a token means the options above, the Product Marker registered, and no flag call |
+| `ingestTarget` in `worker/index.ts` | Vitest: static and array paths to the assets host, the rest to the API host, non-ingest paths `null`; a Worker test for the stripped cookies and `X-Forwarded-For` |
+| `toPostHogEvent` in `convex/model/telemetry.ts` | Vitest on plain data: names, distinct ids, the marker, `is_test_account`, person processing, no email anywhere |
+| `track` and the call sites | `convex-test`: with the env unset nothing is scheduled; with it set, each mutation in §13.5 schedules exactly one `telemetry.send` with the expected event, a refused mutation schedules none, and an Account with `analyticsObjectedAt` schedules none |
+| `requestMail` | `convex-test` with a fake `fetch`: no secret or a `.test` address requests nothing; a 503 then 200 retries once and sends once; a 400 is not retried |
+| `account.confirmTips` | `convex-test`: a valid code within 3 days confirms once, tracks `tips_confirmed` and requests the Tips workflow; a reused, unknown or late code returns `confirmed: false` and requests nothing |
+| `src/lib/errors.ts` reporting | Vitest: a Convex error without a code is reported with the request ID; a coded error is not |
+| The Save sheet box, the `/tips` page, the `/privacy` opt-out | Testing Library: the box is unticked by default and the sign-up params carry `tips` only when ticked; rendering `/tips` calls nothing, and only the button press calls `confirmTips`; both outcomes; the opt-out toggles `opt_out_capturing` |
+| The whole flow | Playwright on the local backend with telemetry off proves nothing breaks. The switch-on ticket proves the live path once with a real address: sign up with Tips, receive the Welcome Mail, confirm, see `tips_confirmed` and the Tips workflow run parked on its delay |
+
+### 13.11 Build plan
+
+| # | Ticket | Blocked by | Write scope |
+| --- | --- | --- | --- |
+| [#74](https://github.com/Silthus/next-session/issues/74) | Browser telemetry: init, redaction, errors, source maps, `/ingest` proxy, opt-out | — | `src/lib/telemetry.ts`, `src/features/legal/**`, `src/main.tsx`, `src/routes/__root.tsx`, `worker/**`, `wrangler.jsonc`, `vite.config.ts`, `package.json`, `bun.lock`, the deploy job in `.github/workflows/ci.yml` |
+| [#75](https://github.com/Silthus/next-session/issues/75) | Server telemetry: the Convex seam and lifecycle events | — | `convex/telemetry.ts`, `convex/model/telemetry.ts`, `convex/schema.ts` (`users.analyticsObjectedAt`), one-line call sites in `convex/{auth,account,groups,player,sessions,cleanup}.ts`, their tests, the sign-up email in `e2e/production.spec.ts` |
+| [#76](https://github.com/Silthus/next-session/issues/76) | Browser events and logs at the UI call sites | #74, #64, #65 | `src/lib/errors.ts`, `src/ui/ShareLinkCard.tsx`, `src/features/landing/**`, `src/features/player/**`, `src/features/account/save.ts`, `src/features/account/keep.ts`, `src/features/account/AccountSheet.tsx` |
+| [#77](https://github.com/Silthus/next-session/issues/77) | Privacy Policy for PostHog | #64 | `docs/legal/privacy.md`, `shared/legal.ts` |
+| [#78](https://github.com/Silthus/next-session/issues/78) | Mail: Welcome Mail requests and double opt-in Tips | #75, #76 | `convex/mail.ts`, `convex/convex.config.ts` (action-retrier), `convex/schema.ts` (`users` Tips fields), `convex/account.ts`, `convex/auth.ts`, `convex/model/rateLimits.ts`, `shared/tips.ts`, `package.json`, `bun.lock`, `src/features/account/AccountSheet.tsx`, `src/routes/tips.tsx`, `src/features/tips/**` |
+| [#79](https://github.com/Silthus/next-session/issues/79) | Switch on PostHog: keys, settings, sender, workflows, live proof | #74, #75, #76, #77, #78 | Repo variables and secrets, Convex prod env, zone DNS, the PostHog project, `docs/posthog/**` (the workflow and template definitions) |
+
+Lanes: #74 and #75 start now, in parallel. #76 waits for #64 and #65 because they own `src/features/player/**` and `src/features/account/**` today. #77 waits for #64's privacy bump.  #75 changes one line of `e2e/production.spec.ts`, which #65 extends with step 8; the later one rebases. Google sign-in (#58) also edits `convex/auth.ts` and `src/features/account/**`: whichever of #58, #75 and #78 lands later rebases. #67 edits `src/features/group/rail/**`, which #76 does not touch (the rail's Share Link uses `ShareLinkCard`).
