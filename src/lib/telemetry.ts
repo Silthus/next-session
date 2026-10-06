@@ -80,7 +80,7 @@ const loadPostHog: LoadPostHog = async () => {
 let client: ActiveClient | null = null;
 let starting: Promise<void> | null = null;
 let waitingCalls: ClientCall[] | null = null;
-let measurementChoice: "on" | "off" | null = null;
+let offForThisVisit = false;
 
 export const reactErrorReporting: Record<"onCaughtError" | "onUncaughtError", ReactErrorCallback> =
   {
@@ -117,18 +117,23 @@ export function measurementAvailable(): boolean {
 }
 
 export function measurementIsOn(storage: KeyValueStorage = browserStorage()): boolean {
-  if (measurementChoice) return measurementChoice === "on";
-  return attempt(() => storage.getItem(MEASUREMENT_OFF_KEY), null) === null;
+  return !offForThisVisit && attempt(() => storage.getItem(MEASUREMENT_OFF_KEY), null) === null;
 }
 
-export function turnMeasurementOff(storage: KeyValueStorage = browserStorage()): void {
-  measurementChoice = "off";
-  attempt(() => storage.setItem(MEASUREMENT_OFF_KEY, "1"), undefined);
+export function turnMeasurementOff(storage: KeyValueStorage = browserStorage()): {
+  remembered: boolean;
+} {
+  offForThisVisit = true;
+  const remembered = attempt(() => {
+    storage.setItem(MEASUREMENT_OFF_KEY, "1");
+    return true;
+  }, false);
+  return { remembered };
 }
 
 export function turnMeasurementOn(): Promise<void> {
   const storage = browserStorage();
-  measurementChoice = "on";
+  offForThisVisit = false;
   attempt(() => storage.removeItem(MEASUREMENT_OFF_KEY), undefined);
   return initTelemetry(import.meta.env, loadPostHog, storage);
 }

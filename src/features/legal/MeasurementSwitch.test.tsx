@@ -86,7 +86,7 @@ describe("the usage measurement switch on /privacy", () => {
     const telemetry = await import("../../lib/telemetry");
     expect(telemetry.measurementIsOn()).toBe(false);
     expect(screen.getByRole("status").textContent).toBe(
-      "Usage measurement is off in this browser.",
+      "Usage measurement is off for this visit. This browser doesn't let Next Session remember the choice.",
     );
   });
 });

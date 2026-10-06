@@ -1,5 +1,5 @@
 import type { CaptureLogOptions, CaptureResult, PostHogConfig } from "posthog-js/dist/module.slim";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { KeyValueStorage } from "./storage";
 import { redactEvent, redactLog, redactUrl } from "./telemetry";
 
@@ -38,6 +38,10 @@ function fakePostHog() {
   const load = vi.fn(() => Promise.resolve({ init }));
   return { load, init, instance };
 }
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 function event(name: string, properties: Record<string, unknown>): CaptureResult {
   return { uuid: "e1", event: name, properties };
@@ -324,6 +328,17 @@ describe("initTelemetry", () => {
       record: CaptureLogOptions,
     ) => CaptureLogOptions | null;
     expect(beforeSendLog({ body: "after opt-out" })).toBeNull();
+  });
+
+  it("honours an opt-out made in another tab after this one turned measurement back on", async () => {
+    const telemetry = await freshTelemetry();
+    const sharedStorage = memoryStorage();
+    vi.stubGlobal("localStorage", sharedStorage);
+    await telemetry.turnMeasurementOn();
+
+    sharedStorage.setItem("next-session.measurementOff", "1");
+
+    expect(telemetry.measurementIsOn(sharedStorage)).toBe(false);
   });
 
   it("delivers what the page sent while PostHog was still loading", async () => {
