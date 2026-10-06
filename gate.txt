@@ -123,10 +123,10 @@ Not implemented: Window's scrollTo() method
 
  Test Files  63 passed (63)
       Tests  907 passed (907)
-   Start at  16:10:58
-   Duration  5.38s (tests 45%, environment 34%, transform 10%, import 6%, setup 4%)
+   Start at  16:37:57
+   Duration  6.44s (tests 47%, environment 34%, transform 8%, import 6%, setup 4%)
 
-Environment  |ui| jsdom was created 39 times · 21.54s total, 44% of tracked time
+Environment  |ui| jsdom was created 39 times · 25.29s total, 44% of tracked time
              create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
              learn more: https://vitest.dev/guide/improving-performance#test-environments
 
@@ -165,27 +165,27 @@ dist/assets/inter-latin-wght-normal-Dx4kXJAl.woff2                      48.25 kB
 dist/assets/bricolage-grotesque-latin-opsz-normal-Cre6nC2_.woff2        76.88 kB
 dist/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2                  85.06 kB
 dist/assets/index-BHkw1Ewr.css                                          59.42 kB │ gzip: 18.05 kB
-dist/assets/terms-JCCWhU6F.js                                            0.15 kB │ gzip:  0.14 kB
-dist/assets/imprint-B7xOWFVw.js                                          0.15 kB │ gzip:  0.14 kB
-dist/assets/privacy-BE3O-hh4.js                                          0.15 kB │ gzip:  0.15 kB
+dist/assets/terms-BkAFcHri.js                                            0.15 kB │ gzip:  0.14 kB
+dist/assets/imprint-dIXYumu1.js                                          0.15 kB │ gzip:  0.15 kB
+dist/assets/privacy-i3YPIw57.js                                          0.15 kB │ gzip:  0.15 kB
 dist/assets/g._groupId-C9hukDba.js                                       0.22 kB │ gzip:  0.19 kB
 dist/assets/Eyebrow-D_m4go3Z.js                                          0.22 kB │ gzip:  0.19 kB
-dist/assets/g._groupId-DZzA4ofk.js                                       0.25 kB │ gzip:  0.20 kB
+dist/assets/g._groupId-CZpqDFkB.js                                       0.25 kB │ gzip:  0.20 kB
 dist/assets/Wordmark-frXmAMSk.js                                         0.43 kB │ gzip:  0.30 kB
 dist/assets/PageShell-B6Vk_MO9.js                                        0.59 kB │ gzip:  0.37 kB
 dist/assets/ShareLinkCard-BTrJGPDR.js                                    3.63 kB │ gzip:  1.66 kB
 dist/assets/HeaderAccount-BfZVznHR.js                                    5.24 kB │ gzip:  2.27 kB
 dist/assets/preload-helper-CEOLxZZk.js                                   5.72 kB │ gzip:  2.25 kB
 dist/assets/routes-BUAAgH8k.js                                           8.03 kB │ gzip:  2.99 kB
-dist/assets/LegalPage-BIy-ajbo.js                                       15.17 kB │ gzip:  6.07 kB
+dist/assets/LegalPage-B6vIoqh6.js                                       15.72 kB │ gzip:  6.25 kB
 dist/assets/LegalFooter-CF_k4Rjp.js                                     20.85 kB │ gzip:  8.41 kB
 dist/assets/useGm-pwz0yrCm.js                                           21.64 kB │ gzip:  7.97 kB
-dist/assets/s._shareToken-CNkf0aFY.js                                   23.15 kB │ gzip:  8.06 kB
+dist/assets/s._shareToken-B3R-fsYd.js                                   23.15 kB │ gzip:  8.06 kB
 dist/assets/GroupScreen-E2-0n4QS.js                                     39.91 kB │ gzip: 12.35 kB
 dist/assets/Button-40OaZzA1.js                                          85.80 kB │ gzip: 24.28 kB
-dist/assets/index-B9HN4M_I.js                                          280.56 kB │ gzip: 90.11 kB
+dist/assets/index-uOv6v4BE.js                                          280.56 kB │ gzip: 90.10 kB
 
-✓ built in 254ms
+✓ built in 274ms
 
  ⛅️ wrangler 4.147.0
 ────────────────────
