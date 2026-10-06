@@ -10,7 +10,14 @@ const ingestPrefix = /^\/ingest(?=\/|$)/;
 const posthogApi = "https://eu.i.posthog.com";
 const posthogAssets = "https://eu-assets.i.posthog.com";
 const posthogAssetPaths = /^\/(static|array)\//;
-const strippedRequestHeaders = ["cookie", "authorization", "x-forwarded-for"];
+const posthogIngestionPaths = /^\/(e\/|i\/v0\/e\/|i\/v1\/logs|batch\/)/;
+const forwardedRequestHeaders = [
+  "content-type",
+  "content-encoding",
+  "user-agent",
+  "accept",
+  "accept-encoding",
+];
 
 function legacyRedirect(url: URL): string | null {
   const isLegacy = legacyShareLink.test(url.pathname) || legacyGroupsPage.test(url.pathname);
@@ -24,9 +31,14 @@ function isIngest(url: URL): boolean {
 export function ingestTarget(url: URL): string | null {
   if (!isIngest(url)) return null;
   const posthogPath = url.pathname.replace(ingestPrefix, "");
-  if (posthogPath === "" || posthogPath === "/") return null;
-  const host = posthogAssetPaths.test(posthogPath) ? posthogAssets : posthogApi;
-  return `${host}${posthogPath}${url.search}`;
+  const host = posthogHostFor(posthogPath);
+  return host ? `${host}${posthogPath}${url.search}` : null;
+}
+
+function posthogHostFor(posthogPath: string): string | null {
+  if (posthogAssetPaths.test(posthogPath)) return posthogAssets;
+  if (posthogIngestionPaths.test(posthogPath)) return posthogApi;
+  return null;
 }
 
 async function proxyToPostHog(request: Request, target: string): Promise<Response> {
@@ -43,8 +55,11 @@ async function proxyToPostHog(request: Request, target: string): Promise<Respons
 }
 
 function forwardedHeaders(incoming: Headers): Headers {
-  const headers = new Headers(incoming);
-  strippedRequestHeaders.forEach((name) => headers.delete(name));
+  const headers = new Headers();
+  forwardedRequestHeaders.forEach((name) => {
+    const value = incoming.get(name);
+    if (value !== null) headers.set(name, value);
+  });
   const visitorIp = incoming.get("cf-connecting-ip");
   if (visitorIp) headers.set("x-forwarded-for", visitorIp);
   return headers;

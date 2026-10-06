@@ -1,55 +1,92 @@
+import { createMemoryHistory, createRouter, RouterProvider } from "@tanstack/react-router";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
-import { MeasurementSwitch, type MeasurementControls } from "./MeasurementSwitch";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-function browserMeasurement({ available = true, on = true } = {}) {
-  let isOn = on;
-  const controls: MeasurementControls = {
-    available: () => available,
-    isOn: () => isOn,
-    turnOff: vi.fn(() => {
-      isOn = false;
-    }),
-    turnOn: vi.fn(() => {
-      isOn = true;
-    }),
-  };
-  return controls;
+const posthog = vi.hoisted(() => ({
+  init: vi.fn(() => ({
+    register: vi.fn(),
+    capture: vi.fn(),
+    captureException: vi.fn(),
+    logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  })),
+}));
+
+vi.mock("posthog-js/dist/module.slim", () => ({ default: posthog }));
+vi.mock("posthog-js/dist/extension-bundles", () => ({
+  AnalyticsExtensions: {},
+  ErrorTrackingExtensions: {},
+  LogsExtensions: {},
+}));
+
+async function openPrivacyPage() {
+  vi.resetModules();
+  const { routeTree } = await import("../../routeTree.gen");
+  const router = createRouter({
+    routeTree,
+    history: createMemoryHistory({ initialEntries: ["/privacy"] }),
+  });
+  const page = render(<RouterProvider router={router} />);
+  await screen.findByRole("heading", { level: 1, name: "Privacy Policy" });
+  return page;
 }
 
-describe("MeasurementSwitch", () => {
-  it("shows nothing in a build without usage measurement", () => {
-    const { container } = render(
-      <MeasurementSwitch controls={browserMeasurement({ available: false })} />,
-    );
+beforeEach(() => {
+  localStorage.clear();
+  posthog.init.mockClear();
+});
 
-    expect(container.innerHTML).toBe("");
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.restoreAllMocks();
+});
+
+describe("the usage measurement switch on /privacy", () => {
+  it("is absent from a build without usage measurement", async () => {
+    await openPrivacyPage();
+
+    expect(screen.queryByRole("heading", { name: "Usage measurement" })).toBeNull();
   });
 
-  it("turns usage measurement off in this browser, and back on", async () => {
-    const controls = browserMeasurement();
-    render(<MeasurementSwitch controls={controls} />);
-    expect(screen.getByText("Usage measurement is on in this browser.")).toBeTruthy();
+  it("turns measurement off for this browser, remembers it, and turns it back on", async () => {
+    vi.stubEnv("VITE_POSTHOG_TOKEN", "phc_test");
+    const first = await openPrivacyPage();
+    expect(screen.getByRole("status").textContent).toBe("Usage measurement is on in this browser.");
 
     await userEvent.click(
       screen.getByRole("button", { name: "Turn off usage measurement in this browser" }),
     );
 
-    expect(controls.turnOff).toHaveBeenCalledOnce();
-    expect(screen.getByText("Usage measurement is off in this browser.")).toBeTruthy();
+    expect(screen.getByRole("status").textContent).toBe(
+      "Usage measurement is off in this browser.",
+    );
+    first.unmount();
+    await openPrivacyPage();
+    expect(screen.getByRole("status").textContent).toBe(
+      "Usage measurement is off in this browser.",
+    );
 
     await userEvent.click(screen.getByRole("button", { name: "Turn it back on" }));
 
-    expect(controls.turnOn).toHaveBeenCalledOnce();
-    expect(
-      screen.getByRole("button", { name: "Turn off usage measurement in this browser" }),
-    ).toBeTruthy();
+    expect(screen.getByRole("status").textContent).toBe("Usage measurement is on in this browser.");
+    await vi.waitFor(() => expect(posthog.init).toHaveBeenCalledOnce());
   });
 
-  it("remembers that this browser turned it off", () => {
-    render(<MeasurementSwitch controls={browserMeasurement({ on: false })} />);
+  it("stays off for the visit when the browser refuses to store the choice", async () => {
+    vi.stubEnv("VITE_POSTHOG_TOKEN", "phc_test");
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("blocked", "SecurityError");
+    });
+    await openPrivacyPage();
 
-    expect(screen.getByRole("button", { name: "Turn it back on" })).toBeTruthy();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Turn off usage measurement in this browser" }),
+    );
+
+    const telemetry = await import("../../lib/telemetry");
+    expect(telemetry.measurementIsOn()).toBe(false);
+    expect(screen.getByRole("status").textContent).toBe(
+      "Usage measurement is off in this browser.",
+    );
   });
 });

@@ -84,16 +84,27 @@ describe("ingestTarget", () => {
     ["/ingest/array/phc_abc/config.js", "https://eu-assets.i.posthog.com/array/phc_abc/config.js"],
     ["/ingest/e/?ip=0&_=1&ver=1.438.1", "https://eu.i.posthog.com/e/?ip=0&_=1&ver=1.438.1"],
     ["/ingest/i/v1/logs?token=phc_abc", "https://eu.i.posthog.com/i/v1/logs?token=phc_abc"],
+    ["/ingest/i/v0/e/?ver=1", "https://eu.i.posthog.com/i/v0/e/?ver=1"],
+    ["/ingest/batch/", "https://eu.i.posthog.com/batch/"],
   ])("sends %s to %s", (path, target) => {
     expect(ingestTarget(new URL(`${app}${path}`))).toBe(target);
   });
 
-  it.each(["/ingest", "/ingest/", "/", "/ingestion", "/s/AbC9_-xZ12", "/static/array.js"])(
-    "has no PostHog target for %s",
-    (path) => {
-      expect(ingestTarget(new URL(`${app}${path}`))).toBeNull();
-    },
-  );
+  it.each([
+    "/ingest",
+    "/ingest/",
+    "/",
+    "/ingestion",
+    "/s/AbC9_-xZ12",
+    "/static/array.js",
+    "/ingest/api/projects/1/insights/",
+    "/ingest/flags/?v=2",
+    "/ingest/decide/",
+    "/ingest/s/",
+    "/ingest/E/",
+  ])("has no PostHog target for %s", (path) => {
+    expect(ingestTarget(new URL(`${app}${path}`))).toBeNull();
+  });
 });
 
 describe("the /ingest proxy", () => {
@@ -109,6 +120,10 @@ describe("the /ingest proxy", () => {
         authorization: "Bearer secret",
         "cf-connecting-ip": "203.0.113.7",
         "x-forwarded-for": "198.51.100.1",
+        referer: "https://next-session.link/s/AbC9_-xZ12?code=SECRETCODE1",
+        "user-agent": "Mozilla/5.0 Firefox/140.0",
+        "accept-language": "de-DE",
+        "sec-ch-ua-platform": '"Android"',
       },
     });
 
@@ -120,10 +135,11 @@ describe("the /ingest proxy", () => {
     expect(upstream.url).toBe("https://eu.i.posthog.com/e/?ver=1");
     expect(upstream.method).toBe("POST");
     expect(await upstream.text()).toBe('{"batch":[]}');
-    expect(upstream.headers.get("content-type")).toBe("application/json");
-    expect(upstream.headers.get("x-forwarded-for")).toBe("203.0.113.7");
-    expect(upstream.headers.has("cookie")).toBe(false);
-    expect(upstream.headers.has("authorization")).toBe(false);
+    expect(Object.fromEntries(upstream.headers)).toEqual({
+      "content-type": "application/json",
+      "user-agent": "Mozilla/5.0 Firefox/140.0",
+      "x-forwarded-for": "203.0.113.7",
+    });
   });
 
   it("forwards no client-supplied X-Forwarded-For when Cloudflare names no visitor IP", async () => {
@@ -148,13 +164,16 @@ describe("the /ingest proxy", () => {
     expect(response.headers.get("content-type")).toBe("text/plain");
   });
 
-  it.each(["/ingest", "/ingest/"])("answers %s with 204 and forwards nothing", async (path) => {
-    const forwarded = posthogAnswering(new Response("unexpected"));
+  it.each(["/ingest", "/ingest/", "/ingest/api/projects/1/insights/"])(
+    "answers %s with 204 and forwards nothing",
+    async (path) => {
+      const forwarded = posthogAnswering(new Response("unexpected"));
 
-    const { response, requested } = await visit(path);
+      const { response, requested } = await visit(path);
 
-    expect(response.status).toBe(204);
-    expect(forwarded).toEqual([]);
-    expect(requested).toEqual([]);
-  });
+      expect(response.status).toBe(204);
+      expect(forwarded).toEqual([]);
+      expect(requested).toEqual([]);
+    },
+  );
 });

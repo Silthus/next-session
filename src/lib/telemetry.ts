@@ -4,7 +4,7 @@ import type {
   PostHog,
   PostHogConfig,
   Properties,
-} from "posthog-js";
+} from "posthog-js/dist/module.slim";
 import type { KeyValueStorage } from "./storage";
 
 export type BrowserEvent =
@@ -24,27 +24,28 @@ export type BrowserEvent =
   | { name: "sign_in_failed"; flow: "signUp" | "signIn"; code: string }
   | { name: "keep_group_started"; group_id: string };
 
-export type LogLevel = "info" | "warn" | "error";
+type LogLevel = "info" | "warn" | "error";
 type LogAttributes = Record<string, string | number | boolean>;
 type EnvSource = Record<string, string | undefined>;
 type ActiveClient = Pick<PostHog, "register" | "capture" | "captureException"> & {
   logger: Pick<PostHog["logger"], LogLevel>;
 };
-export type TelemetryClient = {
+type TelemetryClient = {
   init(token: string, config: Partial<PostHogConfig>): ActiveClient | undefined;
 };
-export type LoadPostHog = () => Promise<TelemetryClient>;
+type LoadPostHog = () => Promise<TelemetryClient>;
 type ClientCall = (client: ActiveClient) => void;
+type ReactErrorCallback = (error: unknown, errorInfo: { componentStack?: string }) => void;
 
 const PRODUCT = "next-session";
 const EVENT_PREFIX = "next_session:";
 const SENT_SDK_EVENTS = new Set(["$pageview", "$exception"]);
 const MEASUREMENT_OFF_KEY = "next-session.measurementOff";
 const KEPT_QUERY_KEYS = ["month", "day"];
+const SECRET_QUERY_KEYS = ["code", "state"];
 const SHARE_TOKEN = ":shareToken";
 const REDACTED = ":redacted";
-const SHARE_TOKEN_PATH = /^\/s\/[^/]+/;
-const SHARE_TOKEN_PATH_IN_TEXT = /\/s\/[A-Za-z0-9_-]+/g;
+const SHARE_TOKEN_PATH = /\/s\/[A-Za-z0-9_-]+/gi;
 const SHORTEST_SCRUBBED_SECRET = 6;
 const DROPPED_PROPERTIES = new Set([
   "$screen_height",
@@ -60,12 +61,32 @@ const DROPPED_PROPERTIES = new Set([
 
 type Secret = { value: string; placeholder: string };
 
-const loadPostHog: LoadPostHog = async () => (await import("posthog-js")).default;
+const loadPostHog: LoadPostHog = async () => {
+  const [{ default: posthog }, { AnalyticsExtensions, ErrorTrackingExtensions, LogsExtensions }] =
+    await Promise.all([
+      import("posthog-js/dist/module.slim"),
+      import("posthog-js/dist/extension-bundles"),
+    ]);
+  const extensions = {
+    historyAutocapture: AnalyticsExtensions.historyAutocapture,
+    ...ErrorTrackingExtensions,
+    ...LogsExtensions,
+  };
+  return {
+    init: (token, config) => posthog.init(token, { ...config, __extensionClasses: extensions }),
+  };
+};
 
 let client: ActiveClient | null = null;
 let starting: Promise<void> | null = null;
 let waitingCalls: ClientCall[] | null = null;
-const reportedErrors = new WeakSet<object>();
+let measurementChoice: "on" | "off" | null = null;
+
+export const reactErrorReporting: Record<"onCaughtError" | "onUncaughtError", ReactErrorCallback> =
+  {
+    onCaughtError: reportingTo("react-caught"),
+    onUncaughtError: reportingTo("react-uncaught"),
+  };
 
 export function initTelemetry(
   source: EnvSource = import.meta.env,
@@ -88,23 +109,26 @@ export function log(level: LogLevel, body: string, attributes?: LogAttributes): 
 }
 
 export function reportError(error: unknown, context: { surface: string }): void {
-  if (alreadyReported(error)) return;
   withClient((active) => active.captureException(error, context));
 }
 
-export function measurementAvailable(source: EnvSource = import.meta.env): boolean {
-  return Boolean(source.VITE_POSTHOG_TOKEN);
+export function measurementAvailable(): boolean {
+  return Boolean(import.meta.env.VITE_POSTHOG_TOKEN);
 }
 
 export function measurementIsOn(storage: KeyValueStorage = browserStorage()): boolean {
+  if (measurementChoice) return measurementChoice === "on";
   return attempt(() => storage.getItem(MEASUREMENT_OFF_KEY), null) === null;
 }
 
 export function turnMeasurementOff(storage: KeyValueStorage = browserStorage()): void {
+  measurementChoice = "off";
   attempt(() => storage.setItem(MEASUREMENT_OFF_KEY, "1"), undefined);
 }
 
-export function turnMeasurementOn(storage: KeyValueStorage = browserStorage()): Promise<void> {
+export function turnMeasurementOn(): Promise<void> {
+  const storage = browserStorage();
+  measurementChoice = "on";
   attempt(() => storage.removeItem(MEASUREMENT_OFF_KEY), undefined);
   return initTelemetry(import.meta.env, loadPostHog, storage);
 }
@@ -156,6 +180,13 @@ function start(
     });
 }
 
+function reportingTo(surface: string): ReactErrorCallback {
+  return (error) => {
+    console.error(error);
+    reportError(error, { surface });
+  };
+}
+
 function becomeActive(started: ActiveClient): void {
   started.register({ product: PRODUCT });
   client = started;
@@ -183,6 +214,8 @@ function telemetryOptions(
     capture_exceptions: true,
     disable_session_recording: true,
     disable_surveys: true,
+    disable_scroll_properties: true,
+    persistence: "memory",
     advanced_disable_flags: true,
     logs: {
       serviceName: "next-session-web",
@@ -226,22 +259,19 @@ function redactText(text: string, secrets: Secret[]): string {
     (scrubbed, secret) => scrubbed.replaceAll(secret.value, secret.placeholder),
     redactUrl(text),
   );
-  return withoutSecrets.replace(SHARE_TOKEN_PATH_IN_TEXT, `/s/${SHARE_TOKEN}`);
+  return withoutSecrets.replace(SHARE_TOKEN_PATH, `/s/${SHARE_TOKEN}`);
 }
 
 function secretsIn(currentUrl: string): Secret[] {
   const parsed = parseUrl(currentUrl);
   if (!parsed) return [];
-  const shareToken = SHARE_TOKEN_PATH.exec(parsed.url.pathname)?.[0].slice("/s/".length);
-  const queryValues = [...parsed.url.searchParams]
-    .filter(([key]) => !KEPT_QUERY_KEYS.includes(key))
-    .map(([, value]) => value);
+  const shareTokens = (parsed.url.pathname.match(SHARE_TOKEN_PATH) ?? []).map((path) =>
+    path.slice("/s/".length),
+  );
+  const secretQueryValues = SECRET_QUERY_KEYS.flatMap((key) => parsed.url.searchParams.getAll(key));
   return [
-    ...(shareToken ? [{ value: shareToken, placeholder: SHARE_TOKEN }] : []),
-    ...[...queryValues, parsed.url.hash.slice(1)].map((value) => ({
-      value,
-      placeholder: REDACTED,
-    })),
+    ...shareTokens.map((value) => ({ value, placeholder: SHARE_TOKEN })),
+    ...secretQueryValues.map((value) => ({ value, placeholder: REDACTED })),
   ].filter((secret) => secret.value.length >= SHORTEST_SCRUBBED_SECRET);
 }
 
@@ -258,13 +288,6 @@ function parseUrl(text: string): { url: URL; absolute: boolean } | null {
   const path = text.startsWith("/") && !text.startsWith("//");
   if (!absolute && !path) return null;
   return attempt(() => ({ url: new URL(text, "https://path.invalid"), absolute }), null);
-}
-
-function alreadyReported(error: unknown): boolean {
-  if (typeof error !== "object" || error === null) return false;
-  if (reportedErrors.has(error)) return true;
-  reportedErrors.add(error);
-  return false;
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

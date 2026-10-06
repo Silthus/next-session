@@ -26,8 +26,45 @@ const transport = vi.hoisted(() => {
   return { requests, decoding };
 });
 
+const device = vi.hoisted(() => {
+  const cookieWrites: string[] = [];
+  const storageKeys: string[] = [];
+  const storageWrites: string[] = [];
+  type StorageMethod = (this: Storage, ...args: string[]) => unknown;
+  for (const name of ["getItem", "setItem", "removeItem"]) {
+    const original = Object.getOwnPropertyDescriptor(Storage.prototype, name)!
+      .value as StorageMethod;
+    const recording: StorageMethod = function (...args) {
+      storageKeys.push(args[0]!);
+      if (name === "setItem") storageWrites.push(args[0]!);
+      return original.apply(this, args);
+    };
+    Object.defineProperty(Storage.prototype, name, { value: recording });
+  }
+  Object.defineProperty(document, "cookie", {
+    configurable: true,
+    get: () => "",
+    set: (value: string) => {
+      cookieWrites.push(value);
+    },
+  });
+  return { cookieWrites, storageKeys, storageWrites };
+});
+
 const shareToken = "AbC9_-xZ12";
 const claimCode = "SECRETCODE1";
+const toolbarLink = btoa(JSON.stringify({ action: "ph_authorize", token: "phc_throwaway" }));
+const token = { VITE_POSTHOG_TOKEN: "phc_throwaway", VITE_RELEASE: "abc123" };
+
+async function startedTelemetry() {
+  const telemetry = await import("./telemetry");
+  await telemetry.initTelemetry(token);
+  return telemetry;
+}
+
+function loadedScripts() {
+  return [...document.querySelectorAll("script")].map((script) => script.src);
+}
 
 async function sentEventually(...fragments: string[]) {
   await vi.waitFor(
@@ -48,7 +85,11 @@ function sent() {
 
 beforeAll(() => {
   vi.useFakeTimers({ toFake: ["setTimeout", "setInterval", "Date"] });
-  window.history.replaceState(null, "", `/s/${shareToken}?code=${claimCode}&month=2026-10`);
+  window.history.replaceState(
+    null,
+    "",
+    `/s/${shareToken}?code=${claimCode}&month=2026-10#__posthog=${toolbarLink}`,
+  );
 });
 
 afterAll(() => {
@@ -57,8 +98,7 @@ afterAll(() => {
 
 describe("a real posthog-js on a Player page", () => {
   it("sends events, errors and logs to /ingest without the Share Token or the claim code", async () => {
-    const telemetry = await import("./telemetry");
-    await telemetry.initTelemetry({ VITE_POSTHOG_TOKEN: "phc_throwaway", VITE_RELEASE: "abc123" });
+    const telemetry = await startedTelemetry();
 
     telemetry.track({ name: "answers_started", group_id: "k57abc" });
     telemetry.reportError(new Error(`No group for ${shareToken}`), { surface: "test" });
@@ -75,21 +115,23 @@ describe("a real posthog-js on a Player page", () => {
     expect(everything).toContain('"product":"next-session"');
     expect(everything).not.toContain(shareToken);
     expect(everything).not.toContain(claimCode);
+    expect(everything).not.toMatch(/\/(flags|decide)\//);
   });
 
-  it("asks PostHog for no flags and no remote config", () => {
-    expect(sent()).not.toMatch(/\/(flags|decide)\//);
-    expect(transport.requests.some(({ url }) => url.includes("/array/"))).toBe(false);
-  });
+  it("keeps nothing of its own on the device, even from a toolbar link", async () => {
+    await startedTelemetry();
 
-  it("stores nothing on the device", () => {
-    expect(Object.keys(localStorage)).toEqual([]);
+    const posthogWrites = device.storageWrites.filter((key) => !key.startsWith("next-session."));
+    expect(new Set(posthogWrites)).toEqual(new Set(["__mplssupport__"]));
+    expect(Object.keys(localStorage).filter((key) => !key.startsWith("next-session."))).toEqual([]);
     expect(Object.keys(sessionStorage)).toEqual([]);
-    expect(document.cookie).toBe("");
+    expect(device.storageKeys).not.toContain("_postHogToolbarParams");
+    expect(device.cookieWrites).toEqual([]);
+    expect(loadedScripts().filter((src) => /toolbar|\/array\//.test(src))).toEqual([]);
   });
 
   it("sends nothing while the visitor has measurement off, and keeps only that choice", async () => {
-    const telemetry = await import("./telemetry");
+    const telemetry = await startedTelemetry();
     transport.requests.length = 0;
 
     telemetry.turnMeasurementOff();

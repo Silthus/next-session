@@ -1,12 +1,5 @@
-import {
-  createRootRoute,
-  type ErrorComponentProps,
-  HeadContent,
-  Outlet,
-} from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createRootRoute, HeadContent, Outlet } from "@tanstack/react-router";
 import { pageTitle } from "../lib/pageTitle";
-import { reportError } from "../lib/telemetry";
 import { Button } from "../ui/Button";
 import { Logo } from "../ui/Logo";
 import { NotFoundScreen } from "../ui/NotFoundScreen";
@@ -31,11 +24,8 @@ function Root() {
   );
 }
 
-function BrokenPageScreen({ error }: ErrorComponentProps) {
+function BrokenPageScreen() {
   const heading = useFocusOnMount<HTMLHeadingElement>();
-  useEffect(() => {
-    reportError(error, { surface: "router" });
-  }, [error]);
   return (
     <PageShell
       maxWidth="md"

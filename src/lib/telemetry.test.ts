@@ -1,6 +1,7 @@
-import type { CaptureResult, PostHogConfig } from "posthog-js";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { CaptureLogOptions, CaptureResult, PostHogConfig } from "posthog-js/dist/module.slim";
+import { describe, expect, it, vi } from "vitest";
 import type { KeyValueStorage } from "./storage";
+import { redactEvent, redactLog, redactUrl } from "./telemetry";
 
 const pageUrl = "https://next-session.link/s/AbC9_-xZ12?code=SECRETCODE1&month=2026-10";
 
@@ -55,25 +56,16 @@ describe("redactUrl", () => {
     ["/g/k57abc123?month=2026-11", "/g/k57abc123?month=2026-11"],
     ["https://next-session.link/privacy", "https://next-session.link/privacy"],
     ["https://www.google.com/url?q=next-session.link/s/AbC9_-xZ12", "https://www.google.com/url"],
+    ["/S/AbC9_-xZ12?code=SECRETCODE1", "/s/:shareToken"],
+    ["https://next-session.link/S/AbC9_-xZ12", "https://next-session.link/s/:shareToken"],
   ])("turns %s into %s", (url, redacted) => {
-    expect(redactUrlOf(url)).toBe(redacted);
+    expect(redactUrl(url)).toBe(redacted);
   });
 
   it("leaves strings that are not URLs alone", () => {
-    expect(redactUrlOf("$direct")).toBe("$direct");
-    expect(redactUrlOf("Tuesday crew")).toBe("Tuesday crew");
+    expect(redactUrl("$direct")).toBe("$direct");
+    expect(redactUrl("Tuesday crew")).toBe("Tuesday crew");
   });
-});
-
-let redactUrlOf: (url: string) => string;
-let redactEvent: (event: CaptureResult | null, currentUrl: string) => CaptureResult | null;
-let redactLog: typeof import("./telemetry").redactLog;
-
-beforeEach(async () => {
-  const telemetry = await freshTelemetry();
-  redactUrlOf = telemetry.redactUrl;
-  redactEvent = telemetry.redactEvent;
-  redactLog = telemetry.redactLog;
 });
 
 describe("redactEvent", () => {
@@ -151,6 +143,33 @@ describe("redactEvent", () => {
     expect(serialized).not.toContain("SECRETCODE1");
     expect(serialized).toContain("https://next-session.link/assets/index-abc.js");
     expect(serialized).toContain('Value: \\":shareToken\\" with code :redacted at /s/:shareToken');
+  });
+
+  it("scrubs a Share Token typed with a capital S", () => {
+    const exception = event("$exception", {
+      $exception_list: [{ value: "failed at /S/AbC9_-xZ12" }],
+    });
+
+    const serialized = JSON.stringify(
+      redactEvent(exception, "https://next-session.link/S/AbC9_-xZ12"),
+    );
+
+    expect(serialized).not.toContain("AbC9_-xZ12");
+  });
+
+  it("keeps ordinary query values intact elsewhere in the event", () => {
+    const pageview = event("$pageview", {
+      $referrer: "https://www.google.com/",
+      $referring_domain: "www.google.com",
+      product: "next-session",
+    });
+
+    const redacted = redactEvent(
+      pageview,
+      "https://next-session.link/?utm_source=google&utm_campaign=session",
+    );
+
+    expect(redacted?.properties).toEqual(pageview.properties);
   });
 
   it.each(["$pageview", "$exception", "next_session:answers_started"])("sends %s", (name) => {
@@ -239,6 +258,8 @@ describe("initTelemetry", () => {
       capture_exceptions: true,
       disable_session_recording: true,
       disable_surveys: true,
+      disable_scroll_properties: true,
+      persistence: "memory",
       advanced_disable_flags: true,
       logs: {
         serviceName: "next-session-web",
@@ -277,6 +298,32 @@ describe("initTelemetry", () => {
 
     expect(posthog.load).not.toHaveBeenCalled();
     expect(telemetry.measurementIsOn(storage)).toBe(false);
+  });
+
+  it("stays quiet after an opt-out in a browser that cannot store the choice", async () => {
+    const telemetry = await freshTelemetry();
+    const posthog = fakePostHog();
+    const blockedStorage: KeyValueStorage = {
+      getItem: () => null,
+      setItem: () => {
+        throw new DOMException("blocked", "SecurityError");
+      },
+      removeItem: () => undefined,
+    };
+    await telemetry.initTelemetry({ VITE_POSTHOG_TOKEN: "phc_test" }, posthog.load, blockedStorage);
+    const config = posthog.init.mock.calls[0]![1];
+
+    telemetry.turnMeasurementOff(blockedStorage);
+
+    expect(telemetry.measurementIsOn(blockedStorage)).toBe(false);
+    expect(config.before_send).toBeTypeOf("function");
+    const beforeSend = config.before_send as (event: CaptureResult) => CaptureResult | null;
+    expect(beforeSend(event("$pageview", {}))).toBeNull();
+    expect(config.logs?.beforeSend).toBeTypeOf("function");
+    const beforeSendLog = config.logs!.beforeSend as (
+      record: CaptureLogOptions,
+    ) => CaptureLogOptions | null;
+    expect(beforeSendLog({ body: "after opt-out" })).toBeNull();
   });
 
   it("delivers what the page sent while PostHog was still loading", async () => {
@@ -327,14 +374,17 @@ describe("track, log and reportError", () => {
     expect(instance.logger.warn).toHaveBeenCalledWith("Claim invalid", { code: "CLAIM_INVALID" });
   });
 
-  it("reports an error once, with the surface it came from", async () => {
+  it.each([
+    ["onCaughtError", "react-caught"],
+    ["onUncaughtError", "react-uncaught"],
+  ] as const)("reports what React hands to %s", async (callback, surface) => {
     const { telemetry, instance } = await started();
     const error = new Error("boom");
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    telemetry.reportError(error, { surface: "react-caught" });
-    telemetry.reportError(error, { surface: "router" });
+    telemetry.reactErrorReporting[callback](error, { componentStack: "" });
 
-    expect(instance.captureException).toHaveBeenCalledOnce();
-    expect(instance.captureException).toHaveBeenCalledWith(error, { surface: "react-caught" });
+    expect(instance.captureException).toHaveBeenCalledWith(error, { surface });
+    expect(console.error).toHaveBeenCalledWith(error);
   });
 });

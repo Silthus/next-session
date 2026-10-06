@@ -7,28 +7,14 @@ import {
 } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
 
-export type MeasurementControls = {
-  available: () => boolean;
-  isOn: () => boolean;
-  turnOff: () => void;
-  turnOn: () => void;
-};
-
-const thisBrowser: MeasurementControls = {
-  available: () => measurementAvailable(),
-  isOn: () => measurementIsOn(),
-  turnOff: () => turnMeasurementOff(),
-  turnOn: () => void turnMeasurementOn(),
-};
-
-export function MeasurementSwitch({ controls = thisBrowser }: { controls?: MeasurementControls }) {
-  const [on, setOn] = useState(controls.isOn);
-  if (!controls.available()) return null;
+export function MeasurementSwitch() {
+  const [on, setOn] = useState(() => measurementIsOn());
+  if (!measurementAvailable()) return null;
 
   function toggle() {
-    if (on) controls.turnOff();
-    else controls.turnOn();
-    setOn(!on);
+    if (on) turnMeasurementOff();
+    else void turnMeasurementOn();
+    setOn(measurementIsOn());
   }
 
   return (
@@ -39,10 +25,10 @@ export function MeasurementSwitch({ controls = thisBrowser }: { controls?: Measu
       <h2 id="usage-measurement" className="font-display text-xl font-bold">
         Usage measurement
       </h2>
-      <p className="leading-relaxed text-ink-2">
+      <p role="status" className="leading-relaxed text-ink-2">
         Usage measurement is {on ? "on" : "off"} in this browser.
       </p>
-      <Button variant="secondary" onClick={toggle}>
+      <Button variant="secondary" className="h-auto! min-h-10 py-2 text-balance" onClick={toggle}>
         {on ? "Turn off usage measurement in this browser" : "Turn it back on"}
       </Button>
     </section>

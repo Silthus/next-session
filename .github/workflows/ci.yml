@@ -77,7 +77,7 @@ jobs:
         if: steps.head.outputs.current == 'true'
         run: |
           : "${LEGAL_CONTROLLER_ADDRESS:?is not set as a repo variable}" "${LEGAL_CONTACT_EMAIL:?is not set as a repo variable}"
-          bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL
+          bunx convex deploy --cmd 'env -u CONVEX_DEPLOY_KEY bun run build && ! find dist -name "*.map" | grep .' --cmd-url-env-var-name VITE_CONVEX_URL
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
           LEGAL_CONTROLLER_ADDRESS: ${{ vars.LEGAL_CONTROLLER_ADDRESS }}
@@ -86,14 +86,6 @@ jobs:
           VITE_RELEASE: ${{ github.sha }}
           POSTHOG_PROJECT_ID: ${{ vars.POSTHOG_PROJECT_ID }}
           POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
-      - name: Refuse to ship source maps
-        if: steps.head.outputs.current == 'true'
-        run: |
-          maps="$(find dist -name '*.map')"
-          if [ -n "$maps" ]; then
-            echo "::error::dist/ holds source maps: $maps"
-            exit 1
-          fi
       - name: Deploy the Worker
         if: steps.head.outputs.current == 'true'
         run: bunx wrangler deploy
