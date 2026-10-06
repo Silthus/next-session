@@ -4,6 +4,7 @@ import terms from "../../../docs/legal/terms.md?raw";
 import { legalContact } from "../../lib/env";
 import { PageShell } from "../../ui/PageShell";
 import { LegalArticle } from "./LegalArticle";
+import { MeasurementSwitch } from "./MeasurementSwitch";
 import { parseLegalDocument } from "./legalDocument";
 import { LEGAL_VERSIONS } from "../../../shared/legal";
 
@@ -21,6 +22,7 @@ export function LegalPage({ page }: { page: LegalPageKey }) {
   return (
     <PageShell>
       <LegalArticle legalDocument={legalDocument} />
+      {page === "privacy" && <MeasurementSwitch />}
     </PageShell>
   );
 }
