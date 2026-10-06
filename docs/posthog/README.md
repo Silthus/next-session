@@ -35,7 +35,7 @@ Each file in [`workflows/`](workflows) is the body of a `POST /api/environments/
 | `<REPLY_TO>` | The contact address, the repo variable `LEGAL_CONTACT_EMAIL`. `hello@next-session.link` has no inbox |
 
 - **Welcome Mail:** webhook trigger, event `next_session:welcome_requested`, then one transactional email. Convex posts `{distinct_id, product, email, tips_confirm_url?}`.
-- **Tips:** webhook trigger, event `next_session:tips_requested`, wait 2 days, Tip 1, then wait up to 5 days for a `next_session:session_scheduled` with `product = next-session`. A scheduled Session exits; the timeout sends Tip 2.
+- **Tips:** webhook trigger, event `next_session:tips_requested`, then wait up to 2 days for a `next_session:session_scheduled` with `product = next-session`, Tip 1, and wait up to 5 days for one more. A scheduled Session ends the run at either wait, so no Tip goes out after it; each timeout sends the next Tip. A wait only sees events that arrive while the run waits there, so a Session scheduled before the GM confirmed still gets both Tips.
 - Every email step has `tracking_enabled: false`: no open pixel, no rewritten links.
 - No message categories: PostHog refuses personal API keys on them. Welcome is `transactional`, so it ignores opt-outs. Tips are `marketing`, so an unsubscribe opts the address out of all marketing mail in the shared project. Lonir sends none through Workflows today. If it starts, add a "Next Session tips" category and set it on both Tip steps.
 - The webhook only captures its event as the run's trigger data. The email address never becomes a stored PostHog event or person property.

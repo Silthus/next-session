@@ -1,6 +1,6 @@
 {
   "name": "Next Session: Tips",
-  "description": "Two Tips after double opt-in (marketing, unsubscribe link in each). Started only by Convex (account.confirmTips) through the secret-guarded webhook. Tip 2 is skipped once the GM schedules a Session. Source: docs/posthog/workflows/tips.json in Silthus/next-session.",
+  "description": "Two Tips after double opt-in (marketing, unsubscribe link in each). Started only by Convex (account.confirmTips) through the secret-guarded webhook. A Session scheduled after confirming ends the run, so no further Tip goes out. Source: docs/posthog/workflows/tips.json in Silthus/next-session.",
   "exit_condition": "exit_only_at_end",
   "actions": [
     {
@@ -11,21 +11,57 @@
         "type": "webhook",
         "template_id": "template-source-webhook",
         "inputs": {
-          "event": { "value": "next_session:tips_requested" },
-          "distinct_id": { "value": "{request.body.distinct_id}" },
-          "properties": {
-            "value": { "product": "{request.body.product}", "email": "{request.body.email}" }
+          "event": {
+            "value": "next_session:tips_requested"
           },
-          "auth_header": { "value": "Bearer <POSTHOG_MAIL_WEBHOOK_SECRET>" },
-          "method": { "value": "POST" }
+          "distinct_id": {
+            "value": "{request.body.distinct_id}"
+          },
+          "properties": {
+            "value": {
+              "product": "{request.body.product}",
+              "email": "{request.body.email}"
+            }
+          },
+          "auth_header": {
+            "value": "Bearer <POSTHOG_MAIL_WEBHOOK_SECRET>"
+          },
+          "method": {
+            "value": "POST"
+          }
         }
       }
     },
     {
-      "id": "delay_2d",
-      "name": "Wait 2 days",
-      "type": "delay",
-      "config": { "delay_duration": "2d" }
+      "id": "wait_before_tip_1",
+      "name": "Wait up to 2 days for a scheduled Session",
+      "type": "wait_until_condition",
+      "config": {
+        "events": [
+          {
+            "name": "Session scheduled",
+            "filters": {
+              "events": [
+                {
+                  "id": "next_session:session_scheduled",
+                  "name": "next_session:session_scheduled",
+                  "type": "events",
+                  "order": 0,
+                  "properties": [
+                    {
+                      "key": "product",
+                      "value": ["next-session"],
+                      "operator": "exact",
+                      "type": "event"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "max_wait_duration": "2d"
+      }
     },
     {
       "id": "email_tip_1",
@@ -39,7 +75,10 @@
         "inputs": {
           "email": {
             "value": {
-              "to": { "email": "{{ event.properties.email }}", "name": "" },
+              "to": {
+                "email": "{{ event.properties.email }}",
+                "name": ""
+              },
               "from": {
                 "integrationId": "<SENDER_INTEGRATION_ID>",
                 "email": "hello@next-session.link",
@@ -53,7 +92,7 @@
       }
     },
     {
-      "id": "wait_for_session",
+      "id": "wait_before_tip_2",
       "name": "Wait up to 5 days for a scheduled Session",
       "type": "wait_until_condition",
       "config": {
@@ -95,7 +134,10 @@
         "inputs": {
           "email": {
             "value": {
-              "to": { "email": "{{ event.properties.email }}", "name": "" },
+              "to": {
+                "email": "{{ event.properties.email }}",
+                "name": ""
+              },
               "from": {
                 "integrationId": "<SENDER_INTEGRATION_ID>",
                 "email": "hello@next-session.link",
@@ -108,14 +150,52 @@
         }
       }
     },
-    { "id": "exit_node", "name": "Exit", "type": "exit", "config": { "reason": "Tips done" } }
+    {
+      "id": "exit_node",
+      "name": "Exit",
+      "type": "exit",
+      "config": {
+        "reason": "Tips done"
+      }
+    }
   ],
   "edges": [
-    { "from": "trigger_node", "to": "delay_2d", "type": "continue" },
-    { "from": "delay_2d", "to": "email_tip_1", "type": "continue" },
-    { "from": "email_tip_1", "to": "wait_for_session", "type": "continue" },
-    { "from": "wait_for_session", "to": "exit_node", "type": "branch", "index": 0 },
-    { "from": "wait_for_session", "to": "email_tip_2", "type": "continue" },
-    { "from": "email_tip_2", "to": "exit_node", "type": "continue" }
+    {
+      "from": "trigger_node",
+      "to": "wait_before_tip_1",
+      "type": "continue"
+    },
+    {
+      "from": "wait_before_tip_1",
+      "to": "exit_node",
+      "type": "branch",
+      "index": 0
+    },
+    {
+      "from": "wait_before_tip_1",
+      "to": "email_tip_1",
+      "type": "continue"
+    },
+    {
+      "from": "email_tip_1",
+      "to": "wait_before_tip_2",
+      "type": "continue"
+    },
+    {
+      "from": "wait_before_tip_2",
+      "to": "exit_node",
+      "type": "branch",
+      "index": 0
+    },
+    {
+      "from": "wait_before_tip_2",
+      "to": "email_tip_2",
+      "type": "continue"
+    },
+    {
+      "from": "email_tip_2",
+      "to": "exit_node",
+      "type": "continue"
+    }
   ]
 }
