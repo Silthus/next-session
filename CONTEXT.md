@@ -99,7 +99,7 @@ The one email every new Account gets right after it is created, confirming the A
 _Avoid_: onboarding email, confirmation email
 
 **Tips**:
-Two short emails on getting the first game night scheduled, sent only to an Account that ticked the box in the Save sheet and confirmed from the Welcome Mail. Unsubscribing stops them.
+Two short emails on getting the first game night scheduled, sent only to an Account that ticked the box in the Save sheet and then pressed **Yes, send me the tips** on the page the Welcome Mail links to. Unsubscribing stops them.
 _Avoid_: drip, newsletter, marketing (in copy)
 
 **Product Marker**:
