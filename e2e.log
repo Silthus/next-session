@@ -1,0 +1,15 @@
+[WebServer]     at authorize [as authorize] (../../convex/auth.ts:67:4)
+[WebServer]     at async handleCredentials (../../node_modules/@convex-dev/auth/src/server/implementation/signIn.ts:191:6)
+[WebServer]     at async handler (../../node_modules/@convex-dev/auth/src/server/implementation/index.ts:416:26)
+[WebServer] 
+  ✓  59 [chromium] › e2e/landing.spec.ts:363:1 › a wrong password says so and keeps the sheet open (2.4s)
+  ✓  60 [chromium] › e2e/landing.spec.ts:379:3 › on a dark OS › a cold load paints a dark canvas (399ms)
+  ✓  61 [chromium] › e2e/landing.spec.ts:386:3 › on a dark OS › an open sheet dims the page behind it (502ms)
+  ✓  62 [chromium] › e2e/landing.spec.ts:391:1 › an open sheet dims the page behind it in light mode (468ms)
+  -  63 [chromium] › e2e/landing.spec.ts:402:7 › screenshots › 390px light
+  -  64 [chromium] › e2e/landing.spec.ts:402:7 › screenshots › 390px dark
+  -  65 [chromium] › e2e/landing.spec.ts:402:7 › screenshots › 1440px light
+  -  66 [chromium] › e2e/landing.spec.ts:402:7 › screenshots › 1440px dark
+
+  17 skipped
+  49 passed (35.3s)

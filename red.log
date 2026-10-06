@@ -1,0 +1,5 @@
+       × finds a listed name through a filter with doubled spaces 239ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  |ui| src/features/player/Join.test.tsx > Join > with a long Roster > finds a listed name through a filter with doubled spaces
+TestingLibraryElementError: Unable to find an accessible element with the role "listitem"
+      Tests  1 failed | 25 skipped (26)

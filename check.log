@@ -1,0 +1,5 @@
+$ tsc -p tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p convex/tsconfig.json && eslint . && prettier --check . && vitest run && vite build && wrangler deploy --dry-run
+ Test Files  54 passed (54)
+      Tests  617 passed (617)
+dist/assets/errors-BdZ24GAS.js                                           4.67 kB │ gzip:  2.19 kB
+--dry-run: exiting now.
