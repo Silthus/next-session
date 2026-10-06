@@ -13,11 +13,12 @@ const limits = {
   startSave: { kind: "fixed window", rate: 10, period: HOUR },
   gmEdit: { kind: "token bucket", rate: 120, period: MINUTE, capacity: 60 },
   claimPlayer: { kind: "token bucket", rate: 30, period: MINUTE, capacity: 10 },
+  confirmTips: { kind: "token bucket", rate: 30, period: MINUTE, capacity: 60 },
 } as const;
 
 export const rateLimiter = new RateLimiter(components.rateLimiter, limits);
 
-type GlobalRateLimit = "anonymousSignUp" | "accountSignUp";
+type GlobalRateLimit = "anonymousSignUp" | "accountSignUp" | "confirmTips";
 type KeyedRateLimit = Exclude<keyof typeof limits, GlobalRateLimit>;
 
 export async function enforceRateLimit(

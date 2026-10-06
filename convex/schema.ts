@@ -18,9 +18,14 @@ export default defineSchema({
     acceptedPrivacyVersion: v.optional(v.string()),
     acceptedLegalAt: v.optional(v.number()),
     analyticsObjectedAt: v.optional(v.number()),
+    tipsRequestedAt: v.optional(v.number()),
+    tipsConsentVersion: v.optional(v.string()),
+    tipsCodeHash: v.optional(v.string()),
+    tipsConfirmedAt: v.optional(v.number()),
   })
     .index("email", ["email"])
-    .index("phone", ["phone"]),
+    .index("phone", ["phone"])
+    .index("by_tipsCodeHash", ["tipsCodeHash"]),
 
   groups: defineTable({
     ownerId: v.id("users"),

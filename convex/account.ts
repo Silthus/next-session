@@ -3,12 +3,13 @@ import type { Doc } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx } from "./_generated/server";
 import { currentGm, requireAccount, requireGm } from "./model/access";
 import { fail } from "./model/errors";
+import { hashSecretCode, newSecretCode } from "./model/codes";
 import { deleteAnonymousGm } from "./model/gms";
 import { ensureRoomForGroups, groupsOwnedBy } from "./model/groups";
 import { enforceRateLimit } from "./model/rateLimits";
 import { track } from "./model/telemetry";
+import { confirmTipsWith } from "./model/tips";
 
-const CLAIM_CODE_BYTES = 32;
 const CLAIM_TTL_MS = 10 * 60_000;
 
 export const me = query({
@@ -29,10 +30,10 @@ export const startSave = mutation({
     if (gm.isAnonymous !== true) fail({ code: "UNAUTHENTICATED" });
     await enforceRateLimit(ctx, "startSave", gm._id);
     await deleteExpiredClaims(ctx, gm);
-    const code = base64url(crypto.getRandomValues(new Uint8Array(CLAIM_CODE_BYTES)));
+    const code = newSecretCode();
     await ctx.db.insert("saveClaims", {
       anonymousUserId: gm._id,
-      codeHash: await hashClaimCode(code),
+      codeHash: await hashSecretCode(code),
       expiresAt: Date.now() + CLAIM_TTL_MS,
     });
     return { code };
@@ -54,6 +55,12 @@ export const finishSave = mutation({
   },
 });
 
+export const confirmTips = mutation({
+  args: { code: v.string() },
+  returns: v.object({ confirmed: v.boolean(), alreadyConfirmed: v.boolean() }),
+  handler: async (ctx, { code }) => await confirmTipsWith(ctx, code),
+});
+
 async function deleteExpiredClaims(ctx: MutationCtx, gm: Doc<"users">) {
   const claims = await ctx.db
     .query("saveClaims")
@@ -65,7 +72,7 @@ async function deleteExpiredClaims(ctx: MutationCtx, gm: Doc<"users">) {
 }
 
 async function redeemClaim(ctx: MutationCtx, code: string) {
-  const codeHash = await hashClaimCode(code);
+  const codeHash = await hashSecretCode(code);
   const claim = await ctx.db
     .query("saveClaims")
     .withIndex("by_codeHash", (q) => q.eq("codeHash", codeHash))
@@ -93,16 +100,4 @@ async function copyLegalAcceptance(ctx: MutationCtx, from: Doc<"users">, to: Doc
     acceptedPrivacyVersion: from.acceptedPrivacyVersion,
     acceptedLegalAt: from.acceptedLegalAt,
   });
-}
-
-async function hashClaimCode(code: string) {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(code));
-  return base64url(new Uint8Array(digest));
-}
-
-function base64url(bytes: Uint8Array) {
-  return btoa(String.fromCharCode(...bytes))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
 }

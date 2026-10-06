@@ -18,7 +18,7 @@ type SignInArgs =
   | { provider: "anonymous" }
   | {
       provider: "password";
-      params: { email: string; password: string; flow: "signUp" | "signIn" };
+      params: { email: string; password: string; flow: "signUp" | "signIn"; tips?: unknown };
     };
 
 export const signInThroughAuth = (t: TestBackend, args: SignInArgs) =>
@@ -46,11 +46,24 @@ export function newCredentials() {
   return { email: `account-${++accountCount}@example.com`, password: "correct horse battery" };
 }
 
-export const signUpAccount = (t: TestBackend, credentials = newCredentials()) =>
-  signInThroughAuth(t, { provider: "password", params: { ...credentials, flow: "signUp" } });
+type Credentials = { email: string; password: string };
+type ExtraParams = { tips?: unknown };
 
-export const logInAccount = (t: TestBackend, credentials: { email: string; password: string }) =>
-  signInThroughAuth(t, { provider: "password", params: { ...credentials, flow: "signIn" } });
+export const signUpAccount = (
+  t: TestBackend,
+  credentials = newCredentials(),
+  extra: ExtraParams = {},
+) =>
+  signInThroughAuth(t, {
+    provider: "password",
+    params: { ...credentials, ...extra, flow: "signUp" },
+  });
+
+export const logInAccount = (t: TestBackend, credentials: Credentials, extra: ExtraParams = {}) =>
+  signInThroughAuth(t, {
+    provider: "password",
+    params: { ...credentials, ...extra, flow: "signIn" },
+  });
 
 export const GOOGLE_CLIENT_ID = "next-session-test.apps.googleusercontent.com";
 

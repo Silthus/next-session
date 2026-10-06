@@ -14,7 +14,9 @@ import { internalMutation, type MutationCtx } from "./_generated/server";
 import { fail } from "./model/errors";
 import { insertGroup } from "./model/groups";
 import { enforceRateLimit } from "./model/rateLimits";
+import { requestMail } from "./mail";
 import { track } from "./model/telemetry";
+import { tipsConfirmUrlFor, tipsConsentFrom } from "./model/tips";
 
 const ANONYMOUS = "anonymous";
 const DAY = 86_400_000;
@@ -50,6 +52,7 @@ const stockPassword = (
     profile: (params) => ({
       email: normalizeEmail(params.email),
       ...(params.flow === "signUp" ? legalAcceptance() : {}),
+      ...tipsConsentFrom(params),
     }),
   }) as unknown as { options: ConvexCredentialsUserConfig<DataModel> }
 ).options;
@@ -114,7 +117,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       if (provider.id === ANONYMOUS) await insertFirstGroup(gmCtx, userId);
       if (provider.id === GOOGLE) await gmCtx.db.patch("users", userId, legalAcceptance());
       if (provider.id === PASSWORD || provider.id === GOOGLE) {
-        await trackNewAccount(gmCtx, userId, provider.id);
+        await welcomeNewAccount(gmCtx, userId, provider.id);
       }
     },
   },
@@ -127,13 +130,17 @@ async function insertFirstGroup(ctx: MutationCtx, userId: Id<"users">) {
   await track(ctx, { name: "link_created", actor: gm, group_id: groupId });
 }
 
-async function trackNewAccount(
+async function welcomeNewAccount(
   ctx: MutationCtx,
   userId: Id<"users">,
   method: typeof PASSWORD | typeof GOOGLE,
 ) {
   const account = await ctx.db.get("users", userId);
-  if (account !== null) await track(ctx, { name: "account_created", actor: account, method });
+  if (account === null) return;
+  const tips_requested = account.tipsRequestedAt !== undefined;
+  await track(ctx, { name: "account_created", actor: account, method, tips_requested });
+  const tipsConfirmUrl = await tipsConfirmUrlFor(ctx, account);
+  await requestMail(ctx, { kind: "welcome", user: account, tipsConfirmUrl });
 }
 
 export const admitAnonymousSignUp = internalMutation({

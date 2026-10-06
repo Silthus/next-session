@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { AppErrorData, ErrorCode } from "../../../convex/model/errors";
 import { MAX_GROUPS_PER_GM } from "../../../shared/limits";
+import { TIPS_CONSENT_WORDING } from "../../../shared/tips";
 import { appErrorOf } from "../../lib/errors";
 import { track } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
@@ -82,6 +83,8 @@ function AccountForm({
   const [mode, setMode] = useState<SaveMode>(intent === "logIn" ? "logIn" : "create");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [tipsTicked, setTipsTicked] = useState(false);
+  const offersTips = intent === "save" && mode === "create";
   const [failure, setFailure] = useState<Failure | null>(() =>
     props.intent === "save" && props.refusal !== undefined
       ? describeFailure(props.refusal, intent)
@@ -132,7 +135,12 @@ function AccountForm({
       return;
     }
     void run(() =>
-      onSubmit({ email: email.trim(), password, mode }).catch((error: unknown) => {
+      onSubmit({
+        email: email.trim(),
+        password,
+        mode,
+        ...(offersTips && tipsTicked && { tips: true }),
+      }).catch((error: unknown) => {
         trackRefusedSignIn(error, mode);
         throw error;
       }),
@@ -207,6 +215,7 @@ function AccountForm({
             />
           )}
         </Field>
+        {offersTips && <TipsBox ticked={tipsTicked} disabled={busy} onChange={setTipsTicked} />}
       </div>
       {failure && (
         <div className="flex flex-wrap items-center gap-x-2 text-sm">
@@ -473,6 +482,29 @@ function ModeSwitch({
         </label>
       ))}
     </fieldset>
+  );
+}
+
+function TipsBox({
+  ticked,
+  disabled,
+  onChange,
+}: {
+  ticked: boolean;
+  disabled: boolean;
+  onChange: (ticked: boolean) => void;
+}) {
+  return (
+    <label className="flex min-h-11 cursor-pointer items-start gap-3 text-sm text-ink-2 has-disabled:cursor-default has-disabled:opacity-50">
+      <input
+        type="checkbox"
+        checked={ticked}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.checked)}
+        className="mt-0.5 size-5 shrink-0 cursor-pointer accent-accent-strong disabled:cursor-default"
+      />
+      {TIPS_CONSENT_WORDING}
+    </label>
   );
 }
 

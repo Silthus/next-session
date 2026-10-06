@@ -12,7 +12,7 @@ const player = { playerId: "player1" as Id<"players"> };
 const everyEvent: ServerEvent[] = [
   { name: "link_created", actor: anonymousGm, group_id: "group1" },
   { name: "group_created", actor: account, group_id: "group1" },
-  { name: "account_created", actor: account, method: "google" },
+  { name: "account_created", actor: account, method: "google", tips_requested: false },
   { name: "groups_saved", actor: account, group_count: 2 },
   { name: "player_joined", actor: player, group_id: "group1", claimed: false },
   { name: "player_claimed", actor: account, group_id: "group1" },
@@ -26,6 +26,7 @@ const everyEvent: ServerEvent[] = [
   },
   { name: "session_unscheduled", actor: account, group_id: "group1" },
   { name: "share_link_rotated", actor: account, group_id: "group1" },
+  { name: "tips_confirmed", actor: account },
 ];
 
 describe("toPostHogEvent", () => {
@@ -70,11 +71,14 @@ describe("toPostHogEvent", () => {
 
   it("sets only next_session_account on the person of a new Account", () => {
     expect(
-      toPostHogEvent({ name: "account_created", actor: account, method: "password" }, NOW)
-        .properties,
+      toPostHogEvent(
+        { name: "account_created", actor: account, method: "password", tips_requested: true },
+        NOW,
+      ).properties,
     ).toEqual({
       product: "next-session",
       method: "password",
+      tips_requested: true,
       $set: { next_session_account: true },
     });
   });

@@ -5,7 +5,7 @@ import type { MutationCtx } from "../_generated/server";
 
 declare const process: { env: Record<string, string | undefined> };
 
-const PRODUCT = "next-session";
+export const PRODUCT = "next-session";
 const SERVICE_NAME = "next-session-convex";
 const EVENT_PREFIX = "next_session:";
 
@@ -16,7 +16,12 @@ type Actor = UserActor | PlayerActor;
 export type ServerEvent =
   | { name: "link_created"; actor: Actor; group_id: string }
   | { name: "group_created"; actor: Actor; group_id: string }
-  | { name: "account_created"; actor: Actor; method: "password" | "google" }
+  | {
+      name: "account_created";
+      actor: Actor;
+      method: "password" | "google";
+      tips_requested: boolean;
+    }
   | { name: "groups_saved"; actor: Actor; group_count: number }
   | { name: "player_joined"; actor: Actor; group_id: string; claimed: boolean }
   | { name: "player_claimed"; actor: Actor; group_id: string }
@@ -29,7 +34,8 @@ export type ServerEvent =
       is_first_for_group: boolean;
     }
   | { name: "session_unscheduled"; actor: Actor; group_id: string }
-  | { name: "share_link_rotated"; actor: Actor; group_id: string };
+  | { name: "share_link_rotated"; actor: Actor; group_id: string }
+  | { name: "tips_confirmed"; actor: Actor };
 
 type PropertyValue = string | number | boolean | Record<string, boolean>;
 
@@ -112,7 +118,11 @@ function personProperties({ name, actor }: ServerEvent): Record<string, Property
 }
 
 function distinctIdOf(actor: Actor) {
-  return isUser(actor) ? `${PRODUCT}:${actor._id}` : `${PRODUCT}:player:${actor.playerId}`;
+  return isUser(actor) ? accountDistinctId(actor) : `${PRODUCT}:player:${actor.playerId}`;
+}
+
+export function accountDistinctId(user: UserActor) {
+  return `${PRODUCT}:${user._id}`;
 }
 
 function isUser(actor: Actor): actor is UserActor {
@@ -124,7 +134,11 @@ function isAccount(actor: Actor) {
 }
 
 function isTestAccount(actor: Actor) {
-  return isUser(actor) && actor.email !== undefined && /@[^@]*\.test$/i.test(actor.email);
+  return isUser(actor) && actor.email !== undefined && isTestAddress(actor.email);
+}
+
+export function isTestAddress(email: string) {
+  return /@[^@]*\.test$/i.test(email);
 }
 
 const SEVERITY: Record<LogLevel, { severityNumber: number; severityText: string }> = {

@@ -10,6 +10,7 @@ import {
   withAuthKeys,
   withGoogleCredentials,
 } from "./auth.test.setup";
+import { hashSecretCode } from "./model/codes";
 import type { LogRecord, PostHogEvent } from "./model/telemetry";
 import {
   expectErrorCode,
@@ -138,6 +139,7 @@ describe("sign-in", () => {
         properties: {
           product: "next-session",
           method: "password",
+          tips_requested: false,
           $set: { next_session_account: true },
         },
       }),
@@ -169,6 +171,58 @@ describe("sign-in", () => {
     );
 
     expect(events[0]?.properties).toMatchObject({ is_test_account: true });
+  });
+});
+
+describe("Tips", () => {
+  it("tracks account_created with tips_requested for a ticked box", async () => {
+    const events = await eventsDuring(() => signUpAccount(t, newCredentials(), { tips: "yes" }));
+
+    expect(events[0]?.properties).toMatchObject({ tips_requested: true });
+  });
+
+  it("tracks account_created without tips_requested for a Google Account", async () => {
+    const events = await eventsDuring(() =>
+      signInWithGoogle(t, { sub: "google-sub-tips", email: "cleo@example.com" }),
+    );
+
+    expect(events[0]?.properties).toMatchObject({ tips_requested: false });
+  });
+
+  async function accountAwaitingTips(code: string) {
+    return await t.run(
+      async (ctx) =>
+        await ctx.db.insert("users", {
+          email: "dana@example.com",
+          tipsRequestedAt: NOW,
+          tipsConsentVersion: "1",
+          tipsCodeHash: await hashSecretCode(code),
+        }),
+    );
+  }
+
+  it("tracks tips_confirmed for the Account, with no email or code", async () => {
+    const userId = await accountAwaitingTips("the-code");
+
+    const events = await eventsDuring(() =>
+      t.mutation(api.account.confirmTips, { code: "the-code" }),
+    );
+
+    expect(events).toEqual([
+      expect.objectContaining({
+        event: "next_session:tips_confirmed",
+        distinct_id: `next-session:${userId}`,
+        properties: { product: "next-session" },
+      }),
+    ]);
+  });
+
+  it("tracks nothing for a refused confirmation", async () => {
+    await accountAwaitingTips("the-code");
+
+    expect(
+      await eventsDuring(() => t.mutation(api.account.confirmTips, { code: "another-code" })),
+    ).toEqual([]);
   });
 });
 

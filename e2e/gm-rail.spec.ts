@@ -341,7 +341,7 @@ test("an Anonymous GM saves into an Account from the header and stays on the Gro
 
   await page.getByRole("button", { name: "Save your group" }).click();
   await sheet.getByText("I already have one").click();
-  await sheet.getByLabel("Email").fill(account.email);
+  await sheet.getByLabel("Email", { exact: true }).fill(account.email);
   await sheet.getByLabel("Password").fill(password);
   const region = toastRegion(page);
   await expect(region).toHaveCount(1);
