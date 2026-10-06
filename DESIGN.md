@@ -51,7 +51,7 @@ Gold on paper, ported from Lonir's Next Session (`packages/ui/src/styles.css` in
 | `accent-soft` | `oklch(92% 0.05 88)` | `oklch(26% 0.05 82)` | share-link card, soft buttons, scheduled cell fill |
 | `free` / `free-soft` | `oklch(62.5% 0.145 157)` / `oklch(94.9% 0.031 162)` | `#3DD68C` / `#113826` | answer: free |
 | `maybe` / `maybe-soft` | `oklch(76% 0.15 52)` / `oklch(94% 0.04 55)` | `oklch(82% 0.13 52)` / `oklch(27% 0.045 55)` | answer: maybe, the nudge banner |
-| `maybe-bar` | `oklch(64% 0.16 52)` | `oklch(82% 0.13 52)` | the maybe bar on the GM grid and its legend: the same orange, darker in light so the bar reads on the cream cell |
+| `maybe-bar` | `oklch(64% 0.16 52)` | `oklch(82% 0.13 52)` | every small maybe graphic on cream: the GM-grid bar and its legend, the `Dot`, the landing demo strip. The same orange, darker in light so it reads at 3:1 on the cream cell |
 | `busy` / `busy-soft` | `oklch(60.5% 0.194 11)` / `oklch(93.4% 0.031 0)` | `#FF6B8B` / `#3F1724` | answer: busy, destructive |
 
 Rules:
@@ -62,7 +62,7 @@ Rules:
 - One exception: the WhatsApp and Telegram share icons in `ShareLinkCard` keep their brand colors (`#25D366` green, `#2AABEE` blue) so people recognize them. The brand colors appear nowhere else.
 - Answer tiles always carry a glyph (✓ ? ✕) in addition to color, for color-blind players.
 - Heat-map intensity on the GM grid is `color-mix(in oklab, var(--free) <0–55>%, var(--surface))` driven by the share of players who are free; a day where everyone is free is solid `free` with white text; a day with any busy answer gets no tint (the busy bar or ✕ count carries the conflict). No day is ever painted red.
-- Contrast, pinned by `src/theme.test.ts`: `ink` on `paper` ≥ 14:1 both themes; `ink-3` on `surface` and `paper` ≥ 4.5:1; `accent-ink` on `accent` and `accent-strong` on `surface`, `paper` and `accent-soft` ≥ 4.5:1; white on `free`/`busy` ≥ 3:1 at ≥ 14 px bold (large-text rule), the glyph adds redundancy; the answer tiles read at least as well as they did before the gold theme. Free and busy are a shade darker in light so their GM-grid bars keep their contrast on the cream `surface`. On cream, one maybe color cannot keep both its GM-grid bar at 3:1 and the ink-on-maybe tile at 8:1, so the bar has its own `maybe-bar` token: 3.26:1 on `surface` in light, 10.2:1 in dark (the same value as `maybe`), at the maybe hue. The player tile keeps `maybe`.
+- Contrast, pinned by `src/theme.test.ts`: `ink` on `paper` ≥ 14:1 both themes; `ink-3` on `surface` and `paper` ≥ 4.5:1; `accent-ink` on `accent` and `accent-strong` on `surface`, `paper` and `accent-soft` ≥ 4.5:1; white on `free`/`busy` ≥ 3:1 at ≥ 14 px bold (large-text rule), the glyph adds redundancy; the answer tiles read at least as well as they did before the gold theme. Free and busy are a shade darker in light so their GM-grid bars keep their contrast on the cream `surface`. On cream, one maybe color cannot keep both its GM-grid bar at 3:1 and the ink-on-maybe tile at 8:1, so the bar has its own `maybe-bar` token: 3.26:1 on `surface` in light, 10.2:1 in dark (the same value as `maybe`), at the maybe hue. Every small maybe graphic (bar, `Dot`, landing demo) uses `maybe-bar`; only the player tile, which carries ink text, keeps `maybe`.
 
 ### Type
 
