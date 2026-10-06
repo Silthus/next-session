@@ -53,7 +53,7 @@ function renderCalendar({
 function countsOf(day: HTMLElement) {
   return Object.fromEntries(
     [...day.querySelectorAll("[data-count]")].map((count) => [
-      count.getAttribute("data-count"),
+      count.getAttribute("data-count") ?? "",
       count.textContent,
     ]),
   );

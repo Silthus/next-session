@@ -8,6 +8,7 @@ import { isImeComposing } from "../../../lib/keyboard";
 export function NameForm({
   label,
   autoFocus = true,
+  focusRequest = 0,
   initialName = "",
   placeholder,
   submitLabel,
@@ -19,6 +20,7 @@ export function NameForm({
 }: {
   label: string;
   autoFocus?: boolean;
+  focusRequest?: number;
   initialName?: string;
   placeholder?: string;
   submitLabel: string;
@@ -39,7 +41,7 @@ export function NameForm({
     if (!autoFocus) return;
     field.current?.focus();
     field.current?.select();
-  }, [autoFocus]);
+  }, [autoFocus, focusRequest]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();

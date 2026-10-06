@@ -1,4 +1,5 @@
 import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { Button } from "../../../ui/Button";
 import { cn } from "../../../ui/cn";
 
 export type RailPanels = { bestNights: ReactNode; players: ReactNode; sessions: ReactNode };
@@ -14,17 +15,27 @@ const tabs: { id: Tab; label: string }[] = [
 export function GroupRail({
   wide,
   rosterEmpty,
+  onAddPlayer,
   shareLink,
   dayPanel,
   panels,
 }: {
   wide: boolean;
   rosterEmpty: boolean;
+  onAddPlayer: () => void;
   shareLink: ReactNode;
   dayPanel: ReactNode;
   panels: RailPanels;
 }) {
-  if (!wide) return <PhoneRail panels={panels} firstTab={rosterEmpty ? "players" : "bestNights"} />;
+  if (!wide) {
+    return (
+      <PhoneRail
+        panels={panels}
+        firstTab={rosterEmpty ? "players" : "bestNights"}
+        onAddPlayer={onAddPlayer}
+      />
+    );
+  }
   return (
     <aside aria-label="Group overview" className="flex flex-col gap-4">
       {shareLink}
@@ -36,12 +47,20 @@ export function GroupRail({
   );
 }
 
-function PhoneRail({ panels, firstTab }: { panels: RailPanels; firstTab: Tab }) {
+function PhoneRail({
+  panels,
+  firstTab,
+  onAddPlayer,
+}: {
+  panels: RailPanels;
+  firstTab: Tab;
+  onAddPlayer: () => void;
+}) {
   const [active, setActive] = useState(firstTab);
   const tabRefs = useRef(new Map<Tab, HTMLButtonElement>());
   const baseId = useId();
   const tabId = (tab: Tab) => `${baseId}-tab-${tab}`;
-  const panelId = `${baseId}-panel`;
+  const panelId = (tab: Tab) => `${baseId}-panel-${tab}`;
 
   const moveTo = (tab: Tab) => {
     setActive(tab);
@@ -54,8 +73,17 @@ function PhoneRail({ panels, firstTab }: { panels: RailPanels; firstTab: Tab }) 
     moveTo(next);
   };
 
+  const addPlayer = () => {
+    setActive("players");
+    onAddPlayer();
+  };
+
   return (
     <div className="flex flex-col gap-3">
+      <Button variant="soft" onClick={addPlayer} className="w-full">
+        <span aria-hidden="true">+</span>
+        Add player
+      </Button>
       <div
         role="tablist"
         aria-label="Group overview"
@@ -73,7 +101,7 @@ function PhoneRail({ panels, firstTab }: { panels: RailPanels; firstTab: Tab }) 
             type="button"
             role="tab"
             aria-selected={tab.id === active}
-            aria-controls={panelId}
+            aria-controls={panelId(tab.id)}
             tabIndex={tab.id === active ? 0 : -1}
             onClick={() => setActive(tab.id)}
             className={cn(
@@ -85,9 +113,17 @@ function PhoneRail({ panels, firstTab }: { panels: RailPanels; firstTab: Tab }) 
           </button>
         ))}
       </div>
-      <div role="tabpanel" id={panelId} aria-labelledby={tabId(active)}>
-        {panels[active]}
-      </div>
+      {tabs.map((tab) => (
+        <div
+          key={tab.id}
+          role="tabpanel"
+          id={panelId(tab.id)}
+          aria-labelledby={tabId(tab.id)}
+          hidden={tab.id !== active}
+        >
+          {panels[tab.id]}
+        </div>
+      ))}
     </div>
   );
 }
