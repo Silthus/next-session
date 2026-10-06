@@ -1,0 +1,18 @@
+import { chromium } from "@playwright/test";
+const browser = await chromium.launch();
+const out = process.argv[2];
+for (const colorScheme of ["light", "dark"]) {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, colorScheme });
+  const errors = [];
+  page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+  await page.goto("https://next-session.link/", { waitUntil: "networkidle" });
+  const strip = page.getByText("Thursday Crew").locator("xpath=../..");
+  await strip.waitFor();
+  const bars = await strip.locator("span.rounded-full.h-3").evaluateAll((els) =>
+    [...new Set(els.map((e) => getComputedStyle(e).backgroundColor))]);
+  await strip.screenshot({ path: `${out}/prod-demo-strip--390--${colorScheme}.png` });
+  await page.screenshot({ path: `${out}/prod-landing--390--${colorScheme}.png` });
+  console.log(colorScheme, JSON.stringify(bars), "console errors:", errors.length);
+  await page.close();
+}
+await browser.close();
