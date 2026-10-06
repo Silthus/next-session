@@ -5,7 +5,13 @@ import type {
   PostHogConfig,
   Properties,
 } from "posthog-js/dist/module.slim";
-import type { KeyValueStorage } from "./storage";
+import { postHogEnv, type EnvSource, type PostHogEnv } from "./env";
+import {
+  forgetMeasurementOff,
+  measurementTurnedOff,
+  rememberMeasurementOff,
+  type KeyValueStorage,
+} from "./storage";
 
 export type BrowserEvent =
   | {
@@ -35,7 +41,6 @@ export type ErrorContext = {
 
 type LogLevel = "info" | "warn" | "error";
 type LogAttributes = Record<string, string | number | boolean>;
-type EnvSource = Record<string, string | undefined>;
 type ActiveClient = Pick<PostHog, "register" | "capture" | "captureException"> & {
   logger: Pick<PostHog["logger"], LogLevel>;
 };
@@ -49,7 +54,6 @@ type ReactErrorCallback = (error: unknown, errorInfo: { componentStack?: string 
 const PRODUCT = "next-session";
 const EVENT_PREFIX = "next_session:";
 const SENT_SDK_EVENTS = new Set(["$pageview", "$exception"]);
-const MEASUREMENT_OFF_KEY = "next-session.measurementOff";
 const KEPT_QUERY_KEYS = ["month", "day"];
 const SECRET_QUERY_KEYS = ["code", "state"];
 const SHARE_TOKEN = ":shareToken";
@@ -99,13 +103,13 @@ export const reactErrorReporting: Record<"onCaughtError" | "onUncaughtError", Re
   };
 
 export function initTelemetry(
-  source: EnvSource = import.meta.env,
+  source?: EnvSource,
   load: LoadPostHog = loadPostHog,
-  storage: KeyValueStorage = browserStorage(),
+  storage?: KeyValueStorage,
 ): Promise<void> {
-  const token = source.VITE_POSTHOG_TOKEN;
-  if (!token || !measurementIsOn(storage)) return Promise.resolve();
-  starting ??= start(load, token, source.VITE_RELEASE, storage);
+  const env = postHogEnv(source);
+  if (!env || !measurementIsOn(storage)) return Promise.resolve();
+  starting ??= start(load, env, storage);
   return starting;
 }
 
@@ -123,29 +127,22 @@ export function reportError(error: unknown, context: ErrorContext): void {
 }
 
 export function measurementAvailable(): boolean {
-  return Boolean(import.meta.env.VITE_POSTHOG_TOKEN);
+  return postHogEnv() !== null;
 }
 
-export function measurementIsOn(storage: KeyValueStorage = browserStorage()): boolean {
-  return !offForThisVisit && attempt(() => storage.getItem(MEASUREMENT_OFF_KEY), null) === null;
+export function measurementIsOn(storage?: KeyValueStorage): boolean {
+  return !offForThisVisit && !measurementTurnedOff(storage);
 }
 
-export function turnMeasurementOff(storage: KeyValueStorage = browserStorage()): {
-  remembered: boolean;
-} {
+export function turnMeasurementOff(storage?: KeyValueStorage): { remembered: boolean } {
   offForThisVisit = true;
-  const remembered = attempt(() => {
-    storage.setItem(MEASUREMENT_OFF_KEY, "1");
-    return true;
-  }, false);
-  return { remembered };
+  return { remembered: rememberMeasurementOff(storage) };
 }
 
 export function turnMeasurementOn(): Promise<void> {
-  const storage = browserStorage();
   offForThisVisit = false;
-  attempt(() => storage.removeItem(MEASUREMENT_OFF_KEY), undefined);
-  return initTelemetry(import.meta.env, loadPostHog, storage);
+  forgetMeasurementOff();
+  return initTelemetry();
 }
 
 export function redactUrl(url: string): string {
@@ -181,9 +178,8 @@ export function redactLog(record: CaptureLogOptions, currentUrl: string): Captur
 
 function start(
   load: LoadPostHog,
-  token: string,
-  release: string | undefined,
-  storage: KeyValueStorage,
+  { token, release }: PostHogEnv,
+  storage: KeyValueStorage | undefined,
 ): Promise<void> {
   waitingCalls = [];
   return load()
@@ -215,7 +211,7 @@ function withClient(call: ClientCall): void {
 
 function telemetryOptions(
   release: string | undefined,
-  storage: KeyValueStorage,
+  storage: KeyValueStorage | undefined,
 ): Partial<PostHogConfig> {
   return {
     api_host: `${window.location.origin}/ingest`,
@@ -308,14 +304,6 @@ function parseUrl(text: string): { url: URL; absolute: boolean } | null {
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function browserStorage(): KeyValueStorage {
-  return attempt<KeyValueStorage>(() => window.localStorage, {
-    getItem: () => null,
-    setItem: () => undefined,
-    removeItem: () => undefined,
-  });
 }
 
 function attempt<T>(run: () => T, fallback: T): T {
