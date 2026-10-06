@@ -1,0 +1,538 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-74
+
+ ❯ |ui| src/lib/telemetry.sdk.test.ts (5 tests | 3 failed) 26ms
+   ❯ a real posthog-js on a Player page (5)
+     × sends events, errors and logs to /ingest without the Share Token or the claim code 5ms
+     × goes quiet the moment the visitor turns measurement off, keeping only that choice 3ms
+     × measures again once the visitor turns it back on 1ms
+ ❯ |ui| src/lib/telemetry.test.ts (31 tests | 23 failed) 39ms
+   ❯ redactUrl (9)
+     × turns /s/AbC9_-xZ12 into /s/:shareToken 11ms
+     × turns /s/AbC9_-xZ12/ into /s/:shareToken/ 2ms
+     × turns https://next-session.link/s/AbC9_-xZ12?code=SECRETCODE1&month=2026-10&day=2026-10-12#join into https://next-session.link/s/:shareToken?month=2026-10&day=2026-10-12 2ms
+     × turns https://next-session.link/tips?code=abc123 into https://next-session.link/tips 1ms
+     × turns /?code=oauth-code&state=xyz into / 1ms
+     × turns https://www.google.com/url?q=next-session.link/s/AbC9_-xZ12 into https://www.google.com/url 1ms
+   ❯ redactEvent (13)
+     × redacts every URL and path the SDK attaches 4ms
+     × drops what the SDK reads from the device and the page title 2ms
+     × scrubs the page's Share Token and query values out of exception messages and frames 1ms
+     × drops $autocapture, which Next Session never measures 1ms
+     × drops $rageclick, which Next Session never measures 1ms
+     × drops $dead_click, which Next Session never measures 0ms
+     × drops $$heatmap, which Next Session never measures 0ms
+     × drops $web_vitals, which Next Session never measures 1ms
+     × drops $identify, which Next Session never measures 0ms
+   ❯ redactLog (2)
+     × replaces the page URL the SDK adds after this filter runs 1ms
+     × redacts URL attributes and scrubs the body 1ms
+   ❯ initTelemetry (4)
+     × starts PostHog cookieless through /ingest, with the Product Marker and no flags 1ms
+     × starts once however often it is called 1ms
+     × stays off in a browser that turned measurement off 1ms
+   ❯ track, log and reportError (3)
+     × sends a browser event under the next_session: prefix 1ms
+     × logs through the PostHog logger 1ms
+     × reports an error once, with the surface it came from 1ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 26 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/lib/telemetry.sdk.test.ts > a real posthog-js on a Player page > sends events, errors and logs to /ingest without the Share Token or the claim code
+AssertionError: expected 0 to be greater than 0
+ ❯ src/lib/telemetry.sdk.test.ts:55:39
+     53|
+     54|     const everything = sent();
+     55|     expect(transport.requests.length).toBeGreaterThan(0);
+       |                                       ^
+     56|     expect(transport.requests.every(({ url }) => url.startsWith(`${loc…
+     57|       true,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.sdk.test.ts > a real posthog-js on a Player page > goes quiet the moment the visitor turns measurement off, keeping only that choice
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/lib/telemetry.sdk.test.ts:91:41
+     89|
+     90|     expect(transport.requests).toEqual([]);
+     91|     expect(telemetry.measurementIsOn()).toBe(false);
+       |                                         ^
+     92|     expect(Object.keys(localStorage)).toEqual(["next-session.measureme…
+     93|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.sdk.test.ts > a real posthog-js on a Player page > measures again once the visitor turns it back on
+AssertionError: expected '' to contain 'next_session:save_started'
+
+- Expected
++ Received
+
+- next_session:save_started
+
+ ❯ src/lib/telemetry.sdk.test.ts:103:20
+    101|
+    102|     expect(telemetry.measurementIsOn()).toBe(true);
+    103|     expect(sent()).toContain("next_session:save_started");
+       |                    ^
+    104|     expect(Object.keys(localStorage)).toEqual([]);
+    105|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactUrl > turns /s/AbC9_-xZ12 into /s/:shareToken
+AssertionError: expected '/s/AbC9_-xZ12' to be '/s/:shareToken' // Object.is equality
+
+Expected: "/s/:shareToken"
+Received: "/s/AbC9_-xZ12"
+
+ ❯ src/lib/telemetry.test.ts:56:30
+     54|     ["https://www.google.com/url?q=next-session.link/s/AbC9_-xZ12", "h…
+     55|   ])("turns %s into %s", (url, redacted) => {
+     56|     expect(redactUrlOf(url)).toBe(redacted);
+       |                              ^
+     57|   });
+     58|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactUrl > turns /s/AbC9_-xZ12/ into /s/:shareToken/
+AssertionError: expected '/s/AbC9_-xZ12/' to be '/s/:shareToken/' // Object.is equality
+
+Expected: "/s/:shareToken/"
+Received: "/s/AbC9_-xZ12/"
+
+ ❯ src/lib/telemetry.test.ts:56:30
+     54|     ["https://www.google.com/url?q=next-session.link/s/AbC9_-xZ12", "h…
+     55|   ])("turns %s into %s", (url, redacted) => {
+     56|     expect(redactUrlOf(url)).toBe(redacted);
+       |                              ^
+     57|   });
+     58|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactUrl > turns https://next-session.link/s/AbC9_-xZ12?code=SECRETCODE1&month=2026-10&day=2026-10-12#join into https://next-session.link/s/:shareToken?month=2026-10&day=2026-10-12
+AssertionError: expected 'https://next-session.link/s/AbC9_-xZ1…' to be 'https://next-session.link/s/:shareTok…' // Object.is equality
+
+Expected: "https://next-session.link/s/:shareToken?month=2026-10&day=2026-10-12"
+Received: "https://next-session.link/s/AbC9_-xZ12?code=SECRETCODE1&month=2026-10&day=2026-10-12#join"
+
+ ❯ src/lib/telemetry.test.ts:56:30
+     54|     ["https://www.google.com/url?q=next-session.link/s/AbC9_-xZ12", "h…
+     55|   ])("turns %s into %s", (url, redacted) => {
+     56|     expect(redactUrlOf(url)).toBe(redacted);
+       |                              ^
+     57|   });
+     58|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactUrl > turns https://next-session.link/tips?code=abc123 into https://next-session.link/tips
+AssertionError: expected 'https://next-session.link/tips?code=a…' to be 'https://next-session.link/tips' // Object.is equality
+
+Expected: "https://next-session.link/tips"
+Received: "https://next-session.link/tips?code=abc123"
+
+ ❯ src/lib/telemetry.test.ts:56:30
+     54|     ["https://www.google.com/url?q=next-session.link/s/AbC9_-xZ12", "h…
+     55|   ])("turns %s into %s", (url, redacted) => {
+     56|     expect(redactUrlOf(url)).toBe(redacted);
+       |                              ^
+     57|   });
+     58|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactUrl > turns /?code=oauth-code&state=xyz into /
+AssertionError: expected '/?code=oauth-code&state=xyz' to be '/' // Object.is equality
+
+Expected: "/"
+Received: "/?code=oauth-code&state=xyz"
+
+ ❯ src/lib/telemetry.test.ts:56:30
+     54|     ["https://www.google.com/url?q=next-session.link/s/AbC9_-xZ12", "h…
+     55|   ])("turns %s into %s", (url, redacted) => {
+     56|     expect(redactUrlOf(url)).toBe(redacted);
+       |                              ^
+     57|   });
+     58|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactUrl > turns https://www.google.com/url?q=next-session.link/s/AbC9_-xZ12 into https://www.google.com/url
+AssertionError: expected 'https://www.google.com/url?q=next-ses…' to be 'https://www.google.com/url' // Object.is equality
+
+Expected: "https://www.google.com/url"
+Received: "https://www.google.com/url?q=next-session.link/s/AbC9_-xZ12"
+
+ ❯ src/lib/telemetry.test.ts:56:30
+     54|     ["https://www.google.com/url?q=next-session.link/s/AbC9_-xZ12", "h…
+     55|   ])("turns %s into %s", (url, redacted) => {
+     56|     expect(redactUrlOf(url)).toBe(redacted);
+       |                              ^
+     57|   });
+     58|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactEvent > redacts every URL and path the SDK attaches
+AssertionError: expected { …(6) } to match object { …(6) }
+
+- Expected
++ Received
+
+  {
+-   "$current_url": "https://next-session.link/s/:shareToken?month=2026-10",
++   "$current_url": "https://next-session.link/s/AbC9_-xZ12?code=SECRETCODE1&month=2026-10",
+    "$host": "next-session.link",
+-   "$pathname": "/s/:shareToken",
+-   "$prev_pageview_pathname": "/s/:shareToken",
+-   "$referrer": "https://next-session.link/s/:shareToken",
+-   "$session_entry_url": "https://next-session.link/s/:shareToken?month=2026-10",
++   "$pathname": "/s/AbC9_-xZ12",
++   "$prev_pageview_pathname": "/s/AbC9_-xZ12",
++   "$referrer": "https://next-session.link/s/AbC9_-xZ12?code=SECRETCODE1",
++   "$session_entry_url": "https://next-session.link/s/AbC9_-xZ12?code=SECRETCODE1&month=2026-10",
+  }
+
+ ❯ src/lib/telemetry.test.ts:92:34
+     90|     const redacted = redactEvent(pageview, pageUrl);
+     91|
+     92|     expect(redacted?.properties).toMatchObject({
+       |                                  ^
+     93|       $current_url: "https://next-session.link/s/:shareToken?month=202…
+     94|       $pathname: "/s/:shareToken",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactEvent > drops what the SDK reads from the device and the page title
+AssertionError: expected { '$screen_height': 800, …(10) } to deeply equal { '$browser': 'Firefox', …(1) }
+
+- Expected
++ Received
+
+  {
+    "$browser": "Firefox",
++   "$browser_language": "de-DE",
++   "$browser_language_prefix": "de",
+    "$os": "Android",
++   "$screen_height": 800,
++   "$screen_width": 400,
++   "$timezone": "Europe/Berlin",
++   "$timezone_offset": -120,
++   "$viewport_height": 700,
++   "$viewport_width": 400,
++   "title": "Tuesday crew · Next Session",
+  }
+
+ ❯ src/lib/telemetry.test.ts:125:34
+    123|     const redacted = redactEvent(pageview, pageUrl);
+    124|
+    125|     expect(redacted?.properties).toEqual({ $browser: "Firefox", $os: "…
+       |                                  ^
+    126|     expect(redacted?.$set_once).toEqual({});
+    127|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactEvent > scrubs the page's Share Token and query values out of exception messages and frames
+AssertionError: expected '{"uuid":"e1","event":"$exception","pr…' not to contain 'AbC9_-xZ12'
+
+Expected: "AbC9_-xZ12"
+Received: "{"uuid":"e1","event":"$exception","properties":{"$exception_list":[{"type":"Error","value":"Value: \"AbC9_-xZ12\" with code SECRETCODE1 at /s/AbC9_-xZ12","stacktrace":{"frames":[{"filename":"https://next-session.link/assets/index-abc.js","lineno":1},{"filename":"https://next-session.link/s/AbC9_-xZ12","lineno":2}]}}]}}"
+
+ ❯ src/lib/telemetry.test.ts:147:28
+    145|     const serialized = JSON.stringify(redactEvent(exception, pageUrl));
+    146|
+    147|     expect(serialized).not.toContain("AbC9_-xZ12");
+       |                            ^
+    148|     expect(serialized).not.toContain("SECRETCODE1");
+    149|     expect(serialized).toContain("https://next-session.link/assets/ind…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactEvent > drops $autocapture, which Next Session never measures
+AssertionError: expected { uuid: 'e1', …(2) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "event": "$autocapture",
+  "properties": {},
+  "uuid": "e1",
+}
+
+ ❯ src/lib/telemetry.test.ts:160:53
+    158|     "drops %s, which Next Session never measures",
+    159|     (name) => {
+    160|       expect(redactEvent(event(name, {}), pageUrl)).toBeNull();
+       |                                                     ^
+    161|     },
+    162|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactEvent > drops $rageclick, which Next Session never measures
+AssertionError: expected { uuid: 'e1', …(2) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "event": "$rageclick",
+  "properties": {},
+  "uuid": "e1",
+}
+
+ ❯ src/lib/telemetry.test.ts:160:53
+    158|     "drops %s, which Next Session never measures",
+    159|     (name) => {
+    160|       expect(redactEvent(event(name, {}), pageUrl)).toBeNull();
+       |                                                     ^
+    161|     },
+    162|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactEvent > drops $dead_click, which Next Session never measures
+AssertionError: expected { uuid: 'e1', …(2) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "event": "$dead_click",
+  "properties": {},
+  "uuid": "e1",
+}
+
+ ❯ src/lib/telemetry.test.ts:160:53
+    158|     "drops %s, which Next Session never measures",
+    159|     (name) => {
+    160|       expect(redactEvent(event(name, {}), pageUrl)).toBeNull();
+       |                                                     ^
+    161|     },
+    162|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactEvent > drops $$heatmap, which Next Session never measures
+AssertionError: expected { Object (uuid, event, ...) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "event": "$$heatmap",
+  "properties": {},
+  "uuid": "e1",
+}
+
+ ❯ src/lib/telemetry.test.ts:160:53
+    158|     "drops %s, which Next Session never measures",
+    159|     (name) => {
+    160|       expect(redactEvent(event(name, {}), pageUrl)).toBeNull();
+       |                                                     ^
+    161|     },
+    162|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactEvent > drops $web_vitals, which Next Session never measures
+AssertionError: expected { uuid: 'e1', …(2) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "event": "$web_vitals",
+  "properties": {},
+  "uuid": "e1",
+}
+
+ ❯ src/lib/telemetry.test.ts:160:53
+    158|     "drops %s, which Next Session never measures",
+    159|     (name) => {
+    160|       expect(redactEvent(event(name, {}), pageUrl)).toBeNull();
+       |                                                     ^
+    161|     },
+    162|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactEvent > drops $identify, which Next Session never measures
+AssertionError: expected { Object (uuid, event, ...) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "event": "$identify",
+  "properties": {},
+  "uuid": "e1",
+}
+
+ ❯ src/lib/telemetry.test.ts:160:53
+    158|     "drops %s, which Next Session never measures",
+    159|     (name) => {
+    160|       expect(redactEvent(event(name, {}), pageUrl)).toBeNull();
+       |                                                     ^
+    161|     },
+    162|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactLog > replaces the page URL the SDK adds after this filter runs
+AssertionError: expected undefined to be 'https://next-session.link/s/:shareTok…' // Object.is equality
+
+- Expected:
+"https://next-session.link/s/:shareToken?month=2026-10"
+
++ Received:
+undefined
+
+ ❯ src/lib/telemetry.test.ts:173:45
+    171|     const record = redactLog({ body: "Save resumed", level: "info" }, …
+    172|
+    173|     expect(record.attributes?.["url.full"]).toBe(
+       |                                             ^
+    174|       "https://next-session.link/s/:shareToken?month=2026-10",
+    175|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > redactLog > redacts URL attributes and scrubs the body
+AssertionError: expected { …(3) } to deeply equal { …(3) }
+
+- Expected
++ Received
+
+  {
+    "attributes": {
+      "code": "CLAIM_INVALID",
+      "count": 2,
+-     "referrer": "/s/:shareToken",
+-     "url.full": "https://next-session.link/s/:shareToken?month=2026-10",
++     "referrer": "/s/AbC9_-xZ12?code=SECRETCODE1",
+    },
+-   "body": "Claim failed for :shareToken",
++   "body": "Claim failed for AbC9_-xZ12",
+    "level": "warn",
+  }
+
+ ❯ src/lib/telemetry.test.ts:188:20
+    186|     );
+    187|
+    188|     expect(record).toEqual({
+       |                    ^
+    189|       body: "Claim failed for :shareToken",
+    190|       level: "warn",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > initTelemetry > starts PostHog cookieless through /ingest, with the Product Marker and no flags
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/lib/telemetry.test.ts:224:26
+    222|     );
+    223|
+    224|     expect(posthog.init).toHaveBeenCalledOnce();
+       |                          ^
+    225|     const [token, config] = posthog.init.mock.calls[0]!;
+    226|     expect(token).toBe("phc_test");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > initTelemetry > starts once however often it is called
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/lib/telemetry.test.ts:260:26
+    258|     telemetry.initTelemetry(source, posthog.client, memoryStorage());
+    259|
+    260|     expect(posthog.init).toHaveBeenCalledOnce();
+       |                          ^
+    261|   });
+    262|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > initTelemetry > stays off in a browser that turned measurement off
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/lib/telemetry.test.ts:272:48
+    270|
+    271|     expect(posthog.init).not.toHaveBeenCalled();
+    272|     expect(telemetry.measurementIsOn(storage)).toBe(false);
+       |                                                ^
+    273|   });
+    274| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > track, log and reportError > sends a browser event under the next_session: prefix
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'next_session:fill_rest_used', …(1) ]
+
+Number of calls: 0
+
+ ❯ src/lib/telemetry.test.ts:289:30
+    287|     telemetry.track({ name: "fill_rest_used", group_id: "k57abc" });
+    288|
+    289|     expect(instance.capture).toHaveBeenCalledWith("next_session:fill_r…
+       |                              ^
+    290|       group_id: "k57abc",
+    291|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > track, log and reportError > logs through the PostHog logger
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'Claim invalid', …(1) ]
+
+Number of calls: 0
+
+ ❯ src/lib/telemetry.test.ts:299:34
+    297|     telemetry.log("warn", "Claim invalid", { code: "CLAIM_INVALID" });
+    298|
+    299|     expect(instance.logger.warn).toHaveBeenCalledWith("Claim invalid",…
+       |                                  ^
+    300|   });
+    301|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/26]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > track, log and reportError > reports an error once, with the surface it came from
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/lib/telemetry.test.ts:309:39
+    307|     telemetry.reportError(error, { surface: "router" });
+    308|
+    309|     expect(instance.captureException).toHaveBeenCalledOnce();
+       |                                       ^
+    310|     expect(instance.captureException).toHaveBeenCalledWith(error, { su…
+    311|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/26]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  26 failed | 10 passed (36)
+   Start at  15:06:27
+   Duration  784ms (environment 74%, setup 11%, transform 8%, tests 5%, import 1%, worker 1%)
+

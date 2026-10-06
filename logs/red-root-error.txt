@@ -1,0 +1,102 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-74
+
+Not implemented: Window's scrollTo() method
+ ❯ |ui| src/routes/rootError.test.tsx (1 test | 1 failed) 1024ms
+   ❯ a page that breaks (1)
+     × reports the error and offers a reload 1023ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/routes/rootError.test.tsx > a page that breaks > reports the error and offers a reload
+TestingLibraryElementError: Unable to find role="heading" and name "Something broke"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mstyle[39m=[32m"padding: 0.5rem; max-width: 100%;"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mstyle[39m=[32m"display: flex; align-items: center; gap: 0.5rem;"[39m
+      [36m>[39m
+        [36m<strong[39m
+          [33mstyle[39m=[32m"font-size: 1rem;"[39m
+        [36m>[39m
+          [0mSomething went wrong![0m
+        [36m</strong>[39m
+        [36m<button[39m
+          [33mstyle[39m=[32m"appearance: none; font-size: 0.6em; border: 1px solid; padding: 0.1rem 0.2rem; font-weight: bold; border-radius: 0.25rem;"[39m
+        [36m>[39m
+          [0mHide Error[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mstyle[39m=[32m"height: 0.25rem;"[39m
+      [36m/>[39m
+      [36m<div>[39m
+        [36m<pre[39m
+          [33mstyle[39m=[32m"font-size: 0.7em; border: 1px solid red; border-radius: 0.25rem; padding: 0.3rem; color: red; overflow: auto;"[39m
+        [36m>[39m
+          [36m<code>[39m
+            [0mboom[0m
+          [36m</code>[39m
+        [36m</pre>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mstyle[39m=[32m"padding: 0.5rem; max-width: 100%;"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mstyle[39m=[32m"display: flex; align-items: center; gap: 0.5rem;"[39m
+      [36m>[39m
+        [36m<strong[39m
+          [33mstyle[39m=[32m"font-size: 1rem;"[39m
+        [36m>[39m
+          [0mSomething went wrong![0m
+        [36m</strong>[39m
+        [36m<button[39m
+          [33mstyle[39m=[32m"appearance: none; font-size: 0.6em; border: 1px solid; padding: 0.1rem 0.2rem; font-weight: bold; border-radius: 0.25rem;"[39m
+        [36m>[39m
+          [0mHide Error[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mstyle[39m=[32m"height: 0.25rem;"[39m
+      [36m/>[39m
+      [36m<div>[39m
+        [36m<pre[39m
+          [33mstyle[39m=[32m"font-size: 0.7em; border: 1px solid red; border-radius: 0.25rem; padding: 0.3rem; color: red; overflow: auto;"[39m
+        [36m>[39m
+          [36m<code>[39m
+            [0mboom[0m
+          [36m</code>[39m
+        [36m</pre>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/routes/rootError.test.tsx:44:25
+     42|     renderBrokenPage();
+     43|
+     44|     expect(await screen.findByRole("heading", { name: "Something broke…
+       |                         ^
+     45|     expect(screen.getByText("Reload the page.")).toBeTruthy();
+     46|     expect(reportError).toHaveBeenCalledWith(failure, { surface: "rout…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  15:14:19
+   Duration  1.79s (tests 60%, environment 27%, import 5%, transform 4%, setup 4%)
+

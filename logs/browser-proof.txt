@@ -1,0 +1,32 @@
+{
+  "requests": 5,
+  "byPhase": {
+    "measuring": [
+      "GET http://127.0.0.1:8787/ingest/static/1.438.1/exception-autocapture.js",
+      "POST http://127.0.0.1:8787/ingest/e/",
+      "POST http://127.0.0.1:8787/ingest/e/",
+      "GET http://127.0.0.1:8787/ingest/static/1.438.1/exception-autocapture.js",
+      "POST http://127.0.0.1:8787/ingest/e/"
+    ],
+    "off": []
+  },
+  "allToSameOriginIngest": true,
+  "events": [
+    "$pageview",
+    "$exception",
+    "$pageview"
+  ],
+  "containsShareToken": false,
+  "containsClaimCode": false,
+  "containsRedactedPath": true,
+  "containsProductMarker": true,
+  "containsDeviceReads": false,
+  "storageAfterOptOut": {
+    "localStorage": [
+      "next-session.measurementOff",
+      "next-session.players"
+    ],
+    "sessionStorage": []
+  },
+  "cookies": []
+}

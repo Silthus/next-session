@@ -1,0 +1,45 @@
+posthog-cli release resolve --release-name next-session-web --release-version proofsha74
+posthog-cli sourcemap upload --stdin --release-name next-session-web --release-version proofsha74 --release-mode event
+stdin files:
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/index-CrCtNWmz.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/Eyebrow-D5SiFkdo.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/GroupScreen-b0YfnPOP.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/LegalFooter-B6Ci8LTO.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/LegalPage-BH9GkgvB.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/PageShell-CkHEhJfj.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/Wordmark-Cj7XSRMp.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/errors-BWeEhnoY.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/g._groupId-4TE7tali.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/g._groupId-DbfdSQG3.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/icons-dj1yOpx1.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/imprint-DHI3hs9g.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/module-CsHAHK0H.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/pageTitle-BGugrAGx.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/preload-helper-BKfZEzcp.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/privacy-CTuv10R6.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/routes-D3dTc1EX.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/s._shareToken-LNSE1JY1.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/terms--zJ12_wI.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/useGm-CFw7JugJ.js
+/home/coder/dev/ns-worktrees/ticket-74/dist/assets/useNavigate-Bbb67ACB.js
+maps in dist at upload time:
+dist/assets/PageShell-CkHEhJfj.js.map
+dist/assets/LegalFooter-B6Ci8LTO.js.map
+dist/assets/s._shareToken-LNSE1JY1.js.map
+dist/assets/GroupScreen-b0YfnPOP.js.map
+dist/assets/terms--zJ12_wI.js.map
+dist/assets/index-CrCtNWmz.js.map
+dist/assets/module-CsHAHK0H.js.map
+dist/assets/g._groupId-DbfdSQG3.js.map
+dist/assets/LegalPage-BH9GkgvB.js.map
+dist/assets/g._groupId-4TE7tali.js.map
+dist/assets/pageTitle-BGugrAGx.js.map
+dist/assets/icons-dj1yOpx1.js.map
+dist/assets/Eyebrow-D5SiFkdo.js.map
+dist/assets/useNavigate-Bbb67ACB.js.map
+dist/assets/useGm-CFw7JugJ.js.map
+dist/assets/errors-BWeEhnoY.js.map
+dist/assets/Wordmark-Cj7XSRMp.js.map
+dist/assets/imprint-DHI3hs9g.js.map
+dist/assets/privacy-CTuv10R6.js.map
+dist/assets/routes-D3dTc1EX.js.map

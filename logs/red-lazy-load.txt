@@ -1,0 +1,102 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-74
+
+ ❯ |ui| src/lib/telemetry.test.ts (32 tests | 6 failed) 61ms
+   ❯ initTelemetry (5)
+     × starts PostHog cookieless through /ingest, with the Product Marker and no flags 4ms
+     × starts once however often it is called 1ms
+     × delivers what the page sent while PostHog was still loading 1ms
+   ❯ track, log and reportError (3)
+     × sends a browser event under the next_session: prefix 1ms
+     × logs through the PostHog logger 1ms
+     × reports an error once, with the surface it came from 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > initTelemetry > starts PostHog cookieless through /ingest, with the Product Marker and no flags
+TypeError: posthogClient.init is not a function
+ ❯ Module.initTelemetry src/lib/telemetry.ts:71:33
+     69|   const token = source.VITE_POSTHOG_TOKEN;
+     70|   if (!token || client || !measurementIsOn(storage)) return;
+     71|   const started = posthogClient.init(token, telemetryOptions(source.VI…
+       |                                 ^
+     72|   if (!started) return;
+     73|   started.register({ product: PRODUCT });
+ ❯ src/lib/telemetry.test.ts:219:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > initTelemetry > starts once however often it is called
+TypeError: posthogClient.init is not a function
+ ❯ Module.initTelemetry src/lib/telemetry.ts:71:33
+     69|   const token = source.VITE_POSTHOG_TOKEN;
+     70|   if (!token || client || !measurementIsOn(storage)) return;
+     71|   const started = posthogClient.init(token, telemetryOptions(source.VI…
+       |                                 ^
+     72|   if (!started) return;
+     73|   started.register({ product: PRODUCT });
+ ❯ src/lib/telemetry.test.ts:259:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > initTelemetry > delivers what the page sent while PostHog was still loading
+TypeError: posthogClient.init is not a function
+ ❯ Module.initTelemetry src/lib/telemetry.ts:71:33
+     69|   const token = source.VITE_POSTHOG_TOKEN;
+     70|   if (!token || client || !measurementIsOn(storage)) return;
+     71|   const started = posthogClient.init(token, telemetryOptions(source.VI…
+       |                                 ^
+     72|   if (!started) return;
+     73|   started.register({ product: PRODUCT });
+ ❯ src/lib/telemetry.test.ts:284:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > track, log and reportError > sends a browser event under the next_session: prefix
+TypeError: posthogClient.init is not a function
+ ❯ Module.initTelemetry src/lib/telemetry.ts:71:33
+     69|   const token = source.VITE_POSTHOG_TOKEN;
+     70|   if (!token || client || !measurementIsOn(storage)) return;
+     71|   const started = posthogClient.init(token, telemetryOptions(source.VI…
+       |                                 ^
+     72|   if (!started) return;
+     73|   started.register({ product: PRODUCT });
+ ❯ started src/lib/telemetry.test.ts:302:21
+ ❯ src/lib/telemetry.test.ts:311:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > track, log and reportError > logs through the PostHog logger
+TypeError: posthogClient.init is not a function
+ ❯ Module.initTelemetry src/lib/telemetry.ts:71:33
+     69|   const token = source.VITE_POSTHOG_TOKEN;
+     70|   if (!token || client || !measurementIsOn(storage)) return;
+     71|   const started = posthogClient.init(token, telemetryOptions(source.VI…
+       |                                 ^
+     72|   if (!started) return;
+     73|   started.register({ product: PRODUCT });
+ ❯ started src/lib/telemetry.test.ts:302:21
+ ❯ src/lib/telemetry.test.ts:321:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > track, log and reportError > reports an error once, with the surface it came from
+TypeError: posthogClient.init is not a function
+ ❯ Module.initTelemetry src/lib/telemetry.ts:71:33
+     69|   const token = source.VITE_POSTHOG_TOKEN;
+     70|   if (!token || client || !measurementIsOn(storage)) return;
+     71|   const started = posthogClient.init(token, telemetryOptions(source.VI…
+       |                                 ^
+     72|   if (!started) return;
+     73|   started.register({ product: PRODUCT });
+ ❯ started src/lib/telemetry.test.ts:302:21
+ ❯ src/lib/telemetry.test.ts:329:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  6 failed | 30 passed (36)
+   Start at  15:16:00
+   Duration  6.71s (tests 85%, environment 12%, setup 2%, transform 1%)
+

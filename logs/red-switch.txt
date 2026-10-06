@@ -1,0 +1,60 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-74
+
+ ❯ |ui| src/features/legal/MeasurementSwitch.test.tsx (3 tests | 2 failed) 93ms
+   ❯ MeasurementSwitch (3)
+     × turns usage measurement off in this browser, and back on 11ms
+     × remembers that this browser turned it off 71ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/legal/MeasurementSwitch.test.tsx > MeasurementSwitch > turns usage measurement off in this browser, and back on
+TestingLibraryElementError: Unable to find an element with the text: Usage measurement is on in this browser.. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div />[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/legal/MeasurementSwitch.test.tsx:33:19
+     31|     const controls = browserMeasurement();
+     32|     render(<MeasurementSwitch controls={controls} />);
+     33|     expect(screen.getByText("Usage measurement is on in this browser."…
+       |                   ^
+     34|
+     35|     await userEvent.click(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/features/legal/MeasurementSwitch.test.tsx > MeasurementSwitch > remembers that this browser turned it off
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Turn it back on"
+
+There are no accessible roles. But there might be some inaccessible roles. If you wish to access them, then set the `hidden` option to `true`. Learn more about this here: https://testing-library.com/docs/dom-testing-library/api-queries#byrole
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div />[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/legal/MeasurementSwitch.test.tsx:53:19
+     51|     render(<MeasurementSwitch controls={browserMeasurement({ on: false…
+     52|
+     53|     expect(screen.getByRole("button", { name: "Turn it back on" })).to…
+       |                   ^
+     54|   });
+     55| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  15:13:21
+   Duration  739ms (environment 67%, tests 14%, setup 9%, import 4%, transform 4%, worker 1%)
+

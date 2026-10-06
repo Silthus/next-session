@@ -1,0 +1,128 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-74
+
+ ❯ |shared| worker/index.test.ts (30 tests | 16 failed) 37ms
+   ❯ ingestTarget (11)
+     × sends /ingest/static/array.js to https://eu-assets.i.posthog.com/static/array.js 2ms
+     × sends /ingest/static/exception-autocapture.js?v=1.438.1 to https://eu-assets.i.posthog.com/static/exception-autocapture.js?v=1.438.1 0ms
+     × sends /ingest/array/phc_abc/config.js to https://eu-assets.i.posthog.com/array/phc_abc/config.js 0ms
+     × sends /ingest/e/?ip=0&_=1&ver=1.438.1 to https://eu.i.posthog.com/e/?ip=0&_=1&ver=1.438.1 0ms
+     × sends /ingest/i/v1/logs?token=phc_abc to https://eu.i.posthog.com/i/v1/logs?token=phc_abc 0ms
+     × has no PostHog target for /ingest 0ms
+     × has no PostHog target for /ingest/ 0ms
+     × has no PostHog target for / 0ms
+     × has no PostHog target for /ingestion 0ms
+     × has no PostHog target for /s/AbC9_-xZ12 0ms
+     × has no PostHog target for /static/array.js 1ms
+   ❯ the /ingest proxy (5)
+     × forwards to PostHog with the visitor's IP and without cookies or credentials 3ms
+     × forwards no client-supplied X-Forwarded-For when Cloudflare names no visitor IP 0ms
+     × drops the cookies PostHog sets 1ms
+     × answers /ingest with 204 and forwards nothing 1ms
+     × answers /ingest/ with 204 and forwards nothing 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 16 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| worker/index.test.ts > ingestTarget > sends /ingest/static/array.js to https://eu-assets.i.posthog.com/static/array.js
+ FAIL  |shared| worker/index.test.ts > ingestTarget > sends /ingest/static/exception-autocapture.js?v=1.438.1 to https://eu-assets.i.posthog.com/static/exception-autocapture.js?v=1.438.1
+ FAIL  |shared| worker/index.test.ts > ingestTarget > sends /ingest/array/phc_abc/config.js to https://eu-assets.i.posthog.com/array/phc_abc/config.js
+ FAIL  |shared| worker/index.test.ts > ingestTarget > sends /ingest/e/?ip=0&_=1&ver=1.438.1 to https://eu.i.posthog.com/e/?ip=0&_=1&ver=1.438.1
+ FAIL  |shared| worker/index.test.ts > ingestTarget > sends /ingest/i/v1/logs?token=phc_abc to https://eu.i.posthog.com/i/v1/logs?token=phc_abc
+TypeError: ingestTarget is not a function
+ ❯ worker/index.test.ts:88:12
+     86|     ["/ingest/i/v1/logs?token=phc_abc", "https://eu.i.posthog.com/i/v1…
+     87|   ])("sends %s to %s", (path, target) => {
+     88|     expect(ingestTarget(new URL(`${app}${path}`))).toBe(target);
+       |            ^
+     89|   });
+     90|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/16]⎯
+
+ FAIL  |shared| worker/index.test.ts > ingestTarget > has no PostHog target for /ingest
+ FAIL  |shared| worker/index.test.ts > ingestTarget > has no PostHog target for /ingest/
+ FAIL  |shared| worker/index.test.ts > ingestTarget > has no PostHog target for /
+ FAIL  |shared| worker/index.test.ts > ingestTarget > has no PostHog target for /ingestion
+ FAIL  |shared| worker/index.test.ts > ingestTarget > has no PostHog target for /s/AbC9_-xZ12
+ FAIL  |shared| worker/index.test.ts > ingestTarget > has no PostHog target for /static/array.js
+TypeError: ingestTarget is not a function
+ ❯ worker/index.test.ts:94:14
+     92|     "has no PostHog target for %s",
+     93|     (path) => {
+     94|       expect(ingestTarget(new URL(`${app}${path}`))).toBeNull();
+       |              ^
+     95|     },
+     96|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/16]⎯
+
+ FAIL  |shared| worker/index.test.ts > the /ingest proxy > forwards to PostHog with the visitor's IP and without cookies or credentials
+AssertionError: expected '<!doctype html>' to be '{"status":1}' // Object.is equality
+
+Expected: "{"status":1}"
+Received: "<!doctype html>"
+
+ ❯ worker/index.test.ts:116:35
+    114|
+    115|     expect(response.status).toBe(200);
+    116|     expect(await response.text()).toBe('{"status":1}');
+       |                                   ^
+    117|     expect(requested).toEqual([]);
+    118|     expect(forwarded).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/16]⎯
+
+ FAIL  |shared| worker/index.test.ts > the /ingest proxy > forwards no client-supplied X-Forwarded-For when Cloudflare names no visitor IP
+TypeError: Cannot read properties of undefined (reading 'url')
+ ❯ worker/index.test.ts:134:26
+    132|     await visit("/ingest/static/array.js", { headers: { "x-forwarded-f…
+    133|
+    134|     expect(forwarded[0]!.url).toBe("https://eu-assets.i.posthog.com/st…
+       |                          ^
+    135|     expect(forwarded[0]!.headers.has("x-forwarded-for")).toBe(false);
+    136|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/16]⎯
+
+ FAIL  |shared| worker/index.test.ts > the /ingest proxy > drops the cookies PostHog sets
+AssertionError: expected 'text/plain;charset=UTF-8' to be 'text/plain' // Object.is equality
+
+Expected: "text/plain"
+Received: "text/plain;charset=UTF-8"
+
+ ❯ worker/index.test.ts:146:50
+    144|
+    145|     expect(response.headers.has("set-cookie")).toBe(false);
+    146|     expect(response.headers.get("content-type")).toBe("text/plain");
+       |                                                  ^
+    147|   });
+    148|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/16]⎯
+
+ FAIL  |shared| worker/index.test.ts > the /ingest proxy > answers /ingest with 204 and forwards nothing
+ FAIL  |shared| worker/index.test.ts > the /ingest proxy > answers /ingest/ with 204 and forwards nothing
+AssertionError: expected 200 to be 204 // Object.is equality
+
+- Expected
++ Received
+
+- 204
++ 200
+
+ ❯ worker/index.test.ts:154:29
+    152|     const { response, requested } = await visit(path);
+    153|
+    154|     expect(response.status).toBe(204);
+       |                             ^
+    155|     expect(forwarded).toEqual([]);
+    156|     expect(requested).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/16]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  16 failed | 14 passed (30)
+   Start at  15:12:34
+   Duration  207ms (tests 52%, transform 31%, import 13%, worker 4%)
+
