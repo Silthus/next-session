@@ -57,6 +57,7 @@ const DROPPED_PROPERTIES = new Set([
   "$browser_language",
   "$browser_language_prefix",
   "title",
+  "ph_keyword",
 ]);
 
 type Secret = { value: string; placeholder: string };
@@ -220,6 +221,7 @@ function telemetryOptions(
     disable_session_recording: true,
     disable_surveys: true,
     disable_scroll_properties: true,
+    save_campaign_params: false,
     persistence: "memory",
     advanced_disable_flags: true,
     logs: {

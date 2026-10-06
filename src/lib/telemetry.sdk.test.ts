@@ -41,6 +41,10 @@ const device = vi.hoisted(() => {
     };
     Object.defineProperty(Storage.prototype, name, { value: recording });
   }
+  Object.defineProperty(document, "referrer", {
+    configurable: true,
+    get: () => "https://www.bing.com/search?q=tuesday+crew+dnd",
+  });
   Object.defineProperty(document, "cookie", {
     configurable: true,
     get: () => "",
@@ -53,6 +57,7 @@ const device = vi.hoisted(() => {
 
 const shareToken = "AbC9_-xZ12";
 const claimCode = "SECRETCODE1";
+const clickId = "CLICKID12345";
 const toolbarLink = btoa(JSON.stringify({ action: "ph_authorize", token: "phc_throwaway" }));
 const token = { VITE_POSTHOG_TOKEN: "phc_throwaway", VITE_RELEASE: "abc123" };
 
@@ -88,7 +93,7 @@ beforeAll(() => {
   window.history.replaceState(
     null,
     "",
-    `/s/${shareToken}?code=${claimCode}&month=2026-10#__posthog=${toolbarLink}`,
+    `/s/${shareToken}?code=${claimCode}&month=2026-10&utm_source=newsletter&gclid=${clickId}#__posthog=${toolbarLink}`,
   );
 });
 
@@ -115,6 +120,9 @@ describe("a real posthog-js on a Player page", () => {
     expect(everything).toContain('"product":"next-session"');
     expect(everything).not.toContain(shareToken);
     expect(everything).not.toContain(claimCode);
+    expect(everything).not.toContain(clickId);
+    expect(everything).not.toMatch(/utm_|gclid/);
+    expect(everything).not.toMatch(/tuesday|ph_keyword/);
     expect(everything).not.toMatch(/\/(flags|decide)\//);
   });
 
