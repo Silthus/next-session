@@ -1,23 +1,29 @@
-import { gunzipSync } from "node:zlib";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 const transport = vi.hoisted(() => {
   const requests: { url: string; body: string }[] = [];
+  const decoding: Promise<void>[] = [];
   globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
-    requests.push({ url: String(input), body: readBody(init?.body) });
+    const request = { url: input instanceof Request ? input.url : input.toString(), body: "" };
+    requests.push(request);
+    decoding.push(
+      readBody(init?.body).then((body) => {
+        request.body = body;
+      }),
+    );
     return Promise.resolve(new Response("{}", { status: 200 }));
   };
-  function readBody(body: unknown): string {
+  async function readBody(body: unknown): Promise<string> {
     if (typeof body === "string") return body;
     if (!(body instanceof ArrayBuffer || ArrayBuffer.isView(body))) return "";
-    const bytes = Buffer.from(body instanceof ArrayBuffer ? body : body.buffer);
-    try {
-      return gunzipSync(bytes).toString();
-    } catch {
-      return bytes.toString();
-    }
+    const bytes = new Uint8Array(body instanceof ArrayBuffer ? body : body.buffer);
+    if (bytes[0] !== 0x1f || bytes[1] !== 0x8b) return new TextDecoder().decode(bytes);
+    const gunzipped = new Response(bytes.slice()).body!.pipeThrough(
+      new DecompressionStream("gzip"),
+    );
+    return await new Response(gunzipped).text();
   }
-  return { requests };
+  return { requests, decoding };
 });
 
 const shareToken = "AbC9_-xZ12";
@@ -30,6 +36,10 @@ async function sentEventually(...fragments: string[]) {
     },
     { timeout: 10_000, interval: 250 },
   );
+}
+
+async function everythingDecoded() {
+  await Promise.all(transport.decoding);
 }
 
 function sent() {
@@ -48,13 +58,14 @@ afterAll(() => {
 describe("a real posthog-js on a Player page", () => {
   it("sends events, errors and logs to /ingest without the Share Token or the claim code", async () => {
     const telemetry = await import("./telemetry");
-    telemetry.initTelemetry({ VITE_POSTHOG_TOKEN: "phc_throwaway", VITE_RELEASE: "abc123" });
+    await telemetry.initTelemetry({ VITE_POSTHOG_TOKEN: "phc_throwaway", VITE_RELEASE: "abc123" });
 
     telemetry.track({ name: "answers_started", group_id: "k57abc" });
     telemetry.reportError(new Error(`No group for ${shareToken}`), { surface: "test" });
     telemetry.log("info", "Save resumed", { from: `/s/${shareToken}?code=${claimCode}` });
     window.history.pushState(null, "", `/s/${shareToken}/again?code=${claimCode}`);
     await sentEventually("next_session:answers_started", "$exception", "Save resumed", "/again");
+    await everythingDecoded();
 
     const everything = sent();
     expect(
@@ -89,9 +100,10 @@ describe("a real posthog-js on a Player page", () => {
     expect(telemetry.measurementIsOn()).toBe(false);
     expect(Object.keys(localStorage)).toEqual(["next-session.measurementOff"]);
 
-    telemetry.turnMeasurementOn();
+    await telemetry.turnMeasurementOn();
     telemetry.track({ name: "keep_group_started", group_id: "back-on" });
     await sentEventually("back-on");
+    await everythingDecoded();
 
     expect(telemetry.measurementIsOn()).toBe(true);
     expect(sent()).not.toContain("while-off");

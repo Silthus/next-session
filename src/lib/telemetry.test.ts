@@ -31,8 +31,11 @@ function fakePostHog() {
     captureException: vi.fn(),
     logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   };
-  const init = vi.fn((_token: string, _config: Partial<PostHogConfig>) => instance);
-  return { client: { init }, init, instance };
+  const init = vi.fn<(token: string, config: Partial<PostHogConfig>) => typeof instance>(
+    () => instance,
+  );
+  const load = vi.fn(() => Promise.resolve({ init }));
+  return { load, init, instance };
 }
 
 function event(name: string, properties: Record<string, unknown>): CaptureResult {
@@ -203,21 +206,21 @@ describe("initTelemetry", () => {
     const telemetry = await freshTelemetry();
     const posthog = fakePostHog();
 
-    telemetry.initTelemetry({}, posthog.client, memoryStorage());
+    await telemetry.initTelemetry({}, posthog.load, memoryStorage());
     telemetry.track({ name: "save_started" });
     telemetry.log("info", "Save resumed");
     telemetry.reportError(new Error("boom"), { surface: "root" });
 
-    expect(posthog.init).not.toHaveBeenCalled();
+    expect(posthog.load).not.toHaveBeenCalled();
   });
 
   it("starts PostHog cookieless through /ingest, with the Product Marker and no flags", async () => {
     const telemetry = await freshTelemetry();
     const posthog = fakePostHog();
 
-    telemetry.initTelemetry(
+    await telemetry.initTelemetry(
       { VITE_POSTHOG_TOKEN: "phc_test", VITE_RELEASE: "abc123" },
-      posthog.client,
+      posthog.load,
       memoryStorage(),
     );
 
@@ -254,9 +257,13 @@ describe("initTelemetry", () => {
     const posthog = fakePostHog();
     const source = { VITE_POSTHOG_TOKEN: "phc_test" };
 
-    telemetry.initTelemetry(source, posthog.client, memoryStorage());
-    telemetry.initTelemetry(source, posthog.client, memoryStorage());
+    await Promise.all([
+      telemetry.initTelemetry(source, posthog.load, memoryStorage()),
+      telemetry.initTelemetry(source, posthog.load, memoryStorage()),
+    ]);
+    await telemetry.initTelemetry(source, posthog.load, memoryStorage());
 
+    expect(posthog.load).toHaveBeenCalledOnce();
     expect(posthog.init).toHaveBeenCalledOnce();
   });
 
@@ -266,10 +273,27 @@ describe("initTelemetry", () => {
     const storage = memoryStorage();
     telemetry.turnMeasurementOff(storage);
 
-    telemetry.initTelemetry({ VITE_POSTHOG_TOKEN: "phc_test" }, posthog.client, storage);
+    await telemetry.initTelemetry({ VITE_POSTHOG_TOKEN: "phc_test" }, posthog.load, storage);
 
-    expect(posthog.init).not.toHaveBeenCalled();
+    expect(posthog.load).not.toHaveBeenCalled();
     expect(telemetry.measurementIsOn(storage)).toBe(false);
+  });
+
+  it("delivers what the page sent while PostHog was still loading", async () => {
+    const telemetry = await freshTelemetry();
+    const posthog = fakePostHog();
+
+    const starting = telemetry.initTelemetry(
+      { VITE_POSTHOG_TOKEN: "phc_test" },
+      posthog.load,
+      memoryStorage(),
+    );
+    telemetry.track({ name: "save_started" });
+    telemetry.log("info", "Save resumed");
+    await starting;
+
+    expect(posthog.instance.capture).toHaveBeenCalledWith("next_session:save_started", {});
+    expect(posthog.instance.logger.info).toHaveBeenCalledWith("Save resumed", undefined);
   });
 });
 
@@ -277,7 +301,11 @@ describe("track, log and reportError", () => {
   async function started() {
     const telemetry = await freshTelemetry();
     const posthog = fakePostHog();
-    telemetry.initTelemetry({ VITE_POSTHOG_TOKEN: "phc_test" }, posthog.client, memoryStorage());
+    await telemetry.initTelemetry(
+      { VITE_POSTHOG_TOKEN: "phc_test" },
+      posthog.load,
+      memoryStorage(),
+    );
     return { telemetry, instance: posthog.instance };
   }
 

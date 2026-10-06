@@ -1,9 +1,9 @@
-import posthog, {
-  type CaptureLogOptions,
-  type CaptureResult,
-  type PostHog,
-  type PostHogConfig,
-  type Properties,
+import type {
+  CaptureLogOptions,
+  CaptureResult,
+  PostHog,
+  PostHogConfig,
+  Properties,
 } from "posthog-js";
 import type { KeyValueStorage } from "./storage";
 
@@ -33,6 +33,8 @@ type ActiveClient = Pick<PostHog, "register" | "capture" | "captureException"> &
 export type TelemetryClient = {
   init(token: string, config: Partial<PostHogConfig>): ActiveClient | undefined;
 };
+export type LoadPostHog = () => Promise<TelemetryClient>;
+type ClientCall = (client: ActiveClient) => void;
 
 const PRODUCT = "next-session";
 const EVENT_PREFIX = "next_session:";
@@ -58,34 +60,36 @@ const DROPPED_PROPERTIES = new Set([
 
 type Secret = { value: string; placeholder: string };
 
+const loadPostHog: LoadPostHog = async () => (await import("posthog-js")).default;
+
 let client: ActiveClient | null = null;
+let starting: Promise<void> | null = null;
+let waitingCalls: ClientCall[] | null = null;
 const reportedErrors = new WeakSet<object>();
 
 export function initTelemetry(
   source: EnvSource = import.meta.env,
-  posthogClient: TelemetryClient = posthog,
+  load: LoadPostHog = loadPostHog,
   storage: KeyValueStorage = browserStorage(),
-): void {
+): Promise<void> {
   const token = source.VITE_POSTHOG_TOKEN;
-  if (!token || client || !measurementIsOn(storage)) return;
-  const started = posthogClient.init(token, telemetryOptions(source.VITE_RELEASE, storage));
-  if (!started) return;
-  started.register({ product: PRODUCT });
-  client = started;
+  if (!token || !measurementIsOn(storage)) return Promise.resolve();
+  starting ??= start(load, token, source.VITE_RELEASE, storage);
+  return starting;
 }
 
 export function track(event: BrowserEvent): void {
   const { name, ...properties } = event;
-  client?.capture(`${EVENT_PREFIX}${name}`, properties);
+  withClient((active) => active.capture(`${EVENT_PREFIX}${name}`, properties));
 }
 
 export function log(level: LogLevel, body: string, attributes?: LogAttributes): void {
-  client?.logger[level](body, attributes);
+  withClient((active) => active.logger[level](body, attributes));
 }
 
 export function reportError(error: unknown, context: { surface: string }): void {
-  if (!client || alreadyReported(error)) return;
-  client.captureException(error, context);
+  if (alreadyReported(error)) return;
+  withClient((active) => active.captureException(error, context));
 }
 
 export function measurementAvailable(source: EnvSource = import.meta.env): boolean {
@@ -100,9 +104,9 @@ export function turnMeasurementOff(storage: KeyValueStorage = browserStorage()):
   attempt(() => storage.setItem(MEASUREMENT_OFF_KEY, "1"), undefined);
 }
 
-export function turnMeasurementOn(storage: KeyValueStorage = browserStorage()): void {
+export function turnMeasurementOn(storage: KeyValueStorage = browserStorage()): Promise<void> {
   attempt(() => storage.removeItem(MEASUREMENT_OFF_KEY), undefined);
-  initTelemetry(import.meta.env, posthog, storage);
+  return initTelemetry(import.meta.env, loadPostHog, storage);
 }
 
 export function redactUrl(url: string): string {
@@ -134,6 +138,33 @@ export function redactLog(record: CaptureLogOptions, currentUrl: string): Captur
       "url.full": redactUrl(currentUrl),
     },
   };
+}
+
+function start(
+  load: LoadPostHog,
+  token: string,
+  release: string | undefined,
+  storage: KeyValueStorage,
+): Promise<void> {
+  waitingCalls = [];
+  return load()
+    .then((posthog) => posthog.init(token, telemetryOptions(release, storage)))
+    .then((started) => started && becomeActive(started))
+    .catch(() => undefined)
+    .finally(() => {
+      waitingCalls = null;
+    });
+}
+
+function becomeActive(started: ActiveClient): void {
+  started.register({ product: PRODUCT });
+  client = started;
+  waitingCalls?.forEach((call) => call(started));
+}
+
+function withClient(call: ClientCall): void {
+  if (client) call(client);
+  else waitingCalls?.push(call);
 }
 
 function telemetryOptions(
@@ -241,7 +272,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 function browserStorage(): KeyValueStorage {
-  return attempt(() => window.localStorage, {
+  return attempt<KeyValueStorage>(() => window.localStorage, {
     getItem: () => null,
     setItem: () => undefined,
     removeItem: () => undefined,

@@ -82,6 +82,18 @@ jobs:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
           LEGAL_CONTROLLER_ADDRESS: ${{ vars.LEGAL_CONTROLLER_ADDRESS }}
           LEGAL_CONTACT_EMAIL: ${{ vars.LEGAL_CONTACT_EMAIL }}
+          VITE_POSTHOG_TOKEN: ${{ vars.VITE_POSTHOG_TOKEN }}
+          VITE_RELEASE: ${{ github.sha }}
+          POSTHOG_PROJECT_ID: ${{ vars.POSTHOG_PROJECT_ID }}
+          POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+      - name: Refuse to ship source maps
+        if: steps.head.outputs.current == 'true'
+        run: |
+          maps="$(find dist -name '*.map')"
+          if [ -n "$maps" ]; then
+            echo "::error::dist/ holds source maps: $maps"
+            exit 1
+          fi
       - name: Deploy the Worker
         if: steps.head.outputs.current == 'true'
         run: bunx wrangler deploy
@@ -106,3 +118,4 @@ jobs:
           expect_response /s/AAAAAAAAAA "200 "
           expect_response /s/AAAAAAAA "302 $LONIR_URL/s/AAAAAAAA"
           expect_response "/groups/smoke?month=2026-01" "302 $LONIR_URL/groups/smoke?month=2026-01"
+          expect_response /ingest/ "204 "

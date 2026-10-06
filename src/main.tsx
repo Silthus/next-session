@@ -5,7 +5,10 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { convexUrl } from "./lib/env";
+import { initTelemetry, reportError } from "./lib/telemetry";
 import { routeTree } from "./routeTree.gen";
+
+void initTelemetry();
 
 const convex = new ConvexReactClient(convexUrl());
 const router = createRouter({ routeTree });
@@ -16,7 +19,12 @@ declare module "@tanstack/react-router" {
   }
 }
 
-createRoot(document.getElementById("root")!).render(
+function reportCaughtError(error: unknown) {
+  console.error(error);
+  reportError(error, { surface: "react" });
+}
+
+createRoot(document.getElementById("root")!, { onCaughtError: reportCaughtError }).render(
   <StrictMode>
     <ConvexAuthProvider client={convex}>
       <RouterProvider router={router} />
