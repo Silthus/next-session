@@ -132,7 +132,7 @@ function LinkInHand({
         </span>
         Your link is ready. Send it to your players.
       </p>
-      <ShareLinkCard url={shareUrl} />
+      <ShareLinkCard url={shareUrl} surface="landing" />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Link
           to="/g/$groupId"

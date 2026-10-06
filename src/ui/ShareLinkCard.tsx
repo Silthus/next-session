@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { log, track, type BrowserEvent } from "../lib/telemetry";
 import { Button } from "./Button";
 import { cn } from "./cn";
 import { Eyebrow } from "./Eyebrow";
@@ -13,14 +14,19 @@ export function shareMessage(url: string) {
 }
 
 type CopyState = "idle" | "copied" | "blocked";
+type ShareSurface = Extract<BrowserEvent, { name: "share_link_copied" }>["surface"];
+type ShareChannel = Extract<BrowserEvent, { name: "share_link_shared" }>["channel"];
+type CopyMethod = Extract<BrowserEvent, { name: "share_link_copied" }>["method"];
 
 export function ShareLinkCard({
   url,
   compact = false,
+  surface = compact ? "compact" : "rail",
   onRotate,
 }: {
   url: string;
   compact?: boolean;
+  surface?: ShareSurface;
   onRotate?: () => void;
 }) {
   const [copied, setCopied] = useState<{ url: string; state: CopyState }>({ url, state: "idle" });
@@ -33,9 +39,10 @@ export function ShareLinkCard({
   }, [copyState, url]);
 
   const copy = () => {
-    void copyText(url)
-      .then(() => setCopyState("copied"))
-      .catch(() => setCopyState("blocked"));
+    void copyText(url, surface).then((method) => {
+      track({ name: "share_link_copied", surface, method });
+      setCopyState(method === "failed" ? "blocked" : "copied");
+    });
   };
 
   return (
@@ -79,7 +86,10 @@ export function ShareLinkCard({
           compact ? "mt-2" : "mt-3",
         )}
       >
-        <ShareTargets url={url} />
+        <ShareTargets
+          url={url}
+          onShared={(channel) => track({ name: "share_link_shared", surface, channel })}
+        />
         {!compact && (
           <p className="text-xs text-ink-3">
             Anyone with the link can answer. Keep it in the group.
@@ -90,10 +100,25 @@ export function ShareLinkCard({
   );
 }
 
-function copyText(text: string): Promise<void> {
-  return writeToClipboard(text).catch(() => {
-    if (!copyThroughSelection(text)) throw new Error("Copy refused");
-  });
+function copyText(text: string, surface: ShareSurface): Promise<CopyMethod> {
+  return writeToClipboard(text).then(
+    () => "clipboard",
+    (refusal: unknown) => {
+      const reason = refusalName(refusal);
+      if (copyThroughSelection(text)) {
+        log("warn", "Copy fell back to the selection", { surface, reason });
+        return "fallback";
+      }
+      log("error", "Copy failed", { surface, reason });
+      return "failed";
+    },
+  );
+}
+
+function refusalName(refusal: unknown) {
+  const name: unknown =
+    typeof refusal === "object" && refusal !== null && "name" in refusal ? refusal.name : null;
+  return typeof name === "string" && /^[A-Za-z]{1,40}$/.test(name) ? name : "unknown";
 }
 
 function copyThroughSelection(text: string) {
@@ -127,9 +152,9 @@ function writeToClipboard(text: string): Promise<void> {
   }
 }
 
-function shareNatively(text: string) {
+function shareNatively(text: string, onShared: () => void) {
   try {
-    void navigator.share({ text }).catch(() => undefined);
+    void navigator.share({ text }).then(onShared, () => undefined);
   } catch {
     return;
   }
@@ -138,11 +163,18 @@ function shareNatively(text: string) {
 const roundTarget =
   "inline-flex size-10 items-center justify-center rounded-full text-sm font-bold transition-transform hover:scale-105 active:scale-95";
 
-function ShareTargets({ url }: { url: string }) {
+function ShareTargets({
+  url,
+  onShared,
+}: {
+  url: string;
+  onShared: (channel: ShareChannel) => void;
+}) {
   const message = shareMessage(url);
   const encoded = encodeURIComponent(message);
   const targets = [
     {
+      channel: "whatsapp",
       label: "WhatsApp",
       glyph: "W",
       tone: "bg-[#25D366] text-white",
@@ -150,6 +182,7 @@ function ShareTargets({ url }: { url: string }) {
       newTab: true,
     },
     {
+      channel: "telegram",
       label: "Telegram",
       glyph: "T",
       tone: "bg-[#2AABEE] text-white",
@@ -157,13 +190,14 @@ function ShareTargets({ url }: { url: string }) {
       newTab: true,
     },
     {
+      channel: "mail",
       label: "Mail",
       glyph: "@",
       tone: "bg-surface text-ink",
       href: `mailto:?subject=${encodeURIComponent("Our next game night")}&body=${encoded}`,
       newTab: false,
     },
-  ];
+  ] satisfies { channel: ShareChannel }[];
   return (
     <div className="flex items-center gap-2">
       {targets.map((target) => (
@@ -172,6 +206,7 @@ function ShareTargets({ url }: { url: string }) {
           href={target.href}
           {...(target.newTab ? { target: "_blank", rel: "noreferrer" } : {})}
           aria-label={`Share via ${target.label}`}
+          onClick={() => onShared(target.channel)}
           className={cn(roundTarget, target.tone)}
         >
           {target.glyph}
@@ -181,7 +216,7 @@ function ShareTargets({ url }: { url: string }) {
         <button
           type="button"
           aria-label="Share"
-          onClick={() => shareNatively(message)}
+          onClick={() => shareNatively(message, () => onShared("native"))}
           className={cn(roundTarget, "bg-surface text-ink")}
         >
           ↗
