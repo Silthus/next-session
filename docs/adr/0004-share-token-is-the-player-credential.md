@@ -11,3 +11,7 @@ Players never sign in. Every player function takes the Share Token and checks th
 
 - Public mutations need rate limits keyed by Group and Player (ADR-0007).
 - New Share Tokens are 10 characters (60 bits) from `A-Za-z0-9_-`. Lonir's were 8, and the length difference lets the Worker tell legacy links apart (ADR-0005).
+
+## Amended
+
+[ADR-0010](0010-accounts-claim-players-share-token-still-answers.md) (2026-10-06): an Account can claim one Player per Group. The Share Token is still the only credential to answer, and a Claimed Player stays answerable through the link. Player identity lives on the device, or on the Account for a Claimed Player; the server's claim wins.

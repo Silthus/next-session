@@ -13,16 +13,18 @@ const tabs: { id: Tab; label: string }[] = [
 
 export function GroupRail({
   wide,
+  rosterEmpty,
   shareLink,
   dayPanel,
   panels,
 }: {
   wide: boolean;
+  rosterEmpty: boolean;
   shareLink: ReactNode;
   dayPanel: ReactNode;
   panels: RailPanels;
 }) {
-  if (!wide) return <PhoneRail panels={panels} />;
+  if (!wide) return <PhoneRail panels={panels} firstTab={rosterEmpty ? "players" : "bestNights"} />;
   return (
     <aside aria-label="Group overview" className="flex flex-col gap-4">
       {shareLink}
@@ -34,8 +36,8 @@ export function GroupRail({
   );
 }
 
-function PhoneRail({ panels }: { panels: RailPanels }) {
-  const [active, setActive] = useState<Tab>("bestNights");
+function PhoneRail({ panels, firstTab }: { panels: RailPanels; firstTab: Tab }) {
+  const [active, setActive] = useState(firstTab);
   const tabRefs = useRef(new Map<Tab, HTMLButtonElement>());
   const baseId = useId();
   const tabId = (tab: Tab) => `${baseId}-tab-${tab}`;
