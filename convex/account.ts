@@ -1,10 +1,10 @@
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx } from "./_generated/server";
-import { currentGm, requireGm } from "./model/access";
+import { currentGm, requireAccount, requireGm } from "./model/access";
 import { fail } from "./model/errors";
 import { deleteAnonymousGm } from "./model/gms";
-import { groupsOwnedBy } from "./model/groups";
+import { ensureRoomForGroups, groupsOwnedBy } from "./model/groups";
 import { enforceRateLimit } from "./model/rateLimits";
 
 const CLAIM_CODE_BYTES = 32;
@@ -42,8 +42,7 @@ export const finishSave = mutation({
   args: { code: v.string() },
   returns: v.object({ groupIds: v.array(v.id("groups")) }),
   handler: async (ctx, { code }) => {
-    const account = await requireGm(ctx);
-    if (account.isAnonymous === true) fail({ code: "UNAUTHENTICATED" });
+    const account = await requireAccount(ctx);
     const anonymousGm = await redeemClaim(ctx, code);
     await enforceRateLimit(ctx, "gmEdit", account._id);
     const groupIds = await moveGroups(ctx, anonymousGm, account);
@@ -78,6 +77,7 @@ async function redeemClaim(ctx: MutationCtx, code: string) {
 
 async function moveGroups(ctx: MutationCtx, from: Doc<"users">, to: Doc<"users">) {
   const groups = await groupsOwnedBy(ctx, from._id);
+  await ensureRoomForGroups(ctx, to, groups.length);
   for (const group of groups) {
     await ctx.db.patch("groups", group._id, { ownerId: to._id, expiresAt: undefined });
   }

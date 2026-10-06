@@ -16,6 +16,15 @@ export async function requireGm(ctx: QueryCtx): Promise<Doc<"users">> {
   return (await currentGm(ctx)) ?? fail({ code: "UNAUTHENTICATED" });
 }
 
+export async function currentAccount(ctx: QueryCtx): Promise<Doc<"users"> | null> {
+  const user = await currentGm(ctx);
+  return user?.isAnonymous === true ? null : user;
+}
+
+export async function requireAccount(ctx: QueryCtx): Promise<Doc<"users">> {
+  return (await currentAccount(ctx)) ?? fail({ code: "UNAUTHENTICATED" });
+}
+
 export async function findOwnedGroup(ctx: QueryCtx, rawGroupId: string) {
   const gm = await currentGm(ctx);
   const groupId = ctx.db.normalizeId("groups", rawGroupId);
