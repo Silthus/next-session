@@ -50,7 +50,7 @@ export function DayCell({
       <span
         className={cn(
           "flex items-center gap-1 text-xs font-semibold leading-none sm:text-sm",
-          isToday && isPlain(day) && "text-accent",
+          isToday && isPlain(day) && "text-accent-strong",
         )}
       >
         {Number(day.date.slice(8))}
@@ -59,7 +59,7 @@ export function DayCell({
         )}
       </span>
       {day.session && (
-        <IconStar className="absolute top-1 right-1 size-3 text-accent sm:top-1.5 sm:right-1.5 sm:size-4" />
+        <IconStar className="absolute top-1 right-1 size-3 text-accent-strong sm:top-1.5 sm:right-1.5 sm:size-4" />
       )}
       <DayAnswers day={day} players={players} onSolidFree={perfect} />
     </button>

@@ -82,7 +82,7 @@ function NightRow({
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5 text-sm font-semibold">
           {label}
-          {night.session && <IconStar className="size-3.5 text-accent" />}
+          {night.session && <IconStar className="size-3.5 text-accent-strong" />}
         </span>
         <span className="block text-xs text-ink-3">{counts}</span>
       </span>
