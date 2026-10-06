@@ -9,11 +9,11 @@ Current configuration:
   routeFileIgnorePattern: undefined
 vite v8.3.2 building client environment for production...
 transforming...
-✓ 272 modules transformed.
+✓ 274 modules transformed.
 rendering chunks...
 [posthog-rollup-plugin] no release could be resolved, injecting chunk ids only, so exceptions from this build will report no release. Set sourcemaps.releaseName and sourcemaps.releaseVersion, or build from a git repository or a supported CI environment.
 computing gzip size...
-dist/index.html                                                          0.93 kB │ gzip:   0.40 kB
+dist/index.html                                                          0.93 kB │ gzip:  0.40 kB
 dist/assets/jetbrains-mono-greek-500-normal-JpySY46c.woff2               4.28 kB
 dist/assets/jetbrains-mono-cyrillic-500-normal-DmUKJPL_.woff2            5.35 kB
 dist/assets/jetbrains-mono-vietnamese-500-normal-DNRqzVM1.woff           5.47 kB
@@ -33,29 +33,30 @@ dist/assets/bricolage-grotesque-latin-ext-opsz-normal-IcJDqblK.woff2    30.73 kB
 dist/assets/inter-latin-wght-normal-Dx4kXJAl.woff2                      48.25 kB
 dist/assets/bricolage-grotesque-latin-opsz-normal-Cre6nC2_.woff2        76.88 kB
 dist/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2                  85.06 kB
-dist/assets/index-458mLVvu.css                                          58.99 kB │ gzip:  17.93 kB
-dist/assets/terms--zJ12_wI.js                                            0.51 kB │ gzip:   0.32 kB │ map:     0.66 kB
-dist/assets/imprint-DHI3hs9g.js                                          0.51 kB │ gzip:   0.32 kB │ map:     0.67 kB
-dist/assets/privacy-CTuv10R6.js                                          0.51 kB │ gzip:   0.32 kB │ map:     0.67 kB
-dist/assets/g._groupId-4TE7tali.js                                       0.58 kB │ gzip:   0.37 kB │ map:     1.50 kB
-dist/assets/Eyebrow-D5SiFkdo.js                                          0.58 kB │ gzip:   0.37 kB │ map:     0.70 kB
-dist/assets/g._groupId-DbfdSQG3.js                                       0.61 kB │ gzip:   0.37 kB │ map:     1.45 kB
-dist/assets/Wordmark-Cj7XSRMp.js                                         0.80 kB │ gzip:   0.47 kB │ map:     1.29 kB
-dist/assets/PageShell-CkHEhJfj.js                                        0.95 kB │ gzip:   0.54 kB │ map:     1.80 kB
-dist/assets/preload-helper-BKfZEzcp.js                                   1.74 kB │ gzip:   0.91 kB
-dist/assets/icons-dj1yOpx1.js                                            3.74 kB │ gzip:   1.47 kB │ map:    21.50 kB
-dist/assets/pageTitle-BGugrAGx.js                                        4.71 kB │ gzip:   1.79 kB │ map:    33.95 kB
-dist/assets/errors-BWeEhnoY.js                                           5.28 kB │ gzip:   2.45 kB │ map:    17.12 kB
-dist/assets/routes-D3dTc1EX.js                                           8.22 kB │ gzip:   3.10 kB │ map:    23.42 kB
-dist/assets/LegalPage-BH9GkgvB.js                                       13.34 kB │ gzip:   5.50 kB │ map:    19.97 kB
-dist/assets/useGm-CFw7JugJ.js                                           14.09 kB │ gzip:   5.32 kB │ map:    42.99 kB
-dist/assets/s._shareToken-LNSE1JY1.js                                   19.84 kB │ gzip:   6.97 kB │ map:    60.73 kB
-dist/assets/LegalFooter-B6Ci8LTO.js                                     22.30 kB │ gzip:   9.03 kB │ map:   100.44 kB
-dist/assets/GroupScreen-b0YfnPOP.js                                     42.24 kB │ gzip:  12.95 kB │ map:   144.51 kB
-dist/assets/useNavigate-Bbb67ACB.js                                     70.74 kB │ gzip:  20.00 kB │ map:   246.10 kB
-dist/assets/index-CrCtNWmz.js                                          300.34 kB │ gzip:  96.50 kB │ map: 1,422.64 kB
-dist/assets/module-CsHAHK0H.js                                         303.50 kB │ gzip: 101.32 kB │ map:   706.75 kB
+dist/assets/index-BSkzwtEh.css                                          59.58 kB │ gzip: 18.05 kB
+dist/assets/terms-CF24VQAs.js                                            0.51 kB │ gzip:  0.32 kB │ map:     0.66 kB
+dist/assets/imprint-DDyrZpUS.js                                          0.51 kB │ gzip:  0.32 kB │ map:     0.67 kB
+dist/assets/privacy-Bt1KUYuF.js                                          0.51 kB │ gzip:  0.32 kB │ map:     0.67 kB
+dist/assets/g._groupId-fnszFRiI.js                                       0.58 kB │ gzip:  0.36 kB │ map:     1.50 kB
+dist/assets/Eyebrow-D5SiFkdo.js                                          0.58 kB │ gzip:  0.37 kB │ map:     0.70 kB
+dist/assets/g._groupId-Cgq0D7ff.js                                       0.61 kB │ gzip:  0.37 kB │ map:     1.45 kB
+dist/assets/Wordmark-Cj7XSRMp.js                                         0.80 kB │ gzip:  0.47 kB │ map:     1.29 kB
+dist/assets/PageShell-CkHEhJfj.js                                        0.95 kB │ gzip:  0.54 kB │ map:     1.80 kB
+dist/assets/preload-helper-BKfZEzcp.js                                   1.74 kB │ gzip:  0.91 kB
+dist/assets/icons-dj1yOpx1.js                                            3.74 kB │ gzip:  1.47 kB │ map:    21.50 kB
+dist/assets/pageTitle-BGugrAGx.js                                        4.71 kB │ gzip:  1.79 kB │ map:    33.95 kB
+dist/assets/errors-BWeEhnoY.js                                           5.28 kB │ gzip:  2.45 kB │ map:    17.12 kB
+dist/assets/routes-YYiVmXef.js                                           8.38 kB │ gzip:  3.15 kB │ map:    23.82 kB
+dist/assets/LegalPage-DMLl6nkB.js                                       14.07 kB │ gzip:  5.75 kB │ map:    20.11 kB
+dist/assets/useGm-TFip8FZv.js                                           16.86 kB │ gzip:  6.45 kB │ map:    51.42 kB
+dist/assets/s._shareToken-B4wmN1Wj.js                                   19.84 kB │ gzip:  6.97 kB │ map:    60.73 kB
+dist/assets/LegalFooter-B6Ci8LTO.js                                     22.30 kB │ gzip:  9.03 kB │ map:   100.44 kB
+dist/assets/GroupScreen-DtHGMOWP.js                                     42.55 kB │ gzip: 13.09 kB │ map:   145.82 kB
+dist/assets/useNavigate-Bbb67ACB.js                                     70.74 kB │ gzip: 20.00 kB │ map:   246.10 kB
+dist/assets/module.slim-COXMLTUe.js                                    146.79 kB │ gzip: 51.41 kB │ map:   328.28 kB
+dist/assets/extension-bundles-CkAczRzD.js                              173.26 kB │ gzip: 57.15 kB │ map:   395.54 kB
+dist/assets/index-uodvt-7d.js                                          300.35 kB │ gzip: 96.57 kB │ map: 1,423.14 kB
 
 [plugin @tailwindcss/vite:generate:build] [33m[SOURCEMAP_BROKEN] [0mSourcemap is likely to be incorrect: a plugin (@tailwindcss/vite:generate:build) was used to transform files, but didn't generate a sourcemap for the transformation. Consult the plugin documentation for help: https://rolldown.rs/guide/troubleshooting#warning-sourcemap-is-likely-to-be-incorrect
 
-✓ built in 423ms
+✓ built in 480ms
