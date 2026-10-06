@@ -1,0 +1,201 @@
+{
+  "name": "Next Session: Tips",
+  "description": "Two Tips after double opt-in (marketing, unsubscribe link in each). Started only by Convex (account.confirmTips) through the secret-guarded webhook. A Session scheduled after confirming ends the run, so no further Tip goes out. Source: docs/posthog/workflows/tips.json in Silthus/next-session.",
+  "exit_condition": "exit_only_at_end",
+  "actions": [
+    {
+      "id": "trigger_node",
+      "name": "Tips confirmed, requested by Convex",
+      "type": "trigger",
+      "config": {
+        "type": "webhook",
+        "template_id": "template-source-webhook",
+        "inputs": {
+          "event": {
+            "value": "next_session:tips_requested"
+          },
+          "distinct_id": {
+            "value": "{request.body.distinct_id}"
+          },
+          "properties": {
+            "value": {
+              "product": "{request.body.product}",
+              "email": "{request.body.email}"
+            }
+          },
+          "auth_header": {
+            "value": "Bearer <POSTHOG_MAIL_WEBHOOK_SECRET>"
+          },
+          "method": {
+            "value": "POST"
+          }
+        }
+      }
+    },
+    {
+      "id": "wait_before_tip_1",
+      "name": "Wait up to 2 days for a scheduled Session",
+      "type": "wait_until_condition",
+      "config": {
+        "events": [
+          {
+            "name": "Session scheduled",
+            "filters": {
+              "events": [
+                {
+                  "id": "next_session:session_scheduled",
+                  "name": "next_session:session_scheduled",
+                  "type": "events",
+                  "order": 0,
+                  "properties": [
+                    {
+                      "key": "product",
+                      "value": ["next-session"],
+                      "operator": "exact",
+                      "type": "event"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "max_wait_duration": "2d"
+      }
+    },
+    {
+      "id": "email_tip_1",
+      "name": "Tip 1: get your players in",
+      "type": "function_email",
+      "config": {
+        "template_id": "template-email",
+        "template_uuid": "<TEMPLATE:tip-1>",
+        "message_category_type": "marketing",
+        "tracking_enabled": false,
+        "inputs": {
+          "email": {
+            "value": {
+              "to": {
+                "email": "{{ event.properties.email }}",
+                "name": ""
+              },
+              "from": {
+                "integrationId": "<SENDER_INTEGRATION_ID>",
+                "email": "hello@next-session.link",
+                "name": "Michael from Next Session"
+              },
+              "replyTo": "<REPLY_TO>",
+              "preheader": "The fastest way to get every answer in."
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "wait_before_tip_2",
+      "name": "Wait up to 5 days for a scheduled Session",
+      "type": "wait_until_condition",
+      "config": {
+        "events": [
+          {
+            "name": "Session scheduled",
+            "filters": {
+              "events": [
+                {
+                  "id": "next_session:session_scheduled",
+                  "name": "next_session:session_scheduled",
+                  "type": "events",
+                  "order": 0,
+                  "properties": [
+                    {
+                      "key": "product",
+                      "value": ["next-session"],
+                      "operator": "exact",
+                      "type": "event"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "max_wait_duration": "5d"
+      }
+    },
+    {
+      "id": "email_tip_2",
+      "name": "Tip 2: pick the date",
+      "type": "function_email",
+      "config": {
+        "template_id": "template-email",
+        "template_uuid": "<TEMPLATE:tip-2>",
+        "message_category_type": "marketing",
+        "tracking_enabled": false,
+        "inputs": {
+          "email": {
+            "value": {
+              "to": {
+                "email": "{{ event.properties.email }}",
+                "name": ""
+              },
+              "from": {
+                "integrationId": "<SENDER_INTEGRATION_ID>",
+                "email": "hello@next-session.link",
+                "name": "Michael from Next Session"
+              },
+              "replyTo": "<REPLY_TO>",
+              "preheader": "Once a few answers are in, the calendar does the math."
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "exit_node",
+      "name": "Exit",
+      "type": "exit",
+      "config": {
+        "reason": "Tips done"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "trigger_node",
+      "to": "wait_before_tip_1",
+      "type": "continue"
+    },
+    {
+      "from": "wait_before_tip_1",
+      "to": "exit_node",
+      "type": "branch",
+      "index": 0
+    },
+    {
+      "from": "wait_before_tip_1",
+      "to": "email_tip_1",
+      "type": "continue"
+    },
+    {
+      "from": "email_tip_1",
+      "to": "wait_before_tip_2",
+      "type": "continue"
+    },
+    {
+      "from": "wait_before_tip_2",
+      "to": "exit_node",
+      "type": "branch",
+      "index": 0
+    },
+    {
+      "from": "wait_before_tip_2",
+      "to": "email_tip_2",
+      "type": "continue"
+    },
+    {
+      "from": "email_tip_2",
+      "to": "exit_node",
+      "type": "continue"
+    }
+  ]
+}

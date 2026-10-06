@@ -2,7 +2,7 @@
 
 > **Draft, pending review by a qualified German lawyer before publication.** Source text for the `/privacy` page. `{{…}}` placeholders are filled at build time (see `docs/spec.md` §7).
 
-**Version 1.3. Effective: {{EFFECTIVE_DATE}}**
+**Version 1.4. Effective: {{EFFECTIVE_DATE}}**
 
 This policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.
 
@@ -73,7 +73,7 @@ Everyone who has a group's share link can see that group's name, its player name
 | An account and its groups | Until you ask us to delete them |
 | A group, player, or answer you delete | Deleted at once; removed from backups within the providers' backup cycles |
 | Server logs at our hosting providers | According to the providers' log retention, typically up to 30 days |
-| Usage events and error reports in PostHog | **Placeholder, to be filled in before usage measurement starts:** the event retention of our PostHog plan |
+| Usage events and error reports in PostHog | 1 year |
 | Technical logs in PostHog | 14 days |
 | Your account's pseudonymous profile in PostHog, and your email address for the welcome mail and tips | Until your account is deleted |
 
@@ -83,7 +83,7 @@ When you save a group to an account, the group moves to the account and the temp
 
 You have the right of access (Art. 15), rectification (Art. 16), erasure (Art. 17), restriction (Art. 18), data portability (Art. 20), and objection (Art. 21). Write to {{CONTACT_EMAIL}}; we answer within one month.
 
-**You may object to usage measurement at any time.** While usage measurement runs in your browser, this page ends with a **Turn off usage measurement in this browser** button. Press it, and the Service sends no usage events, error reports, or technical logs from that browser. If your browser does not let the Service remember the choice, it lasts until you reload the page or leave the site. Steps such as creating a link, joining, or scheduling are recorded on our servers, so the button does not cover them. To object to those, write to {{CONTACT_EMAIL}}; for an account, we then stop them for good.
+**You may object to usage measurement at any time.** While the Service measures use, this page ends with a **Turn off usage measurement in this browser** button. Press it, and the Service sends no usage events, error reports, or technical logs from that browser. At your request, the Service remembers the choice in your browser's local storage, and the button becomes **Turn it back on**. If your browser does not let the Service remember the choice, it lasts until you reload the page or leave the site. Steps such as creating a link, joining, or scheduling are recorded on our servers, so the button does not cover them. To object to those, write to {{CONTACT_EMAIL}}; for an account, we then stop them for good.
 
 You may withdraw your consent to the tips at any time, with the unsubscribe link in every tip or by replying to it. Mails sent before you withdraw stay lawful.
 

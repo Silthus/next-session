@@ -1,0 +1,64 @@
+{
+  "name": "Next Session: Welcome Mail",
+  "description": "One transactional Welcome Mail for every new Next Session Account. Started only by Convex (convex/mail.ts) through the secret-guarded webhook. Source: docs/posthog/workflows/welcome-mail.json in Silthus/next-session.",
+  "exit_condition": "exit_only_at_end",
+  "actions": [
+    {
+      "id": "trigger_node",
+      "name": "Welcome requested by Convex",
+      "type": "trigger",
+      "config": {
+        "type": "webhook",
+        "template_id": "template-source-webhook",
+        "inputs": {
+          "event": { "value": "next_session:welcome_requested" },
+          "distinct_id": { "value": "{request.body.distinct_id}" },
+          "properties": {
+            "value": {
+              "product": "{request.body.product}",
+              "email": "{request.body.email}",
+              "tips_confirm_url": "{request.body.tips_confirm_url}"
+            }
+          },
+          "auth_header": { "value": "Bearer <POSTHOG_MAIL_WEBHOOK_SECRET>" },
+          "method": { "value": "POST" }
+        }
+      }
+    },
+    {
+      "id": "email_welcome",
+      "name": "Welcome",
+      "type": "function_email",
+      "config": {
+        "template_id": "template-email",
+        "template_uuid": "<TEMPLATE:welcome>",
+        "message_category_type": "transactional",
+        "tracking_enabled": false,
+        "inputs": {
+          "email": {
+            "value": {
+              "to": { "email": "{{ event.properties.email }}", "name": "" },
+              "from": {
+                "integrationId": "<SENDER_INTEGRATION_ID>",
+                "email": "hello@next-session.link",
+                "name": "Michael from Next Session"
+              },
+              "replyTo": "<REPLY_TO>",
+              "preheader": "Your groups now follow you to every device."
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "exit_node",
+      "name": "Exit",
+      "type": "exit",
+      "config": { "reason": "Welcome Mail sent" }
+    }
+  ],
+  "edges": [
+    { "from": "trigger_node", "to": "email_welcome", "type": "continue" },
+    { "from": "email_welcome", "to": "exit_node", "type": "continue" }
+  ]
+}
