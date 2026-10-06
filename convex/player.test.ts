@@ -163,6 +163,26 @@ describe("player.group", () => {
     });
   });
 
+  it("shows the Account's Claimed Player on its other devices and to no one else", async () => {
+    const { as: gm, shareToken } = await sharedGroup();
+    const player = await signInAccount(t);
+    const ada = await player.as.mutation(api.player.join, { shareToken, name: "Ada" });
+    const otherSessionId = await t.run(
+      async (ctx) =>
+        await ctx.db.insert("authSessions", {
+          userId: player.userId,
+          expirationTime: Date.now() + DAY,
+        }),
+    );
+    const otherDevice = t.withIdentity({ subject: `${player.userId}|${otherSessionId}` });
+    const anonymousGm = await signInAnonymousGm(t);
+
+    expect(await claimedPlayerIdIn(otherDevice, shareToken)).toBe(ada);
+    for (const stranger of [t, gm, anonymousGm.as, (await signInAccount(t)).as]) {
+      expect(await claimedPlayerIdIn(stranger, shareToken)).toBeNull();
+    }
+  });
+
   it("shows only the Group behind the Share Token", async () => {
     const mine = await sharedGroup();
     const other = await sharedGroup();

@@ -52,8 +52,7 @@ async function seedAnswers(groupId: Id<"groups">, playerId: Id<"players">, dates
   });
 }
 
-const myGroups = (as: GmClient | TestBackend, today = TODAY) =>
-  as.query(api.me.groups, { today });
+const myGroups = (as: GmClient | TestBackend, today = TODAY) => as.query(api.me.groups, { today });
 
 describe("me.groups", () => {
   it("is null for a visitor and an Anonymous GM", async () => {
@@ -95,7 +94,13 @@ describe("me.groups", () => {
     await seedSession(t, groupId, "2026-10-17");
     const player = await signInAccount(t);
     const ada = await joinAs(player.as, shareToken);
-    await seedAnswers(groupId, ada, ["2026-10-01", TODAY, "2026-11-11", "2026-12-31", "2027-01-01"]);
+    await seedAnswers(groupId, ada, [
+      "2026-10-01",
+      TODAY,
+      "2026-11-11",
+      "2026-12-31",
+      "2027-01-01",
+    ]);
 
     expect(await myGroups(player.as)).toEqual({
       running: [],

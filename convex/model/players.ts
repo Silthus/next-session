@@ -52,11 +52,7 @@ export async function claimPlayer(ctx: MutationCtx, account: Doc<"users">, playe
   await ctx.db.patch("players", player._id, { userId: account._id });
 }
 
-export async function releaseClaim(
-  ctx: MutationCtx,
-  account: Doc<"users">,
-  groupId: Id<"groups">,
-) {
+export async function releaseClaim(ctx: MutationCtx, account: Doc<"users">, groupId: Id<"groups">) {
   const claimed = await claimedPlayerIn(ctx, account._id, groupId);
   if (claimed !== null) await unclaim(ctx, claimed);
 }

@@ -47,7 +47,8 @@ const byTopic = {
     TOO_MANY_GROUPS: claimCap,
   },
   keep: {
-    PLAYER_CLAIMED: "Another account keeps this name. Add yours with a last initial, or ask your GM.",
+    PLAYER_CLAIMED:
+      "Another account keeps this name. Add yours with a last initial, or ask your GM.",
     TOO_MANY_GROUPS: claimCap,
     NOT_FOUND: "That player is gone already.",
   },
