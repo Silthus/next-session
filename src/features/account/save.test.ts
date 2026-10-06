@@ -231,7 +231,7 @@ describe("save telemetry", () => {
     expect(track).toHaveBeenCalledExactlyOnceWith({ name: "save_started" });
   });
 
-  it("logs a recovered Save once, without its claim code", async () => {
+  it("logs a recovered Save once per attempt, however many callers wait on it, without its claim code", async () => {
     const { deps, storage } = fakeDeps();
     storage.setItem(PENDING_SAVE_KEY, "claim-code");
 
@@ -263,6 +263,20 @@ describe("save telemetry", () => {
     expect(log).toHaveBeenCalledExactlyOnceWith("warn", "Pending save refused", {
       outcome: "unexpected",
     });
+  });
+
+  it("logs a refused attempt and the retry that finished it, one line each", async () => {
+    const { deps, storage } = fakeDeps({ finishSave: offline });
+    storage.setItem(PENDING_SAVE_KEY, "claim-code");
+    await expect(finishPendingSave(deps)).rejects.toThrow();
+
+    deps.finishSave = () => Promise.resolve({ groupIds: [groupId] });
+    await finishPendingSave(deps);
+
+    expect(vi.mocked(log).mock.calls).toEqual([
+      ["warn", "Pending save refused", { outcome: "unexpected" }],
+      ["info", "Pending save finished", { outcome: "saved" }],
+    ]);
   });
 
   it("logs nothing for a Save that needed no recovery", async () => {
