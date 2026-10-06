@@ -36,6 +36,9 @@ const night = (page: Page, date: IsoDate) =>
 const switcher = (page: Page) =>
   page.getByRole("heading", { level: 1 }).getByRole("button", { name: groupName });
 const rail = (page: Page) => page.getByRole("complementary", { name: "Group overview" });
+const myGroupsSection = (page: Page, name: string) => page.getByRole("region", { name });
+const playingCard = (page: Page) =>
+  myGroupsSection(page, "You play in").getByRole("listitem").filter({ hasText: groupName });
 
 let leftoverGroup: { gm: Page; path: string } | undefined;
 
@@ -52,7 +55,7 @@ async function deleteGroup(gm: Page, groupPath: string) {
     .getByRole("group", { name: /^Delete .*\?$/ })
     .getByRole("button", { name: /^Delete / })
     .click();
-  await expect(gm).toHaveURL(new URL("/", gm.url()).href);
+  await expect(gm).toHaveURL((url) => url.pathname === "/" || url.pathname === "/me");
   leftoverGroup = undefined;
 }
 
@@ -142,7 +145,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
     await shoot(gm, testInfo, "2-group-renamed");
   });
 
-  const playerContext = await browser.newContext();
+  const playerContext = await newContextKnowingPassword(browser);
   const player = await playerContext.newPage();
 
   await test.step("3. A Player joins from the Share Link and answers", async () => {
@@ -211,10 +214,38 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
     expect(response.headers().location).toBe(`${lonirUrl}${legacyShareLink}`);
   });
 
-  await test.step("7. The GM deletes the Group", async () => {
+  await test.step("7. The Player keeps the Group and finds it in My groups", async () => {
+    await player.getByRole("banner").getByRole("button", { name: "Log in" }).click();
+    await submitCredentials(player, "Log in", "Log in");
+    await expect(player.getByRole("button", { name: "Your account" })).toBeVisible();
+    await player.getByRole("button", { name: "Keep this group" }).click();
+    await expect(player.getByRole("main").getByText("Kept in My groups")).toBeVisible();
+    await shoot(player, testInfo, "7-player-kept");
+
+    await player.getByRole("button", { name: "Your account" }).click();
+    await player.getByRole("link", { name: "My groups" }).click();
+    await expect(player).toHaveURL(new URL("/me", appOrigin).href);
+    await expect(myGroupsSection(player, "Next sessions").getByRole("link")).toHaveText([
+      new RegExp(`^${dayLabel(dateOf(5))}.*${groupName}$`),
+    ]);
+    await expect(playingCard(player)).toContainText(`as ${playerName}`);
+    await expect(myGroupsSection(player, "You run").getByRole("link")).toContainText(groupName);
+    await shoot(player, testInfo, "7-my-groups");
+
+    await player.getByRole("button", { name: `Options for ${groupName}` }).click();
+    await player.getByRole("button", { name: "Remove from my groups" }).click();
+    await expect(playingCard(player)).toHaveCount(0);
+    await toastRegion(player).getByRole("button", { name: "Undo" }).click();
+    await expect(toastRegion(player)).toContainText(`${groupName} is back in My groups.`);
+    await expect(playingCard(player)).toHaveCount(1);
+    await shoot(player, testInfo, "7-my-groups-undone");
+  });
+
+  await test.step("8. The GM deletes the Group", async () => {
     await deleteGroup(gm, groupPath);
-    await player.reload();
+    await expect(gm).toHaveURL(new URL("/me", appOrigin).href);
+    await player.goto(`https://${shareLinkShown}`);
     await expect(player.getByRole("heading", { name: "This link no longer works" })).toBeVisible();
-    await shoot(player, testInfo, "7-link-gone");
+    await shoot(player, testInfo, "8-link-gone");
   });
 });

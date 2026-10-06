@@ -35,6 +35,21 @@ describe("errorMessage", () => {
     ],
     ["save", { code: "CLAIM_INVALID" }, "Your own groups didn't move: the save expired."],
     ["keep", { code: "NOT_FOUND" }, "That player is gone already."],
+    [
+      "undoRemove",
+      { code: "PLAYER_CLAIMED" },
+      "Another account keeps that player now. Ask your GM.",
+    ],
+    [
+      "undoRemove",
+      { code: "NOT_FOUND" },
+      "Couldn't put it back. Open the group's link and tap Keep this group.",
+    ],
+    [
+      "undoRemove",
+      { code: "TOO_MANY_GROUPS" },
+      "You keep 50 groups. Remove one from My groups first.",
+    ],
     ["answer", { code: "RATE_LIMITED", retryAfter: 4000 }, "Slow down a moment."],
     ["answer", { code: "OUT_OF_WINDOW" }, "That night is locked now."],
     ["fillRest", { code: "RATE_LIMITED", retryAfter: 4000 }, "Slow down a moment."],

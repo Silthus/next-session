@@ -243,7 +243,7 @@ function AccountControl({
     );
   }
   if (status !== "account") return null;
-  return <HeaderAccount status="account" email={email} onSave={noAction} onLogOut={onLogOut} />;
+  return <HeaderAccount status="account" email={email} onLogOut={onLogOut} />;
 }
 
 function useToast() {
@@ -261,8 +261,6 @@ function useToast() {
 
   return [toast, show] as const;
 }
-
-function noAction() {}
 
 function PlayerAnswers({
   shareToken,

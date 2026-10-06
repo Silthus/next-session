@@ -17,25 +17,15 @@ export type LandingState =
 type LandingViewProps = {
   state: LandingState;
   showLogIn: boolean;
-  loggedInAs?: string;
   onCreate: () => void;
   onLogIn: () => void;
   onSave: () => void;
-  onLogOut: () => void;
 };
 
 const column = "mx-auto w-full max-w-5xl px-4 sm:px-6";
 const steps = ["Create your link", "Send it to the group", "Pick the best night"];
 
-export function LandingView({
-  state,
-  showLogIn,
-  loggedInAs,
-  onCreate,
-  onLogIn,
-  onSave,
-  onLogOut,
-}: LandingViewProps) {
+export function LandingView({ state, showLogIn, onCreate, onLogIn, onSave }: LandingViewProps) {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className={`${column} flex items-center justify-between py-5`}>
@@ -43,11 +33,6 @@ export function LandingView({
         {showLogIn && (
           <Button variant="ghost" size="sm" onClick={onLogIn}>
             Log in
-          </Button>
-        )}
-        {loggedInAs && (
-          <Button variant="ghost" size="sm" onClick={onLogOut}>
-            Log out
           </Button>
         )}
       </header>
@@ -67,7 +52,6 @@ export function LandingView({
             <LinkInHand {...state} onSave={onSave} />
           ) : (
             <CreateLink
-              loggedInAs={loggedInAs}
               busy={state.phase === "creating"}
               failure={state.phase === "failed" ? createFailure(state.error) : undefined}
               onCreate={onCreate}
@@ -85,19 +69,16 @@ export function LandingView({
 }
 
 function CreateLink({
-  loggedInAs,
   busy,
   failure,
   onCreate,
 }: {
-  loggedInAs?: string;
   busy: boolean;
   failure?: string;
   onCreate: () => void;
 }) {
   return (
     <div className="flex flex-col gap-3">
-      {loggedInAs && <LoggedInAs email={loggedInAs} />}
       <Button
         size="lg"
         onClick={onCreate}
@@ -177,16 +158,6 @@ function LinkInHand({
         )}
       </div>
     </div>
-  );
-}
-
-function LoggedInAs({ email }: { email: string }) {
-  const line = useFocusOnMount();
-  return (
-    <p ref={line} role="status" tabIndex={-1} className="max-w-sm text-sm text-ink-2 outline-none">
-      Signed in as <span className="font-semibold break-all text-ink">{email}</span>. No groups here
-      yet, so create your first link.
-    </p>
   );
 }
 
