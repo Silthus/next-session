@@ -1,0 +1,36 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-88
+
+ ❯ |ui| src/lib/telemetry.test.ts (40 tests | 1 failed | 39 skipped) 9ms
+   ❯ initTelemetry (8)
+     × keeps the opt-out for this visit and says so when the browser refuses localStorage 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/lib/telemetry.test.ts > initTelemetry > keeps the opt-out for this visit and says so when the browser refuses localStorage
+AssertionError: expected { remembered: true } to deeply equal { remembered: false }
+
+- Expected
++ Received
+
+  {
+-   "remembered": false,
++   "remembered": true,
+  }
+
+ ❯ src/lib/telemetry.test.ts:341:44
+    339|     });
+    340|
+    341|     expect(telemetry.turnMeasurementOff()).toEqual({ remembered: false…
+       |                                            ^
+    342|     expect(telemetry.measurementIsOn()).toBe(false);
+    343|     vi.restoreAllMocks();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 39 skipped (40)
+   Start at  17:23:11
+   Duration  656ms (environment 77%, setup 11%, transform 9%, tests 2%, import 1%, worker 1%)
+
