@@ -1,0 +1,80 @@
+$ playwright test --config playwright.prod.config.ts
+
+Running 1 test using 1 worker
+
+     1.1 [production] › e2e/production.spec.ts:108:1 › a GM and a Player schedule a Session on the deployed app › 1. Create your link shows the Share Link in place (1.6s)
+     1.2 [production] › e2e/production.spec.ts:108:1 › a GM and a Player schedule a Session on the deployed app › 2. The GM opens the Group and renames it (581ms)
+     1.3 [production] › e2e/production.spec.ts:108:1 › a GM and a Player schedule a Session on the deployed app › 3. A Player joins from the Share Link and answers (1.5s)
+     1.4 [production] › e2e/production.spec.ts:108:1 › a GM and a Player schedule a Session on the deployed app › 4. The GM schedules a free night and the Player sees it (1.0s)
+     1.5 [production] › e2e/production.spec.ts:108:1 › a GM and a Player schedule a Session on the deployed app › 5. The GM saves to a new Account, and a third browser logs in (728ms)
+  ✘  1 [production] › e2e/production.spec.ts:108:1 › a GM and a Player schedule a Session on the deployed app (6.5s)
+
+
+  1) [production] › e2e/production.spec.ts:108:1 › a GM and a Player schedule a Session on the deployed app › 5. The GM saves to a new Account, and a third browser logs in 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('status')
+    Expected: "Saved. Open it anywhere with your account."
+    Error: strict mode violation: getByRole('status') resolved to 2 elements:
+        1) <div role="status" aria-busy="true" class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">…</div> aka getByRole('status').filter({ hasText: 'Loading your group' })
+        2) <div role="status" aria-live="polite" class="fixed left-1/2 z-40 w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 bottom-20">…</div> aka getByRole('status').filter({ hasText: 'Session on Thu, Nov 5.' })
+
+    Call log:
+      - Expect "toHaveText" getByRole('status') with timeout 15000ms
+      - waiting for getByRole('status')
+        4 × locator resolved to <div role="status" aria-live="polite" class="fixed left-1/2 z-40 w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 bottom-20">…</div>
+          - unexpected value "Session on Thu, Nov 5. Players see it on the link.Undo"
+
+
+      189 |     await gm.getByRole("button", { name: "Save your group" }).click();
+      190 |     await submitCredentials(gm, `Keep ${groupName}`, "Save group");
+    > 191 |     await expect(gm.getByRole("status")).toHaveText("Saved. Open it anywhere with your account.");
+          |                                          ^
+      192 |     await expect(gm.getByRole("button", { name: "Your account" })).toBeVisible();
+      193 |     await shoot(gm, testInfo, "5-gm-saved");
+      194 |
+        at ~/dev/ns-worktrees/ticket-23/e2e/production.spec.ts:191:42
+        at ~/dev/ns-worktrees/ticket-23/e2e/production.spec.ts:188:3
+
+    attachment #1: 1-link-created (image/png) ──────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/attachments/1-link-created-480c22d606a34d3608627d93b31f80032b5142d1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: 2-group-renamed (image/png) ─────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/attachments/2-group-renamed-fa8df0add574d1d23805efed9c7a2286ed5043e9.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: 3-player-answered (image/png) ───────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/attachments/3-player-answered-5e0be3be4cb8fcee1d24a02b120779d0e517a770.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #4: 4-gm-session-scheduled (image/png) ──────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/attachments/4-gm-session-scheduled-0a958ccde598c919750206be06801de8f4725be4.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #5: 4-player-sees-session (image/png) ───────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/attachments/4-player-sees-session-dc7ad5efa404e453765b30bc4937d004f945fd85.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #6: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #7: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/error-context.md
+
+    attachment #9: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/production/production-a-GM-and-a-Play-2f6cb-Session-on-the-deployed-app-production/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [production] › e2e/production.spec.ts:108:1 › a GM and a Player schedule a Session on the deployed app 
+error: script "e2e:prod" exited with code 1

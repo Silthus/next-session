@@ -29,6 +29,6 @@ Screenshots from the merged-main run: [workers-dev/](workers-dev/). The HTML rep
 
 ## Apex run
 
-Pending #22's cutover. The redirect rule still 301s `https://next-session.link/` to Lonir.
+Green on `https://next-session.link` after the cutover: see [apex/](apex/).
 
 qa-swarm ledger: [qa-swarm-ledger.md](qa-swarm-ledger.md).
