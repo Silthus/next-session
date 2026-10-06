@@ -184,7 +184,7 @@ The name and Roster checks that `roster` and `player` share (`validName`, `ensur
 | | `release` | mutation | `{groupId}` → `null` | Account only. Clears the caller's claim in that Group, if any. Rate limit `claimPlayer` |
 | | `answer` | mutation | `{shareToken, playerId, date, answer: Answer \| null}` → `null` | Upsert, or delete on `null`. Rate limit `answer`. Touches the Group |
 | | `fillRest` | mutation | `{shareToken, playerId, month}` → `null` | Writes `busy` to every unanswered bookable date of the month in one mutation |
-| `me` | `groups` | query | `{}` → `MyGroups \| null` | Account only, `null` otherwise. The Groups the caller runs and the Groups where it has a Claimed Player, with upcoming Sessions (§12) |
+| `me` | `groups` | query | `{today}` → `MyGroups \| null` | Account only, `null` otherwise. The Groups the caller runs and the Groups where it has a Claimed Player, with upcoming Sessions as of `today` (§12) |
 | `account` | `me` | query | `{}` → `{isAnonymous, email} \| null` | |
 | | `startSave` | mutation | `{}` → `{code}` | Anonymous GM only. 32 random bytes, stored hashed, 10-minute TTL. Rate limit `startSave` |
 | | `finishSave` | mutation | `{code}` → `{groupIds}` | Account only. See §5.3 |
@@ -223,7 +223,7 @@ Convex Auth replaces the session on every sign-in and does not link an anonymous
 1. The Anonymous GM opens the Save sheet and enters an email and a password, choosing "Create account" (default) or "I already have one".
 2. The client calls `account.startSave` and keeps the code in `sessionStorage` (`next-session.pendingSave`). The claim expires on the server after 10 minutes.
 3. The client calls `signIn("password", {email, password, flow: "signUp" | "signIn"})`. On failure nothing changed: the anonymous session still holds the Group.
-4. The client calls `account.finishSave({code})`. The server finds the claim by hash, checks it is unexpired, then for every Group of the anonymous user: sets `ownerId` to the caller and clears `expiresAt`. It copies the Legal Acceptance onto the Account if the Account has none, deletes the claim, and deletes the anonymous user with its `authAccounts`, `authSessions`, and `authRefreshTokens`.
+4. The client calls `account.finishSave({code})`. The server finds the claim by hash, checks it is unexpired, refuses with `TOO_MANY_GROUPS` before moving anything if the Account would own more than 50 Groups (invariant 7; the Groups stay with the anonymous user), then for every Group of the anonymous user: sets `ownerId` to the caller and clears `expiresAt`. It copies the Legal Acceptance onto the Account if the Account has none, deletes the claim, and deletes the anonymous user with its `authAccounts`, `authSessions`, and `authRefreshTokens`.
 5. On app start, a leftover `pendingSave` with a signed-in Account retries step 4, so a dropped connection between steps 3 and 4 loses nothing. The recovery holds only in the same tab and within the claim's 10 minutes: `sessionStorage` is per tab, and an expired claim throws `CLAIM_INVALID`. After that the Groups stay with the anonymous user until they expire (§5.5). A second `finishSave` with a used code throws `CLAIM_INVALID`, and the client clears the pending code.
 
 The Account's existing Groups are never read for deletion. A test pins it: an Account with two Groups saves an anonymous one and ends up with three.
@@ -474,7 +474,7 @@ Schema: `players.userId` and `by_userId_and_groupId` (§3). The field is optiona
 - `player.group` adds `claimedPlayerId`, read through `by_userId_and_groupId`. It is `null` for visitors and Anonymous GMs.
 - `player.join` inserts the Player, then calls `claimPlayer` when the caller is an Account. A refused claim refuses the whole join, so a Player is never inserted half-done.
 - `player.claim({shareToken, playerId})` checks the Player against the token with `playerOnShareLink`, then calls `claimPlayer`. `player.release({groupId})` clears the caller's claim in that Group and returns `null` whether one existed or not, so it cannot probe Groups.
-- `me.groups` returns `null` for anyone but an Account, else:
+- `me.groups({today})` returns `null` for anyone but an Account, else:
 
 ```ts
 type MyGroups = {
@@ -491,7 +491,11 @@ type MyGroups = {
 };
 ```
 
-`upcomingSessions` are the Group's Session dates from today on, ascending. `openDates` counts the Booking Window's bookable dates without an Answer from the Claimed Player. A Group the Account runs and plays in shows in both lists. A claim whose Group was deleted while `groups.deleteChildren` is still running is skipped. The worst case, 50 claims with a full Booking Window, reads about 6,000 documents, well inside Convex's query limits.
+`today` is the client's UTC date from `useTodayUtc`, so the subscription reruns at midnight even when nothing is written; a Session that just passed drops out and `openDates` shrinks without a database change. The server accepts `today` only within one day of its own UTC date and otherwise uses its own, so a wrong clock cannot widen the Booking Window. A test changes `today` across midnight with no write in between and sees both values move.
+
+`upcomingSessions` are the first five Session dates from `today` on, read as an index range on `by_groupId_and_date`. `openDates` is the number of bookable dates from `today` to the end of the Booking Window minus the Claimed Player's Answers in that range, read on `by_playerId_and_date`. A Group the Account runs and plays in shows in both lists. A claim whose Group was deleted while `groups.deleteChildren` is still running is skipped.
+
+Every read is bounded. Running Groups come from `by_ownerId` with `.take(50)`; invariant 7 holds that cap, now also on Save (§5.3). Playing Groups come from `by_userId_and_groupId` with `.take(50)`, the claim cap. Per running Group: the Group and at most 5 Sessions. Per playing Group: the Group, the Player, at most 5 Sessions, and at most 92 Answers. The worst case is 50 × 6 + 50 × 99, about 5,300 documents, inside Convex's per-query read limits. An Account already above 50 Groups from a Save before this change sees its oldest 50 here; the GM surface still lists them all.
 
 Unchanged: `roster.removePlayer` deletes the Player with its Answers, so the claim goes with the row; `groups.remove` and Expiry delete Players in batches the same way. Deleting an Account stays out of v1.
 
@@ -534,7 +538,7 @@ Resend's DNS records are already on the zone. When this is built:
 
 | Seam | Tested through |
 | --- | --- |
-| `player.join`, `player.claim`, `player.release`, `player.group`, `me.groups` | `convex-test` through `api.*` with `t.withIdentity` for an Account and an Anonymous GM. Invariant 9 and every row of §12.2 has a test, including: a joined Player stays until `roster.removePlayer`; release keeps the Player and its Answers; a removed Player leaves My groups; a rotated token still shows in My groups |
+| `player.join`, `player.claim`, `player.release`, `player.group`, `me.groups`, `account.finishSave` | `convex-test` through `api.*` with `t.withIdentity` for an Account and an Anonymous GM. Invariant 9 and every row of §12.2 has a test, including: a joined Player stays until `roster.removePlayer`; release keeps the Player and its Answers; a removed Player leaves My groups; a rotated token still shows in My groups; `today` moving across midnight without a write changes `upcomingSessions` and `openDates`; a Save past 50 Groups moves nothing |
 | `src/features/account/keep.ts` | Vitest with fake `deps`, as `save.ts` |
 | `Join`, `PlayerCalendar`, `MyGroups` views | Testing Library: props in, callbacks out |
 | The whole flow | Playwright on the local backend: a visitor answers, keeps the Group by creating an Account, joins a second Group's link while signed in, sees both Groups and a scheduled Session on `/me`, and a second browser context logging in opens the first Group as the same Player. The production spec gains this as step 8 |
@@ -543,7 +547,7 @@ Resend's DNS records are already on the zone. When this is built:
 
 | # | Ticket | Blocked by | Write scope |
 | --- | --- | --- | --- |
-| A | Backend: Claimed Players and My groups | — | `convex/schema.ts`, `convex/player.ts`, `convex/me.ts`, `convex/model/**`, `shared/limits.ts`, their tests, `src/lib/errors.ts` |
+| A | Backend: Claimed Players and My groups | — | `convex/schema.ts`, `convex/player.ts`, `convex/me.ts`, `convex/account.ts`, `convex/model/**`, `shared/limits.ts`, their tests, `src/lib/errors.ts` |
 | B | UI: Keep this group on the player page | A | `src/features/player/**`, `src/features/account/**`, `src/lib/**`, `docs/legal/privacy.md`, `shared/legal.ts`, `e2e/player-account.spec.ts` |
 | C | UI: My groups at `/me` | A, B, and the Roster ticket #56 (shared `src/features/group/**`) | `src/routes/me.tsx`, `src/features/me/**`, `src/features/landing/Landing.tsx`, the header of `src/features/group/GroupScreen.tsx`, the account control in `src/features/player/**`, `e2e/my-groups.spec.ts`, step 8 of `e2e/production.spec.ts` |
 
