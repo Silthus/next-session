@@ -25,12 +25,12 @@ export type GoogleSaveDeps = Pick<SaveDeps, "startSave" | "storage"> & {
   continueWithGoogle: () => Promise<unknown>;
 };
 
-const FLOWS = { create: "signUp", logIn: "signIn" } as const;
+export const PASSWORD_FLOWS = { create: "signUp", logIn: "signIn" } as const;
 
 export async function saveGroups({ email, password, mode }: SaveInput, deps: SaveDeps) {
   const { code } = await deps.startSave();
   deps.storage.setItem(PENDING_SAVE_KEY, code);
-  await deps.signIn("password", { email, password, flow: FLOWS[mode] });
+  await deps.signIn("password", { email, password, flow: PASSWORD_FLOWS[mode] });
   return await redeem(code, deps);
 }
 
@@ -46,6 +46,10 @@ export async function saveThroughGoogle({
 
 export function hasPendingSave(storage: ClaimDeps["storage"]) {
   return storage.getItem(PENDING_SAVE_KEY) !== null;
+}
+
+export async function finishLeftOverSave(deps: ClaimDeps) {
+  if (hasPendingSave(deps.storage)) await finishPendingSave(deps);
 }
 
 export async function finishPendingSave(deps: ClaimDeps) {

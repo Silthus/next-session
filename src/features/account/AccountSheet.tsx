@@ -8,7 +8,7 @@ import { cn } from "../../ui/cn";
 import { Sheet } from "../../ui/Sheet";
 import type { SaveInput, SaveMode } from "./save";
 
-export type AccountIntent = "save" | "logIn";
+export type AccountIntent = "save" | "keep" | "logIn";
 
 type Failure = { message: string; offer?: SaveMode; claimExpired?: boolean };
 
@@ -28,7 +28,8 @@ type AccountSheetProps = {
       refusal?: unknown;
       onFinish: () => Promise<unknown>;
     }
-  | { intent: "logIn" }
+  | { intent: "keep"; groupName: string; playerName: string; movesGroups?: boolean }
+  | { intent: "logIn"; forPlayer?: boolean }
 );
 
 export function AccountSheet(props: AccountSheetProps) {
@@ -48,7 +49,7 @@ export function AccountSheet(props: AccountSheetProps) {
     onClose();
   };
 
-  const title = props.intent === "save" ? `Keep ${props.groupName}` : "Log in";
+  const title = props.intent === "logIn" ? "Log in" : `Keep ${props.groupName}`;
   return (
     <Sheet open={open} title={title} dismissible={!busy} onClose={dismiss}>
       {open && <AccountForm {...props} busy={busy} setBusy={setBusy} finishingAs={finishingAs} />}
@@ -71,7 +72,7 @@ function AccountForm({
   finishingAs: string | null;
 }) {
   const { intent, onSubmit, onClose, onContinueWithGoogle } = props;
-  const [mode, setMode] = useState<SaveMode>(intent === "save" ? "create" : "logIn");
+  const [mode, setMode] = useState<SaveMode>(intent === "logIn" ? "logIn" : "create");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [failure, setFailure] = useState<Failure | null>(() =>
@@ -153,11 +154,7 @@ function AccountForm({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
-      <p className="text-ink-2">
-        {intent === "save"
-          ? "Open it on any device. The player link stays exactly the same, your players notice nothing."
-          : "Open your groups on this device."}
-      </p>
+      <Intro {...props} />
       {onContinueWithGoogle && (
         <GoogleOption
           busy={busy}
@@ -166,7 +163,7 @@ function AccountForm({
         />
       )}
       <div className="flex flex-col gap-4">
-        {intent === "save" && <ModeSwitch mode={mode} disabled={busy} onChange={switchMode} />}
+        {intent !== "logIn" && <ModeSwitch mode={mode} disabled={busy} onChange={switchMode} />}
         <Field label="Email">
           {({ id }) => (
             <input
@@ -219,13 +216,50 @@ function AccountForm({
         type="submit"
         size="lg"
         disabled={busy}
-        busy={busy && !leavingForGoogle && (intent === "save" ? "Saving…" : "Logging in…")}
+        busy={busy && !leavingForGoogle && busyLabels[intent]}
         className="w-full"
       >
         {submitLabel(intent, mode)}
       </Button>
-      <SheetFooter intent={intent} mode={mode} busy={busy} onClose={onClose} />
+      <SheetFooter
+        intent={intent}
+        mode={mode}
+        busy={busy}
+        forPlayer={props.intent === "logIn" && props.forPlayer === true}
+        onClose={onClose}
+      />
     </form>
+  );
+}
+
+const busyLabels: Record<AccountIntent, string> = {
+  save: "Saving…",
+  keep: "Keeping…",
+  logIn: "Logging in…",
+};
+
+function Intro(props: AccountSheetProps) {
+  if (props.intent === "save") {
+    return (
+      <p className="text-ink-2">
+        Open it on any device. The player link stays exactly the same, your players notice nothing.
+      </p>
+    );
+  }
+  if (props.intent === "keep") {
+    return (
+      <div className="flex flex-col gap-1 text-ink-2">
+        <p className="min-w-0 break-words">Open it as {props.playerName} on any device.</p>
+        {props.movesGroups && <p>Your own groups move to the account too.</p>}
+      </div>
+    );
+  }
+  return (
+    <p className="text-ink-2">
+      {props.forPlayer
+        ? "Open the groups you kept on this device."
+        : "Open your groups on this device."}
+    </p>
   );
 }
 
@@ -343,13 +377,18 @@ function SheetFooter({
   intent,
   mode,
   busy,
+  forPlayer,
   onClose,
 }: {
   intent: AccountIntent;
   mode: SaveMode;
   busy: boolean;
+  forPlayer: boolean;
   onClose: () => void;
 }) {
+  if (intent === "logIn" && forPlayer) {
+    return <p className="text-xs text-ink-3">No account yet? You can answer without one.</p>;
+  }
   if (intent === "logIn") {
     return (
       <p className="text-xs text-ink-3">
@@ -373,6 +412,7 @@ function SheetFooter({
       </p>
     );
   }
+  if (intent === "keep") return null;
   return (
     <p className="text-xs text-ink-3">
       Logging in adds this group to your account. Nothing gets replaced.
@@ -453,9 +493,14 @@ function Field({
   );
 }
 
+const submitLabels: Record<AccountIntent, Record<SaveMode, string>> = {
+  save: { create: "Save group", logIn: "Log in and save" },
+  keep: { create: "Keep group", logIn: "Log in and keep" },
+  logIn: { create: "Log in", logIn: "Log in" },
+};
+
 function submitLabel(intent: AccountIntent, mode: SaveMode) {
-  if (intent === "logIn") return "Log in";
-  return mode === "create" ? "Save group" : "Log in and save";
+  return submitLabels[intent][mode];
 }
 
 function describeFailure(error: unknown, intent: AccountIntent): Failure {
@@ -468,7 +513,7 @@ function describeFailure(error: unknown, intent: AccountIntent): Failure {
     case "INVALID_CREDENTIALS":
       return {
         message: "Wrong email or password.",
-        offer: intent === "save" ? "create" : undefined,
+        offer: intent === "logIn" ? undefined : "create",
       };
     case "RATE_LIMITED":
       return { message: `Too many tries. Try again in ${waitFor(data.retryAfter)}.` };

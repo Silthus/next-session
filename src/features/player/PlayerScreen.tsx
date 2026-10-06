@@ -1,7 +1,8 @@
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ComponentProps } from "react";
 import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { fillRestDates, type Answer } from "../../../shared/answers";
 import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
 import { errorMessage } from "../../lib/errors";
@@ -15,7 +16,12 @@ import {
 } from "../../lib/storage";
 import { NotFoundScreen } from "../../ui/NotFoundScreen";
 import { Skeleton } from "../../ui/Skeleton";
+import { Button } from "../../ui/Button";
 import { Toast, type ToastMessage } from "../../ui/Toast";
+import { AccountSheet } from "../account/AccountSheet";
+import type { KeepOutcome } from "../account/keep";
+import { useGm } from "../account/useGm";
+import { HeaderAccount } from "../group/rail/HeaderAccount";
 import { Join } from "./Join";
 import { PlayerCalendar } from "./PlayerCalendar";
 import { visibleMonth } from "./playerMonth";
@@ -23,8 +29,10 @@ import { useTodayUtc } from "./useTodayUtc";
 
 type PlayerGroupView = NonNullable<FunctionReturnType<typeof api.player.group>>;
 type MonthChange = (month: IsoMonth) => void;
+type Account = ReturnType<typeof useGm>;
 
 const TOAST_MS = 4000;
+const KEPT = "Kept in My groups";
 
 export function PlayerScreen({
   shareToken,
@@ -35,14 +43,18 @@ export function PlayerScreen({
   requestedMonth: string | undefined;
   onMonthChange: MonthChange;
 }) {
+  const account = useGm();
   const group = useQuery(api.player.group, { shareToken });
-  if (group === undefined) return <PlayerLoading />;
+  const [accountKnown, setAccountKnown] = useState(false);
+  if (!accountKnown && account.status !== "loading") setAccountKnown(true);
+  if (group === undefined || !accountKnown) return <PlayerLoading />;
   if (group === null) return <NotFoundScreen kind="link" />;
   return (
     <PlayerGroup
       key={group.groupId}
       shareToken={shareToken}
       group={group}
+      account={account}
       requestedMonth={requestedMonth}
       onMonthChange={onMonthChange}
     />
@@ -52,22 +64,47 @@ export function PlayerScreen({
 function PlayerGroup({
   shareToken,
   group,
+  account,
   requestedMonth,
   onMonthChange,
 }: {
   shareToken: string;
   group: PlayerGroupView;
+  account: Account;
   requestedMonth: string | undefined;
   onMonthChange: MonthChange;
 }) {
   const [identity, setIdentity] = useState(() => recallPlayer(group.groupId));
   const join = useMutation(api.player.join);
-  const player = group.players.find(({ _id }) => _id === identity?.playerId);
+  const release = useMutation(api.player.release);
+  const [toast, showToast] = useToast();
+  const { keepWithGoogle, logInWithGoogle } = account;
+  const [sheet, setSheet] = useState<"logIn" | "keep" | null>(null);
+  const [releasedId, setReleasedId] = useState<Id<"players"> | null>(null);
+  if (releasedId !== null && group.claimedPlayerId !== releasedId) setReleasedId(null);
+  const claimed = group.players.find(
+    ({ _id }) => _id === group.claimedPlayerId && _id !== releasedId,
+  );
+  if (claimed && identity?.playerId !== claimed._id) {
+    setIdentity({ playerId: claimed._id, name: claimed.name });
+  }
+  const player = claimed ?? group.players.find(({ _id }) => _id === identity?.playerId);
   const removed = identity !== null && player === undefined;
+  const keeper = useKeeper(refusalOnReturn(account, shareToken), () => showToast(KEPT));
+  const { keepOnReturn } = account;
+  const keep = player && { shareToken, playerId: player._id };
 
   useEffect(() => {
     if (removed) forgetPlayer(group.groupId);
   }, [removed, group.groupId]);
+
+  useEffect(() => {
+    if (keepOnReturn?.outcome.kept && keepOnReturn.keep.shareToken === shareToken) showToast(KEPT);
+  }, [keepOnReturn, shareToken, showToast]);
+
+  useEffect(() => {
+    if (claimed) rememberPlayer(group.groupId, { playerId: claimed._id, name: claimed.name });
+  }, [claimed, group.groupId]);
 
   function answerAs(next: PlayerIdentity | null) {
     if (next) rememberPlayer(group.groupId, next);
@@ -75,32 +112,157 @@ function PlayerGroup({
     setIdentity(next);
   }
 
-  if (player === undefined) {
-    return (
-      <Join
-        groupName={group.name}
-        players={group.players}
-        removed={removed}
-        onPick={({ _id, name }) => answerAs({ playerId: _id, name })}
-        onJoin={async (name) => {
-          const playerId = await join({ shareToken, name });
-          answerAs({ playerId, name: name.trim() });
-        }}
-      />
-    );
+  function notYou() {
+    account.forgetPendingKeep();
+    answerAs(null);
+    if (!claimed) return;
+    setReleasedId(claimed._id);
+    release({ groupId: group.groupId }).catch((error: unknown) => {
+      setReleasedId(null);
+      showToast(errorMessage(error, "keep"));
+    });
   }
 
-  return (
-    <PlayerAnswers
-      shareToken={shareToken}
-      group={group}
-      player={{ playerId: player._id, name: player.name }}
-      requestedMonth={requestedMonth}
-      onMonthChange={onMonthChange}
-      onNotYou={() => answerAs(null)}
+  const accountControl = (
+    <AccountControl
+      status={account.status}
+      email={account.email}
+      onLogIn={() => setSheet("logIn")}
+      onLogOut={() => void account.signOut()}
     />
   );
+
+  return (
+    <>
+      {player === undefined ? (
+        <Join
+          groupName={group.name}
+          players={group.players}
+          removed={removed}
+          accountControl={accountControl}
+          onPick={({ _id, name }) => answerAs({ playerId: _id, name })}
+          onJoin={async (name) => {
+            const playerId = await join({ shareToken, name });
+            answerAs({ playerId, name: name.trim() });
+            if (account.status === "account") showToast(KEPT);
+          }}
+        />
+      ) : (
+        <PlayerAnswers
+          shareToken={shareToken}
+          group={group}
+          player={{ playerId: player._id, name: player.name }}
+          requestedMonth={requestedMonth}
+          onMonthChange={onMonthChange}
+          onNotYou={notYou}
+          showToast={showToast}
+          keep={player._id === group.claimedPlayerId ? "kept" : keeper.state}
+          keepRefusal={keeper.refusal}
+          onKeep={() => {
+            if (account.status !== "account") setSheet("keep");
+            else if (keep) keeper.keepThrough(() => account.keepNow(keep)).catch(keeper.refuseSave);
+          }}
+          accountControl={accountControl}
+        />
+      )}
+      {player !== undefined && <Toast message={toast} />}
+      {sheet === "keep" && player && keep ? (
+        <AccountSheet
+          open
+          intent="keep"
+          groupName={group.name}
+          playerName={player.name}
+          movesGroups={account.status === "anonymous"}
+          onSubmit={(input) => keeper.keepThrough(() => account.keepWithPassword(keep, input))}
+          onContinueWithGoogle={keepWithGoogle && (() => keepWithGoogle(keep))}
+          onClose={() => setSheet(null)}
+        />
+      ) : (
+        <AccountSheet
+          open={sheet === "logIn"}
+          intent="logIn"
+          forPlayer
+          onSubmit={account.logIn}
+          onContinueWithGoogle={logInWithGoogle && (() => logInWithGoogle(`/s/${shareToken}`))}
+          onClose={() => setSheet(null)}
+        />
+      )}
+    </>
+  );
 }
+
+function useKeeper(refusalOnReturn: string | null, onKept: () => void) {
+  const [state, setState] = useState<"offer" | "keeping">("offer");
+  const [refusal, setRefusal] = useState<string | null>(null);
+  const [tried, setTried] = useState(false);
+
+  async function keepThrough(run: () => Promise<KeepOutcome>) {
+    setTried(true);
+    setState("keeping");
+    setRefusal(null);
+    try {
+      const outcome = await run();
+      if (outcome.kept) onKept();
+      else setRefusal(errorMessage(outcome.error, "keep"));
+    } finally {
+      setState("offer");
+    }
+  }
+
+  return {
+    state,
+    refusal: tried ? refusal : refusalOnReturn,
+    keepThrough,
+    refuseSave: (error: unknown) => setRefusal(errorMessage(error, "save")),
+  };
+}
+
+function refusalOnReturn(account: Account, shareToken: string) {
+  const returned = account.keepOnReturn;
+  if (returned?.keep.shareToken !== shareToken) return null;
+  if (account.refusalOnReturn !== undefined) return errorMessage(account.refusalOnReturn, "save");
+  return returned.outcome.kept ? null : errorMessage(returned.outcome.error, "keep");
+}
+
+function AccountControl({
+  status,
+  email,
+  onLogIn,
+  onLogOut,
+}: {
+  status: Account["status"];
+  email: string | undefined;
+  onLogIn: () => void;
+  onLogOut: () => void;
+}) {
+  if (status === "signedOut") {
+    return (
+      <Button variant="ghost" size="sm" onClick={onLogIn}>
+        Log in
+      </Button>
+    );
+  }
+  if (status !== "account") return null;
+  return <HeaderAccount status="account" email={email} onSave={noAction} onLogOut={onLogOut} />;
+}
+
+function useToast() {
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  useEffect(() => {
+    if (toast === null) return;
+    const timer = setTimeout(() => setToast(null), TOAST_MS);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  const show = useCallback((message: string) => {
+    setToast((current) => ({ text: message, id: (current?.id ?? 0) + 1 }));
+  }, []);
+
+  return [toast, show] as const;
+}
+
+function noAction() {}
 
 function PlayerAnswers({
   shareToken,
@@ -109,6 +271,8 @@ function PlayerAnswers({
   requestedMonth,
   onMonthChange,
   onNotYou,
+  showToast,
+  ...keepLine
 }: {
   shareToken: string;
   group: PlayerGroupView;
@@ -116,7 +280,12 @@ function PlayerAnswers({
   requestedMonth: string | undefined;
   onMonthChange: MonthChange;
   onNotYou: () => void;
-}) {
+  showToast: (message: string) => void;
+} & Pick<
+  ComponentProps<typeof PlayerCalendar>,
+  "keep" | "keepRefusal" | "onKeep" | "accountControl"
+>) {
+  const [answered, setAnswered] = useState(false);
   const today = useTodayUtc();
   const month = visibleMonth(requestedMonth, today);
   const { playerId } = player;
@@ -134,53 +303,43 @@ function PlayerAnswers({
       store.setQuery(api.player.answers, query, withRestBusy(current, args.month, today));
   });
   const [hintVisible, setHintVisible] = useState(() => !hasSeenHint(group.groupId));
-  const [toast, setToast] = useState<ToastMessage | null>(null);
-
-  useEffect(() => {
-    if (toast === null) return;
-    const timer = setTimeout(() => setToast(null), TOAST_MS);
-    return () => clearTimeout(timer);
-  }, [toast]);
 
   function dismissHint() {
     markHintSeen(group.groupId);
     setHintVisible(false);
   }
 
-  function showToast(message: string) {
-    setToast((current) => ({ text: message, id: (current?.id ?? 0) + 1 }));
-  }
+  if (!answered && answers && Object.keys(answers).length > 0) setAnswered(true);
 
   if (answers === null) return <NotFoundScreen kind="link" />;
 
   return (
-    <>
-      <PlayerCalendar
-        groupName={group.name}
-        playerName={player.name}
-        month={month}
-        today={today}
-        answers={answers}
-        sessionDates={group.sessionDates}
-        hintVisible={hintVisible}
-        onHintToggle={() => (hintVisible ? dismissHint() : setHintVisible(true))}
-        onAnswer={(date, answer) => {
-          if (hintVisible) dismissHint();
-          saveAnswer({ shareToken, playerId, date, answer }).catch((error: unknown) =>
-            showToast(errorMessage(error, "answer")),
-          );
-        }}
-        onFillRest={(fillMonth) => {
-          if (hintVisible) dismissHint();
-          const saving = fillRest({ shareToken, playerId, month: fillMonth });
-          saving.catch((error: unknown) => showToast(errorMessage(error, "fillRest")));
-          return saving;
-        }}
-        onMonthChange={onMonthChange}
-        onNotYou={onNotYou}
-      />
-      <Toast message={toast} />
-    </>
+    <PlayerCalendar
+      groupName={group.name}
+      playerName={player.name}
+      month={month}
+      today={today}
+      answers={answers}
+      sessionDates={group.sessionDates}
+      hintVisible={hintVisible}
+      onHintToggle={() => (hintVisible ? dismissHint() : setHintVisible(true))}
+      onAnswer={(date, answer) => {
+        if (hintVisible) dismissHint();
+        saveAnswer({ shareToken, playerId, date, answer }).catch((error: unknown) =>
+          showToast(errorMessage(error, "answer")),
+        );
+      }}
+      onFillRest={(fillMonth) => {
+        if (hintVisible) dismissHint();
+        const saving = fillRest({ shareToken, playerId, month: fillMonth });
+        saving.catch((error: unknown) => showToast(errorMessage(error, "fillRest")));
+        return saving;
+      }}
+      onMonthChange={onMonthChange}
+      onNotYou={onNotYou}
+      keepOffered={answered}
+      {...keepLine}
+    />
   );
 }
 

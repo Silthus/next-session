@@ -21,11 +21,13 @@ import type * as model_gms from "../model/gms.js";
 import type * as model_groups from "../model/groups.js";
 import type * as model_players from "../model/players.js";
 import type * as model_rateLimits from "../model/rateLimits.js";
+import type * as model_telemetry from "../model/telemetry.js";
 import type * as player from "../player.js";
 import type * as roster from "../roster.js";
 import type * as schedule from "../schedule.js";
 import type * as sessions from "../sessions.js";
 import type * as signInOptions from "../signInOptions.js";
+import type * as telemetry from "../telemetry.js";
 
 import type {
   ApiFromModules,
@@ -47,11 +49,13 @@ declare const fullApi: ApiFromModules<{
   "model/groups": typeof model_groups;
   "model/players": typeof model_players;
   "model/rateLimits": typeof model_rateLimits;
+  "model/telemetry": typeof model_telemetry;
   player: typeof player;
   roster: typeof roster;
   schedule: typeof schedule;
   sessions: typeof sessions;
   signInOptions: typeof signInOptions;
+  telemetry: typeof telemetry;
 }>;
 
 /**

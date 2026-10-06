@@ -1,6 +1,6 @@
 import type { AuthTokenFetcher } from "convex/browser";
-import { describe, expect, it, vi } from "vitest";
-import { gmStatus, signInSwitchingIdentity } from "./useGm";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { authGate, gmStatus, signInSwitchingIdentity } from "./useGm";
 
 const signedIn = { isLoading: false, isAuthenticated: true };
 
@@ -105,5 +105,37 @@ describe("signInSwitchingIdentity", () => {
     });
 
     expect(steps).toEqual([]);
+  });
+});
+
+describe("authGate", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("lets a caller through at once while the server confirms the session", async () => {
+    const gate = authGate(true);
+
+    await gate.whenAuthenticated();
+  });
+
+  it("holds a caller until the server confirms a first sign-in", async () => {
+    const gate = authGate(false);
+    let through = false;
+    const waiting = gate.whenAuthenticated().then(() => (through = true));
+    await Promise.resolve();
+    expect(through).toBe(false);
+
+    gate.update(true);
+
+    await waiting;
+    expect(through).toBe(true);
+  });
+
+  it("gives up when the server never confirms the session", async () => {
+    vi.useFakeTimers();
+    const gate = authGate(false);
+    const waiting = gate.whenAuthenticated();
+    vi.advanceTimersByTime(15_000);
+
+    await expect(waiting).rejects.toThrow("The server did not confirm the sign-in");
   });
 });

@@ -1,5 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useId, useRef, useState, type RefObject, type TouchEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+  type TouchEvent,
+} from "react";
 import { ANSWERS, nextAnswer, type Answer } from "../../../shared/answers";
 import type { IsoDate, IsoMonth } from "../../../shared/dates";
 import { pageTitle } from "../../lib/pageTitle";
@@ -28,6 +36,8 @@ const answerTiles: Record<Answer | "none", string> = {
   none: "border-line bg-surface text-ink hover:border-line-strong",
 };
 
+export type KeepState = "offer" | "keeping" | "kept";
+
 export function PlayerCalendar({
   groupName,
   playerName,
@@ -41,6 +51,11 @@ export function PlayerCalendar({
   onMonthChange,
   onNotYou,
   onHintToggle,
+  keep,
+  keepOffered,
+  keepRefusal,
+  onKeep,
+  accountControl,
 }: {
   groupName: string;
   playerName: string;
@@ -54,6 +69,11 @@ export function PlayerCalendar({
   onMonthChange: (month: IsoMonth) => void;
   onNotYou: () => void;
   onHintToggle: () => void;
+  keep: KeepState;
+  keepOffered: boolean;
+  keepRefusal: string | null;
+  onKeep: () => void;
+  accountControl?: ReactNode;
 }) {
   const view = playerMonth({ month, today, answers: answers ?? {}, sessionDates });
   const [taps, setTaps] = useState(0);
@@ -141,17 +161,20 @@ export function PlayerCalendar({
             </p>
           </div>
         </div>
-        {!view.readOnly && (
-          <button
-            type="button"
-            aria-label="How it works"
-            aria-expanded={hintVisible}
-            onClick={onHintToggle}
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"
-          >
-            ?
-          </button>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {accountControl}
+          {!view.readOnly && (
+            <button
+              type="button"
+              aria-label="How it works"
+              aria-expanded={hintVisible}
+              onClick={onHintToggle}
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"
+            >
+              ?
+            </button>
+          )}
+        </div>
       </header>
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5">
@@ -206,6 +229,9 @@ export function PlayerCalendar({
         <p className="text-center text-xs text-ink-3">
           {view.readOnly ? LOCK_TIP : TIPS[Math.floor(taps / 3) % TIPS.length]}
         </p>
+        {(keepOffered || keep !== "offer" || keepRefusal !== null) && (
+          <KeepLine keep={keep} refusal={keepRefusal} onKeep={onKeep} />
+        )}
       </main>
 
       <footer className="mx-auto flex w-full max-w-xl flex-col items-center gap-2 px-4 pb-6 sm:px-5">
@@ -426,6 +452,66 @@ function FirstVisitHint({ id, column }: { id: string; column: number }) {
       />
       Tap a night you can play. Tap again for maybe, then busy.
     </div>
+  );
+}
+
+function KeepLine({
+  keep,
+  refusal,
+  onKeep,
+}: {
+  keep: KeepState;
+  refusal: string | null;
+  onKeep: () => void;
+}) {
+  const [offeredHere] = useState(keep !== "kept");
+  return (
+    <div className="flex flex-col items-center gap-1 text-center text-sm">
+      {keep === "kept" ? (
+        <KeptLine focusOnMount={offeredHere} />
+      ) : (
+        <p className="text-ink-2">
+          <button
+            type="button"
+            onClick={onKeep}
+            disabled={keep === "keeping"}
+            className="-my-3.5 py-3.5 font-semibold text-accent-strong underline underline-offset-2 hover:text-ink disabled:opacity-60"
+          >
+            {keep === "keeping" ? "Keeping…" : "Keep this group"}
+          </button>{" "}
+          on all your devices.
+        </p>
+      )}
+      {refusal !== null && (
+        <p role="alert" className="max-w-sm font-medium text-busy">
+          {refusal}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function KeptLine({ focusOnMount }: { focusOnMount: boolean }) {
+  const line = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (!focusOnMount) return;
+    const focusLine = () => line.current?.focus();
+    const openSheet = document.querySelector("dialog[open]");
+    if (openSheet === null) {
+      focusLine();
+      return;
+    }
+    openSheet.addEventListener("close", focusLine, { once: true });
+    return () => openSheet.removeEventListener("close", focusLine);
+  }, [focusOnMount]);
+  return (
+    <p
+      ref={line}
+      tabIndex={-1}
+      className="text-ink-3 outline-none before:mr-1.5 before:text-free before:content-['✓']"
+    >
+      Kept in My groups
+    </p>
   );
 }
 

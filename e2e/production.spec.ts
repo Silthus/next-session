@@ -16,7 +16,7 @@ const legacyShareLink = "/s/AAAAAAAA";
 const stamp = Date.now();
 const groupName = `Prod proof ${String(stamp)}`;
 const playerName = `Proof Player ${String(stamp)}`;
-const email = `prod-proof+${String(stamp)}@next-session.link`;
+const email = `prod-proof+${String(stamp)}@example.test`;
 const password = randomBytes(18).toString("base64url");
 
 const nextMonth = addMonths(monthOf(todayUtc(stamp)), 1);

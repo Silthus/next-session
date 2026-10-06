@@ -103,6 +103,20 @@ describe("the bright accent", () => {
   });
 });
 
+const maybeGraphicColour = /(?<![\w-])(?:bg|fill|stroke)-maybe(?![\w-])/g;
+
+const maybeTileSources = ["./features/player/PlayerCalendar.tsx"];
+
+const maybeGraphicSources = Object.entries(sources).filter(
+  ([path]) => !maybeTileSources.includes(path),
+);
+
+describe("a maybe graphic on cream", () => {
+  it.each(maybeGraphicSources)("is drawn in the maybe bar colour in %s", (_, source) => {
+    expect(source.match(maybeGraphicColour) ?? []).toEqual([]);
+  });
+});
+
 function tokensIn(block: string) {
   const tokens: Tokens = {};
   for (const [, name, value] of block.matchAll(/--([\w-]+):\s*([^;]+);/g)) {
