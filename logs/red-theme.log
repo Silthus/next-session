@@ -1,0 +1,38 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-81
+
+ ❯ |ui| src/theme.test.ts (129 tests | 2 failed) 18ms
+   ❯ a maybe graphic on cream (48)
+     × is drawn in the maybe bar colour in ./features/landing/DemoStrip.tsx 5ms
+     × is drawn in the maybe bar colour in ./ui/Dot.tsx 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/theme.test.ts > a maybe graphic on cream > is drawn in the maybe bar colour in ./features/landing/DemoStrip.tsx
+ FAIL  |ui| src/theme.test.ts > a maybe graphic on cream > is drawn in the maybe bar colour in ./ui/Dot.tsx
+AssertionError: expected [ 'bg-maybe' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "bg-maybe",
++ ]
+
+ ❯ src/theme.test.ts:116:43
+    114| describe("a maybe graphic on cream", () => {
+    115|   it.each(maybeGraphicSources)("is drawn in the maybe bar colour in %s…
+    116|     expect(source.match(maybeFill) ?? []).toEqual([]);
+       |                                           ^
+    117|   });
+    118| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 127 passed (129)
+   Start at  15:53:53
+   Duration  752ms (environment 68%, transform 16%, setup 10%, import 3%, tests 3%, worker 1%)
+

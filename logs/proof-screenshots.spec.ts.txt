@@ -1,0 +1,36 @@
+import { expect, test } from "@playwright/test";
+import { addMonths, monthOf, todayUtc } from "../shared/dates";
+import { openAsGm, seedPlayer, signInAnonymousGm } from "./helpers";
+
+const stage = process.env.PROOF_STAGE ?? "before";
+const out = (name: string) => `../../ns-proof-81/screenshots/${name}--${stage}.png`;
+
+for (const colorScheme of ["light", "dark"] as const) {
+  test(`landing demo strip ${colorScheme}`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ colorScheme });
+    await page.goto("/");
+    const strip = page.getByText("Thursday Crew").locator("xpath=../..");
+    await expect(strip).toBeVisible();
+    await strip.screenshot({ path: out(`demo-strip--390--${colorScheme}`) });
+  });
+
+  test(`day panel dots ${colorScheme}`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ colorScheme });
+    const nextMonth = addMonths(monthOf(todayUtc(Date.now())), 1);
+    const night = `${nextMonth}-06`;
+    const gm = await signInAnonymousGm();
+    await seedPlayer(gm, "Ana", { [night]: "free" });
+    await seedPlayer(gm, "Ben", { [night]: "maybe" });
+    await seedPlayer(gm, "Chiara", { [night]: "maybe" });
+    await seedPlayer(gm, "Dana", { [night]: "busy" });
+    await seedPlayer(gm, "Eli");
+    await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night}`);
+    const panel = page.getByRole("region", { name: /, \w+ 6$/ });
+    await expect(panel.getByRole("listitem")).toHaveCount(5);
+    await page.waitForTimeout(600);
+    await panel.screenshot({ path: out(`day-panel-dots--390--${colorScheme}`) });
+    await page.screenshot({ path: out(`day-panel-page--390--${colorScheme}`) });
+  });
+}
