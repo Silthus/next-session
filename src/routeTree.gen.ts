@@ -14,6 +14,7 @@ import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as MeRouteImport } from './routes/me'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TipsRouteImport } from './routes/tips'
 import { Route as GGroupIdRouteImport } from './routes/g.$groupId'
 import { Route as SShareTokenRouteImport } from './routes/s.$shareToken'
 
@@ -42,6 +43,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TipsRoute = TipsRouteImport.update({
+  id: '/tips',
+  path: '/tips',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GGroupIdRoute = GGroupIdRouteImport.update({
   id: '/g/$groupId',
   path: '/g/$groupId',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/me': typeof MeRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/tips': typeof TipsRoute
   '/g/$groupId': typeof GGroupIdRoute
   '/s/$shareToken': typeof SShareTokenRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/me': typeof MeRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/tips': typeof TipsRoute
   '/g/$groupId': typeof GGroupIdRoute
   '/s/$shareToken': typeof SShareTokenRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/me': typeof MeRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/tips': typeof TipsRoute
   '/g/$groupId': typeof GGroupIdRoute
   '/s/$shareToken': typeof SShareTokenRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/privacy'
     | '/terms'
+    | '/tips'
     | '/g/$groupId'
     | '/s/$shareToken'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/privacy'
     | '/terms'
+    | '/tips'
     | '/g/$groupId'
     | '/s/$shareToken'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/privacy'
     | '/terms'
+    | '/tips'
     | '/g/$groupId'
     | '/s/$shareToken'
   fileRoutesById: FileRoutesById
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   MeRoute: typeof MeRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  TipsRoute: typeof TipsRoute
   GGroupIdRoute: typeof GGroupIdRoute
   SShareTokenRoute: typeof SShareTokenRoute
 }
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tips': {
+      id: '/tips'
+      path: '/tips'
+      fullPath: '/tips'
+      preLoaderRoute: typeof TipsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/g/$groupId': {
       id: '/g/$groupId'
       path: '/g/$groupId'
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   MeRoute: MeRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  TipsRoute: TipsRoute,
   GGroupIdRoute: GGroupIdRoute,
   SShareTokenRoute: SShareTokenRoute,
 }

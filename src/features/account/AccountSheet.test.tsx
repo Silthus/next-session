@@ -9,6 +9,7 @@ import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import { useState, type ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { TIPS_CONSENT_WORDING } from "../../../shared/tips";
 import { reportError, track } from "../../lib/telemetry";
 import type { SaveInput } from "./save";
 import { AccountSheet } from "./AccountSheet";
@@ -188,6 +189,77 @@ describe("AccountSheet saving a Group", () => {
     await userEvent.click(screen.getByRole("button", { name: "Save group" }));
 
     expect(await alertText()).toBe("Use at least 8 characters for the password.");
+  });
+});
+
+describe("AccountSheet asking for Tips", () => {
+  const tipsBox = { name: TIPS_CONSENT_WORDING };
+
+  it("offers the box unticked under the password when saving", async () => {
+    renderSaveSheet(vi.fn());
+
+    const box = await screen.findByRole("checkbox", tipsBox);
+    expect(box).toHaveProperty("checked", false);
+    expect(
+      screen.getByLabelText("Password").compareDocumentPosition(box) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("saves without Tips when the box stays unticked", async () => {
+    const onSubmit = vi.fn(() => Promise.resolve());
+    renderSaveSheet(onSubmit);
+
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+
+    expect(onSubmit).toHaveBeenCalledWith({ email, password, mode: "create" });
+  });
+
+  it("asks for Tips with the sign-up when the box is ticked", async () => {
+    const onSubmit = vi.fn(() => Promise.resolve());
+    renderSaveSheet(onSubmit);
+
+    await fillIn();
+    await userEvent.click(screen.getByRole("checkbox", tipsBox));
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+
+    expect(onSubmit).toHaveBeenCalledWith({ email, password, mode: "create", tips: true });
+  });
+
+  it("drops the box for a log in, and asks for nothing even if it was ticked", async () => {
+    const onSubmit = vi.fn(() => Promise.resolve());
+    renderSaveSheet(onSubmit);
+
+    await userEvent.click(await screen.findByRole("checkbox", tipsBox));
+    await userEvent.click(screen.getByRole("radio", { name: "I already have one" }));
+    expect(screen.queryByRole("checkbox", tipsBox)).toBeNull();
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Log in and save" }));
+
+    expect(onSubmit).toHaveBeenCalledWith({ email, password, mode: "logIn" });
+  });
+
+  it("locks the box while saving", async () => {
+    renderSaveSheet(vi.fn(() => new Promise(() => {})));
+
+    await fillIn();
+    await userEvent.click(screen.getByRole("button", { name: "Save group" }));
+
+    expect(screen.getByRole("checkbox", tipsBox)).toHaveProperty("disabled", true);
+  });
+
+  it.each([
+    [
+      "keeping a Group",
+      { intent: "keep", groupName: "Thursday Crew", playerName: "Robin" } as const,
+    ],
+    ["logging in", { intent: "logIn" } as const],
+  ])("offers no box when %s", async (_, intentProps) => {
+    renderSheet({ open: true, onSubmit: vi.fn(), onClose: vi.fn(), ...intentProps });
+
+    await screen.findByLabelText("Password");
+    expect(screen.queryByRole("checkbox")).toBeNull();
   });
 });
 

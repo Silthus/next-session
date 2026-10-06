@@ -1,5 +1,6 @@
 import { ConvexError } from "convex/values";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { TIPS_REQUESTED } from "../../../shared/tips";
 import { appErrorOf } from "../../lib/errors";
 import { log, track } from "../../lib/telemetry";
 
@@ -7,7 +8,7 @@ export const PENDING_SAVE_KEY = "next-session.pendingSave";
 
 export type SaveMode = "create" | "logIn";
 
-export type SaveInput = { email: string; password: string; mode: SaveMode };
+export type SaveInput = { email: string; password: string; mode: SaveMode; tips?: boolean };
 
 type SaveResult = { groupIds: Id<"groups">[] };
 
@@ -15,7 +16,12 @@ export type SaveDeps = {
   startSave: () => Promise<{ code: string }>;
   signIn: (
     provider: "password",
-    params: { email: string; password: string; flow: "signUp" | "signIn" },
+    params: {
+      email: string;
+      password: string;
+      flow: "signUp" | "signIn";
+      tips?: typeof TIPS_REQUESTED;
+    },
   ) => Promise<unknown>;
   finishSave: (args: { code: string }) => Promise<SaveResult>;
   storage: Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -29,11 +35,16 @@ export type GoogleSaveDeps = Pick<SaveDeps, "startSave" | "storage"> & {
 
 export const PASSWORD_FLOWS = { create: "signUp", logIn: "signIn" } as const;
 
-export async function saveGroups({ email, password, mode }: SaveInput, deps: SaveDeps) {
+export async function saveGroups({ email, password, mode, tips }: SaveInput, deps: SaveDeps) {
   track({ name: "save_started" });
   const { code } = await deps.startSave();
   deps.storage.setItem(PENDING_SAVE_KEY, code);
-  await deps.signIn("password", { email, password, flow: PASSWORD_FLOWS[mode] });
+  await deps.signIn("password", {
+    email,
+    password,
+    flow: PASSWORD_FLOWS[mode],
+    ...(mode === "create" && tips === true ? { tips: TIPS_REQUESTED } : {}),
+  });
   return await redeem(code, deps);
 }
 

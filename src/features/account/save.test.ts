@@ -9,6 +9,7 @@ import {
   saveGroups,
   saveThroughGoogle,
   type SaveDeps,
+  type SaveInput,
 } from "./save";
 
 vi.mock(import("../../lib/telemetry"), async (original) => ({
@@ -107,6 +108,36 @@ describe("saveGroups", () => {
     await expect(saveGroups({ ...input, mode: "create" }, deps)).rejects.toThrow();
 
     expect(storage.getItem(PENDING_SAVE_KEY)).toBeNull();
+  });
+});
+
+describe("saveGroups asking for Tips", () => {
+  function signInParamsOf(save: SaveInput) {
+    const signIn = vi.fn<SaveDeps["signIn"]>(() => Promise.resolve());
+    const { deps } = fakeDeps({ signIn });
+    return saveGroups(save, deps).then(() => signIn.mock.calls[0]![1]);
+  }
+
+  it("passes tips: yes with a sign-up for a ticked box", async () => {
+    expect(await signInParamsOf({ ...input, mode: "create", tips: true })).toEqual({
+      ...input,
+      flow: "signUp",
+      tips: "yes",
+    });
+  });
+
+  it("passes no tips for an unticked box", async () => {
+    expect(await signInParamsOf({ ...input, mode: "create" })).toEqual({
+      ...input,
+      flow: "signUp",
+    });
+  });
+
+  it("passes no tips with a log in", async () => {
+    expect(await signInParamsOf({ ...input, mode: "logIn", tips: true })).toEqual({
+      ...input,
+      flow: "signIn",
+    });
   });
 });
 
