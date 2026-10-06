@@ -1,0 +1,10 @@
+Local backend with a fake AUTH_GOOGLE_ID/AUTH_GOOGLE_SECRET, Chromium at 390px.
+Create your link -> Open your group -> Save -> Continue with Google:
+left for https://accounts.google.com/o/oauth2/v2/auth
+redirect_uri http://127.0.0.1:3211/api/auth/callback/google
+client_id fake-client.apps.googleusercontent.com
+scope openid profile email pkce S256
+Back to the Group page without finishing at Google (the cancel path):
+back on /g/k17bfwj4n82ftswpb197q484c58fsrnn same group: true
+pending claim kept across the trip: true
+still an Anonymous GM with Save offered: true
