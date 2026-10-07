@@ -318,7 +318,7 @@ function GoogleOption({
   );
 }
 
-function GoogleLogo() {
+export function GoogleLogo() {
   return (
     <svg aria-hidden viewBox="0 0 48 48" className="size-5">
       <path
@@ -341,7 +341,7 @@ function GoogleLogo() {
   );
 }
 
-function LegalLinks() {
+export function LegalLinks() {
   return (
     <>
       <Link to="/terms" className="underline underline-offset-2 hover:text-ink">

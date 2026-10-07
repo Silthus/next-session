@@ -64,10 +64,6 @@ function calendarProps(props: Partial<Props> = {}): Props {
     onMonthChange: vi.fn(),
     onNotYou: vi.fn(),
     onHintToggle: vi.fn(),
-    keep: "offer",
-    keepOffered: false,
-    keepRefusal: null,
-    onKeep: vi.fn(),
     ...props,
   };
 }
@@ -79,7 +75,6 @@ function renderCalendar(overrides: Partial<Props> = {}) {
     onMonthChange: vi.fn<Props["onMonthChange"]>(),
     onNotYou: vi.fn<Props["onNotYou"]>(),
     onHintToggle: vi.fn<Props["onHintToggle"]>(),
-    onKeep: vi.fn<Props["onKeep"]>(),
   };
   const props = calendarProps({ ...handlers, ...overrides });
   renderInRouter(() => <PlayerCalendar {...props} />);
@@ -414,100 +409,19 @@ function swipe(target: Element, from: { x: number; y: number }, to: { x: number;
   fireEvent.touchEnd(target, { changedTouches: [{ clientX: to.x, clientY: to.y }] });
 }
 
-describe("PlayerCalendar keeping the Group", () => {
-  it("offers nothing before the first answer", async () => {
-    renderCalendar({ answers: {}, keepOffered: false });
-    await screen.findByRole("heading", { name: "Thursday Crew" });
-
-    expect(screen.queryByRole("button", { name: "Keep this group" })).toBeNull();
-    expect(screen.queryByText(/Kept in My groups/)).toBeNull();
-  });
-
-  it("offers a quiet line under the calendar once the Player answered", async () => {
-    const { onKeep } = renderCalendar({ answers: {}, keepOffered: true });
-
-    const keep = await screen.findByRole("button", { name: "Keep this group" });
-    expect(keep.closest("p")?.textContent).toBe("Keep this group on all your devices.");
-    await userEvent.click(keep);
-
-    expect(onKeep).toHaveBeenCalledOnce();
-  });
-
-  it("holds the line while keeping", async () => {
-    renderCalendar({ keepOffered: true, keep: "keeping" });
-
-    expect(await screen.findByRole("button", { name: "Keeping…" })).toHaveProperty(
-      "disabled",
-      true,
-    );
-  });
-
-  it("reads Kept in My groups once the Account holds the Player", async () => {
-    renderCalendar({ answers: {}, keep: "kept" });
-
-    expect(await screen.findByText("Kept in My groups")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Keep this group" })).toBeNull();
-  });
-
-  it("moves focus to the kept line once the keep goes through", async () => {
-    function KeepingCalendar() {
-      const [keep, setKeep] = useState<Props["keep"]>("offer");
-      return (
-        <PlayerCalendar
-          {...calendarProps({ keepOffered: true, keep, onKeep: () => setKeep("kept") })}
-        />
-      );
-    }
-    renderInRouter(() => <KeepingCalendar />);
-
-    await userEvent.click(await screen.findByRole("button", { name: "Keep this group" }));
-
-    expect(document.activeElement?.textContent).toBe("Kept in My groups");
-  });
-
-  it("moves focus to the kept line once the sheet the keep went through closes", async () => {
-    const sheet = document.body.appendChild(document.createElement("dialog"));
-    sheet.setAttribute("open", "");
-    function KeptBehindSheet() {
-      const [keep, setKeep] = useState<Props["keep"]>("offer");
-      return (
-        <PlayerCalendar
-          {...calendarProps({ keepOffered: true, keep, onKeep: () => setKeep("kept") })}
-        />
-      );
-    }
-    renderInRouter(() => <KeptBehindSheet />);
-    await userEvent.click(await screen.findByRole("button", { name: "Keep this group" }));
-    expect(document.activeElement?.textContent).not.toBe("Kept in My groups");
-
-    sheet.removeAttribute("open");
-    sheet.dispatchEvent(new Event("close"));
-
-    expect(document.activeElement?.textContent).toBe("Kept in My groups");
-    sheet.remove();
-  });
-
-  it("explains a refusal under the kept line too", async () => {
-    renderCalendar({ keep: "kept", keepRefusal: "Your own groups didn't move: the save expired." });
-
-    expect((await screen.findByRole("alert")).textContent).toBe(
-      "Your own groups didn't move: the save expired.",
-    );
-    expect(screen.getByText("Kept in My groups")).toBeTruthy();
-  });
-
-  it("explains a refused keep", async () => {
-    renderCalendar({ keepOffered: true, keepRefusal: "Another account keeps this name." });
-
-    expect((await screen.findByRole("alert")).textContent).toBe("Another account keeps this name.");
-  });
-
+describe("PlayerCalendar header and keep slot", () => {
   it("shows the account control in the header", async () => {
     renderCalendar({ accountControl: <button type="button">Log in</button> });
 
     expect(
       within(await screen.findByRole("banner")).getByRole("button", { name: "Log in" }),
     ).toBeTruthy();
+  });
+
+  it("shows the keep slot under the calendar", async () => {
+    renderCalendar({ keepGroup: <p>Kept in My groups</p> });
+
+    expect(within(await screen.findByRole("main")).getByText("Kept in My groups")).toBeTruthy();
   });
 });
 
@@ -581,17 +495,5 @@ describe("PlayerCalendar telemetry", () => {
       expect(track).toHaveBeenCalledWith({ name: "fill_rest_used", group_id: "group-fill-rest" }),
     );
     expect(track).toHaveBeenCalledWith({ name: "answers_started", group_id: "group-fill-rest" });
-  });
-
-  it("tracks keep_group_started when the Player taps Keep this group", async () => {
-    const { onKeep } = renderCalendar({ groupId: "group-keep", keepOffered: true });
-
-    await userEvent.click(await screen.findByRole("button", { name: "Keep this group" }));
-
-    expect(onKeep).toHaveBeenCalledOnce();
-    expect(track).toHaveBeenCalledExactlyOnceWith({
-      name: "keep_group_started",
-      group_id: "group-keep",
-    });
   });
 });

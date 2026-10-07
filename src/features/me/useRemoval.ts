@@ -10,15 +10,17 @@ export function useRemoval(
   show: (message: string, undo?: () => void) => void,
   focusPage: () => void,
 ) {
-  const release = useMutation(api.player.release).withOptimisticUpdate((store, { groupId }) => {
-    const current = store.getQuery(api.me.groups, { today });
-    if (!current) return;
-    store.setQuery(
-      api.me.groups,
-      { today },
-      { ...current, playing: current.playing.filter((group) => group.groupId !== groupId) },
-    );
-  });
+  const removeFromMyGroups = useMutation(api.player.removeFromMyGroups).withOptimisticUpdate(
+    (store, { groupId }) => {
+      const current = store.getQuery(api.me.groups, { today });
+      if (!current) return;
+      store.setQuery(
+        api.me.groups,
+        { today },
+        { ...current, playing: current.playing.filter((group) => group.groupId !== groupId) },
+      );
+    },
+  );
   const claim = useMutation(api.player.claim);
 
   async function undo(group: PlayingGroup) {
@@ -35,7 +37,7 @@ export function useRemoval(
     track({ name: "remove_group_started", group_id: group.groupId });
     focusPage();
     show(`Removed ${group.name} from My groups.`, () => void undo(group));
-    release({ groupId: group.groupId }).catch((error: unknown) => {
+    removeFromMyGroups({ groupId: group.groupId }).catch((error: unknown) => {
       show(errorMessage(error, "keep"));
     });
   }

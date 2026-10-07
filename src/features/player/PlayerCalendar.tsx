@@ -44,8 +44,6 @@ const answerTiles: Record<Answer | "none", string> = {
   none: "border-line bg-surface text-ink hover:border-line-strong",
 };
 
-export type KeepState = "offer" | "keeping" | "kept";
-
 export function PlayerCalendar({
   groupId,
   groupName,
@@ -60,10 +58,7 @@ export function PlayerCalendar({
   onMonthChange,
   onNotYou,
   onHintToggle,
-  keep,
-  keepOffered,
-  keepRefusal,
-  onKeep,
+  keepGroup,
   accountControl,
 }: {
   groupId: string;
@@ -79,10 +74,7 @@ export function PlayerCalendar({
   onMonthChange: (month: IsoMonth) => void;
   onNotYou: () => void;
   onHintToggle: () => void;
-  keep: KeepState;
-  keepOffered: boolean;
-  keepRefusal: string | null;
-  onKeep: () => void;
+  keepGroup?: ReactNode;
   accountControl?: ReactNode;
 }) {
   const view = playerMonth({ month, today, answers: answers ?? {}, sessionDates });
@@ -143,11 +135,6 @@ export function PlayerCalendar({
         setRefusedFillRests((count) => count + 1);
       },
     );
-  }
-
-  function keepGroup() {
-    track({ name: "keep_group_started", group_id: groupId });
-    onKeep();
   }
 
   function fillNextMonth(next: IsoMonth) {
@@ -253,9 +240,7 @@ export function PlayerCalendar({
         <p className="text-center text-xs text-ink-3">
           {view.readOnly ? LOCK_TIP : TIPS[Math.floor(taps / 3) % TIPS.length]}
         </p>
-        {(keepOffered || keep !== "offer" || keepRefusal !== null) && (
-          <KeepLine keep={keep} refusal={keepRefusal} onKeep={keepGroup} />
-        )}
+        {keepGroup}
       </main>
 
       <footer className="mx-auto flex w-full max-w-xl flex-col items-center gap-2 px-4 pb-6 sm:px-5">
@@ -476,66 +461,6 @@ function FirstVisitHint({ id, column }: { id: string; column: number }) {
       />
       Tap a night you can play. Tap again for maybe, then busy.
     </div>
-  );
-}
-
-function KeepLine({
-  keep,
-  refusal,
-  onKeep,
-}: {
-  keep: KeepState;
-  refusal: string | null;
-  onKeep: () => void;
-}) {
-  const [offeredHere] = useState(keep !== "kept");
-  return (
-    <div className="flex flex-col items-center gap-1 text-center text-sm">
-      {keep === "kept" ? (
-        <KeptLine focusOnMount={offeredHere} />
-      ) : (
-        <p className="text-ink-2">
-          <button
-            type="button"
-            onClick={onKeep}
-            disabled={keep === "keeping"}
-            className="-my-3.5 py-3.5 font-semibold text-accent-strong underline underline-offset-2 hover:text-ink disabled:opacity-60"
-          >
-            {keep === "keeping" ? "Keeping…" : "Keep this group"}
-          </button>{" "}
-          on all your devices.
-        </p>
-      )}
-      {refusal !== null && (
-        <p role="alert" className="max-w-sm font-medium text-busy">
-          {refusal}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function KeptLine({ focusOnMount }: { focusOnMount: boolean }) {
-  const line = useRef<HTMLParagraphElement>(null);
-  useEffect(() => {
-    if (!focusOnMount) return;
-    const focusLine = () => line.current?.focus();
-    const openSheet = document.querySelector("dialog[open]");
-    if (openSheet === null) {
-      focusLine();
-      return;
-    }
-    openSheet.addEventListener("close", focusLine, { once: true });
-    return () => openSheet.removeEventListener("close", focusLine);
-  }, [focusOnMount]);
-  return (
-    <p
-      ref={line}
-      tabIndex={-1}
-      className="text-ink-3 outline-none before:mr-1.5 before:text-free before:content-['✓']"
-    >
-      Kept in My groups
-    </p>
   );
 }
 
