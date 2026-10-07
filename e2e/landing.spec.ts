@@ -8,7 +8,7 @@ import {
 } from "@playwright/test";
 import { newEmail, password, signUpAccount, toastRegion } from "./helpers";
 
-const shareLinkPattern = /^localhost:5173\/s\/[A-Za-z0-9_-]{10}$/;
+const shareLinkPattern = /^127\.0\.0\.1:\d+\/s\/[A-Za-z0-9_-]{10}$/;
 
 async function createLink(page: Page) {
   await page.goto("/");
@@ -236,7 +236,7 @@ test.describe("a Save whose move fails after the sign-in", () => {
 
     await expect(toastRegion(page)).toHaveText("Saved. Open it anywhere with your account.");
     await expect(page).toHaveURL(new RegExp(`^[^?]*${groupPath}`));
-    await expect(page.getByText(shareLink.replace(/^localhost:5173/, ""))).toBeVisible();
+    await expect(page.getByText(shareLink.replace(/^[^/]+/, ""))).toBeVisible();
   });
 
   test("still goes through when the GM closes the retry from the Group header", async ({
@@ -255,7 +255,7 @@ test.describe("a Save whose move fails after the sign-in", () => {
 
     await expect(toastRegion(page)).toHaveText("Saved. Open it anywhere with your account.");
     await expect(page).toHaveURL(new RegExp(`^[^?]*${groupPath}`));
-    await expect(page.getByText(shareLink.replace(/^localhost:5173/, ""))).toBeVisible();
+    await expect(page.getByText(shareLink.replace(/^[^/]+/, ""))).toBeVisible();
   });
 });
 
@@ -278,7 +278,7 @@ test.describe("a Group page that opens on a pending Save, as after Google's redi
 
     await expect(toastRegion(page)).toHaveText("Saved. Open it anywhere with your account.");
     await expect(page).toHaveURL(new RegExp(`^[^?]*${groupPath}`));
-    await expect(page.getByText(shareLink.replace(/^localhost:5173/, ""))).toBeVisible();
+    await expect(page.getByText(shareLink.replace(/^[^/]+/, ""))).toBeVisible();
     await expect(page.getByRole("button", { name: "Save your group" })).toBeHidden();
   });
 

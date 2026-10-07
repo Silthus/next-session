@@ -6,7 +6,7 @@ import { ANSWERS } from "../shared/answers";
 import { addMonths, monthDays, monthOf, todayUtc, type IsoDate } from "../shared/dates";
 import { convexUrl, toastRegion } from "./helpers";
 
-const screenshotDir = "test-results/player-screenshots";
+const screenshotDir = `${process.env.E2E_OUTPUT_DIR ?? "test-results"}/player-screenshots`;
 
 type SeededGroup = Awaited<ReturnType<typeof seedGroup>>;
 

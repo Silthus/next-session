@@ -375,7 +375,7 @@ Drafts for Terms, Privacy Policy, and Imprint are in [docs/legal/](legal/), writ
 ### Pull requests (`.github/workflows/ci.yml`)
 
 - `check`: `bun install --frozen-lockfile`, `bun run check`.
-- `e2e`: start a local Convex backend with `CONVEX_AGENT_MODE=anonymous bunx convex dev` (verified headless on CLI 1.46.0: it downloads the backend, serves `http://127.0.0.1:3210`, and needs no Convex login), set the Convex Auth env vars on it, start `vite`, run Playwright. Upload the report on failure.
+- `e2e`: run `bun run e2e` against a fresh temporary project and anonymous local Convex backend, with separate frontend, cloud and site ports per run. Set auth through the run’s generated env file, preserve developer env and state, and clean up only that run. Chromium runs the existing suite; mobile WebKit runs the focused sharing/copy project. Upload the report on failure ([ADR-0009](adr/0009-no-pr-previews-e2e-on-local-backend.md)).
 
 ### Deploy from `main`
 
