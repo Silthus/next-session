@@ -9,7 +9,7 @@
     "check": "tsc -p tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p convex/tsconfig.json && eslint . && prettier --check . && vitest run && vite build && wrangler deploy --dry-run",
     "format": "prettier --write .",
     "test": "vitest",
-    "e2e": "playwright test",
+    "e2e": "bun scripts/e2e-run.ts",
     "e2e:prod": "playwright test --config playwright.prod.config.ts"
   },
   "dependencies": {

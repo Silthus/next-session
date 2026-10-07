@@ -131,7 +131,9 @@ test("a visitor keeps the Group with a new Account and plays as that Account on 
     await answerToday(page);
     await page.getByRole("button", { name: "Keep this group" }).click();
     await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
+    await expect(elsewhere.getByRole("main").getByText("Kept in My groups")).toBeVisible();
     await page.getByRole("button", { name: "Not you?" }).click();
+    await expect(elsewhere.getByRole("main").getByText("Kept in My groups")).toBeHidden();
     await expect(page.getByRole("heading", { name: "Who are you?" })).toBeVisible();
     await page.reload();
     await expect(page.getByRole("heading", { name: "Who are you?" })).toBeVisible();
