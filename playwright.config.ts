@@ -10,7 +10,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI
-    ? [["list"], ["html", { open: "never", outputFolder: `${process.env.E2E_OUTPUT_DIR}/report` }]]
+    ? [["list"], ["html", { open: "never", outputFolder: process.env.E2E_REPORT_DIR }]]
     : "list",
   use: {
     baseURL,

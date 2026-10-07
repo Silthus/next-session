@@ -1,8 +1,8 @@
 import { spawn, type ChildProcess } from "node:child_process";
-import { cpSync, mkdtempSync, readdirSync, rmSync, symlinkSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readdirSync, rmSync, symlinkSync } from "node:fs";
 import { createServer, type Server } from "node:net";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 
 async function reservePort() {
   const server = createServer();
@@ -12,7 +12,15 @@ async function reservePort() {
   });
   const address = server.address();
   if (!address || typeof address === "string") throw new Error("No TCP port allocated");
-  return { server, port: address.port };
+  const lease = join(tmpdir(), `next-session-e2e-port-${address.port}`);
+  try {
+    mkdirSync(lease);
+    return { server, port: address.port, lease };
+  } catch (error) {
+    await release(server);
+    if (error instanceof Error && "code" in error && error.code === "EEXIST") return reservePort();
+    throw error;
+  }
 }
 
 async function release(server: Server) {
@@ -24,6 +32,7 @@ export async function createE2eRun(source = process.cwd()) {
   const reservations: Awaited<ReturnType<typeof reservePort>>[] = [];
   const dispose = async () => {
     await Promise.all(reservations.map(({ server }) => release(server)));
+    for (const { lease } of reservations) rmSync(lease, { recursive: true, force: true });
     rmSync(directory, { recursive: true, force: true });
   };
   try {
@@ -64,6 +73,7 @@ export async function createE2eRun(source = process.cwd()) {
 async function main() {
   let run: Awaited<ReturnType<typeof createE2eRun>> | undefined;
   let child: ChildProcess | undefined;
+  let outputDirectory: string | undefined;
   let interrupted = false;
   const stop = () => {
     interrupted = true;
@@ -78,6 +88,7 @@ async function main() {
       process.exitCode = 130;
       return;
     }
+    outputDirectory = resolve("test-results", basename(run.directory));
     child = spawn("bunx", ["playwright", "test", ...process.argv.slice(2)], {
       cwd: run.directory,
       stdio: "inherit",
@@ -89,7 +100,8 @@ async function main() {
         E2E_BASE_URL: `http://127.0.0.1:${run.ports.web}`,
         E2E_CONVEX_URL: `http://127.0.0.1:${run.ports.cloud}`,
         E2E_SITE_PORT: String(run.ports.site),
-        E2E_OUTPUT_DIR: resolve("test-results", run.directory.split("/").at(-1)!),
+        E2E_OUTPUT_DIR: outputDirectory,
+        E2E_REPORT_DIR: resolve("playwright-report", basename(run.directory)),
       },
     });
     process.exitCode = await new Promise<number>((resolve, reject) => {
@@ -98,6 +110,9 @@ async function main() {
     });
   } finally {
     await run?.dispose();
+    if (process.exitCode === 0 && !process.env.CI && outputDirectory) {
+      rmSync(outputDirectory, { recursive: true, force: true });
+    }
     for (const signal of ["SIGINT", "SIGTERM"] as const) process.off(signal, stop);
   }
 }
