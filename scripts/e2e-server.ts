@@ -1,5 +1,5 @@
+import { randomUUID } from "node:crypto";
 import { spawn, type ChildProcess } from "node:child_process";
-import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { version as convexCliVersion } from "convex/package.json";
 import { LOCAL_BACKEND_ENV } from "./localBackendEnv";
 
@@ -7,11 +7,9 @@ interface SignalSource {
   on(signal: NodeJS.Signals, listener: () => void): unknown;
 }
 
-const localBackendPort = 3210;
 const localBackendVersionByCli: Record<string, string> = {
   "1.46.0": "precompiled-2026-09-28-5c7cb5b",
 };
-const developerEnvFile = ".env.local";
 
 export function localBackendVersionFor(cliVersion: string) {
   const backendVersion = localBackendVersionByCli[cliVersion];
@@ -30,6 +28,7 @@ export function forwardShutdownSignals(child: ChildProcess, source: SignalSource
 }
 
 function startLocalBackendWithVite() {
+  const localBackendPort = new URL(process.env.E2E_CONVEX_URL!).port;
   return spawn(
     "bunx",
     [
@@ -40,17 +39,19 @@ function startLocalBackendWithVite() {
       "--local-cloud-port",
       String(localBackendPort),
       "--local-site-port",
-      String(localBackendPort + 1),
+      process.env.E2E_SITE_PORT!,
       "--local-backend-version",
       localBackendVersionFor(convexCliVersion),
       "--start",
-      "bun scripts/auth-env.ts local && bunx vite --port 5173 --strictPort",
+      `bun scripts/auth-env.ts local && bunx vite --host 127.0.0.1 --port ${new URL(process.env.E2E_BASE_URL!).port} --strictPort`,
     ],
     {
       stdio: "inherit",
       env: {
         ...process.env,
         ...LOCAL_BACKEND_ENV,
+        CONVEX_AGENT_MODE: "",
+        CONVEX_DEPLOYMENT: `anonymous:anonymous-e2e-${randomUUID()}`,
         VITE_CONVEX_URL: `http://127.0.0.1:${localBackendPort}`,
       },
     },
@@ -58,21 +59,12 @@ function startLocalBackendWithVite() {
 }
 
 function main() {
-  const developerEnv = existsSync(developerEnvFile) ? readFileSync(developerEnvFile, "utf8") : null;
+  if (!process.env.E2E_BASE_URL || !process.env.E2E_CONVEX_URL || !process.env.E2E_SITE_PORT) {
+    throw new Error("Run e2e through bun run e2e so it owns its project and ports");
+  }
   const server = startLocalBackendWithVite();
   forwardShutdownSignals(server);
-  server.on("exit", (code) => {
-    restoreDeveloperEnv(developerEnv);
-    process.exit(code ?? 0);
-  });
-}
-
-function restoreDeveloperEnv(developerEnv: string | null) {
-  if (developerEnv === null) {
-    rmSync(developerEnvFile, { force: true });
-  } else {
-    writeFileSync(developerEnvFile, developerEnv);
-  }
+  server.on("exit", (code) => process.exit(code ?? 1));
 }
 
 if (import.meta.main) main();

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { authEnv, convexEnvSet, parseEnvFile } from "./auth-env";
 import { generateAuthKeys } from "./authKeys";
 
@@ -70,6 +70,11 @@ describe("authEnv", () => {
 });
 
 describe("convexEnvSet", () => {
+  afterEach(() => vi.unstubAllEnvs());
+  it("configures the isolated e2e deployment from its own env file", () => {
+    vi.stubEnv("E2E_BASE_URL", "http://127.0.0.1:40000");
+    expect(convexEnvSet("local", { SITE_URL: "x" }, {}).command).toContain("--env-file");
+  });
   const env = {
     JWT_PRIVATE_KEY: "-----BEGIN PRIVATE KEY----- abc -----END PRIVATE KEY-----",
     SITE_URL: "x",

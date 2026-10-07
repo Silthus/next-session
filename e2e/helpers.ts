@@ -4,7 +4,7 @@ import { api } from "../convex/_generated/api";
 import type { Id } from "../convex/_generated/dataModel";
 import type { Answer } from "../shared/answers";
 
-export const convexUrl = process.env.E2E_CONVEX_URL ?? "http://127.0.0.1:3210";
+export const convexUrl = process.env.E2E_CONVEX_URL!;
 export const password = "game-night-2026";
 
 const authStorageSuffix = convexUrl.replace(/[^a-zA-Z0-9]/g, "");
@@ -18,7 +18,7 @@ export type Gm = {
 };
 
 export function newEmail() {
-  return `gm-${String(Date.now())}-${Math.random().toString(36).slice(2, 8)}@example.test`;
+  return `gm-${crypto.randomUUID()}@example.test`;
 }
 
 export async function signInAnonymousGm(): Promise<Gm> {
