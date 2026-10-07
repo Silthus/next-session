@@ -104,6 +104,9 @@ async function main() {
         E2E_SITE_PORT: String(run.ports.site),
         E2E_OUTPUT_DIR: outputDirectory,
         E2E_REPORT_DIR: resolve("playwright-report", basename(run.directory)),
+        ...(process.env.E2E_SCREENSHOTS
+          ? { E2E_SCREENSHOTS: resolve(process.env.E2E_SCREENSHOTS) }
+          : {}),
       },
     });
     process.exitCode = await new Promise<number>((resolve, reject) => {
@@ -112,7 +115,12 @@ async function main() {
     });
   } finally {
     await run?.dispose();
-    if (process.exitCode === 0 && !process.env.CI && outputDirectory) {
+    if (
+      process.exitCode === 0 &&
+      !process.env.CI &&
+      !process.env.PLAYER_SCREENSHOTS &&
+      outputDirectory
+    ) {
       rmSync(outputDirectory, { recursive: true, force: true });
     }
     for (const signal of ["SIGINT", "SIGTERM"] as const) process.off(signal, stop);
