@@ -10,12 +10,12 @@ export function LegalArticle({ legalDocument }: { legalDocument: LegalDocument }
       {legalDocument.effectiveDate && (
         <Eyebrow>Updated {humanDate(legalDocument.effectiveDate)}</Eyebrow>
       )}
-      <h1 className="mt-2 font-display text-4xl font-extrabold">{legalDocument.title}</h1>
+      <h1 className="mt-2 font-display text-4xl font-medium">{legalDocument.title}</h1>
       <div className="mt-6 flex flex-col gap-4">{legalDocument.intro.map(renderBlock)}</div>
       <div className="mt-8 flex flex-col gap-8">
         {legalDocument.sections.map((section) => (
           <section key={section.heading} className="flex flex-col gap-3">
-            <h2 className="font-display text-xl font-bold">{section.heading}</h2>
+            <h2 className="font-display text-xl font-semibold">{section.heading}</h2>
             {section.blocks.map(renderBlock)}
           </section>
         ))}
@@ -47,7 +47,7 @@ function renderBlock(block: Block, index: number) {
       );
     case "table":
       return (
-        <div key={index} className="overflow-x-auto rounded-lg border border-line">
+        <div key={index} className="overflow-x-auto rounded-xl border border-line">
           <table className="w-full text-left text-sm">
             <thead className="bg-surface-2">
               <tr>

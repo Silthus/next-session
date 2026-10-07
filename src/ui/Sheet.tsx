@@ -66,7 +66,10 @@ export function Sheet({
     >
       {open && (
         <div className="animate-rise relative max-h-dvh w-full overflow-y-auto overscroll-contain rounded-t-xl border border-line bg-surface p-6 text-ink shadow-card sm:max-w-md sm:rounded-xl">
-          <h2 id={titleId} className="min-w-0 pr-10 font-display text-2xl font-bold break-words">
+          <h2
+            id={titleId}
+            className="min-w-0 pr-10 font-display text-2xl font-semibold break-words"
+          >
             {title}
           </h2>
           <div className="mt-4">{children}</div>

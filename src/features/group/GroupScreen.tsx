@@ -411,11 +411,11 @@ function GroupLoading({ heading, actions }: { heading?: ReactNode; actions?: Rea
     <GroupFrame heading={heading ?? <Skeleton className="h-7 w-40" />} actions={actions}>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]" role="status" aria-busy="true">
         <span className="sr-only">Loading your group</span>
-        <Skeleton className="aspect-[7/6] w-full rounded-lg" />
+        <Skeleton className="aspect-[7/6] w-full rounded-xl" />
         <div className="flex flex-col gap-4">
-          <Skeleton className="h-28 rounded-lg" />
-          <Skeleton className="h-40 rounded-lg" />
-          <Skeleton className="h-48 rounded-lg" />
+          <Skeleton className="h-28 rounded-xl" />
+          <Skeleton className="h-40 rounded-xl" />
+          <Skeleton className="h-48 rounded-xl" />
         </div>
       </div>
     </GroupFrame>
@@ -426,7 +426,7 @@ export function GroupError({ onRetry }: { onRetry: () => void }) {
   return (
     <GroupFrame heading={null}>
       <Card className="mx-auto mt-10 flex max-w-md flex-col items-center gap-3 text-center">
-        <h2 className="font-display text-xl font-bold">We lost the connection</h2>
+        <h2 className="font-display text-xl font-semibold">We lost the connection</h2>
         <p className="text-sm text-ink-2">Your answers are safe. Try again in a moment.</p>
         <Button onClick={onRetry}>Try again</Button>
       </Card>

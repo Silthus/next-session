@@ -409,7 +409,7 @@ function PlayerLoading() {
           <Skeleton className="h-3 w-28" />
         </div>
       </div>
-      <Skeleton className="h-16 rounded-lg" />
+      <Skeleton className="h-16 rounded-xl" />
       <Skeleton className="aspect-square rounded-xl" />
     </div>
   );

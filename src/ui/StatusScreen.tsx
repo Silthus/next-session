@@ -22,7 +22,7 @@ export function StatusScreen({
     >
       <title>{pageTitle(headline)}</title>
       <Logo muted className="size-14" />
-      <h1 ref={heading} tabIndex={-1} className="font-display text-3xl font-extrabold outline-none">
+      <h1 ref={heading} tabIndex={-1} className="font-display text-3xl font-medium outline-none">
         {headline}
       </h1>
       <p className="text-ink-2">{explanation}</p>

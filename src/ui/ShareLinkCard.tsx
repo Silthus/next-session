@@ -48,7 +48,7 @@ export function ShareLinkCard({
   return (
     <div
       className={cn(
-        "rounded-lg border border-accent/30 bg-accent-soft/60 dark:bg-accent-soft/40",
+        "rounded-xl border border-accent/30 bg-accent-soft/60 dark:bg-accent-soft/40",
         compact ? "p-3" : "p-4",
       )}
     >

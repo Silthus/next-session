@@ -94,6 +94,25 @@ describe.each(["light", "dark"] as const)("the %s theme", (theme) => {
   });
 });
 
+describe("the shape scale", () => {
+  const themeBlock = /@theme inline\s*\{([\s\S]*?)\n\}/.exec(css)?.[1] ?? "";
+  const shape = tokensIn(themeBlock);
+
+  it.each([
+    ["sm", "4px"],
+    ["md", "6px"],
+    ["lg", "8px"],
+    ["xl", "12px"],
+    ["2xl", "16px"],
+  ])("rounds %s at Lonir's %s", (size, radius) => {
+    expect(shape[`radius-${size}`]).toBe(radius);
+  });
+
+  it("sets headings in Fraunces", () => {
+    expect(shape["font-display"]).toMatch(/^"Fraunces Variable"/);
+  });
+});
+
 const brightAccentOnTextOrFocus =
   /(?<![\w-])text-accent(?![\w-])|focus[\w-]*:(?:ring|border|outline)-accent(?![\w-])/g;
 

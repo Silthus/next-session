@@ -18,7 +18,7 @@ export function DemoStrip() {
   return (
     <div className="rounded-xl border border-line bg-surface p-4 shadow-card" aria-hidden="true">
       <div className="mb-3 flex items-center justify-between">
-        <span className="font-display text-base font-bold">Thursday Crew</span>
+        <span className="font-display text-base font-semibold">Thursday Crew</span>
         <span className="rounded-full bg-free-soft px-2 py-0.5 text-xs font-semibold text-free">
           Thu is perfect
         </span>

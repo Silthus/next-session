@@ -1,6 +1,6 @@
 @import "tailwindcss";
-@import "@fontsource-variable/bricolage-grotesque/opsz.css";
-@import "@fontsource-variable/inter";
+@import "@fontsource-variable/fraunces/opsz.css";
+@import "@fontsource-variable/geist";
 @import "@fontsource/jetbrains-mono/500.css";
 
 :root {
@@ -78,14 +78,15 @@
   --color-busy: var(--busy);
   --color-busy-soft: var(--busy-soft);
 
-  --font-display: "Bricolage Grotesque Variable", "Inter Variable", system-ui, sans-serif;
-  --font-sans: "Inter Variable", system-ui, sans-serif;
+  --font-display: "Fraunces Variable", Georgia, serif;
+  --font-sans: "Geist Variable", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
 
   --shadow-card: var(--shadow);
 
@@ -133,14 +134,6 @@ body,
 
 body {
   @apply bg-paper text-ink font-sans antialiased;
-  font-feature-settings: "cv11", "ss01";
-}
-
-@layer base {
-  .font-display {
-    font-variation-settings: "opsz" 96;
-    letter-spacing: -0.02em;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

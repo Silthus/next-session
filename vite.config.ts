@@ -1,3 +1,4 @@
+import { realpathSync } from "node:fs";
 import posthogSourceMaps from "@posthog/rollup-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
@@ -26,6 +27,12 @@ export default defineConfig({
     tailwindcss(),
     sourceMapUpload(process.env),
   ],
+  ...(process.env.E2E_BASE_URL
+    ? {
+        cacheDir: ".vite",
+        server: { fs: { allow: [process.cwd(), realpathSync("node_modules")] } },
+      }
+    : {}),
   envPrefix: ["VITE_", "LEGAL_"],
   build: { target: "es2022" },
 });
