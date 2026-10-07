@@ -7,7 +7,7 @@ What Next Session has in PostHog, and how to rebuild it. The design is `docs/spe
 | Thing | Where |
 | --- | --- |
 | Project | Lonir's shared project on EU Cloud (`eu.posthog.com`), project ID `13216`. Free plan: events kept 1 year, logs 14 days |
-| Sender | Workflows → Channels: `Michael from Next Session <hello@next-session.link>`. Its SES records (three `*._domainkey` CNAMEs, `feedback` MX and SPF, `_amazonses` TXT, the root SPF, `_dmarc`) are in the `next-session.link` zone, next to Resend's `send`, `rsend` and `resend._domainkey` |
+| Sender | Workflows → Channels: `Michael from Next Session <hello@next-session.link>`. Its SES records (three `*._domainkey` CNAMEs, `feedback` MX and SPF, `_amazonses` TXT, the root SPF, `_dmarc`) are in the `next-session.link` zone, next to Resend's `send`, `rsend` and `resend._domainkey`. Channel ID `88088`. Someone must press **Verify** on the channel once: PostHog sends nothing from an unverified sender, and its verify endpoint refuses personal API keys |
 | Email templates | Workflows → Library. Definitions in [`templates/`](templates) |
 | Workflows | "Next Session: Welcome Mail" and "Next Session: Tips". Definitions in [`workflows/`](workflows) |
 | Browser token | Repo variable `VITE_POSTHOG_TOKEN`, read by the deploy job's build |
@@ -46,6 +46,8 @@ Test a workflow with `POST .../hog_flows/<id>/invocations/` (`configuration`, `g
 ## Personal API key scopes
 
 `hog_flow:write` (workflows and templates), `error_tracking:write` (source maps), `integration:read` (the sender ID) and `group:read` (workflow test runs).
+
+Personal API keys can't verify the sender or manage message categories. Both need the PostHog UI.
 
 ## Test traffic
 
