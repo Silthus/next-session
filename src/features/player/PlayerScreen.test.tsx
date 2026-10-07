@@ -157,7 +157,7 @@ describe("PlayerScreen", () => {
     renderPage();
     await userEvent.click(await screen.findByRole("button", { name: /^Wednesday, October 7:/ }));
     await userEvent.click(screen.getByRole("button", { name: "Not you?" }));
-    await userEvent.click(await screen.findByRole("button", { name: "Bo", exact: true }));
+    await userEvent.click(await screen.findByRole("button", { name: "Bo" }));
 
     await act(async () => {
       finish({ keptNow: true });
