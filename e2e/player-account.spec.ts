@@ -219,13 +219,20 @@ test("a signed-out visitor still joins and answers in the same steps", async ({ 
 test("an Account can Keep again after removing a freshly joined Group before answering", async ({
   page,
 }) => {
-  const { link } = await seedGroup("New Crew");
+  const { gm, link } = await seedGroup("New Crew");
   const account = await signUpAccount();
   await openAsGm(page, account, link);
   await join(page, "Robin");
   await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
   await page.getByRole("button", { name: "Remove from my groups" }).click();
   await expect(page.getByRole("main").getByText("Kept in My groups")).toBeHidden();
+  await expect
+    .poll(
+      async () =>
+        (await account.client.query(api.player.group, { shareToken: gm.shareToken }))
+          ?.removedFromMyGroups,
+    )
+    .toBe(true);
   await page.reload();
   await expect(page.getByRole("button", { name: "Keep this group", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Keep this group", exact: true }).click();
@@ -252,6 +259,13 @@ for (const entry of ["player", "My groups"] as const) {
     if (entry === "player")
       await expect(page.getByRole("main").getByText("Kept in My groups")).toBeHidden();
     else await expect(page.getByRole("link", { name: /Removed Crew/ })).toBeHidden();
+    await expect
+      .poll(
+        async () =>
+          (await account.client.query(api.player.group, { shareToken: gm.shareToken }))
+            ?.removedFromMyGroups,
+      )
+      .toBe(true);
     await page.reload();
     await expect(
       page.getByRole("button", { name: entry === "player" ? "Your account" : "Log out" }),
