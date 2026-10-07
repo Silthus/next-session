@@ -113,6 +113,7 @@ export const sendSession = internalAction({
     date: v.string(),
     change: v.union(v.literal("scheduled"), v.literal("cancelled")),
     createdAt: v.number(),
+    changedAt: v.number(),
     userId: v.id("users"),
   },
   returns: v.null(),

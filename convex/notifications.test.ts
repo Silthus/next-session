@@ -250,3 +250,27 @@ it("warns as daily estimated mail reaches 80 and exceeds 100 across different Gr
   expect(JSON.stringify(logs)).toContain("101");
   expect(JSON.stringify(logs)).not.toContain("@example.com");
 });
+
+it.each([1_000, 30_000])("Undo cancellation after %i ms sends no update", async (elapsed) => {
+  const { as, groupId } = await crew();
+  const sessionId = await as.mutation(api.sessions.schedule, { groupId, date });
+  await finish();
+  fetchMock.mockClear();
+  await as.mutation(api.sessions.unschedule, { sessionId });
+  await t.finishInProgressScheduledFunctions();
+  await vi.advanceTimersByTimeAsync(elapsed);
+  await t.finishInProgressScheduledFunctions();
+  expect(fetchMock).not.toHaveBeenCalled();
+  await as.mutation(api.sessions.schedule, { groupId, date });
+  await finish();
+  expect(fetchMock).not.toHaveBeenCalled();
+});
+
+it("scheduling again after Undo of an initial schedule still announces the final Session", async () => {
+  const { as, groupId } = await crew();
+  const sessionId = await as.mutation(api.sessions.schedule, { groupId, date });
+  await as.mutation(api.sessions.unschedule, { sessionId });
+  await as.mutation(api.sessions.schedule, { groupId, date });
+  await finish();
+  expect(bodies()).toEqual([expect.objectContaining({ change: "scheduled" })]);
+});

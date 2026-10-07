@@ -18,6 +18,7 @@ export const sessionChange = {
   date: v.string(),
   change: v.union(v.literal("scheduled"), v.literal("cancelled")),
   createdAt: v.number(),
+  changedAt: v.number(),
 };
 
 export const sessionChanged = internalMutation({
@@ -25,7 +26,7 @@ export const sessionChanged = internalMutation({
   returns: v.null(),
   handler: async (ctx, change) => {
     await ctx.scheduler.runAfter(
-      Math.max(0, change.createdAt + UNDO_WINDOW_MS + 1 - Date.now()),
+      Math.max(0, change.changedAt + UNDO_WINDOW_MS + 1 - Date.now()),
       internal.notifications.fanOut,
       change,
     );
@@ -119,7 +120,7 @@ async function recipientBody(ctx: QueryCtx, change: Recipient) {
   };
 }
 
-export async function queueSessionMail(ctx: MutationCtx, change: SessionChange) {
+export async function queueSessionMail(ctx: MutationCtx, change: Omit<SessionChange, "changedAt">) {
   if (!sessionMailConfigured()) return;
   const state = await ctx.db
     .query("sessionMailStates")
@@ -133,6 +134,14 @@ export async function queueSessionMail(ctx: MutationCtx, change: SessionChange) 
     sessionId: change.sessionId,
     change: change.change,
     changedAt: Date.now(),
+    notify:
+      change.change === "cancelled"
+        ? Date.now() - change.createdAt > UNDO_WINDOW_MS
+        : !(
+            state?.change === "cancelled" &&
+            state.notify &&
+            Date.now() - state.changedAt <= UNDO_WINDOW_MS
+          ),
   };
   const stateId = state ? state._id : await ctx.db.insert("sessionMailStates", fields);
   if (state) await ctx.db.patch("sessionMailStates", stateId, fields);
@@ -140,8 +149,11 @@ export async function queueSessionMail(ctx: MutationCtx, change: SessionChange) 
     stateId,
     changedAt: fields.changedAt,
   });
-  if (change.change === "cancelled" && Date.now() - change.createdAt <= UNDO_WINDOW_MS) return;
-  await ctx.scheduler.runAfter(0, internal.notifications.sessionChanged, change);
+  if (!fields.notify) return;
+  await ctx.scheduler.runAfter(0, internal.notifications.sessionChanged, {
+    ...change,
+    changedAt: fields.changedAt,
+  });
 }
 
 export const expireState = internalMutation({
