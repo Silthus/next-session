@@ -165,7 +165,7 @@ export function PlayerCalendar({
             <h1
               ref={heading}
               tabIndex={-1}
-              className="truncate font-display text-lg font-bold outline-none"
+              className="truncate font-display text-lg font-semibold outline-none"
             >
               {groupName}
             </h1>
@@ -204,11 +204,11 @@ export function PlayerCalendar({
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5">
         {!view.readOnly &&
           (loaded ? (
-            <div className="rounded-lg border border-line bg-surface p-3.5 shadow-card">
+            <div className="rounded-xl border border-line bg-surface p-3.5 shadow-card">
               <Progress {...view.progress} />
             </div>
           ) : (
-            <Skeleton className="h-15.5 rounded-lg" />
+            <Skeleton className="h-15.5 rounded-xl" />
           ))}
 
         <MonthCard
@@ -221,7 +221,7 @@ export function PlayerCalendar({
           onMonthChange={onMonthChange}
         />
 
-        {!view.readOnly && !loaded && <Skeleton className="h-14 rounded-lg" />}
+        {!view.readOnly && !loaded && <Skeleton className="h-14 rounded-xl" />}
         {!view.readOnly &&
           loaded &&
           (view.done ? (
@@ -321,7 +321,7 @@ function MonthCard({
             ref={headingRef}
             tabIndex={-1}
             aria-live="polite"
-            className="font-display text-2xl font-bold outline-none"
+            className="font-display text-2xl font-semibold outline-none"
           >
             {view.label}
           </h2>
@@ -553,12 +553,12 @@ function DoneCard({
   return (
     <div
       role="status"
-      className="animate-rise flex flex-col gap-2 rounded-lg border border-free bg-free-soft p-4 text-center"
+      className="animate-rise flex flex-col gap-2 rounded-xl border border-free bg-free-soft p-4 text-center"
     >
       <p
         ref={headingRef}
         tabIndex={-1}
-        className="font-display text-lg font-bold text-ink outline-none dark:text-free"
+        className="font-display text-lg font-semibold text-ink outline-none dark:text-free"
       >
         {nextMonth ? `All set for ${monthName(month)} ✓` : "All set for now ✓"}
       </p>

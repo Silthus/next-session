@@ -25,10 +25,11 @@ Voice rules:
 ### Name and wordmark
 
 - Product name: **Next Session**. Domain: `next-session.link`. The share link reads `next-session.link/s/<token>` and is itself a brand asset: short, lowercase, obviously a link.
-- Wordmark: "Next Session" set in Bricolage Grotesque Bold, tight tracking, next to the mark.
-- Mark: a rounded day tile (the calendar cell) with a darker header band and one bright dot inside, "the one night that works". It is one shape, reads at 16 px as a favicon, and recolors with the theme (gold tile, ink dot). `prototype/src/ui.tsx` → `Logo`.
+- Wordmark: "Next Session" set in Fraunces Semibold next to the mark. `src/ui/Wordmark.tsx`.
+- Mark: Lonir's ornamented gold L, the L of *link*. Michael asked for it back on 2026-10-07 ([#94](https://github.com/Silthus/next-session/issues/94)): "it kind of matched because it was a link". The L stays a fixed gold (`#c69749`) and never themes; a status screen greys it out. Only the L crosses over: Lonir's "onir" wordmark, its name and the rest of its branding stay out. The letterforms live in `src/ui/brand/paths.ts`; `Logo` draws the L with its flourish.
+- Favicon and app icons: generated from the L by `bun scripts/generate-brand.ts`, never edited by hand. `public/favicon.svg` is the plain L body without the flourish, so it reads at 16 px in light and dark tabs; `favicon-32.png` is its fallback; `apple-touch-icon.png` sets the full L on cream. `scripts/generate-brand.test.ts` fails when the committed favicon drifts from the letterforms.
 
-Alternatives considered: a chevron-in-a-tile ("next") read as a media player button; a three-tile stack lost legibility at favicon size.
+Alternatives considered: the first build's gold day tile with an ink dot (replaced in #94: it lost the Lonir mark players know); a chevron-in-a-tile ("next") read as a media player button; a three-tile stack lost legibility at favicon size.
 
 ## 2. Tokens
 
@@ -68,19 +69,19 @@ Rules:
 
 | Token | Face | Use |
 | --- | --- | --- |
-| `font-display` | Bricolage Grotesque 700/800, optical size 96, tracking −0.02em | headlines, month names, group names, big numbers |
-| `font-sans` | Inter 400–700 | everything else |
+| `font-display` | Fraunces, Medium for page headlines (`text-3xl` and up), Semibold below; default tracking and automatic optical size | headlines, month names, group names, big numbers |
+| `font-sans` | Geist 400–700 | everything else |
 | `font-mono` | JetBrains Mono 500 | the share URL, eyebrows (11 px, uppercase, +0.18em), counts like `12/30` |
 
 Scale (rem): 0.6875 (eyebrow, cell counts), 0.75, 0.875 (body on cards), 1 (body), 1.125, 1.25, 1.5 (month), 2.25 (page h1), 3–4.5 (landing hero, fluid). Line height 1.5 for body, 1.0–1.1 for display.
 
-Fonts are loaded from Google Fonts with `display=swap`; the system stack is the fallback, so a blocked font never blocks the page.
+Fonts are self-hosted through Fontsource (`@fontsource-variable/fraunces`, `@fontsource-variable/geist`, `@fontsource/jetbrains-mono`) with `display=swap`; the system stack is the fallback, so a blocked font never blocks the page. These are Lonir's faces ([#94](https://github.com/Silthus/next-session/issues/94)): its Next Session sets headings in Fraunces and body text in Geist.
 
 ### Spacing, radius, elevation
 
 - Spacing: Tailwind's 4 px scale. Page gutters 16 px (mobile) / 24 px (desktop). Card padding 16 px, calendar card 12/20 px. Grid gaps 4–8 px between cells.
-- Radius: `sm` 8 (inputs, small buttons, cells on mobile), `md` 12 (buttons, cells, menus), `lg` 16 (cards), `xl` 24 (hero cards, sheets), full (avatars, pills, share icons).
-- Elevation: one shadow token (`shadow-card`): a paper sheet with a one-pixel top highlight and a soft warm drop in light, a deeper drop in dark. Borders do the structural work; shadow only lifts cards and the primary button.
+- Radius: Lonir's scale ([#94](https://github.com/Silthus/next-session/issues/94)), pinned by `src/theme.test.ts`: `sm` 4 (GM calendar cells, segment tabs, legend swatches), `md` 6 (every button, inputs, menu rows, player tiles), `lg` 8, `xl` 12 (cards, popovers, sheets, banners), `2xl` 16, full (avatars, pills, share icons).
+- Elevation: one shadow token (`shadow-card`): a paper sheet with a one-pixel top highlight and a soft warm drop in light, a deeper drop in dark. Borders do the structural work; shadow only lifts cards and sheets. Buttons are flat, like Lonir's.
 - Layout widths: landing 64 rem, GM surface 72 rem with a `minmax(0,1fr) 22rem` split at `lg`, player surface 36 rem single column, legal 42 rem.
 
 ### Motion
@@ -98,8 +99,8 @@ All presentational; data arrives through props. Prototype equivalents in [`proto
 
 | Component | What it is | Variants / states |
 | --- | --- | --- |
-| `Button` | the one button | `primary` (accent), `secondary` (outlined), `ghost`, `soft` (accent-soft), `free` (green, for "done" progressions), `danger` (busy-soft); sizes sm 32 / md 40 / lg 56; `disabled`, in-flight label swap ("Making your link…") |
-| `Card` | surface + line + shadow-card, radius lg | `accent` border for the active day panel |
+| `Button` | the one button, shaped like Lonir's: `rounded-md`, Medium weight, flat (no shadow), a 2 px `accent-strong` focus outline offset 2 px | `primary` (accent), `secondary` (outlined in `line-strong`, `surface-2` on hover), `ghost` (ink, `surface-2` on hover), `soft` (accent-soft), `free` (green, for "done" progressions), `danger` (busy-soft); sizes sm 32 / md 40 / lg 48; `disabled` at 40 % opacity, in-flight label swap ("Making your link…") |
+| `Card` | surface + line + shadow-card, radius xl | `accent` border for the active day panel |
 | `Eyebrow` | mono uppercase section label | — |
 | `Avatar` | two-letter initials (`playerInitials`), hue derived from the name so it is stable across surfaces | xs 20 / sm 28 / md 36 |
 | `Dot` | 8 px answer dot | yes / maybe / no / null |
@@ -204,7 +205,7 @@ Greyed mark, "This link no longer works", "The GM may have rotated the link or d
 | D3 | **Never paint a day red** on the GM grid; conflicts show as a rose bar or ✕ count on a neutral cell. | Red tint for conflict days. Rejected: red grids read as alarm. |
 | D4 | **Three answer colors are fixed and exclusive** (green/orange/rose); the brand is gold on warm paper, ported from Lonir's Next Session. Michael's redirect on 2026-10-06 ([#55](https://github.com/Silthus/next-session/issues/55)) replaced the violet accent, and maybe moved from amber to orange to stay clear of the gold. | Brand accent as "free" color. Rejected: it muddles the action color with an answer. Violet accent (the first build). Replaced: it lost the Lonir look players know. |
 | D5 | **Glyphs on player tiles** (✓ ? ✕) in addition to color. | Color only (lonir). Rejected for color-blind players. |
-| D6 | **Bricolage Grotesque + Inter + JetBrains Mono** from Google Fonts with system fallback. | System-only stack (zero network). Reversible by removing one `<link>`. |
+| D6 | **Fraunces + Geist + JetBrains Mono**, Lonir's faces, self-hosted through Fontsource with system fallback ([#94](https://github.com/Silthus/next-session/issues/94)). | Bricolage Grotesque + Inter (the first build; replaced because it did not feel like Lonir's Next Session). A system-only stack (zero network). |
 | D7 | **Dark theme follows the OS**, with a manual toggle in the avatar menu later; no toggle in v1. | Toggle in the header. Parity says OS only. |
 | D8 | **Share link lives in the GM header rail, always visible**; the GM tutorial dialog is dropped because the created moment on the landing covers it. | Keep a first-run dialog. One fewer modal. |
 | D9 | **Save group is a sheet**, not a route. | A `/save` page. The sheet keeps the group in view and the merge story believable. |
@@ -215,6 +216,7 @@ Greyed mark, "This link no longer works", "The GM may have rotated the link or d
 | D14 | **Group delete is a two-step confirm inside the menu** naming what is lost. | One-click delete (lonir). |
 | D15 | **No marketing beyond the hero**: no features grid, no testimonials. | A longer landing. The product is one click away; the demo strip does the selling. |
 | D16 | **Phone `+ Add player` is a full-width soft button between the calendar and the segmented control** ([#67](https://github.com/Silthus/next-session/issues/67)). Desktop keeps the Players card's `+ Add`, already in view in the rail. | An icon-only `+` at the end of the segmented control (less obvious, squeezes the tabs at 390 px); a floating action button (covers calendar cells and collides with the toast and the day sheet). |
+| D17 | **Lonir's L is the mark, and Lonir's shapes are the shapes** ([#94](https://github.com/Silthus/next-session/issues/94)). Michael on 2026-10-07: "it still doesn't feel like it has the exact same styles as before, as buttons are rounded". The L reads as the L of *link*; only the L crosses over. Buttons are `rounded-md` (6 px), cards `rounded-xl` (12 px). | Keep the day-tile mark and the rounder 8/12/16/24 scale (the first build). Port Lonir's tokens without rendering it (the #55 pass, which missed the feel). |
 
 Variants considered and not built: a "list-first" GM surface (Best nights as hero) and a "week strip" player surface (one week at a time). Both lost on paper to the month grid because the GM needs the whole booking window at once and the player needs to see progress toward "done".
 

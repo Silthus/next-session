@@ -509,7 +509,7 @@ function TipsBox({
 }
 
 const inputClassName =
-  "h-12 w-full rounded-sm border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent-strong focus:outline-none focus:ring-2 focus:ring-accent-strong/30";
+  "h-12 w-full rounded-md border border-line bg-paper px-3 text-base text-ink placeholder:text-ink-3 focus:border-accent-strong focus:outline-none focus:ring-2 focus:ring-accent-strong/30";
 
 function Field({
   label,

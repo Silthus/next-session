@@ -93,7 +93,7 @@ export function Popover({
         <div
           id={panelId}
           className={cn(
-            "animate-rise absolute top-full z-30 mt-1 rounded-lg border border-line bg-surface p-1.5 text-ink shadow-card",
+            "animate-rise absolute top-full z-30 mt-1 rounded-xl border border-line bg-surface p-1.5 text-ink shadow-card",
             align === "start" ? "left-0" : "right-0",
             className,
           )}

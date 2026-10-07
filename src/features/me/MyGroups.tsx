@@ -29,7 +29,7 @@ type MyGroupsProps = {
 };
 
 const cardClassName =
-  "rounded-lg border border-line bg-surface shadow-card transition-colors hover:border-line-strong";
+  "rounded-xl border border-line bg-surface shadow-card transition-colors hover:border-line-strong";
 
 export function MyGroups({
   email,
@@ -50,11 +50,7 @@ export function MyGroups({
       headerEnd={<AccountLine email={email} onLogOut={onLogOut} />}
       className="flex flex-col gap-8 pt-4"
     >
-      <h1
-        ref={heading}
-        tabIndex={-1}
-        className="font-display text-4xl font-extrabold tracking-tight outline-none"
-      >
+      <h1 ref={heading} tabIndex={-1} className="font-display text-4xl font-medium outline-none">
         My groups
       </h1>
       {groups === undefined ? (
@@ -259,7 +255,7 @@ function CreateLink({
 }
 
 function GroupName({ name }: { name: string }) {
-  return <span className="font-display text-lg font-bold break-words">{name}</span>;
+  return <span className="font-display text-lg font-semibold break-words">{name}</span>;
 }
 
 function NextSession({ dates }: { dates: IsoDate[] }) {
@@ -315,8 +311,8 @@ function MyGroupsLoading() {
       <Skeleton className="h-14 rounded-md" />
       <Skeleton className="h-14 rounded-md" />
       <div className="grid gap-3 sm:grid-cols-2">
-        <Skeleton className="h-28 rounded-lg" />
-        <Skeleton className="h-28 rounded-lg" />
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-28 rounded-xl" />
       </div>
     </div>
   );

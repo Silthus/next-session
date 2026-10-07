@@ -40,7 +40,7 @@ export function LandingView({ state, showLogIn, onCreate, onLogIn, onSave }: Lan
         className={`${column} flex flex-1 flex-col justify-center gap-10 pt-6 pb-16 lg:flex-row lg:items-center lg:gap-16`}
       >
         <section className="flex max-w-xl flex-col gap-6">
-          <h1 className="font-display text-5xl leading-[0.98] font-extrabold tracking-tight text-ink sm:text-6xl lg:text-7xl">
+          <h1 className="font-display text-5xl leading-[1.05] font-medium text-ink sm:text-6xl lg:text-7xl">
             Stop chasing <br />
             the date.
           </h1>
