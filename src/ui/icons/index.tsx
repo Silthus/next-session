@@ -1,4 +1,4 @@
-import { cn } from "./cn";
+import { cn } from "../cn";
 
 export function IconCopy({ className }: { className?: string }) {
   return (
@@ -103,6 +103,41 @@ export function IconClose({ className }: { className?: string }) {
       aria-hidden="true"
     >
       <path d="M5 5l10 10M15 5L5 15" />
+    </svg>
+  );
+}
+
+export function IconMail({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={cn("size-5", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="2.5" y="4.5" width="15" height="11" rx="2" />
+      <path d="M3 5.5l7 5.5 7-5.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconShare({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={cn("size-5", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M10 12.5V3M6.5 6.5L10 3l3.5 3.5" />
+      <path d="M6 9.5H5a1.5 1.5 0 0 0-1.5 1.5v4.5A1.5 1.5 0 0 0 5 17h10a1.5 1.5 0 0 0 1.5-1.5V11A1.5 1.5 0 0 0 15 9.5h-1" />
     </svg>
   );
 }
