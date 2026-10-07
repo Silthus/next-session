@@ -5,8 +5,8 @@
   "content": {
     "templating": "liquid",
     "email": {
-      "subject": "{{ event.properties.group_name }}: session {% if event.properties.change == \"scheduled\" %}set{% else %}cancelled{% endif %}",
-      "text": "Hi there,\n\n{% if event.properties.change == \"scheduled\" %}The next session for {{ event.properties.group_name }} is set for {{ event.properties.date_label }}.{% else %}The session for {{ event.properties.group_name }} on {{ event.properties.date_label }} has been cancelled.{% endif %}\n\nOpen your group: {{ event.properties.player_url }}\n\nThanks!\nMichael\n\nYou get this because you keep this group. Stop session updates: {{ unsubscribe_url }}\nYou can also turn them off in My groups: https://next-session.link/me\n",
+      "subject": "{{ event.properties.group_name | raw }}: session {% if event.properties.change == \"scheduled\" %}set{% else %}cancelled{% endif %}",
+      "text": "Hi there,\n\n{% if event.properties.change == \"scheduled\" %}The next session for {{ event.properties.group_name | raw }} is set for {{ event.properties.date_label | raw }}.{% else %}The session for {{ event.properties.group_name | raw }} on {{ event.properties.date_label | raw }} has been cancelled.{% endif %}\n\nOpen your group: {{ event.properties.player_url | raw }}\n\nThanks!\nMichael\n\nYou get this because you keep this group. Stop session updates: {{ unsubscribe_url | raw }}\nYou can also turn them off in My groups: https://next-session.link/me\n",
       "design": {
         "counters": {
           "u_row": 2,
@@ -148,7 +148,7 @@
                         "duplicatable": true,
                         "deletable": true,
                         "hideable": true,
-                        "text": "<p style=\"margin:0;font-size:16px;line-height:160%;color:#1a1511;\">{% if event.properties.change == \"scheduled\" %}The next session for {{ event.properties.group_name | escape }} is set for {{ event.properties.date_label | escape }}.{% else %}The session for {{ event.properties.group_name | escape }} on {{ event.properties.date_label | escape }} has been cancelled.{% endif %}</p>"
+                        "text": "<p style=\"margin:0;font-size:16px;line-height:160%;color:#1a1511;\">{% if event.properties.change == \"scheduled\" %}The next session for {{ event.properties.group_name }} is set for {{ event.properties.date_label }}.{% else %}The session for {{ event.properties.group_name }} on {{ event.properties.date_label }} has been cancelled.{% endif %}</p>"
                       }
                     },
                     {
