@@ -27,11 +27,15 @@ import {
   ensureNameIsFree,
   releaseClaim,
   ensureRosterHasRoom,
+  keepOnAnswer,
+  removeFromMyGroups as removeGroupFromMyGroups,
   validName,
 } from "./model/players";
 import { enforceRateLimit } from "./model/rateLimits";
 import { track } from "./model/telemetry";
 import { answerValue } from "./schema";
+
+const answered = v.object({ keptNow: v.boolean() });
 
 const playerGroupView = v.object({
   groupId: v.id("groups"),
@@ -118,6 +122,20 @@ export const release = mutation({
   },
 });
 
+export const removeFromMyGroups = mutation({
+  args: { groupId: v.id("groups") },
+  returns: v.null(),
+  handler: async (ctx, { groupId }) => {
+    const account = await requireAccount(ctx);
+    await enforceRateLimit(ctx, "claimPlayer", account._id);
+    const released = await removeGroupFromMyGroups(ctx, account, groupId);
+    if (released === null) return null;
+    await touchGroupOf(ctx, released);
+    await track(ctx, { name: "player_released", actor: account, group_id: released.groupId });
+    return null;
+  },
+});
+
 export const answer = mutation({
   args: {
     shareToken: v.string(),
@@ -125,20 +143,20 @@ export const answer = mutation({
     date: v.string(),
     answer: v.union(answerValue, v.null()),
   },
-  returns: v.null(),
+  returns: answered,
   handler: async (ctx, { shareToken, playerId, date, answer }) => {
     const { group, player } = await playerOnShareLink(ctx, shareToken, playerId);
     if (!isBookable(date, today())) fail({ code: "OUT_OF_WINDOW" });
     await enforceAnswerRateLimits(ctx, group, player);
     await writeAnswer(ctx, player, date, answer);
     await touchGroup(ctx, group);
-    return null;
+    return { keptNow: await keepForAccountCaller(ctx, group, player) };
   },
 });
 
 export const fillRest = mutation({
   args: { shareToken: v.string(), playerId: v.id("players"), month: v.string() },
-  returns: v.null(),
+  returns: answered,
   handler: async (ctx, { shareToken, playerId, month }) => {
     const { group, player } = await playerOnShareLink(ctx, shareToken, playerId);
     if (!isBookableMonth(month, today())) fail({ code: "OUT_OF_WINDOW" });
@@ -154,7 +172,7 @@ export const fillRest = mutation({
       });
     }
     await touchGroup(ctx, group);
-    return null;
+    return { keptNow: await keepForAccountCaller(ctx, group, player) };
   },
 });
 
@@ -170,6 +188,17 @@ async function claimForAccountCaller(ctx: MutationCtx, playerId: Id<"players">) 
   const player = await ctx.db.get("players", playerId);
   if (player !== null) await claimPlayer(ctx, account, player);
   return account;
+}
+
+async function keepForAccountCaller(
+  ctx: MutationCtx,
+  group: Doc<"groups">,
+  player: Doc<"players">,
+) {
+  const account = await currentAccount(ctx);
+  if (account === null || !(await keepOnAnswer(ctx, account, group, player))) return false;
+  await track(ctx, { name: "player_claimed", actor: account, group_id: group._id });
+  return true;
 }
 
 async function touchGroupOf(ctx: MutationCtx, player: Doc<"players">) {
