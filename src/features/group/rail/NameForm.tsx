@@ -10,6 +10,7 @@ export function NameForm({
   autoFocus = true,
   focusRequest = 0,
   initialName = "",
+  readyForNextAfterSubmit = false,
   placeholder,
   submitLabel,
   topic,
@@ -22,6 +23,7 @@ export function NameForm({
   autoFocus?: boolean;
   focusRequest?: number;
   initialName?: string;
+  readyForNextAfterSubmit?: boolean;
   placeholder?: string;
   submitLabel: string;
   topic: ErrorTopic;
@@ -55,11 +57,18 @@ export function NameForm({
     setFailure(null);
     try {
       await onSubmit(normalized.name);
+      if (readyForNextAfterSubmit) readyForNextName();
     } catch (error) {
       setFailure(errorMessage(error, topic));
       setBusy(false);
       field.current?.focus();
     }
+  };
+
+  const readyForNextName = () => {
+    setName("");
+    setBusy(false);
+    field.current?.focus();
   };
 
   return (
