@@ -74,7 +74,8 @@ describe("KeepGroup for a visitor", () => {
     const { onKeep, onContinueWithGoogle } = renderKeep({ invite: "nudge" });
 
     const nudge = await screen.findByRole("region", { name: KEEP_NUDGE.title });
-    for (const reason of KEEP_NUDGE.reasons) expect(within(nudge).getByText(reason)).toBeTruthy();
+    expect(within(nudge).getByText("Find it and your answers on all your devices.")).toBeTruthy();
+    expect(within(nudge).getByText("Get notified when the next session is set.")).toBeTruthy();
     const actions = within(nudge)
       .getAllByRole("button")
       .map((button) => button.textContent);

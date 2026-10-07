@@ -1,6 +1,6 @@
 {
   "name": "Next Session: Session updates",
-  "description": "Disabled definition for #97. #102 supplies the Session updates category, verified sender and template, then enables it. Convex alone requests a mail after Undo settles.",
+  "description": "Draft rebuild definition for transactional Session updates. Resolve the verified sender, real category, template and Bearer secret before activation. Convex alone requests mail after Undo settles.",
   "exit_condition": "exit_only_at_end",
   "actions": [
     {
@@ -43,7 +43,7 @@
       "config": {
         "template_id": "template-email",
         "template_uuid": "<TEMPLATE:session-update>",
-        "message_category_type": "marketing",
+        "message_category_type": "transactional",
         "tracking_enabled": false,
         "inputs": {
           "email": {

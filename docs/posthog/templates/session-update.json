@@ -1,12 +1,12 @@
 {
   "name": "Next Session: Session update",
-  "description": "One service update for a Claimed Account, with hosted Session updates category unsubscribe. Disabled until #102.",
+  "description": "Transactional Session update for a Claimed Account, with the authenticated My groups email preference.",
   "type": "email",
   "content": {
     "templating": "liquid",
     "email": {
       "subject": "{{ event.properties.group_name | raw }}: session {% if event.properties.change == \"scheduled\" %}set{% else %}cancelled{% endif %}",
-      "text": "Hi there,\n\n{% if event.properties.change == \"scheduled\" %}The next session for {{ event.properties.group_name | raw }} is set for {{ event.properties.date_label | raw }}.{% else %}The session for {{ event.properties.group_name | raw }} on {{ event.properties.date_label | raw }} has been cancelled.{% endif %}\n\nOpen your group: {{ event.properties.player_url | raw }}\n\nThanks!\nMichael\n\nYou get this because you keep this group. Stop session updates: {{ unsubscribe_url | raw }}\nYou can also turn them off in My groups: https://next-session.link/me\n",
+      "text": "Hi there,\n\n{% if event.properties.change == \"scheduled\" %}The next session for {{ event.properties.group_name | raw }} is set for {{ event.properties.date_label | raw }}.{% else %}The session for {{ event.properties.group_name | raw }} on {{ event.properties.date_label | raw }} has been cancelled.{% endif %}\n\nOpen your group: {{ event.properties.player_url | raw }}\n\nThanks!\nMichael\n\nYou get this because you keep this group. Turn session updates off in My groups: https://next-session.link/me\n",
       "design": {
         "counters": {
           "u_row": 2,
@@ -259,7 +259,7 @@
                         "duplicatable": true,
                         "deletable": true,
                         "hideable": true,
-                        "text": "<p style=\"margin:0;font-size:13px;line-height:160%;color:#1a1511;\">You get this because you keep this group. <a href=\"{{ unsubscribe_url }}\">Stop session updates</a>. You can also turn them off in <a href=\"https://next-session.link/me\">My groups</a>.</p>"
+                        "text": "<p style=\"margin:0;font-size:13px;line-height:160%;color:#1a1511;\">You get this because you keep this group. Turn session updates off in <a href=\"https://next-session.link/me\">My groups</a>.</p>"
                       }
                     }
                   ],
