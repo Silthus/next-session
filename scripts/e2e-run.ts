@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
 import { cpSync, mkdtempSync, readdirSync, rmSync, symlinkSync } from "node:fs";
 import { createServer, type Server } from "node:net";
 import { tmpdir } from "node:os";
@@ -62,11 +62,23 @@ export async function createE2eRun(source = process.cwd()) {
 }
 
 async function main() {
-  const run = await createE2eRun();
-  console.log(`E2E run ${run.directory} ports ${JSON.stringify(run.ports)}`);
+  let run: Awaited<ReturnType<typeof createE2eRun>> | undefined;
+  let child: ChildProcess | undefined;
+  let interrupted = false;
+  const stop = () => {
+    interrupted = true;
+    child?.kill("SIGINT");
+  };
+  for (const signal of ["SIGINT", "SIGTERM"] as const) process.on(signal, stop);
   try {
+    run = await createE2eRun();
+    console.log(`E2E run ${run.directory} ports ${JSON.stringify(run.ports)}`);
     await run.releasePorts();
-    const child = spawn("bunx", ["playwright", "test", ...process.argv.slice(2)], {
+    if (interrupted) {
+      process.exitCode = 130;
+      return;
+    }
+    child = spawn("bunx", ["playwright", "test", ...process.argv.slice(2)], {
       cwd: run.directory,
       stdio: "inherit",
       env: {
@@ -80,14 +92,13 @@ async function main() {
         E2E_OUTPUT_DIR: resolve("test-results", run.directory.split("/").at(-1)!),
       },
     });
-    for (const signal of ["SIGINT", "SIGTERM"] as const)
-      process.on(signal, () => child.kill("SIGINT"));
     process.exitCode = await new Promise<number>((resolve, reject) => {
-      child.once("error", reject);
-      child.once("exit", (code) => resolve(code ?? 1));
+      child!.once("error", reject);
+      child!.once("exit", (code) => resolve(code ?? 1));
     });
   } finally {
-    await run.dispose();
+    await run?.dispose();
+    for (const signal of ["SIGINT", "SIGTERM"] as const) process.off(signal, stop);
   }
 }
 

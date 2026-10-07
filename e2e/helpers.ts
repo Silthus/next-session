@@ -7,8 +7,6 @@ import type { Answer } from "../shared/answers";
 export const convexUrl = process.env.E2E_CONVEX_URL!;
 export const password = "game-night-2026";
 
-const authStorageSuffix = convexUrl.replace(/[^a-zA-Z0-9]/g, "");
-
 type Tokens = { token: string; refreshToken: string };
 export type Gm = {
   tokens: Tokens;
@@ -69,6 +67,7 @@ export async function seedPlayer(gm: Gm, name: string, answers: Record<string, A
 }
 
 export async function openAsGm(page: Page, gm: Pick<Gm, "tokens">, path: string) {
+  const authStorageSuffix = convexUrl.replace(/[^a-zA-Z0-9]/g, "");
   await page.goto("/terms");
   await page.evaluate(
     ([suffix, tokens]) => {

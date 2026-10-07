@@ -1,4 +1,14 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { spawn } from "node:child_process";
+import { once } from "node:events";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  watch,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, it } from "vitest";
@@ -22,3 +32,35 @@ it("gives concurrent runs fresh projects and ports without changing the develope
     rmSync(source, { recursive: true, force: true });
   }
 });
+
+it.each(["SIGINT", "SIGTERM"] as const)(
+  "cleans up its temporary project on %s during initialization",
+  async (signal) => {
+    const root = mkdtempSync(join(tmpdir(), "e2e-cancellation-"));
+    const source = join(root, "source");
+    mkdirSync(source);
+    writeFileSync(join(source, "package.json"), "{}");
+    const watcher = watch(root);
+    const child = spawn("bun", [new URL("./e2e-run.ts", import.meta.url).pathname, "--list"], {
+      cwd: source,
+      env: { ...process.env, TMPDIR: root },
+      stdio: "ignore",
+    });
+    let directory = "";
+    watcher.on("change", (_event, name) => {
+      if (!directory && typeof name === "string" && name.startsWith("next-session-e2e-")) {
+        directory = join(root, name);
+        child.kill(signal);
+      }
+    });
+    try {
+      await once(child, "exit", { signal: AbortSignal.timeout(10_000) });
+      expect(directory).not.toBe("");
+      expect(existsSync(directory)).toBe(false);
+    } finally {
+      watcher.close();
+      child.kill("SIGKILL");
+      rmSync(root, { recursive: true, force: true });
+    }
+  },
+);
