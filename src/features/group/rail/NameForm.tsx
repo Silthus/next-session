@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { flushSync } from "react-dom";
 import { normalizeName, NAME_MAX_LENGTH } from "../../../../shared/names";
 import { Button } from "../../../ui/Button";
 import { cn } from "../../../ui/cn";
@@ -66,8 +67,10 @@ export function NameForm({
   };
 
   const readyForNextName = () => {
-    setName("");
-    setBusy(false);
+    flushSync(() => {
+      setName("");
+      setBusy(false);
+    });
     field.current?.focus();
   };
 

@@ -131,6 +131,18 @@ describe("Players", () => {
     expect((field as HTMLInputElement).value).toBe("");
   });
 
+  it("hands focus back to an editable, empty field after an add", async () => {
+    const { card } = renderPlayers();
+    await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
+    const field = within(card).getByRole<HTMLInputElement>("textbox", { name: "Player name" });
+    const focusedStates: { readOnly: boolean; value: string }[] = [];
+    vi.spyOn(field, "focus").mockImplementation(() => {
+      focusedStates.push({ readOnly: field.readOnly, value: field.value });
+    });
+    await userEvent.keyboard("Fay{Enter}");
+    expect(focusedStates.at(-1)).toEqual({ readOnly: false, value: "" });
+  });
+
   it("closes the form with Escape and returns focus to + Add", async () => {
     const { card } = renderPlayers();
     await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
