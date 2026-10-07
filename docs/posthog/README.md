@@ -1,6 +1,12 @@
 # PostHog setup
 
-What Next Session has in PostHog, and how to rebuild it. The design is `docs/spec.md` §13 and [ADR-0011](../adr/0011-posthog-cookieless-analytics-and-workflows-mail.md). Switched on in [#79](https://github.com/Silthus/next-session/issues/79).
+What Next Session has in PostHog, and how to rebuild it. The design is `docs/spec.md` §13 and [ADR-0011](../adr/0011-posthog-cookieless-analytics-and-workflows-mail.md). Analytics, errors, logs and source maps are on in production. Welcome Mail and Tips activation is tracked in [#79](https://github.com/Silthus/next-session/issues/79).
+
+## Mail activation
+
+As of 2026-10-07, both workflows are active and all three email steps use sender channel `88088`. The sender still reports `verified: false`, so the production mail environment is unset. Mocked renders and webhook acceptance are proved; real email delivery and the Tips confirmation path still need live proof.
+
+In PostHog EU project `13216`, open **Workflows → Channels → hello@next-session.link** and press **Verify** or **Verify DNS records**. Confirm the channel shows verified before setting `POSTHOG_MAIL_WEBHOOK_SECRET`, `POSTHOG_WELCOME_WEBHOOK_URL` and `POSTHOG_TIPS_WEBHOOK_URL` in Convex production. Both workflows must also be active. A webhook can return 201 before its email step runs, so acceptance alone does not prove delivery.
 
 ## Where things live
 
@@ -12,7 +18,7 @@ What Next Session has in PostHog, and how to rebuild it. The design is `docs/spe
 | Workflows | "Next Session: Welcome Mail" and "Next Session: Tips". Definitions in [`workflows/`](workflows) |
 | Browser token | Repo variable `VITE_POSTHOG_TOKEN`, read by the deploy job's build |
 | Source maps | Repo variable `POSTHOG_PROJECT_ID` and repo secret `POSTHOG_PERSONAL_API_KEY`. The deploy job installs `posthog-cli` pinned by its release checksum |
-| Server token and mail | Convex prod env: `POSTHOG_PROJECT_TOKEN`, `POSTHOG_MAIL_WEBHOOK_SECRET`, `POSTHOG_WELCOME_WEBHOOK_URL`, `POSTHOG_TIPS_WEBHOOK_URL` |
+| Server token and mail | Convex prod env: `POSTHOG_PROJECT_TOKEN` is set. `POSTHOG_MAIL_WEBHOOK_SECRET`, `POSTHOG_WELCOME_WEBHOOK_URL` and `POSTHOG_TIPS_WEBHOOK_URL` wait for sender verification |
 | Local copies | `~/.config/next-session/posthog.env` (token, personal API key) and `posthog-mail.env` (webhook secret) on devbox-michaelr-1. Never commit them |
 
 ## Templates
@@ -39,7 +45,7 @@ Each file in [`workflows/`](workflows) is the body of a `POST /api/environments/
 - Every email step has `tracking_enabled: false`: no open pixel, no rewritten links.
 - No message categories: PostHog refuses personal API keys on them. Welcome is `transactional`, so it ignores opt-outs. Tips are `marketing`, so an unsubscribe opts the address out of all marketing mail in the shared project. Lonir sends none through Workflows today. If it starts, add a "Next Session tips" category and set it on both Tip steps.
 - The webhook only captures its event as the run's trigger data. The email address never becomes a stored PostHog event or person property.
-- The webhook URL is `https://webhooks.eu.posthog.com/public/webhooks/<workflow id>`. It answers only while the workflow is active, so set the Convex mail env after enabling, never before: a 404 is not retried, and the Welcome Mail would be lost.
+- The webhook URL is `https://webhooks.eu.posthog.com/public/webhooks/<workflow id>`. It answers only while the workflow is active. Set the Convex mail env only after both workflows are active and the sender is verified. A 404 is not retried; a 201 from an unverified sender still does not deliver mail. Either can lose a Welcome Mail.
 
 Test a workflow with `POST .../hog_flows/<id>/invocations/` (`configuration`, `globals`, `mock_async_functions: true`, `current_action_id`), one step at a time. The key needs `group:read` for that.
 
