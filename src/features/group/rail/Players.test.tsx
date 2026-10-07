@@ -106,14 +106,68 @@ describe("Players", () => {
     expect(within(card).getByRole("textbox", { name: "Player name" })).toBeTruthy();
   });
 
-  it("adds a Player and closes the form", async () => {
+  it("adds Players one after another with Enter, keeping the field empty and focused", async () => {
     const { onAdd, card } = renderPlayers();
     await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
-    await userEvent.type(
-      within(card).getByRole("textbox", { name: "Player name" }),
-      " Fay {Enter}",
-    );
+    const field = within(card).getByRole("textbox", { name: "Player name" });
+    await userEvent.keyboard(" Fay {Enter}");
+    expect(onAdd).toHaveBeenLastCalledWith("Fay");
+    expect(document.activeElement).toBe(field);
+    expect((field as HTMLInputElement).value).toBe("");
+    await userEvent.keyboard("Gus{Enter}");
+    expect(onAdd).toHaveBeenLastCalledWith("Gus");
+    expect(document.activeElement).toBe(field);
+    expect((field as HTMLInputElement).value).toBe("");
+  });
+
+  it.each(["Enter", "button"])(
+    "keeps editing focus during a pending add with %s and refuses duplicate submits",
+    async (method) => {
+      const onAdd = vi.fn(() => new Promise(() => undefined));
+      const { card } = renderPlayers(monthWith({}), { onAdd });
+      await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
+      const field = within(card).getByRole<HTMLInputElement>("textbox", { name: "Player name" });
+      await userEvent.type(field, "Fay");
+      const blurred = vi.fn();
+      field.addEventListener("blur", blurred);
+      if (method === "Enter") await userEvent.keyboard("{Enter}");
+      else await userEvent.click(within(card).getByRole("button", { name: "Add" }));
+      expect(document.activeElement).toBe(field);
+      expect(field.readOnly).toBe(false);
+      expect(blurred).not.toHaveBeenCalled();
+      await userEvent.keyboard("Gus{Enter}");
+      expect(field.value).toBe("Fay");
+      expect(onAdd).toHaveBeenCalledExactlyOnceWith("Fay");
+    },
+  );
+
+  it("keeps the field empty and focused after adding with the button", async () => {
+    const { onAdd, card } = renderPlayers();
+    await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
+    const field = within(card).getByRole("textbox", { name: "Player name" });
+    await userEvent.type(field, "Fay");
+    await userEvent.click(within(card).getByRole("button", { name: "Add" }));
     expect(onAdd).toHaveBeenCalledWith("Fay");
+    expect(document.activeElement).toBe(field);
+    expect((field as HTMLInputElement).value).toBe("");
+  });
+
+  it("hands focus back to an editable, empty field after an add", async () => {
+    const { card } = renderPlayers();
+    await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
+    const field = within(card).getByRole<HTMLInputElement>("textbox", { name: "Player name" });
+    const focusedStates: { readOnly: boolean; value: string }[] = [];
+    vi.spyOn(field, "focus").mockImplementation(() => {
+      focusedStates.push({ readOnly: field.readOnly, value: field.value });
+    });
+    await userEvent.keyboard("Fay{Enter}");
+    expect(focusedStates.at(-1)).toEqual({ readOnly: false, value: "" });
+  });
+
+  it("closes the form with Escape and returns focus to + Add", async () => {
+    const { card } = renderPlayers();
+    await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
+    await userEvent.keyboard("Fay{Enter}{Escape}");
     expect(within(card).queryByRole("textbox")).toBeNull();
     expect(document.activeElement).toBe(within(card).getByRole("button", { name: "Add player" }));
   });
@@ -125,6 +179,7 @@ describe("Players", () => {
     await userEvent.type(field, "Ana{Enter}");
     expect(within(card).getByRole("alert").textContent).toBe("That name is already on the list.");
     expect((field as HTMLInputElement).value).toBe("Ana");
+    expect(document.activeElement).toBe(field);
   });
 
   it("does not add a blank name", async () => {
