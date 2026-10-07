@@ -95,16 +95,31 @@ export function NameForm({
           maxLength={NAME_MAX_LENGTH * 2}
           placeholder={placeholder}
           autoComplete="off"
-          readOnly={busy}
+          readOnly={busy && !readyForNextAfterSubmit}
           aria-invalid={failure !== null || undefined}
           aria-describedby={failure ? failureId : undefined}
-          onChange={(event) => setName(event.target.value)}
+          onBeforeInput={(event) => {
+            if (busy) event.preventDefault();
+          }}
+          onChange={(event) => {
+            if (!busy) setName(event.target.value);
+          }}
           className={cn(
             "h-9 min-w-0 flex-1 rounded-md border border-line bg-paper px-3 text-sm text-ink outline-none focus:border-accent-strong aria-invalid:border-busy",
             inputClassName,
           )}
         />
-        <Button size="sm" type="submit" variant="secondary" busy={busy && "Saving…"}>
+        <Button
+          size="sm"
+          type="submit"
+          variant="secondary"
+          busy={busy && "Saving…"}
+          onPointerDown={(event) => {
+            if (!readyForNextAfterSubmit || event.button !== 0) return;
+            event.preventDefault();
+            field.current?.focus();
+          }}
+        >
           {submitLabel}
         </Button>
         <Button size="sm" variant="ghost" onClick={onCancel} disabled={busy}>

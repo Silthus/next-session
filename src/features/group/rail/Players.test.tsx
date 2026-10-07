@@ -120,6 +120,27 @@ describe("Players", () => {
     expect((field as HTMLInputElement).value).toBe("");
   });
 
+  it.each(["Enter", "button"])(
+    "keeps editing focus during a pending add with %s and refuses duplicate submits",
+    async (method) => {
+      const onAdd = vi.fn(() => new Promise(() => undefined));
+      const { card } = renderPlayers(monthWith({}), { onAdd });
+      await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
+      const field = within(card).getByRole<HTMLInputElement>("textbox", { name: "Player name" });
+      await userEvent.type(field, "Fay");
+      const blurred = vi.fn();
+      field.addEventListener("blur", blurred);
+      if (method === "Enter") await userEvent.keyboard("{Enter}");
+      else await userEvent.click(within(card).getByRole("button", { name: "Add" }));
+      expect(document.activeElement).toBe(field);
+      expect(field.readOnly).toBe(false);
+      expect(blurred).not.toHaveBeenCalled();
+      await userEvent.keyboard("Gus{Enter}");
+      expect(field.value).toBe("Fay");
+      expect(onAdd).toHaveBeenCalledExactlyOnceWith("Fay");
+    },
+  );
+
   it("keeps the field empty and focused after adding with the button", async () => {
     const { onAdd, card } = renderPlayers();
     await userEvent.click(within(card).getByRole("button", { name: "Add player" }));
