@@ -105,7 +105,7 @@ async function main() {
         E2E_OUTPUT_DIR: outputDirectory,
         E2E_REPORT_DIR: resolve("playwright-report", basename(run.directory)),
         ...(process.env.E2E_SCREENSHOTS
-          ? { E2E_SCREENSHOTS: resolve(process.env.E2E_SCREENSHOTS) }
+          ? { E2E_SCREENSHOTS: resolve(process.env.E2E_SCREENSHOTS, basename(run.directory)) }
           : {}),
       },
     });
