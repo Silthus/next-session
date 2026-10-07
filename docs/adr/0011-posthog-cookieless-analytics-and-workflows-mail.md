@@ -33,3 +33,9 @@ Everything ships disabled and turns on only where the production deploy provides
 Michael chose PostHog Workflows for Session updates, superseding the Session-notification Resend plan above. Resend from Convex remains the considered alternative. Convex fans out through the existing secret-guarded webhook pattern, with the current Claimed Accounts, an Account preference and a hosted "Session updates" unsubscribe category. Group names, emails and Share Links are workflow trigger data only, never capture events or person properties.
 
 Implementation #97 ships disabled. #102 owns sender verification, category creation, live mail environment, inbox proof and the visitor notification promise. Neither implementation nor this amendment enables production mail. The current design is in `docs/spec.md` §12.6 and §13.7.
+
+## Amendment, 2026-10-07: Session updates are transactional
+
+Michael confirmed that Session updates are transactional service mail. This supersedes the hosted Session category unsubscribe decision above. Keep the real category and email action `transactional`, with open/click tracking off. PostHog omits transactional categories from hosted preferences and bypasses category unsubscribe. Each update instead links to the authenticated My groups switch, which stops future Session mail for that Account across Groups. Tips consent and hosted unsubscribe stay separate; no token-unsubscribe backend is added.
+
+Mail-processing delivery metadata may contain recipient email and subject. The application telemetry redaction contract still excludes email, Group names and Share Tokens from application usage events and person properties. #102 verifies actual rendering, tracking and live delivery before adding the visitor notification promise.

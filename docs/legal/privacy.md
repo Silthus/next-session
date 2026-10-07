@@ -2,7 +2,7 @@
 
 > **Draft, pending review by a qualified German lawyer before publication.** Source text for the `/privacy` page. `{{…}}` placeholders are filled at build time (see `docs/spec.md` §7).
 
-**Version 1.5. Effective: {{EFFECTIVE_DATE}}**
+**Version 1.6. Effective: {{EFFECTIVE_DATE}}**
 
 This policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.
 
@@ -86,7 +86,7 @@ You have the right of access (Art. 15), rectification (Art. 16), erasure (Art. 1
 
 **You may object to usage measurement at any time.** While the Service measures use, this page ends with a **Turn off usage measurement in this browser** button. Press it, and the Service sends no usage events, error reports, or technical logs from that browser. At your request, the Service remembers the choice in your browser's local storage, and the button becomes **Turn it back on**. If your browser does not let the Service remember the choice, it lasts until you reload the page or leave the site. Steps such as creating a link, joining, or scheduling are recorded on our servers, so the button does not cover them. To object to those, write to {{CONTACT_EMAIL}}; for an account, we then stop them for good.
 
-When session emails are enabled, you can stop them with the unsubscribe link in each update or the "Email me when a session is set or cancelled" switch on My groups. The switch stores your preference on your account. A hosted unsubscribe still applies if you turn the switch back on. Session updates carry no open or click tracking.
+When session emails are enabled, you can stop them with the "Email me when a session is set or cancelled" switch on My groups, linked from each update. Sign in to change this account-wide preference. Session updates are transactional service messages; the tips unsubscribe does not control them. Session updates carry no open or click tracking.
 
 You may withdraw your consent to the tips at any time, with the unsubscribe link in every tip or by replying to it. Mails sent before you withdraw stay lawful.
 

@@ -8,7 +8,10 @@ export type KeepState = "offer" | "keeping" | "kept";
 
 export const KEEP_NUDGE = {
   title: "Keep this group",
-  reasons: ["Find it and your answers on all your devices."],
+  reasons: [
+    "Find it and your answers on all your devices.",
+    "Get notified when the next session is set.",
+  ],
 };
 
 export function KeepGroup({
