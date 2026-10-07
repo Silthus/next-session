@@ -455,7 +455,7 @@ Each call is a reversible default. Michael can redirect any of them in one line.
 | --- | --- | --- |
 | 1 | One Account type with two roles: it owns Groups as a GM and claims Players | A separate Player account type |
 | 2 | The link is an optional `players.userId` (a Claimed Player), indexed `by_userId_and_groupId` | A `claims` table, needed only if one Player could belong to several Accounts |
-| 3 | Joining with a new name while signed in as an Account claims the new Player. Picking an existing name claims only through **Keep this group** | Claim on every pick, which lets a GM previewing their own link claim their Players' names |
+| 3 | Joining while signed in claims the new Player. Answering or Fill the rest claims a picked name; viewing and picking alone claim nothing (#96, 2026-10-07) | Require a separate Keep tap after answering |
 | 4 | A claim does not lock answering: the Share Link still answers as any Player (ADR-0004 stands) | Claimed Players answer only through their Account |
 | 5 | One Claimed Player per Account per Group; claiming another Player there moves the claim | Several per Group, for a parent who answers for two kids |
 | 6 | Claiming another Account's Player throws `PLAYER_CLAIMED`; the GM removes a squatter | A GM "release claim" action on the Roster |
@@ -463,7 +463,7 @@ Each call is a reversible default. Michael can redirect any of them in one line.
 | 8 | **Not you?** on a Claimed Player releases the claim | **Not you?** switches only on this device and keeps the claim |
 | 9 | Players never leave a Group. **Remove from my groups** releases the claim; only the GM removes a Player (Michael's rule) | A Player can delete themselves |
 | 10 | Rotating the Share Token keeps Claimed Players in: My groups returns the current token | Rotation releases every claim of the Group |
-| 11 | My groups lists Groups and Sessions. Answering stays on the existing player page, reached through `/s/<token>` | An inline multi-Group calendar on `/me` |
+| 11 | My groups lists Groups and Sessions; answering stays on `/s/<token>`. After the first saved answer, visitors see a dismissible Keep card with Create account first and Google when available (#96, 2026-10-07) | An inline multi-Group calendar, or a quiet Keep line that Players miss |
 | 12 | The landing sends an Account without Groups of its own to `/me`. A GM still lands on their last Group, with a **My groups** link in the header | Every Account lands on `/me` |
 | 13 | A Player's name stays per Group. There is no Account display name | An Account name prefilled into Join |
 | 14 | The Privacy Policy gains one row and becomes 1.2. No re-acceptance gate: the new processing happens only when someone keeps a Group, and creating the Account stamps 1.2 | Build the re-acceptance gate first |
@@ -479,12 +479,14 @@ Each call is a reversible default. Michael can redirect any of them in one line.
 
 ### 12.3 Backend
 
-Schema: `players.userId` and `by_userId_and_groupId` (§3). The field is optional, so existing rows need no migration. Invariant 9 in §3 holds the rules.
+Schema: `players.userId` and `by_userId_and_groupId` (§3), plus `groupRemovals {userId, groupId}` indexed by `by_userId_and_groupId` and `by_groupId`. The Player field is optional and the new table starts empty, so existing rows need no migration. Invariant 9 in §3 holds the rules.
 
 - `currentAccount(ctx)` and `requireAccount(ctx)` in `convex/model/access.ts` return the signed-in user only when it is not anonymous.
 - `claimedPlayerIn(ctx, accountId, groupId)` and `claimPlayer(ctx, account, player)` in `convex/model/players.ts`. `claimPlayer` is a no-op when the Account already holds the Player, throws `PLAYER_CLAIMED` when another Account does, and throws `TOO_MANY_GROUPS` at the 50th claim unless it moves a claim within the Group. Otherwise it clears the Account's earlier claim in the Group and sets `userId`.
-- `player.group` adds `claimedPlayerId`, read through `by_userId_and_groupId`. It is `null` for visitors and Anonymous GMs.
+- `player.group` returns `claimedPlayerId` and the caller's `removedFromMyGroups` opt-out, read through the Account/Group indexes. Visitors and Anonymous GMs get `null` and `false`. The opt-out keeps explicit Keep available after reload, even when the Player has no saved answers.
 - `player.join` inserts the Player, then calls `claimPlayer` when the caller is an Account. A refused claim refuses the whole join, so a Player is never inserted half-done.
+- `player.answer` and `player.fillRest` auto-claim an unclaimed Player for an Account, including a GM answering their own link. A new claim moves the Account's previous claim in the Group. They return `{keptNow}` for the confirmation toast. Another Account's claim, the 50 Group cap, or a deliberate removal leaves the answer saved and the claim unchanged; an explicit Keep still reports `PLAYER_CLAIMED` or `TOO_MANY_GROUPS`. The Share Token remains the answer credential.
+- `player.removeFromMyGroups({groupId})` releases the caller's claim and remembers the Account's opt-out in `groupRemovals`. Answering as any Player in this Group no longer auto-claims. Undo or explicit Keep removes the opt-out; joining with a new name also removes it. A deliberate Remove also cancels the matching pending Keep, so reload cannot undo the opt-out. Other Accounts' opt-outs survive. Removing a Player does not erase the Group opt-out; deleting the Group cleans it up in the same bounded child-deletion process.
 - `player.claim({shareToken, playerId})` checks the Player against the token with `playerOnShareLink`, then calls `claimPlayer`. `player.release({groupId})` clears the caller's claim in that Group and returns `null` whether one existed or not, so it cannot probe Groups.
 - `me.groups({today})` returns `null` for anyone but an Account, else:
 
@@ -515,10 +517,10 @@ Unchanged: `roster.removePlayer` deletes the Player with its Answers, so the cla
 
 - **Header.** A small account control: **Log in** for a visitor, the email with **Log out** and **My groups** for an Account, nothing new for an Anonymous GM.
 - **Auto-open.** When `claimedPlayerId` is set, the page skips Join, opens the calendar as that Player, and writes it to `next-session.players`.
-- **Keep this group.** A quiet line under the calendar, never a modal and never before the first tap: "Keep this group on all your devices." Hidden once the caller holds this Player; then the line reads "Kept in My groups".
-  - An Account: one tap calls `player.claim`.
-  - A visitor: the Account sheet opens with **Create account** first and **Log in** second, with the legal line. After sign-in, the client claims.
-  - An Anonymous GM: the sheet runs Save (§5.3), then claims.
+- **Keep this group.** After the first saved answer, a signed-out visitor sees a card under the calendar: "Keep this group" and "Find it and your answers on all your devices." **Create account** opens the existing Account sheet, with **Create account** first and **Log in** second. **Continue with Google** appears when enabled, with its legal line. **Not now** dismisses the card for this visit and leaves a quiet Keep line. The card never blocks answering and promises no notifications until #97 ships.
+  - An Account is kept automatically on Join or a saved answer or Fill the rest. The page shows "Kept in My groups" with **Remove from my groups** beside it. Remove confirms with an **Undo** toast. Explicit **Keep this group** remains available after Remove or an automatic claim that could not succeed.
+  - A visitor signs in through the nudge, then the existing keep path claims at once.
+  - An Anonymous GM keeps the quiet line and Save-first sheet (§5.3), then claims.
   - The client writes `next-session.pendingKeep` (`{shareToken, playerId}`) to `sessionStorage` before signing in and clears it after the claim. It also clears it on `PLAYER_CLAIMED`, `NOT_FOUND`, `TOO_MANY_GROUPS`, a sign-in the server refused, and **Not you?**. App start retries a leftover keep once an Account is signed in, which covers a dropped connection and Google's OAuth redirect (#58) alike.
 - **Join while signed in** claims the new name and confirms with a toast: "Kept in My groups".
 - **Not you?** on a Claimed Player calls `player.release`, then shows Join.
@@ -550,9 +552,9 @@ Resend's DNS records are already on the zone. When this is built:
 
 | Seam | Tested through |
 | --- | --- |
-| `player.join`, `player.claim`, `player.release`, `player.group`, `me.groups`, `account.finishSave` | `convex-test` through `api.*` with `t.withIdentity` for an Account and an Anonymous GM. Invariant 9 and every row of §12.2 has a test, including: a joined Player stays until `roster.removePlayer`; release keeps the Player and its Answers; a removed Player leaves My groups; a rotated token still shows in My groups; `today` moving across midnight without a write changes `upcomingSessions` and `openDates`; a Save past 50 Groups moves nothing |
+| `player.join`, `player.answer`, `player.fillRest`, `player.claim`, `player.release`, `player.removeFromMyGroups`, `player.group`, `me.groups`, `account.finishSave` | `convex-test` through `api.*` with `t.withIdentity` for an Account and an Anonymous GM. Invariant 9 and every row of §12.2 has a test, including: a joined Player stays until `roster.removePlayer`; release keeps the Player and its Answers; a removed Player leaves My groups; a rotated token still shows in My groups; `today` moving across midnight without a write changes `upcomingSessions` and `openDates`; a Save past 50 Groups moves nothing |
 | `src/features/account/keep.ts` | Vitest with fake `deps`, as `save.ts` |
-| `Join`, `PlayerCalendar`, `MyGroups` views | Testing Library: props in, callbacks out |
+| `Join`, `PlayerCalendar`, `KeepGroup`, `PlayerScreen`, `MyGroups` views | Testing Library: props in, callbacks out; PlayerScreen consumes fake Convex subscriptions and Account actions |
 | The whole flow | Playwright on the local backend: a visitor answers, keeps the Group by creating an Account, joins a second Group's link while signed in, sees both Groups and a scheduled Session on `/me`, and a second browser context logging in opens the first Group as the same Player. The production spec gains this as step 8 |
 
 ### 12.9 Build plan

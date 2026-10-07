@@ -28,3 +28,15 @@ An Anonymous GM cannot claim. Its session can end with its last Group, and a cla
 - Rotating the Share Token stops the old link, but Claimed Players keep reaching the Group through My groups, which returns the current token. The GM's remedy for an unwanted Claimed Player is removing that Player.
 - Anyone with the link can claim an unclaimed name first. The real person then sees `PLAYER_CLAIMED`, and the GM removes the squatter. This is the same trust ADR-0004 already places in link holders.
 - Claims give the later email notifications their recipients: the Accounts behind a Group's Claimed Players.
+
+## Amendment, 2026-10-07 (#96)
+
+Michael after using Keep on production: "A player filling out something for a crew should auto-save it in their crew. I would rather have them be the action that they remove the crew if they don't want to be in it."
+
+Joining while signed in still claims the new Player. The first saved answer or Fill the rest now claims a picked Player automatically; viewing and picking alone still claim nothing. Answering as a different unclaimed Player moves the Account's earlier claim in this Group. A GM Account answering its own link follows the same rule. An answer still saves when another Account holds the name or the Account already keeps 50 Groups; explicit Keep explains the refusal.
+
+**Remove from my groups** opts this Account out of automatic keeping in this Group, on both the player page and `/me`. `groupRemovals` stores one indexed record per Account and Group, independent of Player changes and other Accounts' removals. Undo, explicit Keep, or joining with a new name restores keeping. **Not you?** only releases the current claim, so a later answer can keep the selected name again. Group deletion cleans removal records in bounded batches.
+
+Visitors get a visible, dismissible card after their first saved answer, with Create account first and Continue with Google when enabled. Anonymous GMs keep the Save-first flow. The card promises access on all devices; #97 adds notification copy once sending is live.
+
+The alternative was automatic re-claim after Remove. It would undo a deliberate action on the next answer, so the Account-level opt-out wins. Storing the removal on a Player would lose it when the GM deletes that name or another Account uses it, so the Account and Group pair owns the record.

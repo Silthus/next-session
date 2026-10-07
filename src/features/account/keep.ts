@@ -43,6 +43,15 @@ export function forgetPendingKeep(storage: KeyValueStorage) {
   storage.removeItem(PENDING_KEEP_KEY);
 }
 
+export function forgetPendingKeepFor(keep: Keep, storage: KeyValueStorage) {
+  const remembered = storage.getItem(PENDING_KEEP_KEY);
+  if (remembered === null) return;
+  const pending = parseKeep(remembered);
+  if (pending?.shareToken === keep.shareToken || pending?.playerId === keep.playerId) {
+    forgetPendingKeep(storage);
+  }
+}
+
 export async function keepAfterRedirect(
   keep: Keep,
   leaveToSignIn: () => Promise<unknown>,

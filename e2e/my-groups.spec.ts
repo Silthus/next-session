@@ -60,7 +60,6 @@ test("an Account sees every Group it plays in and the Sessions across them on /m
     await page.getByRole("button", { name: "Robin", exact: true }).click();
     await todayTile(page).click();
     await expect(todayTile(page)).toHaveAccessibleName(/: Free$/);
-    await page.getByRole("button", { name: "Keep this group" }).click();
     await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
 
     await page.goto(sunday.link);
@@ -116,6 +115,12 @@ test("an Account sees every Group it plays in and the Sessions across them on /m
       .toEqual(["Sunday Table"]);
     await page.reload();
     await expect(playingCard(page, "Sunday Table")).toHaveCount(1);
+    await expect(playingCard(page, "Thursday Crew")).toHaveCount(0);
+    await page.goto(thursday.link);
+    await todayTile(page).click();
+    await expect(todayTile(page)).toHaveAccessibleName(/: Maybe$/);
+    await expect(page.getByRole("main").getByText("Kept in My groups")).toBeHidden();
+    await page.goto("/me");
     await expect(playingCard(page, "Thursday Crew")).toHaveCount(0);
     const roster = await thursday.gm.client.query(api.schedule.month, {
       groupId: thursday.gm.groupId,

@@ -27,11 +27,16 @@ import {
   ensureNameIsFree,
   releaseClaim,
   ensureRosterHasRoom,
+  keepOnAnswer,
+  hasRemovedGroup,
+  removeFromMyGroups as removeGroupFromMyGroups,
   validName,
 } from "./model/players";
 import { enforceRateLimit } from "./model/rateLimits";
 import { track } from "./model/telemetry";
 import { answerValue } from "./schema";
+
+const answered = v.object({ keptNow: v.boolean() });
 
 const playerGroupView = v.object({
   groupId: v.id("groups"),
@@ -39,6 +44,7 @@ const playerGroupView = v.object({
   players: v.array(v.object({ _id: v.id("players"), name: v.string() })),
   sessionDates: v.array(v.string()),
   claimedPlayerId: v.union(v.id("players"), v.null()),
+  removedFromMyGroups: v.boolean(),
 });
 
 export const group = query({
@@ -47,12 +53,12 @@ export const group = query({
   handler: async (ctx, { shareToken }) => {
     const group = await groupByShareToken(ctx, shareToken);
     if (group === null) return null;
-    const [players, sessionDates, claimedPlayerId] = await Promise.all([
+    const [players, sessionDates, keeping] = await Promise.all([
       rosterOf(ctx, group._id),
       sessionDatesOf(ctx, group._id),
-      claimedPlayerIdOfCaller(ctx, group._id),
+      keepingOfCaller(ctx, group._id),
     ]);
-    return { groupId: group._id, name: group.name, players, sessionDates, claimedPlayerId };
+    return { groupId: group._id, name: group.name, players, sessionDates, ...keeping };
   },
 });
 
@@ -118,6 +124,20 @@ export const release = mutation({
   },
 });
 
+export const removeFromMyGroups = mutation({
+  args: { groupId: v.id("groups") },
+  returns: v.null(),
+  handler: async (ctx, { groupId }) => {
+    const account = await requireAccount(ctx);
+    await enforceRateLimit(ctx, "claimPlayer", account._id);
+    const released = await removeGroupFromMyGroups(ctx, account, groupId);
+    if (released === null) return null;
+    await touchGroupOf(ctx, released);
+    await track(ctx, { name: "player_released", actor: account, group_id: released.groupId });
+    return null;
+  },
+});
+
 export const answer = mutation({
   args: {
     shareToken: v.string(),
@@ -125,20 +145,20 @@ export const answer = mutation({
     date: v.string(),
     answer: v.union(answerValue, v.null()),
   },
-  returns: v.null(),
+  returns: answered,
   handler: async (ctx, { shareToken, playerId, date, answer }) => {
     const { group, player } = await playerOnShareLink(ctx, shareToken, playerId);
     if (!isBookable(date, today())) fail({ code: "OUT_OF_WINDOW" });
     await enforceAnswerRateLimits(ctx, group, player);
     await writeAnswer(ctx, player, date, answer);
     await touchGroup(ctx, group);
-    return null;
+    return { keptNow: await keepForAccountCaller(ctx, group, player) };
   },
 });
 
 export const fillRest = mutation({
   args: { shareToken: v.string(), playerId: v.id("players"), month: v.string() },
-  returns: v.null(),
+  returns: answered,
   handler: async (ctx, { shareToken, playerId, month }) => {
     const { group, player } = await playerOnShareLink(ctx, shareToken, playerId);
     if (!isBookableMonth(month, today())) fail({ code: "OUT_OF_WINDOW" });
@@ -154,14 +174,18 @@ export const fillRest = mutation({
       });
     }
     await touchGroup(ctx, group);
-    return null;
+    return { keptNow: await keepForAccountCaller(ctx, group, player) };
   },
 });
 
-async function claimedPlayerIdOfCaller(ctx: QueryCtx, groupId: Id<"groups">) {
+async function keepingOfCaller(ctx: QueryCtx, groupId: Id<"groups">) {
   const account = await currentAccount(ctx);
-  const claimed = account === null ? null : await claimedPlayerIn(ctx, account._id, groupId);
-  return claimed?._id ?? null;
+  if (account === null) return { claimedPlayerId: null, removedFromMyGroups: false };
+  const [claimed, removedFromMyGroups] = await Promise.all([
+    claimedPlayerIn(ctx, account._id, groupId),
+    hasRemovedGroup(ctx, account._id, groupId),
+  ]);
+  return { claimedPlayerId: claimed?._id ?? null, removedFromMyGroups };
 }
 
 async function claimForAccountCaller(ctx: MutationCtx, playerId: Id<"players">) {
@@ -170,6 +194,17 @@ async function claimForAccountCaller(ctx: MutationCtx, playerId: Id<"players">) 
   const player = await ctx.db.get("players", playerId);
   if (player !== null) await claimPlayer(ctx, account, player);
   return account;
+}
+
+async function keepForAccountCaller(
+  ctx: MutationCtx,
+  group: Doc<"groups">,
+  player: Doc<"players">,
+) {
+  const account = await currentAccount(ctx);
+  if (account === null || !(await keepOnAnswer(ctx, account, group, player))) return false;
+  await track(ctx, { name: "player_claimed", actor: account, group_id: group._id });
+  return true;
 }
 
 async function touchGroupOf(ctx: MutationCtx, player: Doc<"players">) {

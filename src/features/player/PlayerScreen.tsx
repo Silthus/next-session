@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { useCallback, useEffect, useState, type ComponentProps } from "react";
+import { useCallback, useEffect, useState, type ComponentProps, type ReactNode } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { fillRestDates, type Answer } from "../../../shared/answers";
@@ -19,10 +19,11 @@ import { Skeleton } from "../../ui/Skeleton";
 import { Button } from "../../ui/Button";
 import { Toast, type ToastMessage } from "../../ui/Toast";
 import { AccountSheet } from "../account/AccountSheet";
-import type { KeepOutcome } from "../account/keep";
+import { forgetPendingKeepFor, type KeepOutcome } from "../account/keep";
 import { useGm } from "../account/useGm";
 import { HeaderAccount } from "../group/rail/HeaderAccount";
 import { Join } from "./Join";
+import { KeepGroup } from "./KeepGroup";
 import { PlayerCalendar } from "./PlayerCalendar";
 import { visibleMonth } from "./playerMonth";
 import { useTodayUtc } from "./useTodayUtc";
@@ -33,6 +34,9 @@ type Account = ReturnType<typeof useGm>;
 
 const TOAST_MS = 4000;
 const KEPT = "Kept in My groups";
+const REMOVED = "Removed from My groups.";
+
+type ShowToast = (message: string, action?: ToastMessage["action"]) => void;
 
 export function PlayerScreen({
   shareToken,
@@ -77,11 +81,23 @@ function PlayerGroup({
   const [identity, setIdentity] = useState(() => recallPlayer(group.groupId));
   const join = useMutation(api.player.join);
   const release = useMutation(api.player.release);
+  const removeFromMyGroups = useMutation(api.player.removeFromMyGroups).withOptimisticUpdate(
+    (store) => {
+      const current = store.getQuery(api.player.group, { shareToken });
+      if (current)
+        store.setQuery(
+          api.player.group,
+          { shareToken },
+          { ...current, claimedPlayerId: null, removedFromMyGroups: true },
+        );
+    },
+  );
+  const claim = useMutation(api.player.claim);
   const [toast, showToast] = useToast();
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const { keepWithGoogle, logInWithGoogle } = account;
   const [sheet, setSheet] = useState<"logIn" | "keep" | null>(null);
   const [releasedId, setReleasedId] = useState<Id<"players"> | null>(null);
-  if (releasedId !== null && group.claimedPlayerId !== releasedId) setReleasedId(null);
   const claimed = group.players.find(
     ({ _id }) => _id === group.claimedPlayerId && _id !== releasedId,
   );
@@ -107,16 +123,35 @@ function PlayerGroup({
   }, [claimed, group.groupId]);
 
   function answerAs(next: PlayerIdentity | null) {
-    if (next) rememberPlayer(group.groupId, next);
-    else forgetPlayer(group.groupId);
+    if (next) {
+      if (next.playerId === releasedId) setReleasedId(null);
+      rememberPlayer(group.groupId, next);
+    } else forgetPlayer(group.groupId);
     setIdentity(next);
+  }
+
+  function remove(kept: PlayerIdentity) {
+    forgetPendingKeepFor({ shareToken, playerId: kept.playerId }, sessionStorage);
+    showToast(REMOVED, { label: "Undo", run: () => void undoRemove(kept) });
+    removeFromMyGroups({ groupId: group.groupId }).catch((error: unknown) => {
+      showToast(errorMessage(error, "keep"));
+    });
+  }
+
+  async function undoRemove(kept: PlayerIdentity) {
+    try {
+      await claim({ shareToken, playerId: kept.playerId });
+      showToast(KEPT);
+    } catch (error) {
+      showToast(errorMessage(error, "undoRemove"));
+    }
   }
 
   function notYou() {
     account.forgetPendingKeep();
     answerAs(null);
-    if (!claimed) return;
-    setReleasedId(claimed._id);
+    if (account.status !== "account") return;
+    setReleasedId(player?._id ?? null);
     release({ groupId: group.groupId }).catch((error: unknown) => {
       setReleasedId(null);
       showToast(errorMessage(error, "keep"));
@@ -156,11 +191,40 @@ function PlayerGroup({
           onMonthChange={onMonthChange}
           onNotYou={notYou}
           showToast={showToast}
-          keep={player._id === group.claimedPlayerId ? "kept" : keeper.state}
-          keepRefusal={keeper.refusal}
-          onKeep={() => {
-            if (account.status !== "account") setSheet("keep");
-            else if (keep) keeper.keepThrough(() => account.keepNow(keep)).catch(keeper.refuseSave);
+          keepGroup={(offered) => {
+            const state = player._id === group.claimedPlayerId ? "kept" : keeper.state;
+            if (
+              state === "offer" &&
+              !offered &&
+              !group.removedFromMyGroups &&
+              keeper.refusal === null
+            )
+              return null;
+            const visitor = account.status === "signedOut";
+            return (
+              <KeepGroup
+                groupId={group.groupId}
+                state={state}
+                invite={visitor && !nudgeDismissed ? "nudge" : "line"}
+                refusal={keeper.refusal}
+                onKeep={() => {
+                  if (account.status !== "account") setSheet("keep");
+                  else if (keep)
+                    keeper.keepThrough(() => account.keepNow(keep)).catch(keeper.refuseSave);
+                }}
+                onContinueWithGoogle={
+                  keepWithGoogle &&
+                  keep &&
+                  (() => void keepWithGoogle(keep).catch(keeper.refuseSave))
+                }
+                onDismissNudge={() => setNudgeDismissed(true)}
+                onRemove={
+                  account.status === "account"
+                    ? () => remove({ playerId: player._id, name: player.name })
+                    : undefined
+                }
+              />
+            );
           }}
           accountControl={accountControl}
         />
@@ -213,7 +277,10 @@ function useKeeper(refusalOnReturn: string | null, onKept: () => void) {
     state,
     refusal: tried ? refusal : refusalOnReturn,
     keepThrough,
-    refuseSave: (error: unknown) => setRefusal(errorMessage(error, "save")),
+    refuseSave: (error: unknown) => {
+      setTried(true);
+      setRefusal(errorMessage(error, "save"));
+    },
   };
 }
 
@@ -255,8 +322,12 @@ function useToast() {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  const show = useCallback((message: string) => {
-    setToast((current) => ({ text: message, id: (current?.id ?? 0) + 1 }));
+  const show: ShowToast = useCallback((message, action) => {
+    setToast((current) => ({
+      text: message,
+      id: (current?.id ?? 0) + 1,
+      ...(action && { action }),
+    }));
   }, []);
 
   return [toast, show] as const;
@@ -270,7 +341,8 @@ function PlayerAnswers({
   onMonthChange,
   onNotYou,
   showToast,
-  ...keepLine
+  keepGroup,
+  accountControl,
 }: {
   shareToken: string;
   group: PlayerGroupView;
@@ -278,12 +350,11 @@ function PlayerAnswers({
   requestedMonth: string | undefined;
   onMonthChange: MonthChange;
   onNotYou: () => void;
-  showToast: (message: string) => void;
-} & Pick<
-  ComponentProps<typeof PlayerCalendar>,
-  "keep" | "keepRefusal" | "onKeep" | "accountControl"
->) {
+  showToast: ShowToast;
+  keepGroup: (offered: boolean) => ReactNode;
+} & Pick<ComponentProps<typeof PlayerCalendar>, "accountControl">) {
   const [answered, setAnswered] = useState(false);
+  const [loadedMonths, setLoadedMonths] = useState<ReadonlySet<IsoMonth>>(() => new Set());
   const today = useTodayUtc();
   const month = visibleMonth(requestedMonth, today);
   const { playerId } = player;
@@ -307,7 +378,15 @@ function PlayerAnswers({
     setHintVisible(false);
   }
 
-  if (!answered && answers && Object.keys(answers).length > 0) setAnswered(true);
+  if (answers && !loadedMonths.has(month)) {
+    setLoadedMonths(new Set(loadedMonths).add(month));
+    if (Object.keys(answers).length > 0) setAnswered(true);
+  }
+
+  function saved({ keptNow }: { keptNow: boolean }) {
+    setAnswered(true);
+    if (keptNow) showToast(KEPT);
+  }
 
   if (answers === null) return <NotFoundScreen kind="link" />;
 
@@ -325,19 +404,19 @@ function PlayerAnswers({
       onAnswer={(date, answer) => {
         if (hintVisible) dismissHint();
         const saving = saveAnswer({ shareToken, playerId, date, answer });
-        saving.catch((error: unknown) => showToast(errorMessage(error, "answer")));
+        saving.then(saved, (error: unknown) => showToast(errorMessage(error, "answer")));
         return saving;
       }}
       onFillRest={(fillMonth) => {
         if (hintVisible) dismissHint();
         const saving = fillRest({ shareToken, playerId, month: fillMonth });
-        saving.catch((error: unknown) => showToast(errorMessage(error, "fillRest")));
+        saving.then(saved, (error: unknown) => showToast(errorMessage(error, "fillRest")));
         return saving;
       }}
       onMonthChange={onMonthChange}
       onNotYou={onNotYou}
-      keepOffered={answered}
-      {...keepLine}
+      keepGroup={keepGroup(answered === true)}
+      accountControl={accountControl}
     />
   );
 }

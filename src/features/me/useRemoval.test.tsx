@@ -51,7 +51,7 @@ describe("useRemoval", () => {
     const { result } = renderHook(() => useRemoval("2026-10-06", show, vi.fn()));
 
     act(() => result.current.remove(group));
-    expect(calls["player:release"]).toHaveLength(1);
+    expect(calls["player:removeFromMyGroups"]).toHaveLength(1);
     expect(track).toHaveBeenCalledExactlyOnceWith({
       name: "remove_group_started",
       group_id: "group-thursday",
