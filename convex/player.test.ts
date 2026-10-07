@@ -160,6 +160,7 @@ describe("player.group", () => {
       ],
       sessionDates: ["2026-10-02", TODAY, "2026-10-17", LAST_BOOKABLE_DATE, "2027-01-01"],
       claimedPlayerId: null,
+      removedFromMyGroups: false,
     });
   });
 
@@ -1231,6 +1232,28 @@ describe("player.removeFromMyGroups", () => {
 
     expect(await answerAs(player.as, shareToken, bo)).toEqual({ keptNow: false });
     expect(await claimedPlayerIdIn(player.as, shareToken)).toBeNull();
+  });
+
+  it("reports the Group opt-out only to the Account that deliberately removed it", async () => {
+    const { groupId, shareToken, ada, player } = await keptPlayer();
+    expect(await player.as.query(api.player.group, { shareToken })).toMatchObject({
+      removedFromMyGroups: false,
+    });
+    await player.as.mutation(api.player.removeFromMyGroups, { groupId });
+    expect(await player.as.query(api.player.group, { shareToken })).toMatchObject({
+      removedFromMyGroups: true,
+    });
+    expect(await t.query(api.player.group, { shareToken })).toMatchObject({
+      removedFromMyGroups: false,
+    });
+    const other = await signInAccount(t);
+    expect(await other.as.query(api.player.group, { shareToken })).toMatchObject({
+      removedFromMyGroups: false,
+    });
+    await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+    expect(await player.as.query(api.player.group, { shareToken })).toMatchObject({
+      removedFromMyGroups: false,
+    });
   });
 
   it("lets only an Account remove", async () => {

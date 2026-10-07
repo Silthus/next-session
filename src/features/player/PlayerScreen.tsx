@@ -85,13 +85,16 @@ function PlayerGroup({
     (store) => {
       const current = store.getQuery(api.player.group, { shareToken });
       if (current)
-        store.setQuery(api.player.group, { shareToken }, { ...current, claimedPlayerId: null });
+        store.setQuery(
+          api.player.group,
+          { shareToken },
+          { ...current, claimedPlayerId: null, removedFromMyGroups: true },
+        );
     },
   );
   const claim = useMutation(api.player.claim);
   const [toast, showToast] = useToast();
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
-  const [removedHere, setRemovedHere] = useState(false);
   const { keepWithGoogle, logInWithGoogle } = account;
   const [sheet, setSheet] = useState<"logIn" | "keep" | null>(null);
   const [releasedId, setReleasedId] = useState<Id<"players"> | null>(null);
@@ -121,7 +124,7 @@ function PlayerGroup({
 
   function answerAs(next: PlayerIdentity | null) {
     if (next) {
-      setReleasedId(null);
+      if (next.playerId === releasedId) setReleasedId(null);
       rememberPlayer(group.groupId, next);
     } else forgetPlayer(group.groupId);
     setIdentity(next);
@@ -129,7 +132,6 @@ function PlayerGroup({
 
   function remove(kept: PlayerIdentity) {
     forgetPendingKeepFor({ shareToken, playerId: kept.playerId }, sessionStorage);
-    setRemovedHere(true);
     showToast(REMOVED, { label: "Undo", run: () => void undoRemove(kept) });
     removeFromMyGroups({ groupId: group.groupId }).catch((error: unknown) => {
       showToast(errorMessage(error, "keep"));
@@ -191,7 +193,12 @@ function PlayerGroup({
           showToast={showToast}
           keepGroup={(offered) => {
             const state = player._id === group.claimedPlayerId ? "kept" : keeper.state;
-            if (state === "offer" && !offered && !removedHere && keeper.refusal === null)
+            if (
+              state === "offer" &&
+              !offered &&
+              !group.removedFromMyGroups &&
+              keeper.refusal === null
+            )
               return null;
             const visitor = account.status === "signedOut";
             return (

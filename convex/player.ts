@@ -28,6 +28,7 @@ import {
   releaseClaim,
   ensureRosterHasRoom,
   keepOnAnswer,
+  hasRemovedGroup,
   removeFromMyGroups as removeGroupFromMyGroups,
   validName,
 } from "./model/players";
@@ -43,6 +44,7 @@ const playerGroupView = v.object({
   players: v.array(v.object({ _id: v.id("players"), name: v.string() })),
   sessionDates: v.array(v.string()),
   claimedPlayerId: v.union(v.id("players"), v.null()),
+  removedFromMyGroups: v.boolean(),
 });
 
 export const group = query({
@@ -51,12 +53,12 @@ export const group = query({
   handler: async (ctx, { shareToken }) => {
     const group = await groupByShareToken(ctx, shareToken);
     if (group === null) return null;
-    const [players, sessionDates, claimedPlayerId] = await Promise.all([
+    const [players, sessionDates, keeping] = await Promise.all([
       rosterOf(ctx, group._id),
       sessionDatesOf(ctx, group._id),
-      claimedPlayerIdOfCaller(ctx, group._id),
+      keepingOfCaller(ctx, group._id),
     ]);
-    return { groupId: group._id, name: group.name, players, sessionDates, claimedPlayerId };
+    return { groupId: group._id, name: group.name, players, sessionDates, ...keeping };
   },
 });
 
@@ -176,10 +178,14 @@ export const fillRest = mutation({
   },
 });
 
-async function claimedPlayerIdOfCaller(ctx: QueryCtx, groupId: Id<"groups">) {
+async function keepingOfCaller(ctx: QueryCtx, groupId: Id<"groups">) {
   const account = await currentAccount(ctx);
-  const claimed = account === null ? null : await claimedPlayerIn(ctx, account._id, groupId);
-  return claimed?._id ?? null;
+  if (account === null) return { claimedPlayerId: null, removedFromMyGroups: false };
+  const [claimed, removedFromMyGroups] = await Promise.all([
+    claimedPlayerIn(ctx, account._id, groupId),
+    hasRemovedGroup(ctx, account._id, groupId),
+  ]);
+  return { claimedPlayerId: claimed?._id ?? null, removedFromMyGroups };
 }
 
 async function claimForAccountCaller(ctx: MutationCtx, playerId: Id<"players">) {

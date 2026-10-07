@@ -91,11 +91,19 @@ async function answerKeeps(
   player: Doc<"players">,
 ) {
   if (player.userId !== undefined) return false;
-  if ((await removalFromMyGroups(ctx, account._id, group._id)) !== null) return false;
+  if (await hasRemovedGroup(ctx, account._id, group._id)) return false;
   return (
     (await claimedPlayerIn(ctx, account._id, group._id)) !== null ||
     !(await atClaimCap(ctx, account._id))
   );
+}
+
+export async function hasRemovedGroup(
+  ctx: QueryCtx,
+  accountId: Id<"users">,
+  groupId: Id<"groups">,
+) {
+  return (await removalFromMyGroups(ctx, accountId, groupId)) !== null;
 }
 
 async function forgetRemovalFromMyGroups(

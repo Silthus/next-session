@@ -225,6 +225,8 @@ test("an Account can Keep again after removing a freshly joined Group before ans
   await join(page, "Robin");
   await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
   await page.getByRole("button", { name: "Remove from my groups" }).click();
+  await expect(page.getByRole("main").getByText("Kept in My groups")).toBeHidden();
+  await page.reload();
   await expect(page.getByRole("button", { name: "Keep this group", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Keep this group", exact: true }).click();
   await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
@@ -298,7 +300,11 @@ test("an Account at the 50 Group cap still answers, and an explicit keep explain
   page,
 }) => {
   test.setTimeout(90_000);
-  const account = await signUpAccount();
+  let account: Awaited<ReturnType<typeof signUpAccount>> | undefined;
+  await expect(async () => {
+    account = await signUpAccount();
+  }).toPass({ timeout: 30_000, intervals: [2000] });
+  if (account === undefined) throw new Error("The test Account was not created");
   for (let owner = 0; owner < 10; owner++) {
     const gm = await signInAnonymousGm();
     for (let group = 0; group < 5; group++) {

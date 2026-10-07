@@ -20,9 +20,13 @@ const shareToken = "test-share-token";
 const roster = {
   groupId,
   name: "Thursday Crew",
-  players: [{ _id: playerId, name: "Ana" }],
+  players: [
+    { _id: playerId, name: "Ana" },
+    { _id: "player-bo" as Id<"players">, name: "Bo" },
+  ],
   sessionDates: [],
   claimedPlayerId: null,
+  removedFromMyGroups: false,
 };
 const queries: Record<string, unknown> = {};
 const listeners = new Set<() => void>();
@@ -140,6 +144,28 @@ describe("PlayerScreen", () => {
 
     expect(screen.queryByText("Answering as")).toBeNull();
     expect(screen.getByRole("heading", { name: "Who are you?" })).toBeTruthy();
+    expect(release).toHaveBeenCalledWith({ groupId });
+  });
+
+  it("keeps the newly picked name when the rejected Player's claim arrives late", async () => {
+    account.status = "account";
+    let finish: (result: { keptNow: boolean }) => void = () => undefined;
+    const saving = new Promise<{ keptNow: boolean }>((resolve) => {
+      finish = resolve;
+    });
+    answer.mockReturnValue(saving);
+    renderPage();
+    await userEvent.click(await screen.findByRole("button", { name: /^Wednesday, October 7:/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Not you?" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Bo", exact: true }));
+
+    await act(async () => {
+      finish({ keptNow: true });
+      await saving;
+    });
+    updateQuery("player:group", { ...roster, claimedPlayerId: playerId });
+
+    expect(screen.getByText(/Answering as/).textContent).toContain("Bo");
     expect(release).toHaveBeenCalledWith({ groupId });
   });
 
