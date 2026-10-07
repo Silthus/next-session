@@ -1,0 +1,952 @@
+$ bun scripts/e2e-run.ts
+E2E run /tmp/next-session-e2e-iV6Nns ports {"web":34529,"cloud":44291,"site":44661}
+[WebServer] Could not find project with name anonymous-e2e-d5c4d89c-ab1d-4e63-99d6-e48bc081adb1!
+[WebServer] Setting up a new project...
+[WebServer] (node:27839) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] ✔ Configured a local deployment for http://127.0.0.1:44291 and saved its:
+[WebServer]     name as CONVEX_DEPLOYMENT
+[WebServer]     client URL as VITE_CONVEX_URL
+[WebServer]     HTTP actions URL as VITE_CONVEX_SITE_URL
+[WebServer]  to .env.local
+[WebServer] 
+[WebServer] Write your Convex functions in convex/
+[WebServer] Give us feedback at https://convex.dev/community or support@convex.dev
+[WebServer] View the Convex dashboard at null
+[WebServer] 
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 44291 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:44291
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ Added table indexes:
+[WebServer]   [+] answers.by_groupId_and_date   groupId, date, _creationTime
+[WebServer]   [+] answers.by_playerId_and_date   playerId, date, _creationTime
+[WebServer]   [+] authAccounts.providerAndAccountId   provider, providerAccountId, _creationTime
+[WebServer]   [+] authAccounts.userIdAndProvider   userId, provider, _creationTime
+[WebServer]   [+] authRateLimits.identifier   identifier, _creationTime
+[WebServer]   [+] authRefreshTokens.sessionId   sessionId, _creationTime
+[WebServer]   [+] authRefreshTokens.sessionIdAndParentRefreshTokenId   sessionId, parentRefreshTokenId, _creationTime
+[WebServer]   [+] authSessions.userId   userId, _creationTime
+[WebServer]   [+] authVerificationCodes.accountId   accountId, _creationTime
+[WebServer]   [+] authVerificationCodes.code   code, _creationTime
+[WebServer]   [+] authVerifiers.signature   signature, _creationTime
+[WebServer]   [+] groups.by_expiresAt   expiresAt, _creationTime
+[WebServer]   [+] groups.by_ownerId   ownerId, _creationTime
+[WebServer]   [+] groups.by_shareToken   shareToken, _creationTime
+[WebServer]   [+] players.by_groupId_and_nameKey   groupId, nameKey, _creationTime
+[WebServer]   [+] players.by_userId_and_groupId   userId, groupId, _creationTime
+[WebServer]   [+] saveClaims.by_anonymousUserId   anonymousUserId, _creationTime
+[WebServer]   [+] saveClaims.by_codeHash   codeHash, _creationTime
+[WebServer]   [+] sessions.by_groupId_and_date   groupId, date, _creationTime
+[WebServer]   [+] users.by_tipsCodeHash   tipsCodeHash, _creationTime
+[WebServer]   [+] users.email   email, _creationTime
+[WebServer]   [+] users.phone   phone, _creationTime
+[WebServer] ✔ Installed component actionRetrier.
+[WebServer] ✔ Installed component rateLimiter.
+[WebServer] ✔ Installed component rateLimiter/batchWorker.
+[WebServer] ✔ 07:17:14 Convex functions ready! (2.64s)
+[WebServer] 2026-10-07T07:17:14.492149Z  INFO convex_local_backend: Starting a Convex backend
+[WebServer] 2026-10-07T07:17:14.492209Z  INFO convex_local_backend: The self-host Convex backend will periodically communicate with a remote beacon server. This is to help Convex understand and improve the product. You can disable this telemetry by setting the --disable-beacon flag or the DISABLE_BEACON environment variable.
+[WebServer] 2026-10-07T07:17:14.492305Z  INFO convex_local_backend: Sentry is not enabled.
+[WebServer] 2026-10-07T07:17:14.493864Z  INFO db_connection: Connected to SQLite at /tmp/next-session-e2e-iV6Nns/.convex/local/default/convex_local_backend.sqlite3
+[WebServer] 2026-10-07T07:17:14.494057Z  INFO search::searcher::searcher: Searchlight starting, local_storage_path: /tmp/.tmpHf3mo1 max_size: 500.0 MiB
+[WebServer] 2026-10-07T07:17:14.505127Z  INFO database::database: Bootstrapping indexes...
+[WebServer] 2026-10-07T07:17:14.508611Z  INFO indexing::in_memory_indexes: Loading 19 tables with 53 indexes...
+[WebServer] 2026-10-07T07:17:14.509841Z  INFO database::database: Bootstrapping table metadata...
+[WebServer] 2026-10-07T07:17:14.515783Z  INFO database::retention: No tablets left to delete
+[WebServer] 2026-10-07T07:17:14.515812Z  INFO database::subscription: Starting subscriptions worker
+[WebServer] 2026-10-07T07:17:14.516722Z  INFO indexing::in_memory_indexes: Loading 29 tables with 76 indexes...
+[WebServer] 2026-10-07T07:17:14.534359Z  INFO database::committer: Loaded indexes into memory
+[WebServer] 2026-10-07T07:17:14.534580Z  INFO application: files storage path: "/tmp/next-session-e2e-iV6Nns/.convex/local/default/convex_local_storage/files"
+[WebServer] 2026-10-07T07:17:14.534613Z  INFO application: modules storage path: "/tmp/next-session-e2e-iV6Nns/.convex/local/default/convex_local_storage/modules"
+[WebServer] 2026-10-07T07:17:14.534624Z  INFO application: search storage path: "/tmp/next-session-e2e-iV6Nns/.convex/local/default/convex_local_storage/search"
+[WebServer] 2026-10-07T07:17:14.534633Z  INFO application: exports storage path: "/tmp/next-session-e2e-iV6Nns/.convex/local/default/convex_local_storage/exports"
+[WebServer] 2026-10-07T07:17:14.534641Z  INFO application: snapshot_imports storage path: "/tmp/next-session-e2e-iV6Nns/.convex/local/default/convex_local_storage/snapshot_imports"
+[WebServer] 2026-10-07T07:17:14.534654Z  INFO database::database: Set search storage to LocalDirStorage { dir: "/tmp/next-session-e2e-iV6Nns/.convex/local/default/convex_local_storage/search" }
+[WebServer] 2026-10-07T07:17:14.534660Z  INFO application: Local { dir: "/tmp/next-session-e2e-iV6Nns/.convex/local/default/convex_local_storage" } storage is configured.
+[WebServer] 2026-10-07T07:17:14.534675Z  WARN local_backend: Running without a proxy in release mode -- UDF `fetch` requests are unrestricted!
+[WebServer] 2026-10-07T07:17:14.568106Z  INFO database::database_index_workers: Starting IndexWorker
+[WebServer] 2026-10-07T07:17:14.568161Z  INFO search_index_workers::retriable_worker: Starting FastForwardWorker
+[WebServer] 2026-10-07T07:17:14.568181Z  INFO search_index_workers::retriable_worker: Starting VectorBackfillFlusher
+[WebServer] 2026-10-07T07:17:14.568201Z  INFO search_index_workers::retriable_worker: Starting TextBackfillFlusher
+[WebServer] 2026-10-07T07:17:14.568196Z  INFO search_index_workers::retriable_worker: Starting VectorLiveFlusher
+[WebServer] 2026-10-07T07:17:14.568201Z  INFO search_index_workers::retriable_worker: Starting TextLiveFlusher
+[WebServer] 2026-10-07T07:17:14.568208Z  INFO search_index_workers::retriable_worker: Starting VectorCompactor
+[WebServer] 2026-10-07T07:17:14.568220Z  INFO application::schema_worker: Starting SchemaWorker
+[WebServer] 2026-10-07T07:17:14.568233Z  INFO search_index_workers::retriable_worker: Starting TextCompactor
+[WebServer] 2026-10-07T07:17:14.568240Z  INFO log_streaming: Starting LogManager
+[WebServer] 2026-10-07T07:17:14.568220Z  INFO application::table_summary_worker: Starting background table summary worker
+[WebServer] 2026-10-07T07:17:14.568254Z  INFO log_streaming: Starting listening for logs
+[WebServer] 2026-10-07T07:17:14.568262Z  INFO application::system_table_cleanup: Starting SystemTableCleanupWorker
+[WebServer] 2026-10-07T07:17:14.568283Z  INFO application::system_table_cleanup: Deleted tablet channel closed, exiting cleanup_deleted_tablets
+[WebServer] 2026-10-07T07:17:14.568342Z  INFO database::search_index_bootstrap: Starting search index bootstrap at 1791357434497947043 with upper bound 1791357434497947043
+[WebServer] 2026-10-07T07:17:14.568364Z  INFO database::search_index_bootstrap: Loaded 0 revisions (0 bytes) in 121.991µs.
+[WebServer] 2026-10-07T07:17:14.568395Z  INFO database::committer: Committed backfilled vector indexes
+[WebServer] 2026-10-07T07:17:14.568410Z  INFO database::search_index_bootstrap: SearchIndexBoostrapWorker finished!
+[WebServer] 2026-10-07T07:17:14.568802Z  INFO usage_limits::worker: Starting UsageLimitWorker
+[WebServer] 2026-10-07T07:17:14.568818Z  INFO log_streaming: Found 0 sink(s) in `Tombstoned` state
+[WebServer] 2026-10-07T07:17:14.568829Z  INFO log_streaming: Found 0 sink(s) in Pending state.
+[WebServer] 2026-10-07T07:17:14.568832Z  INFO log_streaming: Found 0 inactive sink(s).
+[WebServer] 2026-10-07T07:17:14.568875Z  INFO application::scheduled_jobs: Starting scheduled job executor
+[WebServer] 2026-10-07T07:17:14.568898Z  INFO application::cron_jobs: Starting cron job executor
+[WebServer] 2026-10-07T07:17:14.568917Z  INFO model::migrations: Attempting migration
+[WebServer] 2026-10-07T07:17:14.568931Z  INFO usage_gauges_tracking_worker: Starting UsageGaugesTrackingWorker
+[WebServer] 2026-10-07T07:17:14.568956Z  INFO local_backend::beacon: Starting beacon coroutine...
+[WebServer] 2026-10-07T07:17:14.568987Z  INFO model::migrations: db metadata version up to date at 133
+[WebServer] 2026-10-07T07:17:14.568996Z  INFO model::migrations: Migration complete
+[WebServer] 2026-10-07T07:17:14.571364Z  INFO application::exports::worker: No exports requested or in progress.
+[WebServer] 2026-10-07T07:17:14.572430Z  INFO common::http: backend listening on 0.0.0.0:44291
+[WebServer] 2026-10-07T07:17:14.572480Z  INFO local_backend::proxy: Starting dev site proxy at 0.0.0.0:44661...
+[WebServer] 2026-10-07T07:17:14.572527Z  INFO common::http: backend_http_proxy listening on 0.0.0.0:44661
+[WebServer] 2026-10-07T07:17:14.579443Z  INFO isolate::client: Created funrun isolate worker 0
+[WebServer] 2026-10-07T07:17:14.584167Z  INFO database::table_summary: Writing table summary checkpoint at ts 1791357434497947043
+[WebServer] 2026-10-07T07:17:14.597064Z  INFO application::table_summary_worker: Finishing table summary bootstrap
+[WebServer] 2026-10-07T07:17:14.602245Z  INFO database::committer: Bootstrapped table summaries at ts 1791357434497947043
+[WebServer] 2026-10-07T07:17:14.602333Z  INFO application::table_summary_worker: Table summary bootstrap finished
+[WebServer] 2026-10-07T07:17:14.624299Z  INFO local_backend::beacon: Beacon request with json {"database_uuid":"h024fsgcdpr9kgv4kfg4r7xdch8fvsnw","migration_version":133,"compiled_revision":"5c7cb5bc7db457290f1769f95f1d1340912f7fd7","commit_timestamp":"2026-09-28T20:34:23.000000000Z","uptime":0,"beacon_tag":"self-host","beacon_fields":null} sent successfully to https://api.convex.dev/api/self_host_beacon. This anonymized data is used to help Convex understand and improve the product. You can disable this telemetry by setting the --disable-beacon flag or the DISABLE_BEACON environment variable.
+[WebServer] (node:28545) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] 2026-10-07T07:17:15.003972Z  INFO convex-cloud-http: [] 127.0.0.1:52802 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "-" - - 0.097ms
+[WebServer] 2026-10-07T07:17:15.008067Z  INFO keybroker::broker: Admin key accepted from MemberId(0) at Some(2026-10-07T07:17:11Z) for anonymous-next-session-e2e-iV6Nns
+[WebServer] 2026-10-07T07:17:15.020930Z  INFO keybroker::broker: Admin key accepted from MemberId(0) at Some(2026-10-07T07:17:11Z) for anonymous-next-session-e2e-iV6Nns
+[WebServer] 2026-10-07T07:17:15.038136Z  INFO convex-cloud-http: [] 127.0.0.1:52790 "POST /api/update_environment_variables HTTP/1.1" 200 "-" "node" - - 17.266ms
+[WebServer] ✔ Successfully set 3 environment variables from stdin (3 new) (on anonymous deployment anonymous-next-session-e2e-iV6Nns)
+[WebServer] (node:28602) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] Warning: Route file "/tmp/next-session-e2e-iV6Nns/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/tmp/next-session-e2e-iV6Nns/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 434 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://127.0.0.1:34529/
+
+Running 96 tests using 2 workers
+
+(node:28745) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:28748) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] 2026-10-07T07:17:16.505589Z  INFO isolate::client: Created funrun isolate worker 1
+[WebServer] 2026-10-07T07:17:16.510460Z  INFO isolate::client: Created funrun isolate worker 2
+[WebServer] 2026-10-07T07:17:16.514717Z  INFO isolate::client: Created funrun isolate worker 3
+[WebServer] 2026-10-07T07:17:16.522623Z  INFO isolate::client: Created funrun isolate worker 4
+[WebServer] 2026-10-07T07:17:16.524680Z  INFO isolate::client: Created funrun isolate worker 5
+[WebServer] 2026-10-07T07:17:16.534990Z ERROR isolate_worker_handle_request: common::errors: Caught occ error (RUST_BACKTRACE=1 RUST_LOG=info,common::errors=debug for full trace): Documents read from or written to the "rateLimits" table changed while this mutation was being run and on every subsequent retry. Another call to this mutation changed the document with ID "j977dckrmeskbbph8n9hzspmk18fvr21". See https://docs.convex.dev/error#1 instance_name="anonymous-next-session-e2e-iV6Nns"
+[WebServer] 2026-10-07T07:17:16.535052Z  WARN isolate_worker_handle_request: application::application_function_runner: Optimistic concurrency control failed (Documents read from or written to the "rateLimits" table changed while this mutation was being run and on every subsequent retry. Another call to this mutation changed the document with ID "j977dckrmeskbbph8n9hzspmk18fvr21". See https://docs.convex.dev/error#1), retrying Udf(auth.js:admitAnonymousSignUp) after 96.156317ms instance_name="anonymous-next-session-e2e-iV6Nns"
+[WebServer] 2026-10-07T07:17:16.579148Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 74.037ms
+[WebServer] 2026-10-07T07:17:16.594890Z  INFO convex-cloud-http: [] 127.0.0.1:41568 "GET /http/.well-known/openid-configuration HTTP/1.1" 200 "-" "Convex/1.0" application/json 159 6.922ms
+[WebServer] 2026-10-07T07:17:16.595031Z  INFO common::http: stats_middleware: matched_path is None, uri: /.well-known/openid-configuration
+[WebServer] 2026-10-07T07:17:16.595052Z  INFO convex-cloud-http: [] 127.0.0.1:39450 "GET /.well-known/openid-configuration HTTP/1.1" 200 "-" "Convex/1.0" application/json 159 7.359ms
+[WebServer] 2026-10-07T07:17:16.600281Z  INFO convex-cloud-http: [] 127.0.0.1:41582 "GET /http/.well-known/jwks.json HTTP/1.1" 200 "-" "Convex/1.0" application/json 410 4.687ms
+[WebServer] 2026-10-07T07:17:16.600385Z  INFO common::http: stats_middleware: matched_path is None, uri: /.well-known/jwks.json
+[WebServer] 2026-10-07T07:17:16.600397Z  INFO convex-cloud-http: [] 127.0.0.1:39450 "GET /.well-known/jwks.json HTTP/1.1" 200 "-" "Convex/1.0" application/json 410 5.051ms
+[WebServer] 2026-10-07T07:17:16.606796Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 19.678ms
+[WebServer] 2026-10-07T07:17:16.614200Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.852ms
+[WebServer] 2026-10-07T07:17:16.693205Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 204.134ms
+[WebServer] 2026-10-07T07:17:16.710117Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 6.632ms
+[WebServer] 2026-10-07T07:17:16.717308Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.941ms
+[WebServer] 2026-10-07T07:17:16.747357Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 27.978ms
+[WebServer] 2026-10-07T07:17:16.772002Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.839ms
+[WebServer] 2026-10-07T07:17:16.794040Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.203ms
+[WebServer] 2026-10-07T07:17:16.820014Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 24.298ms
+[WebServer] 2026-10-07T07:17:16.844558Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.989ms
+[WebServer] 2026-10-07T07:17:16.872586Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 26.339ms
+[WebServer] 2026-10-07T07:17:16.899005Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 24.498ms
+[WebServer] 2026-10-07T07:17:16.923608Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.877ms
+[WebServer] 2026-10-07T07:17:16.945151Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.157ms
+[WebServer] 2026-10-07T07:17:16.966964Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.580ms
+[WebServer] 2026-10-07T07:17:17.213508Z  INFO convex-cloud-http: [] 127.0.0.1:41608 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.083ms
+[WebServer] 2026-10-07T07:17:17.220490Z  INFO convex-cloud-http: [] 127.0.0.1:41610 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.044ms
+[WebServer] 2026-10-07T07:17:17.250196Z  INFO convex-cloud-http: [] 127.0.0.1:41610 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 28.857ms
+[WebServer] 2026-10-07T07:17:17.527435Z  INFO convex-cloud-http: [] 127.0.0.1:41616 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.071ms
+[WebServer] 2026-10-07T07:17:17.558944Z  INFO convex-cloud-http: [] 127.0.0.1:41622 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.032ms
+[WebServer] 2026-10-07T07:17:17.593656Z  INFO convex-cloud-http: [] 127.0.0.1:41622 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 26.481ms
+[WebServer] 2026-10-07T07:17:17.646060Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.444ms
+[WebServer] 2026-10-07T07:17:17.648967Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.480ms
+[WebServer] 2026-10-07T07:17:17.777252Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.536ms
+  ✓   2 [chromium] › e2e/gm-rail.spec.ts:50:1 › the GM copies, rotates, and undoes the Share Link from the rail (1.4s)
+[WebServer] 2026-10-07T07:17:17.884055Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 61.285ms
+[WebServer] 2026-10-07T07:17:17.890481Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.920ms
+[WebServer] 2026-10-07T07:17:17.896530Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.540ms
+[WebServer] 2026-10-07T07:17:17.918101Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.487ms
+[WebServer] 2026-10-07T07:17:17.942843Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 23.161ms
+[WebServer] 2026-10-07T07:17:17.964251Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.109ms
+[WebServer] 2026-10-07T07:17:17.985409Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.934ms
+[WebServer] 2026-10-07T07:17:18.007852Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.175ms
+[WebServer] 2026-10-07T07:17:18.029206Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.197ms
+[WebServer] 2026-10-07T07:17:18.051910Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.536ms
+[WebServer] 2026-10-07T07:17:18.075124Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.083ms
+[WebServer] 2026-10-07T07:17:18.093886Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.527ms
+[WebServer] 2026-10-07T07:17:18.115542Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.481ms
+[WebServer] 2026-10-07T07:17:18.137912Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.174ms
+  ✓   1 [chromium] › e2e/gm-calendar.spec.ts:23:1 › the GM reads the heat-map and sees who is free on a night (1.9s)
+[WebServer] 2026-10-07T07:17:18.413074Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 64.596ms
+[WebServer] 2026-10-07T07:17:18.419814Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.339ms
+[WebServer] 2026-10-07T07:17:18.426352Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.540ms
+[WebServer] 2026-10-07T07:17:18.444485Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.934ms
+[WebServer] 2026-10-07T07:17:18.468436Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.716ms
+[WebServer] 2026-10-07T07:17:18.507804Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 38.177ms
+[WebServer] 2026-10-07T07:17:18.529663Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.692ms
+[WebServer] 2026-10-07T07:17:18.551800Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.928ms
+[WebServer] 2026-10-07T07:17:18.574059Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.015ms
+[WebServer] 2026-10-07T07:17:18.598585Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 23.225ms
+[WebServer] 2026-10-07T07:17:18.616908Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.113ms
+[WebServer] 2026-10-07T07:17:18.637623Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.629ms
+[WebServer] 2026-10-07T07:17:18.659876Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.153ms
+[WebServer] 2026-10-07T07:17:18.776319Z  INFO convex-cloud-http: [] 127.0.0.1:41628 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.078ms
+[WebServer] 2026-10-07T07:17:18.803384Z  INFO convex-cloud-http: [] 127.0.0.1:41636 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.034ms
+[WebServer] 2026-10-07T07:17:18.833426Z  INFO convex-cloud-http: [] 127.0.0.1:41636 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 27.305ms
+[WebServer] 2026-10-07T07:17:19.163797Z  INFO convex-cloud-http: [] 127.0.0.1:41652 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.082ms
+[WebServer] 2026-10-07T07:17:19.191092Z  INFO convex-cloud-http: [] 127.0.0.1:41664 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.037ms
+[WebServer] 2026-10-07T07:17:19.220034Z  INFO convex-cloud-http: [] 127.0.0.1:41664 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 24.632ms
+  ✓   4 [chromium] › e2e/gm-calendar.spec.ts:44:1 › on a phone the day sheet leaves the tapped night in view (1.2s)
+[WebServer] 2026-10-07T07:17:19.643596Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 62.173ms
+[WebServer] 2026-10-07T07:17:19.649762Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.895ms
+[WebServer] 2026-10-07T07:17:19.655184Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.221ms
+[WebServer] 2026-10-07T07:17:19.674295Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.857ms
+[WebServer] 2026-10-07T07:17:19.695912Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.459ms
+[WebServer] 2026-10-07T07:17:19.715289Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.154ms
+[WebServer] 2026-10-07T07:17:19.739390Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.991ms
+[WebServer] 2026-10-07T07:17:19.757931Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.249ms
+[WebServer] 2026-10-07T07:17:19.778912Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.851ms
+[WebServer] 2026-10-07T07:17:19.797281Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.211ms
+[WebServer] 2026-10-07T07:17:19.819500Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.105ms
+[WebServer] 2026-10-07T07:17:19.839142Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.418ms
+[WebServer] 2026-10-07T07:17:19.861750Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.447ms
+[WebServer] 2026-10-07T07:17:19.887067Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 24.157ms
+[WebServer] 2026-10-07T07:17:19.917337Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 29.014ms
+[WebServer] 2026-10-07T07:17:19.938523Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.936ms
+[WebServer] 2026-10-07T07:17:19.957255Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.489ms
+[WebServer] 2026-10-07T07:17:19.964964Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 25.333ms
+  ✓   3 [chromium] › e2e/gm-rail.spec.ts:84:1 › the newest action owns the only toast (2.2s)
+[WebServer] 2026-10-07T07:17:19.988752Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.557ms
+[WebServer] 2026-10-07T07:17:20.015068Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 25.179ms
+[WebServer] 2026-10-07T07:17:20.043052Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 26.787ms
+[WebServer] 2026-10-07T07:17:20.069198Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 65.506ms
+[WebServer] 2026-10-07T07:17:20.078598Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 34.242ms
+[WebServer] 2026-10-07T07:17:20.079808Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 9.297ms
+[WebServer] 2026-10-07T07:17:20.085246Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.219ms
+[WebServer] 2026-10-07T07:17:20.107629Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 27.883ms
+[WebServer] 2026-10-07T07:17:20.138279Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 29.458ms
+[WebServer] 2026-10-07T07:17:20.163867Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 24.470ms
+[WebServer] 2026-10-07T07:17:20.192062Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 27.038ms
+[WebServer] 2026-10-07T07:17:20.217166Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 23.957ms
+[WebServer] 2026-10-07T07:17:20.238567Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.301ms
+[WebServer] 2026-10-07T07:17:20.259286Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.702ms
+[WebServer] 2026-10-07T07:17:20.280901Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.457ms
+[WebServer] 2026-10-07T07:17:20.300521Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.433ms
+[WebServer] 2026-10-07T07:17:20.323620Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.982ms
+[WebServer] 2026-10-07T07:17:20.343495Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.775ms
+[WebServer] 2026-10-07T07:17:20.373197Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 28.607ms
+[WebServer] 2026-10-07T07:17:20.391847Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.390ms
+[WebServer] 2026-10-07T07:17:20.415259Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.367ms
+[WebServer] 2026-10-07T07:17:20.441926Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 25.458ms
+[WebServer] 2026-10-07T07:17:20.467222Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 24.136ms
+[WebServer] 2026-10-07T07:17:20.491225Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.802ms
+[WebServer] 2026-10-07T07:17:20.508400Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.032ms
+[WebServer] 2026-10-07T07:17:20.525016Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 15.302ms
+[WebServer] 2026-10-07T07:17:20.542557Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.405ms
+[WebServer] 2026-10-07T07:17:20.556515Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 12.776ms
+[WebServer] 2026-10-07T07:17:20.572296Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 14.604ms
+[WebServer] 2026-10-07T07:17:20.586160Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 12.662ms
+[WebServer] 2026-10-07T07:17:20.602036Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 14.717ms
+[WebServer] 2026-10-07T07:17:20.617105Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 13.910ms
+[WebServer] 2026-10-07T07:17:20.632974Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 14.716ms
+[WebServer] 2026-10-07T07:17:20.650781Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.592ms
+[WebServer] 2026-10-07T07:17:20.668538Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.634ms
+[WebServer] 2026-10-07T07:17:20.682810Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 13.138ms
+[WebServer] 2026-10-07T07:17:20.694175Z  INFO convex-cloud-http: [] 127.0.0.1:41680 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.078ms
+[WebServer] 2026-10-07T07:17:20.698481Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 14.557ms
+[WebServer] 2026-10-07T07:17:20.717639Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.077ms
+[WebServer] 2026-10-07T07:17:20.726685Z  INFO convex-cloud-http: [] 127.0.0.1:41696 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.045ms
+[WebServer] 2026-10-07T07:17:20.738392Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.595ms
+[WebServer] 2026-10-07T07:17:20.748151Z  INFO convex-cloud-http: [] 127.0.0.1:41696 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 17.259ms
+[WebServer] 2026-10-07T07:17:20.975117Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.505ms
+[WebServer] 7:17:21 AM [vite] (client) [console.error] [CONVEX M(roster:addPlayer)] [Request ID: 16d8616aabc06c68] Server Error
+[WebServer] Uncaught ConvexError: {"code":"NAME_TAKEN","playerId":"k57cywqbcnw3n8ne6qjc122ag98fvx3g"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at ensureNameIsFree (../../convex/model/players.ts:24:0)
+[WebServer]     at async handler (../convex/roster.ts:16:4)
+[WebServer] 
+[WebServer] 2026-10-07T07:17:21.286129Z  INFO convex-cloud-http: [] 127.0.0.1:41708 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.069ms
+[WebServer] 2026-10-07T07:17:21.314853Z  INFO convex-cloud-http: [] 127.0.0.1:41712 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.039ms
+[WebServer] 2026-10-07T07:17:21.344790Z  INFO convex-cloud-http: [] 127.0.0.1:41712 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 26.180ms
+[WebServer] 2026-10-07T07:17:21.394590Z  INFO convex-cloud-http: [] 127.0.0.1:41728 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.069ms
+[WebServer] 2026-10-07T07:17:21.456180Z  INFO convex-cloud-http: [] 127.0.0.1:41696 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 30.670ms
+  ✓   5 [chromium] › e2e/gm-calendar.spec.ts:73:1 › on a phone a dense day keeps two-digit counts inside its cell (2.0s)
+[WebServer] 2026-10-07T07:17:21.690558Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 60.233ms
+[WebServer] 2026-10-07T07:17:21.697798Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 6.068ms
+[WebServer] 2026-10-07T07:17:21.715016Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 16.019ms
+[WebServer] 2026-10-07T07:17:21.732714Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.435ms
+[WebServer] 2026-10-07T07:17:21.756497Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.721ms
+[WebServer] 2026-10-07T07:17:21.781788Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 24.183ms
+[WebServer] 2026-10-07T07:17:21.805387Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.454ms
+[WebServer] 2026-10-07T07:17:21.826090Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.343ms
+[WebServer] 2026-10-07T07:17:21.848889Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.431ms
+[WebServer] 2026-10-07T07:17:21.872636Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.649ms
+[WebServer] 2026-10-07T07:17:21.892863Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.010ms
+[WebServer] 2026-10-07T07:17:21.925307Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 31.361ms
+[WebServer] 2026-10-07T07:17:21.949688Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 23.166ms
+[WebServer] 2026-10-07T07:17:21.984912Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.524ms
+  ✓   6 [chromium] › e2e/gm-rail.spec.ts:103:1 › the GM adds, renames, and removes Players (2.0s)
+[WebServer] 2026-10-07T07:17:22.092145Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 63.605ms
+[WebServer] 2026-10-07T07:17:22.099978Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 6.691ms
+[WebServer] 2026-10-07T07:17:22.105517Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.289ms
+[WebServer] 2026-10-07T07:17:22.125685Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.930ms
+[WebServer] 2026-10-07T07:17:22.151337Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 24.484ms
+[WebServer] 2026-10-07T07:17:22.172786Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.358ms
+[WebServer] 2026-10-07T07:17:22.196639Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.675ms
+[WebServer] 2026-10-07T07:17:22.216066Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.238ms
+[WebServer] 2026-10-07T07:17:22.237459Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.260ms
+[WebServer] 2026-10-07T07:17:22.262206Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 23.695ms
+[WebServer] 2026-10-07T07:17:22.289251Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 25.881ms
+[WebServer] 2026-10-07T07:17:22.311788Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.315ms
+[WebServer] 2026-10-07T07:17:22.334317Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.398ms
+[WebServer] 2026-10-07T07:17:22.355728Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.278ms
+[WebServer] 2026-10-07T07:17:22.478916Z  INFO convex-cloud-http: [] 127.0.0.1:41732 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.085ms
+[WebServer] 2026-10-07T07:17:22.509158Z  INFO convex-cloud-http: [] 127.0.0.1:41748 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.036ms
+[WebServer] 2026-10-07T07:17:22.539110Z  INFO convex-cloud-http: [] 127.0.0.1:41748 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 25.341ms
+[WebServer] 2026-10-07T07:17:22.944352Z  INFO convex-cloud-http: [] 127.0.0.1:41760 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.072ms
+[WebServer] 2026-10-07T07:17:22.968204Z  INFO convex-cloud-http: [] 127.0.0.1:41766 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.038ms
+[WebServer] 2026-10-07T07:17:22.998042Z  INFO convex-cloud-http: [] 127.0.0.1:41766 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 25.704ms
+[WebServer] 2026-10-07T07:17:23.158562Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.482ms
+[WebServer] 2026-10-07T07:17:23.291636Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.488ms
+[WebServer] 2026-10-07T07:17:23.395203Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.481ms
+[WebServer] 2026-10-07T07:17:23.521247Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.482ms
+[WebServer] 2026-10-07T07:17:23.800141Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.520ms
+[WebServer] 2026-10-07T07:17:23.991025Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.510ms
+  ✓   7 [chromium] › e2e/gm-calendar.spec.ts:100:1 › the GM schedules a Session, unschedules it, and undoes that (2.4s)
+[WebServer] 2026-10-07T07:17:24.058431Z  INFO convex-cloud-http: [] 127.0.0.1:41776 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.067ms
+[WebServer] 2026-10-07T07:17:24.122795Z  INFO convex-cloud-http: [] 127.0.0.1:41766 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 26.228ms
+[WebServer] 2026-10-07T07:17:24.153377Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 109.384ms
+[WebServer] 2026-10-07T07:17:24.164141Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 8.395ms
+[WebServer] 2026-10-07T07:17:24.171287Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.625ms
+  ✓   8 [chromium] › e2e/gm-rail.spec.ts:143:1 › Best Nights and Sessions open their day (2.5s)
+[WebServer] 2026-10-07T07:17:24.558366Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 53.187ms
+[WebServer] 2026-10-07T07:17:24.564884Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.362ms
+[WebServer] 2026-10-07T07:17:24.570319Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.213ms
+[WebServer] 2026-10-07T07:17:24.590702Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.264ms
+[WebServer] 2026-10-07T07:17:24.614344Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.447ms
+[WebServer] 2026-10-07T07:17:24.635039Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.459ms
+[WebServer] 2026-10-07T07:17:24.726171Z  INFO convex-cloud-http: [] 127.0.0.1:41788 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.077ms
+[WebServer] 2026-10-07T07:17:24.748225Z  INFO convex-cloud-http: [] 127.0.0.1:41792 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.043ms
+[WebServer] 2026-10-07T07:17:24.784249Z  INFO convex-cloud-http: [] 127.0.0.1:41792 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 32.469ms
+[WebServer] 2026-10-07T07:17:25.241980Z  INFO convex-cloud-http: [] 127.0.0.1:57052 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.089ms
+[WebServer] 2026-10-07T07:17:25.273504Z  INFO convex-cloud-http: [] 127.0.0.1:57056 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.037ms
+[WebServer] 2026-10-07T07:17:25.304475Z  INFO convex-cloud-http: [] 127.0.0.1:57056 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 27.830ms
+  ✓   9 [chromium] › e2e/gm-calendar.spec.ts:139:1 › month navigation lives in the URL and stops at the end of the Booking Window (1.4s)
+[WebServer] 2026-10-07T07:17:25.545204Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 60.642ms
+[WebServer] 2026-10-07T07:17:25.551141Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.723ms
+[WebServer] 2026-10-07T07:17:25.556374Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.060ms
+[WebServer] 2026-10-07T07:17:25.610223Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 52.632ms
+[WebServer] 2026-10-07T07:17:25.616530Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.219ms
+[WebServer] 2026-10-07T07:17:25.623029Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.501ms
+[WebServer] 2026-10-07T07:17:26.160483Z  INFO convex-cloud-http: [] 127.0.0.1:57064 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.073ms
+[WebServer] 2026-10-07T07:17:26.191931Z  INFO convex-cloud-http: [] 127.0.0.1:57070 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.071ms
+[WebServer] 2026-10-07T07:17:26.192906Z  INFO convex-cloud-http: [] 127.0.0.1:57086 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.032ms
+[WebServer] 2026-10-07T07:17:26.229350Z  INFO convex-cloud-http: [] 127.0.0.1:57086 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 33.594ms
+[WebServer] 2026-10-07T07:17:26.248466Z  INFO convex-cloud-http: [] 127.0.0.1:57056 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 45.565ms
+[WebServer] 2026-10-07T07:17:26.558464Z  INFO convex-cloud-http: [] 127.0.0.1:57098 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.085ms
+[WebServer] 2026-10-07T07:17:26.614500Z  INFO convex-cloud-http: [] 127.0.0.1:57086 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 26.641ms
+  ✓  11 [chromium] › e2e/gm-calendar.spec.ts:172:1 › another GM's Group or a malformed id falls back to the GM's own Group (1.3s)
+[WebServer] 2026-10-07T07:17:26.802677Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 60.478ms
+[WebServer] 2026-10-07T07:17:26.810466Z  INFO convex-cloud-http: [] 127.0.0.1:41598 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 6.598ms
+[WebServer] 2026-10-07T07:17:26.824092Z  INFO convex-cloud-http: [] 127.0.0.1:41536 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 12.435ms
+[WebServer] 2026-10-07T07:17:27.188875Z  INFO convex-cloud-http: [] 127.0.0.1:57106 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.072ms
+  ✓  12 [chromium] › e2e/gm-calendar.spec.ts:184:1 › a signed-out visitor lands on the landing page (498ms)
+[WebServer] 2026-10-07T07:17:27.420287Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.500ms
+[WebServer] 2026-10-07T07:17:27.615360Z  INFO convex-cloud-http: [] 127.0.0.1:57116 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.073ms
+[WebServer] 2026-10-07T07:17:27.780407Z  INFO convex-cloud-http: [] 127.0.0.1:57130 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.032ms
+[WebServer] 2026-10-07T07:17:27.804933Z  INFO convex-cloud-http: [] 127.0.0.1:57130 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 23.553ms
+[WebServer] 2026-10-07T07:17:27.940177Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.441ms
+  ✓  10 [chromium] › e2e/gm-rail.spec.ts:168:1 › the switcher opens, makes, renames and deletes Groups, and the landing returns to the last one (3.6s)
+[WebServer] 2026-10-07T07:17:28.124543Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 58.315ms
+[WebServer] 2026-10-07T07:17:28.130793Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.197ms
+[WebServer] 2026-10-07T07:17:28.135770Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.058ms
+[WebServer] 2026-10-07T07:17:28.394949Z  INFO convex-cloud-http: [] 127.0.0.1:57142 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.076ms
+[WebServer] 2026-10-07T07:17:28.445175Z  INFO convex-cloud-http: [] 127.0.0.1:57130 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 27.584ms
+  ✓  13 [chromium] › e2e/landing.spec.ts:155:1 › one click puts the link in hand and lands the GM on their Group (1.2s)
+[WebServer] 2026-10-07T07:17:28.716059Z  INFO convex-cloud-http: [] 127.0.0.1:57146 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.083ms
+[WebServer] 2026-10-07T07:17:28.744371Z  INFO convex-cloud-http: [] 127.0.0.1:57154 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.035ms
+[WebServer] 2026-10-07T07:17:28.774698Z  INFO convex-cloud-http: [] 127.0.0.1:57154 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 27.827ms
+[WebServer] 2026-10-07T07:17:28.851031Z  INFO convex-cloud-http: [] 127.0.0.1:57160 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.071ms
+[WebServer] 2026-10-07T07:17:28.923294Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 23.118ms
+[WebServer] 2026-10-07T07:17:28.945985Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.463ms
+[WebServer] 2026-10-07T07:17:29.014614Z  INFO convex-cloud-http: [] 127.0.0.1:57168 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.044ms
+[WebServer] 2026-10-07T07:17:29.037953Z  INFO convex-cloud-http: [] 127.0.0.1:57168 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 22.508ms
+[WebServer] 2026-10-07T07:17:29.218819Z  INFO convex-cloud-http: [] 127.0.0.1:57172 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.075ms
+[WebServer] 2026-10-07T07:17:29.273579Z  INFO convex-cloud-http: [] 127.0.0.1:57154 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 23.141ms
+[WebServer] 2026-10-07T07:17:30.065922Z  INFO convex-cloud-http: [] 127.0.0.1:57168 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 27.027ms
+[WebServer] 2026-10-07T07:17:30.129353Z  INFO convex-cloud-http: [] 127.0.0.1:57184 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.073ms
+[WebServer] 2026-10-07T07:17:30.186837Z  INFO convex-cloud-http: [] 127.0.0.1:57154 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 27.241ms
+  ✓  14 [chromium] › e2e/gm-rail.spec.ts:214:1 › an Anonymous GM is nudged to save once a Player joins, until Later (2.2s)
+[WebServer] 2026-10-07T07:17:30.371027Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 63.938ms
+[WebServer] 2026-10-07T07:17:30.377024Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.745ms
+[WebServer] 2026-10-07T07:17:30.382195Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.215ms
+[WebServer] 2026-10-07T07:17:30.401998Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.566ms
+[WebServer] 2026-10-07T07:17:30.424142Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.978ms
+[WebServer] 2026-10-07T07:17:30.447885Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.522ms
+[WebServer] 2026-10-07T07:17:30.471621Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.551ms
+[WebServer] 2026-10-07T07:17:30.492985Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.226ms
+[WebServer] 2026-10-07T07:17:30.518161Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 24.063ms
+[WebServer] 2026-10-07T07:17:30.541003Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.727ms
+[WebServer] 2026-10-07T07:17:30.542242Z  INFO convex-cloud-http: [] 127.0.0.1:57192 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.075ms
+[WebServer] 2026-10-07T07:17:30.563249Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.082ms
+[WebServer] 2026-10-07T07:17:30.584394Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.924ms
+[WebServer] 2026-10-07T07:17:30.609012Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 23.486ms
+[WebServer] 2026-10-07T07:17:30.630372Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.228ms
+[WebServer] 2026-10-07T07:17:31.189837Z  INFO convex-cloud-http: [] 127.0.0.1:57198 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.031ms
+[WebServer] 2026-10-07T07:17:31.217920Z  INFO convex-cloud-http: [] 127.0.0.1:57198 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 27.195ms
+[WebServer] 2026-10-07T07:17:31.223028Z  INFO convex-cloud-http: [] 127.0.0.1:57206 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.072ms
+[WebServer] 2026-10-07T07:17:31.248655Z  INFO convex-cloud-http: [] 127.0.0.1:57214 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.033ms
+[WebServer] 2026-10-07T07:17:31.279898Z  INFO convex-cloud-http: [] 127.0.0.1:57214 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 28.323ms
+  ✓  15 [chromium] › e2e/landing.spec.ts:170:1 › saving to a new Account keeps the Share Link, and logging in finds the Group (2.9s)
+  ✓  16 [chromium] › e2e/gm-rail.spec.ts:238:1 › on a phone the rail sits under the calendar behind a segmented control (1.3s)
+[WebServer] 2026-10-07T07:17:31.667248Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 61.881ms
+[WebServer] 2026-10-07T07:17:31.675633Z  INFO convex-cloud-http: [] 127.0.0.1:57222 "GET /http/.well-known/openid-configuration HTTP/1.1" 200 "-" "Convex/1.0" application/json 159 6.478ms
+[WebServer] 2026-10-07T07:17:31.675791Z  INFO common::http: stats_middleware: matched_path is None, uri: /.well-known/openid-configuration
+[WebServer] 2026-10-07T07:17:31.675811Z  INFO convex-cloud-http: [] 127.0.0.1:39450 "GET /.well-known/openid-configuration HTTP/1.1" 200 "-" "Convex/1.0" application/json 159 6.943ms
+[WebServer] 2026-10-07T07:17:31.680268Z  INFO convex-cloud-http: [] 127.0.0.1:57232 "GET /http/.well-known/jwks.json HTTP/1.1" 200 "-" "Convex/1.0" application/json 410 3.805ms
+[WebServer] 2026-10-07T07:17:31.680393Z  INFO common::http: stats_middleware: matched_path is None, uri: /.well-known/jwks.json
+[WebServer] 2026-10-07T07:17:31.680412Z  INFO convex-cloud-http: [] 127.0.0.1:39450 "GET /.well-known/jwks.json HTTP/1.1" 200 "-" "Convex/1.0" application/json 410 4.234ms
+[WebServer] 2026-10-07T07:17:31.684917Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 16.348ms
+[WebServer] 2026-10-07T07:17:31.690361Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.338ms
+[WebServer] 2026-10-07T07:17:31.760925Z  INFO convex-cloud-http: [] 127.0.0.1:57242 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.078ms
+[WebServer] 2026-10-07T07:17:31.909980Z  INFO convex-cloud-http: [] 127.0.0.1:57254 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.029ms
+[WebServer] 2026-10-07T07:17:31.932105Z  INFO convex-cloud-http: [] 127.0.0.1:57254 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 21.109ms
+[WebServer] 2026-10-07T07:17:32.267848Z  INFO convex-cloud-http: [] 127.0.0.1:57260 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.074ms
+[WebServer] 2026-10-07T07:17:32.299328Z  INFO convex-cloud-http: [] 127.0.0.1:57262 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.035ms
+[WebServer] 2026-10-07T07:17:32.329851Z  INFO convex-cloud-http: [] 127.0.0.1:57262 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 27.760ms
+  ✓  18 [chromium] › e2e/gm-rail.spec.ts:257:1 › on a phone a fresh Group opens on Players, so the GM adds one under the calendar (989ms)
+[WebServer] 2026-10-07T07:17:32.659339Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 55.765ms
+[WebServer] 2026-10-07T07:17:32.665100Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.546ms
+[WebServer] 2026-10-07T07:17:32.670194Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.019ms
+[WebServer] 2026-10-07T07:17:32.688811Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.581ms
+[WebServer] 2026-10-07T07:17:32.714287Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 24.351ms
+[WebServer] 2026-10-07T07:17:32.737534Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.226ms
+[WebServer] 2026-10-07T07:17:32.761755Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 23.149ms
+[WebServer] 2026-10-07T07:17:32.784206Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.358ms
+[WebServer] 2026-10-07T07:17:32.806814Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.484ms
+[WebServer] 2026-10-07T07:17:32.829338Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.419ms
+[WebServer] 2026-10-07T07:17:32.849073Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.647ms
+[WebServer] 2026-10-07T07:17:32.877404Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 27.169ms
+[WebServer] 2026-10-07T07:17:32.911627Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 33.156ms
+[WebServer] 2026-10-07T07:17:32.932414Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.634ms
+[WebServer] 2026-10-07T07:17:33.075524Z  INFO convex-cloud-http: [] 127.0.0.1:57254 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 23.200ms
+[WebServer] 2026-10-07T07:17:33.536509Z  INFO convex-cloud-http: [] 127.0.0.1:57270 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.081ms
+[WebServer] 2026-10-07T07:17:33.564387Z  INFO convex-cloud-http: [] 127.0.0.1:57274 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.038ms
+[WebServer] 2026-10-07T07:17:33.566167Z  INFO convex-cloud-http: [] 127.0.0.1:57280 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.075ms
+[WebServer] 2026-10-07T07:17:33.593973Z  INFO convex-cloud-http: [] 127.0.0.1:57274 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 25.299ms
+[WebServer] 2026-10-07T07:17:33.704605Z  INFO convex-cloud-http: [] 127.0.0.1:57282 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.031ms
+[WebServer] 2026-10-07T07:17:33.729470Z  INFO convex-cloud-http: [] 127.0.0.1:57282 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 23.891ms
+  ✓  19 [chromium] › e2e/gm-rail.spec.ts:273:1 › on a phone Add player stays in reach under the calendar whatever tab is open (1.9s)
+[WebServer] 2026-10-07T07:17:34.622128Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 70.583ms
+[WebServer] 2026-10-07T07:17:34.628657Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.196ms
+[WebServer] 2026-10-07T07:17:34.634057Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.249ms
+[WebServer] 2026-10-07T07:17:34.655274Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.108ms
+[WebServer] 2026-10-07T07:17:34.772366Z  INFO convex-cloud-http: [] 127.0.0.1:57282 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 30.224ms
+  ✓  17 [chromium] › e2e/landing.spec.ts:186:1 › saving into an Account that has older Groups keeps showing the new Group (3.5s)
+[WebServer] 2026-10-07T07:17:35.372301Z  INFO convex-cloud-http: [] 127.0.0.1:39512 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.077ms
+[WebServer] 2026-10-07T07:17:35.411032Z  INFO convex-cloud-http: [] 127.0.0.1:39526 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.036ms
+[WebServer] 2026-10-07T07:17:35.481837Z  INFO convex-cloud-http: [] 127.0.0.1:39526 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 57.486ms
+[WebServer] 2026-10-07T07:17:35.488919Z  INFO convex-cloud-http: [] 127.0.0.1:39536 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.076ms
+[WebServer] 2026-10-07T07:17:35.765966Z  INFO convex-cloud-http: [] 127.0.0.1:39544 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.035ms
+[WebServer] 2026-10-07T07:17:35.823719Z  INFO convex-cloud-http: [] 127.0.0.1:39544 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 54.913ms
+[WebServer] 2026-10-07T07:17:36.175756Z  INFO convex-cloud-http: [] 127.0.0.1:39546 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.065ms
+[WebServer] 2026-10-07T07:17:36.317225Z  INFO convex-cloud-http: [] 127.0.0.1:39526 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 55.121ms
+[WebServer] 2026-10-07T07:17:36.525065Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.551ms
+[WebServer] 2026-10-07T07:17:36.931360Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.585ms
+  ✓  20 [chromium] › e2e/gm-rail.spec.ts:305:1 › a Player who joins with a new name stays on the Roster as grey bars until the GM removes them (2.4s)
+[WebServer] 7:17:36 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 2026-10-07T07:17:37.027840Z  INFO convex-cloud-http: [] 127.0.0.1:39544 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 39.016ms
+[WebServer] 2026-10-07T07:17:37.237507Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 203.873ms
+[WebServer] 2026-10-07T07:17:37.269159Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 29.059ms
+[WebServer] 2026-10-07T07:17:37.334325Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 64.045ms
+[WebServer] 2026-10-07T07:17:37.340399Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.821ms
+[WebServer] 2026-10-07T07:17:37.345769Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.270ms
+[WebServer] 2026-10-07T07:17:38.231208Z  INFO convex-cloud-http: [] 127.0.0.1:39554 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.071ms
+[WebServer] 2026-10-07T07:17:38.285510Z  INFO convex-cloud-http: [] 127.0.0.1:39560 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.036ms
+[WebServer] 2026-10-07T07:17:38.378473Z  INFO convex-cloud-http: [] 127.0.0.1:39560 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 84.711ms
+[WebServer] 2026-10-07T07:17:38.381383Z  INFO convex-cloud-http: [] 127.0.0.1:39568 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.076ms
+[WebServer] 2026-10-07T07:17:39.170784Z  INFO convex-cloud-http: [] 127.0.0.1:39570 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.033ms
+[WebServer] 2026-10-07T07:17:39.239931Z  INFO convex-cloud-http: [] 127.0.0.1:39570 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 67.831ms
+  ✓  21 [chromium] › e2e/landing.spec.ts:207:3 › a Save whose move fails after the sign-in › goes through on retry from the landing (4.6s)
+[WebServer] 2026-10-07T07:17:40.134802Z  INFO convex-cloud-http: [] 127.0.0.1:39560 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 54.181ms
+[WebServer] 2026-10-07T07:17:40.314247Z  INFO convex-cloud-http: [] 127.0.0.1:39572 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.085ms
+[WebServer] 2026-10-07T07:17:40.411663Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 40.298ms
+  ✓  22 [chromium] › e2e/gm-rail.spec.ts:327:1 › an Anonymous GM saves into an Account from the header and stays on the Group (3.5s)
+[WebServer] 2026-10-07T07:17:40.611427Z  INFO convex-cloud-http: [] 127.0.0.1:39588 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.034ms
+[WebServer] 2026-10-07T07:17:40.655940Z  INFO convex-cloud-http: [] 127.0.0.1:39588 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 42.117ms
+[WebServer] 2026-10-07T07:17:40.669756Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 126.938ms
+[WebServer] 2026-10-07T07:17:40.685165Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 14.057ms
+[WebServer] 2026-10-07T07:17:40.700704Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 14.413ms
+[WebServer] 2026-10-07T07:17:40.737971Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 35.208ms
+[WebServer] 2026-10-07T07:17:40.791161Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 51.758ms
+[WebServer] 2026-10-07T07:17:40.843570Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 50.459ms
+[WebServer] 2026-10-07T07:17:40.900362Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 55.173ms
+[WebServer] 2026-10-07T07:17:40.937844Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 36.063ms
+[WebServer] 2026-10-07T07:17:40.988134Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 48.944ms
+[WebServer] 2026-10-07T07:17:41.022231Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 32.766ms
+[WebServer] 2026-10-07T07:17:41.063134Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 39.819ms
+[WebServer] 2026-10-07T07:17:41.087099Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.857ms
+[WebServer] 2026-10-07T07:17:41.127386Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 39.197ms
+[WebServer] 2026-10-07T07:17:41.163936Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 35.379ms
+[WebServer] 2026-10-07T07:17:42.112332Z  INFO convex-cloud-http: [] 127.0.0.1:39602 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.087ms
+[WebServer] 2026-10-07T07:17:42.137868Z  INFO convex-cloud-http: [] 127.0.0.1:39618 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.035ms
+[WebServer] 2026-10-07T07:17:42.162152Z  INFO convex-cloud-http: [] 127.0.0.1:39618 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 17.912ms
+[WebServer] 7:17:42 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 2026-10-07T07:17:42.872755Z  INFO convex-cloud-http: [] 127.0.0.1:39588 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 22.700ms
+  ✓  23 [chromium] › e2e/landing.spec.ts:225:3 › a Save whose move fails after the sign-in › goes through on retry from the Group header (3.5s)
+  ✓  24 [chromium] › e2e/gm-rail.spec.ts:364:1 › on a phone the toast clears the open day sheet (2.9s)
+[WebServer] 2026-10-07T07:17:43.428277Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 70.562ms
+[WebServer] 2026-10-07T07:17:43.434353Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.861ms
+[WebServer] 2026-10-07T07:17:43.440015Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.545ms
+[WebServer] 2026-10-07T07:17:43.454541Z  INFO convex-cloud-http: [] 127.0.0.1:39624 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.074ms
+[WebServer] 2026-10-07T07:17:43.599710Z  INFO convex-cloud-http: [] 127.0.0.1:39626 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.035ms
+[WebServer] 2026-10-07T07:17:43.624556Z  INFO convex-cloud-http: [] 127.0.0.1:39626 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 23.059ms
+[WebServer] 2026-10-07T07:17:44.038080Z  INFO convex-cloud-http: [] 127.0.0.1:39640 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.076ms
+[WebServer] 2026-10-07T07:17:44.058465Z  INFO convex-cloud-http: [] 127.0.0.1:39644 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.033ms
+[WebServer] 2026-10-07T07:17:44.095624Z  INFO convex-cloud-http: [] 127.0.0.1:39644 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 33.399ms
+  ✓  26 [chromium] › e2e/gm-rail.spec.ts:380:1 › deleting the last Group of an Anonymous GM returns to the landing (1.5s)
+  -  27 [chromium] › e2e/gm-rail.spec.ts:397:7 › screenshots › 390px light
+  -  28 [chromium] › e2e/gm-rail.spec.ts:440:7 › screenshots › 390px light: Add player in reach, the maybe bar and a dense day
+  -  29 [chromium] › e2e/gm-rail.spec.ts:516:7 › screenshots › 390px light: a fresh Group and grey bars
+  -  30 [chromium] › e2e/gm-rail.spec.ts:397:7 › screenshots › 390px dark
+  -  31 [chromium] › e2e/gm-rail.spec.ts:440:7 › screenshots › 390px dark: Add player in reach, the maybe bar and a dense day
+  -  32 [chromium] › e2e/gm-rail.spec.ts:516:7 › screenshots › 390px dark: a fresh Group and grey bars
+  -  33 [chromium] › e2e/gm-rail.spec.ts:397:7 › screenshots › 1440px light
+  -  34 [chromium] › e2e/gm-rail.spec.ts:440:7 › screenshots › 1440px light: Add player in reach, the maybe bar and a dense day
+  -  35 [chromium] › e2e/gm-rail.spec.ts:516:7 › screenshots › 1440px light: a fresh Group and grey bars
+  -  36 [chromium] › e2e/gm-rail.spec.ts:397:7 › screenshots › 1440px dark
+  -  37 [chromium] › e2e/gm-rail.spec.ts:440:7 › screenshots › 1440px dark: Add player in reach, the maybe bar and a dense day
+  -  38 [chromium] › e2e/gm-rail.spec.ts:516:7 › screenshots › 1440px dark: a fresh Group and grey bars
+[WebServer] 7:17:45 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 2026-10-07T07:17:45.103872Z  INFO convex-cloud-http: [] 127.0.0.1:39626 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 27.455ms
+[WebServer] 2026-10-07T07:17:45.250430Z  INFO convex-cloud-http: [] 127.0.0.1:34390 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.071ms
+  ✓  25 [chromium] › e2e/landing.spec.ts:242:3 › a Save whose move fails after the sign-in › still goes through when the GM closes the retry from the Group header (2.3s)
+[WebServer] 2026-10-07T07:17:45.419927Z  INFO convex-cloud-http: [] 127.0.0.1:34406 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.031ms
+[WebServer] 2026-10-07T07:17:45.447407Z  INFO convex-cloud-http: [] 127.0.0.1:34406 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 25.948ms
+[WebServer] 2026-10-07T07:17:45.771776Z  INFO convex-cloud-http: [] 127.0.0.1:34420 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.070ms
+[WebServer] 2026-10-07T07:17:45.912483Z  INFO convex-cloud-http: [] 127.0.0.1:34430 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.032ms
+[WebServer] 2026-10-07T07:17:45.935623Z  INFO convex-cloud-http: [] 127.0.0.1:34430 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 22.194ms
+  ✓  39 [chromium] › e2e/mobile-copy.spec.ts:24:1 › a phone that refuses clipboard writes still copies the new link on the landing (1.1s)
+[WebServer] 2026-10-07T07:17:46.057571Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 59.306ms
+[WebServer] 2026-10-07T07:17:46.063184Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.460ms
+[WebServer] 2026-10-07T07:17:46.067990Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 3.960ms
+[WebServer] 2026-10-07T07:17:46.649707Z  INFO convex-cloud-http: [] 127.0.0.1:34434 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.082ms
+[WebServer] 2026-10-07T07:17:46.680012Z  INFO convex-cloud-http: [] 127.0.0.1:34442 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.036ms
+[WebServer] 2026-10-07T07:17:46.713198Z  INFO convex-cloud-http: [] 127.0.0.1:34442 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 29.302ms
+  ✓  41 [chromium] › e2e/mobile-copy.spec.ts:35:1 › a phone that refuses clipboard writes still copies the link from the group (986ms)
+[WebServer] 2026-10-07T07:17:47.340328Z  INFO convex-cloud-http: [] 127.0.0.1:34448 "GET /http/.well-known/openid-configuration HTTP/1.1" 200 "-" "Convex/1.0" application/json 159 6.672ms
+[WebServer] 2026-10-07T07:17:47.340476Z  INFO common::http: stats_middleware: matched_path is None, uri: /.well-known/openid-configuration
+[WebServer] 2026-10-07T07:17:47.340494Z  INFO convex-cloud-http: [] 127.0.0.1:39450 "GET /.well-known/openid-configuration HTTP/1.1" 200 "-" "Convex/1.0" application/json 159 7.170ms
+[WebServer] 2026-10-07T07:17:47.345225Z  INFO convex-cloud-http: [] 127.0.0.1:34450 "GET /http/.well-known/jwks.json HTTP/1.1" 200 "-" "Convex/1.0" application/json 410 4.063ms
+[WebServer] 2026-10-07T07:17:47.345370Z  INFO common::http: stats_middleware: matched_path is None, uri: /.well-known/jwks.json
+[WebServer] 2026-10-07T07:17:47.345391Z  INFO convex-cloud-http: [] 127.0.0.1:39450 "GET /.well-known/jwks.json HTTP/1.1" 200 "-" "Convex/1.0" application/json 410 4.524ms
+[WebServer] 7:17:47 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 2026-10-07T07:17:47.383518Z  INFO convex-cloud-http: [] 127.0.0.1:34456 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.078ms
+[WebServer] 2026-10-07T07:17:47.387565Z  INFO convex-cloud-http: [] 127.0.0.1:34430 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 24.410ms
+[WebServer] 2026-10-07T07:17:47.554499Z  INFO convex-cloud-http: [] 127.0.0.1:34460 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.032ms
+[WebServer] 2026-10-07T07:17:47.580700Z  INFO convex-cloud-http: [] 127.0.0.1:34460 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 22.398ms
+[WebServer] 2026-10-07T07:17:47.679480Z  INFO convex-cloud-http: [] 127.0.0.1:34474 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.074ms
+[WebServer] 2026-10-07T07:17:47.735950Z  INFO convex-cloud-http: [] 127.0.0.1:34430 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 31.596ms
+  ✓  40 [chromium] › e2e/landing.spec.ts:274:3 › a Group page that opens on a pending Save, as after Google's redirect › moves the Group, says Saved once, and stays on it (2.6s)
+  ✓  42 [chromium] › e2e/mobile-copy.spec.ts:45:1 › a phone offers a selectable link when both clipboard methods refuse (1.0s)
+[WebServer] 2026-10-07T07:17:48.323003Z  INFO convex-cloud-http: [] 127.0.0.1:34482 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.076ms
+[WebServer] 2026-10-07T07:17:48.411883Z  INFO convex-cloud-http: [] 127.0.0.1:34490 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.068ms
+[WebServer] 2026-10-07T07:17:48.446412Z  INFO convex-cloud-http: [] 127.0.0.1:34492 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.035ms
+[WebServer] 2026-10-07T07:17:48.476491Z  INFO convex-cloud-http: [] 127.0.0.1:34492 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 26.412ms
+[WebServer] 2026-10-07T07:17:48.590900Z  INFO convex-cloud-http: [] 127.0.0.1:34502 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.029ms
+[WebServer] 2026-10-07T07:17:48.612460Z  INFO convex-cloud-http: [] 127.0.0.1:34502 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 20.670ms
+  ✓  44 [chromium] › e2e/mobile-copy.spec.ts:62:1 › a phone shares its invitation and link through the native share sheet (1.0s)
+[WebServer] 2026-10-07T07:17:49.094212Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 55.603ms
+[WebServer] 2026-10-07T07:17:49.100225Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.709ms
+[WebServer] 2026-10-07T07:17:49.107515Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 6.224ms
+[WebServer] 2026-10-07T07:17:49.125750Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.989ms
+[WebServer] 2026-10-07T07:17:49.183564Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 56.790ms
+[WebServer] 2026-10-07T07:17:49.189218Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.557ms
+[WebServer] 2026-10-07T07:17:49.194813Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.663ms
+[WebServer] 2026-10-07T07:17:49.212742Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.019ms
+[WebServer] 2026-10-07T07:17:49.231785Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.000ms
+[WebServer] 2026-10-07T07:17:49.384064Z  INFO convex-cloud-http: [] 127.0.0.1:41566 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 151.112ms
+[WebServer] 7:17:49 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 2026-10-07T07:17:49.931156Z  INFO convex-cloud-http: [] 127.0.0.1:34492 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 23.573ms
+[WebServer] 2026-10-07T07:17:49.972928Z  INFO convex-cloud-http: [] 127.0.0.1:34510 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.083ms
+[WebServer] 2026-10-07T07:17:49.996506Z  INFO convex-cloud-http: [] 127.0.0.1:34516 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.037ms
+[WebServer] 2026-10-07T07:17:50.023683Z  INFO convex-cloud-http: [] 127.0.0.1:34516 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 25.314ms
+[WebServer] 2026-10-07T07:17:50.246401Z  INFO convex-cloud-http: [] 127.0.0.1:34532 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.077ms
+[WebServer] 2026-10-07T07:17:50.300342Z  INFO convex-cloud-http: [] 127.0.0.1:34492 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 31.472ms
+[WebServer] 7:17:50 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 2026-10-07T07:17:50.349008Z  INFO convex-cloud-http: [] 127.0.0.1:34546 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.087ms
+[WebServer] 2026-10-07T07:17:50.400990Z  INFO convex-cloud-http: [] 127.0.0.1:34516 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 38.220ms
+  ✓  43 [chromium] › e2e/landing.spec.ts:285:3 › a Group page that opens on a pending Save, as after Google's redirect › offers to finish when the move fails again (3.0s)
+[WebServer] 2026-10-07T07:17:51.296499Z  INFO convex-cloud-http: [] 127.0.0.1:34558 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.086ms
+[WebServer] 2026-10-07T07:17:51.321002Z  INFO convex-cloud-http: [] 127.0.0.1:34568 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.083ms
+[WebServer] 2026-10-07T07:17:51.377688Z  INFO convex-cloud-http: [] 127.0.0.1:34516 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 29.846ms
+[WebServer] 2026-10-07T07:17:51.434899Z  INFO convex-cloud-http: [] 127.0.0.1:34576 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.041ms
+[WebServer] 2026-10-07T07:17:51.459723Z  INFO convex-cloud-http: [] 127.0.0.1:34576 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 23.800ms
+[WebServer] 2026-10-07T07:17:51.880514Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.452ms
+[WebServer] 7:17:52 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] 
+[WebServer] 2026-10-07T07:17:52.567616Z  INFO convex-cloud-http: [] 127.0.0.1:34576 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 22.523ms
+  ✓  46 [chromium] › e2e/landing.spec.ts:299:3 › a Save that expires › starts the landing over once its sheet is closed (1.9s)
+[WebServer] 2026-10-07T07:17:53.117068Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.514ms
+[WebServer] 2026-10-07T07:17:53.184711Z  INFO convex-cloud-http: [] 127.0.0.1:34582 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.083ms
+[WebServer] 2026-10-07T07:17:53.222729Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.491ms
+[WebServer] 2026-10-07T07:17:53.348501Z  INFO convex-cloud-http: [] 127.0.0.1:34588 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.040ms
+[WebServer] 2026-10-07T07:17:53.371355Z  INFO convex-cloud-http: [] 127.0.0.1:34588 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 21.856ms
+[WebServer] 2026-10-07T07:17:53.459685Z  INFO convex-cloud-http: [] 127.0.0.1:34596 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.087ms
+[WebServer] 2026-10-07T07:17:53.508916Z  INFO convex-cloud-http: [] 127.0.0.1:34516 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 25.588ms
+[WebServer] 2026-10-07T07:17:53.532782Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.653ms
+  ✓  45 [chromium] › e2e/my-groups.spec.ts:42:1 › an Account sees every Group it plays in and the Sessions across them on /me (4.6s)
+[WebServer] 2026-10-07T07:17:54.040834Z  INFO convex-cloud-http: [] 127.0.0.1:34600 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.077ms
+[WebServer] 2026-10-07T07:17:54.183389Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 62.569ms
+[WebServer] 2026-10-07T07:17:54.192452Z  INFO convex-cloud-http: [] 127.0.0.1:34602 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 6.056ms
+[WebServer] 2026-10-07T07:17:54.200758Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 6.187ms
+[WebServer] 7:17:54 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 2026-10-07T07:17:54.511511Z  INFO convex-cloud-http: [] 127.0.0.1:34588 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 25.572ms
+[WebServer] 7:17:54 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] 
+  ✓  47 [chromium] › e2e/landing.spec.ts:315:3 › a Save that expires › starts the landing over when it expires after the GM dismissed the retry (1.9s)
+[WebServer] 2026-10-07T07:17:54.715934Z  INFO convex-cloud-http: [] 127.0.0.1:34614 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.074ms
+[WebServer] 2026-10-07T07:17:54.745413Z  INFO convex-cloud-http: [] 127.0.0.1:34630 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.037ms
+[WebServer] 2026-10-07T07:17:54.777704Z  INFO convex-cloud-http: [] 127.0.0.1:34630 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 31.331ms
+  ✓  48 [chromium] › e2e/my-groups.spec.ts:146:1 › /me sends anyone but an Account away without showing them the page (1.2s)
+[WebServer] 2026-10-07T07:17:54.966854Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 61.019ms
+[WebServer] 2026-10-07T07:17:54.972876Z  INFO convex-cloud-http: [] 127.0.0.1:34602 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.641ms
+[WebServer] 2026-10-07T07:17:54.978472Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.566ms
+[WebServer] 2026-10-07T07:17:54.996508Z  INFO convex-cloud-http: [] 127.0.0.1:34602 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.122ms
+[WebServer] 2026-10-07T07:17:55.058559Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 60.922ms
+[WebServer] 2026-10-07T07:17:55.064258Z  INFO convex-cloud-http: [] 127.0.0.1:34602 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.683ms
+[WebServer] 2026-10-07T07:17:55.069425Z  INFO convex-cloud-http: [] 127.0.0.1:41550 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.168ms
+[WebServer] 2026-10-07T07:17:55.087666Z  INFO convex-cloud-http: [] 127.0.0.1:34602 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.255ms
+[WebServer] 2026-10-07T07:17:55.099011Z  INFO convex-cloud-http: [] 127.0.0.1:58430 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.083ms
+[WebServer] 2026-10-07T07:17:55.254891Z  INFO convex-cloud-http: [] 127.0.0.1:58440 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.034ms
+[WebServer] 2026-10-07T07:17:55.276845Z  INFO convex-cloud-http: [] 127.0.0.1:58440 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 20.981ms
+[WebServer] 2026-10-07T07:17:55.504687Z  INFO convex-cloud-http: [] 127.0.0.1:58442 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.093ms
+[WebServer] 7:17:56 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 2026-10-07T07:17:56.402594Z  INFO convex-cloud-http: [] 127.0.0.1:58440 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 25.431ms
+  ✓  49 [chromium] › e2e/landing.spec.ts:332:1 › a retry dismissed, reopened, then finished in the background keeps the Save (2.0s)
+[WebServer] 2026-10-07T07:17:56.998164Z  INFO convex-cloud-http: [] 127.0.0.1:58452 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.027ms
+[WebServer] 2026-10-07T07:17:57.034497Z  INFO convex-cloud-http: [] 127.0.0.1:58452 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 35.379ms
+[WebServer] 2026-10-07T07:17:57.101507Z  INFO convex-cloud-http: [] 127.0.0.1:58458 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.075ms
+[WebServer] 2026-10-07T07:17:57.221027Z  INFO convex-cloud-http: [] 127.0.0.1:58460 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.037ms
+[WebServer] 2026-10-07T07:17:57.244875Z  INFO convex-cloud-http: [] 127.0.0.1:58460 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 22.882ms
+[WebServer] 2026-10-07T07:17:57.504342Z  INFO convex-cloud-http: [] 127.0.0.1:58468 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.078ms
+[WebServer] 2026-10-07T07:17:58.177288Z  INFO convex-cloud-http: [] 127.0.0.1:58478 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.029ms
+[WebServer] 2026-10-07T07:17:58.201012Z  INFO convex-cloud-http: [] 127.0.0.1:58478 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 22.820ms
+[WebServer] 2026-10-07T07:17:58.498787Z  INFO convex-cloud-http: [] 127.0.0.1:58486 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.066ms
+[WebServer] 2026-10-07T07:17:58.516041Z  INFO convex-cloud-http: [] 127.0.0.1:58460 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 24.754ms
+[WebServer] 2026-10-07T07:17:58.549810Z  INFO convex-cloud-http: [] 127.0.0.1:58478 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 22.765ms
+  ✓  51 [chromium] › e2e/landing.spec.ts:355:1 › pressing Escape again and again mid-Save keeps the sheet up until it is done (1.9s)
+[WebServer] 2026-10-07T07:17:58.804206Z  INFO convex-cloud-http: [] 127.0.0.1:58488 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 159.842ms
+[WebServer] 2026-10-07T07:17:59.153671Z  INFO convex-cloud-http: [] 127.0.0.1:58500 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.099ms
+[WebServer] 2026-10-07T07:17:59.358791Z  INFO convex-cloud-http: [] 127.0.0.1:58502 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.074ms
+[WebServer] 2026-10-07T07:17:59.413234Z  INFO convex-cloud-http: [] 127.0.0.1:58452 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 28.522ms
+[WebServer] 2026-10-07T07:17:59.786666Z  INFO convex-cloud-http: [] 127.0.0.1:58518 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.123ms
+[WebServer] 2026-10-07T07:17:59.797125Z  INFO convex-cloud-http: [] 127.0.0.1:58524 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.032ms
+[WebServer] 2026-10-07T07:17:59.828068Z  INFO convex-cloud-http: [] 127.0.0.1:58524 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 29.227ms
+[WebServer] 2026-10-07T07:17:59.845658Z  INFO convex-cloud-http: [] 127.0.0.1:58478 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 33.681ms
+[WebServer] 2026-10-07T07:17:59.924426Z  INFO convex-cloud-http: [] 127.0.0.1:58526 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.216ms
+[WebServer] 2026-10-07T07:18:00.077964Z  INFO convex-cloud-http: [] 127.0.0.1:58540 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.071ms
+[WebServer] 2026-10-07T07:18:00.126619Z  INFO convex-cloud-http: [] 127.0.0.1:58524 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 24.509ms
+  ✓  52 [chromium] › e2e/landing.spec.ts:377:1 › logging in to an Account without Groups lands on My groups (1.5s)
+[WebServer] 2026-10-07T07:18:00.502881Z  INFO convex-cloud-http: [] 127.0.0.1:58546 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.097ms
+[WebServer] 2026-10-07T07:18:00.552949Z  INFO convex-cloud-http: [] 127.0.0.1:58562 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.096ms
+[WebServer] 2026-10-07T07:18:00.608658Z  INFO convex-cloud-http: [] 127.0.0.1:58452 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 31.514ms
+  ✓  50 [chromium] › e2e/player-account.spec.ts:77:1 › a visitor keeps the Group with a new Account and plays as that Account on any device (5.7s)
+[WebServer] 2026-10-07T07:18:00.680745Z  INFO convex-cloud-http: [] 127.0.0.1:58578 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.030ms
+[WebServer] 2026-10-07T07:18:00.710889Z  INFO convex-cloud-http: [] 127.0.0.1:58578 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 29.179ms
+[WebServer] 2026-10-07T07:18:00.721333Z  INFO convex-cloud-http: [] 127.0.0.1:58526 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 56.835ms
+[WebServer] 2026-10-07T07:18:00.728090Z  INFO convex-cloud-http: [] 127.0.0.1:58586 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.160ms
+[WebServer] 2026-10-07T07:18:00.733275Z  INFO convex-cloud-http: [] 127.0.0.1:58526 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.168ms
+[WebServer] 2026-10-07T07:18:00.755709Z  INFO convex-cloud-http: [] 127.0.0.1:58586 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.401ms
+[WebServer] 2026-10-07T07:18:00.913490Z  INFO convex-cloud-http: [] 127.0.0.1:58526 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 156.529ms
+[WebServer] 2026-10-07T07:18:00.933030Z  INFO convex-cloud-http: [] 127.0.0.1:58586 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.423ms
+[WebServer] 2026-10-07T07:18:01.324638Z  INFO convex-cloud-http: [] 127.0.0.1:58594 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.086ms
+[WebServer] 2026-10-07T07:18:01.814607Z  INFO convex-cloud-http: [] 127.0.0.1:58578 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 27.160ms
+[WebServer] 2026-10-07T07:18:02.315093Z  INFO convex-cloud-http: [] 127.0.0.1:58598 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.076ms
+[WebServer] 7:18:02 AM [vite] (client) [console.error] [CONVEX A(auth:signIn)] [Request ID: f9f5d6192daf4f64] Server Error
+[WebServer] Uncaught ConvexError: {"code":"INVALID_CREDENTIALS"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at refuseSignIn (../../convex/auth.ts:98:0)
+[WebServer]     at authorize [as authorize] (../../convex/auth.ts:72:4)
+[WebServer]     at async handleCredentials (../../../../home/coder/dev/ns-worktrees/ticket-94/node_modules/@convex-dev/auth/src/server/implementation/signIn.ts:191:6)
+[WebServer]     at async handler (../../../../home/coder/dev/ns-worktrees/ticket-94/node_modules/@convex-dev/auth/src/server/implementation/index.ts:416:26)
+[WebServer] 
+[WebServer] 2026-10-07T07:18:02.598315Z  INFO convex-cloud-http: [] 127.0.0.1:58606 "GET /http/.well-known/openid-configuration HTTP/1.1" 200 "-" "Convex/1.0" application/json 159 6.293ms
+[WebServer] 2026-10-07T07:18:02.598478Z  INFO common::http: stats_middleware: matched_path is None, uri: /.well-known/openid-configuration
+[WebServer] 2026-10-07T07:18:02.598498Z  INFO convex-cloud-http: [] 127.0.0.1:39450 "GET /.well-known/openid-configuration HTTP/1.1" 200 "-" "Convex/1.0" application/json 159 6.796ms
+[WebServer] 2026-10-07T07:18:02.602986Z  INFO convex-cloud-http: [] 127.0.0.1:58610 "GET /http/.well-known/jwks.json HTTP/1.1" 200 "-" "Convex/1.0" application/json 410 3.909ms
+[WebServer] 2026-10-07T07:18:02.603096Z  INFO common::http: stats_middleware: matched_path is None, uri: /.well-known/jwks.json
+[WebServer] 2026-10-07T07:18:02.603115Z  INFO convex-cloud-http: [] 127.0.0.1:39450 "GET /.well-known/jwks.json HTTP/1.1" 200 "-" "Convex/1.0" application/json 410 4.260ms
+[WebServer] 2026-10-07T07:18:02.631372Z  INFO convex-cloud-http: [] 127.0.0.1:58620 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.034ms
+[WebServer] 2026-10-07T07:18:02.640040Z  WARN isolate_worker_handle_request: isolate::request_scope: Promise handler added after reject instance_name="anonymous-next-session-e2e-iV6Nns"
+[WebServer] 7:18:02 AM [vite] (client) [console.error] [CONVEX M(player:claim)] [Request ID: 2f99d6147213c575] Server Error
+[WebServer] Uncaught ConvexError: {"code":"PLAYER_CLAIMED"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at claimPlayer (../../convex/model/players.ts:48:53)
+[WebServer]     at handler (../convex/player.ts:94:11)
+[WebServer] 
+[WebServer] 2026-10-07T07:18:02.655287Z  INFO convex-cloud-http: [] 127.0.0.1:58620 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 22.802ms
+  ✓  53 [chromium] › e2e/landing.spec.ts:392:1 › a wrong password says so and keeps the sheet open (2.5s)
+  ✓  54 [chromium] › e2e/player-account.spec.ts:143:1 › keeping another Account's Player says so after the sign-in (2.1s)
+[WebServer] 2026-10-07T07:18:02.821988Z  INFO convex-cloud-http: [] 127.0.0.1:58526 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 61.225ms
+[WebServer] 2026-10-07T07:18:02.827877Z  INFO convex-cloud-http: [] 127.0.0.1:58586 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.469ms
+[WebServer] 2026-10-07T07:18:02.832799Z  INFO convex-cloud-http: [] 127.0.0.1:58526 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 3.893ms
+[WebServer] 2026-10-07T07:18:02.852383Z  INFO convex-cloud-http: [] 127.0.0.1:58586 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.602ms
+[WebServer] 2026-10-07T07:18:03.046196Z  INFO convex-cloud-http: [] 127.0.0.1:58634 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.078ms
+  ✓  55 [chromium] › e2e/landing.spec.ts:408:3 › on a dark OS › a cold load paints a dark canvas (433ms)
+[WebServer] 2026-10-07T07:18:03.447416Z  INFO convex-cloud-http: [] 127.0.0.1:58640 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.075ms
+[WebServer] 2026-10-07T07:18:03.471060Z  INFO convex-cloud-http: [] 127.0.0.1:58648 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.036ms
+[WebServer] 2026-10-07T07:18:03.482832Z  INFO convex-cloud-http: [] 127.0.0.1:58664 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.066ms
+[WebServer] 2026-10-07T07:18:03.506271Z  INFO convex-cloud-http: [] 127.0.0.1:58648 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 28.983ms
+  ✓  57 [chromium] › e2e/landing.spec.ts:415:3 › on a dark OS › an open sheet dims the page behind it (505ms)
+[WebServer] 2026-10-07T07:18:03.999512Z  INFO convex-cloud-http: [] 127.0.0.1:58676 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.073ms
+  ✓  58 [chromium] › e2e/landing.spec.ts:420:1 › an open sheet dims the page behind it in light mode (506ms)
+  -  59 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 390px light
+  -  60 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 390px dark
+  -  61 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 1440px light
+  -  62 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 1440px dark
+[WebServer] 2026-10-07T07:18:04.209486Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 40.136ms
+[WebServer] 2026-10-07T07:18:04.223924Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 12.683ms
+[WebServer] 2026-10-07T07:18:04.238668Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 13.617ms
+[WebServer] 2026-10-07T07:18:04.253135Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 13.347ms
+[WebServer] 2026-10-07T07:18:04.266987Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 12.757ms
+[WebServer] 2026-10-07T07:18:04.280770Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 12.682ms
+[WebServer] 2026-10-07T07:18:04.286100Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.281ms
+[WebServer] 2026-10-07T07:18:04.299133Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 12.064ms
+[WebServer] 2026-10-07T07:18:04.634776Z  INFO database::table_summary: Writing table summary checkpoint at ts 1791357484527293691
+[WebServer] 2026-10-07T07:18:04.644892Z  INFO convex-cloud-http: [] 127.0.0.1:58706 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.084ms
+[WebServer] 2026-10-07T07:18:04.837807Z  INFO convex-cloud-http: [] 127.0.0.1:58648 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 14.717ms
+[WebServer] 2026-10-07T07:18:05.187988Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 6.190ms
+[WebServer] 2026-10-07T07:18:05.193307Z  INFO convex-cloud-http: [] 127.0.0.1:48746 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.076ms
+[WebServer] 2026-10-07T07:18:05.229238Z  INFO convex-cloud-http: [] 127.0.0.1:58648 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 18.129ms
+  ✓  56 [chromium] › e2e/player-account.spec.ts:161:1 › an Anonymous GM keeping their own link saves first, then keeps the Player (2.6s)
+[WebServer] 2026-10-07T07:18:05.436965Z  INFO convex-cloud-http: [] 127.0.0.1:58526 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 46.743ms
+[WebServer] 2026-10-07T07:18:05.443965Z  INFO convex-cloud-http: [] 127.0.0.1:58586 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.850ms
+[WebServer] 2026-10-07T07:18:05.448931Z  INFO convex-cloud-http: [] 127.0.0.1:58526 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 3.891ms
+[WebServer] 2026-10-07T07:18:05.467199Z  INFO convex-cloud-http: [] 127.0.0.1:58586 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.373ms
+[WebServer] 2026-10-07T07:18:05.586965Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.075ms
+[WebServer] 2026-10-07T07:18:05.844357Z  INFO convex-cloud-http: [] 127.0.0.1:48760 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.071ms
+[WebServer] 2026-10-07T07:18:05.854263Z  INFO convex-cloud-http: [] 127.0.0.1:48772 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.070ms
+[WebServer] 2026-10-07T07:18:06.027787Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 6.311ms
+  ✓  63 [chromium] › e2e/player.spec.ts:151:3 › the player surface › a new player joins by name, answers, fills the rest, and comes back (2.3s)
+  ✓  64 [chromium] › e2e/player-account.spec.ts:183:1 › a signed-out visitor still joins and answers in the same steps (1.1s)
+  -  66 [chromium] › e2e/player-account.spec.ts:203:7 › screenshots › 390px light
+  -  67 [chromium] › e2e/player-account.spec.ts:203:7 › screenshots › 390px dark
+  -  68 [chromium] › e2e/player-account.spec.ts:203:7 › screenshots › 1440px light
+  -  69 [chromium] › e2e/player-account.spec.ts:203:7 › screenshots › 1440px dark
+[WebServer] 2026-10-07T07:18:06.603424Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 85.716ms
+[WebServer] 2026-10-07T07:18:06.622989Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.421ms
+[WebServer] 2026-10-07T07:18:06.646288Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 22.234ms
+[WebServer] 2026-10-07T07:18:06.668614Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.255ms
+[WebServer] 2026-10-07T07:18:06.686798Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.142ms
+[WebServer] 2026-10-07T07:18:06.706538Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.596ms
+[WebServer] 2026-10-07T07:18:06.712058Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.348ms
+[WebServer] 2026-10-07T07:18:06.932199Z  INFO convex-cloud-http: [] 127.0.0.1:48778 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.087ms
+  ✓  70 [chromium] › e2e/smoke.spec.ts:3:1 › the landing page renders the app shell without errors (452ms)
+[WebServer] 2026-10-07T07:18:07.080827Z  INFO convex-cloud-http: [] 127.0.0.1:48794 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.078ms
+  ✓  71 [chromium] › e2e/smoke.spec.ts:16:1 › reduced motion stops pulsing animations after one run (377ms)
+[WebServer] 2026-10-07T07:18:07.404795Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 6.192ms
+[WebServer] 2026-10-07T07:18:07.408534Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 0.443ms
+[WebServer] 2026-10-07T07:18:07.519131Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 6.112ms
+  ✓  65 [chromium] › e2e/player.spec.ts:205:3 › the player surface › taps and Fill Rest show at once, before the backend answers (1.0s)
+[WebServer] 2026-10-07T07:18:07.619698Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 57.157ms
+[WebServer] 2026-10-07T07:18:07.641304Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.468ms
+[WebServer] 2026-10-07T07:18:07.663034Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.610ms
+[WebServer] 2026-10-07T07:18:07.681980Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.844ms
+[WebServer] 2026-10-07T07:18:07.700579Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.536ms
+[WebServer] 2026-10-07T07:18:07.721825Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.148ms
+[WebServer] 2026-10-07T07:18:07.727266Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.344ms
+[WebServer] 2026-10-07T07:18:07.799666Z  INFO convex-cloud-http: [] 127.0.0.1:48806 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.093ms
+[WebServer] 2026-10-07T07:18:07.939598Z  INFO convex-cloud-http: [] 127.0.0.1:48808 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.031ms
+[WebServer] 2026-10-07T07:18:07.961227Z  INFO convex-cloud-http: [] 127.0.0.1:48808 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 20.732ms
+[WebServer] 2026-10-07T07:18:08.065008Z  INFO convex-cloud-http: [] 127.0.0.1:48824 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.073ms
+[WebServer] 2026-10-07T07:18:08.617168Z  INFO convex-cloud-http: [] 127.0.0.1:48828 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.085ms
+  ✓  73 [chromium] › e2e/player.spec.ts:231:3 › the player surface › a first Fill Rest dismisses the first-visit hint (1.2s)
+[WebServer] 2026-10-07T07:18:08.814477Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 64.601ms
+[WebServer] 2026-10-07T07:18:08.832239Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.712ms
+[WebServer] 2026-10-07T07:18:08.849984Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.698ms
+[WebServer] 2026-10-07T07:18:08.868319Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.348ms
+[WebServer] 2026-10-07T07:18:08.887335Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.897ms
+[WebServer] 2026-10-07T07:18:08.916221Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 27.877ms
+[WebServer] 2026-10-07T07:18:08.921446Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.146ms
+[WebServer] 2026-10-07T07:18:09.109199Z  INFO convex-cloud-http: [] 127.0.0.1:48808 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" application/json - 28.715ms
+  ✓  72 [chromium] › e2e/tips.spec.ts:16:1 › saves to a new Account that asked for Tips (1.8s)
+[WebServer] 2026-10-07T07:18:09.267885Z  INFO convex-cloud-http: [] 127.0.0.1:48842 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.076ms
+[WebServer] 7:18:09 AM [vite] (client) [console.error] [CONVEX M(player:answer)] [Request ID: 5d3904ce93ea2b28] Server Error
+[WebServer] Uncaught ConvexError: {"code":"OUT_OF_WINDOW"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at handler (../convex/player.ts:128:11)
+[WebServer] 
+[WebServer] 2026-10-07T07:18:09.520278Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.225ms
+  ✓  74 [chromium] › e2e/player.spec.ts:247:3 › the player surface › a tap the backend refuses rolls back and says why (802ms)
+[WebServer] 2026-10-07T07:18:09.622707Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 63.594ms
+[WebServer] 2026-10-07T07:18:09.645505Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.764ms
+[WebServer] 2026-10-07T07:18:09.663536Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.935ms
+[WebServer] 2026-10-07T07:18:09.680811Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.289ms
+[WebServer] 2026-10-07T07:18:09.699005Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.273ms
+[WebServer] 2026-10-07T07:18:09.706348Z  INFO convex-cloud-http: [] 127.0.0.1:48854 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.069ms
+[WebServer] 2026-10-07T07:18:09.719829Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.687ms
+[WebServer] 2026-10-07T07:18:09.725206Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.204ms
+  ✓  75 [chromium] › e2e/tips.spec.ts:30:1 › /tips takes the code out of the address bar and confirms only on the press (595ms)
+  -  77 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 390 px, light
+  -  78 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 390 px, dark
+  -  79 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 1440 px, light
+  -  80 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 1440 px, dark
+[WebServer] 2026-10-07T07:18:10.070695Z  INFO convex-cloud-http: [] 127.0.0.1:48862 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.082ms
+(node:36200) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] 2026-10-07T07:18:10.288525Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 7.038ms
+[WebServer] 2026-10-07T07:18:10.397310Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 6.189ms
+[WebServer] 2026-10-07T07:18:10.676380Z  INFO convex-cloud-http: [] 127.0.0.1:48866 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1" - - 0.087ms
+[WebServer] 2026-10-07T07:18:10.979270Z  INFO convex-cloud-http: [] 127.0.0.1:48878 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1" - - 0.029ms
+[WebServer] 2026-10-07T07:18:11.001912Z  INFO convex-cloud-http: [] 127.0.0.1:48880 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1" application/json - 21.985ms
+[WebServer] 2026-10-07T07:18:11.102640Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 6.100ms
+[WebServer] 2026-10-07T07:18:11.366610Z  INFO convex-cloud-http: [] 127.0.0.1:48882 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.092ms
+  ✓  76 [chromium] › e2e/player.spec.ts:261:3 › the player surface › tapping a night back to not set clears its Answer (1.9s)
+  ✓  81 [mobile-webkit] › e2e/mobile-copy.spec.ts:24:1 › a phone that refuses clipboard writes still copies the new link on the landing (1.2s)
+[WebServer] 2026-10-07T07:18:11.561347Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 60.509ms
+[WebServer] 2026-10-07T07:18:11.582899Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.366ms
+[WebServer] 2026-10-07T07:18:11.603304Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.258ms
+[WebServer] 2026-10-07T07:18:11.621659Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.224ms
+[WebServer] 2026-10-07T07:18:11.643374Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.736ms
+[WebServer] 2026-10-07T07:18:11.661885Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.407ms
+[WebServer] 2026-10-07T07:18:11.667943Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.014ms
+[WebServer] 2026-10-07T07:18:11.760626Z  INFO convex-cloud-http: [] 127.0.0.1:48888 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 68.549ms
+[WebServer] 2026-10-07T07:18:11.774171Z  INFO convex-cloud-http: [] 127.0.0.1:48896 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.077ms
+[WebServer] 2026-10-07T07:18:11.781424Z  INFO convex-cloud-http: [] 127.0.0.1:48888 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.687ms
+[WebServer] 2026-10-07T07:18:12.021744Z  INFO convex-cloud-http: [] 127.0.0.1:48906 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.072ms
+[WebServer] 2026-10-07T07:18:12.154865Z  INFO convex-cloud-http: [] 127.0.0.1:48920 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1" - - 0.077ms
+[WebServer] 2026-10-07T07:18:12.231501Z  INFO convex-cloud-http: [] 127.0.0.1:48936 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1" - - 0.037ms
+[WebServer] 7:18:12 AM [vite] (client) [console.error] [CONVEX M(player:fillRest)] [Request ID: 9a609fcde823f0ef] Server Error
+[WebServer] Uncaught ConvexError: {"code":"OUT_OF_WINDOW"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at handler (../convex/player.ts:145:27)
+[WebServer] 
+[WebServer] 2026-10-07T07:18:12.262973Z  INFO convex-cloud-http: [] 127.0.0.1:48948 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1" application/json - 30.430ms
+[WebServer] 2026-10-07T07:18:12.314762Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 10.676ms
+  ✓  82 [chromium] › e2e/player.spec.ts:279:3 › the player surface › a Fill Rest the backend refuses rolls back and says why (846ms)
+[WebServer] 2026-10-07T07:18:12.426024Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 65.095ms
+[WebServer] 2026-10-07T07:18:12.450217Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 23.010ms
+[WebServer] 2026-10-07T07:18:12.469987Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.578ms
+[WebServer] 2026-10-07T07:18:12.494524Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 23.385ms
+[WebServer] 2026-10-07T07:18:12.515209Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.598ms
+[WebServer] 2026-10-07T07:18:12.536296Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.909ms
+[WebServer] 2026-10-07T07:18:12.543123Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.680ms
+  ✓  83 [mobile-webkit] › e2e/mobile-copy.spec.ts:35:1 › a phone that refuses clipboard writes still copies the link from the group (1.0s)
+[WebServer] 2026-10-07T07:18:12.898211Z  INFO convex-cloud-http: [] 127.0.0.1:48954 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.079ms
+[WebServer] 2026-10-07T07:18:12.924799Z  INFO convex-cloud-http: [] 127.0.0.1:48958 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1" - - 0.067ms
+[WebServer] 2026-10-07T07:18:13.147699Z  INFO convex-cloud-http: [] 127.0.0.1:48974 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1" - - 0.032ms
+[WebServer] 2026-10-07T07:18:13.168784Z  INFO convex-cloud-http: [] 127.0.0.1:48990 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1" application/json - 20.426ms
+[WebServer] 2026-10-07T07:18:13.488102Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.286ms
+  ✓  85 [mobile-webkit] › e2e/mobile-copy.spec.ts:45:1 › a phone offers a selectable link when both clipboard methods refuse (1.1s)
+[WebServer] 2026-10-07T07:18:13.812517Z  INFO convex-cloud-http: [] 127.0.0.1:49002 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.082ms
+  ✓  84 [chromium] › e2e/player.spec.ts:297:3 › the player surface › a listed player answers with one tap and can switch with Not you? (1.6s)
+[WebServer] 2026-10-07T07:18:13.971692Z  INFO convex-cloud-http: [] 127.0.0.1:49014 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1" - - 0.089ms
+[WebServer] 2026-10-07T07:18:13.973130Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 63.127ms
+[WebServer] 2026-10-07T07:18:13.992319Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.043ms
+[WebServer] 2026-10-07T07:18:14.010274Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.898ms
+[WebServer] 2026-10-07T07:18:14.029017Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.722ms
+[WebServer] 2026-10-07T07:18:14.047514Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.465ms
+[WebServer] 2026-10-07T07:18:14.065846Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.184ms
+[WebServer] 2026-10-07T07:18:14.071844Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.990ms
+[WebServer] 2026-10-07T07:18:14.215823Z  INFO convex-cloud-http: [] 127.0.0.1:49026 "OPTIONS /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1" - - 0.032ms
+[WebServer] 2026-10-07T07:18:14.237030Z  INFO convex-cloud-http: [] 127.0.0.1:49028 "POST /api/action HTTP/1.1" 200 "http://127.0.0.1:34529/" "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1" application/json - 20.368ms
+[WebServer] 2026-10-07T07:18:14.419699Z  INFO convex-cloud-http: [] 127.0.0.1:49040 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.080ms
+  ✓  86 [mobile-webkit] › e2e/mobile-copy.spec.ts:62:1 › a phone shares its invitation and link through the native share sheet (1.1s)
+[WebServer] 7:18:14 AM [vite] (client) [console.error] [CONVEX M(player:join)] [Request ID: 05866d6db5debcda] Server Error
+[WebServer] Uncaught ConvexError: {"code":"NAME_TAKEN","playerId":"k577p36dv5zrvmep8xkkhqaak58fvekw"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at ensureNameIsFree (../../convex/model/players.ts:24:0)
+[WebServer]     at async handler (../convex/player.ts:78:4)
+[WebServer] 
+  ✓  87 [chromium] › e2e/player.spec.ts:313:3 › the player surface › a taken name points at the existing chip (1.0s)
+[WebServer] 2026-10-07T07:18:15.008336Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 53.514ms
+[WebServer] 2026-10-07T07:18:15.026279Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.769ms
+[WebServer] 2026-10-07T07:18:15.043451Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.120ms
+[WebServer] 2026-10-07T07:18:15.064072Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.718ms
+[WebServer] 2026-10-07T07:18:15.081281Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.237ms
+[WebServer] 2026-10-07T07:18:15.099968Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.667ms
+[WebServer] 2026-10-07T07:18:15.117186Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.235ms
+[WebServer] 2026-10-07T07:18:15.135635Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.445ms
+[WebServer] 2026-10-07T07:18:15.153218Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.540ms
+[WebServer] 2026-10-07T07:18:15.171279Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.079ms
+[WebServer] 2026-10-07T07:18:15.190041Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.783ms
+[WebServer] 2026-10-07T07:18:15.209102Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.116ms
+[WebServer] 2026-10-07T07:18:15.239353Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 29.299ms
+[WebServer] 2026-10-07T07:18:15.256562Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.371ms
+[WebServer] 2026-10-07T07:18:15.274524Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.988ms
+[WebServer] 2026-10-07T07:18:15.294363Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.958ms
+[WebServer] 2026-10-07T07:18:15.312422Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.112ms
+[WebServer] 2026-10-07T07:18:15.331147Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.853ms
+[WebServer] 2026-10-07T07:18:15.350175Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.176ms
+[WebServer] 2026-10-07T07:18:15.368857Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.684ms
+[WebServer] 2026-10-07T07:18:15.389243Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.437ms
+[WebServer] 2026-10-07T07:18:15.409265Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.664ms
+[WebServer] 2026-10-07T07:18:15.428922Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.616ms
+[WebServer] 2026-10-07T07:18:15.448413Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.511ms
+[WebServer] 2026-10-07T07:18:15.467630Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.311ms
+[WebServer] 2026-10-07T07:18:15.486824Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.139ms
+[WebServer] 2026-10-07T07:18:15.505098Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.181ms
+[WebServer] 2026-10-07T07:18:15.526250Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.999ms
+[WebServer] 2026-10-07T07:18:15.545991Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.766ms
+[WebServer] 2026-10-07T07:18:15.564775Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.812ms
+[WebServer] 2026-10-07T07:18:15.584220Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.495ms
+[WebServer] 2026-10-07T07:18:15.606376Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.977ms
+[WebServer] 2026-10-07T07:18:15.625684Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.314ms
+[WebServer] 2026-10-07T07:18:15.630942Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.309ms
+[WebServer] 2026-10-07T07:18:15.971308Z  INFO convex-cloud-http: [] 127.0.0.1:43492 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.076ms
+  ✓  88 [chromium] › e2e/player.spec.ts:328:3 › the player surface › a player on a long Roster finds their name with the filter (1.6s)
+[WebServer] 2026-10-07T07:18:16.613749Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 56.951ms
+[WebServer] 2026-10-07T07:18:16.632540Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.598ms
+[WebServer] 2026-10-07T07:18:16.650425Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.839ms
+[WebServer] 2026-10-07T07:18:16.668764Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.339ms
+[WebServer] 2026-10-07T07:18:16.690905Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 21.158ms
+[WebServer] 2026-10-07T07:18:16.711191Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 19.091ms
+[WebServer] 2026-10-07T07:18:16.717242Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 5.041ms
+[WebServer] 2026-10-07T07:18:17.060932Z  INFO convex-cloud-http: [] 127.0.0.1:43508 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.076ms
+[WebServer] 2026-10-07T07:18:17.160470Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.964ms
+  ✓  89 [chromium] › e2e/player.spec.ts:350:3 › the player surface › a player the GM removed lands on the join screen (671ms)
+[WebServer] 2026-10-07T07:18:17.294184Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/action HTTP/1.1" 200 "-" "node" application/json - 59.258ms
+[WebServer] 2026-10-07T07:18:17.313571Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.339ms
+[WebServer] 2026-10-07T07:18:17.331285Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 16.667ms
+[WebServer] 2026-10-07T07:18:17.350023Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 17.704ms
+[WebServer] 2026-10-07T07:18:17.369319Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 18.220ms
+[WebServer] 2026-10-07T07:18:17.390763Z  INFO convex-cloud-http: [] 127.0.0.1:58700 "POST /api/mutation HTTP/1.1" 200 "-" "node" application/json - 20.396ms
+[WebServer] 2026-10-07T07:18:17.396342Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 4.550ms
+[WebServer] 2026-10-07T07:18:17.741379Z  INFO convex-cloud-http: [] 127.0.0.1:43520 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.079ms
+[WebServer] 2026-10-07T07:18:17.955719Z  INFO convex-cloud-http: [] 127.0.0.1:43526 "GET /http/.well-known/openid-configuration HTTP/1.1" 200 "-" "Convex/1.0" application/json 159 7.813ms
+[WebServer] 2026-10-07T07:18:17.955894Z  INFO common::http: stats_middleware: matched_path is None, uri: /.well-known/openid-configuration
+[WebServer] 2026-10-07T07:18:17.955914Z  INFO convex-cloud-http: [] 127.0.0.1:39450 "GET /.well-known/openid-configuration HTTP/1.1" 200 "-" "Convex/1.0" application/json 159 8.316ms
+[WebServer] 2026-10-07T07:18:17.960228Z  INFO convex-cloud-http: [] 127.0.0.1:43532 "GET /http/.well-known/jwks.json HTTP/1.1" 200 "-" "Convex/1.0" application/json 410 3.700ms
+[WebServer] 2026-10-07T07:18:17.960343Z  INFO common::http: stats_middleware: matched_path is None, uri: /.well-known/jwks.json
+[WebServer] 2026-10-07T07:18:17.960360Z  INFO convex-cloud-http: [] 127.0.0.1:39450 "GET /.well-known/jwks.json HTTP/1.1" 200 "-" "Convex/1.0" application/json 410 4.093ms
+[WebServer] 2026-10-07T07:18:17.967409Z  INFO convex-cloud-http: [] 127.0.0.1:58684 "POST /api/query HTTP/1.1" 200 "-" "node" application/json - 20.123ms
+[WebServer] 2026-10-07T07:18:18.221496Z  INFO convex-cloud-http: [] 127.0.0.1:43536 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.074ms
+  ✓  90 [chromium] › e2e/player.spec.ts:364:3 › the player surface › a past month is read-only (1.1s)
+[WebServer] 2026-10-07T07:18:18.710037Z  INFO convex-cloud-http: [] 127.0.0.1:43542 "GET /api/1.46.0/sync HTTP/1.1" 101 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36" - - 0.092ms
+  ✓  91 [chromium] › e2e/player.spec.ts:382:3 › the player surface › an unknown link says it no longer works (467ms)
+  -  92 [chromium] › e2e/player.spec.ts:419:3 › player surface screenshots › every player screen at 390 and 1440 px, light and dark
+  -  93 [chromium] › e2e/player.spec.ts:466:3 › player surface screenshots › the past month at 390 and 1440 px, light and dark
+  -  94 [chromium] › e2e/player.spec.ts:509:3 › player surface screenshots › the first-visit hint at 390 and 1440 px, light and dark
+  -  95 [chromium] › e2e/player.spec.ts:519:3 › player surface screenshots › the done card at 390 and 1440 px, light and dark
+  -  96 [chromium] › e2e/player.spec.ts:534:3 › player surface screenshots › the long-Roster join screen at 390 and 1440 px, light and dark
+[WebServer] 2026-10-07T07:18:18.898358Z  INFO convex_local_backend: Received Ctrl-C signal!
+[WebServer] 2026-10-07T07:18:18.898399Z  INFO convex_local_backend: Shutdown initiated, draining existing requests...
+[WebServer] 2026-10-07T07:18:18.898430Z  INFO local_backend::proxy: Shut down proxy
+[WebServer] 2026-10-07T07:18:18.898508Z  INFO convex_local_backend: Shutting down application...
+[WebServer] 2026-10-07T07:18:18.898590Z  INFO application::table_summary_worker: Shutting down table summary worker...
+[WebServer] 2026-10-07T07:18:18.898636Z  WARN convex_local_backend: Forcibly shutting down!
+[WebServer] 2026-10-07T07:18:18.898718Z  INFO convex_local_backend: Done
+
+  29 skipped
+  67 passed (1.1m)
