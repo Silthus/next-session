@@ -276,6 +276,32 @@ for (const width of [390, 1440]) {
   });
 }
 
+test.describe("phone Add tap", () => {
+  test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
+
+  test("the GM taps Add for consecutive names without blurring the field", async ({ page }) => {
+    const gm = await signInAnonymousGm();
+    await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+    const card = playersCard(page);
+    const field = card.getByRole("textbox", { name: "Player name" });
+    await field.tap();
+    await field.evaluate((input) => {
+      input.dataset.blurred = "false";
+      input.addEventListener("blur", () => {
+        input.dataset.blurred = "true";
+      });
+    });
+    for (const [index, name] of ["Ana", "Ben", "Chiara"].entries()) {
+      await page.keyboard.type(name);
+      await card.getByRole("button", { name: "Add", exact: true }).tap();
+      await expect(card.getByRole("listitem")).toHaveCount(index + 1);
+      await expect(field).toBeFocused();
+      await expect(field).toHaveValue("");
+      await expect(field).toHaveAttribute("data-blurred", "false");
+    }
+  });
+});
+
 test("on a phone a fresh Group opens on Players, so the GM adds one under the calendar", async ({
   page,
 }) => {

@@ -114,7 +114,7 @@ export function NameForm({
           type="submit"
           variant="secondary"
           busy={busy && "Saving…"}
-          onPointerDown={(event) => {
+          onMouseDown={(event) => {
             if (!readyForNextAfterSubmit || event.button !== 0) return;
             event.preventDefault();
             field.current?.focus();
