@@ -64,3 +64,21 @@ it.each(["SIGINT", "SIGTERM"] as const)(
     }
   },
 );
+
+it("a disposed run never deletes a later owner's port lease", async () => {
+  const source = mkdtempSync(join(tmpdir(), "e2e-lease-owner-"));
+  writeFileSync(join(source, "package.json"), "{}");
+  const run = await createE2eRun(source);
+  const lease = join(tmpdir(), `next-session-e2e-port-${run.ports.web}`);
+  await run.dispose();
+  mkdirSync(lease);
+  const owner = join(lease, "owner");
+  writeFileSync(owner, "later run");
+  try {
+    await Promise.all([run.dispose(), run.dispose()]);
+    expect(readFileSync(owner, "utf8")).toBe("later run");
+  } finally {
+    rmSync(lease, { recursive: true, force: true });
+    rmSync(source, { recursive: true, force: true });
+  }
+});

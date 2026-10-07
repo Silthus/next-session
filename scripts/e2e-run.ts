@@ -30,7 +30,9 @@ async function release(server: Server) {
 export async function createE2eRun(source = process.cwd()) {
   const directory = mkdtempSync(join(tmpdir(), "next-session-e2e-"));
   const reservations: Awaited<ReturnType<typeof reservePort>>[] = [];
-  const dispose = async () => {
+  let disposal: Promise<void> | undefined;
+  const dispose = () => (disposal ??= removeRun());
+  const removeRun = async () => {
     await Promise.all(reservations.map(({ server }) => release(server)));
     for (const { lease } of reservations) rmSync(lease, { recursive: true, force: true });
     rmSync(directory, { recursive: true, force: true });
