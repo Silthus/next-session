@@ -200,7 +200,7 @@ it("rejects signed-out and anonymous preference writes", async () => {
   expect(await t.query(api.me.sessionEmails, {})).toBeNull();
 });
 
-it("invalidates an older cancellation when the same night is scheduled and cancelled again", async () => {
+it("sends only the final cancellation when an older Session is cancelled, restored and cancelled again", async () => {
   const { as, groupId } = await crew();
   const old = await as.mutation(api.sessions.schedule, { groupId, date });
   await finish();
@@ -209,7 +209,7 @@ it("invalidates an older cancellation when the same night is scheduled and cance
   const replacement = await as.mutation(api.sessions.schedule, { groupId, date });
   await as.mutation(api.sessions.unschedule, { sessionId: replacement });
   await finish();
-  expect(fetchMock).not.toHaveBeenCalled();
+  expect(bodies()).toEqual([expect.objectContaining({ change: "cancelled" })]);
 });
 
 it("warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient", async () => {

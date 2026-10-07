@@ -128,20 +128,20 @@ export async function queueSessionMail(ctx: MutationCtx, change: Omit<SessionCha
       q.eq("groupId", change.groupId).eq("date", change.date),
     )
     .unique();
+  const settled =
+    change.change === "cancelled"
+      ? state?.settled === true || Date.now() - change.createdAt > UNDO_WINDOW_MS
+      : state?.change === "cancelled" &&
+        state.settled === true &&
+        Date.now() - state.changedAt <= UNDO_WINDOW_MS;
   const fields = {
     groupId: change.groupId,
     date: change.date,
     sessionId: change.sessionId,
     change: change.change,
     changedAt: Date.now(),
-    notify:
-      change.change === "cancelled"
-        ? Date.now() - change.createdAt > UNDO_WINDOW_MS
-        : !(
-            state?.change === "cancelled" &&
-            state.notify &&
-            Date.now() - state.changedAt <= UNDO_WINDOW_MS
-          ),
+    settled,
+    notify: change.change === "cancelled" ? settled : !settled,
   };
   const stateId = state ? state._id : await ctx.db.insert("sessionMailStates", fields);
   if (state) await ctx.db.patch("sessionMailStates", stateId, fields);

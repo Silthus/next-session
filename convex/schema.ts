@@ -72,6 +72,7 @@ export default defineSchema({
     change: v.union(v.literal("scheduled"), v.literal("cancelled")),
     changedAt: v.number(),
     notify: v.optional(v.boolean()),
+    settled: v.optional(v.boolean()),
   }).index("by_groupId_and_date", ["groupId", "date"]),
 
   saveClaims: defineTable({
