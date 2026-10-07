@@ -44,11 +44,16 @@ export default defineSchema({
     name: v.string(),
     nameKey: v.string(),
     userId: v.optional(v.id("users")),
-    removedFromMyGroupsBy: v.optional(v.id("users")),
   })
     .index("by_groupId_and_nameKey", ["groupId", "nameKey"])
+    .index("by_userId_and_groupId", ["userId", "groupId"]),
+
+  groupRemovals: defineTable({
+    userId: v.id("users"),
+    groupId: v.id("groups"),
+  })
     .index("by_userId_and_groupId", ["userId", "groupId"])
-    .index("by_removedFromMyGroupsBy_and_groupId", ["removedFromMyGroupsBy", "groupId"]),
+    .index("by_groupId", ["groupId"]),
 
   answers: defineTable({
     groupId: v.id("groups"),

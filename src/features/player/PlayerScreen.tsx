@@ -200,7 +200,11 @@ function PlayerGroup({
                   else if (keep)
                     keeper.keepThrough(() => account.keepNow(keep)).catch(keeper.refuseSave);
                 }}
-                onContinueWithGoogle={keepWithGoogle && keep && (() => void keepWithGoogle(keep))}
+                onContinueWithGoogle={
+                  keepWithGoogle &&
+                  keep &&
+                  (() => void keepWithGoogle(keep).catch(keeper.refuseSave))
+                }
                 onDismissNudge={() => setNudgeDismissed(true)}
                 onRemove={
                   account.status === "account"

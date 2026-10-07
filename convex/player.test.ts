@@ -1061,7 +1061,7 @@ describe("keeping the Group on an answer", () => {
     expect(players.map(({ userId }) => userId)).toEqual([undefined]);
   });
 
-  it("keeps nothing when the GM answers on their own link", async () => {
+  it("keeps the GM only once they answer on their own link", async () => {
     const { as, shareToken, ada } = await pickedPlayer();
 
     const result = await as.mutation(api.player.answer, {
@@ -1071,8 +1071,8 @@ describe("keeping the Group on an answer", () => {
       answer: "free",
     });
 
-    expect(result).toEqual({ keptNow: false });
-    expect(await claimedPlayerIdIn(as, shareToken)).toBeNull();
+    expect(result).toEqual({ keptNow: true });
+    expect(await claimedPlayerIdIn(as, shareToken)).toBe(ada);
   });
 
   it("saves the answer and leaves another Account's Player with them", async () => {
@@ -1093,7 +1093,7 @@ describe("keeping the Group on an answer", () => {
     expect(await claimedPlayerIdIn(player.as, shareToken)).toBeNull();
   });
 
-  it("never moves the Account's claim to another Player it answers for", async () => {
+  it("moves the Account's claim to the Player they answer as", async () => {
     const { groupId, shareToken, ada, player } = await pickedPlayer();
     const bo = await seedPlayer(groupId, "Bo");
     await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
@@ -1105,7 +1105,7 @@ describe("keeping the Group on an answer", () => {
       answer: "free",
     });
 
-    expect(await claimedPlayerIdIn(player.as, shareToken)).toBe(ada);
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBe(bo);
   });
 
   it("saves the answer but keeps nothing past 50 Claimed Players", async () => {
@@ -1151,7 +1151,12 @@ describe("player.removeFromMyGroups", () => {
   }
 
   async function answerAs(as: GmClient, shareToken: string, playerId: Id<"players">) {
-    return await as.mutation(api.player.answer, { shareToken, playerId, date: TODAY, answer: "free" });
+    return await as.mutation(api.player.answer, {
+      shareToken,
+      playerId,
+      date: TODAY,
+      answer: "free",
+    });
   }
 
   it("releases the claim and keeps the Player with its Answers", async () => {
@@ -1204,6 +1209,28 @@ describe("player.removeFromMyGroups", () => {
 
     expect(await answerAs(other.as, shareToken, bo)).toEqual({ keptNow: true });
     expect(await answerAs(player.as, elsewhere.shareToken, dee)).toEqual({ keptNow: true });
+  });
+
+  it("remembers both Accounts' removals when they used the same Player", async () => {
+    const { groupId, shareToken, ada, player } = await keptPlayer();
+    await player.as.mutation(api.player.removeFromMyGroups, { groupId });
+    const other = await signInAccount(t);
+    await other.as.mutation(api.player.claim, { shareToken, playerId: ada });
+    await other.as.mutation(api.player.removeFromMyGroups, { groupId });
+
+    expect(await answerAs(player.as, shareToken, ada)).toEqual({ keptNow: false });
+    expect(await answerAs(other.as, shareToken, ada)).toEqual({ keptNow: false });
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBeNull();
+    expect(await claimedPlayerIdIn(other.as, shareToken)).toBeNull();
+  });
+
+  it("remembers Remove after the GM removes the Player", async () => {
+    const { gm, groupId, shareToken, ada, bo, player } = await keptPlayer();
+    await player.as.mutation(api.player.removeFromMyGroups, { groupId });
+    await gm.mutation(api.roster.removePlayer, { playerId: ada });
+
+    expect(await answerAs(player.as, shareToken, bo)).toEqual({ keptNow: false });
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBeNull();
   });
 
   it("lets only an Account remove", async () => {
