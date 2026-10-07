@@ -135,6 +135,17 @@ describe("ShareLinkCard", () => {
     expect(share).toHaveBeenCalledWith({ text: message });
   });
 
+  it.each(["Share via WhatsApp", "Share via Telegram", "Share via Mail", "Share"])(
+    "draws %s as an icon, not a stand-in letter",
+    (name) => {
+      vi.stubGlobal("navigator", { ...navigator, share: () => Promise.resolve() });
+      render(<ShareLinkCard url={url} />);
+      const target = screen.getByRole(name === "Share" ? "button" : "link", { name });
+      expect(target.textContent).toBe("");
+      expect(target.querySelector("svg")).not.toBeNull();
+    },
+  );
+
   it("keeps the share targets but drops the hint when compact, and offers Rotate when asked", async () => {
     vi.stubGlobal("navigator", { ...navigator, share: () => Promise.resolve() });
     const onRotate = vi.fn();
