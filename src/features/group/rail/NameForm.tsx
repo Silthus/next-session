@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { flushSync } from "react-dom";
 import { normalizeName, NAME_MAX_LENGTH } from "../../../../shared/names";
 import { Button } from "../../../ui/Button";
 import { cn } from "../../../ui/cn";
@@ -10,6 +11,7 @@ export function NameForm({
   autoFocus = true,
   focusRequest = 0,
   initialName = "",
+  readyForNextAfterSubmit = false,
   placeholder,
   submitLabel,
   topic,
@@ -22,6 +24,7 @@ export function NameForm({
   autoFocus?: boolean;
   focusRequest?: number;
   initialName?: string;
+  readyForNextAfterSubmit?: boolean;
   placeholder?: string;
   submitLabel: string;
   topic: ErrorTopic;
@@ -55,11 +58,20 @@ export function NameForm({
     setFailure(null);
     try {
       await onSubmit(normalized.name);
+      if (readyForNextAfterSubmit) readyForNextName();
     } catch (error) {
       setFailure(errorMessage(error, topic));
       setBusy(false);
       field.current?.focus();
     }
+  };
+
+  const readyForNextName = () => {
+    flushSync(() => {
+      setName("");
+      setBusy(false);
+    });
+    field.current?.focus();
   };
 
   return (
@@ -83,16 +95,31 @@ export function NameForm({
           maxLength={NAME_MAX_LENGTH * 2}
           placeholder={placeholder}
           autoComplete="off"
-          readOnly={busy}
+          readOnly={busy && !readyForNextAfterSubmit}
           aria-invalid={failure !== null || undefined}
           aria-describedby={failure ? failureId : undefined}
-          onChange={(event) => setName(event.target.value)}
+          onBeforeInput={(event) => {
+            if (busy) event.preventDefault();
+          }}
+          onChange={(event) => {
+            if (!busy) setName(event.target.value);
+          }}
           className={cn(
             "h-9 min-w-0 flex-1 rounded-md border border-line bg-paper px-3 text-sm text-ink outline-none focus:border-accent-strong aria-invalid:border-busy",
             inputClassName,
           )}
         />
-        <Button size="sm" type="submit" variant="secondary" busy={busy && "Saving…"}>
+        <Button
+          size="sm"
+          type="submit"
+          variant="secondary"
+          busy={busy && "Saving…"}
+          onMouseDown={(event) => {
+            if (!readyForNextAfterSubmit || event.button !== 0) return;
+            event.preventDefault();
+            field.current?.focus();
+          }}
+        >
           {submitLabel}
         </Button>
         <Button size="sm" variant="ghost" onClick={onCancel} disabled={busy}>

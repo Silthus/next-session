@@ -110,7 +110,8 @@ export async function deleteChildBatch(ctx: MutationCtx, groupId: Id<"groups">) 
   return (
     (await deleteAnswerBatch(ctx, groupId)) ||
     (await deleteSessionBatch(ctx, groupId)) ||
-    (await deletePlayerBatch(ctx, groupId))
+    (await deletePlayerBatch(ctx, groupId)) ||
+    (await deleteRemovalBatch(ctx, groupId))
   );
 }
 
@@ -139,4 +140,13 @@ async function deletePlayerBatch(ctx: MutationCtx, groupId: Id<"groups">) {
     .take(CHILD_DELETE_BATCH_SIZE);
   for (const player of players) await ctx.db.delete("players", player._id);
   return players.length > 0;
+}
+
+async function deleteRemovalBatch(ctx: MutationCtx, groupId: Id<"groups">) {
+  const removals = await ctx.db
+    .query("groupRemovals")
+    .withIndex("by_groupId", (q) => q.eq("groupId", groupId))
+    .take(CHILD_DELETE_BATCH_SIZE);
+  for (const removal of removals) await ctx.db.delete("groupRemovals", removal._id);
+  return removals.length > 0;
 }

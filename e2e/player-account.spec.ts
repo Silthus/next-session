@@ -7,6 +7,8 @@ import {
   password,
   signInAnonymousGm,
   signUpAccount,
+  seedPlayer,
+  shareTokenOf,
   toastRegion,
   type Gm,
 } from "./helpers";
@@ -57,7 +59,10 @@ async function logIn(page: Page, email: string) {
 }
 
 async function keepByCreatingAccount(page: Page, email: string) {
-  await page.getByRole("button", { name: "Keep this group" }).click();
+  await page
+    .getByRole("region", { name: "Keep this group" })
+    .getByRole("button", { name: "Create account" })
+    .click();
   const sheet = await fillAccount(page, email);
   await sheet.getByRole("button", { name: "Keep group" }).click();
   await expect(page.getByRole("dialog")).toBeHidden();
@@ -86,14 +91,30 @@ test("a visitor keeps the Group with a new Account and plays as that Account on 
   await test.step("the visitor answers, then keeps the Group by creating an Account", async () => {
     await page.goto(first.link);
     await join(page, "Ana");
-    await expect(page.getByRole("button", { name: "Keep this group" })).toBeHidden();
+    await expect(page.getByRole("region", { name: "Keep this group" })).toBeHidden();
     await answerToday(page);
-    await expect(page.getByText("Keep this group on all your devices.")).toBeVisible();
+    await expect(page.getByRole("region", { name: "Keep this group" })).toBeVisible();
     await page.getByRole("button", { name: "Next month" }).click();
-    await expect(page.getByText("Keep this group on all your devices.")).toBeVisible();
+    await expect(page.getByRole("region", { name: "Keep this group" })).toBeVisible();
     await page.getByRole("button", { name: "Previous month" }).click();
     await keepByCreatingAccount(page, email);
     await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
+  });
+
+  await test.step("Remove keeps the Group out after another answer, and Undo restores it", async () => {
+    await page.getByRole("button", { name: "Remove from my groups" }).click();
+    await expect(page.getByRole("main").getByText("Kept in My groups")).toBeHidden();
+    await todayTile(page).click();
+    await expect(todayTile(page)).toHaveAccessibleName(/: Maybe$/);
+    await expect(page.getByRole("main").getByText("Kept in My groups")).toBeHidden();
+    await page.getByRole("button", { name: "Undo", exact: true }).click();
+    await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
+    await page.goto("/me");
+    await expect(page.getByRole("link", { name: /Thursday Crew/ })).toBeVisible();
+    await page.goto(first.link);
+    await todayTile(page).click();
+    await todayTile(page).click();
+    await answerToday(page);
   });
 
   await test.step("a second browser that logs in opens the Group as the same Player", async () => {
@@ -129,7 +150,6 @@ test("a visitor keeps the Group with a new Account and plays as that Account on 
   await test.step("keeping the same Player again and saying Not you? again releases again", async () => {
     await page.getByRole("button", { name: "Bea" }).click();
     await answerToday(page);
-    await page.getByRole("button", { name: "Keep this group" }).click();
     await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
     await expect(elsewhere.getByRole("main").getByText("Kept in My groups")).toBeVisible();
     await page.getByRole("button", { name: "Not you?" }).click();
@@ -147,7 +167,10 @@ test("keeping another Account's Player says so after the sign-in", async ({ page
   await page.goto(link);
   await page.getByRole("button", { name: "Dana" }).click();
   await answerToday(page);
-  await page.getByRole("button", { name: "Keep this group" }).click();
+  await page
+    .getByRole("region", { name: "Keep this group" })
+    .getByRole("button", { name: "Create account" })
+    .click();
   const sheet = await fillAccount(page, newEmail());
   await sheet.getByRole("button", { name: "Keep group" }).click();
 
@@ -193,6 +216,132 @@ test("a signed-out visitor still joins and answers in the same steps", async ({ 
   await expect(page.getByText("Kept in My groups")).toBeHidden();
 });
 
+test("an Account can Keep again after removing a freshly joined Group before answering", async ({
+  page,
+}) => {
+  const { gm, link } = await seedGroup("New Crew");
+  const account = await signUpAccount();
+  await openAsGm(page, account, link);
+  await join(page, "Robin");
+  await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
+  await page.getByRole("button", { name: "Remove from my groups" }).click();
+  await expect(page.getByRole("main").getByText("Kept in My groups")).toBeHidden();
+  await expect
+    .poll(
+      async () =>
+        (await account.client.query(api.player.group, { shareToken: gm.shareToken }))
+          ?.removedFromMyGroups,
+    )
+    .toBe(true);
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Keep this group", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Keep this group", exact: true }).click();
+  await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
+});
+
+for (const entry of ["player", "My groups"] as const) {
+  test(`Remove from ${entry} cancels a leftover Keep before reload`, async ({ page }) => {
+    const { gm, link } = await seedGroup("Removed Crew");
+    const account = await signUpAccount();
+    await openAsGm(page, account, link);
+    await join(page, "Robin");
+    await answerToday(page);
+    const kept = await account.client.query(api.player.group, { shareToken: gm.shareToken });
+    if (entry === "My groups") {
+      await page.goto("/me");
+      await page.getByRole("button", { name: "Options for Removed Crew" }).click();
+    }
+    await page.evaluate(
+      (pending) => sessionStorage.setItem("next-session.pendingKeep", JSON.stringify(pending)),
+      { shareToken: gm.shareToken, playerId: kept?.claimedPlayerId },
+    );
+    await page.getByRole("button", { name: "Remove from my groups" }).click();
+    if (entry === "player")
+      await expect(page.getByRole("main").getByText("Kept in My groups")).toBeHidden();
+    else await expect(page.getByRole("link", { name: /Removed Crew/ })).toBeHidden();
+    await expect
+      .poll(
+        async () =>
+          (await account.client.query(api.player.group, { shareToken: gm.shareToken }))
+            ?.removedFromMyGroups,
+      )
+      .toBe(true);
+    await page.reload();
+    await expect(
+      page.getByRole("button", { name: entry === "player" ? "Your account" : "Log out" }),
+    ).toBeVisible();
+    expect(
+      await page.evaluate(() => sessionStorage.getItem("next-session.pendingKeep")),
+    ).toBeNull();
+    expect(
+      (await account.client.query(api.me.groups, { today: todayUtc(Date.now()) }))?.playing,
+    ).toHaveLength(0);
+  });
+}
+
+test("viewing and picking claim nothing; the first Fill the rest keeps the Player", async ({
+  page,
+}) => {
+  const { gm, link } = await seedGroup("Friday Crew");
+  await seedPlayer(gm, "Robin");
+  const account = await signUpAccount();
+
+  await openAsGm(page, account, link);
+  await page.getByRole("button", { name: "Robin", exact: true }).click();
+  expect(
+    (await account.client.query(api.player.group, { shareToken: gm.shareToken }))?.claimedPlayerId,
+  ).toBeNull();
+  await page.getByRole("button", { name: /^Mark the other/ }).click();
+  await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
+  await page.goto("/me");
+  await expect(page.getByRole("link", { name: /Friday Crew/ })).toBeVisible();
+});
+
+test("the visitor can dismiss the nudge and keep answering during this visit", async ({ page }) => {
+  const { link } = await seedGroup("Open Crew");
+  await page.goto(link);
+  await join(page, "Eli");
+  await expect(page.getByRole("region", { name: "Keep this group" })).toBeHidden();
+  await answerToday(page);
+  await page.getByRole("button", { name: "Not now" }).click();
+  await todayTile(page).click();
+  await expect(todayTile(page)).toHaveAccessibleName(/: Maybe$/);
+  await expect(page.getByRole("region", { name: "Keep this group" })).toBeHidden();
+  await expect(page.getByRole("dialog")).toBeHidden();
+});
+
+test("an Account at the 50 Group cap still answers, and an explicit keep explains the cap", async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  let account: Awaited<ReturnType<typeof signUpAccount>> | undefined;
+  await expect(async () => {
+    account = await signUpAccount();
+  }).toPass({ timeout: 30_000, intervals: [2000] });
+  if (account === undefined) throw new Error("The test Account was not created");
+  for (let owner = 0; owner < 10; owner++) {
+    const gm = await signInAnonymousGm();
+    for (let group = 0; group < 5; group++) {
+      const token =
+        group === 0
+          ? gm.shareToken
+          : await shareTokenOf(gm.client, await gm.client.mutation(api.groups.create, {}));
+      await account.client.mutation(api.player.join, { shareToken: token, name: "Robin" });
+    }
+  }
+  const { gm, link } = await seedGroup("One more crew");
+  await seedPlayer(gm, "Robin");
+  await openAsGm(page, account, link);
+  await page.getByRole("button", { name: "Robin", exact: true }).click();
+  await answerToday(page);
+  await expect(page.getByRole("main").getByText("Kept in My groups")).toBeHidden();
+  await page.getByRole("button", { name: "Keep this group", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("50");
+  expect(
+    (await account.client.query(api.me.groups, { today: todayUtc(Date.now()) }))?.playing,
+  ).toHaveLength(50);
+});
+
 const screenshotDir = process.env.E2E_SCREENSHOTS;
 
 test.describe("screenshots", () => {
@@ -225,7 +374,14 @@ test.describe("screenshots", () => {
 
         await keepByCreatingAccount(page, newEmail());
         await expect(toastRegion(page)).toBeEmpty({ timeout: 10_000 });
-        await shot("kept-with-not-you");
+        await shot("kept-with-remove");
+
+        await page.getByRole("button", { name: "Remove from my groups" }).click();
+        await expect(page.getByRole("button", { name: "Undo", exact: true })).toBeVisible();
+        await expect(page.getByRole("main").getByText("Kept in My groups")).toBeHidden();
+        await shot("removed-with-undo");
+        await page.getByRole("button", { name: "Undo", exact: true }).click();
+        await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
 
         await page.getByRole("button", { name: "Not you?" }).click();
         await page.getByRole("button", { name: "Dana" }).click();

@@ -111,7 +111,6 @@ test("the GM adds, renames, and removes Players", async ({ page }) => {
   await expect(players.getByRole("listitem")).toHaveText([/Ana/]);
   await expect.poll(() => rosterNames(gm)).toEqual(["Ana"]);
 
-  await players.getByRole("button", { name: "Add player" }).click();
   await players.getByRole("textbox", { name: "Player name" }).fill("ana");
   await page.keyboard.press("Enter");
   await expect(players.getByRole("alert")).toHaveText("That name is already on the list.");
@@ -252,6 +251,55 @@ test("on a phone the rail sits under the calendar behind a segmented control", a
   await page.keyboard.press("ArrowRight");
   await expect(tabs.getByRole("tab", { name: "Sessions" })).toBeFocused();
   await expect(page.getByRole("region", { name: "Sessions" })).toBeVisible();
+});
+
+for (const width of [390, 1440]) {
+  test(`${String(width)}px: the GM types three Players in a row with Enter only`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 844 });
+    const gm = await signInAnonymousGm();
+    await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+
+    const field = playersCard(page).getByRole("textbox", { name: "Player name" });
+    await field.click();
+    const added: RegExp[] = [];
+    for (const name of ["Ana", "Ben", "Chiara"]) {
+      await page.keyboard.type(name);
+      await page.keyboard.press("Enter");
+      added.push(new RegExp(name));
+      await expect(playersCard(page).getByRole("listitem")).toHaveText(added);
+      await expect(field).toBeFocused();
+      await expect(field).toHaveValue("");
+    }
+    await expect.poll(() => rosterNames(gm)).toEqual(["Ana", "Ben", "Chiara"]);
+  });
+}
+
+test.describe("phone Add tap", () => {
+  test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
+
+  test("the GM taps Add for consecutive names without blurring the field", async ({ page }) => {
+    const gm = await signInAnonymousGm();
+    await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+    const card = playersCard(page);
+    const field = card.getByRole("textbox", { name: "Player name" });
+    await field.tap();
+    await field.evaluate((input) => {
+      input.dataset.blurred = "false";
+      input.addEventListener("blur", () => {
+        input.dataset.blurred = "true";
+      });
+    });
+    for (const [index, name] of ["Ana", "Ben", "Chiara"].entries()) {
+      await page.keyboard.type(name);
+      await card.getByRole("button", { name: "Add", exact: true }).tap();
+      await expect(card.getByRole("listitem")).toHaveCount(index + 1);
+      await expect(field).toBeFocused();
+      await expect(field).toHaveValue("");
+      await expect(field).toHaveAttribute("data-blurred", "false");
+    }
+  });
 });
 
 test("on a phone a fresh Group opens on Players, so the GM adds one under the calendar", async ({

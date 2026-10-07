@@ -196,9 +196,12 @@ test.describe("the player surface", () => {
 
     await page.getByRole("button", { name: `Fill ${monthName(addMonths(month, 1))} →` }).click();
     await expect(page).toHaveURL(new RegExp(`month=${addMonths(month, 1)}`));
-    await expect(page.getByRole("heading", { level: 2 })).toContainText(
-      monthName(addMonths(month, 1)),
-    );
+    await expect(
+      page.getByRole("heading", {
+        level: 2,
+        name: new RegExp(`^${monthName(addMonths(month, 1))}`),
+      }),
+    ).toBeVisible();
     expect(pageErrors).toEqual([]);
   });
 

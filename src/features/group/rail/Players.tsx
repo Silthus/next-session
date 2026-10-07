@@ -92,10 +92,8 @@ export function Players<Player extends PlayerRow>({
           submitLabel="Add"
           topic="roster"
           className="mt-3"
-          onSubmit={async (name) => {
-            await onAdd(name);
-            closeForm();
-          }}
+          readyForNextAfterSubmit
+          onSubmit={onAdd}
           onCancel={closeForm}
         />
       )}

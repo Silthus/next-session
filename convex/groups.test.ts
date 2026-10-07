@@ -309,6 +309,25 @@ describe("groups.remove", () => {
     expect(await countChildren(groupId)).toBe(0);
   });
 
+  it("deletes Account opt-outs with the Group, and leaves other Groups' opt-outs alone", async () => {
+    const { as } = await signInAccount(t);
+    const removed = await as.mutation(api.groups.create, {});
+    const kept = await as.mutation(api.groups.create, {});
+    const { as: player } = await signInAccount(t);
+    for (const groupId of [removed, kept]) {
+      const group = await as.query(api.groups.get, { groupId });
+      if (group === null) throw new Error("Missing Group");
+      await player.mutation(api.player.join, { shareToken: group.shareToken, name: "Robin" });
+      await player.mutation(api.player.removeFromMyGroups, { groupId });
+    }
+
+    await as.mutation(api.groups.remove, { groupId: removed });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    const removals = await t.run(async (ctx) => await ctx.db.query("groupRemovals").collect());
+    expect(removals.map(({ groupId }) => groupId)).toEqual([kept]);
+  });
+
   it("keeps the other Groups and their rows", async () => {
     const { as } = await signInAccount(t);
     const removed = await as.mutation(api.groups.create, {});
