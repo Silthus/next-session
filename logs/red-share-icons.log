@@ -1,0 +1,90 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-94
+
+ ❯ |ui| src/ui/ShareLinkCard.test.tsx (19 tests | 4 failed) 2072ms
+   ❯ ShareLinkCard (19)
+     × draws Share via WhatsApp as an icon, not a stand-in letter 14ms
+     × draws Share via Telegram as an icon, not a stand-in letter 10ms
+     × draws Share via Mail as an icon, not a stand-in letter 10ms
+     × draws Share as an icon, not a stand-in letter 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > draws Share via WhatsApp as an icon, not a stand-in letter
+AssertionError: expected 'W' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ W
+
+ ❯ src/ui/ShareLinkCard.test.tsx:144:34
+    142|       render(<ShareLinkCard url={url} />);
+    143|       const target = screen.getByRole(name === "Share" ? "button" : "l…
+    144|       expect(target.textContent).toBe("");
+       |                                  ^
+    145|       expect(target.querySelector("svg")).not.toBeNull();
+    146|     },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > draws Share via Telegram as an icon, not a stand-in letter
+AssertionError: expected 'T' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ T
+
+ ❯ src/ui/ShareLinkCard.test.tsx:144:34
+    142|       render(<ShareLinkCard url={url} />);
+    143|       const target = screen.getByRole(name === "Share" ? "button" : "l…
+    144|       expect(target.textContent).toBe("");
+       |                                  ^
+    145|       expect(target.querySelector("svg")).not.toBeNull();
+    146|     },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > draws Share via Mail as an icon, not a stand-in letter
+AssertionError: expected '@' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ @
+
+ ❯ src/ui/ShareLinkCard.test.tsx:144:34
+    142|       render(<ShareLinkCard url={url} />);
+    143|       const target = screen.getByRole(name === "Share" ? "button" : "l…
+    144|       expect(target.textContent).toBe("");
+       |                                  ^
+    145|       expect(target.querySelector("svg")).not.toBeNull();
+    146|     },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > draws Share as an icon, not a stand-in letter
+AssertionError: expected '↗' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ ↗
+
+ ❯ src/ui/ShareLinkCard.test.tsx:144:34
+    142|       render(<ShareLinkCard url={url} />);
+    143|       const target = screen.getByRole(name === "Share" ? "button" : "l…
+    144|       expect(target.textContent).toBe("");
+       |                                  ^
+    145|       expect(target.querySelector("svg")).not.toBeNull();
+    146|     },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 15 passed (19)
+   Start at  03:42:41
+   Duration  2.81s (tests 76%, environment 17%, transform 3%, setup 2%, import 2%)
+

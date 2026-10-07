@@ -1,0 +1,176 @@
+$ playwright test
+[WebServer] CONVEX_AGENT_MODE=anonymous mode is in beta, functionality may change in the future.
+[WebServer] ✔ Configured a local deployment for http://127.0.0.1:3210 and saved its:
+[WebServer]     name as CONVEX_DEPLOYMENT
+[WebServer]     client URL as VITE_CONVEX_URL
+[WebServer]     HTTP actions URL as VITE_CONVEX_SITE_URL
+[WebServer]  to .env.local
+[WebServer] 
+[WebServer] Write your Convex functions in convex/
+[WebServer] Give us feedback at https://convex.dev/community or support@convex.dev
+[WebServer] View the Convex dashboard at http://127.0.0.1:6790/
+[WebServer] 
+[WebServer] ▌ Developing against deployment:
+[WebServer] ▌  Local  Port 3210 • No Convex account (run npx convex login to link to a project)
+[WebServer] ▌ └─ http://127.0.0.1:3210
+[WebServer] - Preparing Convex functions...
+[WebServer] 
+[WebServer] Convex AI files are not installed. Run npx convex ai-files install to get started or npx convex ai-files disable to hide this message.
+[WebServer] ✔ 03:47:14 Convex functions ready! (2.59s)
+[WebServer] ✔ Successfully set 2 environment variables from stdin (2 updated, 1 unchanged) (on anonymous deployment anonymous-agent)
+[WebServer] Warning: Route file "/home/coder/dev/ns-worktrees/ticket-94/src/routes/routes.test.tsx" does not export a Route. This file will not be included in the route tree.
+[WebServer] 
+[WebServer] If this file is not intended to be a route, you can exclude it using one of these options:
+[WebServer]   1. Rename the file to "/home/coder/dev/ns-worktrees/ticket-94/src/routes/-routes.test.tsx" (prefix with "-")
+[WebServer]   2. Use 'routeFileIgnorePattern' in your config to match this file
+[WebServer] 
+[WebServer] Current configuration:
+[WebServer]   routeFileIgnorePrefix: "-"
+[WebServer]   routeFileIgnorePattern: undefined
+[WebServer] 
+[WebServer]   VITE v8.3.2  ready in 467 ms
+[WebServer] 
+[WebServer]   ➜  Local:   http://localhost:5173/
+[WebServer]   ➜  Network: use --host to expose
+
+Running 90 tests using 8 workers
+
+  ✓   1 [chromium] › e2e/smoke.spec.ts:3:1 › the landing page renders the app shell without errors (685ms)
+  ✓   9 [chromium] › e2e/smoke.spec.ts:16:1 › reduced motion stops pulsing animations after one run (427ms)
+  ✓   8 [chromium] › e2e/gm-rail.spec.ts:50:1 › the GM copies, rotates, and undoes the Share Link from the rail (1.6s)
+  ✓   5 [chromium] › e2e/landing.spec.ts:155:1 › one click puts the link in hand and lands the GM on their Group (2.0s)
+  ✓   4 [chromium] › e2e/tips.spec.ts:16:1 › saves to a new Account that asked for Tips (2.7s)
+  ✓   3 [chromium] › e2e/gm-calendar.spec.ts:23:1 › the GM reads the heat-map and sees who is free on a night (2.8s)
+  ✓  10 [chromium] › e2e/mobile-copy.spec.ts:24:1 › a phone that refuses clipboard writes still copies the new link on the landing (1.3s)
+  ✓  13 [chromium] › e2e/tips.spec.ts:30:1 › /tips takes the code out of the address bar and confirms only on the press (583ms)
+  -  16 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 390 px, light
+  -  17 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 390 px, dark
+  -  18 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 1440 px, light
+  -  19 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 1440 px, dark
+  ✓   7 [chromium] › e2e/player.spec.ts:151:3 › the player surface › a new player joins by name, answers, fills the rest, and comes back (3.5s)
+  ✓  15 [chromium] › e2e/mobile-copy.spec.ts:35:1 › a phone that refuses clipboard writes still copies the link from the group (1.2s)
+  ✓  11 [chromium] › e2e/gm-rail.spec.ts:84:1 › the newest action owns the only toast (2.6s)
+  ✓  14 [chromium] › e2e/gm-calendar.spec.ts:44:1 › on a phone the day sheet leaves the tapped night in view (1.7s)
+  ✓  20 [chromium] › e2e/player.spec.ts:205:3 › the player surface › taps and Fill Rest show at once, before the backend answers (1.5s)
+[WebServer] 3:47:22 AM [vite] (client) [console.error] [CONVEX M(roster:addPlayer)] [Request ID: 949fe911761ee804] Server Error
+[WebServer] Uncaught ConvexError: {"code":"NAME_TAKEN","playerId":"k570nt8adz29mbhp4d1gpys7fx8fvx1j"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at ensureNameIsFree (../../convex/model/players.ts:24:0)
+[WebServer]     at async handler (../convex/roster.ts:16:4)
+[WebServer] 
+  ✓  12 [chromium] › e2e/landing.spec.ts:170:1 › saving to a new Account keeps the Share Link, and logging in finds the Group (3.7s)
+  ✓  23 [chromium] › e2e/player.spec.ts:231:3 › the player surface › a first Fill Rest dismisses the first-visit hint (1.3s)
+  ✓   2 [chromium] › e2e/my-groups.spec.ts:42:1 › an Account sees every Group it plays in and the Sessions across them on /me (6.6s)
+  ✓  21 [chromium] › e2e/gm-rail.spec.ts:103:1 › the GM adds, renames, and removes Players (2.4s)
+  ✓   6 [chromium] › e2e/player-account.spec.ts:77:1 › a visitor keeps the Group with a new Account and plays as that Account on any device (7.3s)
+[WebServer] 3:47:23 AM [vite] (client) [console.error] [CONVEX M(player:answer)] [Request ID: f37d4f82bcdf1d79] Server Error
+[WebServer] Uncaught ConvexError: {"code":"OUT_OF_WINDOW"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at handler (../convex/player.ts:128:11)
+[WebServer] 
+  ✓  22 [chromium] › e2e/gm-calendar.spec.ts:73:1 › on a phone a dense day keeps two-digit counts inside its cell (3.0s)
+  ✓  25 [chromium] › e2e/player.spec.ts:247:3 › the player surface › a tap the backend refuses rolls back and says why (1.1s)
+  ✓  26 [chromium] › e2e/my-groups.spec.ts:146:1 › /me sends anyone but an Account away without showing them the page (1.2s)
+  ✓  27 [chromium] › e2e/gm-rail.spec.ts:143:1 › Best Nights and Sessions open their day (2.5s)
+[WebServer] 3:47:26 AM [vite] (client) [console.error] [CONVEX M(player:claim)] [Request ID: 24150c3379749dce] Server Error
+[WebServer] Uncaught ConvexError: {"code":"PLAYER_CLAIMED"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at claimPlayer (../../convex/model/players.ts:48:53)
+[WebServer]     at handler (../convex/player.ts:94:11)
+[WebServer] 
+  ✓  28 [chromium] › e2e/player-account.spec.ts:141:1 › keeping another Account's Player says so after the sign-in (2.3s)
+  ✓  30 [chromium] › e2e/player.spec.ts:261:3 › the player surface › tapping a night back to not set clears its Answer (2.3s)
+  ✓  29 [chromium] › e2e/gm-calendar.spec.ts:100:1 › the GM schedules a Session, unschedules it, and undoes that (2.7s)
+  ✓  24 [chromium] › e2e/landing.spec.ts:186:1 › saving into an Account that has older Groups keeps showing the new Group (4.4s)
+[WebServer] 3:47:27 AM [vite] (client) [console.error] [CONVEX M(player:fillRest)] [Request ID: d56600262c63b7a5] Server Error
+[WebServer] Uncaught ConvexError: {"code":"OUT_OF_WINDOW"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at handler (../convex/player.ts:145:27)
+[WebServer] 
+  ✓  33 [chromium] › e2e/player.spec.ts:279:3 › the player surface › a Fill Rest the backend refuses rolls back and says why (1.0s)
+  ✓  34 [chromium] › e2e/gm-calendar.spec.ts:139:1 › month navigation lives in the URL and stops at the end of the Booking Window (1.5s)
+[WebServer] 3:47:28 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓  36 [chromium] › e2e/player.spec.ts:297:3 › the player surface › a listed player answers with one tap and can switch with Not you? (1.8s)
+  ✓  32 [chromium] › e2e/player-account.spec.ts:159:1 › an Anonymous GM keeping their own link saves first, then keeps the Player (3.3s)
+  ✓  31 [chromium] › e2e/gm-rail.spec.ts:168:1 › the switcher opens, makes, renames and deletes Groups, and the landing returns to the last one (3.7s)
+  ✓  37 [chromium] › e2e/gm-calendar.spec.ts:172:1 › another GM's Group or a malformed id falls back to the GM's own Group (1.5s)
+  ✓  35 [chromium] › e2e/landing.spec.ts:207:3 › a Save whose move fails after the sign-in › goes through on retry from the landing (3.3s)
+  ✓  41 [chromium] › e2e/gm-calendar.spec.ts:184:1 › a signed-out visitor lands on the landing page (624ms)
+[WebServer] 3:47:30 AM [vite] (client) [console.error] [CONVEX M(player:join)] [Request ID: 9f403a0f34859e59] Server Error
+[WebServer] Uncaught ConvexError: {"code":"NAME_TAKEN","playerId":"k5749b86tabyrgtd8fp7k7fdx58ftatv"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at ensureNameIsFree (../../convex/model/players.ts:24:0)
+[WebServer]     at async handler (../convex/player.ts:78:4)
+[WebServer] 
+  ✓  38 [chromium] › e2e/player.spec.ts:313:3 › the player surface › a taken name points at the existing chip (1.2s)
+  ✓  39 [chromium] › e2e/player-account.spec.ts:181:1 › a signed-out visitor still joins and answers in the same steps (1.2s)
+  -  44 [chromium] › e2e/player-account.spec.ts:201:7 › screenshots › 390px light
+  -  45 [chromium] › e2e/player-account.spec.ts:201:7 › screenshots › 390px dark
+  -  46 [chromium] › e2e/player-account.spec.ts:201:7 › screenshots › 1440px light
+  -  47 [chromium] › e2e/player-account.spec.ts:201:7 › screenshots › 1440px dark
+  ✓  40 [chromium] › e2e/gm-rail.spec.ts:214:1 › an Anonymous GM is nudged to save once a Player joins, until Later (2.3s)
+[WebServer] 3:47:32 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓  43 [chromium] › e2e/player.spec.ts:328:3 › the player surface › a player on a long Roster finds their name with the filter (1.8s)
+  ✓  42 [chromium] › e2e/landing.spec.ts:225:3 › a Save whose move fails after the sign-in › goes through on retry from the Group header (2.3s)
+  ✓  49 [chromium] › e2e/player.spec.ts:350:3 › the player surface › a player the GM removed lands on the join screen (812ms)
+  ✓  48 [chromium] › e2e/gm-rail.spec.ts:238:1 › on a phone the rail sits under the calendar behind a segmented control (1.4s)
+  ✓  52 [chromium] › e2e/gm-rail.spec.ts:257:1 › on a phone a fresh Group opens on Players, so the GM adds one under the calendar (968ms)
+  ✓  51 [chromium] › e2e/player.spec.ts:364:3 › the player surface › a past month is read-only (1.3s)
+[WebServer] 3:47:34 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓  54 [chromium] › e2e/player.spec.ts:382:3 › the player surface › an unknown link says it no longer works (432ms)
+  -  55 [chromium] › e2e/player.spec.ts:419:3 › player surface screenshots › every player screen at 390 and 1440 px, light and dark
+  -  56 [chromium] › e2e/player.spec.ts:466:3 › player surface screenshots › the past month at 390 and 1440 px, light and dark
+  -  57 [chromium] › e2e/player.spec.ts:509:3 › player surface screenshots › the first-visit hint at 390 and 1440 px, light and dark
+  -  58 [chromium] › e2e/player.spec.ts:519:3 › player surface screenshots › the done card at 390 and 1440 px, light and dark
+  -  59 [chromium] › e2e/player.spec.ts:534:3 › player surface screenshots › the long-Roster join screen at 390 and 1440 px, light and dark
+  ✓  50 [chromium] › e2e/landing.spec.ts:242:3 › a Save whose move fails after the sign-in › still goes through when the GM closes the retry from the Group header (2.4s)
+  ✓  53 [chromium] › e2e/gm-rail.spec.ts:273:1 › on a phone Add player stays in reach under the calendar whatever tab is open (2.0s)
+[WebServer] 3:47:36 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓  60 [chromium] › e2e/landing.spec.ts:274:3 › a Group page that opens on a pending Save, as after Google's redirect › moves the Group, says Saved once, and stays on it (2.3s)
+  ✓  61 [chromium] › e2e/gm-rail.spec.ts:305:1 › a Player who joins with a new name stays on the Roster as grey bars until the GM removes them (1.3s)
+[WebServer] 3:47:38 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 3:47:39 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓  63 [chromium] › e2e/gm-rail.spec.ts:327:1 › an Anonymous GM saves into an Account from the header and stays on the Group (2.0s)
+  ✓  62 [chromium] › e2e/landing.spec.ts:285:3 › a Group page that opens on a pending Save, as after Google's redirect › offers to finish when the move fails again (2.7s)
+[WebServer] 3:47:41 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] 
+  ✓  64 [chromium] › e2e/gm-rail.spec.ts:364:1 › on a phone the toast clears the open day sheet (2.1s)
+  ✓  65 [chromium] › e2e/landing.spec.ts:299:3 › a Save that expires › starts the landing over once its sheet is closed (1.9s)
+  ✓  66 [chromium] › e2e/gm-rail.spec.ts:380:1 › deleting the last Group of an Anonymous GM returns to the landing (1.5s)
+  -  68 [chromium] › e2e/gm-rail.spec.ts:397:7 › screenshots › 390px light
+  -  69 [chromium] › e2e/gm-rail.spec.ts:440:7 › screenshots › 390px light: Add player in reach, the maybe bar and a dense day
+  -  70 [chromium] › e2e/gm-rail.spec.ts:516:7 › screenshots › 390px light: a fresh Group and grey bars
+  -  71 [chromium] › e2e/gm-rail.spec.ts:397:7 › screenshots › 390px dark
+  -  72 [chromium] › e2e/gm-rail.spec.ts:440:7 › screenshots › 390px dark: Add player in reach, the maybe bar and a dense day
+  -  73 [chromium] › e2e/gm-rail.spec.ts:516:7 › screenshots › 390px dark: a fresh Group and grey bars
+  -  74 [chromium] › e2e/gm-rail.spec.ts:397:7 › screenshots › 1440px light
+  -  75 [chromium] › e2e/gm-rail.spec.ts:440:7 › screenshots › 1440px light: Add player in reach, the maybe bar and a dense day
+  -  76 [chromium] › e2e/gm-rail.spec.ts:516:7 › screenshots › 1440px light: a fresh Group and grey bars
+  -  77 [chromium] › e2e/gm-rail.spec.ts:397:7 › screenshots › 1440px dark
+  -  78 [chromium] › e2e/gm-rail.spec.ts:440:7 › screenshots › 1440px dark: Add player in reach, the maybe bar and a dense day
+  -  79 [chromium] › e2e/gm-rail.spec.ts:516:7 › screenshots › 1440px dark: a fresh Group and grey bars
+[WebServer] 3:47:43 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+[WebServer] 3:47:43 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] 
+  ✓  67 [chromium] › e2e/landing.spec.ts:315:3 › a Save that expires › starts the landing over when it expires after the GM dismissed the retry (1.9s)
+[WebServer] 3:47:45 AM [vite] (client) [console.error] [CONVEX M(account:finishSave)] Server Error
+  ✓  80 [chromium] › e2e/landing.spec.ts:332:1 › a retry dismissed, reopened, then finished in the background keeps the Save (2.0s)
+  ✓  81 [chromium] › e2e/landing.spec.ts:355:1 › pressing Escape again and again mid-Save keeps the sheet up until it is done (1.9s)
+  ✓  82 [chromium] › e2e/landing.spec.ts:377:1 › logging in to an Account without Groups lands on My groups (1.5s)
+[WebServer] 3:47:51 AM [vite] (client) [console.error] [CONVEX A(auth:signIn)] [Request ID: e3c65bcecbdc5907] Server Error
+[WebServer] Uncaught ConvexError: {"code":"INVALID_CREDENTIALS"}
+[WebServer]     at fail (../../convex/model/errors.ts:27:0)
+[WebServer]     at refuseSignIn (../../convex/auth.ts:98:0)
+[WebServer]     at authorize [as authorize] (../../convex/auth.ts:72:4)
+[WebServer]     at async handleCredentials (../../node_modules/@convex-dev/auth/src/server/implementation/signIn.ts:191:6)
+[WebServer]     at async handler (../../node_modules/@convex-dev/auth/src/server/implementation/index.ts:416:26)
+[WebServer] 
+  ✓  83 [chromium] › e2e/landing.spec.ts:392:1 › a wrong password says so and keeps the sheet open (2.5s)
+  ✓  84 [chromium] › e2e/landing.spec.ts:408:3 › on a dark OS › a cold load paints a dark canvas (426ms)
+  ✓  85 [chromium] › e2e/landing.spec.ts:415:3 › on a dark OS › an open sheet dims the page behind it (489ms)
+  ✓  86 [chromium] › e2e/landing.spec.ts:420:1 › an open sheet dims the page behind it in light mode (491ms)
+  -  87 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 390px light
+  -  88 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 390px dark
+  -  89 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 1440px light
+  -  90 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 1440px dark
+
+  29 skipped
+  61 passed (42.2s)

@@ -7,6 +7,7 @@ import { convexUrl, openAsGm, signInAnonymousGm } from "./helpers";
 
 const out = process.env.PROOF_DIR!;
 const label = process.env.PROOF_LABEL!;
+const only = process.env.PROOF_ONLY;
 
 const viewports = [390, 1440] as const;
 const themes = ["light", "dark"] as const;
@@ -58,6 +59,11 @@ for (const width of viewports) {
         await page.screenshot({ path: `${out}/${label}-${name}-${width}-${theme}.png`, fullPage: true });
       };
 
+      await context.addInitScript(() => {
+        if (!("share" in navigator)) {
+          Object.defineProperty(navigator, "share", { value: () => Promise.resolve() });
+        }
+      });
       const landing = await context.newPage();
       await landing.goto("/");
       await landing.getByRole("button", { name: "Create your link" }).waitFor();
@@ -65,7 +71,17 @@ for (const width of viewports) {
       await landing.getByRole("button", { name: "Create your link" }).click();
       await landing.getByRole("link", { name: "Open your group →" }).waitFor();
       await shot(landing, "link-created");
+      await landing.waitForTimeout(300);
+      await landing
+        .locator("div", { has: landing.getByRole("button", { name: "Copy" }) })
+        .filter({ hasText: "Player link" })
+        .last()
+        .screenshot({ path: `${out}/${label}-share-row-${width}-${theme}.png` });
       await landing.close();
+      if (only === "share") {
+        await context.close();
+        return;
+      }
 
       const gmContext = await browser.newContext({
         viewport: { width, height: width === 390 ? 844 : 900 },
