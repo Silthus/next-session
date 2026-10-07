@@ -1,0 +1,122 @@
+
+ RUN  v5.0.3 /home/coder/dev/ns-worktrees/ticket-94
+
+ ❯ |ui| src/theme.test.ts (151 tests | 6 failed) 22ms
+   ❯ the shape scale (6)
+     × rounds sm at Lonir's 4px 5ms
+     × rounds md at Lonir's 6px 1ms
+     × rounds lg at Lonir's 8px 0ms
+     × rounds xl at Lonir's 12px 1ms
+     × rounds 2xl at Lonir's 16px 1ms
+     × sets headings in Fraunces 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/theme.test.ts > the shape scale > rounds sm at Lonir's 4px
+AssertionError: expected '8px' to be '4px' // Object.is equality
+
+Expected: "4px"
+Received: "8px"
+
+ ❯ src/theme.test.ts:108:37
+    106|     ["2xl", "16px"],
+    107|   ])("rounds %s at Lonir's %s", (size, radius) => {
+    108|     expect(shape[`radius-${size}`]).toBe(radius);
+       |                                     ^
+    109|   });
+    110|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  |ui| src/theme.test.ts > the shape scale > rounds md at Lonir's 6px
+AssertionError: expected '12px' to be '6px' // Object.is equality
+
+Expected: "6px"
+Received: "12px"
+
+ ❯ src/theme.test.ts:108:37
+    106|     ["2xl", "16px"],
+    107|   ])("rounds %s at Lonir's %s", (size, radius) => {
+    108|     expect(shape[`radius-${size}`]).toBe(radius);
+       |                                     ^
+    109|   });
+    110|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  |ui| src/theme.test.ts > the shape scale > rounds lg at Lonir's 8px
+AssertionError: expected '16px' to be '8px' // Object.is equality
+
+Expected: "8px"
+Received: "16px"
+
+ ❯ src/theme.test.ts:108:37
+    106|     ["2xl", "16px"],
+    107|   ])("rounds %s at Lonir's %s", (size, radius) => {
+    108|     expect(shape[`radius-${size}`]).toBe(radius);
+       |                                     ^
+    109|   });
+    110|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  |ui| src/theme.test.ts > the shape scale > rounds xl at Lonir's 12px
+AssertionError: expected '24px' to be '12px' // Object.is equality
+
+Expected: "12px"
+Received: "24px"
+
+ ❯ src/theme.test.ts:108:37
+    106|     ["2xl", "16px"],
+    107|   ])("rounds %s at Lonir's %s", (size, radius) => {
+    108|     expect(shape[`radius-${size}`]).toBe(radius);
+       |                                     ^
+    109|   });
+    110|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  |ui| src/theme.test.ts > the shape scale > rounds 2xl at Lonir's 16px
+AssertionError: expected undefined to be '16px' // Object.is equality
+
+- Expected:
+"16px"
+
++ Received:
+undefined
+
+ ❯ src/theme.test.ts:108:37
+    106|     ["2xl", "16px"],
+    107|   ])("rounds %s at Lonir's %s", (size, radius) => {
+    108|     expect(shape[`radius-${size}`]).toBe(radius);
+       |                                     ^
+    109|   });
+    110|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  |ui| src/theme.test.ts > the shape scale > sets headings in Fraunces
+AssertionError: expected '"Bricolage Grotesque Variable", "Inte…' to match /^"Fraunces Variable"/
+
+- Expected:
+/^"Fraunces Variable"/
+
++ Received:
+"\"Bricolage Grotesque Variable\", \"Inter Variable\", system-ui, sans-serif"
+
+ ❯ src/theme.test.ts:112:35
+    110|
+    111|   it("sets headings in Fraunces", () => {
+    112|     expect(shape["font-display"]).toMatch(/^"Fraunces Variable"/);
+       |                                   ^
+    113|   });
+    114| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 145 passed (151)
+   Start at  03:29:50
+   Duration  786ms (environment 65%, transform 18%, setup 9%, import 3%, tests 3%, worker 1%)
+
