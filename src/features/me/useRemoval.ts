@@ -3,6 +3,7 @@ import { api } from "../../../convex/_generated/api";
 import type { IsoDate } from "../../../shared/dates";
 import { errorMessage } from "../../lib/errors";
 import { track } from "../../lib/telemetry";
+import { forgetPendingKeepFor } from "../account/keep";
 import type { PlayingGroup } from "./myGroups";
 
 export function useRemoval(
@@ -34,6 +35,7 @@ export function useRemoval(
   }
 
   function remove(group: PlayingGroup) {
+    forgetPendingKeepFor(group, sessionStorage);
     track({ name: "remove_group_started", group_id: group.groupId });
     focusPage();
     show(`Removed ${group.name} from My groups.`, () => void undo(group));

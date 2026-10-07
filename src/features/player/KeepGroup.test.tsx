@@ -98,6 +98,27 @@ describe("KeepGroup for a visitor", () => {
     expect(within(nudge).queryByRole("link", { name: "Terms" })).toBeNull();
   });
 
+  it("moves focus to the quiet Keep button when the visitor dismisses the nudge", async () => {
+    function Visit() {
+      const [invite, setInvite] = useState<"nudge" | "line">("nudge");
+      return (
+        <KeepGroup
+          groupId="group-keep"
+          state="offer"
+          invite={invite}
+          refusal={null}
+          onKeep={() => undefined}
+          onDismissNudge={() => setInvite("line")}
+        />
+      );
+    }
+    renderInRouter(Visit);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Not now" }));
+
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Keep this group" }));
+  });
+
   it("hands Not now to the page", async () => {
     const { onDismissNudge } = renderKeep({ invite: "nudge" });
 

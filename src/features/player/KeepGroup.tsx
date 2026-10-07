@@ -31,6 +31,7 @@ export function KeepGroup({
   onRemove?: () => void;
 }) {
   const [keepTapped, setKeepTapped] = useState(false);
+  const [dismissedHere, setDismissedHere] = useState(false);
   const removedHere = useRemovedHere(state);
 
   function keep() {
@@ -52,10 +53,20 @@ export function KeepGroup({
         <KeepNudge
           onCreateAccount={keep}
           onContinueWithGoogle={onContinueWithGoogle && continueWithGoogle}
-          onDismiss={onDismissNudge}
+          onDismiss={
+            onDismissNudge &&
+            (() => {
+              setDismissedHere(true);
+              onDismissNudge();
+            })
+          }
         />
       ) : (
-        <KeepLine keeping={state === "keeping"} focusOnMount={removedHere} onKeep={keep} />
+        <KeepLine
+          keeping={state === "keeping"}
+          focusOnMount={removedHere || dismissedHere}
+          onKeep={keep}
+        />
       )}
       {refusal !== null && (
         <p role="alert" className="max-w-sm font-medium text-busy">

@@ -19,7 +19,7 @@ import { Skeleton } from "../../ui/Skeleton";
 import { Button } from "../../ui/Button";
 import { Toast, type ToastMessage } from "../../ui/Toast";
 import { AccountSheet } from "../account/AccountSheet";
-import type { KeepOutcome } from "../account/keep";
+import { forgetPendingKeepFor, type KeepOutcome } from "../account/keep";
 import { useGm } from "../account/useGm";
 import { HeaderAccount } from "../group/rail/HeaderAccount";
 import { Join } from "./Join";
@@ -91,10 +91,10 @@ function PlayerGroup({
   const claim = useMutation(api.player.claim);
   const [toast, showToast] = useToast();
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
+  const [removedHere, setRemovedHere] = useState(false);
   const { keepWithGoogle, logInWithGoogle } = account;
   const [sheet, setSheet] = useState<"logIn" | "keep" | null>(null);
   const [releasedId, setReleasedId] = useState<Id<"players"> | null>(null);
-  if (releasedId !== null && group.claimedPlayerId !== releasedId) setReleasedId(null);
   const claimed = group.players.find(
     ({ _id }) => _id === group.claimedPlayerId && _id !== releasedId,
   );
@@ -120,12 +120,16 @@ function PlayerGroup({
   }, [claimed, group.groupId]);
 
   function answerAs(next: PlayerIdentity | null) {
-    if (next) rememberPlayer(group.groupId, next);
-    else forgetPlayer(group.groupId);
+    if (next) {
+      setReleasedId(null);
+      rememberPlayer(group.groupId, next);
+    } else forgetPlayer(group.groupId);
     setIdentity(next);
   }
 
   function remove(kept: PlayerIdentity) {
+    forgetPendingKeepFor({ shareToken, playerId: kept.playerId }, sessionStorage);
+    setRemovedHere(true);
     showToast(REMOVED, { label: "Undo", run: () => void undoRemove(kept) });
     removeFromMyGroups({ groupId: group.groupId }).catch((error: unknown) => {
       showToast(errorMessage(error, "keep"));
@@ -144,8 +148,8 @@ function PlayerGroup({
   function notYou() {
     account.forgetPendingKeep();
     answerAs(null);
-    if (!claimed) return;
-    setReleasedId(claimed._id);
+    if (account.status !== "account") return;
+    setReleasedId(player?._id ?? null);
     release({ groupId: group.groupId }).catch((error: unknown) => {
       setReleasedId(null);
       showToast(errorMessage(error, "keep"));
@@ -187,7 +191,8 @@ function PlayerGroup({
           showToast={showToast}
           keepGroup={(offered) => {
             const state = player._id === group.claimedPlayerId ? "kept" : keeper.state;
-            if (state === "offer" && !offered && keeper.refusal === null) return null;
+            if (state === "offer" && !offered && !removedHere && keeper.refusal === null)
+              return null;
             const visitor = account.status === "signedOut";
             return (
               <KeepGroup
@@ -265,7 +270,10 @@ function useKeeper(refusalOnReturn: string | null, onKept: () => void) {
     state,
     refusal: tried ? refusal : refusalOnReturn,
     keepThrough,
-    refuseSave: (error: unknown) => setRefusal(errorMessage(error, "save")),
+    refuseSave: (error: unknown) => {
+      setTried(true);
+      setRefusal(errorMessage(error, "save"));
+    },
   };
 }
 
@@ -338,7 +346,8 @@ function PlayerAnswers({
   showToast: ShowToast;
   keepGroup: (offered: boolean) => ReactNode;
 } & Pick<ComponentProps<typeof PlayerCalendar>, "accountControl">) {
-  const [answered, setAnswered] = useState<boolean | null>(null);
+  const [answered, setAnswered] = useState(false);
+  const [loadedMonths, setLoadedMonths] = useState<ReadonlySet<IsoMonth>>(() => new Set());
   const today = useTodayUtc();
   const month = visibleMonth(requestedMonth, today);
   const { playerId } = player;
@@ -362,7 +371,10 @@ function PlayerAnswers({
     setHintVisible(false);
   }
 
-  if (answers && answered === null) setAnswered(Object.keys(answers).length > 0);
+  if (answers && !loadedMonths.has(month)) {
+    setLoadedMonths(new Set(loadedMonths).add(month));
+    if (Object.keys(answers).length > 0) setAnswered(true);
+  }
 
   function saved({ keptNow }: { keptNow: boolean }) {
     setAnswered(true);

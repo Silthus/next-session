@@ -216,6 +216,53 @@ test("a signed-out visitor still joins and answers in the same steps", async ({ 
   await expect(page.getByText("Kept in My groups")).toBeHidden();
 });
 
+test("an Account can Keep again after removing a freshly joined Group before answering", async ({
+  page,
+}) => {
+  const { link } = await seedGroup("New Crew");
+  const account = await signUpAccount();
+  await openAsGm(page, account, link);
+  await join(page, "Robin");
+  await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
+  await page.getByRole("button", { name: "Remove from my groups" }).click();
+  await expect(page.getByRole("button", { name: "Keep this group", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Keep this group", exact: true }).click();
+  await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
+});
+
+for (const entry of ["player", "My groups"] as const) {
+  test(`Remove from ${entry} cancels a leftover Keep before reload`, async ({ page }) => {
+    const { gm, link } = await seedGroup("Removed Crew");
+    const account = await signUpAccount();
+    await openAsGm(page, account, link);
+    await join(page, "Robin");
+    await answerToday(page);
+    const kept = await account.client.query(api.player.group, { shareToken: gm.shareToken });
+    if (entry === "My groups") {
+      await page.goto("/me");
+      await page.getByRole("button", { name: "Options for Removed Crew" }).click();
+    }
+    await page.evaluate(
+      (pending) => sessionStorage.setItem("next-session.pendingKeep", JSON.stringify(pending)),
+      { shareToken: gm.shareToken, playerId: kept?.claimedPlayerId },
+    );
+    await page.getByRole("button", { name: "Remove from my groups" }).click();
+    if (entry === "player")
+      await expect(page.getByRole("main").getByText("Kept in My groups")).toBeHidden();
+    else await expect(page.getByRole("link", { name: /Removed Crew/ })).toBeHidden();
+    await page.reload();
+    await expect(
+      page.getByRole("button", { name: entry === "player" ? "Your account" : "Log out" }),
+    ).toBeVisible();
+    expect(
+      await page.evaluate(() => sessionStorage.getItem("next-session.pendingKeep")),
+    ).toBeNull();
+    expect(
+      (await account.client.query(api.me.groups, { today: todayUtc(Date.now()) }))?.playing,
+    ).toHaveLength(0);
+  });
+}
+
 test("viewing and picking claim nothing; the first Fill the rest keeps the Player", async ({
   page,
 }) => {
