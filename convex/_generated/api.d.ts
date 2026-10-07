@@ -25,6 +25,7 @@ import type * as model_players from "../model/players.js";
 import type * as model_rateLimits from "../model/rateLimits.js";
 import type * as model_telemetry from "../model/telemetry.js";
 import type * as model_tips from "../model/tips.js";
+import type * as notifications from "../notifications.js";
 import type * as player from "../player.js";
 import type * as roster from "../roster.js";
 import type * as schedule from "../schedule.js";
@@ -56,6 +57,7 @@ declare const fullApi: ApiFromModules<{
   "model/rateLimits": typeof model_rateLimits;
   "model/telemetry": typeof model_telemetry;
   "model/tips": typeof model_tips;
+  notifications: typeof notifications;
   player: typeof player;
   roster: typeof roster;
   schedule: typeof schedule;

@@ -62,3 +62,11 @@ Convex marks events from a `.test` Account with `is_test_account: true`. The ano
 ## Moving to a dedicated project
 
 `docs/spec.md` §13.9: create the project in EU Cloud, re-create the sender, templates and workflows from these files, and change `VITE_POSTHOG_TOKEN`, `POSTHOG_PROJECT_ID`, the Convex env and the webhook URLs.
+
+## Session updates (disabled, #97)
+
+`workflows/session-updates.json` and `templates/session-update.json` define the third mail workflow. Do not enable it or set `POSTHOG_SESSION_WEBHOOK_URL` in #97. #102 verifies sender channel 88088, creates the "Session updates" category in the UI, replaces `<CATEGORY:session-updates>`, `<TEMPLATE:session-update>`, sender, reply-to and secret placeholders, tests both set and cancelled copy, and then supplies the environment with inbox proof. Keep its status `draft` until then. A category with type `marketing` enforces hosted unsubscribe; these are service updates with tracking off. Re-enabling the in-app switch does not reverse a hosted unsubscribe.
+
+The webhook carries names, email and the current Share Link only as the run's trigger data. It captures no analytics event or person property. The editable design escapes Group names in HTML. Local graph reference: PostHog source `products/workflows/frontend/Workflows/workflowMetricsSummaryLogic.ts` at `9db777913f5907388cfc655c0d7fe531e8ddca54` confirms `message_category_id`, `message_category_type` and `tracking_enabled` on email configuration. Existing Welcome/Tips definitions supply the webhook and template shape. Live workflow rendering and hosted category proof remain with #102.
+
+Convex estimates planned deliveries per UTC day across Welcome (1), Tips (2) and session recipients (1 each). It warns at 80 and above 100, but queues every eligible recipient. Delayed Tips, hosted suppression, timeout duplicates and other products mean this is not the provider's actual send count. Inspect the shared project's real quota before activation; a per-Group check cannot warn meaningfully with a 100-Player Roster cap and the actor excluded.

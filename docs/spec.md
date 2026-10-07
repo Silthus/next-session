@@ -467,7 +467,7 @@ Each call is a reversible default. Michael can redirect any of them in one line.
 | 12 | The landing sends an Account without Groups of its own to `/me`. A GM still lands on their last Group, with a **My groups** link in the header | Every Account lands on `/me` |
 | 13 | A Player's name stays per Group. There is no Account display name | An Account name prefilled into Join |
 | 14 | The Privacy Policy gains one row and becomes 1.2. No re-acceptance gate: the new processing happens only when someone keeps a Group, and creating the Account stamps 1.2 | Build the re-acceptance gate first |
-| 15 | Email notifications are specified as a hook (§12.6) and not built | Build Resend sending now |
+| 15 | Session emails use disabled PostHog Workflows (§12.6); #102 owns activation | Build Resend sending now |
 
 ### 12.2 Who sees what
 
@@ -536,13 +536,16 @@ The no-account path keeps its steps and its fields: Join shows no new prompt, an
 - **Empty:** "Open your GM's link and tap Keep this group", plus Create your link.
 - **Log out** in the header. The GM surface's header gains a **My groups** link for Accounts.
 
-### 12.6 Email notifications: the hook, not built
+### 12.6 Session emails through PostHog Workflows
 
-Resend's DNS records are already on the zone. When this is built:
+Michael chose Workflows on 2026-10-07; Resend from Convex was the alternative. Implementation (#97) ships disabled. #102 owns sender verification, the hosted "Session updates" category, activation, mail environment and inbox proof. The visitor nudge promises notifications only after #102.
 
-- Triggers: `sessions.schedule` and `sessions.unschedule` schedule `internal.notifications.sessionChanged({groupId, date, change})` with `ctx.scheduler.runAfter(0, …)`, so the GM's mutation never waits on email.
-- Recipients: the Accounts behind the Group's Claimed Players, read through `players.by_groupId_and_nameKey` and `userId`, except the Account that made the change. Visitors without an Account get nothing; that is the reason to keep a Group.
-- Needs, then: `@convex-dev/resend`, a `RESEND_API_KEY` from Michael, a per-Account opt-out field on `users`, an unsubscribe link, a verified email (Google's is verified; Password needs a verification step or Resend OTP first), and a Privacy Policy row.
+- `sessions.schedule` and `sessions.unschedule` call `queueSessionMail` in their transaction, which records the latest change for that Group and date and schedules `internal.notifications.sessionChanged` with `runAfter(0, ...)`. The GM never waits for a webhook. With either `POSTHOG_SESSION_WEBHOOK_URL` or `POSTHOG_MAIL_WEBHOOK_SECRET` missing, no notification state or job is created.
+- Each change waits until its server-side 30-second Undo window ends. Unscheduling inside that window invalidates it and sends neither mail. Later cancellation sends an update, unless that night has since changed again. Restoring that cancelled night within 30 seconds invalidates its cancellation and requests no new schedule mail. The latest-change row expires after seven days; Session and Group existence are checked separately before fan-out and every retry.
+- Recipients are the current Accounts behind the Group's Claimed Players, read through indexed queries and deduplicated by Account. Exclude the actor, Anonymous GMs, missing emails, `.test` addresses and opted-out Accounts. Release, Player removal, Session removal, Group removal and a newer change suppress stale deliveries. Read the email, Group name and current Share Token at each send attempt. Cancellation uses the current Share Link, never a deleted Session URL.
+- One secret-guarded webhook per eligible Account, through the existing action retrier: at most four attempts for network failures and 5xx; 4xx, including 429, log refusal without retry. The webhook carries `{distinct_id, product, email, group_name, date_label, change, player_url}` as workflow trigger data only. No personal mail data reaches capture events or person properties. A timeout after acceptance can still duplicate a mail, as with Welcome Mail.
+- `/me` stores `users.sessionEmailsEnabled`, defaulting to true when absent. Only the authenticated Account can change its own preference. It applies to all Groups. PostHog independently enforces the hosted category unsubscribe. Re-enabling the in-app switch does not override a hosted unsubscribe.
+- Daily volume is an estimate of planned Next Session deliveries requested in a UTC day across all Groups and mail kinds: Welcome = 1, Tips = 2, Session update = 1. Warn through `serverLog` when the count first reaches 80 and first exceeds tier 0's 100. Count no suppressed recipients and no retry twice; never drop a fan-out at the threshold. Rows expire after two days. This estimate includes future Tips conservatively but cannot know when those delayed sends happen, whether they exit early, provider suppression, accepted retries or Lonir's other mail. #102 must check the shared project's actual sending usage and queuing before activation.
 
 ### 12.7 Legal
 
@@ -606,7 +609,7 @@ Each call is a reversible default unless marked as Michael's. He can redirect an
 | 9 | Group analytics stays off; events carry `group_id` as a plain property | A `next_session_group` group type, which needs the paid add-on and one of the shared project's five group-type slots |
 | 10 | Browser traffic goes through the Worker at `next-session.link/ingest`, the PostHog Cloudflare proxy pattern | Send straight to `eu.i.posthog.com`, which ad blockers drop |
 | 11 | Everything ships disabled: the browser initialises PostHog only when the build has `VITE_POSTHOG_TOKEN`, and Convex sends only when the deployment has `POSTHOG_PROJECT_TOKEN`. Only the production deploy sets them, so dev, CI, e2e and the local backend send nothing | A runtime kill switch through a flag, which would contradict call 3 |
-| 12 | PostHog Workflows sends the mail. It can: a webhook trigger guarded by a secret `Authorization` header, delays up to 30 days per step, email steps, message categories with a hosted unsubscribe page, and a verified sender domain. Only Convex starts a mail workflow: the project token is public, so a workflow triggered by a captured event would mail any address anyone posts | Resend from Convex scheduled functions, the §12.6 hook. Kept for Session notifications, which fan out to many recipients (§13.7) |
+| 12 | PostHog Workflows sends the mail. It can: a webhook trigger guarded by a secret `Authorization` header, delays up to 30 days per step, email steps, message categories with a hosted unsubscribe page, and a verified sender domain. Only Convex starts a mail workflow: the project token is public, so a workflow triggered by a captured event would mail any address anyone posts | Resend from Convex scheduled functions, the §12.6 hook. Replaced for Session updates by Michael's 2026-10-07 Workflows call (§13.7) |
 | 13 | Every new Account gets one **Welcome Mail** (transactional, no promotion) | No mail at all until notifications ship |
 | 14 | The drip is **Tips**: two mails, only for Accounts that tick an unticked box in the Save sheet and then press **Yes, send me the tips** on the page the Welcome Mail links to (double opt-in). Opening the link alone confirms nothing, so a mail scanner cannot subscribe anyone | Single opt-in, or treat the tips as service messages without consent. German law (§ 7 UWG) reads usage tips as advertising, and double opt-in is how consent is proven |
 | 15 | Email open and click tracking are off on every step (`tracking_enabled: false`) | Turn them on, which puts a tracking pixel in a mail and needs consent of its own |
@@ -854,9 +857,11 @@ In Michael's voice, plain text first (every template carries a real `text` part)
 >
 > You get this because you asked for tips. [Unsubscribe]({{ unsubscribe_url }})
 
-### 13.7 How this fits the §12.6 email hook
+### 13.7 Session updates share the Workflows mail path
 
-Session notifications stay on the §12.6 plan: Resend from a Convex action. A Session change mails every Claimed Player's Account except the one who made it, and a PostHog workflow runs per person and per event, so it would need one event per recipient and would put every Player's email into PostHog. The two paths share the sending domain (`next-session.link`) and the opt-out rule: when notifications ship, their opt-out lives on `users`, not in PostHog.
+Session updates use the §12.6 Convex fan-out and `POSTHOG_SESSION_WEBHOOK_URL`, reusing `POSTHOG_MAIL_WEBHOOK_SECRET`, the sender and the action retrier. Michael chose this over Resend on 2026-10-07. Definitions in `docs/posthog/workflows/session-updates.json` and `templates/session-update.json` are draft-only: secret, sender, template and category placeholders must be resolved by #102.
+
+Each mail names the Group and the night, states "set" or "cancelled", and has one button to the current Share Link. The template includes real plain text and editable design blocks, with tracking off and hosted category unsubscribe. "Session updates" uses PostHog's `marketing` category type to honor unsubscribe, although the copy is a service update rather than advertising. No notification promise or production mail environment ships in #97.
 
 ### 13.8 Credentials and switch-on
 

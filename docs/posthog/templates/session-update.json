@@ -1,0 +1,325 @@
+{
+  "name": "Next Session: Session update",
+  "description": "One service update for a Claimed Account, with hosted Session updates category unsubscribe. Disabled until #102.",
+  "type": "email",
+  "content": {
+    "templating": "liquid",
+    "email": {
+      "subject": "{{ event.properties.group_name }}: session {% if event.properties.change == \"scheduled\" %}set{% else %}cancelled{% endif %}",
+      "text": "Hi there,\n\n{% if event.properties.change == \"scheduled\" %}The next session for {{ event.properties.group_name }} is set for {{ event.properties.date_label }}.{% else %}The session for {{ event.properties.group_name }} on {{ event.properties.date_label }} has been cancelled.{% endif %}\n\nOpen your group: {{ event.properties.player_url }}\n\nThanks!\nMichael\n\nYou get this because you keep this group. Stop session updates: {{ unsubscribe_url }}\nYou can also turn them off in My groups: https://next-session.link/me\n",
+      "design": {
+        "counters": {
+          "u_row": 2,
+          "u_column": 2,
+          "u_content_text": 6,
+          "u_content_button": 1,
+          "u_content_html": 1
+        },
+        "schemaVersion": 16,
+        "body": {
+          "id": "next_session_mail",
+          "rows": [
+            {
+              "id": "u_row_1",
+              "cells": [1],
+              "columns": [
+                {
+                  "id": "u_column_1",
+                  "contents": [
+                    {
+                      "id": "u_content_text_1",
+                      "type": "text",
+                      "values": {
+                        "containerPadding": "28px 32px 8px",
+                        "anchor": "",
+                        "textAlign": "left",
+                        "lineHeight": "160%",
+                        "linkStyle": {
+                          "inherit": false,
+                          "linkColor": "#835200",
+                          "linkHoverColor": "#835200",
+                          "linkUnderline": true,
+                          "linkHoverUnderline": true
+                        },
+                        "hideDesktop": false,
+                        "displayCondition": null,
+                        "_meta": {
+                          "htmlID": "u_content_text_1",
+                          "htmlClassNames": "u_content_text"
+                        },
+                        "selectable": true,
+                        "draggable": true,
+                        "duplicatable": true,
+                        "deletable": true,
+                        "hideable": true,
+                        "text": "<p style=\"margin:0;font-family:'Courier New',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#835200;font-weight:bold;\">Next Session</p>"
+                      }
+                    }
+                  ],
+                  "values": {
+                    "_meta": {
+                      "htmlID": "u_column_1",
+                      "htmlClassNames": "u_column"
+                    },
+                    "border": {},
+                    "padding": "0px",
+                    "backgroundColor": ""
+                  }
+                }
+              ],
+              "values": {
+                "displayCondition": null,
+                "columns": false,
+                "backgroundColor": "#fbf5e5",
+                "columnsBackgroundColor": "#fbf5e5",
+                "backgroundImage": {
+                  "url": "",
+                  "fullWidth": true,
+                  "repeat": false,
+                  "center": true,
+                  "cover": false
+                },
+                "padding": "0px",
+                "_meta": {
+                  "htmlID": "u_row_1",
+                  "htmlClassNames": "u_row"
+                }
+              }
+            },
+            {
+              "id": "u_row_2",
+              "cells": [1],
+              "columns": [
+                {
+                  "id": "u_column_2",
+                  "contents": [
+                    {
+                      "id": "u_content_text_2",
+                      "type": "text",
+                      "values": {
+                        "containerPadding": "10px 32px",
+                        "anchor": "",
+                        "textAlign": "left",
+                        "lineHeight": "160%",
+                        "linkStyle": {
+                          "inherit": false,
+                          "linkColor": "#835200",
+                          "linkHoverColor": "#835200",
+                          "linkUnderline": true,
+                          "linkHoverUnderline": true
+                        },
+                        "hideDesktop": false,
+                        "displayCondition": null,
+                        "_meta": {
+                          "htmlID": "u_content_text_2",
+                          "htmlClassNames": "u_content_text"
+                        },
+                        "selectable": true,
+                        "draggable": true,
+                        "duplicatable": true,
+                        "deletable": true,
+                        "hideable": true,
+                        "text": "<p style=\"margin:0;font-size:16px;line-height:160%;color:#1a1511;\">Hi there,</p>"
+                      }
+                    },
+                    {
+                      "id": "u_content_text_3",
+                      "type": "text",
+                      "values": {
+                        "containerPadding": "10px 32px",
+                        "anchor": "",
+                        "textAlign": "left",
+                        "lineHeight": "160%",
+                        "linkStyle": {
+                          "inherit": false,
+                          "linkColor": "#835200",
+                          "linkHoverColor": "#835200",
+                          "linkUnderline": true,
+                          "linkHoverUnderline": true
+                        },
+                        "hideDesktop": false,
+                        "displayCondition": null,
+                        "_meta": {
+                          "htmlID": "u_content_text_3",
+                          "htmlClassNames": "u_content_text"
+                        },
+                        "selectable": true,
+                        "draggable": true,
+                        "duplicatable": true,
+                        "deletable": true,
+                        "hideable": true,
+                        "text": "<p style=\"margin:0;font-size:16px;line-height:160%;color:#1a1511;\">{% if event.properties.change == \"scheduled\" %}The next session for {{ event.properties.group_name | escape }} is set for {{ event.properties.date_label | escape }}.{% else %}The session for {{ event.properties.group_name | escape }} on {{ event.properties.date_label | escape }} has been cancelled.{% endif %}</p>"
+                      }
+                    },
+                    {
+                      "id": "u_content_button_1",
+                      "type": "button",
+                      "values": {
+                        "containerPadding": "18px 32px 22px",
+                        "anchor": "",
+                        "textAlign": "left",
+                        "lineHeight": "120%",
+                        "linkStyle": {
+                          "inherit": false,
+                          "linkColor": "#835200",
+                          "linkHoverColor": "#835200",
+                          "linkUnderline": true,
+                          "linkHoverUnderline": true
+                        },
+                        "hideDesktop": false,
+                        "displayCondition": null,
+                        "_meta": {
+                          "htmlID": "u_content_button_1",
+                          "htmlClassNames": "u_content_button"
+                        },
+                        "selectable": true,
+                        "draggable": true,
+                        "duplicatable": true,
+                        "deletable": true,
+                        "hideable": true,
+                        "href": {
+                          "name": "web",
+                          "values": {
+                            "href": "{{ event.properties.player_url }}",
+                            "target": "_blank"
+                          }
+                        },
+                        "buttonColors": {
+                          "color": "#221811",
+                          "backgroundColor": "#c5953b",
+                          "hoverColor": "#221811",
+                          "hoverBackgroundColor": "#c5953b"
+                        },
+                        "size": {
+                          "autoWidth": true,
+                          "width": "100%"
+                        },
+                        "fontSize": "16px",
+                        "fontWeight": 700,
+                        "padding": "14px 24px",
+                        "border": {},
+                        "borderRadius": "10px",
+                        "text": "<span style=\"font-size:16px;line-height:19px;\">Open your group</span>",
+                        "calculatedWidth": 160,
+                        "calculatedHeight": 47
+                      }
+                    },
+                    {
+                      "id": "u_content_text_6",
+                      "type": "text",
+                      "values": {
+                        "containerPadding": "10px 32px",
+                        "anchor": "",
+                        "textAlign": "left",
+                        "lineHeight": "160%",
+                        "linkStyle": {
+                          "inherit": false,
+                          "linkColor": "#835200",
+                          "linkHoverColor": "#835200",
+                          "linkUnderline": true,
+                          "linkHoverUnderline": true
+                        },
+                        "hideDesktop": false,
+                        "displayCondition": null,
+                        "_meta": {
+                          "htmlID": "u_content_text_6",
+                          "htmlClassNames": "u_content_text"
+                        },
+                        "selectable": true,
+                        "draggable": true,
+                        "duplicatable": true,
+                        "deletable": true,
+                        "hideable": true,
+                        "text": "<p style=\"margin:0;font-size:16px;line-height:160%;color:#1a1511;\">Thanks!<br />Michael</p>"
+                      }
+                    },
+                    {
+                      "id": "u_content_text_5",
+                      "type": "text",
+                      "values": {
+                        "containerPadding": "10px 32px",
+                        "anchor": "",
+                        "textAlign": "left",
+                        "lineHeight": "160%",
+                        "linkStyle": {
+                          "inherit": false,
+                          "linkColor": "#835200",
+                          "linkHoverColor": "#835200",
+                          "linkUnderline": true,
+                          "linkHoverUnderline": true
+                        },
+                        "hideDesktop": false,
+                        "displayCondition": null,
+                        "_meta": {
+                          "htmlID": "u_content_text_5",
+                          "htmlClassNames": "u_content_text"
+                        },
+                        "selectable": true,
+                        "draggable": true,
+                        "duplicatable": true,
+                        "deletable": true,
+                        "hideable": true,
+                        "text": "<p style=\"margin:0;font-size:13px;line-height:160%;color:#1a1511;\">You get this because you keep this group. <a href=\"{{ unsubscribe_url }}\">Stop session updates</a>. You can also turn them off in <a href=\"https://next-session.link/me\">My groups</a>.</p>"
+                      }
+                    }
+                  ],
+                  "values": {
+                    "_meta": {
+                      "htmlID": "u_column_2",
+                      "htmlClassNames": "u_column"
+                    },
+                    "border": {},
+                    "padding": "0px",
+                    "backgroundColor": ""
+                  }
+                }
+              ],
+              "values": {
+                "displayCondition": null,
+                "columns": false,
+                "backgroundColor": "#fbf5e5",
+                "columnsBackgroundColor": "#fbf5e5",
+                "backgroundImage": {
+                  "url": "",
+                  "fullWidth": true,
+                  "repeat": false,
+                  "center": true,
+                  "cover": false
+                },
+                "padding": "0px 0px 24px",
+                "_meta": {
+                  "htmlID": "u_row_2",
+                  "htmlClassNames": "u_row"
+                }
+              }
+            }
+          ],
+          "headers": [],
+          "footers": [],
+          "values": {
+            "backgroundColor": "#f2e7ce",
+            "contentWidth": "560px",
+            "contentAlign": "center",
+            "fontFamily": {
+              "label": "Trebuchet MS",
+              "value": "'Trebuchet MS', Tahoma, Verdana, sans-serif"
+            },
+            "textColor": "#1a1511",
+            "preheaderText": "",
+            "linkStyle": {
+              "body": true,
+              "linkColor": "#835200",
+              "linkHoverColor": "#835200",
+              "linkUnderline": true,
+              "linkHoverUnderline": true
+            },
+            "_meta": {
+              "htmlID": "u_body",
+              "htmlClassNames": "u_body"
+            }
+          }
+        }
+      }
+    }
+  }
+}

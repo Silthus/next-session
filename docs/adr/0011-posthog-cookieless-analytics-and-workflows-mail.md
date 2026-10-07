@@ -27,3 +27,9 @@ Everything ships disabled and turns on only where the production deploy provides
 - Server errors from queries and mutations stay in the Convex dashboard until Convex Pro. The browser reports the unexpected ones it sees, with the Convex request ID.
 - Shared-project settings (cookieless server hash, IP discard) apply to Lonir too, so Michael changes them, not an agent.
 - Each server-tracked fact costs one Convex action call, which is why answer taps are not tracked on the server.
+
+## Amendment, 2026-10-07: Session updates use Workflows
+
+Michael chose PostHog Workflows for Session updates, superseding the Session-notification Resend plan above. Resend from Convex remains the considered alternative. Convex fans out through the existing secret-guarded webhook pattern, with the current Claimed Accounts, an Account preference and a hosted "Session updates" unsubscribe category. Group names, emails and Share Links are workflow trigger data only, never capture events or person properties.
+
+Implementation #97 ships disabled. #102 owns sender verification, category creation, live mail environment, inbox proof and the visitor notification promise. Neither implementation nor this amendment enables production mail. The current design is in `docs/spec.md` §12.6 and §13.7.
