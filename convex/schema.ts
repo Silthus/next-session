@@ -21,6 +21,7 @@ export default defineSchema({
     tipsRequestedAt: v.optional(v.number()),
     tipsConsentVersion: v.optional(v.string()),
     tipsCodeHash: v.optional(v.string()),
+    sessionEmailsEnabled: v.optional(v.boolean()),
     tipsConfirmedAt: v.optional(v.number()),
   })
     .index("email", ["email"])
@@ -60,6 +61,16 @@ export default defineSchema({
   sessions: defineTable({
     groupId: v.id("groups"),
     date: v.string(),
+  }).index("by_groupId_and_date", ["groupId", "date"]),
+
+  mailVolume: defineTable({ day: v.string(), count: v.number() }).index("by_day", ["day"]),
+
+  sessionMailStates: defineTable({
+    groupId: v.id("groups"),
+    date: v.string(),
+    sessionId: v.id("sessions"),
+    change: v.union(v.literal("scheduled"), v.literal("cancelled")),
+    changedAt: v.number(),
   }).index("by_groupId_and_date", ["groupId", "date"]),
 
   saveClaims: defineTable({

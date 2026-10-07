@@ -7,6 +7,7 @@ import { Toast } from "../../ui/Toast";
 import { useGm } from "../account/useGm";
 import { useToast, type GroupToast } from "../group/useToast";
 import { useTodayUtc } from "../player/useTodayUtc";
+import { SessionEmailSettings } from "./SessionEmailSettings";
 import { MyGroups } from "./MyGroups";
 import { useRemoval } from "./useRemoval";
 
@@ -28,6 +29,7 @@ export function MyGroupsScreen() {
   return (
     <>
       <MyGroups
+        settings={<SessionEmailSettings />}
         email={gm.email}
         groups={groups}
         today={today}

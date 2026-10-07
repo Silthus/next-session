@@ -98,6 +98,10 @@ _Avoid_: consent (that word is reserved for Tips), clickwrap
 The one email every new Account gets right after it is created, confirming the Account and linking My groups. It is part of the Service, not advertising.
 _Avoid_: onboarding email, confirmation email
 
+**Session updates**:
+Emails to the Accounts behind a Group's Claimed Players when a Session is set or cancelled, excluding the actor. The Account preference on My groups and the hosted unsubscribe both stop them. Implementation ships disabled until live activation.
+_Avoid_: alerts, reminders (these do not remind before a Session)
+
 **Tips**:
 Two short emails on getting the first game night scheduled, sent only to an Account that ticked the box in the Save sheet and then pressed **Yes, send me the tips** on the page the Welcome Mail links to. Unsubscribing stops them.
 _Avoid_: drip, newsletter, marketing (in copy)

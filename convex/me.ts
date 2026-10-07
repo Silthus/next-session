@@ -9,7 +9,8 @@ import {
 } from "../shared/dates";
 import { MAX_CLAIMED_PLAYERS_PER_ACCOUNT, MAX_GROUPS_PER_GM } from "../shared/limits";
 import type { Doc, Id } from "./_generated/dataModel";
-import { query, type QueryCtx } from "./_generated/server";
+import { mutation, query, type QueryCtx } from "./_generated/server";
+import { fail } from "./model/errors";
 import { currentAccount } from "./model/access";
 
 const UPCOMING_SESSIONS = 5;
@@ -123,3 +124,23 @@ function daysBetween(first: IsoDate, last: IsoDate) {
   }
   return days;
 }
+
+export const sessionEmails = query({
+  args: {},
+  returns: v.union(v.boolean(), v.null()),
+  handler: async (ctx) => {
+    const account = await currentAccount(ctx);
+    return account ? account.sessionEmailsEnabled !== false : null;
+  },
+});
+
+export const setSessionEmails = mutation({
+  args: { enabled: v.boolean() },
+  returns: v.null(),
+  handler: async (ctx, { enabled }) => {
+    const account = await currentAccount(ctx);
+    if (!account) fail({ code: "UNAUTHENTICATED" });
+    await ctx.db.patch("users", account._id, { sessionEmailsEnabled: enabled });
+    return null;
+  },
+});

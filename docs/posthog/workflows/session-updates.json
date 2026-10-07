@@ -1,0 +1,90 @@
+{
+  "name": "Next Session: Session updates",
+  "description": "Disabled definition for #97. #102 supplies the Session updates category, verified sender and template, then enables it. Convex alone requests a mail after Undo settles.",
+  "exit_condition": "exit_only_at_end",
+  "actions": [
+    {
+      "id": "trigger_node",
+      "name": "Session changed, requested by Convex",
+      "type": "trigger",
+      "config": {
+        "type": "webhook",
+        "template_id": "template-source-webhook",
+        "inputs": {
+          "event": {
+            "value": "next_session:session_mail_requested"
+          },
+          "distinct_id": {
+            "value": "{request.body.distinct_id}"
+          },
+          "properties": {
+            "value": {
+              "product": "{request.body.product}",
+              "email": "{request.body.email}",
+              "group_name": "{request.body.group_name}",
+              "date_label": "{request.body.date_label}",
+              "change": "{request.body.change}",
+              "player_url": "{request.body.player_url}"
+            }
+          },
+          "auth_header": {
+            "value": "Bearer <POSTHOG_MAIL_WEBHOOK_SECRET>"
+          },
+          "method": {
+            "value": "POST"
+          }
+        }
+      }
+    },
+    {
+      "id": "email_session",
+      "name": "Session update",
+      "type": "function_email",
+      "config": {
+        "template_id": "template-email",
+        "template_uuid": "<TEMPLATE:session-update>",
+        "message_category_type": "marketing",
+        "tracking_enabled": false,
+        "inputs": {
+          "email": {
+            "value": {
+              "to": {
+                "email": "{{ event.properties.email }}",
+                "name": ""
+              },
+              "from": {
+                "integrationId": "<SENDER_INTEGRATION_ID>",
+                "email": "hello@next-session.link",
+                "name": "Michael from Next Session"
+              },
+              "replyTo": "<REPLY_TO>",
+              "preheader": "The next game night for your group."
+            }
+          }
+        },
+        "message_category_id": "<CATEGORY:session-updates>"
+      }
+    },
+    {
+      "id": "exit_node",
+      "name": "Exit",
+      "type": "exit",
+      "config": {
+        "reason": "Session update sent"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "trigger_node",
+      "to": "email_session",
+      "type": "continue"
+    },
+    {
+      "from": "email_session",
+      "to": "exit_node",
+      "type": "continue"
+    }
+  ],
+  "status": "draft"
+}

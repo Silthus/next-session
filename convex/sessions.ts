@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { isBookable, todayUtc } from "../shared/dates";
 import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
+import { queueSessionMail } from "./notifications";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, type QueryCtx } from "./_generated/server";
 import { ownedGroup, ownedSession, touchGroup } from "./model/access";
@@ -17,6 +18,14 @@ export const schedule = mutation({
     if ((await sessionOn(ctx, group._id, date)) !== null) fail({ code: "SESSION_EXISTS" });
     await enforceRateLimit(ctx, "gmEdit", gm._id);
     const sessionId = await ctx.db.insert("sessions", { groupId: group._id, date });
+    await queueSessionMail(ctx, {
+      groupId,
+      sessionId,
+      actorId: gm._id,
+      date,
+      change: "scheduled",
+      createdAt: Date.now(),
+    });
     await touchGroup(ctx, group);
     await track(ctx, () => sessionScheduled(ctx, gm, group._id));
     return sessionId;
@@ -31,6 +40,14 @@ export const unschedule = mutation({
     ensureBookable(session.date);
     await enforceRateLimit(ctx, "gmEdit", gm._id);
     await ctx.db.delete("sessions", session._id);
+    await queueSessionMail(ctx, {
+      groupId: group._id,
+      sessionId,
+      actorId: gm._id,
+      date: session.date,
+      change: "cancelled",
+      createdAt: session._creationTime,
+    });
     await touchGroup(ctx, group);
     await track(ctx, { name: "session_unscheduled", actor: gm, group_id: group._id });
     return null;

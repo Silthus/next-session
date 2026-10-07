@@ -18,6 +18,7 @@ import {
 } from "./myGroups";
 
 type MyGroupsProps = {
+  settings?: ReactNode;
   email: string | undefined;
   groups: MyGroupsData | undefined;
   today: IsoDate;
@@ -32,6 +33,7 @@ const cardClassName =
   "rounded-xl border border-line bg-surface shadow-card transition-colors hover:border-line-strong";
 
 export function MyGroups({
+  settings,
   email,
   groups,
   today,
@@ -66,6 +68,7 @@ export function MyGroups({
           <RunningGroups groups={groups.running} creating={creating} onCreate={onCreate} />
         </>
       )}
+      {settings}
     </PageShell>
   );
 }
