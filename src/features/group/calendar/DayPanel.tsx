@@ -51,7 +51,7 @@ export function DayPanel({
         </button>
         <span className="text-xs text-ink-3">{relativeDay(day.date, today)}</span>
       </div>
-      <h3 id={headingId} className="mt-2 font-display text-2xl font-bold">
+      <h3 id={headingId} className="mt-2 font-display text-2xl font-semibold">
         {longDayLabel(day.date)}
       </h3>
       {playerCount === 0 ? (

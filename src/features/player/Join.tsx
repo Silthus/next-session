@@ -74,14 +74,14 @@ export function Join({
         <h1
           ref={heading}
           tabIndex={-1}
-          className="mt-1 font-display text-4xl font-extrabold break-words outline-none"
+          className="mt-1 font-display text-4xl font-medium break-words outline-none"
         >
           {groupName}
         </h1>
         <p className="mt-2 text-ink-2">Tap the nights you can play. No account, takes a minute.</p>
       </div>
       <section className="animate-rise rounded-xl border border-line bg-surface p-5 shadow-card">
-        <h2 className="font-display text-lg font-bold">Who are you?</h2>
+        <h2 className="font-display text-lg font-semibold">Who are you?</h2>
         {removed && (
           <p className="mt-1 text-sm text-ink-2">
             Your name is no longer on the list. Pick or add one.

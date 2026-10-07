@@ -67,7 +67,7 @@ export function GroupSwitcher({ group, onRename, ...menu }: GroupSwitcherProps) 
         submitLabel="Save"
         topic="group"
         className="min-w-0 flex-1"
-        inputClassName="font-display text-base font-bold sm:text-lg"
+        inputClassName="font-display text-base font-semibold sm:text-lg"
         onSubmit={async (name) => {
           await onRename(name);
           stopRenaming();
@@ -87,7 +87,7 @@ export function GroupSwitcher({ group, onRename, ...menu }: GroupSwitcherProps) 
           <button
             {...props}
             type="button"
-            className="flex max-w-full min-w-0 items-center gap-1.5 rounded-md px-2 py-1 font-display text-lg font-bold hover:bg-surface-2 sm:text-xl"
+            className="flex max-w-full min-w-0 items-center gap-1.5 rounded-md px-2 py-1 font-display text-lg font-semibold hover:bg-surface-2 sm:text-xl"
           >
             <span className="truncate">{group.name}</span>
             <IconChevron direction="down" className="shrink-0 text-ink-3" />

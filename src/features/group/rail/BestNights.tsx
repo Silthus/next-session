@@ -73,7 +73,7 @@ function NightRow({
     >
       <span
         className={cn(
-          "inline-flex size-7 shrink-0 items-center justify-center rounded-full font-display text-sm font-bold",
+          "inline-flex size-7 shrink-0 items-center justify-center rounded-full font-display text-sm font-semibold",
           rank === 1 ? "bg-free text-white dark:text-paper" : "bg-surface-2 text-ink-2",
         )}
       >

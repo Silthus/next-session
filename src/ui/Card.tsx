@@ -9,7 +9,7 @@ export function Card({
   return (
     <section
       className={cn(
-        "rounded-lg border bg-surface p-4 shadow-card",
+        "rounded-xl border bg-surface p-4 shadow-card",
         accent ? "border-accent" : "border-line",
         className,
       )}

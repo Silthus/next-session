@@ -23,7 +23,12 @@ const DEPLOY_KEY_NAMES: Record<Exclude<Target, "local">, string> = {
 const DEPLOY_KEYS_FILE = join(homedir(), ".config", "next-session", "deploy-keys.env");
 
 export function authEnv(target: Target, { jwtPrivateKey, jwks }: AuthKeys): Env {
-  return { JWT_PRIVATE_KEY: jwtPrivateKey, JWKS: jwks, SITE_URL: SITE_URLS[target] };
+  return {
+    JWT_PRIVATE_KEY: jwtPrivateKey,
+    JWKS: jwks,
+    SITE_URL:
+      target === "local" ? (process.env.E2E_BASE_URL ?? SITE_URLS.local) : SITE_URLS[target],
+  };
 }
 
 export function convexEnvSet(target: Target, values: Env, deployKeys: Env) {
@@ -31,7 +36,18 @@ export function convexEnvSet(target: Target, values: Env, deployKeys: Env) {
     .map(([name, value]) => `${name}='${value}'\n`)
     .join("");
   if (target === "local") {
-    return { command: ["bunx", "convex", "env", "set", "--force"], stdin, env: LOCAL_BACKEND_ENV };
+    return {
+      command: [
+        "bunx",
+        "convex",
+        "env",
+        "set",
+        "--force",
+        ...(process.env.E2E_BASE_URL ? ["--env-file", ".env.local"] : []),
+      ],
+      stdin,
+      env: LOCAL_BACKEND_ENV,
+    };
   }
   return {
     command: ["bunx", "convex", "env", "set"],

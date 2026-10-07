@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { log, track, type BrowserEvent } from "../lib/telemetry";
 import { Button } from "./Button";
 import { cn } from "./cn";
 import { Eyebrow } from "./Eyebrow";
-import { IconCheck, IconCopy } from "./icons";
+import { IconCheck, IconCopy, IconMail, IconShare } from "./icons";
+import { IconTelegram, IconWhatsApp } from "./icons/brands";
 
 const copiedFor = 1600;
 const invitation =
@@ -48,7 +49,7 @@ export function ShareLinkCard({
   return (
     <div
       className={cn(
-        "rounded-lg border border-accent/30 bg-accent-soft/60 dark:bg-accent-soft/40",
+        "rounded-xl border border-accent/30 bg-accent-soft/60 dark:bg-accent-soft/40",
         compact ? "p-3" : "p-4",
       )}
     >
@@ -163,14 +164,14 @@ function shareNatively(text: string, onShared: () => void) {
 type ShareTarget = {
   channel: ShareChannel;
   label: string;
-  glyph: string;
+  icon: ReactNode;
   tone: string;
   href: string;
   newTab: boolean;
 };
 
 const roundTarget =
-  "inline-flex size-10 items-center justify-center rounded-full text-sm font-bold transition-transform hover:scale-105 active:scale-95";
+  "inline-flex size-11 items-center justify-center overflow-hidden rounded-full transition-transform hover:scale-105 active:scale-95";
 
 function ShareTargets({
   url,
@@ -185,7 +186,7 @@ function ShareTargets({
     {
       channel: "whatsapp",
       label: "WhatsApp",
-      glyph: "W",
+      icon: <IconWhatsApp />,
       tone: "bg-[#25D366] text-white",
       href: `https://wa.me/?text=${encoded}`,
       newTab: true,
@@ -193,15 +194,15 @@ function ShareTargets({
     {
       channel: "telegram",
       label: "Telegram",
-      glyph: "T",
-      tone: "bg-[#2AABEE] text-white",
+      icon: <IconTelegram className="size-full" />,
+      tone: "bg-white text-[#2AABEE]",
       href: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(`${invitation}.`)}`,
       newTab: true,
     },
     {
       channel: "mail",
       label: "Mail",
-      glyph: "@",
+      icon: <IconMail />,
       tone: "bg-surface text-ink",
       href: `mailto:?subject=${encodeURIComponent("Our next game night")}&body=${encoded}`,
       newTab: false,
@@ -218,7 +219,7 @@ function ShareTargets({
           onClick={() => onShared(target.channel)}
           className={cn(roundTarget, target.tone)}
         >
-          {target.glyph}
+          {target.icon}
         </a>
       ))}
       {canShareNatively() && (
@@ -228,7 +229,7 @@ function ShareTargets({
           onClick={() => shareNatively(message, () => onShared("native"))}
           className={cn(roundTarget, "bg-surface text-ink")}
         >
-          ↗
+          <IconShare />
         </button>
       )}
     </div>

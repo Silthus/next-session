@@ -81,7 +81,7 @@ function MonthHeader({
         <h2
           tabIndex={-1}
           data-month-heading
-          className="font-display text-xl font-bold outline-none sm:text-2xl"
+          className="font-display text-xl font-semibold outline-none sm:text-2xl"
         >
           {monthLabel(month)}
         </h2>
