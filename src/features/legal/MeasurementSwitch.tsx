@@ -32,9 +32,9 @@ export function MeasurementSwitch() {
   return (
     <section
       aria-labelledby="usage-measurement"
-      className="mt-8 flex flex-col items-start gap-3 rounded-lg border border-line p-4"
+      className="mt-8 flex flex-col items-start gap-3 rounded-xl border border-line p-4"
     >
-      <h2 id="usage-measurement" className="font-display text-xl font-bold">
+      <h2 id="usage-measurement" className="font-display text-xl font-semibold">
         Usage measurement
       </h2>
       <p role="status" className="leading-relaxed text-ink-2">

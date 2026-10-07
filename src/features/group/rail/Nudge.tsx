@@ -16,7 +16,7 @@ export function Nudge({
   return (
     <section
       aria-labelledby={headingId}
-      className="animate-rise flex flex-col gap-3 rounded-lg border border-maybe/50 bg-maybe-soft/70 px-4 py-3 sm:flex-row sm:items-center"
+      className="animate-rise flex flex-col gap-3 rounded-xl border border-maybe/50 bg-maybe-soft/70 px-4 py-3 sm:flex-row sm:items-center"
     >
       <h2 id={headingId} className="sr-only">
         Save your group
