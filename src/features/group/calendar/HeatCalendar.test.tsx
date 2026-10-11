@@ -64,6 +64,58 @@ function barsOf(day: HTMLElement) {
 }
 
 describe("HeatCalendar", () => {
+  describe("who is behind a night", () => {
+    const crew = [
+      { _id: "ana", name: "Ana" },
+      { _id: "ben", name: "Ben" },
+      { _id: "chiara", name: "Chiara" },
+    ];
+
+    it("names each Player's answer beside the night, for hover, focus and screen readers", () => {
+      renderCalendar({
+        players: crew,
+        answers: [
+          { playerId: "ana", date: "2026-10-16", answer: "free" },
+          { playerId: "ben", date: "2026-10-16", answer: "maybe" },
+        ],
+      });
+      const night = screen.getByRole("button", { name: /^Friday, October 16/ });
+      const detail = document.getElementById(night.getAttribute("aria-describedby") ?? "");
+      expect(detail?.textContent).toBe("Free AnaMaybe BenNo answer Chiara");
+    });
+
+    it("hides the names on Escape until the night is hovered or focused again", async () => {
+      renderCalendar({
+        players: crew,
+        answers: [{ playerId: "ana", date: "2026-10-16", answer: "free" }],
+      });
+      const night = screen.getByRole("button", { name: /^Friday, October 16/ });
+      night.focus();
+      expect(night.getAttribute("aria-describedby")).not.toBeNull();
+      await userEvent.keyboard("{Escape}");
+      expect(night.getAttribute("aria-describedby")).toBeNull();
+      expect(document.activeElement).toBe(night);
+      await userEvent.tab();
+      await userEvent.tab({ shift: true });
+      expect(night.getAttribute("aria-describedby")).not.toBeNull();
+    });
+
+    it("says nothing beside a past night", () => {
+      renderCalendar({
+        players: crew,
+        answers: [{ playerId: "ana", date: "2026-10-01", answer: "free" }],
+      });
+      const past = screen.getByRole("button", { name: /^Thursday, October 1:/ });
+      expect(past.getAttribute("aria-describedby")).toBeNull();
+    });
+
+    it("says nothing beside a night while the Roster is empty", () => {
+      renderCalendar({ players: [] });
+      const night = screen.getByRole("button", { name: "Friday, October 16" });
+      expect(night.getAttribute("aria-describedby")).toBeNull();
+    });
+  });
+
   it("steps from the requested month and holds the old grid while the next month loads", async () => {
     const { onMonthChange } = renderCalendar({ month: "2026-11", loadedMonth: "2026-10" });
     expect(screen.getByRole("heading", { name: "November 2026" })).toBeTruthy();

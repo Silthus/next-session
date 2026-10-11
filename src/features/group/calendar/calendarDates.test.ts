@@ -2,12 +2,20 @@ import { describe, expect, it } from "vitest";
 import {
   dayLabel,
   leadingBlanks,
+  weekdayColumn,
   longDayLabel,
   monthLabel,
   relativeDay,
   visibleDay,
   visibleMonth,
 } from "./calendarDates";
+
+describe("weekdayColumn", () => {
+  it("counts from Monday", () => {
+    expect(weekdayColumn("2026-10-05")).toBe(0);
+    expect(weekdayColumn("2026-10-11")).toBe(6);
+  });
+});
 
 describe("leadingBlanks", () => {
   it("counts the blank cells before the first day of a week that starts on Monday", () => {

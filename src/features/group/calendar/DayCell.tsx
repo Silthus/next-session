@@ -1,10 +1,10 @@
-import type { CSSProperties } from "react";
+import { useId, useState, type CSSProperties, type KeyboardEvent } from "react";
 import type { Answer } from "../../../../shared/answers";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import type { IsoDate } from "../../../../shared/dates";
 import type { DaySummary, PlayerRow } from "../../../../shared/monthSummary";
 import { cn } from "../../../ui/cn";
-import { longDayLabel } from "./calendarDates";
+import { longDayLabel, weekdayColumn } from "./calendarDates";
 import { IconStar } from "../../../ui/icons";
 
 export type CalendarSession = { _id: Id<"sessions">; date: IsoDate };
@@ -28,42 +28,109 @@ export function DayCell({
 }) {
   const perfect = day.perfect && day.session === null;
   const isToday = day.date === today;
+  const whoId = useId();
+  const [whoDismissed, setWhoDismissed] = useState(false);
+  const who = players.length > 0 && !day.past && !whoDismissed;
+  const dismissWho = (event: KeyboardEvent) => {
+    if (event.key !== "Escape" || !who) return;
+    event.stopPropagation();
+    setWhoDismissed(true);
+  };
+  const showWhoAgain = () => setWhoDismissed(false);
   return (
     <button
       type="button"
       onClick={onToggle}
+      onKeyDown={dismissWho}
+      onMouseEnter={showWhoAgain}
+      onFocus={showWhoAgain}
       disabled={day.past}
       aria-label={dayCellLabel(day, players.length)}
+      aria-describedby={who ? whoId : undefined}
       aria-pressed={selected}
       aria-current={isToday ? "date" : undefined}
       data-date={day.date}
       style={tintOf(day)}
       className={cn(
-        "relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2",
+        "group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6",
         cellTone(day),
         selected
           ? "z-10 outline-2 outline-offset-2 outline-ink focus-visible:outline-offset-4 focus-visible:outline-accent-strong max-sm:outline-offset-0 max-sm:focus-visible:outline-offset-0"
           : "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0",
-        day.past ? "cursor-default opacity-40" : "active:scale-[0.97]",
+        day.past ? "cursor-default opacity-40" : "motion-safe:active:scale-[0.97]",
       )}
     >
       <span
         className={cn(
           "flex items-center gap-1 text-sm font-semibold leading-none",
           isToday && isPlain(day) && "text-accent-strong",
+          isToday &&
+            "sm:-mx-1 sm:-my-0.5 sm:self-start sm:rounded-full sm:bg-accent sm:px-1.5 sm:py-0.5 sm:text-accent-ink",
         )}
       >
         {Number(day.date.slice(8))}
         {isToday && (
-          <span className={cn("size-1.5 rounded-full", perfect ? "bg-current" : "bg-accent")} />
+          <span
+            className={cn("size-1.5 rounded-full sm:hidden", perfect ? "bg-current" : "bg-accent")}
+          />
         )}
       </span>
       {day.session && (
         <IconStar className="absolute top-1 right-1 size-3 text-accent-strong sm:top-1.5 sm:right-1.5 sm:size-4" />
       )}
       <DayAnswers day={day} players={players} onSolidFree={perfect} />
+      {who && <DayWho id={whoId} day={day} />}
     </button>
   );
+}
+
+const NAMES_SHOWN = 6;
+
+const whoRows = [
+  { label: "Free", tone: "bg-free", of: (day: CalendarDay) => day.free },
+  { label: "Maybe", tone: "bg-maybe-bar", of: (day: CalendarDay) => day.maybe },
+  { label: "Busy", tone: "bg-busy", of: (day: CalendarDay) => day.busy },
+  {
+    label: "No answer",
+    tone: "border border-paper/60",
+    of: (day: CalendarDay) => (day.bookable ? day.unanswered : []),
+  },
+];
+
+function DayWho({ id, day }: { id: string; day: CalendarDay }) {
+  const rows = whoRows
+    .map((row) => ({ ...row, players: row.of(day) }))
+    .filter((row) => row.players.length > 0);
+  return (
+    <span
+      id={id}
+      role="tooltip"
+      className={cn(
+        "pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block",
+        weekdayColumn(day.date) < 4 ? "left-0" : "right-0",
+      )}
+    >
+      <span className="flex flex-col gap-1 rounded-md bg-ink px-2.5 py-2 text-left text-xs leading-snug font-medium text-paper shadow-card">
+        {rows.map((row) => (
+          <span key={row.label} className="flex items-start gap-1.5">
+            <span
+              aria-hidden="true"
+              className={cn("mt-1 size-2 shrink-0 rounded-full", row.tone)}
+            />
+            <span className="min-w-0 wrap-anywhere">
+              <span className="text-paper/70">{row.label}</span> {namesOf(row.players)}
+            </span>
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
+function namesOf(players: readonly PlayerRow[]) {
+  const shown = players.slice(0, NAMES_SHOWN).map((player) => player.name);
+  const hidden = players.length - shown.length;
+  return hidden > 0 ? `${shown.join(", ")} +${String(hidden)}` : shown.join(", ");
 }
 
 function isPlain(day: CalendarDay) {
@@ -73,7 +140,7 @@ function isPlain(day: CalendarDay) {
 function cellTone(day: CalendarDay) {
   if (day.session) return "border-accent bg-accent-soft ring-2 ring-accent ring-inset";
   if (day.perfect) return "border-free bg-free text-white dark:text-paper";
-  return "border-line bg-surface hover:border-line-strong";
+  return "border-line bg-surface hover:border-line-strong sm:hover:border-ink-3";
 }
 
 function DayAnswers({
