@@ -123,6 +123,7 @@ function NightRow({
       aria-label={`${label}, ${counts}${free}${scheduled}`}
       className={cn(
         "flex w-full items-center gap-3 rounded-md px-2 py-2 text-left",
+        rank === 1 && "lg:flex-wrap",
         pressable,
         night.perfect
           ? "bg-free-soft hover:brightness-[0.97] dark:hover:brightness-110"
@@ -141,7 +142,7 @@ function NightRow({
         <span
           className={cn(
             "flex items-center gap-1.5 font-semibold",
-            rank === 1 ? "text-sm lg:font-display lg:text-base lg:leading-tight" : "text-sm",
+            rank === 1 ? "text-sm lg:font-display lg:text-lg lg:leading-tight" : "text-sm",
           )}
         >
           {label}
@@ -151,7 +152,12 @@ function NightRow({
           {counts}
         </span>
       </span>
-      <span className="flex shrink-0 items-center -space-x-1">
+      <span
+        className={cn(
+          "flex shrink-0 items-center -space-x-1",
+          rank === 1 && "lg:basis-full lg:justify-end",
+        )}
+      >
         {night.free.slice(0, SHOWN_AVATARS).map((player) => (
           <Avatar
             key={player._id}
