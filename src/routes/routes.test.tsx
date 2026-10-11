@@ -90,3 +90,20 @@ describe("unknown paths", () => {
     expect(document.title).toBe("Nothing here · Next Session");
   });
 });
+
+describe("/s/$shareToken", () => {
+  it.each([
+    ["?month=2026-11", { month: "2026-11" }],
+    ["", {}],
+    ["?month=soon", {}],
+    ["?month=2026-13", {}],
+    ["?month=2026-1", {}],
+  ])("keeps only a well-formed month from %j", async (query, { month }: { month?: string }) => {
+    const router = createRouter({
+      routeTree,
+      history: createMemoryHistory({ initialEntries: [`/s/k3Qx9Lm2aB${query}`] }),
+    });
+    await router.load();
+    expect(router.state.matches.at(-1)?.search).toHaveProperty("month", month);
+  });
+});

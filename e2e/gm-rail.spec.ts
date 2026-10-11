@@ -35,6 +35,11 @@ test.beforeEach(() => {
   nextMonth = addMonths(monthOf(todayUtc(Date.now())), 1);
 });
 
+const monthName = (month: string) =>
+  new Intl.DateTimeFormat("en-US", { month: "long", timeZone: "UTC" }).format(
+    new Date(`${month}-01T00:00:00Z`),
+  );
+
 const night = (day: number) => `${nextMonth}-${String(day).padStart(2, "0")}`;
 
 async function seedCrew(gm: Gm) {
@@ -79,6 +84,36 @@ test("the GM copies, rotates, and undoes the Share Link from the rail", async ({
   await expect(page.locator("[data-month-heading]")).toBeFocused();
   await expect(rail.getByText(`/s/${gm.shareToken}`)).toBeVisible();
   await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).toBe(gm.shareToken);
+});
+
+test("the GM shares the month they are looking at, and players open on it", async ({
+  page,
+  browser,
+  context,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  const gm = await signInAnonymousGm();
+  await seedPlayer(gm, "Ana");
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+
+  const rail = page.getByRole("complementary", { name: "Group overview" });
+  await rail.getByRole("button", { name: "Copy" }).click();
+  await expect(rail.getByRole("button", { name: "Copied" })).toBeVisible();
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).toBe(`${new URL(page.url()).origin}/s/${gm.shareToken}?month=${nextMonth}`);
+  await expect(rail.getByRole("link", { name: "Share via WhatsApp" })).toHaveAttribute(
+    "href",
+    `https://wa.me/?text=${encodeURIComponent(`Help me find our next game night. Tap the days you can play, it takes 30 seconds: ${copied}`)}`,
+  );
+
+  const playerContext = await browser.newContext();
+  const player = await playerContext.newPage();
+  await player.goto(copied);
+  await player.getByRole("button", { name: "Ana", exact: true }).click();
+  await expect(
+    player.getByRole("heading", { level: 2, name: new RegExp(`^${monthName(nextMonth)}`) }),
+  ).toBeVisible();
+  await playerContext.close();
 });
 
 test("the newest action owns the only toast", async ({ page }) => {
