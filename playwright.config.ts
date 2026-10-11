@@ -18,8 +18,17 @@ export default defineConfig({
   },
   outputDir: process.env.E2E_OUTPUT_DIR,
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    {
+      name: "chromium",
+      testIgnore: ["production.spec.ts", "sign-up-budget.spec.ts"],
+      use: { ...devices["Desktop Chrome"] },
+    },
     { name: "mobile-webkit", testMatch: "mobile-copy.spec.ts", use: { ...devices["iPhone 13"] } },
+    {
+      name: "sign-up-budget",
+      testMatch: "sign-up-budget.spec.ts",
+      dependencies: ["chromium", "mobile-webkit"],
+    },
   ],
   webServer: {
     command: "bun scripts/e2e-server.ts",
