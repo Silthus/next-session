@@ -135,13 +135,19 @@ function copyThroughSelection(text: string) {
   field.value = text;
   field.readOnly = true;
   field.className = "fixed top-0 left-0 text-base opacity-0";
-  document.body.append(field);
+  besideFocus(focused).append(field);
   field.select();
   field.setSelectionRange(0, text.length);
   const copied = runCopyCommand();
   field.remove();
   if (focused instanceof HTMLElement) focused.focus();
   return copied;
+}
+
+function besideFocus(focused: Element | null) {
+  return focused instanceof HTMLElement && focused !== document.body
+    ? (focused.parentElement ?? document.body)
+    : document.body;
 }
 
 function runCopyCommand() {

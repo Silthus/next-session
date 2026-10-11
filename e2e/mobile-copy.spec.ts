@@ -64,6 +64,23 @@ test("a phone offers a selectable link when both clipboard methods refuse", asyn
   await expect(page.locator("textarea")).toHaveCount(0);
 });
 
+test("a phone keeps the Share menu open with the link to long-press when both clipboard methods refuse", async ({
+  page,
+  context,
+}) => {
+  await context.addInitScript(() => {
+    document.execCommand = () => false;
+  });
+  const gm = await signInAnonymousGm();
+  await openAsGm(page, gm, `/g/${gm.groupId}`);
+  await page.getByRole("button", { name: "Share player link" }).tap();
+  await page.getByRole("button", { name: "Copy", exact: true }).tap();
+
+  await expect(page.getByText("Long-press the link to copy it.")).toBeVisible();
+  await expect(page.getByText(`/s/${gm.shareToken}`)).toHaveCSS("user-select", "all");
+  await expect(page.locator("textarea")).toHaveCount(0);
+});
+
 test("a phone shares its invitation and link through the native share sheet", async ({
   page,
   context,
