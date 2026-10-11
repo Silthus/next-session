@@ -179,6 +179,24 @@ for (const width of [360, 390]) {
   });
 }
 
+test("on a phone a focused night's outline stays clear of its neighbour", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 844 });
+  const gm = await signInAnonymousGm();
+  await seedSixPlayers(gm);
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+
+  const day = dayCell(page, /, \w+ 6: /);
+  const neighbour = dayCell(page, /, \w+ 7: /);
+  await day.focus();
+  expect(await day.evaluate((cell) => cell.matches(":focus-visible"))).toBe(true);
+  const outlineReach = await day.evaluate((cell) => {
+    const style = getComputedStyle(cell);
+    return parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth);
+  });
+  const [box, next] = await Promise.all([day.boundingBox(), neighbour.boundingBox()]);
+  expect(box!.x + box!.width + outlineReach).toBeLessThanOrEqual(next!.x);
+});
+
 async function isInside(inner: Locator, outer: Locator) {
   const [box, frame] = await Promise.all([inner.boundingBox(), outer.boundingBox()]);
   if (!box || !frame) return false;
