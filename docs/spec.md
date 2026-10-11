@@ -291,7 +291,7 @@ Convex Auth's Google provider sits next to Password and Anonymous, always regist
 | --- | --- | --- | --- |
 | `/` | | Landing with Create your link; the link-created moment in place | A GM with Groups is redirected to the last visited Group (or the first). An Account without Groups of its own is redirected to `/me` |
 | `/g/$groupId` | `month` (YYYY-MM), `day` (YYYY-MM-DD) | GM group surface | Signed out → `/`. Missing or foreign id → the first Group, without an error boundary |
-| `/s/$shareToken` | `month` | Player join, then the player calendar; not-found for an unknown token | None. The Group's GM, signed in with an Account, is sent on to `/g/<groupId>` (replacing the history entry, keeping `month`). A signed-in Account with a Claimed Player in the Group skips Join |
+| `/s/$shareToken` | `month` | Player join, then the player calendar; not-found for an unknown token | None. The Group's GM, signed in with an Account, opening the link is sent on to `/g/<groupId>` (replacing the history entry, keeping a valid `month`). A Group that becomes the Account's own while the page is open, as when an Anonymous GM keeps their own link, stays on the player view. A signed-in Account with a Claimed Player in the Group skips Join |
 | `/me` | | My groups (§12) | Not an Account → `/` |
 | `/terms`, `/privacy`, `/imprint` | | Legal pages | None |
 | `*` | | Not found ("Nothing here") | None |

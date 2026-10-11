@@ -35,6 +35,7 @@ const answer = vi.fn();
 const release = vi.fn();
 const google = vi.fn();
 const noMutation = vi.fn();
+const openOwnGroup = vi.fn();
 const account: Partial<ReturnType<typeof useGm>> = {
   status: "signedOut",
   email: undefined,
@@ -84,7 +85,7 @@ function Page() {
       shareToken={shareToken}
       requestedMonth={month}
       onMonthChange={setMonth}
-      onOwnGroup={vi.fn()}
+      onOwnGroup={openOwnGroup}
     />
   );
 }
@@ -110,9 +111,30 @@ beforeEach(() => {
   answer.mockReset().mockResolvedValue({ keptNow: false });
   release.mockReset().mockResolvedValue(null);
   noMutation.mockReset().mockResolvedValue(null);
+  openOwnGroup.mockReset();
 });
 
 describe("PlayerScreen", () => {
+  it("opens the GM view when the GM's Account opens its own Share Link", async () => {
+    account.status = "account";
+    queries["player:group"] = { ...roster, callerIsGm: true };
+    renderPage();
+
+    await vi.waitFor(() => expect(openOwnGroup).toHaveBeenCalledWith(groupId));
+    expect(screen.queryByText("Thursday Crew")).toBeNull();
+  });
+
+  it("stays on the player view when the Group becomes the Account's own while open", async () => {
+    account.status = "account";
+    renderPage();
+    await screen.findByRole("button", { name: /^Wednesday, October 7:/ });
+
+    updateQuery("player:group", { ...roster, callerIsGm: true });
+
+    expect(screen.getByRole("button", { name: /^Wednesday, October 7:/ })).toBeTruthy();
+    expect(openOwnGroup).not.toHaveBeenCalled();
+  });
+
   it("waits for the first answer to save before showing the visitor nudge", async () => {
     let finish: (result: { keptNow: boolean }) => void = () => undefined;
     const saving = new Promise<{ keptNow: boolean }>((resolve) => {
