@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { api } from "../convex/_generated/api";
-import { addMonths, monthDays, monthOf, todayUtc } from "../shared/dates";
+import { addMonths, monthOf, todayUtc } from "../shared/dates";
 import { openAsGm, seedPlayer, signInAnonymousGm, toastRegion, type Gm } from "./helpers";
 
 let today = todayUtc(Date.now());
@@ -41,34 +41,96 @@ test("the GM reads the heat-map and sees who is free on a night", async ({ page 
   await expect(dayCell(page, /, \w+ 6: /)).toBeFocused();
 });
 
-test("on a phone the day sheet leaves the tapped night in view", async ({ page }) => {
-  await page.setViewportSize({ width: 375, height: 667 });
-  const gm = await signInAnonymousGm();
-  await seedThreePlayers(gm);
-  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+test.describe("on a phone", () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
 
-  const lastNight = dayCell(page, new RegExp(`, \\w+ ${String(monthDays(nextMonth).length)}: `));
-  await lastNight.click();
-  const sheet = page.getByRole("region", {
-    name: new RegExp(`${String(monthDays(nextMonth).length)}$`),
+  test("a tapped night slides its detail in place of the calendar and back", async ({ page }) => {
+    const gm = await signInAnonymousGm();
+    await seedThreePlayers(gm);
+    await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+    const monthHeading = page.locator("[data-month-heading]");
+    const month = await monthHeading.innerText();
+    const night6 = dayCell(page, /, \w+ 6: /);
+    const detail = page.getByRole("region", { name: /, \w+ 6$/ });
+
+    const openNight6 = async () => {
+      await night6.tap();
+      await expect(detail.getByRole("heading")).toBeFocused();
+      await expect(monthHeading).toBeHidden();
+    };
+    const expectBackOnNight6 = async () => {
+      await expect(detail).toBeHidden();
+      await expect(monthHeading).toHaveText(month);
+      await expect(page).not.toHaveURL(/day=/);
+      await expect(night6).toBeFocused();
+    };
+
+    await openNight6();
+    await expect(page).toHaveURL(new RegExp(`day=${night(6)}`));
+    await expect(detail.getByRole("listitem")).toHaveText([
+      /Ana.*Free/,
+      /Ben.*Maybe/,
+      /Chiara.*Busy/,
+    ]);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await detail.getByRole("button", { name: `Back to ${month}` }).tap();
+    await expectBackOnNight6();
+
+    await openNight6();
+    await page.keyboard.press("Escape");
+    await expectBackOnNight6();
+
+    await openNight6();
+    await page.goBack();
+    await expectBackOnNight6();
   });
-  await expect(sheet).toBeVisible();
-  await expectAboveSheet(lastNight, sheet);
 
-  await page.setViewportSize({ width: 667, height: 375 });
-  await expectAboveSheet(lastNight, sheet);
+  test("Undo in the night's detail keeps focus there", async ({ page }) => {
+    const gm = await signInAnonymousGm();
+    await seedThreePlayers(gm);
+    await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
+
+    const detail = page.getByRole("region", { name: /, \w+ 5$/ });
+    await detail.getByRole("button", { name: "Schedule session" }).tap();
+    const toast = toastRegion(page);
+    await toast.getByRole("button", { name: "Undo" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(detail.getByRole("button", { name: "Schedule session" })).toBeVisible();
+    await expect(detail.getByRole("heading")).toBeFocused();
+  });
+
+  test("Undo for another night keeps focus in the open detail", async ({ page }) => {
+    const gm = await signInAnonymousGm();
+    await seedThreePlayers(gm);
+    await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
+
+    await page
+      .getByRole("region", { name: /, \w+ 5$/ })
+      .getByRole("button", { name: "Schedule session" })
+      .tap();
+    const toast = toastRegion(page);
+    await expect(toast).toContainText("Players see it on the link.");
+    await page.keyboard.press("Escape");
+    await dayCell(page, /, \w+ 6: /).tap();
+    const night6 = page.getByRole("region", { name: /, \w+ 6$/ });
+    await toast.getByRole("button", { name: "Undo" }).focus();
+    await page.keyboard.press("Enter");
+    await expect.poll(() => sessionDates(gm)).toEqual([]);
+    await expect(night6.getByRole("heading")).toBeFocused();
+  });
+
+  test("a Session in another month opens its detail with focus on it", async ({ page }) => {
+    const gm = await signInAnonymousGm();
+    await seedThreePlayers(gm);
+    await gm.client.mutation(api.sessions.schedule, { groupId: gm.groupId, date: night(6) });
+    await openAsGm(page, gm, `/g/${gm.groupId}?month=${monthOf(today)}`);
+
+    await page.getByRole("tab", { name: "Sessions" }).tap();
+    await page.getByRole("region", { name: "Sessions" }).getByRole("button").first().tap();
+    await expect(page).toHaveURL(new RegExp(`month=${nextMonth}&day=${night(6)}`));
+    await expect(page.getByRole("region", { name: /, \w+ 6$/ }).getByRole("heading")).toBeFocused();
+  });
 });
-
-async function expectAboveSheet(cell: Locator, sheet: Locator) {
-  await expect
-    .poll(async () => {
-      const [cellBox, sheetBox] = await Promise.all([cell.boundingBox(), sheet.boundingBox()]);
-      return cellBox && sheetBox
-        ? cellBox.y >= 0 && cellBox.y + cellBox.height <= sheetBox.y
-        : false;
-    })
-    .toBe(true);
-}
 
 test("on a phone a dense day keeps two-digit counts inside its cell", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });

@@ -409,22 +409,6 @@ test("an Anonymous GM saves into an Account from the header and stays on the Gro
     .toContain(gm.groupId);
 });
 
-test("on a phone the toast clears the open day sheet", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  const gm = await signInAnonymousGm();
-  await seedCrew(gm);
-  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
-
-  const sheet = page.getByRole("region", { name: /, \w+ 5$/ });
-  await sheet.getByRole("button", { name: "Schedule session" }).click();
-  const toast = toastRegion(page);
-  await expect(toast).toContainText("Players see it on the link.");
-  const [toastBox, sheetBox] = await Promise.all([toast.boundingBox(), sheet.boundingBox()]);
-  expect(toastBox!.y + toastBox!.height).toBeLessThanOrEqual(sheetBox!.y);
-  await toast.getByRole("button", { name: "Undo" }).click();
-  await expect(sheet.getByRole("button", { name: "Schedule session" })).toBeVisible();
-});
-
 test("deleting the last Group of an Anonymous GM returns to the landing", async ({ page }) => {
   const gm = await signInAnonymousGm();
   await openAsGm(page, gm, `/g/${gm.groupId}`);

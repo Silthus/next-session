@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import type { Answer } from "../../../../shared/answers";
 import type { IsoDate } from "../../../../shared/dates";
 import type { PlayerRow } from "../../../../shared/monthSummary";
@@ -23,6 +23,8 @@ export function DayPanel({
   playerCount,
   today,
   pending,
+  closeLabel,
+  focusHeading = false,
   onClose,
   onSchedule,
   onUnschedule,
@@ -32,26 +34,38 @@ export function DayPanel({
   playerCount: number;
   today: IsoDate;
   pending: boolean;
+  closeLabel: ReactNode;
+  focusHeading?: boolean;
   onClose: () => void;
   onSchedule: () => void;
   onUnschedule: (session: CalendarSession) => void;
   className?: string;
 }) {
   const headingId = useId();
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (focusHeading) heading.current?.focus();
+  }, [focusHeading]);
   return (
-    <Card accent aria-labelledby={headingId} className={cn("animate-rise", className)}>
+    <Card accent aria-labelledby={headingId} className={className}>
       <div className="flex items-center justify-between">
         <button
           type="button"
           onClick={onClose}
-          className="-ml-1 flex items-center gap-1 rounded-sm px-1 py-0.5 text-xs font-medium text-ink-3 hover:text-ink"
+          className="-ml-2 flex items-center gap-1 rounded-sm px-2 py-1.5 text-sm font-medium text-ink-2 hover:text-ink"
         >
-          <IconChevron direction="left" className="size-3.5" />
-          Overview
+          <IconChevron direction="left" className="size-4" />
+          {closeLabel}
         </button>
         <span className="text-xs text-ink-3">{relativeDay(day.date, today)}</span>
       </div>
-      <h3 id={headingId} className="mt-2 font-display text-2xl font-semibold">
+      <h3
+        ref={heading}
+        id={headingId}
+        tabIndex={-1}
+        data-day-heading
+        className="mt-2 font-display text-2xl font-semibold outline-none"
+      >
         {longDayLabel(day.date)}
       </h3>
       {playerCount === 0 ? (
@@ -93,7 +107,7 @@ function PlayerAnswers({ day }: { day: CalendarDay }) {
     ...day.unanswered.map((player) => ({ player, answer: null })),
   ];
   return (
-    <ul className="mt-4 flex max-h-[min(22rem,40dvh)] flex-col gap-2 overflow-y-auto lg:max-h-none">
+    <ul className="mt-4 flex flex-col gap-2">
       {rows.map(({ player, answer }) => (
         <li key={player._id} className="flex items-center gap-2.5">
           <Avatar name={player.name} size="sm" />
