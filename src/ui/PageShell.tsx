@@ -23,7 +23,7 @@ export function PageShell({
   const column = cn("mx-auto w-full px-4 sm:px-6", maxWidths[maxWidth]);
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className={cn(column, "flex items-center justify-between py-5")}>
+      <header className={cn(column, "flex items-center justify-between gap-3 py-5")}>
         <Wordmark />
         {headerEnd}
       </header>

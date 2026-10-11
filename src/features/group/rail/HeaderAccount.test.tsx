@@ -4,7 +4,7 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -46,5 +46,25 @@ describe("HeaderAccount", () => {
     ));
     await userEvent.click(await screen.findByRole("button", { name: "Your account" }));
     expect(screen.getByRole("link", { name: "My groups" })).toHaveProperty("pathname", "/me");
+  });
+
+  it("shows the Account's picture on its button, and its first letter if the picture fails", async () => {
+    renderInRouter(() => (
+      <HeaderAccount
+        status="account"
+        email="gm@example.com"
+        image="https://files.example.test/gm.png"
+        onLogOut={vi.fn()}
+      />
+    ));
+    const button = await screen.findByRole("button", { name: "Your account" });
+    expect(button.querySelector("img")?.getAttribute("src")).toBe(
+      "https://files.example.test/gm.png",
+    );
+
+    fireEvent.error(button.querySelector("img")!);
+
+    expect(button.querySelector("img")).toBeNull();
+    expect(button.textContent).toBe("g");
   });
 });

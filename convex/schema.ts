@@ -8,7 +8,7 @@ export default defineSchema({
   ...authTables,
   users: defineTable({
     name: v.optional(v.string()),
-    image: v.optional(v.string()),
+    image: v.optional(v.union(v.string(), v.null())),
     email: v.optional(v.string()),
     emailVerificationTime: v.optional(v.number()),
     phone: v.optional(v.string()),
@@ -23,6 +23,8 @@ export default defineSchema({
     tipsCodeHash: v.optional(v.string()),
     sessionEmailsEnabled: v.optional(v.boolean()),
     tipsConfirmedAt: v.optional(v.number()),
+    profileImageId: v.optional(v.id("_storage")),
+    profileImageFrom: v.optional(v.string()),
   })
     .index("email", ["email"])
     .index("phone", ["phone"])

@@ -13,6 +13,7 @@ import type { DataModel, Id } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx } from "./_generated/server";
 import { fail } from "./model/errors";
 import { insertGroup } from "./model/groups";
+import { syncProfileImage } from "./model/profileImages";
 import { enforceRateLimit } from "./model/rateLimits";
 import { requestMail } from "./mail";
 import { track } from "./model/telemetry";
@@ -78,7 +79,11 @@ const GOOGLE = "google";
 
 const AccountGoogle = Google({
   allowDangerousEmailAccountLinking: false,
-  profile: (google) => ({ id: google.sub, email: normalizeEmail(google.email) }),
+  profile: (google) => ({
+    id: google.sub,
+    email: normalizeEmail(google.email),
+    image: typeof google.picture === "string" ? google.picture : null,
+  }),
 });
 
 function requireStrongPassword(password: unknown) {
@@ -112,8 +117,9 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   signIn: { maxFailedAttempsPerHour: MAX_FAILED_SIGN_INS_PER_HOUR },
   callbacks: {
     async afterUserCreatedOrUpdated(ctx, { userId, existingUserId, provider }) {
-      if (existingUserId !== null) return;
       const gmCtx = ctx as unknown as MutationCtx;
+      if (provider.id === GOOGLE) await syncProfileImage(gmCtx, userId);
+      if (existingUserId !== null) return;
       if (provider.id === ANONYMOUS) await insertFirstGroup(gmCtx, userId);
       if (provider.id === GOOGLE) await gmCtx.db.patch("users", userId, legalAcceptance());
       if (provider.id === PASSWORD || provider.id === GOOGLE) {

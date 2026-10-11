@@ -31,6 +31,7 @@ export function MyGroupsScreen() {
       <MyGroups
         settings={<SessionEmailSettings />}
         email={gm.email}
+        image={gm.image}
         groups={groups}
         today={today}
         creating={creating}

@@ -74,7 +74,20 @@ export function withGoogleCredentials() {
   });
 }
 
-export type GoogleIdentity = { sub: string; email: string };
+export type GoogleIdentity = { sub: string; email: string; picture?: string };
+
+export const GOOGLE_PICTURES = "https://lh3.googleusercontent.com/a/";
+export const FOREIGN_PICTURE = "https://pictures.example.com/photo.png";
+
+export const pictureBytes = (url: string) => `picture bytes of ${url}`;
+
+export const pictureFailures = new Map<string, "missing" | "brokenOff">();
+
+function brokenOffBody() {
+  return new ReadableStream({
+    start: (controller) => controller.error(new Error("The connection was reset")),
+  });
+}
 
 const GOOGLE_ISSUER = "https://accounts.google.com";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
@@ -83,7 +96,7 @@ function base64urlJson(value: object) {
   return btoa(JSON.stringify(value)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function googleIdToken({ sub, email }: GoogleIdentity) {
+function googleIdToken({ sub, email, picture }: GoogleIdentity) {
   const now = Math.floor(Date.now() / 1000);
   const claims = {
     iss: GOOGLE_ISSUER,
@@ -91,6 +104,7 @@ function googleIdToken({ sub, email }: GoogleIdentity) {
     sub,
     email,
     email_verified: true,
+    picture,
     iat: now,
     exp: now + 3600,
   };
@@ -120,6 +134,13 @@ function googleAnswer(identity: GoogleIdentity, url: string) {
       expires_in: 3600,
       id_token: googleIdToken(identity),
     });
+  }
+  const png = { "Content-Type": "image/png" };
+  const failure = pictureFailures.get(url);
+  if (failure === "missing") return new Response("Not found", { status: 404 });
+  if (failure === "brokenOff") return new Response(brokenOffBody(), { headers: png });
+  if (url.startsWith(GOOGLE_PICTURES) || url === FOREIGN_PICTURE) {
+    return new Response(pictureBytes(url), { headers: png });
   }
   throw new Error(`The fake Google does not answer ${url}`);
 }
@@ -161,6 +182,7 @@ export async function signInWithGoogle(
     const signedIn = await signInWithTokens(t, () =>
       t.action(api.auth.signIn, { params: { code }, verifier: started.verifier }),
     );
+    await t.finishAllScheduledFunctions(() => undefined);
     return { ...signedIn, backToApp };
   } finally {
     vi.stubGlobal("fetch", realFetch);

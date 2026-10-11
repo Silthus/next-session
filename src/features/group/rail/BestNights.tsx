@@ -88,7 +88,13 @@ function NightRow({
       </span>
       <span className="flex shrink-0 items-center -space-x-1">
         {night.free.slice(0, SHOWN_AVATARS).map((player) => (
-          <Avatar key={player._id} name={player.name} size="sm" className="ring-2 ring-surface" />
+          <Avatar
+            key={player._id}
+            name={player.name}
+            image={player.image}
+            size="sm"
+            className="ring-2 ring-surface"
+          />
         ))}
         {hidden > 0 && (
           <span className="inline-flex size-7 items-center justify-center rounded-full bg-surface-2 font-mono text-[10px] text-ink-2 ring-2 ring-surface">

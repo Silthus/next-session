@@ -1,7 +1,7 @@
 import { monthProgress, type Answer } from "./answers";
 import { isBookable, monthDays, type IsoDate, type IsoMonth } from "./dates";
 
-export type PlayerRow = { _id: string; name: string };
+export type PlayerRow = { _id: string; name: string; image?: string };
 export type AnswerRow<PlayerId extends string> = {
   playerId: PlayerId;
   date: IsoDate;

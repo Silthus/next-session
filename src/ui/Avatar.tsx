@@ -1,5 +1,6 @@
 import { playerInitials } from "../../shared/names";
 import { cn } from "./cn";
+import { ProfileImage } from "./ProfileImage";
 
 const hues = [
   "bg-accent-soft text-accent-strong",
@@ -18,24 +19,26 @@ const sizes: Record<Size, string> = {
 
 export function Avatar({
   name,
+  image,
   size = "md",
   className,
 }: {
   name: string;
+  image?: string;
   size?: Size;
   className?: string;
 }) {
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-full font-bold",
+        "inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full font-bold",
         hueFor(name),
         sizes[size],
         className,
       )}
       aria-hidden="true"
     >
-      {playerInitials(name)}
+      <ProfileImage src={image} fallback={playerInitials(name)} className="size-full" />
     </span>
   );
 }

@@ -110,7 +110,7 @@ function PlayerAnswers({ day }: { day: CalendarDay }) {
     <ul className="mt-4 flex flex-col gap-2">
       {rows.map(({ player, answer }) => (
         <li key={player._id} className="flex items-center gap-2.5">
-          <Avatar name={player.name} size="sm" />
+          <Avatar name={player.name} image={player.image} size="sm" />
           <span
             className={cn("min-w-0 flex-1 truncate text-sm font-medium", !answer && "text-ink-3")}
           >

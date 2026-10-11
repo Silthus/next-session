@@ -4,6 +4,7 @@ import { mutation, query, type MutationCtx } from "./_generated/server";
 import { currentGm, requireAccount, requireGm } from "./model/access";
 import { fail } from "./model/errors";
 import { hashSecretCode, newSecretCode } from "./model/codes";
+import { profileImageUrl } from "./model/profileImages";
 import { deleteAnonymousGm } from "./model/gms";
 import { ensureRoomForGroups, groupsOwnedBy } from "./model/groups";
 import { enforceRateLimit } from "./model/rateLimits";
@@ -14,11 +15,22 @@ const CLAIM_TTL_MS = 10 * 60_000;
 
 export const me = query({
   args: {},
-  returns: v.union(v.object({ isAnonymous: v.boolean(), email: v.optional(v.string()) }), v.null()),
+  returns: v.union(
+    v.object({
+      isAnonymous: v.boolean(),
+      email: v.optional(v.string()),
+      image: v.optional(v.string()),
+    }),
+    v.null(),
+  ),
   handler: async (ctx) => {
     const gm = await currentGm(ctx);
     if (gm === null) return null;
-    return { isAnonymous: gm.isAnonymous === true, email: gm.email };
+    return {
+      isAnonymous: gm.isAnonymous === true,
+      email: gm.email,
+      image: await profileImageUrl(ctx, gm),
+    };
   },
 });
 

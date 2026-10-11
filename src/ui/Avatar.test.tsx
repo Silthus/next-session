@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { Avatar } from "./Avatar";
 
@@ -9,6 +9,25 @@ describe("Avatar", () => {
     expect(first?.getAttribute("aria-hidden")).toBe("true");
     expect(first?.textContent).toBe("AL");
     expect(hueOf(first)).toBe(hueOf(second));
+  });
+});
+
+describe("Avatar with a profile picture", () => {
+  const picture = "https://files.example.test/ada.png";
+
+  it("shows the picture instead of the letters, without sending a referrer", () => {
+    const avatar = render(<Avatar name="Ada" image={picture} />).container.firstElementChild;
+    const shown = avatar?.querySelector("img");
+    expect(shown?.getAttribute("src")).toBe(picture);
+    expect(shown?.getAttribute("referrerpolicy")).toBe("no-referrer");
+    expect(avatar?.textContent).toBe("");
+  });
+
+  it("falls back to the letters when the picture does not load", () => {
+    const avatar = render(<Avatar name="Ada" image={picture} />).container.firstElementChild;
+    fireEvent.error(avatar!.querySelector("img")!);
+    expect(avatar?.querySelector("img")).toBeNull();
+    expect(avatar?.textContent).toBe("AD");
   });
 });
 

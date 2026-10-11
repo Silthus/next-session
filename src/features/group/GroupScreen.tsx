@@ -94,7 +94,12 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
       <HeaderAccount status="anonymous" onSave={() => setSaveSheetFor(group.name)} />
     ) : (
       gm.status === "account" && (
-        <HeaderAccount status="account" email={gm.email} onLogOut={() => void gm.signOut()} />
+        <HeaderAccount
+          status="account"
+          email={gm.email}
+          image={gm.image}
+          onLogOut={() => void gm.signOut()}
+        />
       )
     ));
 

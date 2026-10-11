@@ -168,6 +168,7 @@ function PlayerGroup({
     <AccountControl
       status={account.status}
       email={account.email}
+      image={account.image}
       onLogIn={() => setSheet("logIn")}
       onLogOut={() => void account.signOut()}
     />
@@ -300,11 +301,13 @@ function refusalOnReturn(account: Account, shareToken: string) {
 function AccountControl({
   status,
   email,
+  image,
   onLogIn,
   onLogOut,
 }: {
   status: Account["status"];
   email: string | undefined;
+  image: string | undefined;
   onLogIn: () => void;
   onLogOut: () => void;
 }) {
@@ -316,7 +319,7 @@ function AccountControl({
     );
   }
   if (status !== "account") return null;
-  return <HeaderAccount status="account" email={email} onLogOut={onLogOut} />;
+  return <HeaderAccount status="account" email={email} image={image} onLogOut={onLogOut} />;
 }
 
 function useToast() {

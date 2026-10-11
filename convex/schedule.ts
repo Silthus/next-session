@@ -3,10 +3,13 @@ import { addMonths, isValidMonth, type IsoMonth } from "../shared/dates";
 import type { Id } from "./_generated/dataModel";
 import { query, type QueryCtx } from "./_generated/server";
 import { findOwnedGroup } from "./model/access";
+import { profileImageUrl } from "./model/profileImages";
 import { answerValue } from "./schema";
 
 const monthSchedule = v.object({
-  players: v.array(v.object({ _id: v.id("players"), name: v.string() })),
+  players: v.array(
+    v.object({ _id: v.id("players"), name: v.string(), image: v.optional(v.string()) }),
+  ),
   answers: v.array(v.object({ playerId: v.id("players"), date: v.string(), answer: answerValue })),
   sessions: v.array(v.object({ _id: v.id("sessions"), date: v.string() })),
 });
@@ -31,7 +34,12 @@ async function rosterOf(ctx: QueryCtx, groupId: Id<"groups">) {
     .query("players")
     .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", groupId))
     .collect();
-  return players.map(({ _id, name }) => ({ _id, name }));
+  return await Promise.all(
+    players.map(async ({ _id, name, userId }) => {
+      const image = userId && (await profileImageUrl(ctx, await ctx.db.get("users", userId)));
+      return image ? { _id, name, image } : { _id, name };
+    }),
+  );
 }
 
 async function answersIn(ctx: QueryCtx, groupId: Id<"groups">, month: IsoMonth) {

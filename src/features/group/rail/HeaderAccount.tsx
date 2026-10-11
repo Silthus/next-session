@@ -1,11 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { Button } from "../../../ui/Button";
+import { ProfileImage } from "../../../ui/ProfileImage";
 import { menuItemClassName, MenuButton, Popover, useClosePopover } from "./Popover";
 
 type HeaderAccountProps =
   | { status: "anonymous"; onSave: () => void }
-  | { status: "account"; email: string | undefined; onLogOut: () => void };
+  | { status: "account"; email: string | undefined; image?: string; onLogOut: () => void };
 
 export function HeaderAccount(props: HeaderAccountProps) {
   if (props.status === "anonymous") {
@@ -16,10 +17,18 @@ export function HeaderAccount(props: HeaderAccountProps) {
       </Button>
     );
   }
-  return <AccountMenu email={props.email} onLogOut={props.onLogOut} />;
+  return <AccountMenu email={props.email} image={props.image} onLogOut={props.onLogOut} />;
 }
 
-function AccountMenu({ email, onLogOut }: { email: string | undefined; onLogOut: () => void }) {
+function AccountMenu({
+  email,
+  image,
+  onLogOut,
+}: {
+  email: string | undefined;
+  image: string | undefined;
+  onLogOut: () => void;
+}) {
   const trigger = useRef<HTMLButtonElement>(null);
   return (
     <Popover
@@ -31,9 +40,9 @@ function AccountMenu({ email, onLogOut }: { email: string | undefined; onLogOut:
           {...props}
           type="button"
           aria-label="Your account"
-          className="inline-flex size-9 items-center justify-center rounded-full bg-accent-soft font-bold text-accent-strong uppercase hover:brightness-95"
+          className="inline-flex size-9 items-center justify-center overflow-hidden rounded-full bg-accent-soft font-bold text-accent-strong uppercase hover:brightness-95"
         >
-          {(email ?? "?").slice(0, 1)}
+          <ProfileImage src={image} fallback={(email ?? "?").slice(0, 1)} className="size-full" />
         </button>
       )}
     >
