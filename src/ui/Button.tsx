@@ -1,13 +1,14 @@
 import type { ComponentProps } from "react";
 import { cn } from "./cn";
+import { pressable } from "./interactive";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "soft" | "free" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const variants: Record<ButtonVariant, string> = {
-  primary: "bg-accent text-accent-ink hover:brightness-105 active:brightness-95",
-  secondary: "border border-line-strong text-ink hover:bg-surface-2",
-  ghost: "text-ink hover:bg-surface-2",
+  primary: "bg-accent text-accent-ink hover:brightness-[1.08] active:brightness-95",
+  secondary: "border border-line-strong text-ink hover:border-ink-3 hover:bg-surface-hover",
+  ghost: "text-ink hover:bg-surface-hover",
   soft: "bg-accent-soft text-accent-strong hover:brightness-95 dark:hover:brightness-110",
   free: "bg-free text-white hover:brightness-105 dark:text-paper",
   danger: "bg-busy text-white hover:brightness-95 dark:text-paper",
@@ -31,7 +32,8 @@ export function buttonClassName(
   className?: string,
 ) {
   return cn(
-    "inline-flex shrink-0 items-center justify-center rounded-md font-medium transition-[background-color,color,transform,border-color,filter] duration-150 ease-(--ease-snap) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40",
+    "inline-flex shrink-0 items-center justify-center rounded-md font-medium disabled:pointer-events-none disabled:opacity-40",
+    pressable,
     variants[variant],
     sizes[size],
     className,

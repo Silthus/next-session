@@ -4,6 +4,7 @@ import { Avatar } from "../../../ui/Avatar";
 import { Button } from "../../../ui/Button";
 import { cn } from "../../../ui/cn";
 import { IconCheck, IconMore } from "../../../ui/icons";
+import { focusRing } from "../../../ui/interactive";
 import { errorMessage } from "../../../lib/errors";
 import { NameForm } from "./NameForm";
 import { EmptyLine, RailCard } from "./RailCard";
@@ -56,7 +57,10 @@ export function Players<Player extends PlayerRow>({
             type="button"
             aria-label="Add player"
             onClick={() => setAddForm("openedByGm")}
-            className="rounded-sm text-xs font-semibold text-accent-strong hover:underline"
+            className={cn(
+              "rounded-sm text-xs font-semibold text-accent-strong hover:underline",
+              focusRing,
+            )}
           >
             + Add
           </button>
@@ -160,7 +164,7 @@ function PlayerItem({
   return (
     <li
       onKeyDown={showingActions ? closeOnEscape : undefined}
-      className="group flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-surface-2"
+      className="group flex items-center gap-2.5 rounded-md px-1.5 py-1.5 transition-colors duration-150 hover:bg-surface-hover"
     >
       <Avatar name={player.name} image={player.image} size="sm" />
       <span className="min-w-0 flex-1 truncate text-sm font-medium">{player.name}</span>
@@ -187,7 +191,10 @@ function PlayerItem({
         aria-expanded={showingActions}
         aria-controls={showingActions ? actionsId : undefined}
         onClick={() => setMode(showingActions ? "view" : "actions")}
-        className="rounded-sm p-1 text-ink-3 transition-opacity hover:text-ink focus-visible:opacity-100 aria-expanded:opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100"
+        className={cn(
+          "rounded-sm p-1 text-ink-3 transition-opacity hover:text-ink focus-visible:opacity-100 aria-expanded:opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100",
+          focusRing,
+        )}
       >
         <IconMore />
       </button>
@@ -195,8 +202,7 @@ function PlayerItem({
   );
 }
 
-const rowActionClassName =
-  "rounded-sm px-2 py-1 text-xs font-semibold text-ink-2 hover:bg-surface hover:text-ink";
+const rowActionClassName = `rounded-sm px-2 py-1 text-xs font-semibold text-ink-2 transition-colors hover:bg-surface hover:text-ink ${focusRing}`;
 
 function AnswerProgress({ answered, fillable }: { answered: number; fillable: number }) {
   if (fillable > 0 && answered === fillable) {

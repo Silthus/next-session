@@ -1,6 +1,7 @@
 import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Button } from "../../../ui/Button";
 import { cn } from "../../../ui/cn";
+import { focusRing } from "../../../ui/interactive";
 
 export type RailPanels = { bestNights: ReactNode; players: ReactNode; sessions: ReactNode };
 
@@ -106,6 +107,7 @@ function PhoneRail({
             onClick={() => setActive(tab.id)}
             className={cn(
               "rounded-sm py-1.5 text-sm font-semibold transition-colors",
+              focusRing,
               tab.id === active ? "bg-surface text-ink shadow-card" : "text-ink-3 hover:text-ink",
             )}
           >

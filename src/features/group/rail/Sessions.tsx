@@ -1,6 +1,8 @@
 import { useId, useState } from "react";
 import type { IsoDate } from "../../../../shared/dates";
+import { cn } from "../../../ui/cn";
 import { IconChevron, IconStar } from "../../../ui/icons";
+import { focusRing, pressable } from "../../../ui/interactive";
 import { longDayLabel, nightLabel, relativeDay } from "../calendar/calendarDates";
 import type { CalendarSession } from "../calendar/DayCell";
 import { EmptyLine, RailCard } from "./RailCard";
@@ -28,7 +30,10 @@ export function Sessions({
               <button
                 type="button"
                 onClick={() => onSelectDay(session.date)}
-                className="flex w-full items-center gap-3 rounded-md border border-accent/40 bg-accent-soft/50 px-3 py-2.5 text-left transition-colors hover:bg-accent-soft"
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-md border border-accent/40 bg-accent-soft/50 px-3 py-2.5 text-left hover:border-accent hover:bg-accent-soft",
+                  pressable,
+                )}
               >
                 <IconStar className="size-5 shrink-0 text-accent-strong" />
                 <span className="min-w-0 flex-1">
@@ -57,7 +62,10 @@ function PlayedSessions({ sessions }: { sessions: readonly CalendarSession[] }) 
         aria-expanded={open}
         aria-controls={listId}
         onClick={() => setOpen((shown) => !shown)}
-        className="-ml-1 flex items-center gap-1 rounded-sm px-1 py-0.5 text-xs font-medium text-ink-3 hover:text-ink"
+        className={cn(
+          "-ml-1 flex items-center gap-1 rounded-sm px-1 py-0.5 text-xs font-medium text-ink-3 transition-colors hover:text-ink",
+          focusRing,
+        )}
       >
         <IconChevron direction={open ? "up" : "down"} className="size-3.5" />
         {`${String(sessions.length)} played`}

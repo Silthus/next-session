@@ -10,6 +10,7 @@ import { Dot } from "../../../ui/Dot";
 import { longDayLabel, relativeDay } from "./calendarDates";
 import type { CalendarDay, CalendarSession } from "./DayCell";
 import { IconChevron, IconStar } from "../../../ui/icons";
+import { hoverRow } from "../../../ui/interactive";
 
 const answerLabels: Record<Answer, string> = { free: "Free", maybe: "Maybe", busy: "Busy" };
 const answerTones: Record<Answer, string> = {
@@ -52,7 +53,10 @@ export function DayPanel({
         <button
           type="button"
           onClick={onClose}
-          className="-ml-2 flex items-center gap-1 rounded-sm px-2 py-1.5 text-sm font-medium text-ink-2 hover:text-ink"
+          className={cn(
+            "-ml-2 flex items-center gap-1 rounded-md px-2 py-1.5 text-sm font-medium text-ink-2 hover:text-ink",
+            hoverRow,
+          )}
         >
           <IconChevron direction="left" className="size-4" />
           {closeLabel}

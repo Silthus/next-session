@@ -7,8 +7,11 @@ import { appErrorOf } from "../../lib/errors";
 import { track } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
+import { focusRing } from "../../ui/interactive";
 import { Sheet } from "../../ui/Sheet";
 import { PASSWORD_FLOWS, type SaveInput, type SaveMode } from "./save";
+
+const inlineLink = `rounded-sm underline underline-offset-2 transition-colors hover:text-ink ${focusRing}`;
 
 export type AccountIntent = "save" | "keep" | "logIn";
 
@@ -226,7 +229,7 @@ function AccountForm({
             <button
               type="button"
               onClick={() => takeOffer(offer)}
-              className="font-semibold text-accent-strong underline underline-offset-2"
+              className={`font-semibold text-accent-strong underline underline-offset-2 ${inlineLink}`}
             >
               {offer === "logIn" ? "Log in instead" : "Create account instead"}
             </button>
@@ -344,11 +347,11 @@ export function GoogleLogo() {
 export function LegalLinks() {
   return (
     <>
-      <Link to="/terms" className="underline underline-offset-2 hover:text-ink">
+      <Link to="/terms" className={inlineLink}>
         Terms
       </Link>{" "}
       and{" "}
-      <Link to="/privacy" className="underline underline-offset-2 hover:text-ink">
+      <Link to="/privacy" className={inlineLink}>
         Privacy Policy
       </Link>
     </>
@@ -418,7 +421,7 @@ function SheetFooter({
           type="button"
           onClick={onClose}
           disabled={busy}
-          className="font-semibold text-ink-2 underline underline-offset-2 hover:text-ink disabled:opacity-50"
+          className={`font-semibold text-ink-2 disabled:opacity-50 ${inlineLink}`}
         >
           Go back
         </button>{" "}
