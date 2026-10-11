@@ -165,7 +165,7 @@ function SwitcherMenu({
       {groups === undefined ? (
         <Skeleton className="mx-2 my-2 h-6" />
       ) : (
-        <ul className="flex max-h-64 flex-col overflow-y-auto">
+        <ul className="-m-1 flex max-h-64 flex-col overflow-y-auto p-1">
           {groups.map((candidate) => (
             <li key={candidate.id}>
               <a

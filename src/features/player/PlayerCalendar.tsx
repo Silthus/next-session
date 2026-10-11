@@ -416,11 +416,11 @@ function DayTile({
           : { transitionDelay: `${String(staggerIndex * FILL_STAGGER_MS)}ms` }
       }
       className={cn(
-        "relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none motion-reduce:delay-0! sm:p-2",
+        "relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,scale] duration-150 ease-(--ease-snap) select-none motion-reduce:delay-0! sm:p-2",
         focusRing,
         answerTiles[day.answer ?? "none"],
         popping && "animate-pop",
-        day.locked ? "cursor-default opacity-45 saturate-50" : "active:scale-95",
+        day.locked ? "cursor-default opacity-45 saturate-50" : "motion-safe:active:scale-95",
         day.session && "ring-2 ring-accent ring-offset-2 ring-offset-surface",
       )}
     >
