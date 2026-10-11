@@ -4,7 +4,7 @@ import { Avatar } from "../../../ui/Avatar";
 import { Button } from "../../../ui/Button";
 import { cn } from "../../../ui/cn";
 import { IconCheck, IconMore } from "../../../ui/icons";
-import { focusRing } from "../../../ui/interactive";
+import { focusRing, mutedStepsUp } from "../../../ui/interactive";
 import { errorMessage } from "../../../lib/errors";
 import { NameForm } from "./NameForm";
 import { EmptyLine, RailCard } from "./RailCard";
@@ -164,7 +164,10 @@ function PlayerItem({
   return (
     <li
       onKeyDown={showingActions ? closeOnEscape : undefined}
-      className="group flex items-center gap-2.5 rounded-md px-1.5 py-1.5 transition-colors duration-150 hover:bg-surface-hover"
+      className={cn(
+        "group flex items-center gap-2.5 rounded-md px-1.5 py-1.5 transition-colors duration-150 hover:bg-surface-hover",
+        mutedStepsUp,
+      )}
     >
       <Avatar name={player.name} image={player.image} size="sm" />
       <span className="min-w-0 flex-1 truncate text-sm font-medium">{player.name}</span>
