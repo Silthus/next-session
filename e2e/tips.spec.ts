@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { TIPS_CONSENT_WORDING } from "../shared/tips";
-import { newEmail, password } from "./helpers";
+import { reserveAccountSignUp, password } from "./helpers";
 
 const yes = { name: "Yes, send me the tips" };
 
@@ -14,7 +14,7 @@ async function openSaveSheet(page: Page) {
 }
 
 test("saves to a new Account that asked for Tips", async ({ page }) => {
-  const email = newEmail();
+  const email = await reserveAccountSignUp();
   const sheet = await openSaveSheet(page);
   const tipsBox = sheet.getByRole("checkbox", { name: TIPS_CONSENT_WORDING });
 

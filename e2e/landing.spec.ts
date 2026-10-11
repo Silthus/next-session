@@ -6,7 +6,7 @@ import {
   type Page,
   type WebSocketRoute,
 } from "@playwright/test";
-import { newEmail, password, signUpAccount, toastRegion } from "./helpers";
+import { reserveAccountSignUp, password, signUpAccount, toastRegion } from "./helpers";
 
 const shareLinkPattern = /^127\.0\.0\.1:\d+\/s\/[A-Za-z0-9_-]{10}$/;
 
@@ -42,7 +42,7 @@ async function saveToNewAccount(page: Page, email: string, typedEmail = email) {
 async function seedAccount(browser: Browser) {
   const context = await browser.newContext();
   const page = await context.newPage();
-  const email = newEmail();
+  const email = await reserveAccountSignUp();
   const { groupPath } = await createLink(page);
   await saveToNewAccount(page, email);
   await context.close();
@@ -171,7 +171,7 @@ test("saving to a new Account keeps the Share Link, and logging in finds the Gro
   page,
   browser,
 }) => {
-  const email = newEmail();
+  const email = await reserveAccountSignUp();
   const { shareLink, groupPath } = await createLink(page);
 
   await saveToNewAccount(page, email, email.replace(/^gm/, "GM"));
@@ -205,7 +205,7 @@ test("saving into an Account that has older Groups keeps showing the new Group",
 
 test.describe("a Save whose move fails after the sign-in", () => {
   test("goes through on retry from the landing", async ({ page, browser }) => {
-    const email = newEmail();
+    const email = await reserveAccountSignUp();
     await failFinishSaves(page, [serverError]);
     const { shareLink, groupPath } = await createLink(page);
 
@@ -223,7 +223,7 @@ test.describe("a Save whose move fails after the sign-in", () => {
   });
 
   test("goes through on retry from the Group header", async ({ page }) => {
-    const email = newEmail();
+    const email = await reserveAccountSignUp();
     await failFinishSaves(page, [serverError]);
     const { shareLink, groupPath } = await createLink(page);
     await openGroupLink(page).click();
@@ -242,7 +242,7 @@ test.describe("a Save whose move fails after the sign-in", () => {
   test("still goes through when the GM closes the retry from the Group header", async ({
     page,
   }) => {
-    const email = newEmail();
+    const email = await reserveAccountSignUp();
     await failFinishSaves(page, [serverError]);
     const { shareLink, groupPath } = await createLink(page);
     await openGroupLink(page).click();
@@ -266,7 +266,7 @@ test.describe("a Group page that opens on a pending Save, as after Google's redi
     await openGroupLink(page).click();
     await expect(page).toHaveURL(groupPath);
     await page.getByRole("button", { name: "Save your group" }).click();
-    const sheet = await fillSaveSheet(page, newEmail());
+    const sheet = await fillSaveSheet(page, await reserveAccountSignUp());
     await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
     return { shareLink, groupPath };
   }
@@ -301,7 +301,7 @@ test.describe("a Save that expires", () => {
     await createLink(page);
 
     await page.getByRole("button", { name: "save it to an account" }).click();
-    const sheet = await fillSaveSheet(page, newEmail());
+    const sheet = await fillSaveSheet(page, await reserveAccountSignUp());
     await expect(sheet.getByRole("alert")).toHaveText(
       "This save expired before the group moved. Close this and create a new link.",
     );
@@ -319,7 +319,7 @@ test.describe("a Save that expires", () => {
     await createLink(page);
 
     await page.getByRole("button", { name: "save it to an account" }).click();
-    const sheet = await fillSaveSheet(page, newEmail());
+    const sheet = await fillSaveSheet(page, await reserveAccountSignUp());
     await expect(sheet.getByRole("alert")).toHaveText("That didn't work. Try again.");
     await page.keyboard.press("Escape");
 
@@ -332,7 +332,7 @@ test.describe("a Save that expires", () => {
 test("a retry dismissed, reopened, then finished in the background keeps the Save", async ({
   page,
 }) => {
-  const email = newEmail();
+  const email = await reserveAccountSignUp();
   const finish = await failThenHoldFinishSave(page);
   const { shareLink } = await createLink(page);
 
@@ -355,7 +355,7 @@ test("a retry dismissed, reopened, then finished in the background keeps the Sav
 test("pressing Escape again and again mid-Save keeps the sheet up until it is done", async ({
   page,
 }) => {
-  const email = newEmail();
+  const email = await reserveAccountSignUp();
   const signIn = await holdPasswordSignIn(page);
   await createLink(page);
   await page.getByRole("button", { name: "save it to an account" }).click();

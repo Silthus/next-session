@@ -1,5 +1,7 @@
 import type { Page } from "@playwright/test";
 import { ConvexHttpClient } from "convex/browser";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { api } from "../convex/_generated/api";
 import type { Id } from "../convex/_generated/dataModel";
 import type { Answer } from "../shared/answers";
@@ -15,8 +17,34 @@ export type Gm = {
   shareToken: string;
 };
 
-export function newEmail() {
+export async function reserveAccountSignUp() {
+  await refillAccountSignUpBudget();
   return `gm-${crypto.randomUUID()}@example.test`;
+}
+
+async function refillAccountSignUpBudget() {
+  const response = await fetch(`${convexUrl}/api/function`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Convex ${localBackendAdminKey()}`,
+    },
+    body: JSON.stringify({
+      componentPath: "rateLimiter",
+      path: "lib:resetRateLimit",
+      format: "json",
+      args: { name: "accountSignUp" },
+    }),
+  });
+  const result = (await response.json()) as { status: string; errorMessage?: string };
+  if (result.status !== "success") {
+    throw new Error(`Refilling the sign-up budget failed: ${result.errorMessage}`);
+  }
+}
+
+function localBackendAdminKey() {
+  const config = join(process.cwd(), ".convex", "local", "default", "config.json");
+  return (JSON.parse(readFileSync(config, "utf8")) as { adminKey: string }).adminKey;
 }
 
 export async function signInAnonymousGm(): Promise<Gm> {
@@ -30,7 +58,7 @@ export async function signInAnonymousGm(): Promise<Gm> {
 }
 
 export async function signUpAccount() {
-  const email = newEmail();
+  const email = await reserveAccountSignUp();
   const client = new ConvexHttpClient(convexUrl);
   const { tokens } = await client.action(api.auth.signIn, {
     provider: "password",
