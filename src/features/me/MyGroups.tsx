@@ -4,7 +4,7 @@ import type { IsoDate } from "../../../shared/dates";
 import { track } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
 import { IconMore, IconStar } from "../../ui/icons";
-import { focusRing, hoverRow, pressable } from "../../ui/interactive";
+import { focusRing, hoverRow, mutedStepsUp, pressable } from "../../ui/interactive";
 import { PageShell } from "../../ui/PageShell";
 import { Skeleton } from "../../ui/Skeleton";
 import { dayLabel, longDayLabel, relativeDay } from "../group/calendar/calendarDates";
@@ -30,8 +30,7 @@ type MyGroupsProps = {
   onLogOut: () => void;
 };
 
-const cardClassName =
-  "rounded-xl border border-line bg-surface shadow-card transition-[border-color,background-color] duration-150 hover:border-line-strong hover:bg-surface-hover";
+const cardClassName = `rounded-xl border border-line bg-surface shadow-card transition-[border-color,background-color] duration-150 hover:border-line-strong hover:bg-surface-hover ${mutedStepsUp}`;
 
 export function MyGroups({
   settings,
