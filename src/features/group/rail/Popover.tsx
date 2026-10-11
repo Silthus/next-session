@@ -25,6 +25,12 @@ export function useClosePopover(): ClosePopover {
   return useContext(CloseContext);
 }
 
+const placements = {
+  start: "absolute top-full left-0",
+  end: "absolute top-full right-0",
+  full: "fixed inset-x-4 sm:left-auto sm:right-6 sm:w-96",
+};
+
 export function Popover({
   triggerRef,
   trigger,
@@ -36,7 +42,7 @@ export function Popover({
   triggerRef: RefObject<HTMLButtonElement | null>;
   trigger: (props: PopoverTriggerProps) => ReactNode;
   children: ReactNode;
-  align?: "start" | "end";
+  align?: keyof typeof placements;
   className?: string;
   onClosed?: () => void;
 }) {
@@ -93,8 +99,8 @@ export function Popover({
         <div
           id={panelId}
           className={cn(
-            "animate-rise absolute top-full z-30 mt-1 rounded-xl border border-line bg-surface p-1.5 text-ink shadow-card",
-            align === "start" ? "left-0" : "right-0",
+            "animate-rise z-30 mt-1 rounded-xl border border-line bg-surface p-1.5 text-ink shadow-card",
+            placements[align],
             className,
           )}
         >

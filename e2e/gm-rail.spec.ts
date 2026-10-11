@@ -62,6 +62,7 @@ test("the GM copies, rotates, and undoes the Share Link from the rail", async ({
 
   const rail = page.getByRole("complementary", { name: "Group overview" });
   await expect(rail.getByText(`/s/${gm.shareToken}`)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copy player link" })).toBeHidden();
   await rail.getByRole("button", { name: "Copy" }).click();
   await expect(rail.getByRole("button", { name: "Copied" })).toBeVisible();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
@@ -269,13 +270,46 @@ test("an Anonymous GM is nudged to save once a Player joins, until Later", async
   await expect(page.getByRole("button", { name: "Save your group" })).toBeVisible();
 });
 
+test("on a phone the calendar starts under the top bar, the link one tap away", async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.setViewportSize({ width: 390, height: 844 });
+  const gm = await signInAnonymousGm();
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+
+  const calendar = page.locator("section").filter({ has: page.locator("[data-month-heading]") });
+  await expect(calendar).toBeVisible();
+  const [headerBox, calendarBox] = await Promise.all([
+    page.locator("header").boundingBox(),
+    calendar.boundingBox(),
+  ]);
+  expect(calendarBox!.y - (headerBox!.y + headerBox!.height)).toBeLessThanOrEqual(16);
+  await expect(page.getByText(`/s/${gm.shareToken}`)).toBeHidden();
+
+  await page.getByRole("button", { name: "Copy player link" }).click();
+  await expect(toastRegion(page)).toContainText("Link copied. Send it to your players.");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+    `${new URL(page.url()).origin}/s/${gm.shareToken}?month=${nextMonth}`,
+  );
+
+  await page.getByRole("button", { name: "Share player link" }).click();
+  await expect(page.getByText(`/s/${gm.shareToken}`)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Share via WhatsApp" })).toBeVisible();
+  await page.getByRole("button", { name: "Rotate" }).click();
+  await expect(toastRegion(page)).toContainText("Link rotated. Old links stopped working.");
+  await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).not.toBe(gm.shareToken);
+  await expect(page.getByText(`/s/${await shareTokenOf(gm.client, gm.groupId)}`)).toBeVisible();
+});
+
 test("on a phone the rail sits under the calendar behind a segmented control", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const gm = await signInAnonymousGm();
   await seedCrew(gm);
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
 
-  await expect(page.getByText(`/s/${gm.shareToken}`)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copy player link" })).toBeVisible();
   const tabs = page.getByRole("tablist", { name: "Group overview" });
   await expect(tabs.getByRole("tab", { selected: true })).toHaveText("Best nights");
   await expect(page.getByRole("region", { name: "Best nights" })).toBeVisible();
@@ -500,6 +534,7 @@ test.describe("screenshots", () => {
         }
         await shot("rail");
 
+        if (width < 640) await page.getByRole("button", { name: "Share player link" }).click();
         await page.getByRole("button", { name: "Rotate" }).first().click();
         await expect(toastRegion(page)).toContainText("Link rotated.");
         await shot("rotate-undo", false);

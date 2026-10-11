@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { monthOf, todayUtc } from "../shared/dates";
-import { openAsGm, signInAnonymousGm } from "./helpers";
+import { openAsGm, signInAnonymousGm, toastRegion } from "./helpers";
 
 test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 
@@ -38,9 +38,13 @@ test("a phone that refuses clipboard writes still copies the link from the group
 }) => {
   const gm = await signInAnonymousGm();
   await openAsGm(page, gm, `/g/${gm.groupId}`);
-  await expect(page.getByText(`/s/${gm.shareToken}`)).toBeVisible();
 
-  await expectTapToCopy(page, `/s/${gm.shareToken}?month=${monthOf(todayUtc(Date.now()))}`);
+  await page.getByRole("button", { name: "Copy player link" }).tap();
+  await expect(toastRegion(page)).toContainText("Link copied. Send it to your players.");
+  await expect(page.locator("textarea")).toHaveCount(0);
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+    `${new URL(page.url()).origin}/s/${gm.shareToken}?month=${monthOf(todayUtc(Date.now()))}`,
+  );
 });
 
 test("a phone offers a selectable link when both clipboard methods refuse", async ({
@@ -57,6 +61,23 @@ test("a phone offers a selectable link when both clipboard methods refuse", asyn
   await expect(page.getByText("Long-press the link to copy it.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Copied" })).toBeHidden();
   await expect(page.locator("code")).toHaveCSS("user-select", "all");
+  await expect(page.locator("textarea")).toHaveCount(0);
+});
+
+test("a phone keeps the Share menu open with the link to long-press when both clipboard methods refuse", async ({
+  page,
+  context,
+}) => {
+  await context.addInitScript(() => {
+    document.execCommand = () => false;
+  });
+  const gm = await signInAnonymousGm();
+  await openAsGm(page, gm, `/g/${gm.groupId}`);
+  await page.getByRole("button", { name: "Share player link" }).tap();
+  await page.getByRole("button", { name: "Copy", exact: true }).tap();
+
+  await expect(page.getByText("Long-press the link to copy it.")).toBeVisible();
+  await expect(page.getByText(`/s/${gm.shareToken}`)).toHaveCSS("user-select", "all");
   await expect(page.locator("textarea")).toHaveCount(0);
 });
 
