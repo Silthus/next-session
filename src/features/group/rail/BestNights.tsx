@@ -1,8 +1,10 @@
+import { useLayoutEffect, useRef, useState, type Ref, type RefObject } from "react";
 import type { IsoDate } from "../../../../shared/dates";
 import { Avatar } from "../../../ui/Avatar";
+import { Button } from "../../../ui/Button";
 import { cn } from "../../../ui/cn";
-import { hoverRow } from "../../../ui/interactive";
 import { IconStar } from "../../../ui/icons";
+import { pressable } from "../../../ui/interactive";
 import { nightLabel } from "../calendar/calendarDates";
 import type { CalendarDay } from "../calendar/DayCell";
 import { EmptyLine, RailCard } from "./RailCard";
@@ -14,11 +16,13 @@ export function BestNights({
   playerCount,
   monthOver,
   onSelectDay,
+  onSchedule,
 }: {
   nights: readonly CalendarDay[];
   playerCount: number;
   monthOver: boolean;
   onSelectDay: (date: IsoDate) => void;
+  onSchedule?: (date: IsoDate) => Promise<unknown>;
 }) {
   return (
     <RailCard title="Best nights">
@@ -27,14 +31,14 @@ export function BestNights({
       ) : (
         <ol className="mt-3 flex flex-col gap-1">
           {nights.map((night, index) => (
-            <li key={night.date}>
-              <NightRow
-                night={night}
-                rank={index + 1}
-                playerCount={playerCount}
-                onSelect={() => onSelectDay(night.date)}
-              />
-            </li>
+            <BestNight
+              key={night.date}
+              night={night}
+              rank={index + 1}
+              playerCount={playerCount}
+              onSelectDay={onSelectDay}
+              onSchedule={onSchedule}
+            />
           ))}
         </ol>
       )}
@@ -48,12 +52,44 @@ function emptyLine(playerCount: number, monthOver: boolean) {
   return "No night works for everyone yet. Nudge the quiet ones.";
 }
 
+function BestNight({
+  night,
+  rank,
+  playerCount,
+  onSelectDay,
+  onSchedule,
+}: {
+  night: CalendarDay;
+  rank: number;
+  playerCount: number;
+  onSelectDay: (date: IsoDate) => void;
+  onSchedule?: (date: IsoDate) => Promise<unknown>;
+}) {
+  const row = useRef<HTMLButtonElement>(null);
+  return (
+    <li className="group relative">
+      <NightRow
+        ref={row}
+        night={night}
+        rank={rank}
+        playerCount={playerCount}
+        onSelect={() => onSelectDay(night.date)}
+      />
+      {onSchedule && night.session === null && (
+        <QuickSchedule night={night} focusAfter={row} onSchedule={onSchedule} />
+      )}
+    </li>
+  );
+}
+
 function NightRow({
+  ref,
   night,
   rank,
   playerCount,
   onSelect,
 }: {
+  ref: Ref<HTMLButtonElement>;
   night: CalendarDay;
   rank: number;
   playerCount: number;
@@ -67,10 +103,17 @@ function NightRow({
   const hidden = night.free.length - SHOWN_AVATARS;
   return (
     <button
+      ref={ref}
       type="button"
       onClick={onSelect}
       aria-label={`${label}, ${counts}${free}${scheduled}`}
-      className={cn("flex w-full items-center gap-3 rounded-md px-2 py-2 text-left", hoverRow)}
+      className={cn(
+        "flex w-full items-center gap-3 rounded-md px-2 py-2 text-left",
+        pressable,
+        night.perfect
+          ? "bg-free-soft hover:brightness-[0.97] dark:hover:brightness-110"
+          : "hover:bg-surface-hover",
+      )}
     >
       <span
         className={cn(
@@ -104,6 +147,49 @@ function NightRow({
         )}
       </span>
     </button>
+  );
+}
+
+function QuickSchedule({
+  night,
+  focusAfter,
+  onSchedule,
+}: {
+  night: CalendarDay;
+  focusAfter: RefObject<HTMLButtonElement | null>;
+  onSchedule: (date: IsoDate) => Promise<unknown>;
+}) {
+  const [scheduling, setScheduling] = useState(false);
+  const button = useRef<HTMLButtonElement>(null);
+  const label = nightLabel(night.date);
+  useLayoutEffect(
+    () => () => {
+      if (document.activeElement === button.current) focusAfter.current?.focus();
+    },
+    [focusAfter],
+  );
+  const schedule = async () => {
+    if (scheduling) return;
+    setScheduling(true);
+    try {
+      await onSchedule(night.date);
+    } finally {
+      setScheduling(false);
+    }
+  };
+  return (
+    <Button
+      ref={button}
+      size="sm"
+      aria-label={`${scheduling ? "Scheduling" : "Schedule"} ${label}`}
+      aria-disabled={scheduling || undefined}
+      aria-busy={scheduling || undefined}
+      onClick={() => void schedule()}
+      className="absolute top-1/2 right-2 -translate-y-1/2 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:hidden"
+    >
+      <IconStar className="size-3.5" />
+      {scheduling ? "Scheduling…" : "Schedule"}
+    </Button>
   );
 }
 

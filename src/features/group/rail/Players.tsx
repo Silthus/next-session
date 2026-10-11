@@ -170,7 +170,10 @@ function PlayerItem({
       )}
     >
       <Avatar name={player.name} image={player.image} size="sm" />
-      <span className="min-w-0 flex-1 truncate text-sm font-medium">{player.name}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium">{player.name}</span>
+        <AnswerTrack answered={answered} fillable={fillable} />
+      </span>
       {showingActions ? (
         <span id={actionsId} className="flex shrink-0 items-center gap-1">
           <button type="button" className={rowActionClassName} onClick={() => setMode("renaming")}>
@@ -206,6 +209,25 @@ function PlayerItem({
 }
 
 const rowActionClassName = `rounded-sm px-2 py-1 text-xs font-semibold text-ink-2 transition-colors hover:bg-surface hover:text-ink ${focusRing}`;
+
+function AnswerTrack({ answered, fillable }: { answered: number; fillable: number }) {
+  if (fillable === 0) return null;
+  const done = answered === fillable;
+  return (
+    <span
+      aria-hidden="true"
+      className="mt-1 block h-1 w-full max-w-28 overflow-hidden rounded-full bg-surface-2"
+    >
+      <span
+        className={cn(
+          "block h-full rounded-full transition-[width] duration-300 ease-out",
+          done ? "bg-free" : "bg-accent",
+        )}
+        style={{ width: `${String(Math.round((answered / fillable) * 100))}%` }}
+      />
+    </span>
+  );
+}
 
 function AnswerProgress({ answered, fillable }: { answered: number; fillable: number }) {
   if (fillable > 0 && answered === fillable) {
