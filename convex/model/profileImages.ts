@@ -35,8 +35,8 @@ export async function profileImageUrl(ctx: QueryCtx, user: Doc<"users"> | null) 
 
 export async function downloadGooglePicture(from: string): Promise<Blob | null> {
   if (!isGooglePicture(from)) return null;
-  const response = await fetch(from, { redirect: "error" }).catch(() => null);
-  if (!response?.ok) return null;
+  const response = await fetch(from, { redirect: "error" });
+  if (!response.ok) return null;
   const picture = await response.blob();
   const isImage = picture.type.startsWith("image/");
   return isImage && picture.size <= MAX_PICTURE_BYTES ? picture : null;

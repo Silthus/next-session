@@ -77,10 +77,17 @@ export function withGoogleCredentials() {
 export type GoogleIdentity = { sub: string; email: string; picture?: string };
 
 export const GOOGLE_PICTURES = "https://lh3.googleusercontent.com/a/";
-export const MISSING_GOOGLE_PICTURE = `${GOOGLE_PICTURES}missing=s96-c`;
 export const FOREIGN_PICTURE = "https://pictures.example.com/photo.png";
 
 export const pictureBytes = (url: string) => `picture bytes of ${url}`;
+
+export const pictureFailures = new Map<string, "missing" | "brokenOff">();
+
+function brokenOffBody() {
+  return new ReadableStream({
+    start: (controller) => controller.error(new Error("The connection was reset")),
+  });
+}
 
 const GOOGLE_ISSUER = "https://accounts.google.com";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
@@ -128,9 +135,12 @@ function googleAnswer(identity: GoogleIdentity, url: string) {
       id_token: googleIdToken(identity),
     });
   }
-  if (url === MISSING_GOOGLE_PICTURE) return new Response("Not found", { status: 404 });
+  const png = { "Content-Type": "image/png" };
+  const failure = pictureFailures.get(url);
+  if (failure === "missing") return new Response("Not found", { status: 404 });
+  if (failure === "brokenOff") return new Response(brokenOffBody(), { headers: png });
   if (url.startsWith(GOOGLE_PICTURES) || url === FOREIGN_PICTURE) {
-    return new Response(pictureBytes(url), { headers: { "Content-Type": "image/png" } });
+    return new Response(pictureBytes(url), { headers: png });
   }
   throw new Error(`The fake Google does not answer ${url}`);
 }

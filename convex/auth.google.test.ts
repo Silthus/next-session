@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { LEGAL_VERSIONS } from "../shared/legal";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
   createYourLink,
   FOREIGN_PICTURE,
   GOOGLE_PICTURES,
   logInAccount,
-  MISSING_GOOGLE_PICTURE,
   pictureBytes,
+  pictureFailures,
   newCredentials,
   signInWithGoogle,
   signUpAccount,
@@ -180,24 +180,45 @@ describe("Google profile picture", () => {
     expect(await fileExists(fileId!)).toBe(false);
   });
 
-  it("shows no picture when Google's picture does not load", async () => {
-    const { as } = await signInWithGoogle(t, {
-      ...newGoogleIdentity(),
-      picture: MISSING_GOOGLE_PICTURE,
-    });
-
+  it("shows the picture at the next sign-in after it failed to load", async () => {
+    const identity = withPicture();
+    pictureFailures.set(identity.picture, "missing");
+    const { as } = await signInWithGoogle(t, identity);
     expect((await as.query(api.account.me, {}))?.image).toBeUndefined();
+
+    pictureFailures.delete(identity.picture);
+    await signInWithGoogle(t, identity);
+
+    expect((await as.query(api.account.me, {}))?.image).toBeTypeOf("string");
   });
 
-  it("drops the old picture when the new one does not load", async () => {
+  it.each([
+    ["does not load", "missing"],
+    ["breaks off mid-download", "brokenOff"],
+  ] as const)("drops the old picture when the new one %s", async (_, failure) => {
     const identity = withPicture();
     const { as, userId } = await signInWithGoogle(t, identity);
     const { fileId } = await storedPictureOf(userId);
 
-    await signInWithGoogle(t, { ...identity, picture: MISSING_GOOGLE_PICTURE });
+    const changed = withPicture(identity);
+    pictureFailures.set(changed.picture, failure);
+    await signInWithGoogle(t, changed);
 
     expect((await as.query(api.account.me, {}))?.image).toBeUndefined();
     expect(await fileExists(fileId!)).toBe(false);
+  });
+
+  it("keeps a copied picture when an overlapping download of it fails", async () => {
+    const identity = withPicture();
+    const { as, userId } = await signInWithGoogle(t, identity);
+
+    await t.mutation(internal.profileImages.replace, {
+      userId,
+      from: identity.picture,
+      imageId: null,
+    });
+
+    expect((await as.query(api.account.me, {}))?.image).toBeTypeOf("string");
   });
 
   it("never fetches a picture from outside Google's picture host", async () => {
