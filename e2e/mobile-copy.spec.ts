@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { monthOf, todayUtc } from "../shared/dates";
 import { openAsGm, signInAnonymousGm } from "./helpers";
 
 test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -11,13 +12,13 @@ test.beforeEach(async ({ context }) => {
   });
 });
 
-async function expectTapToCopy(page: Page, shareToken: string) {
+async function expectTapToCopy(page: Page, link: string) {
   await page.getByRole("button", { name: "Copy" }).tap();
   await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
   await expect(page.getByText("Long-press the link to copy it.")).toBeHidden();
   await expect(page.locator("textarea")).toHaveCount(0);
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
-    `${new URL(page.url()).origin}/s/${shareToken}`,
+    `${new URL(page.url()).origin}${link}`,
   );
 }
 
@@ -29,7 +30,7 @@ test("a phone that refuses clipboard writes still copies the new link on the lan
   await expect(page.getByText("Your link is ready. Send it to your players.")).toBeVisible();
   const shareLink = (await page.locator("code").textContent()) ?? "";
 
-  await expectTapToCopy(page, shareLink.split("/s/")[1] ?? "");
+  await expectTapToCopy(page, `/s/${shareLink.split("/s/")[1] ?? ""}`);
 });
 
 test("a phone that refuses clipboard writes still copies the link from the group", async ({
@@ -39,7 +40,7 @@ test("a phone that refuses clipboard writes still copies the link from the group
   await openAsGm(page, gm, `/g/${gm.groupId}`);
   await expect(page.getByText(`/s/${gm.shareToken}`)).toBeVisible();
 
-  await expectTapToCopy(page, gm.shareToken);
+  await expectTapToCopy(page, `/s/${gm.shareToken}?month=${monthOf(todayUtc(Date.now()))}`);
 });
 
 test("a phone offers a selectable link when both clipboard methods refuse", async ({

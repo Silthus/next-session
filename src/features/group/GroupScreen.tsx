@@ -35,6 +35,7 @@ import { showsNudge } from "./rail/nudge";
 import { Players } from "./rail/Players";
 import { Sessions } from "./rail/Sessions";
 import { useRailActions } from "./rail/useRailActions";
+import { shareLinkUrl } from "./shareLink";
 import { useWideLayout } from "./rail/useWideLayout";
 import { useToast, type GroupToast, type ShowToast } from "./useToast";
 
@@ -259,7 +260,12 @@ function GroupSurface({
 
   const summary = summarizeMonth({ month, today, ...schedule });
   const day = summary.days.find((candidate) => candidate.date === selectedDay) ?? null;
-  const shareUrl = shareLinkUrl(group.shareToken);
+  const shareUrl = shareLinkUrl({
+    origin: window.location.origin,
+    shareToken: group.shareToken,
+    month: requestedMonth,
+    today,
+  });
   const dayPanel = (presentation: DayPanelPresentation) =>
     day && (
       <DayPanel
@@ -382,10 +388,6 @@ function toastMessage(toast: GroupToast, undo: (toast: GroupToast) => void): Toa
 
 function insideDialog(target: EventTarget | null) {
   return target instanceof Element && target.closest("dialog") !== null;
-}
-
-function shareLinkUrl(shareToken: string) {
-  return `${window.location.origin}/s/${shareToken}`;
 }
 
 function GroupFrame({
