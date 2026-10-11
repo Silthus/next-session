@@ -27,13 +27,13 @@ export function HeatCalendar({
   const gridMonth = days[0] ? monthOf(days[0].date) : month;
   const loading = gridMonth !== month;
   return (
-    <Card className="p-3 sm:p-5">
+    <Card className="px-1.5 py-3 max-sm:-mx-4 max-sm:rounded-none max-sm:border-x-0 sm:p-5">
       <MonthHeader month={month} today={today} onMonthChange={onMonthChange} />
       <div
         aria-busy={loading || undefined}
         inert={loading}
         className={cn(
-          "grid grid-cols-7 gap-1 transition-opacity duration-150 sm:gap-1.5",
+          "grid grid-cols-7 gap-0.5 transition-opacity duration-150 sm:gap-1.5",
           loading && "opacity-50",
         )}
       >
@@ -76,7 +76,7 @@ function MonthHeader({
 }) {
   const atLastMonth = month >= lastVisibleMonth(today);
   return (
-    <div className="mb-3 flex items-center justify-between gap-2">
+    <div className="mb-3 flex items-center justify-between gap-2 max-sm:px-2.5">
       <div className="flex min-w-0 items-center gap-2">
         <h2
           tabIndex={-1}
@@ -119,7 +119,7 @@ function MonthHeader({
 
 function Legend({ dense }: { dense: boolean }) {
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3">
+    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3 max-sm:px-2.5">
       <span className="flex items-center gap-1.5">
         <span className="size-3 rounded-sm bg-free" /> everyone free
       </span>

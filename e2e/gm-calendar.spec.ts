@@ -148,6 +148,55 @@ test("on a phone a dense day keeps two-digit counts inside its cell", async ({ p
   }
 });
 
+async function seedSixPlayers(gm: Gm) {
+  await seedPlayer(gm, "Ana", { [night(5)]: "free", [night(6)]: "free", [night(7)]: "free" });
+  await seedPlayer(gm, "Ben", { [night(5)]: "free", [night(6)]: "maybe", [night(7)]: "free" });
+  await seedPlayer(gm, "Chiara", { [night(5)]: "busy", [night(6)]: "free", [night(7)]: "free" });
+  await seedPlayer(gm, "Dev", { [night(5)]: "free", [night(6)]: "maybe", [night(7)]: "free" });
+  await seedPlayer(gm, "Ema", { [night(5)]: "maybe", [night(7)]: "free" });
+  await seedPlayer(gm, "Finn", { [night(6)]: "busy", [night(7)]: "free" });
+}
+
+for (const width of [360, 390]) {
+  test(`on a ${String(width)} px phone a night shows six player bars on one line in a roomy cell`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 844 });
+    const gm = await signInAnonymousGm();
+    await seedSixPlayers(gm);
+    await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+
+    const day = dayCell(page, /, \w+ 6: 2 free, 2 maybe, 1 busy, 1 not answered$/);
+    await expect(day.locator("[data-bar]")).toHaveCount(6);
+    const bars = await day.locator("[data-bar]").all();
+    const tops = new Set<number>();
+    for (const bar of bars) {
+      expect(await isInside(bar, day)).toBe(true);
+      tops.add(Math.round((await bar.boundingBox())?.y ?? -1));
+    }
+    expect(tops.size).toBe(1);
+    expect((await day.boundingBox())?.width).toBeGreaterThanOrEqual(44);
+  });
+}
+
+test("on a phone a focused night's outline stays clear of its neighbour", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 844 });
+  const gm = await signInAnonymousGm();
+  await seedSixPlayers(gm);
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+
+  const day = dayCell(page, /, \w+ 6: /);
+  const neighbour = dayCell(page, /, \w+ 7: /);
+  await day.focus();
+  expect(await day.evaluate((cell) => cell.matches(":focus-visible"))).toBe(true);
+  const outlineReach = await day.evaluate((cell) => {
+    const style = getComputedStyle(cell);
+    return parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth);
+  });
+  const [box, next] = await Promise.all([day.boundingBox(), neighbour.boundingBox()]);
+  expect(box!.x + box!.width + outlineReach).toBeLessThanOrEqual(next!.x);
+});
+
 async function isInside(inner: Locator, outer: Locator) {
   const [box, frame] = await Promise.all([inner.boundingBox(), outer.boundingBox()]);
   if (!box || !frame) return false;
@@ -247,4 +296,33 @@ test("a signed-out visitor lands on the landing page", async ({ page }) => {
   const stranger = await signInAnonymousGm();
   await page.goto(`/g/${stranger.groupId}`);
   await expect(page).toHaveURL(/\/$/);
+});
+
+const screenshotDir = process.env.E2E_SCREENSHOTS;
+
+test.describe("screenshots", () => {
+  test.skip(!screenshotDir, "Set E2E_SCREENSHOTS to a directory to capture them");
+
+  for (const width of [360, 390, 1440]) {
+    for (const colorScheme of ["light", "dark"] as const) {
+      test(`six players at ${String(width)}px ${colorScheme}`, async ({ browser }) => {
+        const gm = await signInAnonymousGm();
+        await seedSixPlayers(gm);
+        await gm.client.mutation(api.sessions.schedule, { groupId: gm.groupId, date: night(12) });
+        const context = await browser.newContext({
+          viewport: { width, height: width < 640 ? 844 : 1000 },
+          colorScheme,
+        });
+        const page = await context.newPage();
+        await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+        await expect(dayCell(page, /, \w+ 7: everyone free$/)).toBeVisible();
+        await page.screenshot({
+          path: `${screenshotDir ?? ""}/six-players--${String(width)}--${colorScheme}.png`,
+          fullPage: true,
+          animations: "disabled",
+        });
+        await context.close();
+      });
+    }
+  }
 });

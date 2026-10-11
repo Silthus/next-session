@@ -79,7 +79,7 @@ Fonts are self-hosted through Fontsource (`@fontsource-variable/fraunces`, `@fon
 
 ### Spacing, radius, elevation
 
-- Spacing: Tailwind's 4 px scale. Page gutters 16 px (mobile) / 24 px (desktop). Card padding 16 px, calendar card 12/20 px. Grid gaps 4–8 px between cells.
+- Spacing: Tailwind's 4 px scale. Page gutters 16 px (mobile) / 24 px (desktop). Card padding 16 px. The GM calendar card runs edge to edge on phones (6 px inside, its month header and legend back on the 16 px gutter) and pads 20 px from 640 px. Grid gaps 2 px between GM cells on phones, 6 px from 640 px; 4–8 px between player tiles.
 - Radius: Lonir's scale ([#94](https://github.com/Silthus/next-session/issues/94)), pinned by `src/theme.test.ts`: `sm` 4 (GM calendar cells, segment tabs, legend swatches), `md` 6 (every button, inputs, menu rows, player tiles), `lg` 8, `xl` 12 (cards, popovers, sheets, banners), `2xl` 16, full (avatars, pills, share icons).
 - Elevation: one shadow token (`shadow-card`): a paper sheet with a one-pixel top highlight and a soft warm drop in light, a deeper drop in dark. Borders do the structural work; shadow only lifts cards and sheets. Buttons are flat, like Lonir's.
 - Layout widths: landing 64 rem, GM surface 72 rem with a `minmax(0,1fr) 22rem` split at `lg`, player surface 36 rem single column, legal 42 rem.
@@ -221,6 +221,7 @@ Greyed mark, "This link no longer works", "The GM may have rotated the link or d
 | D15 | **No marketing beyond the hero**: no features grid, no testimonials. | A longer landing. The product is one click away; the demo strip does the selling. |
 | D16 | **Phone `+ Add player` is a full-width soft button between the calendar and the segmented control** ([#67](https://github.com/Silthus/next-session/issues/67)). Desktop keeps the Players card's `+ Add`, already in view in the rail. | An icon-only `+` at the end of the segmented control (less obvious, squeezes the tabs at 390 px); a floating action button (covers calendar cells and collides with the toast and the day sheet). |
 | D17 | **Lonir's L is the mark, and Lonir's shapes are the shapes** ([#94](https://github.com/Silthus/next-session/issues/94)). Michael on 2026-10-07: "it still doesn't feel like it has the exact same styles as before, as buttons are rounded". The L reads as the L of *link*; only the L crosses over. Buttons are `rounded-md` (6 px), cards `rounded-xl` (12 px). | Keep the day-tile mark and the rounder 8/12/16/24 scale (the first build). Port Lonir's tokens without rendering it (the #55 pass, which missed the feel). |
+| D18 | **The GM calendar runs edge to edge on phones** so a cell is about 48 px wide at 360 px and holds six player bars on one line. Michael on 2026-10-11: "Improve the spacing on the calendar so its cells are bigger on mobile and can host up to 6 players." | Keep the inset card and shrink the bars (thinner than 4 px stops reading as a bar); switch to counts above four players (loses *who*, see D2). |
 
 Variants considered and not built: a "list-first" GM surface (Best nights as hero) and a "week strip" player surface (one week at a time). Both lost on paper to the month grid because the GM needs the whole booking window at once and the player needs to see progress toward "done".
 
