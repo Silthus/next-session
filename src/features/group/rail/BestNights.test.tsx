@@ -6,18 +6,32 @@ import { monthWith, rosterOf } from "./railFixtures";
 
 function renderBestNights(
   summary: ReturnType<typeof monthWith>,
-  { playerCount = 5, monthOver = false } = {},
+  {
+    playerCount = 5,
+    monthOver = false,
+    onSchedule,
+  }: {
+    playerCount?: number;
+    monthOver?: boolean;
+    onSchedule?: (date: string) => Promise<unknown>;
+  } = {},
 ) {
   const onSelectDay = vi.fn();
-  render(
+  const bestNights = (nights: ReturnType<typeof monthWith>) => (
     <BestNights
-      nights={summary.bestNights}
+      nights={nights.bestNights}
       playerCount={playerCount}
       monthOver={monthOver}
       onSelectDay={onSelectDay}
-    />,
+      onSchedule={onSchedule}
+    />
   );
-  return { onSelectDay, card: screen.getByRole("region", { name: "Best nights" }) };
+  const view = render(bestNights(summary));
+  return {
+    onSelectDay,
+    card: screen.getByRole("region", { name: "Best nights" }),
+    rerenderWith: (next: ReturnType<typeof monthWith>) => view.rerender(bestNights(next)),
+  };
 }
 
 describe("BestNights", () => {
@@ -74,6 +88,54 @@ describe("BestNights", () => {
       monthWith({ answers: { "2026-10-16": { Ana: "free" } }, sessions: ["2026-10-16"] }),
     );
     expect(screen.getByRole("button", { name: /Session scheduled/ })).toBeTruthy();
+  });
+
+  describe("scheduling straight from the rail", () => {
+    const nights = () =>
+      monthWith({
+        answers: { "2026-10-16": { Ana: "free" }, "2026-10-09": { Ana: "free", Ben: "free" } },
+        sessions: ["2026-10-16"],
+      });
+
+    it("schedules a night without opening its day", async () => {
+      let settle = () => undefined as void;
+      const onSchedule = vi.fn(() => new Promise<void>((resolve) => (settle = resolve)));
+      const { onSelectDay } = renderBestNights(nights(), { onSchedule });
+      const schedule = screen.getByRole("button", { name: "Schedule Friday, Oct 9" });
+      await userEvent.click(schedule);
+      expect(onSchedule).toHaveBeenCalledWith("2026-10-09");
+      expect(onSelectDay).not.toHaveBeenCalled();
+      const scheduling = screen.getByRole("button", { name: "Scheduling Friday, Oct 9" });
+      expect(scheduling.getAttribute("aria-disabled")).toBe("true");
+      await userEvent.click(scheduling);
+      expect(onSchedule).toHaveBeenCalledOnce();
+      settle();
+      expect(await screen.findByRole("button", { name: "Schedule Friday, Oct 9" })).toBeTruthy();
+    });
+
+    it("keeps focus on the night once it is scheduled and the quick action goes", async () => {
+      const onSchedule = vi.fn(() => Promise.resolve());
+      const view = renderBestNights(nights(), { onSchedule });
+      await userEvent.click(screen.getByRole("button", { name: "Schedule Friday, Oct 9" }));
+      view.rerenderWith(
+        monthWith({
+          answers: { "2026-10-16": { Ana: "free" }, "2026-10-09": { Ana: "free", Ben: "free" } },
+          sessions: ["2026-10-16", "2026-10-09"],
+        }),
+      );
+      expect(screen.queryByRole("button", { name: "Schedule Friday, Oct 9" })).toBeNull();
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: /^Friday, Oct 9,/ }));
+    });
+
+    it("offers no quick action for a night that already has a Session", () => {
+      renderBestNights(nights(), { onSchedule: vi.fn(() => Promise.resolve()) });
+      expect(screen.queryByRole("button", { name: "Schedule Friday, Oct 16" })).toBeNull();
+    });
+
+    it("offers no quick action where the rail cannot schedule", () => {
+      renderBestNights(nights());
+      expect(screen.queryByRole("button", { name: /^Schedule / })).toBeNull();
+    });
   });
 
   it.each([

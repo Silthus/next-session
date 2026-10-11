@@ -330,6 +330,7 @@ function GroupSurface({
                 playerCount={schedule.players.length}
                 monthOver={month < monthOf(today)}
                 onSelectDay={openDay}
+                onSchedule={wide ? sessions.schedule : undefined}
               />
             ),
             sessions: <Sessions sessions={schedule.sessions} today={today} onSelectDay={openDay} />,
