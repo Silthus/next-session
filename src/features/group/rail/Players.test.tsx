@@ -42,6 +42,28 @@ describe("Players", () => {
     ).toEqual(["ANAna2/30", "BEBen0/30"]);
   });
 
+  it.each([
+    [{ "2026-10-16": { Ana: "free" } }, "1 still to answer"],
+    [{ "2026-10-16": { Ana: "free", Ben: "busy" } }, "0 of 2 answered every night"],
+  ] as const)("says what matters now", (answers, status) => {
+    const { card } = renderPlayers(monthWith({ players: rosterOf("Ana", "Ben"), answers }));
+    expect(within(card).getByText(status)).toBeTruthy();
+  });
+
+  it("says when everyone answered every night", () => {
+    const nights = Array.from(
+      { length: 30 },
+      (_, i) => `2026-10-${String(i + 2).padStart(2, "0")}`,
+    );
+    const { card } = renderPlayers(
+      monthWith({
+        players: rosterOf("Ana"),
+        answers: Object.fromEntries(nights.map((date) => [date, { Ana: "free" }])),
+      }),
+    );
+    expect(within(card).getByText("Everyone answered every night")).toBeTruthy();
+  });
+
   it("ticks a Player who answered every night", () => {
     const nights = Array.from(
       { length: 30 },

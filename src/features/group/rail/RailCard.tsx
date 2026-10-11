@@ -3,11 +3,13 @@ import { Card } from "../../../ui/Card";
 
 export function RailCard({
   title,
+  status,
   action,
   headingRef,
   children,
 }: {
   title: string;
+  status?: string;
   action?: ReactNode;
   headingRef?: Ref<HTMLHeadingElement>;
   children: ReactNode;
@@ -26,6 +28,7 @@ export function RailCard({
         </h2>
         {action}
       </div>
+      {status && <p className="mt-1 font-display text-base font-semibold text-ink">{status}</p>}
       {children}
     </Card>
   );

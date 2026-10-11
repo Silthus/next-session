@@ -32,7 +32,7 @@ type MyGroupsProps = {
   onLogOut: () => void;
 };
 
-const cardClassName = `rounded-xl border border-line bg-surface shadow-card transition-[border-color,background-color] duration-150 hover:border-line-strong hover:bg-surface-hover ${mutedStepsUp}`;
+const cardClassName = `rounded-xl border border-line bg-surface shadow-card transition-[border-color,background-color,translate] duration-150 ease-(--ease-snap) hover:border-line-strong hover:bg-surface-hover motion-safe:hover:-translate-y-0.5 ${mutedStepsUp}`;
 
 export function MyGroups({
   settings,
@@ -277,9 +277,11 @@ function GroupName({ name }: { name: string }) {
 
 function NextSession({ dates }: { dates: IsoDate[] }) {
   const [next] = dates;
+  if (next === undefined) return <span className="text-sm text-ink-3">No session yet</span>;
   return (
-    <span className="text-sm text-ink-3">
-      {next === undefined ? "No session yet" : `Next session ${dayLabel(next)}`}
+    <span className="flex items-center gap-1.5 text-sm font-medium text-accent-strong">
+      <IconStar className="size-3.5 shrink-0" />
+      {`Next session ${dayLabel(next)}`}
     </span>
   );
 }

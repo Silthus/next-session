@@ -25,7 +25,7 @@ export function BestNights({
   onSchedule?: (date: IsoDate) => Promise<unknown>;
 }) {
   return (
-    <RailCard title="Best nights">
+    <RailCard title="Best nights" status={nightsStatus(nights)}>
       {nights.length === 0 ? (
         <EmptyLine>{emptyLine(playerCount, monthOver)}</EmptyLine>
       ) : (
@@ -44,6 +44,14 @@ export function BestNights({
       )}
     </RailCard>
   );
+}
+
+function nightsStatus(nights: readonly CalendarDay[]) {
+  if (nights.length === 0) return undefined;
+  const perfect = nights.filter((night) => night.perfect).length;
+  const count = perfect > 0 ? perfect : nights.length;
+  const work = count === 1 ? "night works" : "nights work";
+  return `${String(count)} ${work}${perfect > 0 ? " for everyone" : ""}`;
 }
 
 function emptyLine(playerCount: number, monthOver: boolean) {
@@ -76,7 +84,12 @@ function BestNight({
         onSelect={() => onSelectDay(night.date)}
       />
       {onSchedule && night.session === null && (
-        <QuickSchedule night={night} focusAfter={row} onSchedule={onSchedule} />
+        <QuickSchedule
+          night={night}
+          inTheOpen={rank === 1}
+          focusAfter={row}
+          onSchedule={onSchedule}
+        />
       )}
     </li>
   );
@@ -124,7 +137,12 @@ function NightRow({
         {rank}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-1.5 text-sm font-semibold">
+        <span
+          className={cn(
+            "flex items-center gap-1.5 font-semibold",
+            rank === 1 ? "font-display text-lg leading-tight" : "text-sm",
+          )}
+        >
           {label}
           {night.session && <IconStar className="size-3.5 text-accent-strong" />}
         </span>
@@ -154,10 +172,12 @@ function NightRow({
 
 function QuickSchedule({
   night,
+  inTheOpen,
   focusAfter,
   onSchedule,
 }: {
   night: CalendarDay;
+  inTheOpen: boolean;
   focusAfter: RefObject<HTMLButtonElement | null>;
   onSchedule: (date: IsoDate) => Promise<unknown>;
 }) {
@@ -187,7 +207,11 @@ function QuickSchedule({
       aria-disabled={scheduling || undefined}
       aria-busy={scheduling || undefined}
       onClick={() => void schedule()}
-      className="absolute top-1/2 right-2 -translate-y-1/2 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:hidden"
+      className={
+        inTheOpen
+          ? "mt-1 mb-1 ml-10"
+          : "absolute top-1/2 right-2 -translate-y-1/2 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:hidden"
+      }
     >
       <IconStar className="size-3.5" />
       {scheduling ? "Scheduling…" : "Schedule"}
