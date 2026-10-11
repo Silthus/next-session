@@ -280,6 +280,7 @@ test("on a phone the calendar starts under the top bar, the link one tap away", 
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
 
   const calendar = page.locator("section").filter({ has: page.locator("[data-month-heading]") });
+  await expect(calendar).toBeVisible();
   const [headerBox, calendarBox] = await Promise.all([
     page.locator("header").boundingBox(),
     calendar.boundingBox(),
