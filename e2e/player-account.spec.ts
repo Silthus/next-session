@@ -2,7 +2,7 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 import { api } from "../convex/_generated/api";
 import { todayUtc, type IsoDate } from "../shared/dates";
 import {
-  newEmail,
+  reserveAccountSignUp,
   openAsGm,
   password,
   signInAnonymousGm,
@@ -85,7 +85,7 @@ test("a visitor keeps the Group with a new Account and plays as that Account on 
 }) => {
   const first = await seedGroup("Thursday Crew");
   const second = await seedGroup("Sunday Table");
-  const email = newEmail();
+  const email = await reserveAccountSignUp();
   const elsewhere = await freshPage(browser);
 
   await test.step("the visitor answers, then keeps the Group by creating an Account", async () => {
@@ -171,7 +171,7 @@ test("keeping another Account's Player says so after the sign-in", async ({ page
     .getByRole("region", { name: "Keep this group" })
     .getByRole("button", { name: "Create account" })
     .click();
-  const sheet = await fillAccount(page, newEmail());
+  const sheet = await fillAccount(page, await reserveAccountSignUp());
   await sheet.getByRole("button", { name: "Keep group" }).click();
 
   await expect(page.getByRole("dialog")).toBeHidden();
@@ -185,7 +185,7 @@ test("an Anonymous GM keeping their own link saves first, then keeps the Player"
   page,
 }) => {
   const { gm, link } = await seedGroup("Home Game");
-  const email = newEmail();
+  const email = await reserveAccountSignUp();
 
   await openAsGm(page, gm, link);
   await join(page, "Gus");
@@ -372,7 +372,7 @@ test.describe("screenshots", () => {
         await answerToday(page);
         await shot("keep-this-group");
 
-        await keepByCreatingAccount(page, newEmail());
+        await keepByCreatingAccount(page, await reserveAccountSignUp());
         await expect(toastRegion(page)).toBeEmpty({ timeout: 10_000 });
         await shot("kept-with-remove");
 
