@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { isValidMonth } from "../../shared/dates";
 import { PlayerScreen } from "../features/player/PlayerScreen";
 
 export const Route = createFileRoute("/s/$shareToken")({
@@ -16,6 +17,14 @@ function PlayerRoute() {
       shareToken={shareToken}
       requestedMonth={month}
       onMonthChange={(next) => void navigate({ search: { month: next } })}
+      onOwnGroup={(groupId) =>
+        void navigate({
+          to: "/g/$groupId",
+          params: { groupId },
+          search: { month: month && isValidMonth(month) ? month : undefined },
+          replace: true,
+        })
+      }
     />
   );
 }

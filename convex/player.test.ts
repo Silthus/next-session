@@ -161,7 +161,26 @@ describe("player.group", () => {
       sessionDates: ["2026-10-02", TODAY, "2026-10-17", LAST_BOOKABLE_DATE, "2027-01-01"],
       claimedPlayerId: null,
       removedFromMyGroups: false,
+      callerIsGm: false,
     });
+  });
+
+  it("tells the GM's Account that it runs this Group, and no one else", async () => {
+    const { as: gm, shareToken } = await sharedGroup();
+    const playerAccount = await signInAccount(t);
+    await playerAccount.as.mutation(api.player.join, { shareToken, name: "Ada" });
+    const otherGm = await sharedGroup();
+
+    expect(await callerIsGmOn(gm, shareToken)).toBe(true);
+    for (const stranger of [t, playerAccount.as, otherGm.as, (await signInAnonymousGm(t)).as]) {
+      expect(await callerIsGmOn(stranger, shareToken)).toBe(false);
+    }
+  });
+
+  it("keeps the player view for an Anonymous GM opening their own Share Link", async () => {
+    const { as: anonymousGm, shareToken } = await sharedGroup(signInAnonymousGm);
+
+    expect(await callerIsGmOn(anonymousGm, shareToken)).toBe(false);
   });
 
   it("shows the Account's Claimed Player on its other devices and to no one else", async () => {
@@ -770,6 +789,10 @@ describe("joining while signed in", () => {
 
 async function claimedPlayerIdIn(as: GmClient, shareToken: string) {
   return (await as.query(api.player.group, { shareToken }))?.claimedPlayerId;
+}
+
+async function callerIsGmOn(as: GmClient, shareToken: string) {
+  return (await as.query(api.player.group, { shareToken }))?.callerIsGm;
 }
 
 async function seedClaimsInOtherGroups(accountId: Id<"users">, count: number) {

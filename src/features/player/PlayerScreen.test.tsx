@@ -27,6 +27,7 @@ const roster = {
   sessionDates: [],
   claimedPlayerId: null,
   removedFromMyGroups: false,
+  callerIsGm: false,
 };
 const queries: Record<string, unknown> = {};
 const listeners = new Set<() => void>();
@@ -78,7 +79,14 @@ function updateQuery(key: string, value: unknown) {
 
 function Page() {
   const [month, setMonth] = useState("2026-10");
-  return <PlayerScreen shareToken={shareToken} requestedMonth={month} onMonthChange={setMonth} />;
+  return (
+    <PlayerScreen
+      shareToken={shareToken}
+      requestedMonth={month}
+      onMonthChange={setMonth}
+      onOwnGroup={vi.fn()}
+    />
+  );
 }
 
 function renderPage() {
