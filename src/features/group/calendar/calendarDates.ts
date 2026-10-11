@@ -11,6 +11,10 @@ const DAY_MS = 86_400_000;
 
 export const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] as const;
 
+export function weekdayColumn(date: IsoDate): number {
+  return (new Date(`${date}T00:00:00Z`).getUTCDay() + 6) % 7;
+}
+
 export function leadingBlanks(month: IsoMonth): number {
   const sundayFirst = new Date(`${month}-01T00:00:00Z`).getUTCDay();
   return (sundayFirst + 6) % 7;
