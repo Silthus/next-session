@@ -30,7 +30,7 @@ export function SessionEmailSettings() {
           checked={enabled === true}
           disabled={enabled == null || saving}
           onChange={(event) => void change(event.target.checked)}
-          className="size-5 shrink-0 accent-accent focus-visible:outline-2 focus-visible:outline-offset-4"
+          className="size-5 shrink-0 accent-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-strong"
         />
         Email me when a session is set or cancelled
       </label>

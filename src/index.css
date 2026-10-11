@@ -7,6 +7,7 @@
   --paper: oklch(93% 0.035 88);
   --surface: oklch(97% 0.022 88);
   --surface-2: oklch(95% 0.018 88);
+  --surface-hover: oklch(87.5% 0.065 85);
   --line: oklch(89% 0.022 88);
   --line-strong: oklch(82% 0.026 88);
   --ink: oklch(20% 0.012 60);
@@ -34,6 +35,7 @@
     --paper: oklch(15% 0.022 75);
     --surface: oklch(18% 0.028 75);
     --surface-2: oklch(21% 0.026 75);
+    --surface-hover: oklch(28% 0.05 78);
     --line: oklch(27% 0.016 80);
     --line-strong: oklch(35% 0.02 80);
     --ink: oklch(96% 0.006 85);
@@ -61,6 +63,7 @@
   --color-paper: var(--paper);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-surface-hover: var(--surface-hover);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-ink: var(--ink);

@@ -24,7 +24,7 @@ function ToastPill({ message }: { message: ToastMessage }) {
         <button
           type="button"
           onClick={message.action.run}
-          className="font-semibold text-paper underline underline-offset-2"
+          className="rounded-sm font-semibold text-paper underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-paper"
         >
           {message.action.label}
         </button>

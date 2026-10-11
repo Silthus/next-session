@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Fragment } from "react";
 import { Eyebrow } from "../../ui/Eyebrow";
+import { focusRing } from "../../ui/interactive";
 import { humanDate } from "./humanDate";
 import type { Block, Inline, LegalDocument } from "./legalDocument";
 
@@ -75,7 +76,7 @@ function renderBlock(block: Block, index: number) {
   }
 }
 
-const linkClassName = "text-accent-strong underline underline-offset-2 hover:decoration-2";
+const linkClassName = `rounded-sm text-accent-strong underline underline-offset-2 hover:decoration-2 ${focusRing}`;
 
 function renderInlines(inlines: Inline[]) {
   return inlines.map((inline, index) => {

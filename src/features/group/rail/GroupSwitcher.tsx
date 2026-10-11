@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 import { Button } from "../../../ui/Button";
 import { cn } from "../../../ui/cn";
+import { hoverRow } from "../../../ui/interactive";
 import { IconChevron } from "../../../ui/icons";
 import { Skeleton } from "../../../ui/Skeleton";
 import { errorMessage } from "../../../lib/errors";
@@ -87,7 +88,10 @@ export function GroupSwitcher({ group, onRename, ...menu }: GroupSwitcherProps) 
           <button
             {...props}
             type="button"
-            className="flex max-w-full min-w-0 items-center gap-1.5 rounded-md px-2 py-1 font-display text-lg font-semibold hover:bg-surface-2 sm:text-xl"
+            className={cn(
+              "flex max-w-full min-w-0 items-center gap-1.5 rounded-md px-2 py-1 font-display text-lg font-semibold sm:text-xl",
+              hoverRow,
+            )}
           >
             <span className="truncate">{group.name}</span>
             <IconChevron direction="down" className="shrink-0 text-ink-3" />
@@ -161,7 +165,7 @@ function SwitcherMenu({
       {groups === undefined ? (
         <Skeleton className="mx-2 my-2 h-6" />
       ) : (
-        <ul className="flex max-h-64 flex-col overflow-y-auto">
+        <ul className="-m-1 flex max-h-64 flex-col overflow-y-auto p-1">
           {groups.map((candidate) => (
             <li key={candidate.id}>
               <a

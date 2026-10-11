@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { cn } from "./cn";
+import { focusRing } from "./interactive";
 
 const links = [
   { to: "/terms", label: "Terms" },
@@ -13,7 +14,11 @@ export function LegalFooter({ className }: { className?: string }) {
       className={cn("flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-3", className)}
     >
       {links.map((link) => (
-        <Link key={link.to} to={link.to} className="transition-colors hover:text-ink">
+        <Link
+          key={link.to}
+          to={link.to}
+          className={cn("rounded-sm transition-colors hover:text-ink", focusRing)}
+        >
           {link.label}
         </Link>
       ))}

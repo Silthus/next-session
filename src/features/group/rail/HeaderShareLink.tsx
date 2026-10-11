@@ -3,10 +3,10 @@ import { cn } from "../../../ui/cn";
 import { IconCheck, IconCopy, IconShare } from "../../../ui/icons";
 import { ShareLinkCard, useCopyLink } from "../../../ui/ShareLinkCard";
 import type { ShowToast } from "../useToast";
+import { hoverRow } from "../../../ui/interactive";
 import { Popover } from "./Popover";
 
-const iconButton =
-  "inline-flex size-9 items-center justify-center rounded-full text-ink-2 hover:bg-surface-2 hover:text-ink";
+const iconButton = `inline-flex size-9 items-center justify-center rounded-full text-ink-2 hover:text-ink ${hoverRow}`;
 
 export function HeaderShareLink({
   url,

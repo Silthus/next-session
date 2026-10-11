@@ -9,6 +9,7 @@ import {
   type RefObject,
 } from "react";
 import { cn } from "../../../ui/cn";
+import { hoverRow } from "../../../ui/interactive";
 
 export type PopoverTriggerProps = {
   ref: RefObject<HTMLButtonElement | null>;
@@ -111,8 +112,7 @@ export function Popover({
   );
 }
 
-export const menuItemClassName =
-  "flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-surface-2 disabled:opacity-50";
+export const menuItemClassName = `flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm disabled:opacity-50 ${hoverRow}`;
 
 export function MenuButton({ onSelect, children }: { onSelect: () => void; children: ReactNode }) {
   const close = useClosePopover();

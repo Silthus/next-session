@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { track } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
+import { focusRing } from "../../ui/interactive";
 import { GoogleLogo, LegalLinks } from "../account/AccountSheet";
 
 export type KeepState = "offer" | "keeping" | "kept";
@@ -110,7 +111,7 @@ function KeepLine({
         type="button"
         onClick={onKeep}
         disabled={keeping}
-        className="-my-3.5 py-3.5 font-semibold text-accent-strong underline underline-offset-2 hover:text-ink disabled:opacity-60"
+        className={`-my-3.5 rounded-sm py-3.5 font-semibold text-accent-strong underline underline-offset-2 hover:text-ink disabled:opacity-60 ${focusRing}`}
       >
         {keeping ? "Keeping…" : "Keep this group"}
       </button>{" "}
@@ -147,7 +148,7 @@ function KeptLine({ focusOnMount, onRemove }: { focusOnMount: boolean; onRemove?
           <button
             type="button"
             onClick={onRemove}
-            className="-my-3.5 py-3.5 underline underline-offset-2 hover:text-ink"
+            className={`-my-3.5 rounded-sm py-3.5 underline underline-offset-2 hover:text-ink ${focusRing}`}
           >
             Remove from my groups
           </button>

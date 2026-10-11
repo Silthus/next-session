@@ -17,6 +17,7 @@ import { cn } from "../../ui/cn";
 import { LegalFooter } from "../../ui/LegalFooter";
 import { Logo } from "../../ui/Logo";
 import { IconChevron } from "../../ui/icons";
+import { focusRing, pressable } from "../../ui/interactive";
 import { Skeleton } from "../../ui/Skeleton";
 import { useFocusOnMount } from "../../ui/useFocusOnMount";
 import { Progress } from "./Progress";
@@ -41,7 +42,7 @@ const answerTiles: Record<Answer | "none", string> = {
   free: "border-free bg-free text-white dark:text-paper",
   maybe: "border-maybe bg-maybe text-ink dark:text-paper",
   busy: "border-busy bg-busy text-white dark:text-paper",
-  none: "border-line bg-surface text-ink hover:border-line-strong",
+  none: "border-line bg-surface text-ink hover:border-line-strong hover:bg-surface-hover",
 };
 
 export function PlayerCalendar({
@@ -165,7 +166,10 @@ export function PlayerCalendar({
               <button
                 type="button"
                 onClick={onNotYou}
-                className="-mx-1 -my-3.5 px-1 py-3.5 underline underline-offset-2 hover:text-ink"
+                className={cn(
+                  "-mx-1 -my-3.5 rounded-sm px-1 py-3.5 underline underline-offset-2 hover:text-ink",
+                  focusRing,
+                )}
               >
                 Not you?
               </button>
@@ -180,7 +184,10 @@ export function PlayerCalendar({
               aria-label="How it works"
               aria-expanded={hintVisible}
               onClick={onHintToggle}
-              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 transition-colors hover:bg-surface-2"
+              className={cn(
+                "inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-line text-sm font-bold text-ink-2 hover:border-line-strong hover:bg-surface-hover",
+                pressable,
+              )}
             >
               ?
             </button>
@@ -246,7 +253,10 @@ export function PlayerCalendar({
       <footer className="mx-auto flex w-full max-w-xl flex-col items-center gap-2 px-4 pb-6 sm:px-5">
         <Link
           to="/"
-          className="inline-flex min-h-11 items-center text-xs font-semibold text-accent-strong hover:underline"
+          className={cn(
+            "inline-flex min-h-11 items-center rounded-sm text-xs font-semibold text-accent-strong hover:underline",
+            focusRing,
+          )}
         >
           Plan your own game →
         </Link>
@@ -406,10 +416,11 @@ function DayTile({
           : { transitionDelay: `${String(staggerIndex * FILL_STAGGER_MS)}ms` }
       }
       className={cn(
-        "relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,transform] duration-150 ease-(--ease-snap) select-none motion-reduce:delay-0! sm:p-2",
+        "relative flex aspect-square w-full touch-manipulation flex-col items-start justify-between rounded-md border p-1.5 text-left transition-[background-color,border-color,color,scale] duration-150 ease-(--ease-snap) select-none motion-reduce:delay-0! sm:p-2",
+        focusRing,
         answerTiles[day.answer ?? "none"],
         popping && "animate-pop",
-        day.locked ? "cursor-default opacity-45 saturate-50" : "active:scale-95",
+        day.locked ? "cursor-default opacity-45 saturate-50" : "motion-safe:active:scale-95",
         day.session && "ring-2 ring-accent ring-offset-2 ring-offset-surface",
       )}
     >

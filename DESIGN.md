@@ -44,6 +44,7 @@ Gold on paper, ported from Lonir's Next Session (`packages/ui/src/styles.css` in
 | `paper` | `oklch(93% 0.035 88)` | `oklch(15% 0.022 75)` | page background (cream, warm near-black) |
 | `surface` | `oklch(97% 0.022 88)` | `oklch(18% 0.028 75)` | cards, calendar cells: the lighter sheet on the page |
 | `surface-2` | `oklch(95% 0.018 88)` | `oklch(21% 0.026 75)` | sunken areas, segmented controls, skeletons |
+| `surface-hover` | `oklch(87.5% 0.065 85)` | `oklch(28% 0.05 78)` | the one hover fill for rows, menu items, ghost and secondary buttons; about 10 % L and a touch of gold away from `surface`, and below `paper`, so it reads at arm's length on either |
 | `line` / `line-strong` | `oklch(89% 0.022 88)` / `oklch(82% 0.026 88)` | `oklch(27% 0.016 80)` / `oklch(35% 0.02 80)` | quiet borders, unanswered bars |
 | `ink` / `ink-2` / `ink-3` | `oklch(20% 0.012 60)` / `oklch(40% 0.018 60)` / `oklch(50% 0.02 60)` | `oklch(96% 0.006 85)` / `oklch(76% 0.018 85)` / `oklch(62% 0.02 85)` | text: primary, secondary, muted |
 | `accent` | `oklch(70% 0.12 80)` | `oklch(74% 0.12 82)` | honey gold: primary buttons, the logo, session tiles and badges. A fill, never text |
@@ -92,6 +93,17 @@ Fonts are self-hosted through Fontsource (`@fontsource-variable/fraunces`, `@fon
 - Fill-rest recolors cells with a 26 ms stagger (ported behaviour) while the mutation stays a single call.
 - Particles: on first answer of a day, three gold flecks travel cell → progress bar; on clearing a day, grey flecks travel back (ported from lonir). Skipped under `prefers-reduced-motion`, where all durations collapse to ~0.
 - Haptics: `navigator.vibrate(8)` on a tap, `[20,10,20]` on fill-rest, where available.
+
+### Interaction states
+
+Every pressable answers the pointer, the keyboard and the press the same way, from one recipe in `src/ui/interactive.ts` (`focusRing`, `pressable`, `hoverRow`). Added 2026-10-11 after the design audit found hover one lightness step apart on a two-step palette and keyboard focus falling back to the browser ring on most text controls.
+
+- **Hover is an enhancement.** Tailwind v4 compiles `hover:` inside `@media (hover: hover)`, so no hover state sticks on touch. Nothing is reachable by hover alone: a hover reveal (the player kebab, a quick action on a row) always has a `focus-visible` or `aria-expanded` twin, and the thing it opens is also reachable by click or tap.
+- **Fill.** Rows, menu items, ghost and secondary buttons, the switcher and the sheet close take `surface-hover` on hover, and any `ink-3` text inside a hovered row steps up to `ink-2` (`mutedStepsUp`), so the fill can be strong without dimming the row's small print. `surface-2` stays for sunken areas; it is too close to `surface` to signal hover. Primary buttons brighten 8 %, the soft button darkens 5 %, accent rows (a Session, a next session) go from `accent-soft/50` to solid `accent-soft` with an `accent` border. Cards lift their border to `line-strong`. Buttons stay flat: no hover shadow, no translate.
+- **Focus.** One ring: 2 px `accent-strong` outline, offset 2 px, on `focus-visible` only. On the ink toast it is `paper`. Inline text links and small text buttons carry `rounded-sm` so the ring has a shape. A scrolling list that holds focusable rows pads itself by 4 px (`-m-1 p-1`) so `overflow` cannot clip the ring. Nothing relies on the browser default.
+- **Press.** `motion-safe:active:scale-[0.98]` on every pressable, 150 ms on `--ease-snap`. Tailwind v4 scales through the `scale` property, so the transition list names `scale`, not `transform`. Player tiles keep their `pop` on top; the GM calendar cell keeps `0.97`.
+- **Contrast.** `ink-2` and `accent-strong` read at 4.5:1 on `surface-hover` in both themes (`ink-3` does not, which is why it steps up), and the hover fill sits at least 9 % L from `surface` and 5 % L from `paper`, pinned by `src/theme.test.ts`.
+- **Reduced motion** collapses every transition and animation to ~0 and drops the press scale (`motion-safe:`), so a press or hover still changes color but never moves.
 
 ## 3. Components
 

@@ -4,6 +4,7 @@ import type { IsoDate } from "../../../shared/dates";
 import { track } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
 import { IconMore, IconStar } from "../../ui/icons";
+import { focusRing, hoverRow, mutedStepsUp, pressable } from "../../ui/interactive";
 import { PageShell } from "../../ui/PageShell";
 import { ProfileImage } from "../../ui/ProfileImage";
 import { Skeleton } from "../../ui/Skeleton";
@@ -31,8 +32,7 @@ type MyGroupsProps = {
   onLogOut: () => void;
 };
 
-const cardClassName =
-  "rounded-xl border border-line bg-surface shadow-card transition-colors hover:border-line-strong";
+const cardClassName = `rounded-xl border border-line bg-surface shadow-card transition-[border-color,background-color] duration-150 hover:border-line-strong hover:bg-surface-hover ${mutedStepsUp}`;
 
 export function MyGroups({
   settings,
@@ -125,7 +125,7 @@ function NextSessions({ groups, today }: { groups: MyGroupsData; today: IsoDate 
             <li key={`${session.date}-${pageKey(session.to)}`}>
               <GroupPageLink
                 to={session.to}
-                className="flex items-center gap-3 rounded-md border border-accent/40 bg-accent-soft/50 px-3 py-2.5 transition-colors hover:bg-accent-soft"
+                className={`flex items-center gap-3 rounded-md border border-accent/40 bg-accent-soft/50 px-3 py-2.5 hover:border-accent hover:bg-accent-soft ${pressable}`}
               >
                 <IconStar className="size-5 shrink-0 text-accent-strong" />
                 <span className="min-w-0 flex-1">
@@ -160,7 +160,7 @@ function PlayingGroups({
           <li key={group.groupId} className={`${cardClassName} relative`}>
             <GroupPageLink
               to={{ kind: "player", shareToken: group.shareToken }}
-              className="flex flex-col gap-1 p-4 pr-14"
+              className={`flex flex-col gap-1 rounded-xl p-4 pr-14 ${focusRing}`}
             >
               <GroupName name={group.name} />
               <span className="text-sm text-ink-2">as {group.playerName}</span>
@@ -195,7 +195,7 @@ function GroupMenu({
           {...props}
           type="button"
           aria-label={`Options for ${group.name}`}
-          className="rounded-md p-2.5 text-ink-3 hover:bg-surface-2 hover:text-ink"
+          className={`rounded-md p-2.5 text-ink-3 hover:text-ink ${hoverRow}`}
         >
           <IconMore />
         </button>
@@ -228,7 +228,7 @@ function RunningGroups({
             <li key={group.groupId} className={cardClassName}>
               <GroupPageLink
                 to={{ kind: "gm", groupId: group.groupId }}
-                className="flex flex-col gap-1 p-4"
+                className={`flex flex-col gap-1 rounded-xl p-4 ${focusRing}`}
               >
                 <GroupName name={group.name} />
                 <NextSession dates={group.upcomingSessions} />
