@@ -100,10 +100,10 @@ Every pressable answers the pointer, the keyboard and the press the same way, fr
 
 - **Hover is an enhancement.** Tailwind v4 compiles `hover:` inside `@media (hover: hover)`, so no hover state sticks on touch. Nothing is reachable by hover alone: a hover reveal (the player kebab, a quick action on a row) always has a `focus-visible` or `aria-expanded` twin, and the thing it opens is also reachable by click or tap.
 - **Fill.** Rows, menu items, ghost and secondary buttons, the switcher and the sheet close take `surface-hover` on hover. `surface-2` stays for sunken areas; it is too close to `surface` to signal hover. Primary buttons brighten 8 %, the soft button darkens 5 %, accent rows (a Session, a next session) go from `accent-soft/50` to solid `accent-soft` with an `accent` border. Cards lift their border to `line-strong`. Buttons stay flat: no hover shadow, no translate.
-- **Focus.** One ring: 2 px `accent-strong` outline, offset 2 px, on `focus-visible` only. On the ink toast it is `paper`. Inline text links and small text buttons carry `rounded-sm` so the ring has a shape. Nothing relies on the browser default.
-- **Press.** `active:scale-[0.98]` on every pressable, 150 ms on `--ease-snap`. Player tiles keep their `pop` on top; the GM calendar cell keeps `0.97`.
+- **Focus.** One ring: 2 px `accent-strong` outline, offset 2 px, on `focus-visible` only. On the ink toast it is `paper`. Inline text links and small text buttons carry `rounded-sm` so the ring has a shape. A scrolling list that holds focusable rows pads itself by 4 px (`-m-1 p-1`) so `overflow` cannot clip the ring. Nothing relies on the browser default.
+- **Press.** `motion-safe:active:scale-[0.98]` on every pressable, 150 ms on `--ease-snap`. Tailwind v4 scales through the `scale` property, so the transition list names `scale`, not `transform`. Player tiles keep their `pop` on top; the GM calendar cell keeps `0.97`.
 - **Contrast.** `ink-3` and `accent-strong` read at 4.5:1 on `surface-hover` in both themes, and the hover fill sits at least 5 % L from `surface` and 2 % L from `paper`, pinned by `src/theme.test.ts`.
-- **Reduced motion** collapses every transition and animation to ~0, so a press or hover still changes color but never moves.
+- **Reduced motion** collapses every transition and animation to ~0 and drops the press scale (`motion-safe:`), so a press or hover still changes color but never moves.
 
 ## 3. Components
 
