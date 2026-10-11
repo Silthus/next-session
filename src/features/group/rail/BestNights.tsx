@@ -141,7 +141,7 @@ function NightRow({
         <span
           className={cn(
             "flex items-center gap-1.5 font-semibold",
-            rank === 1 ? "text-sm lg:font-display lg:text-lg lg:leading-tight" : "text-sm",
+            rank === 1 ? "text-sm lg:font-display lg:text-base lg:leading-tight" : "text-sm",
           )}
         >
           {label}
