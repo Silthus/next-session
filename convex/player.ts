@@ -45,7 +45,7 @@ const playerGroupView = v.object({
   sessionDates: v.array(v.string()),
   claimedPlayerId: v.union(v.id("players"), v.null()),
   removedFromMyGroups: v.boolean(),
-  callerIsGm: v.boolean(),
+  opensAsGm: v.boolean(),
 });
 
 export const group = query({
@@ -182,7 +182,7 @@ export const fillRest = mutation({
 async function callerIn(ctx: QueryCtx, group: Doc<"groups">) {
   const account = await currentAccount(ctx);
   if (account === null)
-    return { claimedPlayerId: null, removedFromMyGroups: false, callerIsGm: false };
+    return { claimedPlayerId: null, removedFromMyGroups: false, opensAsGm: false };
   const [claimed, removedFromMyGroups] = await Promise.all([
     claimedPlayerIn(ctx, account._id, group._id),
     hasRemovedGroup(ctx, account._id, group._id),
@@ -190,7 +190,7 @@ async function callerIn(ctx: QueryCtx, group: Doc<"groups">) {
   return {
     claimedPlayerId: claimed?._id ?? null,
     removedFromMyGroups,
-    callerIsGm: group.ownerId === account._id,
+    opensAsGm: group.ownerId === account._id && claimed === null,
   };
 }
 

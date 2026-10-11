@@ -27,7 +27,7 @@ const roster = {
   sessionDates: [],
   claimedPlayerId: null,
   removedFromMyGroups: false,
-  callerIsGm: false,
+  opensAsGm: false,
 };
 const queries: Record<string, unknown> = {};
 const listeners = new Set<() => void>();
@@ -117,7 +117,7 @@ beforeEach(() => {
 describe("PlayerScreen", () => {
   it("opens the GM view when the GM's Account opens its own Share Link", async () => {
     account.status = "account";
-    queries["player:group"] = { ...roster, callerIsGm: true };
+    queries["player:group"] = { ...roster, opensAsGm: true };
     renderPage();
 
     await vi.waitFor(() => expect(openOwnGroup).toHaveBeenCalledWith(groupId));
@@ -129,7 +129,7 @@ describe("PlayerScreen", () => {
     renderPage();
     await screen.findByRole("button", { name: /^Wednesday, October 7:/ });
 
-    updateQuery("player:group", { ...roster, callerIsGm: true });
+    updateQuery("player:group", { ...roster, opensAsGm: true });
 
     expect(screen.getByRole("button", { name: /^Wednesday, October 7:/ })).toBeTruthy();
     expect(openOwnGroup).not.toHaveBeenCalled();

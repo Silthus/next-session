@@ -14,7 +14,7 @@ const playerGroup = {
   sessionDates: [],
   claimedPlayerId: null,
   removedFromMyGroups: false,
-  callerIsGm: false,
+  opensAsGm: false,
 };
 const queries: Record<string, unknown> = {};
 const account: Partial<ReturnType<typeof useGm>> = { status: "account", keepOnReturn: null };
@@ -40,7 +40,7 @@ beforeEach(() => {
 
 describe("/s/$shareToken", () => {
   it("takes the GM's Account to the GM view of its Group, in place of the Share Link", async () => {
-    queries["player:group"] = { ...playerGroup, callerIsGm: true };
+    queries["player:group"] = { ...playerGroup, opensAsGm: true };
 
     const router = renderAt("/s/the-token?month=2026-11");
 
@@ -50,7 +50,7 @@ describe("/s/$shareToken", () => {
   });
 
   it("drops a month the GM view cannot open", async () => {
-    queries["player:group"] = { ...playerGroup, callerIsGm: true };
+    queries["player:group"] = { ...playerGroup, opensAsGm: true };
 
     const router = renderAt("/s/the-token?month=2026-13");
 

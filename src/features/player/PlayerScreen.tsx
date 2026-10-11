@@ -56,8 +56,8 @@ export function PlayerScreen({
   if (!accountKnown && account.status !== "loading") setAccountKnown(true);
   if (group === undefined || !accountKnown) return <PlayerLoading />;
   if (group === null) return <NotFoundScreen kind="link" />;
-  if (openedByGm === null) setOpenedByGm(group.callerIsGm);
-  if (openedByGm ?? group.callerIsGm)
+  if (openedByGm === null) setOpenedByGm(group.opensAsGm);
+  if (openedByGm ?? group.opensAsGm)
     return <OpenOwnGroup groupId={group.groupId} onOpen={onOwnGroup} />;
   return (
     <PlayerGroup
