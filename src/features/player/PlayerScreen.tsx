@@ -52,12 +52,12 @@ export function PlayerScreen({
   const account = useGm();
   const group = useQuery(api.player.group, { shareToken });
   const [accountKnown, setAccountKnown] = useState(false);
-  const [openedByGm, setOpenedByGm] = useState<boolean | null>(null);
+  const [opensAsGmOnArrival, setOpensAsGmOnArrival] = useState<boolean | null>(null);
   if (!accountKnown && account.status !== "loading") setAccountKnown(true);
   if (group === undefined || !accountKnown) return <PlayerLoading />;
   if (group === null) return <NotFoundScreen kind="link" />;
-  if (openedByGm === null) setOpenedByGm(group.opensAsGm);
-  if (openedByGm ?? group.opensAsGm)
+  if (opensAsGmOnArrival === null) setOpensAsGmOnArrival(group.opensAsGm);
+  if (opensAsGmOnArrival ?? group.opensAsGm)
     return <OpenOwnGroup groupId={group.groupId} onOpen={onOwnGroup} />;
   return (
     <PlayerGroup
