@@ -39,6 +39,7 @@ function renderPanel({
       playerCount={roster.length}
       today={today}
       pending={pending}
+      closeLabel="Overview"
       {...handlers}
     />,
   );

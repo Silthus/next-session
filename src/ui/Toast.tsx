@@ -1,33 +1,15 @@
-import { cn } from "./cn";
-
-type ToastPosition = "bottom" | "top";
-
 export type ToastMessage = {
   id: number;
   text: string;
   action?: { label: string; run: () => void };
 };
 
-const positions: Record<ToastPosition, string> = {
-  bottom: "bottom-20",
-  top: "top-20",
-};
-
-export function Toast({
-  message,
-  position = "bottom",
-}: {
-  message: ToastMessage | null;
-  position?: ToastPosition;
-}) {
+export function Toast({ message }: { message: ToastMessage | null }) {
   return (
     <div
       role="status"
       aria-live="polite"
-      className={cn(
-        "fixed left-1/2 z-40 w-max max-w-[calc(100vw-2rem)] -translate-x-1/2",
-        positions[position],
-      )}
+      className="fixed bottom-20 left-1/2 z-40 w-max max-w-[calc(100vw-2rem)] -translate-x-1/2"
     >
       {message && <ToastPill key={message.id} message={message} />}
     </div>

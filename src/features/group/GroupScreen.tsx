@@ -14,14 +14,15 @@ import { Logo } from "../../ui/Logo";
 import { ShareLinkCard } from "../../ui/ShareLinkCard";
 import { Skeleton } from "../../ui/Skeleton";
 import { Toast, type ToastMessage } from "../../ui/Toast";
+import { cn } from "../../ui/cn";
 import { AccountSheet } from "../account/AccountSheet";
 import type { SaveInput } from "../account/save";
 import { useGm } from "../account/useGm";
-import { visibleDay, visibleMonth } from "./calendar/calendarDates";
+import { monthLabel, visibleDay, visibleMonth } from "./calendar/calendarDates";
 import { focusDay, focusMonthHeading } from "./calendar/dayFocus";
 import { DayPanel } from "./calendar/DayPanel";
 import { HeatCalendar } from "./calendar/HeatCalendar";
-import { MobileDaySheet } from "./calendar/MobileDaySheet";
+import { useDaySlideOver } from "./calendar/useDaySlideOver";
 import { useSessionActions } from "./calendar/useSessionActions";
 import { useMonthSchedule } from "./calendar/useMonthSchedule";
 import { useToday } from "./calendar/useToday";
@@ -110,7 +111,7 @@ export function GroupScreen({ groupId, search }: { groupId: string; search: Grou
         onHeadingFocused: headingFocused,
         onSave: setSaveSheetFor,
       })}
-      <GroupToastRegion toasts={toasts} search={search} />
+      <GroupToastRegion toasts={toasts} />
       <AccountSheet
         open={saveSheetFor !== null}
         intent="save"
@@ -215,8 +216,9 @@ function GroupSurface({
   const selectedDay = loaded ? visibleDay(search.day, loaded.month) : null;
   const closeDay = () => {
     selectDay(null);
-    if (selectedDay) focusDay(selectedDay);
+    if (wide && selectedDay) focusDay(selectedDay);
   };
+  const { slidBack } = useDaySlideOver(visibleDay(search.day, requestedMonth), !wide);
 
   useEffect(() => rememberLastGroup(groupId), [groupId]);
 
@@ -258,7 +260,7 @@ function GroupSurface({
   const summary = summarizeMonth({ month, today, ...schedule });
   const day = summary.days.find((candidate) => candidate.date === selectedDay) ?? null;
   const shareUrl = shareLinkUrl(group.shareToken);
-  const dayPanel = (className?: string) =>
+  const dayPanel = (closeLabel: ReactNode, className?: string) =>
     day && (
       <DayPanel
         key={day.date}
@@ -266,6 +268,7 @@ function GroupSurface({
         playerCount={schedule.players.length}
         today={today}
         pending={sessions.isPending(day.date)}
+        closeLabel={closeLabel}
         onClose={closeDay}
         onSchedule={() => void sessions.schedule(day.date)}
         onUnschedule={(session) => void sessions.unschedule(session)}
@@ -290,21 +293,27 @@ function GroupSurface({
       )}
       {!wide && <ShareLinkCard url={shareUrl} compact onRotate={rotate} />}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-        <HeatCalendar
-          month={requestedMonth}
-          today={today}
-          players={schedule.players}
-          days={summary.days}
-          selectedDay={selectedDay}
-          onSelectDay={selectDay}
-          onMonthChange={showMonth}
-        />
+        {day && !wide ? (
+          dayPanel(<BackTo month={month} />, "animate-slide-forward")
+        ) : (
+          <div className={cn(slidBack && "animate-slide-back")}>
+            <HeatCalendar
+              month={requestedMonth}
+              today={today}
+              players={schedule.players}
+              days={summary.days}
+              selectedDay={selectedDay}
+              onSelectDay={selectDay}
+              onMonthChange={showMonth}
+            />
+          </div>
+        )}
         <GroupRail
           wide={wide}
           rosterEmpty={schedule.players.length === 0}
           onAddPlayer={() => setAddPlayerRequests((requests) => requests + 1)}
           shareLink={<ShareLinkCard url={shareUrl} onRotate={rotate} />}
-          dayPanel={dayPanel()}
+          dayPanel={dayPanel("Overview")}
           panels={{
             bestNights: (
               <BestNights
@@ -327,19 +336,20 @@ function GroupSurface({
           }}
         />
       </div>
-      {day && !wide && (
-        <MobileDaySheet date={day.date}>
-          {dayPanel("shadow-[0_-8px_32px_-12px_rgb(0_0_0/0.35)]")}
-        </MobileDaySheet>
-      )}
     </GroupFrame>
   );
 }
 
-function GroupToastRegion({ toasts, search }: { toasts: Toasts; search: GroupSearch }) {
-  const today = useToday();
-  const wide = useWideLayout();
-  const dayOpen = visibleDay(search.day, visibleMonth(search.month, today)) !== null;
+function BackTo({ month }: { month: IsoMonth }) {
+  return (
+    <span>
+      <span className="sr-only">Back to </span>
+      {monthLabel(month)}
+    </span>
+  );
+}
+
+function GroupToastRegion({ toasts }: { toasts: Toasts }) {
   const undo = (toast: GroupToast) => {
     toasts.release();
     toasts.dismiss();
@@ -349,10 +359,7 @@ function GroupToastRegion({ toasts, search }: { toasts: Toasts; search: GroupSea
 
   return (
     <div onFocus={toasts.hold} onBlur={toasts.release}>
-      <Toast
-        position={dayOpen && !wide ? "top" : "bottom"}
-        message={toasts.toast && toastMessage(toasts.toast, undo)}
-      />
+      <Toast message={toasts.toast && toastMessage(toasts.toast, undo)} />
     </div>
   );
 }
@@ -398,7 +405,7 @@ function GroupFrame({
           {actions && <div className="ml-auto flex shrink-0 items-center gap-2">{actions}</div>}
         </div>
       </header>
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 px-4 py-4 sm:px-6 sm:py-6">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 overflow-x-clip px-4 py-4 sm:px-6 sm:py-6">
         {children}
       </main>
       <LegalFooter className="mx-auto w-full max-w-6xl px-4 pb-6 sm:px-6" />
