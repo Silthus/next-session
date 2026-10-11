@@ -84,6 +84,22 @@ describe("HeatCalendar", () => {
       expect(detail?.textContent).toBe("Free AnaMaybe BenNo answer Chiara");
     });
 
+    it("hides the names on Escape until the night is hovered or focused again", async () => {
+      renderCalendar({
+        players: crew,
+        answers: [{ playerId: "ana", date: "2026-10-16", answer: "free" }],
+      });
+      const night = screen.getByRole("button", { name: /^Friday, October 16/ });
+      night.focus();
+      expect(night.getAttribute("aria-describedby")).not.toBeNull();
+      await userEvent.keyboard("{Escape}");
+      expect(night.getAttribute("aria-describedby")).toBeNull();
+      expect(document.activeElement).toBe(night);
+      await userEvent.tab();
+      await userEvent.tab({ shift: true });
+      expect(night.getAttribute("aria-describedby")).not.toBeNull();
+    });
+
     it("says nothing beside a past night", () => {
       renderCalendar({
         players: crew,

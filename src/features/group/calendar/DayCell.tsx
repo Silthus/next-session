@@ -1,4 +1,4 @@
-import { useId, type CSSProperties } from "react";
+import { useId, useState, type CSSProperties, type KeyboardEvent } from "react";
 import type { Answer } from "../../../../shared/answers";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import type { IsoDate } from "../../../../shared/dates";
@@ -29,11 +29,21 @@ export function DayCell({
   const perfect = day.perfect && day.session === null;
   const isToday = day.date === today;
   const whoId = useId();
-  const who = players.length > 0 && !day.past;
+  const [whoDismissed, setWhoDismissed] = useState(false);
+  const who = players.length > 0 && !day.past && !whoDismissed;
+  const dismissWho = (event: KeyboardEvent) => {
+    if (event.key !== "Escape" || !who) return;
+    event.stopPropagation();
+    setWhoDismissed(true);
+  };
+  const showWhoAgain = () => setWhoDismissed(false);
   return (
     <button
       type="button"
       onClick={onToggle}
+      onKeyDown={dismissWho}
+      onMouseEnter={showWhoAgain}
+      onFocus={showWhoAgain}
       disabled={day.past}
       aria-label={dayCellLabel(day, players.length)}
       aria-describedby={who ? whoId : undefined}
@@ -96,18 +106,23 @@ function DayWho({ id, day }: { id: string; day: CalendarDay }) {
       id={id}
       role="tooltip"
       className={cn(
-        "pointer-events-none absolute top-full z-20 mt-1.5 hidden w-max max-w-60 flex-col gap-1 rounded-md bg-ink px-2.5 py-2 text-left text-xs leading-snug font-medium text-paper opacity-0 shadow-card transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 lg:flex",
+        "pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block",
         weekdayColumn(day.date) < 4 ? "left-0" : "right-0",
       )}
     >
-      {rows.map((row) => (
-        <span key={row.label} className="flex items-start gap-1.5">
-          <span aria-hidden="true" className={cn("mt-1 size-2 shrink-0 rounded-full", row.tone)} />
-          <span>
-            <span className="text-paper/70">{row.label}</span> {namesOf(row.players)}
+      <span className="flex flex-col gap-1 rounded-md bg-ink px-2.5 py-2 text-left text-xs leading-snug font-medium text-paper shadow-card">
+        {rows.map((row) => (
+          <span key={row.label} className="flex items-start gap-1.5">
+            <span
+              aria-hidden="true"
+              className={cn("mt-1 size-2 shrink-0 rounded-full", row.tone)}
+            />
+            <span className="min-w-0 wrap-anywhere">
+              <span className="text-paper/70">{row.label}</span> {namesOf(row.players)}
+            </span>
           </span>
-        </span>
-      ))}
+        ))}
+      </span>
     </span>
   );
 }
@@ -125,7 +140,7 @@ function isPlain(day: CalendarDay) {
 function cellTone(day: CalendarDay) {
   if (day.session) return "border-accent bg-accent-soft ring-2 ring-accent ring-inset";
   if (day.perfect) return "border-free bg-free text-white dark:text-paper";
-  return "border-line bg-surface hover:border-ink-3";
+  return "border-line bg-surface hover:border-line-strong sm:hover:border-ink-3";
 }
 
 function DayAnswers({
