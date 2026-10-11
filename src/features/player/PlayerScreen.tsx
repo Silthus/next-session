@@ -42,17 +42,23 @@ export function PlayerScreen({
   shareToken,
   requestedMonth,
   onMonthChange,
+  onOwnGroup,
 }: {
   shareToken: string;
   requestedMonth: string | undefined;
   onMonthChange: MonthChange;
+  onOwnGroup: (groupId: Id<"groups">) => void;
 }) {
   const account = useGm();
   const group = useQuery(api.player.group, { shareToken });
   const [accountKnown, setAccountKnown] = useState(false);
+  const [opensAsGmOnArrival, setOpensAsGmOnArrival] = useState<boolean | null>(null);
   if (!accountKnown && account.status !== "loading") setAccountKnown(true);
   if (group === undefined || !accountKnown) return <PlayerLoading />;
   if (group === null) return <NotFoundScreen kind="link" />;
+  if (opensAsGmOnArrival === null) setOpensAsGmOnArrival(group.opensAsGm);
+  if (opensAsGmOnArrival ?? group.opensAsGm)
+    return <OpenOwnGroup groupId={group.groupId} onOpen={onOwnGroup} />;
   return (
     <PlayerGroup
       key={group.groupId}
@@ -419,6 +425,17 @@ function PlayerAnswers({
       accountControl={accountControl}
     />
   );
+}
+
+function OpenOwnGroup({
+  groupId,
+  onOpen,
+}: {
+  groupId: Id<"groups">;
+  onOpen: (groupId: Id<"groups">) => void;
+}) {
+  useEffect(() => onOpen(groupId), [groupId, onOpen]);
+  return <PlayerLoading />;
 }
 
 function PlayerLoading() {

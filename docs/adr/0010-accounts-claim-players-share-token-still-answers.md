@@ -40,3 +40,11 @@ Joining while signed in still claims the new Player. The first saved answer or F
 Visitors get a visible, dismissible card after their first saved answer, with Create account first and Continue with Google when enabled. Anonymous GMs keep the Save-first flow. The card promises access on all devices; #97 adds notification copy once sending is live.
 
 The alternative was automatic re-claim after Remove. It would undo a deliberate action on the next answer, so the Account-level opt-out wins. Storing the removal on a Player would lose it when the GM deletes that name or another Account uses it, so the Account and Group pair owns the record.
+
+## Amendment, 2026-10-11 (#110)
+
+Michael: "When a signed in gm clicks a link to their own group they are taken to the gm view not the player view."
+
+A GM Account that opens its own Share Link without a Claimed Player in the Group lands on `/g/<groupId>`, so it no longer previews its own link or starts playing there. A GM Account that already plays in the Group through a Claimed Player keeps its player view, so My groups' "You play in" card still opens it. The decision is made once, when the link opens: a Group that becomes the Account's own while the page is open, as when an Anonymous GM keeps their own link, stays on the player view. Anonymous GMs and every other caller see the player view as before.
+
+The alternative was an explicit "Open as player" entry from the GM view for previewing. Nothing asks for it yet, so it waits for a request.
