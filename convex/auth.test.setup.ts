@@ -78,6 +78,7 @@ export type GoogleIdentity = { sub: string; email: string; picture?: string };
 
 export const GOOGLE_PICTURES = "https://lh3.googleusercontent.com/a/";
 export const MISSING_GOOGLE_PICTURE = `${GOOGLE_PICTURES}missing=s96-c`;
+export const FOREIGN_PICTURE = "https://pictures.example.com/photo.png";
 
 export const pictureBytes = (url: string) => `picture bytes of ${url}`;
 
@@ -128,7 +129,7 @@ function googleAnswer(identity: GoogleIdentity, url: string) {
     });
   }
   if (url === MISSING_GOOGLE_PICTURE) return new Response("Not found", { status: 404 });
-  if (url.startsWith(GOOGLE_PICTURES)) {
+  if (url.startsWith(GOOGLE_PICTURES) || url === FOREIGN_PICTURE) {
     return new Response(pictureBytes(url), { headers: { "Content-Type": "image/png" } });
   }
   throw new Error(`The fake Google does not answer ${url}`);

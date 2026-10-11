@@ -21,7 +21,7 @@ We have not appointed a data protection officer because we are not required to.
 | For a group created without an account: a random user ID and the time you accepted the Terms | Run your group and prove your acceptance | Contract, 6(1)(b) |
 | For an account with a password: your email address and a hash of your password | Let you sign in on any device | Contract, 6(1)(b) |
 | For an account with Google: your email address, whether Google verified it, and your Google account ID, which Google sends us when you continue with Google | Let you sign in on any device | Contract, 6(1)(b) |
-| For an account with Google: your Google profile picture and its Google address, which Google sends us when you continue with Google | Show your picture to you, and to the GM of each group where your account has a player | Contract, 6(1)(b) |
+| For an account with Google: your Google profile picture and its Google address, which Google sends us when you continue with Google | Show your picture to you, and to the GM of each group where your account has a player, so the GM recognizes who answered | Legitimate interest, 6(1)(f) |
 | For a player with an account: which player in which group belongs to your account | Show your groups on any device | Contract, 6(1)(b) |
 | Group names, player names, the days players marked as free, maybe, or busy, and the scheduled dates | Provide the Service to the GM and the group | Contract, 6(1)(b) |
 | Technical connection data (IP address, browser, time) in server logs of our hosting providers | Deliver the site and keep it secure | Legitimate interest, 6(1)(f) |

@@ -4,6 +4,7 @@ import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
   createYourLink,
+  FOREIGN_PICTURE,
   GOOGLE_PICTURES,
   logInAccount,
   MISSING_GOOGLE_PICTURE,
@@ -188,10 +189,21 @@ describe("Google profile picture", () => {
     expect((await as.query(api.account.me, {}))?.image).toBeUndefined();
   });
 
+  it("drops the old picture when the new one does not load", async () => {
+    const identity = withPicture();
+    const { as, userId } = await signInWithGoogle(t, identity);
+    const { fileId } = await storedPictureOf(userId);
+
+    await signInWithGoogle(t, { ...identity, picture: MISSING_GOOGLE_PICTURE });
+
+    expect((await as.query(api.account.me, {}))?.image).toBeUndefined();
+    expect(await fileExists(fileId!)).toBe(false);
+  });
+
   it("never fetches a picture from outside Google's picture host", async () => {
     const { as } = await signInWithGoogle(t, {
       ...newGoogleIdentity(),
-      picture: "https://pictures.example.com/photo.png",
+      picture: FOREIGN_PICTURE,
     });
 
     expect((await as.query(api.account.me, {}))?.image).toBeUndefined();

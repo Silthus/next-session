@@ -8,23 +8,23 @@ export const copy = internalAction({
   returns: v.null(),
   handler: async (ctx, { userId, from }) => {
     const picture = await downloadGooglePicture(from);
-    if (picture === null) return null;
-    const imageId = await ctx.storage.store(picture);
-    await ctx.runMutation(internal.profileImages.keep, { userId, from, imageId });
+    const imageId = picture === null ? null : await ctx.storage.store(picture);
+    await ctx.runMutation(internal.profileImages.replace, { userId, from, imageId });
     return null;
   },
 });
 
-export const keep = internalMutation({
-  args: { userId: v.id("users"), from: v.string(), imageId: v.id("_storage") },
+export const replace = internalMutation({
+  args: { userId: v.id("users"), from: v.string(), imageId: v.union(v.id("_storage"), v.null()) },
   returns: v.null(),
   handler: async (ctx, { userId, from, imageId }) => {
     const user = await ctx.db.get("users", userId);
     if (user?.image !== from) {
-      await ctx.storage.delete(imageId);
+      if (imageId !== null) await ctx.storage.delete(imageId);
       return null;
     }
-    await replaceProfileImage(ctx, user, { profileImageId: imageId, profileImageFrom: from });
+    const copied = imageId === null ? {} : { profileImageId: imageId, profileImageFrom: from };
+    await replaceProfileImage(ctx, user, copied);
     return null;
   },
 });

@@ -11,7 +11,9 @@ export function Wordmark({ size = "md" }: { size?: Size }) {
   return (
     <Link to="/" className="inline-flex items-center gap-2 text-ink" aria-label="Next Session home">
       <Logo className={logo[size]} />
-      <span className={cn("font-display font-semibold", text[size])}>Next Session</span>
+      <span className={cn("font-display font-semibold whitespace-nowrap", text[size])}>
+        Next Session
+      </span>
     </Link>
   );
 }
