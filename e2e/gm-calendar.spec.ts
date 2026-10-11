@@ -98,6 +98,38 @@ test.describe("on a phone", () => {
     await expect(detail.getByRole("button", { name: "Schedule session" })).toBeVisible();
     await expect(detail.getByRole("heading")).toBeFocused();
   });
+
+  test("Undo for another night keeps focus in the open detail", async ({ page }) => {
+    const gm = await signInAnonymousGm();
+    await seedThreePlayers(gm);
+    await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
+
+    await page
+      .getByRole("region", { name: /, \w+ 5$/ })
+      .getByRole("button", { name: "Schedule session" })
+      .tap();
+    const toast = toastRegion(page);
+    await expect(toast).toContainText("Players see it on the link.");
+    await page.keyboard.press("Escape");
+    await dayCell(page, /, \w+ 6: /).tap();
+    const night6 = page.getByRole("region", { name: /, \w+ 6$/ });
+    await toast.getByRole("button", { name: "Undo" }).focus();
+    await page.keyboard.press("Enter");
+    await expect.poll(() => sessionDates(gm)).toEqual([]);
+    await expect(night6.getByRole("heading")).toBeFocused();
+  });
+
+  test("a Session in another month opens its detail with focus on it", async ({ page }) => {
+    const gm = await signInAnonymousGm();
+    await seedThreePlayers(gm);
+    await gm.client.mutation(api.sessions.schedule, { groupId: gm.groupId, date: night(6) });
+    await openAsGm(page, gm, `/g/${gm.groupId}?month=${monthOf(today)}`);
+
+    await page.getByRole("tab", { name: "Sessions" }).tap();
+    await page.getByRole("region", { name: "Sessions" }).getByRole("button").first().tap();
+    await expect(page).toHaveURL(new RegExp(`month=${nextMonth}&day=${night(6)}`));
+    await expect(page.getByRole("region", { name: /, \w+ 6$/ }).getByRole("heading")).toBeFocused();
+  });
 });
 
 test("on a phone a dense day keeps two-digit counts inside its cell", async ({ page }) => {

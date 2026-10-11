@@ -1,6 +1,6 @@
 import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ComponentProps, type ReactNode } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
@@ -218,7 +218,7 @@ function GroupSurface({
     selectDay(null);
     if (wide && selectedDay) focusDay(selectedDay);
   };
-  const { slidBack } = useDaySlideOver(visibleDay(search.day, requestedMonth), !wide);
+  const slide = useDaySlideOver(visibleDay(search.day, requestedMonth), !wide);
 
   useEffect(() => rememberLastGroup(groupId), [groupId]);
 
@@ -260,7 +260,7 @@ function GroupSurface({
   const summary = summarizeMonth({ month, today, ...schedule });
   const day = summary.days.find((candidate) => candidate.date === selectedDay) ?? null;
   const shareUrl = shareLinkUrl(group.shareToken);
-  const dayPanel = (closeLabel: ReactNode, className?: string) =>
+  const dayPanel = (presentation: DayPanelPresentation) =>
     day && (
       <DayPanel
         key={day.date}
@@ -268,11 +268,10 @@ function GroupSurface({
         playerCount={schedule.players.length}
         today={today}
         pending={sessions.isPending(day.date)}
-        closeLabel={closeLabel}
+        {...presentation}
         onClose={closeDay}
         onSchedule={() => void sessions.schedule(day.date)}
         onUnschedule={(session) => void sessions.unschedule(session)}
-        className={className}
       />
     );
   const nudging = showsNudge({
@@ -294,9 +293,13 @@ function GroupSurface({
       {!wide && <ShareLinkCard url={shareUrl} compact onRotate={rotate} />}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
         {day && !wide ? (
-          dayPanel(<BackTo month={month} />, "animate-slide-forward")
+          dayPanel({
+            closeLabel: <BackTo month={month} />,
+            className: "animate-slide-forward",
+            focusHeading: slide === "forward",
+          })
         ) : (
-          <div className={cn(slidBack && "animate-slide-back")}>
+          <div className={cn(slide === "back" && "animate-slide-back")}>
             <HeatCalendar
               month={requestedMonth}
               today={today}
@@ -313,7 +316,7 @@ function GroupSurface({
           rosterEmpty={schedule.players.length === 0}
           onAddPlayer={() => setAddPlayerRequests((requests) => requests + 1)}
           shareLink={<ShareLinkCard url={shareUrl} onRotate={rotate} />}
-          dayPanel={dayPanel("Overview", "animate-rise")}
+          dayPanel={dayPanel({ closeLabel: "Overview", className: "animate-rise" })}
           panels={{
             bestNights: (
               <BestNights
@@ -339,6 +342,11 @@ function GroupSurface({
     </GroupFrame>
   );
 }
+
+type DayPanelPresentation = Pick<
+  ComponentProps<typeof DayPanel>,
+  "closeLabel" | "className" | "focusHeading"
+>;
 
 function BackTo({ month }: { month: IsoMonth }) {
   return (

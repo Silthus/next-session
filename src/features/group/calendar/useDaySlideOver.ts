@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { IsoDate } from "../../../../shared/dates";
-import { focusDay, focusDayHeading } from "./dayFocus";
+import { focusDay } from "./dayFocus";
 
 type Slide = { direction: "forward" | "back"; day: IsoDate };
 
@@ -14,11 +14,10 @@ export function useDaySlideOver(openDay: IsoDate | null, slides: boolean) {
   }
 
   useEffect(() => {
-    if (slide?.direction === "forward") focusDayHeading(slide.day);
     if (slide?.direction === "back") focusDay(slide.day);
   }, [slide]);
 
-  return { slidBack: slide?.direction === "back" };
+  return slide?.direction ?? null;
 }
 
 function slideBetween(from: IsoDate | null, to: IsoDate | null): Slide | null {

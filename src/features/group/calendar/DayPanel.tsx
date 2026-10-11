@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import type { Answer } from "../../../../shared/answers";
 import type { IsoDate } from "../../../../shared/dates";
 import type { PlayerRow } from "../../../../shared/monthSummary";
@@ -24,6 +24,7 @@ export function DayPanel({
   today,
   pending,
   closeLabel,
+  focusHeading = false,
   onClose,
   onSchedule,
   onUnschedule,
@@ -34,12 +35,17 @@ export function DayPanel({
   today: IsoDate;
   pending: boolean;
   closeLabel: ReactNode;
+  focusHeading?: boolean;
   onClose: () => void;
   onSchedule: () => void;
   onUnschedule: (session: CalendarSession) => void;
   className?: string;
 }) {
   const headingId = useId();
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (focusHeading) heading.current?.focus();
+  }, [focusHeading]);
   return (
     <Card accent aria-labelledby={headingId} className={className}>
       <div className="flex items-center justify-between">
@@ -54,9 +60,10 @@ export function DayPanel({
         <span className="text-xs text-ink-3">{relativeDay(day.date, today)}</span>
       </div>
       <h3
+        ref={heading}
         id={headingId}
         tabIndex={-1}
-        data-day-heading={day.date}
+        data-day-heading
         className="mt-2 font-display text-2xl font-semibold outline-none"
       >
         {longDayLabel(day.date)}
