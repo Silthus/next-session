@@ -9,6 +9,7 @@ import { nightLabel } from "../calendar/calendarDates";
 import type { CalendarDay } from "../calendar/DayCell";
 import { EmptyLine, RailCard } from "./RailCard";
 
+const SHOWN_NIGHTS = 3;
 const SHOWN_AVATARS = 4;
 
 export function BestNights({
@@ -25,12 +26,12 @@ export function BestNights({
   onSchedule?: (date: IsoDate) => Promise<unknown>;
 }) {
   return (
-    <RailCard title="Best nights">
+    <RailCard title="Best nights" status={nightsStatus(nights)}>
       {nights.length === 0 ? (
         <EmptyLine>{emptyLine(playerCount, monthOver)}</EmptyLine>
       ) : (
         <ol className="mt-3 flex flex-col gap-1">
-          {nights.map((night, index) => (
+          {nights.slice(0, SHOWN_NIGHTS).map((night, index) => (
             <BestNight
               key={night.date}
               night={night}
@@ -44,6 +45,14 @@ export function BestNights({
       )}
     </RailCard>
   );
+}
+
+function nightsStatus(nights: readonly CalendarDay[]) {
+  if (nights.length === 0) return undefined;
+  const perfect = nights.filter((night) => night.perfect).length;
+  const count = perfect > 0 ? perfect : nights.length;
+  const work = count === 1 ? "night works" : "nights work";
+  return `${String(count)} ${work}${perfect > 0 ? " for everyone" : ""}`;
 }
 
 function emptyLine(playerCount: number, monthOver: boolean) {
@@ -76,7 +85,12 @@ function BestNight({
         onSelect={() => onSelectDay(night.date)}
       />
       {onSchedule && night.session === null && (
-        <QuickSchedule night={night} focusAfter={row} onSchedule={onSchedule} />
+        <QuickSchedule
+          night={night}
+          inTheOpen={rank === 1}
+          focusAfter={row}
+          onSchedule={onSchedule}
+        />
       )}
     </li>
   );
@@ -109,6 +123,7 @@ function NightRow({
       aria-label={`${label}, ${counts}${free}${scheduled}`}
       className={cn(
         "flex w-full items-center gap-3 rounded-md px-2 py-2 text-left",
+        rank === 1 && "lg:flex-wrap",
         pressable,
         night.perfect
           ? "bg-free-soft hover:brightness-[0.97] dark:hover:brightness-110"
@@ -124,7 +139,12 @@ function NightRow({
         {rank}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-1.5 text-sm font-semibold">
+        <span
+          className={cn(
+            "flex items-center gap-1.5 font-semibold",
+            rank === 1 ? "text-sm lg:font-display lg:text-lg lg:leading-tight" : "text-sm",
+          )}
+        >
           {label}
           {night.session && <IconStar className="size-3.5 text-accent-strong" />}
         </span>
@@ -132,7 +152,12 @@ function NightRow({
           {counts}
         </span>
       </span>
-      <span className="flex shrink-0 items-center -space-x-1">
+      <span
+        className={cn(
+          "flex shrink-0 items-center -space-x-1",
+          rank === 1 && "lg:basis-full lg:justify-end",
+        )}
+      >
         {night.free.slice(0, SHOWN_AVATARS).map((player) => (
           <Avatar
             key={player._id}
@@ -154,10 +179,12 @@ function NightRow({
 
 function QuickSchedule({
   night,
+  inTheOpen,
   focusAfter,
   onSchedule,
 }: {
   night: CalendarDay;
+  inTheOpen: boolean;
   focusAfter: RefObject<HTMLButtonElement | null>;
   onSchedule: (date: IsoDate) => Promise<unknown>;
 }) {
@@ -187,7 +214,11 @@ function QuickSchedule({
       aria-disabled={scheduling || undefined}
       aria-busy={scheduling || undefined}
       onClick={() => void schedule()}
-      className="absolute top-1/2 right-2 -translate-y-1/2 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:hidden"
+      className={
+        inTheOpen
+          ? "mt-1 mb-1 ml-10"
+          : "absolute top-1/2 right-2 -translate-y-1/2 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:hidden"
+      }
     >
       <IconStar className="size-3.5" />
       {scheduling ? "Scheduling…" : "Schedule"}

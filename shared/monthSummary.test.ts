@@ -123,7 +123,7 @@ describe("summarizeMonth Best Nights", () => {
   const midOctober = { ...october, today: "2026-10-20" };
   const allFree = (date: string) => [ana, ben, cy].map((p) => answer(p, date, "free"));
 
-  it("ranks the top three dates by free Players, with maybe counting half and ties going to the earlier date", () => {
+  it("ranks every date that works by free Players, with maybe counting half and ties going to the earlier date", () => {
     const { bestNights } = summarizeMonth({
       ...midOctober,
       answers: [
@@ -140,6 +140,7 @@ describe("summarizeMonth Best Nights", () => {
       "2026-10-25",
       "2026-10-21",
       "2026-10-22",
+      "2026-10-24",
     ]);
   });
 

@@ -52,6 +52,48 @@ describe("BestNights", () => {
     ]);
   });
 
+  it.each([
+    [
+      { "2026-10-09": { Ana: "free", Ben: "free", Chiara: "free", Dev: "free", Eli: "free" } },
+      "1 night works for everyone",
+    ],
+    [
+      {
+        "2026-10-09": { Ana: "free", Ben: "free", Chiara: "free", Dev: "free", Eli: "free" },
+        "2026-10-16": { Ana: "free", Ben: "free", Chiara: "free", Dev: "free", Eli: "free" },
+        "2026-10-23": { Ana: "free" },
+      },
+      "2 nights work for everyone",
+    ],
+    [{ "2026-10-09": { Ana: "free" }, "2026-10-16": { Ana: "free" } }, "2 nights work"],
+    [{ "2026-10-09": { Ana: "free" } }, "1 night works"],
+  ] as const)("says what matters now", (answers, status) => {
+    const { card } = renderBestNights(monthWith({ answers }));
+    expect(within(card).getByText(status)).toBeTruthy();
+  });
+
+  it("counts every night that works but lists the top three", () => {
+    const everyone = {
+      Ana: "free",
+      Ben: "free",
+      Chiara: "free",
+      Dev: "free",
+      Eli: "free",
+    } as const;
+    const { card } = renderBestNights(
+      monthWith({
+        answers: {
+          "2026-10-09": everyone,
+          "2026-10-16": everyone,
+          "2026-10-23": everyone,
+          "2026-10-30": everyone,
+        },
+      }),
+    );
+    expect(within(card).getByText("4 nights work for everyone")).toBeTruthy();
+    expect(within(card).getAllByRole("listitem")).toHaveLength(3);
+  });
+
   it("selects a night's day", async () => {
     const { onSelectDay } = renderBestNights(
       monthWith({ answers: { "2026-10-16": { Ana: "free" } } }),

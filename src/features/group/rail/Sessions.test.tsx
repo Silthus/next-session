@@ -25,6 +25,14 @@ describe("Sessions", () => {
     ]);
   });
 
+  it.each([
+    [["2026-10-02", "2026-10-16"], "Next today"],
+    [["2026-11-20", "2026-10-16"], "Next in 14 days"],
+  ])("says when the next Session is", (dates, status) => {
+    const { card } = renderSessions(dates);
+    expect(within(card).getByText(status)).toBeTruthy();
+  });
+
   it("selects a Session's day", async () => {
     const { onSelectDay } = renderSessions(["2026-11-20"]);
     await userEvent.click(screen.getByRole("button", { name: /November 20/ }));

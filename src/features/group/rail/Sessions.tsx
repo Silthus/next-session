@@ -19,8 +19,9 @@ export function Sessions({
   const byDate = [...sessions].sort((a, b) => a.date.localeCompare(b.date));
   const upcoming = byDate.filter((session) => session.date >= today);
   const played = byDate.filter((session) => session.date < today).reverse();
+  const next = upcoming[0];
   return (
-    <RailCard title="Sessions">
+    <RailCard title="Sessions" status={next && `Next ${relativeDay(next.date, today)}`}>
       {upcoming.length === 0 ? (
         <EmptyLine>Nothing scheduled. Pick a night from the calendar or the best nights.</EmptyLine>
       ) : (

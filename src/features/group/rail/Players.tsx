@@ -49,6 +49,7 @@ export function Players<Player extends PlayerRow>({
   return (
     <RailCard
       title={`Players · ${String(progress.length)}`}
+      status={rosterStatus(progress)}
       headingRef={heading}
       action={
         addForm === "closed" && (
@@ -103,6 +104,16 @@ export function Players<Player extends PlayerRow>({
       )}
     </RailCard>
   );
+}
+
+function rosterStatus(progress: readonly PlayerProgress<PlayerRow>[]) {
+  const fillable = progress[0]?.fillable ?? 0;
+  if (fillable === 0) return undefined;
+  const quiet = progress.filter((entry) => entry.answered === 0).length;
+  if (quiet > 0) return `${String(quiet)} still to answer`;
+  const done = progress.filter((entry) => entry.answered === fillable).length;
+  if (done === progress.length) return "Everyone answered every night";
+  return `${String(done)} of ${String(progress.length)} answered every night`;
 }
 
 type Mode = "view" | "actions" | "renaming" | "confirmingRemove";
