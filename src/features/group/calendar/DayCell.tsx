@@ -39,7 +39,7 @@ export function DayCell({
       data-date={day.date}
       style={tintOf(day)}
       className={cn(
-        "relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1.5 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2",
+        "relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[transform,background-color,border-color] duration-150 ease-(--ease-snap) sm:rounded-md sm:p-2",
         cellTone(day),
         selected
           ? "z-10 outline-2 outline-offset-2 outline-ink focus-visible:outline-offset-4 focus-visible:outline-accent-strong"
@@ -49,7 +49,7 @@ export function DayCell({
     >
       <span
         className={cn(
-          "flex items-center gap-1 text-xs font-semibold leading-none sm:text-sm",
+          "flex items-center gap-1 text-sm font-semibold leading-none",
           isToday && isPlain(day) && "text-accent-strong",
         )}
       >
@@ -147,7 +147,7 @@ export function UnansweredMark() {
   );
 }
 
-const barShape = "h-2.5 w-1 rounded-full sm:h-3 sm:w-[5px]";
+const barShape = "h-3 w-1 rounded-full sm:w-[5px]";
 
 const barTones: Record<Answer, string> = {
   free: "bg-free",
