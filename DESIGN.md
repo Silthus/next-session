@@ -104,6 +104,7 @@ Every pressable answers the pointer, the keyboard and the press the same way, fr
 - **Press.** `motion-safe:active:scale-[0.98]` on every pressable, 150 ms on `--ease-snap`. Tailwind v4 scales through the `scale` property, so the transition list names `scale`, not `transform`. Player tiles keep their `pop` on top; the GM calendar cell keeps `0.97`.
 - **Contrast.** `ink-2` and `accent-strong` read at 4.5:1 on `surface-hover` in both themes (`ink-3` does not, which is why it steps up), and the hover fill sits at least 9 % L from `surface` and 5 % L from `paper`, pinned by `src/theme.test.ts`.
 - **Reduced motion** collapses every transition and animation to ~0 and drops the press scale (`motion-safe:`), so a press or hover still changes color but never moves.
+- **Quick actions reveal on demand, never only on hover.** A row may carry a secondary action (the player kebab, `Schedule` on a best night) that appears on `group-hover` and `group-focus-within`, so a mouse finds it by sweeping and a keyboard finds it by tabbing to the row. Coarse pointers never see it (`pointer-coarse:hidden`): the row's tap opens the day, where the same action sits in the open. A quick action is a shortcut to an action that is already reachable, never the only path.
 
 ## 3. Components
 
@@ -120,8 +121,8 @@ All presentational; data arrives through props. Prototype equivalents in [`proto
 | `GroupSwitcher` | group name as a menu button: lists all groups with player counts, New group, Rename (inline input), Delete (two-step confirm inside the menu) | renaming, confirming delete |
 | `HeatCalendar` | GM month grid; `DayCell` shows day number, today dot, per-player `MiniBars` (≤ 8 players, a grey outlined bar for each Player who hasn't answered a bookable day) or `n/N ✕k ▯m` counts (> 8: free, busy in rose, not answered behind the grey outlined bar), star for scheduled, tint by free share; month nav; legend adapts to density and always explains the grey bar | past day (40 % opacity, disabled), selected (ink ring), scheduled, perfect, tinted, neutral |
 | `DayPanel` | per-date roster sorted free → maybe → busy → silent, headline counts, relative date, Schedule / Unschedule | past (button disabled), scheduled |
-| `BestNights` | top three by `yes − 2·no + 0.5·maybe`, only days with no busy answer and positive score; rank badge, who is free as avatars; click selects the day | empty roster, no positive night |
-| `Players` | roster rows: avatar, name, `answered/fillable` or ✓, hover kebab (rename / remove); inline add form | empty (explains self-join), adding |
+| `BestNights` | top three by `yes − 2·no + 0.5·maybe`, only days with no busy answer and positive score; rank badge, who is free as avatars; click selects the day; a night where everyone is free sits on `free-soft` with its counts line in `ink-2` (pinned at 4.5:1 by the theme test); on the wide layout each unscheduled night reveals a `Schedule` button on hover or focus that schedules it in place (toast with Undo, no panel) | empty roster, no positive night, scheduling |
+| `Players` | roster rows: avatar, name over a hairline answer track (accent, green when done), `answered/fillable` or ✓, hover kebab (rename / remove); inline add form | empty (explains self-join), adding |
 | `Sessions` | upcoming as accent cards with relative date; history collapsed as "n played" | none scheduled |
 | `Nudge` | orange banner after the first player joins: Save group / Later | dismissed (per browser) |
 | `SaveSheet` | bottom sheet (mobile) / centered dialog (desktop): Google, email code, merge reassurance | — |
