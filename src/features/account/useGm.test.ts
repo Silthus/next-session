@@ -19,8 +19,12 @@ describe("gmStatus", () => {
   });
 
   it("tells an Anonymous GM from an Account", () => {
-    expect(gmStatus(signedIn, { isAnonymous: true, email: undefined })).toBe("anonymous");
-    expect(gmStatus(signedIn, { isAnonymous: false, email: "ada@example.com" })).toBe("account");
+    expect(gmStatus(signedIn, { isAnonymous: true, email: undefined, image: undefined })).toBe(
+      "anonymous",
+    );
+    expect(
+      gmStatus(signedIn, { isAnonymous: false, email: "ada@example.com", image: undefined }),
+    ).toBe("account");
   });
 });
 

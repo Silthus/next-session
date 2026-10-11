@@ -2,7 +2,7 @@
 
 > **Draft, pending review by a qualified German lawyer before publication.** Source text for the `/privacy` page. `{{…}}` placeholders are filled at build time (see `docs/spec.md` §7).
 
-**Version 1.6. Effective: {{EFFECTIVE_DATE}}**
+**Version 1.7. Effective: {{EFFECTIVE_DATE}}**
 
 This policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.
 
@@ -21,6 +21,7 @@ We have not appointed a data protection officer because we are not required to.
 | For a group created without an account: a random user ID and the time you accepted the Terms | Run your group and prove your acceptance | Contract, 6(1)(b) |
 | For an account with a password: your email address and a hash of your password | Let you sign in on any device | Contract, 6(1)(b) |
 | For an account with Google: your email address, whether Google verified it, and your Google account ID, which Google sends us when you continue with Google | Let you sign in on any device | Contract, 6(1)(b) |
+| For an account with Google: your Google profile picture and its Google address, which Google sends us when you continue with Google | Show your picture to you, and to the GM of each group where your account has a player | Contract, 6(1)(b) |
 | For a player with an account: which player in which group belongs to your account | Show your groups on any device | Contract, 6(1)(b) |
 | Group names, player names, the days players marked as free, maybe, or busy, and the scheduled dates | Provide the Service to the GM and the group | Contract, 6(1)(b) |
 | Technical connection data (IP address, browser, time) in server logs of our hosting providers | Deliver the site and keep it secure | Legitimate interest, 6(1)(f) |
@@ -50,7 +51,7 @@ Apart from remembering that you turned it off, usage measurement stores nothing 
 
 We set cookies only while you continue with Google: short-lived sign-in cookies that protect the round trip to Google and expire within 15 minutes. They are strictly necessary for the sign-in you asked for.
 
-When you continue with Google, Google processes your sign-in under its own privacy policy. We receive only the data listed in section 2.
+When you continue with Google, Google processes your sign-in under its own privacy policy. We receive only the data listed in section 2. We copy your Google profile picture to our own storage, so no browser loads it from Google and Google does not learn who views it.
 
 ## 4. Recipients
 
@@ -66,6 +67,8 @@ Transfers to the USA rely on the EU–US Data Privacy Framework and the EU Stand
 
 Everyone who has a group's share link can see that group's name, its player names, its scheduled dates, and its answers. That is how the Service works; see the Terms.
 
+Your Google profile picture is shown only to you and to the GM of each group where your account has a player. People with a share link do not see it.
+
 ## 5. How long we keep data
 
 | Data | Retention |
@@ -76,6 +79,7 @@ Everyone who has a group's share link can see that group's name, its player name
 | Server logs at our hosting providers | According to the providers' log retention, typically up to 30 days |
 | Usage events and error reports in PostHog | 1 year |
 | Technical logs in PostHog | 14 days |
+| Your Google profile picture | Replaced or deleted at your next Google sign-in after you change or remove it at Google; deleted with your account |
 | Your account's pseudonymous profile in PostHog, and your email address for the welcome mail, tips, and session updates | Until your account is deleted |
 
 When you save a group to an account, the group moves to the account and the temporary user ID is deleted.

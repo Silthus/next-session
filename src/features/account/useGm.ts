@@ -226,6 +226,7 @@ export function useGm() {
   return {
     status,
     email: me?.email,
+    image: me?.image,
     ...saveOnReturn,
     keepOnReturn,
     ...actions,

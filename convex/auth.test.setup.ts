@@ -74,7 +74,12 @@ export function withGoogleCredentials() {
   });
 }
 
-export type GoogleIdentity = { sub: string; email: string };
+export type GoogleIdentity = { sub: string; email: string; picture?: string };
+
+export const GOOGLE_PICTURES = "https://lh3.googleusercontent.com/a/";
+export const MISSING_GOOGLE_PICTURE = `${GOOGLE_PICTURES}missing=s96-c`;
+
+export const pictureBytes = (url: string) => `picture bytes of ${url}`;
 
 const GOOGLE_ISSUER = "https://accounts.google.com";
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
@@ -83,7 +88,7 @@ function base64urlJson(value: object) {
   return btoa(JSON.stringify(value)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function googleIdToken({ sub, email }: GoogleIdentity) {
+function googleIdToken({ sub, email, picture }: GoogleIdentity) {
   const now = Math.floor(Date.now() / 1000);
   const claims = {
     iss: GOOGLE_ISSUER,
@@ -91,6 +96,7 @@ function googleIdToken({ sub, email }: GoogleIdentity) {
     sub,
     email,
     email_verified: true,
+    picture,
     iat: now,
     exp: now + 3600,
   };
@@ -120,6 +126,10 @@ function googleAnswer(identity: GoogleIdentity, url: string) {
       expires_in: 3600,
       id_token: googleIdToken(identity),
     });
+  }
+  if (url === MISSING_GOOGLE_PICTURE) return new Response("Not found", { status: 404 });
+  if (url.startsWith(GOOGLE_PICTURES)) {
+    return new Response(pictureBytes(url), { headers: { "Content-Type": "image/png" } });
   }
   throw new Error(`The fake Google does not answer ${url}`);
 }
@@ -161,6 +171,7 @@ export async function signInWithGoogle(
     const signedIn = await signInWithTokens(t, () =>
       t.action(api.auth.signIn, { params: { code }, verifier: started.verifier }),
     );
+    await t.finishAllScheduledFunctions(() => undefined);
     return { ...signedIn, backToApp };
   } finally {
     vi.stubGlobal("fetch", realFetch);

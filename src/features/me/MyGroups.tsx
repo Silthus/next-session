@@ -5,6 +5,7 @@ import { track } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
 import { IconMore, IconStar } from "../../ui/icons";
 import { PageShell } from "../../ui/PageShell";
+import { ProfileImage } from "../../ui/ProfileImage";
 import { Skeleton } from "../../ui/Skeleton";
 import { dayLabel, longDayLabel, relativeDay } from "../group/calendar/calendarDates";
 import { MenuButton, Popover } from "../group/rail/Popover";
@@ -20,6 +21,7 @@ import {
 type MyGroupsProps = {
   settings?: ReactNode;
   email: string | undefined;
+  image?: string;
   groups: MyGroupsData | undefined;
   today: IsoDate;
   creating: boolean;
@@ -35,6 +37,7 @@ const cardClassName =
 export function MyGroups({
   settings,
   email,
+  image,
   groups,
   today,
   creating,
@@ -49,7 +52,7 @@ export function MyGroups({
 
   return (
     <PageShell
-      headerEnd={<AccountLine email={email} onLogOut={onLogOut} />}
+      headerEnd={<AccountLine email={email} image={image} onLogOut={onLogOut} />}
       className="flex flex-col gap-8 pt-4"
     >
       <h1 ref={heading} tabIndex={-1} className="font-display text-4xl font-medium outline-none">
@@ -73,9 +76,18 @@ export function MyGroups({
   );
 }
 
-function AccountLine({ email, onLogOut }: { email: string | undefined; onLogOut: () => void }) {
+function AccountLine({
+  email,
+  image,
+  onLogOut,
+}: {
+  email: string | undefined;
+  image: string | undefined;
+  onLogOut: () => void;
+}) {
   return (
     <div className="flex min-w-0 items-center gap-2">
+      <ProfileImage src={image} fallback={null} className="size-7 shrink-0" />
       <span className="max-w-[7.5rem] truncate text-sm text-ink-3 sm:max-w-xs">{email}</span>
       <Button variant="ghost" size="sm" onClick={onLogOut}>
         Log out

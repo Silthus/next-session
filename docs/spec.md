@@ -65,7 +65,7 @@ export default defineSchema({
   users: defineTable({
     // Convex Auth fields
     name: v.optional(v.string()),
-    image: v.optional(v.string()),
+    image: v.optional(v.union(v.string(), v.null())), // Google's picture address, §5.7
     email: v.optional(v.string()),
     emailVerificationTime: v.optional(v.number()),
     phone: v.optional(v.string()),
@@ -75,6 +75,9 @@ export default defineSchema({
     acceptedTermsVersion: v.optional(v.string()),
     acceptedPrivacyVersion: v.optional(v.string()),
     acceptedLegalAt: v.optional(v.number()),
+    // Google profile picture copy, §5.7
+    profileImageId: v.optional(v.id("_storage")),
+    profileImageFrom: v.optional(v.string()),
   })
     .index("email", ["email"])
     .index("phone", ["phone"]),
@@ -278,7 +281,8 @@ Convex Auth's default is 30 days in total, which would lock out an active Anonym
 Convex Auth's Google provider sits next to Password and Anonymous, always registered. **Continue with Google** shows in the Save sheet and the Log in sheet only while `signInOptions.available` reports `google: true`, which is when `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` are both set on the deployment. Without them, the provider stays unused and Password and Anonymous sign-in work as before; a test pins that.
 
 - **The OAuth client.** A Google Cloud OAuth client of type Web application, with the JavaScript origin `https://next-session.link` and the redirect URI `https://pleasant-sockeye-672.convex.site/api/auth/callback/google`. `SITE_URL` sends the browser back to the app.
-- **Profile.** Only Google's `sub` (the account id) and the email (trimmed and lowercased) are kept. No name, no picture, no verification flag.
+- **Profile.** Google's `sub` (the account id), the email (trimmed and lowercased), and the picture address as `users.image` (`null` once Google sends none) are kept. No name, no verification flag.
+- **Profile picture.** Every Google sign-in compares `users.image` with `users.profileImageFrom`. On a change, `profileImages.copy` downloads the picture (https on `lh3.googleusercontent.com` only, an `image/*` type, at most 512 KB) into Convex file storage, and `profileImages.keep` swaps it in as `profileImageId` and deletes the old file. A removed picture deletes the copy; a picture that fails to load keeps the letter, and the next sign-in tries again. Browsers load the copy from Convex, never from Google's CDN, for the reason the fonts are self-hosted (§2). `account.me` shows the Account its own picture; `schedule.month` shows the GM the picture of each Claimed Player. `player.group` never carries pictures: holding the Share Link does not show other Players' faces. Without a picture, or when it fails to load, the letter avatar stays.
 - **Legal Acceptance.** A new Google Account gets the current stamps in `afterUserCreatedOrUpdated`, because the button sits under "By continuing with Google you agree to the Terms and Privacy Policy."
 - **Save through Google.** The client calls `account.startSave`, keeps the code in `sessionStorage` as in §5.3, and leaves for Google with `redirectTo` set to the Group's page. `sessionStorage` survives the same-tab round trip. Back on the page, Convex Auth exchanges the `code` from the URL, and the GM surface holds the Group on a loading state while the pending claim is redeemed (step 5 of §5.3), then toasts "Saved" once. When the redeem fails, the Save sheet opens on **Finish saving** for a retry, which also explains an expired claim or the 50-Group cap.
 - **No linking by email.** Every Google account (`sub`) is its own Account, and a Google sign-in never joins an existing Account by email (`allowDangerousEmailAccountLinking: false`). Password Accounts never verify their email (§5.3), and Google's `email_verified` is only authoritative for Gmail and Workspace addresses: a re-registered domain or a changed Google login lets a new Google account claim an old address. Linking by email would hand that address's Account, Groups and all, to whoever holds it now. So one email through Password and Google, or through two Google accounts, gives separate Accounts. The alternative, linking a Google identity into a Password Account, needs Password email verification first (an email code through Resend) and a rule that trusts Google's flag only for Gmail and Workspace (`hd`) addresses.

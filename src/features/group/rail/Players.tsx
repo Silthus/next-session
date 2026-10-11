@@ -162,7 +162,7 @@ function PlayerItem({
       onKeyDown={showingActions ? closeOnEscape : undefined}
       className="group flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-surface-2"
     >
-      <Avatar name={player.name} size="sm" />
+      <Avatar name={player.name} image={player.image} size="sm" />
       <span className="min-w-0 flex-1 truncate text-sm font-medium">{player.name}</span>
       {showingActions ? (
         <span id={actionsId} className="flex shrink-0 items-center gap-1">

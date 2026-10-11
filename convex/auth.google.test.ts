@@ -4,14 +4,17 @@ import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
   createYourLink,
+  GOOGLE_PICTURES,
   logInAccount,
+  MISSING_GOOGLE_PICTURE,
+  pictureBytes,
   newCredentials,
   signInWithGoogle,
   signUpAccount,
   withAuthKeys,
   withGoogleCredentials,
 } from "./auth.test.setup";
-import { newBackend, type TestBackend } from "./model/test.setup";
+import { newBackend, signedInGmWithGroup, type TestBackend } from "./model/test.setup";
 
 withAuthKeys();
 withGoogleCredentials();
@@ -26,6 +29,10 @@ let googleCount = 0;
 
 function newGoogleIdentity(email = `google-${++googleCount}@example.com`) {
   return { sub: `google-sub-${++googleCount}`, email };
+}
+
+function withPicture(identity = newGoogleIdentity()) {
+  return { ...identity, picture: `${GOOGLE_PICTURES}photo-${++googleCount}=s96-c` };
 }
 
 async function userOf(userId: Id<"users">) {
@@ -123,5 +130,97 @@ describe("Save through Google", () => {
     const moved = await google.as.query(api.groups.get, { groupId: group!.id });
     expect(moved?.expiresAt).toBeUndefined();
     expect(await userOf(anonymous.userId)).toBeNull();
+  });
+});
+
+describe("Google profile picture", () => {
+  async function storedPictureOf(userId: Id<"users">) {
+    return await t.run(async (ctx) => {
+      const user = await ctx.db.get("users", userId);
+      const file = user?.profileImageId && (await ctx.storage.get(user.profileImageId));
+      return { fileId: user?.profileImageId, bytes: file ? await file.text() : undefined };
+    });
+  }
+
+  async function fileExists(fileId: Id<"_storage">) {
+    return await t.run(async (ctx) => (await ctx.storage.get(fileId)) !== null);
+  }
+
+  it("shows the Account its Google picture from our own storage, not Google's", async () => {
+    const identity = withPicture();
+    const { as, userId } = await signInWithGoogle(t, identity);
+
+    const { image } = (await as.query(api.account.me, {}))!;
+    expect(image).toBeTypeOf("string");
+    expect(image).not.toContain("googleusercontent");
+    expect((await storedPictureOf(userId)).bytes).toBe(pictureBytes(identity.picture));
+  });
+
+  it("swaps in the new picture at the next sign-in and deletes the old copy", async () => {
+    const identity = withPicture();
+    const first = await signInWithGoogle(t, identity);
+    const { fileId: oldFileId } = await storedPictureOf(first.userId);
+
+    const changed = withPicture(identity);
+    await signInWithGoogle(t, changed);
+
+    expect((await storedPictureOf(first.userId)).bytes).toBe(pictureBytes(changed.picture));
+    expect(await fileExists(oldFileId!)).toBe(false);
+  });
+
+  it("drops the picture once Google sends none", async () => {
+    const identity = withPicture();
+    const { as, userId } = await signInWithGoogle(t, identity);
+    const { fileId } = await storedPictureOf(userId);
+
+    await signInWithGoogle(t, { ...identity, picture: undefined });
+
+    expect((await as.query(api.account.me, {}))?.image).toBeUndefined();
+    expect(await fileExists(fileId!)).toBe(false);
+  });
+
+  it("shows no picture when Google's picture does not load", async () => {
+    const { as } = await signInWithGoogle(t, {
+      ...newGoogleIdentity(),
+      picture: MISSING_GOOGLE_PICTURE,
+    });
+
+    expect((await as.query(api.account.me, {}))?.image).toBeUndefined();
+  });
+
+  it("never fetches a picture from outside Google's picture host", async () => {
+    const { as } = await signInWithGoogle(t, {
+      ...newGoogleIdentity(),
+      picture: "https://pictures.example.com/photo.png",
+    });
+
+    expect((await as.query(api.account.me, {}))?.image).toBeUndefined();
+  });
+
+  it("shows a Claimed Player's picture to the GM, but not on the Share Link", async () => {
+    const gm = await signedInGmWithGroup(t);
+    const { shareToken } = (await gm.as.query(api.groups.get, { groupId: gm.groupId }))!;
+    const graceId = await gm.as.mutation(api.roster.addPlayer, {
+      groupId: gm.groupId,
+      name: "Grace",
+    });
+    const ada = await signInWithGoogle(t, withPicture());
+    const adaId = await ada.as.mutation(api.player.join, { shareToken, name: "Ada" });
+    const adasPicture = (await ada.as.query(api.account.me, {}))?.image;
+
+    const schedule = await gm.as.query(api.schedule.month, {
+      groupId: gm.groupId,
+      month: "2026-10",
+    });
+
+    expect(schedule?.players).toEqual([
+      { _id: adaId, name: "Ada", image: adasPicture },
+      { _id: graceId, name: "Grace" },
+    ]);
+    const shareLink = await t.query(api.player.group, { shareToken });
+    expect(shareLink?.players.map((player) => Object.keys(player))).toEqual([
+      ["_id", "name"],
+      ["_id", "name"],
+    ]);
   });
 });

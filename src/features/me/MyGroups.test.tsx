@@ -174,6 +174,15 @@ describe("MyGroups", () => {
     expect(onLogOut).toHaveBeenCalledOnce();
   });
 
+  it("shows the Account's picture next to its email", async () => {
+    renderMyGroups({ image: "https://files.example.test/robin.png" });
+
+    const header = await screen.findByRole("banner");
+    expect(header.querySelector("img")?.getAttribute("src")).toBe(
+      "https://files.example.test/robin.png",
+    );
+  });
+
   it("puts focus on its heading when it opens, so a redirect lands somewhere", async () => {
     renderMyGroups();
 
