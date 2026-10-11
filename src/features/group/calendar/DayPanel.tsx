@@ -41,7 +41,7 @@ export function DayPanel({
 }) {
   const headingId = useId();
   return (
-    <Card accent aria-labelledby={headingId} className={cn("animate-rise", className)}>
+    <Card accent aria-labelledby={headingId} className={className}>
       <div className="flex items-center justify-between">
         <button
           type="button"

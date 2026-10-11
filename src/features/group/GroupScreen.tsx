@@ -313,7 +313,7 @@ function GroupSurface({
           rosterEmpty={schedule.players.length === 0}
           onAddPlayer={() => setAddPlayerRequests((requests) => requests + 1)}
           shareLink={<ShareLinkCard url={shareUrl} onRotate={rotate} />}
-          dayPanel={dayPanel("Overview")}
+          dayPanel={dayPanel("Overview", "animate-rise")}
           panels={{
             bestNights: (
               <BestNights
