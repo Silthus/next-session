@@ -128,7 +128,9 @@ function NightRow({
           {label}
           {night.session && <IconStar className="size-3.5 text-accent-strong" />}
         </span>
-        <span className="block text-xs text-ink-3">{counts}</span>
+        <span className={cn("block text-xs", night.perfect ? "text-ink-2" : "text-ink-3")}>
+          {counts}
+        </span>
       </span>
       <span className="flex shrink-0 items-center -space-x-1">
         {night.free.slice(0, SHOWN_AVATARS).map((player) => (
