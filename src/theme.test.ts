@@ -66,6 +66,7 @@ describe.each(["light", "dark"] as const)("the %s theme", (theme) => {
     ["accent-strong", "accent-soft", 4.5],
     ["ink-2", "surface-hover", 4.5],
     ["accent-strong", "surface-hover", 4.5],
+    ["ink-2", "free-soft", 4.5],
   ])("reads %s on %s at %s:1 or better", (text, background, floor) => {
     expect(contrast(token(text), token(background))).toBeGreaterThanOrEqual(floor);
   });
