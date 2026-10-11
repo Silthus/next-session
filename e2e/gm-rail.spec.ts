@@ -372,7 +372,7 @@ test("a Player who joins with a new name stays on the Roster as grey bars until 
   await expect.poll(() => rosterNames(gm)).toEqual([]);
 });
 
-test("an Anonymous GM saves into an Account from the header and stays on the Group", async ({
+test("an Anonymous GM saves into an Account from the header, stays on the Group, and its own Share Link leads back to it", async ({
   page,
 }) => {
   const account = await signUpAccountWithGroup();
@@ -407,6 +407,12 @@ test("an Anonymous GM saves into an Account from the header and stays on the Gro
   await expect
     .poll(async () => (await account.client.query(api.groups.mine, {})).map((group) => group.id))
     .toContain(gm.groupId);
+
+  await page.goto(`/s/${gm.shareToken}?month=${nextMonth}`);
+  await expect(page).toHaveURL(new RegExp(`/g/${gm.groupId}\\?month=${nextMonth}$`));
+  await expect(page.getByText(`/s/${gm.shareToken}`)).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(new RegExp(`/g/${gm.groupId}\\?month=${nextMonth}&day=`));
 });
 
 test("deleting the last Group of an Anonymous GM returns to the landing", async ({ page }) => {

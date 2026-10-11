@@ -1,13 +1,12 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { api } from "../convex/_generated/api";
-import { addMonths, monthOf, todayUtc, type IsoDate } from "../shared/dates";
+import { todayUtc, type IsoDate } from "../shared/dates";
 import {
   newEmail,
   openAsGm,
   password,
   signInAnonymousGm,
   signUpAccount,
-  signUpAccountWithGroup,
   seedPlayer,
   shareTokenOf,
   toastRegion,
@@ -202,27 +201,6 @@ test("an Anonymous GM keeping their own link saves first, then keeps the Player"
 
   await page.goto(`/g/${gm.groupId}`);
   await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
-});
-
-test("the GM's Account opening its own Share Link lands on the GM view, and Back skips the link", async ({
-  page,
-  browser,
-}) => {
-  const gm = await signUpAccountWithGroup();
-  const [group] = await gm.client.query(api.groups.mine, {});
-  const link = `/s/${await shareTokenOf(gm.client, group!.id)}`;
-  const nextMonth = addMonths(monthOf(todayUtc(Date.now())), 1);
-
-  await openAsGm(page, gm, `${link}?month=${nextMonth}`);
-  await expect(page).toHaveURL(new RegExp(`/g/${group!.id}\\?month=${nextMonth}$`));
-  await expect(page.getByText(link)).toBeVisible();
-  await page.goBack();
-  await expect(page).toHaveURL(/\/terms$/);
-
-  const visitor = await freshPage(browser);
-  await visitor.goto(link);
-  await expect(visitor.getByRole("textbox", { name: /Your name/ })).toBeVisible();
-  await expect(visitor).toHaveURL(new RegExp(`${link}$`));
 });
 
 test("a signed-out visitor still joins and answers in the same steps", async ({ page }) => {
