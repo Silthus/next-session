@@ -72,6 +72,28 @@ describe("BestNights", () => {
     expect(within(card).getByText(status)).toBeTruthy();
   });
 
+  it("counts every night that works but lists the top three", () => {
+    const everyone = {
+      Ana: "free",
+      Ben: "free",
+      Chiara: "free",
+      Dev: "free",
+      Eli: "free",
+    } as const;
+    const { card } = renderBestNights(
+      monthWith({
+        answers: {
+          "2026-10-09": everyone,
+          "2026-10-16": everyone,
+          "2026-10-23": everyone,
+          "2026-10-30": everyone,
+        },
+      }),
+    );
+    expect(within(card).getByText("4 nights work for everyone")).toBeTruthy();
+    expect(within(card).getAllByRole("listitem")).toHaveLength(3);
+  });
+
   it("selects a night's day", async () => {
     const { onSelectDay } = renderBestNights(
       monthWith({ answers: { "2026-10-16": { Ana: "free" } } }),

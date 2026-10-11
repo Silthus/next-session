@@ -9,6 +9,7 @@ import { nightLabel } from "../calendar/calendarDates";
 import type { CalendarDay } from "../calendar/DayCell";
 import { EmptyLine, RailCard } from "./RailCard";
 
+const SHOWN_NIGHTS = 3;
 const SHOWN_AVATARS = 4;
 
 export function BestNights({
@@ -30,7 +31,7 @@ export function BestNights({
         <EmptyLine>{emptyLine(playerCount, monthOver)}</EmptyLine>
       ) : (
         <ol className="mt-3 flex flex-col gap-1">
-          {nights.map((night, index) => (
+          {nights.slice(0, SHOWN_NIGHTS).map((night, index) => (
             <BestNight
               key={night.date}
               night={night}
@@ -140,7 +141,7 @@ function NightRow({
         <span
           className={cn(
             "flex items-center gap-1.5 font-semibold",
-            rank === 1 ? "font-display text-lg leading-tight" : "text-sm",
+            rank === 1 ? "text-sm lg:font-display lg:text-lg lg:leading-tight" : "text-sm",
           )}
         >
           {label}

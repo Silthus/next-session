@@ -42,8 +42,6 @@ export type PlayerProgress<Player extends PlayerRow> = {
   fillable: number;
 };
 
-const BEST_NIGHTS_COUNT = 3;
-
 export function summarizeMonth<Player extends PlayerRow, Session extends SessionRow>(
   input: MonthSummaryInput<Player, Session>,
 ): MonthSummary<Player, Session> {
@@ -72,8 +70,7 @@ function bestNights<Player extends PlayerRow, Session extends SessionRow>(
 ): DaySummary<Player, Session>[] {
   return days
     .filter((day) => day.bookable && day.busy.length === 0 && nightScore(day) > 0)
-    .sort((a, b) => nightScore(b) - nightScore(a) || a.date.localeCompare(b.date))
-    .slice(0, BEST_NIGHTS_COUNT);
+    .sort((a, b) => nightScore(b) - nightScore(a) || a.date.localeCompare(b.date));
 }
 
 function nightScore(day: { free: readonly unknown[]; maybe: readonly unknown[] }): number {
