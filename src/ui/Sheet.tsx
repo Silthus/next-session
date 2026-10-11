@@ -7,7 +7,9 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
+import { cn } from "./cn";
 import { IconClose } from "./icons";
+import { pressable } from "./interactive";
 
 export function Sheet({
   open,
@@ -87,7 +89,10 @@ function CloseButton({ dismissible, onClose }: { dismissible: boolean; onClose: 
       aria-label="Close"
       aria-disabled={!dismissible || undefined}
       onClick={onClose}
-      className="absolute top-4 right-3 inline-flex size-11 items-center justify-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink focus-visible:ring-2 focus-visible:ring-accent-strong focus-visible:outline-none aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2"
+      className={cn(
+        "absolute top-4 right-3 inline-flex size-11 items-center justify-center rounded-full text-ink-2 hover:bg-surface-hover hover:text-ink aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2",
+        pressable,
+      )}
     >
       <IconClose className="size-5" />
     </button>

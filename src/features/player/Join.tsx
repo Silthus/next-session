@@ -9,6 +9,7 @@ import { Avatar } from "../../ui/Avatar";
 import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
 import { Eyebrow } from "../../ui/Eyebrow";
+import { focusRing, pressable } from "../../ui/interactive";
 import { PageShell } from "../../ui/PageShell";
 import { useFocusOnMount } from "../../ui/useFocusOnMount";
 
@@ -134,7 +135,10 @@ export function Join({
         Planning your own game?{" "}
         <Link
           to="/"
-          className="-my-3.5 inline-block py-3.5 font-semibold text-accent-strong hover:underline"
+          className={cn(
+            "-my-3.5 inline-block rounded-sm py-3.5 font-semibold text-accent-strong hover:underline",
+            focusRing,
+          )}
         >
           Create your link
         </Link>
@@ -195,7 +199,8 @@ function PlayerChip({
       disabled={disabled}
       aria-describedby={describedBy}
       className={cn(
-        "flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:border-accent hover:bg-accent-soft active:scale-95 disabled:pointer-events-none disabled:opacity-60",
+        "flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold hover:border-accent hover:bg-accent-soft disabled:pointer-events-none disabled:opacity-60",
+        pressable,
         highlighted
           ? "animate-pop border-accent bg-accent-soft ring-2 ring-accent"
           : "border-line bg-paper",

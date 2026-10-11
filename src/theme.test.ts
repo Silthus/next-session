@@ -64,8 +64,16 @@ describe.each(["light", "dark"] as const)("the %s theme", (theme) => {
     ["accent-strong", "surface", 4.5],
     ["accent-strong", "paper", 4.5],
     ["accent-strong", "accent-soft", 4.5],
+    ["ink-3", "surface-hover", 4.5],
+    ["accent-strong", "surface-hover", 4.5],
   ])("reads %s on %s at %s:1 or better", (text, background, floor) => {
     expect(contrast(token(text), token(background))).toBeGreaterThanOrEqual(floor);
+  });
+
+  it("lifts a hovered row clear of the surface and the paper", () => {
+    const hover = lab(token("surface-hover")).L;
+    expect(Math.abs(hover - lab(token("surface")).L)).toBeGreaterThanOrEqual(0.05);
+    expect(Math.abs(hover - lab(token("paper")).L)).toBeGreaterThanOrEqual(0.02);
   });
 
   it.each(["free", "maybe", "busy"] as const)(

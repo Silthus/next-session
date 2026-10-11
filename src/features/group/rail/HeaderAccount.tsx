@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { Button } from "../../../ui/Button";
+import { cn } from "../../../ui/cn";
+import { pressable } from "../../../ui/interactive";
 import { menuItemClassName, MenuButton, Popover, useClosePopover } from "./Popover";
 
 type HeaderAccountProps =
@@ -31,7 +33,10 @@ function AccountMenu({ email, onLogOut }: { email: string | undefined; onLogOut:
           {...props}
           type="button"
           aria-label="Your account"
-          className="inline-flex size-9 items-center justify-center rounded-full bg-accent-soft font-bold text-accent-strong uppercase hover:brightness-95"
+          className={cn(
+            "inline-flex size-9 items-center justify-center rounded-full bg-accent-soft font-bold text-accent-strong uppercase hover:brightness-95",
+            pressable,
+          )}
         >
           {(email ?? "?").slice(0, 1)}
         </button>

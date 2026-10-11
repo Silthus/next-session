@@ -3,6 +3,7 @@ import { ConvexError } from "convex/values";
 import { useEffect, useRef } from "react";
 import { Button, buttonClassName } from "../../ui/Button";
 import { IconCheck } from "../../ui/icons";
+import { focusRing } from "../../ui/interactive";
 import { LegalFooter } from "../../ui/LegalFooter";
 import { ShareLinkCard } from "../../ui/ShareLinkCard";
 import { Wordmark } from "../../ui/Wordmark";
@@ -23,6 +24,7 @@ type LandingViewProps = {
 };
 
 const column = "mx-auto w-full max-w-5xl px-4 sm:px-6";
+const inlineLink = `rounded-sm underline underline-offset-2 transition-colors hover:text-ink ${focusRing}`;
 const steps = ["Create your link", "Send it to the group", "Pick the best night"];
 
 export function LandingView({ state, showLogIn, onCreate, onLogIn, onSave }: LandingViewProps) {
@@ -94,11 +96,11 @@ function CreateLink({
       )}
       <p className="max-w-sm text-xs text-ink-3">
         No sign-up. By creating a link you agree to the{" "}
-        <Link to="/terms" className="underline underline-offset-2 hover:text-ink">
+        <Link to="/terms" className={inlineLink}>
           Terms
         </Link>{" "}
         and{" "}
-        <Link to="/privacy" className="underline underline-offset-2 hover:text-ink">
+        <Link to="/privacy" className={inlineLink}>
           Privacy Policy
         </Link>
         .
@@ -149,7 +151,7 @@ function LinkInHand({
             <button
               type="button"
               onClick={onSave}
-              className="font-semibold text-ink-2 underline underline-offset-2 hover:text-ink"
+              className={`font-semibold text-ink-2 ${inlineLink}`}
             >
               save it to an account
             </button>{" "}
