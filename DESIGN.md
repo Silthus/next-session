@@ -104,7 +104,7 @@ All presentational; data arrives through props. Prototype equivalents in [`proto
 | `Eyebrow` | mono uppercase section label | — |
 | `Avatar` | two-letter initials (`playerInitials`), hue derived from the name so it is stable across surfaces | xs 20 / sm 28 / md 36 |
 | `Dot` | 8 px answer dot | yes / maybe / no / null |
-| `ShareLinkCard` | accent-soft card: eyebrow, mono URL, Copy (turns green "Copied" for 1.6 s), WhatsApp / Telegram / Mail / native share as 44 px icon circles, hint line, optional Rotate | `compact` (mobile header version: tighter padding, share row without the hint line) |
+| `ShareLinkCard` | accent-soft card: eyebrow, mono URL, Copy (turns green "Copied" for 1.6 s), WhatsApp / Telegram / Mail / native share as 44 px icon circles, hint line, optional Rotate | `compact` (inside the phone header's Share menu: tighter padding, share row without the hint line) |
 | `GroupSwitcher` | group name as a menu button: lists all groups with player counts, New group, Rename (inline input), Delete (two-step confirm inside the menu) | renaming, confirming delete |
 | `HeatCalendar` | GM month grid; `DayCell` shows day number, today dot, per-player `MiniBars` (≤ 8 players, a grey outlined bar for each Player who hasn't answered a bookable day) or `n/N ✕k ▯m` counts (> 8: free, busy in rose, not answered behind the grey outlined bar), star for scheduled, tint by free share; month nav; legend adapts to density and always explains the grey bar | past day (40 % opacity, disabled), selected (ink ring), scheduled, perfect, tinted, neutral |
 | `DayPanel` | per-date roster sorted free → maybe → busy → silent, headline counts, relative date, Schedule / Unschedule | past (button disabled), scheduled |
@@ -149,9 +149,11 @@ States: **copied** (button green 1.6 s), **clipboard blocked** (URL text is sele
 
 Purpose: see which night works and lock it in; keep the link one tap away.
 
+Below `lg` the link lives in the header so the calendar starts right under it: a Copy icon copies the link in one tap and confirms it with a toast ("Link copied. Send it to your players."), and a Share icon opens the compact `ShareLinkCard` (URL to long-press, Copy, the share targets, Rotate) as a menu spanning the page gutters. A refused copy toasts "Copying didn't work. Open Share and long-press the link."
+
 Desktop (≥ lg): sticky header (mark, `/`, `GroupSwitcher`, right: `Save your group` for anonymous GMs, avatar menu with sign-out for signed-in). Below: `Nudge` when it applies. Then a `minmax(0,1fr) 22rem` grid: left the `HeatCalendar`; right a stack of `ShareLinkCard` → `DayPanel` (only when a day is selected, it slides in above the rest) → `BestNights` → `Sessions` → `Players`.
 
-Mobile: header, `Nudge`, compact `ShareLinkCard`, `HeatCalendar`, a full-width soft `+ Add player` button, a segmented control `Best nights | Players | Sessions`, the chosen panel. The rail opens on Players while the Roster is empty, otherwise on Best nights. `+ Add player` stays under the calendar whatever tab is open: it switches to Players and opens the add form focused. Selecting a day opens `DayPanel` as a fixed bottom sheet over the page; "Overview" closes it.
+Mobile: header, `Nudge`, `HeatCalendar`, a full-width soft `+ Add player` button, a segmented control `Best nights | Players | Sessions`, the chosen panel. The rail opens on Players while the Roster is empty, otherwise on Best nights. `+ Add player` stays under the calendar whatever tab is open: it switches to Players and opens the add form focused. Selecting a day opens `DayPanel` as a fixed bottom sheet over the page; "Overview" closes it.
 
 Interactions: tap a day to select (URL `?day=`), tap again to clear; Best nights and Sessions rows select their day; Schedule / Unschedule is optimistic with a toast ("Session on Fri, Oct 16. Players see it on the link.") and an Undo action; month nav is URL-backed `?month=`, forward limit current month + 2; Rotate asks for no confirm but toasts "Link rotated. Old links stopped working." with Undo for 5 s.
 

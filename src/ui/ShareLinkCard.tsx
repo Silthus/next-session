@@ -15,7 +15,8 @@ export function shareMessage(url: string) {
 }
 
 type CopyState = "idle" | "copied" | "blocked";
-type ShareSurface = Extract<BrowserEvent, { name: "share_link_copied" }>["surface"];
+type CopySurface = Extract<BrowserEvent, { name: "share_link_copied" }>["surface"];
+type ShareSurface = Extract<BrowserEvent, { name: "share_link_shared" }>["surface"];
 type ShareChannel = Extract<BrowserEvent, { name: "share_link_shared" }>["channel"];
 type CopyMethod = Extract<BrowserEvent, { name: "share_link_copied" }>["method"];
 
@@ -30,21 +31,7 @@ export function ShareLinkCard({
   surface?: ShareSurface;
   onRotate?: () => void;
 }) {
-  const [copied, setCopied] = useState<{ url: string; state: CopyState }>({ url, state: "idle" });
-  const copyState = copied.url === url ? copied.state : "idle";
-  const setCopyState = (state: CopyState) => setCopied({ url, state });
-  useEffect(() => {
-    if (copyState !== "copied") return;
-    const timer = setTimeout(() => setCopied({ url, state: "idle" }), copiedFor);
-    return () => clearTimeout(timer);
-  }, [copyState, url]);
-
-  const copy = () => {
-    void copyText(url, surface).then((method) => {
-      track({ name: "share_link_copied", surface, method });
-      setCopyState(method === "failed" ? "blocked" : "copied");
-    });
-  };
+  const { copyState, copy } = useCopyLink(url, surface);
 
   return (
     <div
@@ -71,7 +58,7 @@ export function ShareLinkCard({
         </code>
         <Button
           variant={copyState === "copied" ? "free" : "primary"}
-          onClick={copy}
+          onClick={() => void copy()}
           className="min-w-24"
         >
           {copyState === "copied" ? <IconCheck /> : <IconCopy />}
@@ -101,7 +88,27 @@ export function ShareLinkCard({
   );
 }
 
-function copyText(text: string, surface: ShareSurface): Promise<CopyMethod> {
+export function useCopyLink(url: string, surface: CopySurface) {
+  const [copied, setCopied] = useState<{ url: string; state: CopyState }>({ url, state: "idle" });
+  const copyState = copied.url === url ? copied.state : "idle";
+  useEffect(() => {
+    if (copyState !== "copied") return;
+    const timer = setTimeout(() => setCopied({ url, state: "idle" }), copiedFor);
+    return () => clearTimeout(timer);
+  }, [copyState, url]);
+
+  const copy = () =>
+    copyText(url, surface).then((method) => {
+      track({ name: "share_link_copied", surface, method });
+      const state: CopyState = method === "failed" ? "blocked" : "copied";
+      setCopied({ url, state });
+      return state;
+    });
+
+  return { copyState, copy };
+}
+
+function copyText(text: string, surface: CopySurface): Promise<CopyMethod> {
   return writeToClipboard(text).then(
     () => "clipboard",
     (refusal: unknown) => {

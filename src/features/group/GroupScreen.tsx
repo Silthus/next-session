@@ -30,6 +30,7 @@ import { BestNights } from "./rail/BestNights";
 import { GroupRail } from "./rail/GroupRail";
 import { GroupSwitcherContainer } from "./rail/GroupSwitcherContainer";
 import { HeaderAccount } from "./rail/HeaderAccount";
+import { HeaderShareLink } from "./rail/HeaderShareLink";
 import { Nudge } from "./rail/Nudge";
 import { showsNudge } from "./rail/nudge";
 import { Players } from "./rail/Players";
@@ -293,7 +294,15 @@ function GroupSurface({
   });
 
   return (
-    <GroupFrame heading={heading} actions={headerActions}>
+    <GroupFrame
+      heading={heading}
+      actions={
+        <>
+          {!wide && <HeaderShareLink url={shareUrl} onRotate={rotate} showToast={showToast} />}
+          {headerActions}
+        </>
+      }
+    >
       {nudging && (
         <Nudge
           names={schedule.players.map((player) => player.name)}
@@ -301,7 +310,6 @@ function GroupSurface({
           onLater={laterNudge}
         />
       )}
-      {!wide && <ShareLinkCard url={shareUrl} compact onRotate={rotate} />}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
         {day && !wide ? (
           dayPanel({

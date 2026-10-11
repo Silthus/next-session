@@ -17,7 +17,7 @@ import {
 export type BrowserEvent =
   | {
       name: "share_link_copied";
-      surface: "landing" | "rail" | "compact";
+      surface: "landing" | "rail" | "compact" | "header";
       method: "clipboard" | "fallback" | "failed";
     }
   | {
