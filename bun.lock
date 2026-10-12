@@ -23,7 +23,7 @@
         "@fontsource-variable/geist": "^5.3.0",
         "@fontsource/jetbrains-mono": "^5.3.0",
         "@playwright/test": "1.63.0",
-        "@posthog/coherence": "/home/coder/dev/coherence-pr104/posthog-coherence-1.7.2-pr104.tgz",
+        "@posthog/coherence": "1.7.2",
         "@posthog/rollup-plugin": "1.6.1",
         "@tailwindcss/vite": "4.3.3",
         "@tanstack/router-plugin": "1.168.42",
@@ -320,7 +320,7 @@
 
     "@posthog/cli": ["@posthog/cli@0.16.2", "", { "dependencies": { "detect-libc": "^2.1.2" }, "bin": { "posthog-cli": "run-posthog-cli.js" } }, "sha512-h8bpf9ffBUH/Z9IoyGV+wiI+vS8rIPorKT3eKQXuzuwawO0G7Qvy+hDd7HQ9YJjHByYZ77yPPQvrSs4WsqTUCg=="],
 
-    "@posthog/coherence": ["@posthog/coherence@/home/coder/dev/coherence-pr104/posthog-coherence-1.7.2-pr104.tgz", { "optionalDependencies": { "pyright": "^1.1.414", "typescript": "^5.9.3", "typescript-language-server": "^5.3.0" }, "peerDependencies": { "node-llama-cpp": "3.21.1" }, "optionalPeers": ["node-llama-cpp"], "bin": { "coherence": "dist/cli.js", "coherence-statusline": "dist/statusline.js" } }, "sha512-QDfnda/wjqeObWRSMTacLz0nH+CQWsWRSS/6YUw7MX2n4oiuhovLt9N5gVd+yBpXzLrBfOnOIaAP1r8zBv78xw=="],
+    "@posthog/coherence": ["@posthog/coherence@1.7.2", "", { "optionalDependencies": { "pyright": "^1.1.414", "typescript": "^5.9.3", "typescript-language-server": "^5.3.0" }, "peerDependencies": { "node-llama-cpp": "3.21.1" }, "optionalPeers": ["node-llama-cpp"], "os": [ "linux", "darwin", ], "bin": { "coherence": "dist/cli.js", "coherence-statusline": "dist/statusline.js" } }, "sha512-hhAigEuCRWwQcEiuIoVG8QoWjPa3wmgWWprIpLOm/f4t2Pu+tazs8NI2fSHc+zcwV1oSd8IoXPI0zzqnXq1COg=="],
 
     "@posthog/core": ["@posthog/core@1.57.0", "", { "dependencies": { "@posthog/types": "^1.415.0" } }, "sha512-ZpIWCSkog0v4whufAXetagBsVLqE1Zjl5DsHC2squTy8nS/vqZ9W5JvWkJFgHK8hk5x1gdwMoXY7FK2S0YRT1Q=="],
 
