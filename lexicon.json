@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "concepts": [
+    {
+      "name": "GM",
+      "definition": "The person who owns a Group and picks its Sessions. A GM is a signed-in user, either an Anonymous GM or an Account."
+    },
+    {
+      "name": "Anonymous GM",
+      "definition": "A GM created by the one click on \"Create your link\", with no email and no password. An Anonymous GM exists only while it owns at least one Group."
+    },
+    {
+      "name": "Account",
+      "definition": "A signed-in user who can sign in again on any device. One Account can be a GM, a Player, or both: it owns Groups and claims Players."
+    },
+    {
+      "name": "Player",
+      "definition": "A name on a Group's Roster. A Player needs no Account; whoever holds the Share Link can answer as any Player."
+    },
+    {
+      "name": "Claimed Player",
+      "definition": "A Player linked to an Account, so the Account opens the Group as that Player on any device. An Account claims at most one Player per Group. A claim adds no protection."
+    },
+    {
+      "name": "Claim",
+      "definition": "Linking a Player to the signed-in Account. Distinct from the Save claim code, which moves an Anonymous GM's Groups."
+    },
+    {
+      "name": "Release",
+      "definition": "Undoing a Claim. Releasing never deletes the Player."
+    },
+    {
+      "name": "My groups",
+      "definition": "The Account's page (/me): the Groups it runs and the Groups where it has a Claimed Player, each with its upcoming Sessions."
+    },
+    {
+      "name": "Group",
+      "definition": "One table of people who play together: one GM, a Roster, Answers, and Sessions."
+    },
+    {
+      "name": "Roster",
+      "definition": "The Players of one Group."
+    },
+    {
+      "name": "Share Link",
+      "definition": "The URL next-session.link/s/<Share Token> that opens a Group's player surface. It is the only credential a Player needs."
+    },
+    {
+      "name": "Share Token",
+      "definition": "The unguessable part of the Share Link. Rotating it gives the Group a new Share Link and stops the old one."
+    },
+    {
+      "name": "Unsaved Group",
+      "definition": "A Group owned by an Anonymous GM. It expires after 30 days without activity."
+    },
+    {
+      "name": "Save",
+      "definition": "Moving every Group of an Anonymous GM to an Account. The Share Link stays the same, and an Account's existing Groups are never touched."
+    },
+    {
+      "name": "Expiry",
+      "definition": "The moment an Unsaved Group is deleted for inactivity. Any GM or Player activity on the Group pushes it out again."
+    },
+    {
+      "name": "Answer",
+      "definition": "One Player's reply for one date: free, maybe, or busy. A date without an Answer is unanswered."
+    },
+    {
+      "name": "Booking Window",
+      "definition": "The dates that can be answered or scheduled: from today to the end of the month two months after the current one."
+    },
+    {
+      "name": "Session",
+      "definition": "A date the GM picked for the Group to play. A Group has at most one Session per date."
+    },
+    {
+      "name": "Best Nights",
+      "definition": "The top three dates of the visible month that no Player answered busy, ranked by how many are free, with maybe counting half."
+    },
+    {
+      "name": "Fill Rest",
+      "definition": "A Player's action that answers busy for every unanswered date left in the month."
+    },
+    {
+      "name": "Legal Acceptance",
+      "definition": "The record that a GM agreed to the Terms and the Privacy Policy: both document versions and a timestamp."
+    },
+    {
+      "name": "Welcome Mail",
+      "definition": "The one email every new Account gets right after it is created, confirming the Account and linking My groups."
+    },
+    {
+      "name": "Session updates",
+      "definition": "Emails to the Accounts behind a Group's Claimed Players when a Session is set or cancelled, excluding the actor."
+    },
+    {
+      "name": "Tips",
+      "definition": "Two short emails on getting the first game night scheduled, sent only to an Account that opted in twice."
+    },
+    {
+      "name": "Product Marker",
+      "definition": "The product: \"next-session\" property on every event, exception and log Next Session sends to PostHog."
+    },
+    {
+      "name": "Terms",
+      "definition": "The Next Session Terms of Service a GM accepts, drafted in docs/legal/terms.md."
+    },
+    {
+      "name": "Privacy Policy",
+      "definition": "The Next Session Privacy Policy a GM accepts, drafted in docs/legal/privacy.md."
+    }
+  ]
+}
