@@ -85,6 +85,7 @@ describe("sessions.updateDetails", () => {
       end: Date.UTC(2026, 9, 17, 21),
       location: "The club",
       summary: "My group",
+      timeZone: "Europe/Berlin",
       revision: 2,
     });
   });

@@ -947,6 +947,23 @@ describe("the calendar follows the Roster", () => {
     },
   );
 
+  it("names an invite's time in the zone of the night it carries while a zone change waits out its Undo window", async () => {
+    const { as, groupId } = await crewWithNights();
+    await as.mutation(api.groups.updateSettings, {
+      groupId,
+      startTime: "19:00",
+      lengthMinutes: 240,
+      timeZone: "Pacific/Auckland",
+      location: "Max's place",
+    });
+    const kim = await signIn(t, { email: KIM });
+
+    await kim.as.mutation(api.player.join, { shareToken: SHARE_TOKEN, name: "Kim" });
+    await finish();
+
+    expect(firstLinesTo(KIM).slice(0, 2)).toEqual([INVITED("17"), INVITED("24")]);
+  });
+
   it("drops a pending withdrawal once the Account turns Session mail off", async () => {
     const { groupId, robin } = await crewWithNights();
 
@@ -1064,18 +1081,17 @@ describe("the one-time invites", () => {
     const kim = await signIn(t, { email: "kim@example.com" });
     await kim.as.mutation(api.player.join, { shareToken: "crew-token", name: "Kim" });
     await finish();
+    expect(resendMails().flatMap(({ to }) => to)).toEqual(["kim@example.com"]);
     sent = [];
 
     await startInvites();
 
-    expect(resendMails().flatMap(({ to }) => to)).toEqual(
-      expect.arrayContaining([gmEmail, ROBIN, "kim@example.com"]),
-    );
+    expect(resendMails().flatMap(({ to }) => to)).toEqual([gmEmail, "kim@example.com", ROBIN]);
   });
 
   it("pages through Sessions whose recipients all turned Session mail off within Convex's limits", async () => {
     t = newBackend({ transactionLimits: true });
-    for (let night = 0; night < 15; night++) {
+    for (let night = 0; night < 21; night++) {
       const { groupId } = await signedInGmWithGroup(t, (backend) =>
         signIn(backend, { email: `gm-${night}@example.com`, sessionEmailsEnabled: false }),
       );

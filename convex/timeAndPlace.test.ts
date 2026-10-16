@@ -235,6 +235,7 @@ describe("a saved Time and place", () => {
       end: Date.UTC(2026, 9, 17, 19, 30),
       location: "Max's place",
       summary: "My group",
+      timeZone: "Europe/Berlin",
       revision: 2,
     });
     expect(await publishedOf(laterId)).toEqual({
@@ -243,6 +244,7 @@ describe("a saved Time and place", () => {
       end: Date.UTC(2026, 10, 3, 20, 30),
       location: "Max's place",
       summary: "My group",
+      timeZone: "Europe/Berlin",
       revision: 2,
     });
   });

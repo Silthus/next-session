@@ -56,7 +56,6 @@ const publishedSend = {
   revision: v.number(),
   sequence: v.number(),
   stamp: v.number(),
-  timeZone: v.string(),
 };
 
 export const calendarSend = v.union(

@@ -1,0 +1,106 @@
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > publishes every legacy Session as scheduled at revision 0, page by page 201ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.settings > reads a Group nobody has set up as 19:00 for 4 hours, Berlin time, with no location 61ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.settings > reads back what the GM saved 19ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.settings > reads a missing id as null 4ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.create > keeps the browser's time zone for the new Group 5ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.create > keeps the time zone in its usual spelling 4ms
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > empties the retired Session mail table, page by page 12ms
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > changes nothing on a second run 6ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses once the GM's edits are spent, and changes nothing 41ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.create > drops a time zone it doesn't know and follows Berlin time 41ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > pushes out the Expiry of an Unsaved Group 3ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > trims the location 5ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > clears the location when it is left empty 7ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > keeps the time zone in its usual spelling 9ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > takes a location of 200 characters 5ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { startTime: '7pm' } as invalid settings and changes nothing 3ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { startTime: '7:30' } as invalid settings and changes nothing 2ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { startTime: '24:00' } as invalid settings and changes nothing 13ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { lengthMinutes: 15 } as invalid settings and changes nothing 3ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { lengthMinutes: 735 } as invalid settings and changes nothing 2ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { lengthMinutes: 250 } as invalid settings and changes nothing 9ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { timeZone: 'Mars/Olympus_Mons' } as invalid settings and changes nothing 7ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { …(1) } as invalid settings and changes nothing 7ms
+ ✓ |convex| convex/timeAndPlace.test.ts > a saved Time and place > publishes each upcoming Session once, a window after the last save, at the new time and place 170ms
+ ✓ |convex| convex/timeAndPlace.test.ts > a saved Time and place > follows a new time zone 5ms
+ ✓ |convex| convex/timeAndPlace.test.ts > a saved Time and place > publishes nothing when the save changes nothing 6ms
+ ✓ |convex| convex/timeAndPlace.test.ts > a saved Time and place > leaves a Cancelled Session's published time alone 4ms
+ ✓ |convex| convex/timeAndPlace.test.ts > a saved Time and place > leaves a past Session's published time alone 5ms
+ ✓ |convex| convex/timeAndPlace.test.ts > a saved Time and place > publishes a Cancelled Session at the new time once it is scheduled again 8ms
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > leaves a Session inside its first Undo window to announce itself 290ms
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > lets the first cancel of a legacy Session announce it 43ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > publishes a burst of edits once, a window after the last one, with the Session's own values 485ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails every calendar recipient once after the Undo window, the GM included, and nobody before 611ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > returns a field to the Group's value with null and leaves an absent field alone 102ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > reads an empty place of the Session's own as no place this night 58ms
+ ✓ |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > fills the usual start, end and Group name into every published Session at the same revision, page by page 152ms
+ ✓ |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > widens with what was published before Time and place, so a Save before it still moves the Session 23ms
+ ✓ |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > lets a settle that runs before it publish nothing for an unchanged Session 13ms
+ ✓ |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > keeps a Cancelled Session cancelled 16ms
+ ✓ |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > leaves a Session that was never published alone 13ms
+ ✓ |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > changes nothing on a second run 18ms
+ ✓ |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > lets the first settle after it publish nothing for an unchanged Session 27ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > keeps the Session's own values when it is cancelled and scheduled again 57ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > pushes out the Expiry of an Unsaved Group 26ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses a Cancelled Session and keeps its values 9ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses a Session that has passed 24ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails only the Group's calendar recipient set, rechecked on every attempt 278ms
+ ✓ |convex| convex/sessionInvites.test.ts > puts the night into each calendar as an accepted invite without an alarm and with a token-free link 44ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses { startTime: '7pm' } as invalid and changes nothing 29ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses { startTime: '24:00' } as invalid and changes nothing 21ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses { lengthMinutes: 15 } as invalid and changes nothing 24ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses { lengthMinutes: 735 } as invalid and changes nothing 16ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses { lengthMinutes: 250 } as invalid and changes nothing 13ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses { …(1) } as invalid and changes nothing 17ms
+ ✓ |convex| convex/sessionInvites.test.ts > takes a cancelled night out of every calendar 69ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses once the GM's edits are spent, and changes nothing 55ms
+ ✓ |convex| convex/sessionDetails.test.ts > a Session's own values against a saved Time and place > keeps the Session's own start time and still follows the Group's length 19ms
+ ✓ |convex| convex/sessionDetails.test.ts > a Session's own values against a saved Time and place > moves a Session that has only its own time to the new place, and leaves one with its own place alone 29ms
+ ✓ |convex| convex/sessionDetails.test.ts > the reads > schedule.month returns the Session's own values and which ones it overrides 15ms
+ ✓ |convex| convex/sessionDetails.test.ts > the reads > player.group shows the Session's own values over the Group's 21ms
+ ✓ |convex| convex/sessionDetails.test.ts > the reads > me.groups shows the Session's own values to the GM and to a Claimed Player 43ms
+ ✓ |convex| convex/sessionInvites.test.ts > raises SEQUENCE for every recipient across set, change, cancel and Schedule again under one UID 114ms
+ ✓ |convex| convex/sessionInvites.test.ts > gives the Calendar download and feed the SEQUENCE of the night's last invite 119ms
+ ✓ |convex| convex/sessionInvites.test.ts > spaces the sends of one fan-out at least 500 ms apart 29ms
+ ✓ |convex| convex/sessionInvites.test.ts > links the footer's My groups to the deployment's own site 14ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > drops a retry whose revision is no longer the published one 39ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > sends a 503 then 200 once, the same request under one Idempotency-Key 15ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > still delivers a retry after the Share Token rotates, under a key that matches its new body 32ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > names the night's time in the zone it was published in when the zone changes before a retry 37ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > logs a 422 without the recipient and does not retry it 12ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Account with Session mail off 8ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Account with a .test address 10ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Anonymous GM 9ms
+ ✓ |convex| convex/sessionInvites.test.ts > the provider switch > leaves Session updates on Workflows and Resend untouched without RESEND_API_KEY 9ms
+ ✓ |convex| convex/sessionInvites.test.ts > the provider switch > requests no Workflows Session update while RESEND_API_KEY is set 10ms
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > counts and warns Resend sends apart from Workflows sends 376ms
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > reads a day counted before providers as Workflows 4ms
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > keeps emails, Group names and Share Tokens out of usage events and logs 23ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites a Player who keeps the Group through Join while signed in to each upcoming published scheduled Session 64ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites a Player who keeps the Group through Keep this group to each upcoming published scheduled Session 56ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites a Player who keeps the Group through the auto-keep on answer to each upcoming published scheduled Session 57ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > withdraws each upcoming published Session from a Player who leaves through Not you? 44ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > withdraws each upcoming published Session from a Player who leaves through Remove from my groups 38ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > withdraws each upcoming published Session from a Player who leaves through the GM removing the Player 50ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > still withdraws the night as it was at the release after a change and the Group's deletion 106ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > drops a withdrawal when the Player keeps the Group again before it sends 55ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > drops an invite when the Player leaves before it sends 52ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > lets a claim's invite leave another recipient's pending broadcast retry alone 20ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > sends nothing when a Player switches to another name in the same Group 46ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > sends nothing when the GM releases their own Player 32ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites the Account that Saves the Group to each upcoming published scheduled Session 173ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > lets an Account Save 26 Groups with 20 published nights each, and invites it to every night 1507ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > neither invites nor withdraws an Account with Session mail off 31ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > neither invites nor withdraws an Account with a .test address 32ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > names an invite's time in the zone of the night it carries while a zone change waits out its Undo window 72ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > drops a pending withdrawal once the Account turns Session mail off 32ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > invites the whole recipient set to every upcoming Session that fits the day's share, soonest first 29ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > queues only what fits a day near its share, then finishes after the next UTC midnight 29ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > skips a Session that had a Resend send, a cancelled Session and a past Session 26ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > still invites the GM and every Player to a night a newcomer was invited to first 18ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > pages through Sessions whose recipients all turned Session mail off within Convex's limits 226ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > queues nothing on a second start after it finished 13ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > queues nothing without RESEND_API_KEY and leaves every Session for the start after the switch-on 9ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > sends a Session larger than the day's share alone, on a day with no Resend sends yet 201ms
+ Test Files  4 passed (4)
+      Tests  104 passed (104)

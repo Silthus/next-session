@@ -51,7 +51,7 @@ type CalendarMessage = Infer<typeof calendarMessage>;
 type FrozenEntry = Infer<typeof frozenEntry>;
 type RecipientSetMember = { groupId: Id<"groups">; userId: Id<"users"> };
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
-type NightRound = DistributiveOmit<NightSend, "sessionId" | "userId" | "stamp" | "timeZone">;
+type NightRound = DistributiveOmit<NightSend, "sessionId" | "userId" | "stamp">;
 
 export async function sessionPublished(
   ctx: MutationCtx,
@@ -104,11 +104,10 @@ async function roundOf(
   round: NightRound,
 ) {
   const stamp = Date.now();
-  const { timeZone } = groupTimeOf(group);
   const sends: NightSend[] = [];
   for (const userId of await calendarRecipients(ctx, group)) {
     if (receivesSessionMail(await ctx.db.get("users", userId)))
-      sends.push({ ...round, sessionId: session._id, userId, stamp, timeZone });
+      sends.push({ ...round, sessionId: session._id, userId, stamp });
   }
   return sends;
 }
@@ -171,12 +170,11 @@ export const inviteToNights = internalMutation({
     if (!(await isCalendarRecipient(ctx, group, userId))) return null;
     if (!receivesSessionMail(await ctx.db.get("users", userId))) return null;
     const nights = await upcomingPublishedNights(ctx, groupId);
-    const { timeZone } = groupTimeOf(group);
     const stamp = Date.now();
     const sends: NightSend[] = [];
     for (const night of nights.filter(({ entry }) => entry.state === "scheduled")) {
       const sequence = await raiseSequence(ctx, night.session);
-      sends.push(inviteOf(night, { userId, sequence, stamp, timeZone }));
+      sends.push(inviteOf(night, { userId, sequence, stamp }));
     }
     await requestCalendarMails(ctx, sends);
     return null;
@@ -203,7 +201,7 @@ async function upcomingPublishedNights(ctx: QueryCtx, groupId: Id<"groups">) {
 
 function inviteOf(
   { session, entry }: PublishedNight,
-  send: { userId: Id<"users">; sequence: number; stamp: number; timeZone: string },
+  send: { userId: Id<"users">; sequence: number; stamp: number },
 ): NightSend {
   return { kind: "invite", sessionId: session._id, revision: entry.revision, ...send };
 }
@@ -298,6 +296,7 @@ type PublishedEntry = {
   end: number;
   summary: string;
   location?: string;
+  timeZone?: string;
   state: Published["state"];
   revision: number;
 };
@@ -313,9 +312,9 @@ type NightTarget = {
 
 function entryOf(published: Published | undefined): PublishedEntry | null {
   if (published === undefined) return null;
-  const { start, end, summary, location, state, revision } = published;
+  const { start, end, summary } = published;
   if (start === undefined || end === undefined || summary === undefined) return null;
-  return { start, end, summary, state, revision, ...(location === undefined ? {} : { location }) };
+  return { ...published, start, end, summary };
 }
 
 async function nightTarget(ctx: QueryCtx, send: NightSend): Promise<NightTarget | null> {
@@ -347,7 +346,7 @@ function nightMessageFor(
     groupName: entry.summary,
     date: session.date,
     window,
-    timeZone: send.timeZone,
+    timeZone: entry.timeZone ?? groupTimeOf(group).timeZone,
     ...(entry.location === undefined ? {} : { location: entry.location }),
     groupLink: runsGroup ? calendarLink : shareLinkOf(group),
     myGroupsLink: myGroupsLink(),

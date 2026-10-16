@@ -66,6 +66,7 @@ export const publishedSession = v.object({
   end: v.optional(v.number()),
   location: v.optional(v.string()),
   summary: v.optional(v.string()), // the Group name at publish time
+  timeZone: v.optional(v.string()), // the Group's zone at publish time; missing before Session mail, read as the Group's zone (§15.8)
   revision: v.number(),
 }); // start, end and summary are missing only on rows published before the Time and place deploy
 
@@ -1038,7 +1039,7 @@ Every Session update is one mail through Resend that carries a calendar invite (
 ### 15.3 A broadcast round
 
 - Every publish is a round, because the invite carries the start, end, location and Group name: `set` for a first publish or **Schedule again**, `changed` for a new start, length, location or Group name, `cancelled` for a cancel. A publish that keeps a Cancelled Session cancelled sends nothing: those calendars already hold the cancel.
-- A round raises `sessions.sequence` by one (missing is 0), sets `sessions.wholeRoundSent`, and queues one send per eligible recipient, each carrying `{kind: "broadcast", change, sessionId, userId, revision, sequence, timeZone}`. The Group's time zone is frozen into the send, so a retry names the time in the zone the round was published in, even when the zone changes before it.
+- A round raises `sessions.sequence` by one (missing is 0), sets `sessions.wholeRoundSent`, and queues one send per eligible recipient, each carrying `{kind: "broadcast", change, sessionId, userId, revision, sequence}`. The published snapshot carries the Group's zone, so a mail names the time in the zone its night was published in, even while a zone change waits out its Undo window.
 - Sends are scheduled 600 ms apart within a round, under Resend's 2 requests a second. Two rounds that overlap rely on the retries.
 - Each attempt rechecks, in `sessionMail.calendarMail`, that `published.revision` still equals the send's revision and that the Account is still in the set and eligible. A send whose revision moved on drops itself, so a slow mail never overwrites a newer change. Staleness is judged by revision, never by `sequence`.
 
@@ -1046,7 +1047,7 @@ Every Session update is one mail through Resend that carries a calendar invite (
 
 - Every mutation that can move an Account into or out of a Group's set runs its change through `changeRecipientSet` in `convex/sessionMail.ts`, which compares membership before and after in the same transaction: a claim (**Join** while signed in, **Keep this group**, the auto-keep on answer) and a release (**Not you?**, **Remove from my groups**) in `convex/model/players.ts`, the GM removing a Player, and **Save**, which makes the Account the GM of the moved Groups.
 - A set that ends where it began sends nothing: a switch to another name in the same Group, or a GM releasing their own Player.
-- Entering schedules `sessionMail.inviteToNights` for that Group and Account, so a Save that moves many Groups stays under Convex's 1,000 scheduled functions per mutation. It rechecks that the Account is still in the set and eligible, then queues an `invite` for each upcoming Session (from today, UTC, to the end of the Booking Window) whose published state is scheduled: a `request` to that Account alone, `{kind: "invite", sessionId, userId, revision, sequence, timeZone}`.
+- Entering schedules `sessionMail.inviteToNights` for that Group and Account, so a Save that moves many Groups stays under Convex's 1,000 scheduled functions per mutation. It rechecks that the Account is still in the set and eligible, then queues an `invite` for each upcoming Session (from today, UTC, to the end of the Booking Window) whose published state is scheduled: a `request` to that Account alone, `{kind: "invite", sessionId, userId, revision, sequence}`.
 - Leaving queues a `withdraw` for each upcoming published Session, Cancelled ones included, so an entry whose cancel the release dropped still leaves: `{kind: "withdraw", groupId, userId, date, entry}`, with `entry` frozen as `{uid, sequence, start, end, summary}`.
 - Each raises that Session's `sequence` by one. Staleness stays with the revision, so an invite never drops another recipient's pending broadcast.
 - An invite sends only while its revision is still published, the Session is still scheduled and the Account is still in the set. A withdrawal sends only while the Account is still out of the set, whatever the revision; a deleted Group counts as out. It is built from its frozen entry, so it lands after the Group is deleted and never shows a change made after the release. A re-claim before it sends makes it drop itself.
@@ -1076,7 +1077,7 @@ Every Session update is one mail through Resend that carries a calendar invite (
 
 `sessionMailCopy` in `convex/model/sessionMailCopy.ts` is pure: plain text first, then the same words in HTML (the Workflows template's cream background, mono "NEXT SESSION" header and one button, no images, no tracking). System mail: nobody signs.
 
-`{when}` is "Saturday, October 31, 2026, 19:00–23:00, Berlin time", in the Group's zone with its city. `{where}` is the line "Where: <location>" when there is one. The button "Open your group" goes to the Share Link for a Player and to `/g/<groupId>` for the GM.
+`{when}` is "Saturday, October 31, 2026, 19:00–23:00, Berlin time", in the published zone with its city (the Group's zone for a snapshot published before Session mail). `{where}` is the line "Where: <location>" when there is one. The button "Open your group" goes to the Share Link for a Player and to `/g/<groupId>` for the GM.
 
 | Change | Subject | Player | GM |
 | --- | --- | --- | --- |

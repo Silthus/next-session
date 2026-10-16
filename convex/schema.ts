@@ -17,6 +17,7 @@ export const publishedSession = v.object({
   end: v.optional(v.number()),
   location: v.optional(v.string()),
   summary: v.optional(v.string()),
+  timeZone: v.optional(v.string()),
   revision: v.number(),
 });
 

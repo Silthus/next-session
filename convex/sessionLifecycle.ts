@@ -64,6 +64,7 @@ function snapshotOf(
     ...sessionWindow(session.date, groupTimeOf(group), sessionOverridesOf(session)),
     ...sessionLocationOf(group, session),
     summary: group.name,
+    timeZone: groupTimeOf(group).timeZone,
   };
 }
 

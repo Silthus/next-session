@@ -133,7 +133,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - expiry sweep: the daily cron deletes Unsaved Groups past their Expiry
   handler: sweepExpiredGroups in cleanup.ts
   trust: operator
-- one-time invites: the operator starts it once at the Resend switch-on; it invites the calendar recipient set to every upcoming Session that never had a Resend send, paced to half the daily quota
+- one-time invites: the operator starts it once at the Resend switch-on; it invites the calendar recipient set to every upcoming Session that never had a round to its whole calendar recipient set, paced to half the daily quota
   handler: inviteScheduledSessions in oneTimeInvites.ts
   trust: operator
 - reminder job: the scheduler fires a Reminder 1 day or 2 hours before a published Session starts, and it emails the Accounts behind the Group's Claimed Players
