@@ -1,0 +1,18 @@
+# Red: the #159 tests on origin/spec/session-mail-invites at 9f4de3a, before the change
+# bunx vitest run convex/sessionInvites.test.ts -t "one-time invites"
+      Tests  6 failed | 33 skipped (39)
+     × invites the whole recipient set to every upcoming Session that fits the day's share, soonest first 154ms
+     × queues nothing on a second start after it finished 11ms
+     × queues nothing without RESEND_API_KEY, and never resumes 6ms
+     × queues only what fits a day near its share, then finishes after the next UTC midnight 9ms
+     × sends a Session larger than the day's share alone, on a day with no Resend sends yet 13ms
+     × skips a Session that had a Resend send, a cancelled Session and a past Session 112ms
+ FAIL  |convex| convex/sessionInvites.test.ts > the one-time invites > invites the whole recipient set to every upcoming Session that fits the day's share, soonest first
+ FAIL  |convex| convex/sessionInvites.test.ts > the one-time invites > queues nothing on a second start after it finished
+ FAIL  |convex| convex/sessionInvites.test.ts > the one-time invites > queues nothing without RESEND_API_KEY, and never resumes
+ FAIL  |convex| convex/sessionInvites.test.ts > the one-time invites > queues only what fits a day near its share, then finishes after the next UTC midnight
+ FAIL  |convex| convex/sessionInvites.test.ts > the one-time invites > sends a Session larger than the day's share alone, on a day with no Resend sends yet
+ FAIL  |convex| convex/sessionInvites.test.ts > the one-time invites > skips a Session that had a Resend send, a cancelled Session and a past Session
+ Test Files  1 failed (1)
+Error: Could not find module for: "oneTimeInvites"
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯

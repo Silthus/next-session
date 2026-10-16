@@ -107,6 +107,9 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - expiry sweep: the daily cron deletes Unsaved Groups past their Expiry
   handler: sweepExpiredGroups in cleanup.ts
   trust: operator
+- one-time invites: the operator starts it once at the Resend switch-on; it invites the calendar recipient set to every upcoming Session that never had a Resend send, paced to half the daily quota
+  handler: inviteScheduledSessions in oneTimeInvites.ts
+  trust: operator
 
 ## invariants
 - owner-only groups: A GM reads or changes a Group, its Players and its Sessions only when they own the Group; another GM's ids read as missing and nothing changes.

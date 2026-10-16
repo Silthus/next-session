@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { requestMail } from "./mail";
 import {
@@ -145,6 +145,30 @@ function uidsTo(address: string) {
   return resendMails()
     .filter(({ to }) => to.includes(address))
     .map((mail) => /UID:(.+)\r\n/.exec(inviteOf(mail))![1]);
+}
+
+function logLines(message: string) {
+  return sent
+    .filter(({ url }) => url.includes(POSTHOG_LOGS))
+    .flatMap(({ body }) => {
+      const { resourceLogs } = JSON.parse(body) as {
+        resourceLogs: {
+          scopeLogs: {
+            logRecords: {
+              body: { stringValue: string };
+              attributes: { key: string; value: Record<string, unknown> }[];
+            }[];
+          }[];
+        }[];
+      };
+      return resourceLogs.flatMap(({ scopeLogs }) =>
+        scopeLogs.flatMap(({ logRecords }) => logRecords),
+      );
+    })
+    .filter((record) => record.body.stringValue === message)
+    .map(({ attributes }) =>
+      Object.fromEntries(attributes.map(({ key, value }) => [key, Object.values(value)[0]])),
+    );
 }
 
 it("mails every calendar recipient once after the Undo window, the GM included, and nobody before", async () => {
@@ -436,27 +460,7 @@ describe("mail volume", () => {
   beforeEach(() => vi.stubEnv("POSTHOG_PROJECT_TOKEN", "test-project-token"));
 
   function volumeWarnings() {
-    return sent
-      .filter(({ url }) => url.includes(POSTHOG_LOGS))
-      .flatMap(({ body }) => {
-        const { resourceLogs } = JSON.parse(body) as {
-          resourceLogs: {
-            scopeLogs: {
-              logRecords: {
-                body: { stringValue: string };
-                attributes: { key: string; value: Record<string, unknown> }[];
-              }[];
-            }[];
-          }[];
-        };
-        return resourceLogs.flatMap(({ scopeLogs }) =>
-          scopeLogs.flatMap(({ logRecords }) => logRecords),
-        );
-      })
-      .filter((record) => record.body.stringValue === "Daily mail volume warning")
-      .map(({ attributes }) =>
-        Object.fromEntries(attributes.map(({ key, value }) => [key, Object.values(value)[0]])),
-      );
+    return logLines("Daily mail volume warning");
   }
 
   it("counts and warns Resend sends apart from Workflows sends", async () => {
@@ -817,5 +821,157 @@ describe("the calendar follows the Roster", () => {
     await finish();
 
     expect(resendRequests()).toEqual([]);
+  });
+});
+
+describe("the one-time invites", () => {
+  const ROBIN = "robin@example.com";
+  const FINISHED = "One-time invites finished";
+  const NEXT = (day: string) => `Thursday Crew: next session Saturday, October ${day}, 2026`;
+
+  beforeEach(() => vi.stubEnv("POSTHOG_PROJECT_TOKEN", "test-project-token"));
+
+  async function nightOn(
+    groupId: Id<"groups">,
+    date: string,
+    state: "scheduled" | "cancelled" = "scheduled",
+  ) {
+    const [year, month, day] = date.split("-").map(Number) as [number, number, number];
+    return await seedSession(t, groupId, date, {
+      state,
+      published: {
+        state,
+        start: Date.UTC(year, month - 1, day, 17),
+        end: Date.UTC(year, month - 1, day, 21),
+        summary: "Thursday Crew",
+        revision: 1,
+      },
+    });
+  }
+
+  async function resendSendsToday(count: number) {
+    await t.run(async (ctx) => {
+      await ctx.db.insert("mailVolume", { provider: "resend", day: "2026-10-07", count });
+    });
+  }
+
+  async function startInvites() {
+    await t.mutation(internal.oneTimeInvites.inviteScheduledSessions, {});
+    await finish();
+  }
+
+  async function untilNextUtcMidnight() {
+    await wait(Date.UTC(2026, 9, 8) - Date.now());
+    await finish();
+  }
+
+  function subjectsTo(address: string) {
+    return mailsTo(address).map(({ subject }) => subject);
+  }
+
+  it("invites the whole recipient set to every upcoming Session that fits the day's share, soonest first", async () => {
+    const { groupId, gmEmail } = await crew();
+    await nightOn(groupId, "2026-10-31");
+    await nightOn(groupId, "2026-10-17");
+    await nightOn(groupId, "2026-10-24");
+
+    await startInvites();
+
+    for (const address of [gmEmail, ROBIN])
+      expect(subjectsTo(address)).toEqual([NEXT("17"), NEXT("24"), NEXT("31")]);
+    expect(mailsTo(ROBIN)[0]!.text.split("\n")[0]).toBe(
+      "You keep Thursday Crew now, so its session is in your calendar: Saturday, October 17, 2026, 19:00–23:00, Berlin time.",
+    );
+    expect(sequencesTo(ROBIN)).toEqual([1, 1, 1]);
+    expect(logLines(FINISHED)).toEqual([{ sessions_invited: 3, invites_queued: 6 }]);
+  });
+
+  it("queues only what fits a day near its share, then finishes after the next UTC midnight", async () => {
+    const { groupId } = await crew();
+    for (const day of ["17", "24", "31"]) await nightOn(groupId, `2026-10-${day}`);
+    await resendSendsToday(47);
+
+    await startInvites();
+
+    expect(subjectsTo(ROBIN)).toEqual([NEXT("17")]);
+    expect(logLines(FINISHED)).toEqual([]);
+
+    await untilNextUtcMidnight();
+
+    expect(subjectsTo(ROBIN)).toEqual([NEXT("17"), NEXT("24"), NEXT("31")]);
+    expect(
+      resendRequests()
+        .slice(2)
+        .map(({ at }) => at >= Date.UTC(2026, 9, 8)),
+    ).toEqual(Array(4).fill(true));
+    expect(logLines(FINISHED)).toEqual([{ sessions_invited: 3, invites_queued: 6 }]);
+  });
+
+  it("skips a Session that had a Resend send, a cancelled Session and a past Session", async () => {
+    const { as, groupId } = await crew();
+    await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-24" });
+    await finish();
+    await nightOn(groupId, "2026-10-31", "cancelled");
+    await nightOn(groupId, "2026-10-03");
+    await nightOn(groupId, "2026-10-17");
+    sent = [];
+
+    await startInvites();
+
+    expect(subjectsTo(ROBIN)).toEqual([NEXT("17")]);
+  });
+
+  it("queues nothing on a second start after it finished", async () => {
+    const { groupId } = await crew();
+    await nightOn(groupId, "2026-10-17");
+    await startInvites();
+    sent = [];
+
+    await startInvites();
+
+    expect(resendRequests()).toEqual([]);
+  });
+
+  it("queues nothing without RESEND_API_KEY and leaves every Session for the start after the switch-on", async () => {
+    vi.stubEnv("RESEND_API_KEY", "");
+    const { groupId } = await crew();
+    await nightOn(groupId, "2026-10-17");
+
+    await startInvites();
+    await untilNextUtcMidnight();
+
+    expect(resendRequests()).toEqual([]);
+
+    vi.stubEnv("RESEND_API_KEY", "re_test_key");
+    await startInvites();
+
+    expect(subjectsTo(ROBIN)).toEqual([NEXT("17")]);
+  });
+
+  it("sends a Session larger than the day's share alone, on a day with no Resend sends yet", async () => {
+    const big = await signedInGmWithGroup(t);
+    await t.run(async (ctx) => {
+      for (let index = 0; index < 59; index++) {
+        const userId = await ctx.db.insert("users", { email: `player-${index}@example.com` });
+        await ctx.db.insert("players", {
+          groupId: big.groupId,
+          name: `Player ${index}`,
+          nameKey: `${index}`,
+          userId,
+        });
+      }
+    });
+    const { groupId } = await crew();
+    await nightOn(big.groupId, "2026-10-17");
+    await nightOn(groupId, "2026-10-24");
+
+    await startInvites();
+
+    expect(resendRequests()).toHaveLength(60);
+    expect(subjectsTo(ROBIN)).toEqual([]);
+
+    await untilNextUtcMidnight();
+
+    expect(subjectsTo(ROBIN)).toEqual([NEXT("24")]);
   });
 });

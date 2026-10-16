@@ -2,7 +2,13 @@ import { ActionRetrier } from "@convex-dev/action-retrier";
 import { v, type Infer } from "convex/values";
 import { components, internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
-import { internalAction, internalMutation, type MutationCtx } from "./_generated/server";
+import {
+  internalAction,
+  internalMutation,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
+import { todayUtc } from "../shared/dates";
 import { calendarContentType } from "../shared/icalendar";
 import { SESSION_CHANGES } from "./model/sessionMailCopy";
 import { accountDistinctId, isTestAddress, PRODUCT, serverLog } from "./model/telemetry";
@@ -250,8 +256,12 @@ function base64(text: string) {
   return btoa(binary);
 }
 
+export async function calendarMailsToday(ctx: QueryCtx) {
+  return (await mailVolumeOn(ctx, "resend", today()))?.count ?? 0;
+}
+
 async function recordMailVolume(ctx: MutationCtx, provider: MailProvider, count: number) {
-  const day = new Date(Date.now()).toISOString().slice(0, 10);
+  const day = today();
   const volume = await mailVolumeOn(ctx, provider, day);
   const before = volume?.count ?? 0;
   const after = before + count;
@@ -273,7 +283,11 @@ async function recordMailVolume(ctx: MutationCtx, provider: MailProvider, count:
   }
 }
 
-async function mailVolumeOn(ctx: MutationCtx, provider: MailProvider, day: string) {
+function today() {
+  return todayUtc(Date.now());
+}
+
+async function mailVolumeOn(ctx: QueryCtx, provider: MailProvider, day: string) {
   const counted = await ctx.db
     .query("mailVolume")
     .withIndex("by_provider_and_day", (q) => q.eq("provider", provider).eq("day", day))

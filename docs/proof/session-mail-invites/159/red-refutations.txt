@@ -1,0 +1,65 @@
+# Refutations: each rule of convex/oneTimeInvites.ts broken on purpose, then
+# bunx vitest run convex/sessionInvites.test.ts -t "one-time invites"
+# The file is restored from a copy after each break (cmp clean).
+
+## No daily share: every round fits
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+      Tests  2 failed | 4 passed | 33 skipped (39)
+     × queues only what fits a day near its share, then finishes after the next UTC midnight
+     × sends a Session larger than the day's share alone, on a day with no Resend sends yet
+AssertionError: expected [ { …(4) }, { …(4) }, { …(4) }, …(59) ] to have a length of 60 but got 62
+AssertionError: expected [ …(3) ] to deeply equal [ Array(1) ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+restored
+
+## Already-sent Sessions not skipped
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+      Tests  4 failed | 2 passed | 33 skipped (39)
+     × queues nothing on a second start after it finished
+     × queues only what fits a day near its share, then finishes after the next UTC midnight
+     × sends a Session larger than the day's share alone, on a day with no Resend sends yet
+     × skips a Session that had a Resend send, a cancelled Session and a past Session
+AssertionError: expected [ { …(4) }, { …(4) } ] to deeply equal []
+AssertionError: expected [ …(2) ] to deeply equal [ Array(1) ]
+AssertionError: expected [ …(4) ] to deeply equal [ …(3) ]
+AssertionError: expected [] to deeply equal [ Array(1) ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+restored
+
+## No resume at the next UTC midnight
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+      Tests  2 failed | 4 passed | 33 skipped (39)
+     × queues only what fits a day near its share, then finishes after the next UTC midnight
+     × sends a Session larger than the day's share alone, on a day with no Resend sends yet
+AssertionError: expected [ { invites_queued: 2, …(1) } ] to deeply equal []
+AssertionError: expected [] to deeply equal [ Array(1) ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+restored
+
+## No exception for a round larger than the share
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+      Tests  1 failed | 5 passed | 33 skipped (39)
+     × sends a Session larger than the day's share alone, on a day with no Resend sends yet
+AssertionError: expected [] to have a length of 60 but got +0
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+restored
+
+## Runs without RESEND_API_KEY
+ 1 file changed, 1 deletion(-)
+      Tests  1 failed | 5 passed | 33 skipped (39)
+     × queues nothing without RESEND_API_KEY and leaves every Session for the start after the switch-on
+AssertionError: expected [] to deeply equal [ Array(1) ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+restored
+
+## Sequence not raised
+ 1 file changed, 1 deletion(-)
+      Tests  3 failed | 3 passed | 33 skipped (39)
+     × queues nothing on a second start after it finished
+     × queues only what fits a day near its share, then finishes after the next UTC midnight
+     × sends a Session larger than the day's share alone, on a day with no Resend sends yet
+AssertionError: expected [ { …(4) }, { …(4) } ] to deeply equal []
+AssertionError: expected [ …(4) ] to deeply equal [ …(3) ]
+AssertionError: expected [] to deeply equal [ Array(1) ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+restored
