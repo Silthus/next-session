@@ -1,0 +1,48 @@
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > lists who is free first, then maybe, busy and silent 138ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > schedules a bookable night 33ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > says what players' calendars will show right above Schedule session 29ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > names the Group's zone in the line when the GM's browser is elsewhere 7ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > leaves the line off a scheduled Session 5ms
+ × |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > leaves the line off a Cancelled Session 11ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > leaves the line off a past night 5ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > cancels a Session that has not passed 16ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > still cancels a Session today 17ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > marks a Cancelled Session and schedules it again 18ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > keeps a past Cancelled Session marked and read-only 8ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > offers no cancel on a past Session 7ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > cannot schedule a past night 8ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > holds the button, and its focus, while the change is on its way 15ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > goes back to the overview 17ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > explains an empty Roster 7ms
+ × |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > shows the Session's range and place, marked as only this night 33ms
+ × |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > leaves the mark off a Session that follows the Group 27ms
+ × |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > sends exactly the fields the GM changed 26ms
+ × |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > marks each of the Session's own values as only this night in the editor 20ms
+ × |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > sends null for a field the GM sets back to the usual 20ms
+ × |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > marks a value the GM changes as only this night 21ms
+ × |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > keeps the editor open with the error when the save fails 24ms
+ × |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > shows the values of a Cancelled Session read-only 27ms
+ × |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > shows the values of a past Session read-only 23ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > leaves the line off a Cancelled Session
+AssertionError: expected <p class="min-w-0 flex-1"></p> to be null
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > shows the Session's range and place, marked as only this night
+TestingLibraryElementError: Unable to find an accessible element with the role "group" and name "When and where"
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > leaves the mark off a Session that follows the Group
+TestingLibraryElementError: Unable to find an accessible element with the role "group" and name "When and where"
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > sends exactly the fields the GM changed
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Edit when and where"
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > marks each of the Session's own values as only this night in the editor
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Edit when and where"
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > sends null for a field the GM sets back to the usual
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Edit when and where"
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > marks a value the GM changes as only this night
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Edit when and where"
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > keeps the editor open with the error when the save fails
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Edit when and where"
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > shows the values of a Cancelled Session read-only
+TestingLibraryElementError: Unable to find an accessible element with the role "group" and name "When and where"
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > shows the values of a past Session read-only
+TestingLibraryElementError: Unable to find an accessible element with the role "group" and name "When and where"
+ Test Files  1 failed (1)
+      Tests  10 failed | 15 passed (25)

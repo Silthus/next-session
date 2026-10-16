@@ -15,6 +15,7 @@ const NOW = Date.UTC(2026, 9, 3, 12);
 const TODAY = "2026-10-03";
 const USUAL = { startTime: "19:00", lengthMinutes: 240 };
 const USUAL_IN_BERLIN = { ...USUAL, timeZone: "Europe/Berlin" };
+const FOLLOWS_THE_GROUP = { ...USUAL, overrides: [] };
 
 let t: TestBackend;
 
@@ -71,9 +72,27 @@ describe("schedule.month", () => {
         { playerId: ada, date: "2026-10-31", answer: "maybe" },
       ],
       sessions: [
-        { _id: september, date: "2026-09-12", state: "scheduled", published: false, ...USUAL },
-        { _id: october, date: "2026-10-17", state: "scheduled", published: false, ...USUAL },
-        { _id: december, date: "2026-12-05", state: "scheduled", published: false, ...USUAL },
+        {
+          _id: september,
+          date: "2026-09-12",
+          state: "scheduled",
+          published: false,
+          ...FOLLOWS_THE_GROUP,
+        },
+        {
+          _id: october,
+          date: "2026-10-17",
+          state: "scheduled",
+          published: false,
+          ...FOLLOWS_THE_GROUP,
+        },
+        {
+          _id: december,
+          date: "2026-12-05",
+          state: "scheduled",
+          published: false,
+          ...FOLLOWS_THE_GROUP,
+        },
       ],
       timeAndPlace: USUAL_IN_BERLIN,
     });
@@ -91,9 +110,27 @@ describe("schedule.month", () => {
     const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
 
     expect(schedule?.sessions).toEqual([
-      { _id: cancelled, date: "2026-10-10", state: "cancelled", published: true, ...USUAL },
-      { _id: announced, date: "2026-10-17", state: "scheduled", published: true, ...USUAL },
-      { _id: fresh, date: "2026-10-24", state: "scheduled", published: false, ...USUAL },
+      {
+        _id: cancelled,
+        date: "2026-10-10",
+        state: "cancelled",
+        published: true,
+        ...FOLLOWS_THE_GROUP,
+      },
+      {
+        _id: announced,
+        date: "2026-10-17",
+        state: "scheduled",
+        published: true,
+        ...FOLLOWS_THE_GROUP,
+      },
+      {
+        _id: fresh,
+        date: "2026-10-24",
+        state: "scheduled",
+        published: false,
+        ...FOLLOWS_THE_GROUP,
+      },
     ]);
   });
 
@@ -110,7 +147,14 @@ describe("schedule.month", () => {
     const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
 
     expect(schedule?.sessions).toEqual([
-      { _id: sessionId, date: "2026-10-17", state: "scheduled", published: false, ...saved },
+      {
+        _id: sessionId,
+        date: "2026-10-17",
+        state: "scheduled",
+        published: false,
+        ...saved,
+        overrides: [],
+      },
     ]);
     expect(schedule?.timeAndPlace).toEqual({ ...saved, timeZone: "America/New_York" });
   });

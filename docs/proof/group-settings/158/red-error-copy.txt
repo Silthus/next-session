@@ -1,0 +1,43 @@
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a session { code: 'SESSION_EXISTS' } 2ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a session { code: 'OUT_OF_WINDOW' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a session { code: 'NOT_FOUND' } 0ms
+ × |ui| src/lib/errors.test.ts > errorMessage > explains a session { code: 'SESSION_CANCELLED' } 5ms
+ × |ui| src/lib/errors.test.ts > errorMessage > explains a session { code: 'INVALID_SETTINGS' } 1ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a roster { code: 'NAME_TAKEN', playerId: 'p1' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a roster { code: 'ROSTER_FULL' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a roster { code: 'NOT_FOUND' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a group { code: 'TOO_MANY_GROUPS' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a group { code: 'NOT_FOUND' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a shareLink { code: 'UNDO_EXPIRED' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a join { code: 'NAME_TAKEN', playerId: 'p1' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a join { code: 'ROSTER_FULL' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a join { code: 'INVALID_NAME' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a join { code: 'RATE_LIMITED', …(1) } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a join { code: 'TOO_MANY_GROUPS' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a keep { code: 'PLAYER_CLAIMED' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a keep { code: 'TOO_MANY_GROUPS' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a save { code: 'TOO_MANY_GROUPS' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a save { code: 'CLAIM_INVALID' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a keep { code: 'NOT_FOUND' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a undoRemove { code: 'PLAYER_CLAIMED' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a undoRemove { code: 'NOT_FOUND' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a undoRemove { code: 'TOO_MANY_GROUPS' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a answer { code: 'RATE_LIMITED', …(1) } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a answer { code: 'OUT_OF_WINDOW' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a fillRest { code: 'RATE_LIMITED', …(1) } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a fillRest { code: 'OUT_OF_WINDOW' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a rate limit and a bad name the same way for a session 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a rate limit and a bad name the same way for a roster 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a rate limit and a bad name the same way for a group 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a rate limit and a bad name the same way for a shareLink 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > falls back to a retry line for anything else 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > asks to retry an unsaved answer 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > asks to retry an unsaved fillRest 0ms
+ ✓ |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > reports a failure without an ErrorCode with its function name and request ID 1ms
+ ✓ |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > reports nothing of the server's message, which can carry names 1ms
+ ✓ |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > reports a failure without a request ID by its function name 0ms
+ ✓ |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > does not report a coded error: it is product flow 0ms
+ ✓ |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > does not report an error that did not come from a Convex call 0ms
+ ✓ |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > reports the same failure once, however often it is read 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 39 passed (41)

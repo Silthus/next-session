@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../../convex/_generated/dataModel";
@@ -20,7 +20,10 @@ type PanelSetup = {
   pending?: boolean;
   roster?: typeof players;
   timeAndPlace?: { startTime: string; lengthMinutes: number; timeZone: string; location?: string };
-  sessionTime?: { startTime: ClockTime; lengthMinutes: number };
+  sessionTime?: Partial<
+    Pick<CalendarSession, "startTime" | "lengthMinutes" | "location" | "overrides">
+  > & { startTime?: ClockTime };
+  onSaveDetails?: () => Promise<void>;
 };
 
 function renderPanel({
@@ -31,6 +34,7 @@ function renderPanel({
   roster = players,
   timeAndPlace = { startTime: "19:00", lengthMinutes: 240, timeZone: "Europe/Berlin" },
   sessionTime,
+  onSaveDetails = () => Promise.resolve(),
 }: PanelSetup = {}) {
   const summary = summarizeMonth({
     month: date.slice(0, 7),
@@ -46,6 +50,7 @@ function renderPanel({
             published: true,
             startTime: "19:00" as const,
             lengthMinutes: 240,
+            overrides: [],
             ...sessionTime,
           },
         ]
@@ -57,6 +62,7 @@ function renderPanel({
     onSchedule: vi.fn(),
     onCancel: vi.fn(),
     onOpenTimeAndPlace: vi.fn(),
+    onSaveDetails: vi.fn(onSaveDetails),
   };
   render(
     <DayPanel
@@ -125,15 +131,9 @@ describe("DayPanel", () => {
     );
   });
 
-  it("shows the time a Cancelled Session comes back with", () => {
-    renderPanel({ session: "cancelled", sessionTime: { startTime: "20:00", lengthMinutes: 120 } });
-    expect(screen.getByText(/^Players' calendars will show/).textContent).toBe(
-      "Players' calendars will show 20:00–22:00",
-    );
-  });
-
   it.each([
     ["a scheduled Session", { session: "scheduled" as const }],
+    ["a Cancelled Session", { session: "cancelled" as const }],
     ["a past night", { date: "2026-10-01" }],
   ])("leaves the line off %s", (_, setup) => {
     renderPanel(setup);
@@ -205,5 +205,131 @@ describe("DayPanel", () => {
       within(panel).getByText("No players yet. They show up here once they open your link."),
     ).toBeTruthy();
     expect(within(panel).queryByRole("list")).toBeNull();
+  });
+});
+
+describe("DayPanel when and where of a Session", () => {
+  const OWN_NIGHT = {
+    startTime: "20:00",
+    lengthMinutes: 240,
+    location: "The club",
+    overrides: ["startTime", "location"],
+  } satisfies PanelSetup["sessionTime"];
+
+  const USUAL_AT_MAX = {
+    startTime: "19:00",
+    lengthMinutes: 240,
+    timeZone: "Europe/Berlin",
+    location: "Max's place",
+  };
+
+  function whenAndWhere() {
+    return screen.getByRole("group", { name: "When and where" });
+  }
+
+  function fieldRow(name: string) {
+    return screen.getByRole("group", { name });
+  }
+
+  function startTimeField() {
+    return within(fieldRow("Starts at")).getByDisplayValue<HTMLInputElement>(/^\d\d:\d\d$/);
+  }
+
+  it("shows the Session's range and place, marked as only this night", () => {
+    renderPanel({ session: "scheduled", sessionTime: OWN_NIGHT });
+
+    expect(within(whenAndWhere()).getByText("20:00–00:00 · The club")).toBeTruthy();
+    expect(within(whenAndWhere()).getByText("Only this night")).toBeTruthy();
+  });
+
+  it("leaves the mark off a Session that follows the Group", () => {
+    renderPanel({
+      session: "scheduled",
+      timeAndPlace: USUAL_AT_MAX,
+      sessionTime: { location: "Max's place" },
+    });
+
+    expect(within(whenAndWhere()).getByText("19:00–23:00 · Max's place")).toBeTruthy();
+    expect(screen.queryByText("Only this night")).toBeNull();
+  });
+
+  it("sends exactly the fields the GM changed", async () => {
+    const { onSaveDetails } = renderPanel({ session: "scheduled", timeAndPlace: USUAL_AT_MAX });
+
+    await userEvent.click(screen.getByRole("button", { name: "Edit when and where" }));
+    fireEvent.change(startTimeField(), { target: { value: "20:30" } });
+    await userEvent.click(screen.getByRole("radio", { name: "3 h" }));
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(onSaveDetails).toHaveBeenCalledWith(expect.objectContaining({ _id: "s1" }), {
+      startTime: "20:30",
+      lengthMinutes: 180,
+    });
+    expect(screen.queryByRole("button", { name: "Save" })).toBeNull();
+  });
+
+  it("marks each of the Session's own values as only this night in the editor", async () => {
+    renderPanel({ session: "scheduled", timeAndPlace: USUAL_AT_MAX, sessionTime: OWN_NIGHT });
+
+    await userEvent.click(screen.getByRole("button", { name: "Edit when and where" }));
+
+    expect(within(fieldRow("Starts at")).getByText("Only this night")).toBeTruthy();
+    expect(within(fieldRow("Where")).getByText("Only this night")).toBeTruthy();
+    expect(within(fieldRow("Plays for")).queryByText("Only this night")).toBeNull();
+    expect(
+      within(fieldRow("Plays for")).queryByRole("button", { name: /Use the usual/ }),
+    ).toBeNull();
+  });
+
+  it("sends null for a field the GM sets back to the usual", async () => {
+    const { onSaveDetails } = renderPanel({
+      session: "scheduled",
+      timeAndPlace: USUAL_AT_MAX,
+      sessionTime: OWN_NIGHT,
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: "Edit when and where" }));
+    await userEvent.click(screen.getByRole("button", { name: "Use the usual start time" }));
+
+    expect(startTimeField().value).toBe("19:00");
+    expect(within(fieldRow("Starts at")).queryByText("Only this night")).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(onSaveDetails).toHaveBeenCalledWith(expect.anything(), { startTime: null });
+  });
+
+  it("marks a value the GM changes as only this night", async () => {
+    renderPanel({ session: "scheduled", timeAndPlace: USUAL_AT_MAX });
+
+    await userEvent.click(screen.getByRole("button", { name: "Edit when and where" }));
+    await userEvent.type(within(fieldRow("Where")).getByRole("textbox"), "!");
+
+    expect(within(fieldRow("Where")).getByText("Only this night")).toBeTruthy();
+    expect(
+      within(fieldRow("Where")).getByRole("button", { name: "Use the usual place" }),
+    ).toBeTruthy();
+  });
+
+  it("keeps the editor open with the error when the save fails", async () => {
+    renderPanel({
+      session: "scheduled",
+      onSaveDetails: () => Promise.reject(new Error("offline")),
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: "Edit when and where" }));
+    fireEvent.change(startTimeField(), { target: { value: "20:30" } });
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(screen.getByRole("alert").textContent).toBe("That didn't work. Try again.");
+    expect(startTimeField().value).toBe("20:30");
+  });
+
+  it.each([
+    ["a Cancelled Session", { session: "cancelled" as const }],
+    ["a past Session", { session: "scheduled" as const, date: "2026-10-01" }],
+  ])("shows the values of %s read-only", (_, setup) => {
+    renderPanel({ ...setup, sessionTime: OWN_NIGHT });
+
+    expect(within(whenAndWhere()).getByText("20:00–00:00 · The club")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Edit when and where" })).toBeNull();
   });
 });

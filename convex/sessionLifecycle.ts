@@ -8,7 +8,12 @@ import type { SessionState } from "../shared/sessions";
 import type { publishedSession } from "./schema";
 import { sessionPublished } from "./sessionMail";
 import { fail } from "./model/errors";
-import { groupTimeOf, locationOf } from "./model/timeAndPlace";
+import {
+  groupTimeOf,
+  sessionLocationOf,
+  sessionOverridesOf,
+  type SessionDetailChanges,
+} from "./model/timeAndPlace";
 
 export const UNDO_WINDOW_MS = 30_000;
 const SNAPSHOT_FIELDS = ["state", "start", "end", "location", "summary"] as const;
@@ -45,6 +50,14 @@ export async function groupChanged(ctx: MutationCtx, group: Doc<"groups">) {
   for (const session of upcoming.filter(isScheduled)) await recordChange(ctx, session._id);
 }
 
+export async function updateSessionDetails(
+  ctx: MutationCtx,
+  session: Doc<"sessions">,
+  changes: SessionDetailChanges,
+) {
+  await recordChange(ctx, session._id, changes);
+}
+
 export function snapshotOf(
   group: Doc<"groups">,
   session: Doc<"sessions">,
@@ -52,8 +65,8 @@ export function snapshotOf(
 ): SessionSnapshot {
   return {
     state,
-    ...sessionWindow(session.date, groupTimeOf(group)),
-    ...locationOf(group),
+    ...sessionWindow(session.date, groupTimeOf(group), sessionOverridesOf(session)),
+    ...sessionLocationOf(group, session),
     summary: group.name,
   };
 }
@@ -98,7 +111,7 @@ async function sessionOn(ctx: QueryCtx, groupId: Id<"groups">, date: IsoDate) {
 async function recordChange(
   ctx: MutationCtx,
   sessionId: Id<"sessions">,
-  change: { state?: SessionState } = {},
+  change: { state?: SessionState } & SessionDetailChanges = {},
 ) {
   const changedAt = Date.now();
   await ctx.db.patch("sessions", sessionId, { ...change, changedAt });

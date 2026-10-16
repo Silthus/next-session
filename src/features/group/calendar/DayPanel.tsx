@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { Answer } from "../../../../shared/answers";
 import type { IsoDate } from "../../../../shared/dates";
 import type { PlayerRow } from "../../../../shared/monthSummary";
@@ -11,7 +11,8 @@ import { longDayLabel, relativeDay } from "./calendarDates";
 import type { CalendarDay, CalendarSession } from "./DayCell";
 import { IconChevron, IconClock, IconStar } from "../../../ui/icons";
 import { focusRing, hoverRow } from "../../../ui/interactive";
-import { timeRange, type WallClockTime } from "../../../lib/timeAndPlace";
+import { timeRange } from "../../../lib/timeAndPlace";
+import { SessionDetails, type SessionDetailChanges, type TimeAndPlace } from "./SessionDetails";
 
 const answerLabels: Record<Answer, string> = { free: "Free", maybe: "Maybe", busy: "Busy" };
 const answerTones: Record<Answer, string> = {
@@ -32,6 +33,7 @@ export function DayPanel({
   onSchedule,
   onCancel,
   onOpenTimeAndPlace,
+  onSaveDetails,
   className,
 }: {
   day: CalendarDay;
@@ -45,8 +47,13 @@ export function DayPanel({
   onSchedule: () => void;
   onCancel: (session: CalendarSession) => void;
   onOpenTimeAndPlace: () => void;
+  onSaveDetails: (session: CalendarSession, changes: SessionDetailChanges) => Promise<void>;
   className?: string;
 }) {
+  const [editingDetails, setEditingDetails] = useState(false);
+  const shownSession = day.session ?? day.cancelled;
+  const editableSession = day.bookable ? day.session : null;
+  const editing = editingDetails && editableSession !== null;
   const headingId = useId();
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -95,21 +102,26 @@ export function DayPanel({
         </>
       )}
       <div className="mt-5 flex flex-col gap-2">
-        {day.bookable && !day.session && (
-          <CalendarLine
-            timeAndPlace={
-              day.cancelled ? { ...day.cancelled, timeZone: timeAndPlace.timeZone } : timeAndPlace
-            }
-            onChange={onOpenTimeAndPlace}
+        {day.bookable && !shownSession && (
+          <CalendarLine timeAndPlace={timeAndPlace} onChange={onOpenTimeAndPlace} />
+        )}
+        {shownSession && (
+          <SessionDetails
+            session={shownSession}
+            usual={timeAndPlace}
+            editing={editing}
+            onEdit={editableSession ? () => setEditingDetails(true) : undefined}
+            onDone={() => setEditingDetails(false)}
+            onSave={(changes) => onSaveDetails(shownSession, changes)}
           />
         )}
-        <SessionAction day={day} pending={pending} onSchedule={onSchedule} onCancel={onCancel} />
+        {!editing && (
+          <SessionAction day={day} pending={pending} onSchedule={onSchedule} onCancel={onCancel} />
+        )}
       </div>
     </Card>
   );
 }
-
-type TimeAndPlace = WallClockTime & { location?: string };
 
 function CalendarLine({
   timeAndPlace,

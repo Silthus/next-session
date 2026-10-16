@@ -6,6 +6,8 @@ import { findOwnedGroup } from "./model/access";
 import { datedSessionOf } from "./sessionLifecycle";
 import { profileImageUrl } from "./model/profileImages";
 import {
+  overriddenFields,
+  sessionDetailField,
   sessionTimeAndPlace,
   sessionTimeAndPlaceFields,
   timeAndPlaceOf,
@@ -24,6 +26,7 @@ const monthSchedule = v.object({
       ...datedSession.fields,
       published: v.boolean(),
       ...sessionTimeAndPlaceFields,
+      overrides: v.array(sessionDetailField),
     }),
   ),
   timeAndPlace: timeAndPlaceView,
@@ -75,12 +78,12 @@ async function sessionsOf(ctx: QueryCtx, group: Doc<"groups">) {
     .query("sessions")
     .withIndex("by_groupId_and_date", (q) => q.eq("groupId", group._id))
     .collect();
-  const timeAndPlace = sessionTimeAndPlace(group);
   return sessions.map((session) => ({
     _id: session._id,
     ...datedSessionOf(session),
     published: session.published !== undefined,
-    ...timeAndPlace,
+    ...sessionTimeAndPlace(group, session),
+    overrides: overriddenFields(session),
   }));
 }
 

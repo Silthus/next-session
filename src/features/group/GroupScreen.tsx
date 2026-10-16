@@ -295,6 +295,7 @@ function GroupSurface({
         onSchedule={() => void sessions.schedule(day.date)}
         onCancel={(session) => void sessions.cancel(session)}
         onOpenTimeAndPlace={openTimeAndPlace}
+        onSaveDetails={sessions.updateDetails}
       />
     );
   const nudging = showsNudge({
