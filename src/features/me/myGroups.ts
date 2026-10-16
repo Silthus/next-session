@@ -44,6 +44,10 @@ export function isCancelled(session: GroupSession) {
   return session.state === "cancelled";
 }
 
+export function nextSessionOf(sessions: GroupSession[]): GroupSession | undefined {
+  return sessions.find((session) => !isCancelled(session)) ?? sessions[0];
+}
+
 function sessionsOf(
   group: { name: string; timeZone: string; upcomingSessions: GroupSession[] },
   to: GroupPage,

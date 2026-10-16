@@ -69,7 +69,7 @@ const everything: MyGroupsData = { running: [ownTable], playing: [thursday, sund
 
 const feedUrl = "https://next-session.link/cal/a/feedTokenFeedTokenAb.ics";
 
-function renderMyGroups(props: Partial<ComponentProps<typeof MyGroups>> = {}) {
+function renderMyGroups(props: Partial<ComponentProps<typeof MyGroups>> = {}, path = "/me") {
   const handlers = {
     onCreate: vi.fn(),
     onRemove: vi.fn(),
@@ -93,7 +93,7 @@ function renderMyGroups(props: Partial<ComponentProps<typeof MyGroups>> = {}) {
   });
   const router = createRouter({
     routeTree: rootRoute,
-    history: createMemoryHistory({ initialEntries: ["/me"] }),
+    history: createMemoryHistory({ initialEntries: [path] }),
   });
   render(<RouterProvider router={router} />);
   return handlers;
@@ -151,6 +151,19 @@ describe("MyGroups", () => {
       "/s/thursdayTk",
       "/s/thursdayTk",
     ]);
+    expect(within(section("You play in")).getByRole("link").textContent).toBe(
+      "Thursday Crewas RobinNext session Thu, Oct 2212 days to answer",
+    );
+  });
+
+  it("marks a Group's card Cancelled when no other night is scheduled", async () => {
+    const onlyCancelled = {
+      ...thursday,
+      upcomingSessions: [{ date: "2026-10-08", state: "cancelled" as const, ...USUAL }],
+    };
+    renderMyGroups({ groups: { running: [], playing: [onlyCancelled] } });
+
+    await screen.findByRole("heading", { level: 1, name: "My groups" });
     expect(within(section("You play in")).getByRole("link").textContent).toBe(
       "Thursday Crewas RobinNext session Thu, Oct 8 · Cancelled12 days to answer",
     );
@@ -213,6 +226,14 @@ describe("MyGroups", () => {
     expect(screen.queryByRole("region", { name: "You play in" })).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "Create your link" }));
     expect(onCreate).toHaveBeenCalledOnce();
+  });
+
+  it("lands on Your calendar when opened to subscribe", async () => {
+    renderMyGroups({}, "/me#your-calendar");
+
+    const calendar = await screen.findByRole("heading", { level: 2, name: "Your calendar" });
+
+    await waitFor(() => expect(document.activeElement).toBe(calendar));
   });
 
   it("holds Create your link while the link is being made", async () => {

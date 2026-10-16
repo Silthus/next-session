@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react";
 import type { IsoDate } from "../../../shared/dates";
 import { track } from "../../lib/telemetry";
@@ -15,6 +15,7 @@ import { MenuButton, Popover } from "../group/rail/Popover";
 import {
   daysToAnswer,
   isCancelled,
+  nextSessionOf,
   nextSessions,
   type GroupPage,
   type GroupSession,
@@ -23,7 +24,7 @@ import {
   type RunningGroup,
   type UpcomingSession,
 } from "./myGroups";
-import { YourCalendar, type CalendarFeedActions } from "./YourCalendar";
+import { YOUR_CALENDAR, YourCalendar, type CalendarFeedActions } from "./YourCalendar";
 
 type MyGroupsProps = {
   settings?: ReactNode;
@@ -57,6 +58,7 @@ export function MyGroups({
   const ownHeading = useRef<HTMLHeadingElement>(null);
   const heading = headingRef ?? ownHeading;
   useEffect(() => heading.current?.focus(), [heading]);
+  const calendarHeading = useLandingOnCalendar(groups !== undefined);
 
   return (
     <PageShell
@@ -77,7 +79,7 @@ export function MyGroups({
             <PlayingGroups groups={groups.playing} onRemove={onRemove} />
           )}
           <RunningGroups groups={groups.running} creating={creating} onCreate={onCreate} />
-          <Section title="Your calendar">
+          <Section title="Your calendar" id={YOUR_CALENDAR} headingRef={calendarHeading}>
             <YourCalendar calendarFeed={calendarFeed} />
           </Section>
         </>
@@ -109,13 +111,37 @@ function AccountLine({
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function useLandingOnCalendar(loaded: boolean) {
+  const calendarHeading = useRef<HTMLHeadingElement>(null);
+  const wanted = useLocation({ select: (location) => location.hash === YOUR_CALENDAR });
+  const landed = useRef(false);
+  useEffect(() => {
+    if (!wanted || !loaded || landed.current) return;
+    landed.current = true;
+    calendarHeading.current?.focus();
+  }, [wanted, loaded]);
+  return calendarHeading;
+}
+
+function Section({
+  title,
+  id,
+  headingRef,
+  children,
+}: {
+  title: string;
+  id?: string;
+  headingRef?: RefObject<HTMLHeadingElement | null>;
+  children: ReactNode;
+}) {
   const headingId = useId();
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-3">
+    <section id={id} aria-labelledby={headingId} className="flex flex-col gap-3">
       <h2
+        ref={headingRef}
         id={headingId}
-        className="font-mono text-[11px] font-medium tracking-[0.18em] text-ink-3 uppercase"
+        tabIndex={headingRef && -1}
+        className="font-mono text-[11px] font-medium tracking-[0.18em] text-ink-3 uppercase outline-none"
       >
         {title}
       </h2>
@@ -316,7 +342,7 @@ function SessionWhen({ session, today }: { session: UpcomingSession; today: IsoD
 }
 
 function NextSession({ sessions }: { sessions: GroupSession[] }) {
-  const [next] = sessions;
+  const next = nextSessionOf(sessions);
   if (next === undefined) return <span className="text-sm text-ink-3">No session yet</span>;
   const cancelled = isCancelled(next);
   return (
