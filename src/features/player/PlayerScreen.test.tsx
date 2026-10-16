@@ -24,7 +24,7 @@ const roster = {
     { _id: playerId, name: "Ana" },
     { _id: "player-bo" as Id<"players">, name: "Bo" },
   ],
-  sessionDates: [],
+  sessions: [],
   claimedPlayerId: null,
   removedFromMyGroups: false,
   opensAsGm: false,

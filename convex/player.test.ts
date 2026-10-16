@@ -144,7 +144,7 @@ function datesFrom(first: number, last: number, month = "2026-10") {
 }
 
 describe("player.group", () => {
-  it("shows the Group's name, its Roster, and every Session date", async () => {
+  it("shows the Group's name, its Roster, and every Session with its state", async () => {
     const { groupId, shareToken } = await sharedGroup();
     const bo = await seedPlayer(groupId, "Bo");
     const ada = await seedPlayer(groupId, "Ada");
@@ -159,19 +159,24 @@ describe("player.group", () => {
         { _id: ada, name: "Ada" },
         { _id: bo, name: "Bo" },
       ],
-      sessionDates: ["2026-10-02", TODAY, "2026-10-17", LAST_BOOKABLE_DATE, "2027-01-01"],
+      sessions: ["2026-10-02", TODAY, "2026-10-17", LAST_BOOKABLE_DATE, "2027-01-01"].map(
+        (date) => ({ date, state: "scheduled" }),
+      ),
       claimedPlayerId: null,
       removedFromMyGroups: false,
       opensAsGm: false,
     });
   });
 
-  it("leaves Cancelled Sessions out", async () => {
+  it("shows a Cancelled Session as cancelled", async () => {
     const { groupId, shareToken } = await sharedGroup();
     await seedSession(t, groupId, "2026-10-10", CANCELLED);
     await seedSession(t, groupId, "2026-10-17", { state: "scheduled" });
 
-    expect((await t.query(api.player.group, { shareToken }))?.sessionDates).toEqual(["2026-10-17"]);
+    expect((await t.query(api.player.group, { shareToken }))?.sessions).toEqual([
+      { date: "2026-10-10", state: "cancelled" },
+      { date: "2026-10-17", state: "scheduled" },
+    ]);
   });
 
   it("opens the GM view for the GM's Account, and for no one else", async () => {
@@ -224,11 +229,12 @@ describe("player.group", () => {
     const other = await sharedGroup();
     await seedPlayer(other.groupId, "Stranger");
     await seedSession(t, other.groupId, "2026-10-17");
+    await seedSession(t, other.groupId, "2026-10-24", CANCELLED);
 
     expect(await t.query(api.player.group, { shareToken: mine.shareToken })).toMatchObject({
       groupId: mine.groupId,
       players: [],
-      sessionDates: [],
+      sessions: [],
     });
   });
 
