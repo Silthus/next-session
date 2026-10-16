@@ -167,6 +167,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   because: the Undo window promises that a mis-tap reaches nobody (#124); a mail sent before it ends tells players about a night the GM took back, and calendars that arrive later would add and remove entries for nothing
   crossing: store -> egress
   refuted: recordChange scheduled settle at once instead of after UNDO_WINDOW_MS -> the oracle failed by name (2026-10-16)
+  refuted: the Calendar download took each Session's live state instead of its published state -> the oracle failed by name (2026-10-16)
   kinds: output
   checklist: commit-ordered-effects declared as published only
   checklist: revalidated-permission dismissed: every send attempt rechecks the published revision, the Group, the Claim and the Session email switch in its own query
@@ -179,6 +180,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   via: every calendar file holds only the published Sessions of its own token's Group
   because: the Share Link is the only Player credential (ADR-0004); a download that reached another Group's Sessions would turn one leaked link into every table's plans, and one that still opened after a rotation would undo the GM's remedy for a leaked link
   crossing: visitor -> store
+  refuted: groupDownload read every Group's Sessions in the window instead of only its own Group's index range -> the oracle failed by name (2026-10-16)
   entrances: calendar download
   kinds: read, credential
   checklist: scoped-reads declared as feed scoping

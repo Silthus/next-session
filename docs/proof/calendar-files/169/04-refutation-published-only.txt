@@ -1,0 +1,60 @@
+# published only refutation (download half): the witness with the break staged (the download takes the live state instead of the published one)
+
+diff --git a/convex/calendarFiles.ts b/convex/calendarFiles.ts
+index c286b3a..fdc2805 100644
+--- a/convex/calendarFiles.ts
++++ b/convex/calendarFiles.ts
+@@ -67,7 +67,7 @@ function publishedEntryOf(
+     sequence: UNSENT_SEQUENCE,
+     stamp,
+     window: { start: published.start, end: published.end },
+-    status: published.state === "cancelled" ? "CANCELLED" : "CONFIRMED",
++    status: (session.state ?? "scheduled") === "cancelled" ? "CANCELLED" : "CONFIRMED",
+     summary: published.summary,
+     ...(published.location === undefined ? {} : { location: published.location }),
+     description: `Open the group on Next Session: ${url}`,
+
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-57fbe946
+
+stdout | convex/sessionMail.test.ts > never announces a change before its Undo window ends
+Run 0000000000000000000000010000runs succeeded.
+
+ ❯ |convex| convex/sessionMail.test.ts (33 tests | 1 failed | 32 skipped) 155ms
+   × never announces a change before its Undo window ends 154ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > never announces a change before its Undo window ends
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to contain 'UID:000000000000000000010006sessions@…'
+
+- Expected
++ Received
+
+- UID:000000000000000000010006sessions@next-session.link
++ BEGIN:VCALENDAR
++ VERSION:2.0
++ PRODID:-//Next Session//next-session.link//EN
++ CALSCALE:GREGORIAN
++ X-WR-CALNAME:Thursday Crew
++ REFRESH-INTERVAL;VALUE=DURATION:PT1H
++ X-PUBLISHED-TTL:PT1H
++ END:VCALENDAR
++
+
+ ❯ convex/sessionMail.test.ts:128:38
+    126|   await wait(UNDO_WINDOW_MS);
+    127|   expect(fetchMock).not.toHaveBeenCalled();
+    128|   expect(await downloadedCalendar()).toContain(`UID:${sessionId}@next-…
+       |                                      ^
+    129|
+    130|   await wait(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 32 skipped (33)
+   Start at  10:36:14
+   Duration  592ms (transform 35%, tests 31%, import 25%, environment 8%, worker 1%)
+
