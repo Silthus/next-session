@@ -2,11 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { newBackend, signedInGmWithGroup, signIn, type TestBackend } from "./model/test.setup";
+import { UNDO_WINDOW_MS } from "./sessionLifecycle";
 
 let t: TestBackend;
 let fetchMock: ReturnType<typeof vi.fn<typeof fetch>>;
 const date = "2026-10-17";
-const UNDO_WINDOW_MS = 30_000;
 
 beforeEach(() => {
   vi.useFakeTimers();

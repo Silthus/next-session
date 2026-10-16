@@ -4,15 +4,14 @@ import { sessionWindow } from "../shared/sessionTime";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx, type QueryCtx } from "./_generated/server";
-import type { publishedSession, sessionState } from "./schema";
+import type { publishedSession, SessionState } from "./schema";
 import { sessionPublished } from "./sessionMail";
 import { fail } from "./model/errors";
 import { groupTimeOf, locationOf } from "./model/timeAndPlace";
 
-const UNDO_WINDOW_MS = 30_000;
+export const UNDO_WINDOW_MS = 30_000;
 const SNAPSHOT_FIELDS = ["state", "start", "end", "location", "summary"] as const;
 
-type SessionState = Infer<typeof sessionState>;
 type PublishedSession = Infer<typeof publishedSession>;
 export type SessionSnapshot = Omit<PublishedSession, "revision">;
 
@@ -82,6 +81,10 @@ function isPublishedAs(published: PublishedSession, snapshot: SessionSnapshot) {
 
 export function stateOf(session: Doc<"sessions">): SessionState {
   return session.state ?? "scheduled";
+}
+
+export function datedSessionOf(session: Doc<"sessions">) {
+  return { date: session.date, state: stateOf(session) };
 }
 
 async function sessionOn(ctx: QueryCtx, groupId: Id<"groups">, date: IsoDate) {

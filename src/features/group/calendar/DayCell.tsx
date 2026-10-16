@@ -13,7 +13,7 @@ export type CalendarSession = NonNullable<
 export type CalendarDay = DaySummary<PlayerRow, CalendarSession>;
 
 export const MAX_PLAYERS_WITH_BARS = 8;
-const MAX_TINT_PERCENT = 55;
+export const MAX_TINT_PERCENT = 55;
 
 export function DayCell({
   day,
@@ -94,7 +94,7 @@ function SessionMark({ day, onSolidFree }: { day: CalendarDay; onSolidFree: bool
     );
   }
   if (!day.cancelled) return null;
-  const tone = onSolidFree ? "text-current" : "text-ink-3";
+  const tone = cancelledTone(day, onSolidFree);
   return (
     <>
       <span data-mark="cancelled" className={cn(corner, tone)}>
@@ -110,6 +110,11 @@ function SessionMark({ day, onSolidFree }: { day: CalendarDay; onSolidFree: bool
       </span>
     </>
   );
+}
+
+function cancelledTone(day: CalendarDay, onSolidFree: boolean) {
+  if (onSolidFree) return "text-current";
+  return day.heat > 0 ? "text-ink" : "text-ink-3";
 }
 
 const NAMES_SHOWN = 6;

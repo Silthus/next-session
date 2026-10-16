@@ -194,20 +194,20 @@ The name and Roster checks that `roster` and `player` share (`validName`, `ensur
 | | `remove` | mutation | `{groupId}` → `null` | Deletes the Group row, then schedules `internal.groups.deleteChildren` (batches of 200). Ends an Anonymous GM that owned only this Group |
 | | `rotateShareToken` | mutation | `{groupId}` → `null` | Keeps `previousShareToken` and `shareTokenRotatedAt` |
 | | `undoRotateShareToken` | mutation | `{groupId}` → `null` | Within 30 s of the rotation, else `UNDO_EXPIRED` |
-| `schedule` | `month` | query | `{groupId, month: "YYYY-MM"}` → `{players, answers, sessions, timeAndPlace}` | The Roster, the month's Answers, and every scheduled Session of the Group (a few dozen at most), as raw rows, each with its effective `startTime`, `lengthMinutes` and `location`. `timeAndPlace` is the Group's own, with its `timeZone`. Cancelled Sessions are left out until the GM screens show them (#142). All derivation happens in `shared/monthSummary.ts` on the client |
+| `schedule` | `month` | query | `{groupId, month: "YYYY-MM"}` → `{players, answers, sessions, timeAndPlace}` | The Roster, the month's Answers, and every Session of the Group, Cancelled ones included (a few dozen at most), as raw rows: `{_id, date, state, published}` with the effective `startTime`, `lengthMinutes` and `location`. `published` tells the optimistic cancel whether the Session disappears or turns Cancelled. `timeAndPlace` is the Group's own, with its `timeZone`. All derivation happens in `shared/monthSummary.ts` on the client |
 | `roster` | `addPlayer` | mutation | `{groupId, name}` → `Id<"players">` | Name rules, `NAME_TAKEN`, `ROSTER_FULL` |
 | | `renamePlayer` | mutation | `{playerId, name}` → `null` | Owner check through the Player's Group |
 | | `removePlayer` | mutation | `{playerId}` → `null` | Deletes the Player's Answers too |
 | `sessions` | `schedule` | mutation | `{groupId, date}` → `Id<"sessions">` | `OUT_OF_WINDOW` for past or outside dates, `SESSION_EXISTS` for a scheduled Session. Restores a Cancelled Session in place with its id: Undo of a cancel and Schedule again are this call |
 | | `cancel` | mutation | `{sessionId}` → `null` | `OUT_OF_WINDOW` for a past date (today still counts). Deletes a Session that was never published, else marks it Cancelled. A Cancelled Session is a no-op success |
-| `player` | `group` | query | `{shareToken}` → `PlayerGroupView \| null` | groupId, name, Players (id, name), every scheduled Session of the Group with its date and effective `startTime`, `lengthMinutes` and `location` (the client filters them by the Booking Window), the Group's `timeZone`, `claimedPlayerId`: the caller's Claimed Player in this Group, or `null`, and `opensAsGm`: whether the caller's Account runs this Group without a Claimed Player in it, which sends the Share Link on to `/g/<groupId>`. `null` renders the not-found page |
+| `player` | `group` | query | `{shareToken}` → `PlayerGroupView \| null` | groupId, name, Players (id, name), every Session of the Group as `{date, state}` with its effective `startTime`, `lengthMinutes` and `location`, Cancelled ones included (the client filters them by the Booking Window), the Group's `timeZone`, `claimedPlayerId`: the caller's Claimed Player in this Group, or `null`, and `opensAsGm`: whether the caller's Account runs this Group without a Claimed Player in it, which sends the Share Link on to `/g/<groupId>`. `null` renders the not-found page |
 | | `answers` | query | `{shareToken, playerId, month}` → `Record<date, Answer> \| null` | `null` for an unknown token, a foreign or removed Player, or a malformed id or month |
 | | `join` | mutation | `{shareToken, name}` → `Id<"players">` | `NAME_TAKEN` carries the existing `playerId` so the UI can highlight the chip. Rate limit `joinGroup`. An Account caller claims the new Player (§12) |
 | | `claim` | mutation | `{shareToken, playerId}` → `null` | Account only. Moves the caller's claim in this Group to the Player. `PLAYER_CLAIMED` if another Account holds it. Rate limit `claimPlayer` |
 | | `release` | mutation | `{groupId}` → `null` | Account only. Clears the caller's claim in that Group, if any. Rate limit `claimPlayer` |
 | | `answer` | mutation | `{shareToken, playerId, date, answer: Answer \| null}` → `null` | Upsert, or delete on `null`. Rate limit `answer`. Touches the Group |
 | | `fillRest` | mutation | `{shareToken, playerId, month}` → `null` | Writes `busy` to every unanswered bookable date of the month in one mutation |
-| `me` | `groups` | query | `{today}` → `MyGroups \| null` | Account only, `null` otherwise. The Groups the caller runs and the Groups where it has a Claimed Player, with the next five scheduled Sessions as of `today`, each with its effective `startTime`, `lengthMinutes` and `location`, and each Group's `timeZone` (§12) |
+| `me` | `groups` | query | `{today}` → `MyGroups \| null` | Account only, `null` otherwise. The Groups the caller runs and the Groups where it has a Claimed Player, with the next five Sessions as of `today`, Cancelled ones included, as `{date, state}` with each one's effective `startTime`, `lengthMinutes` and `location`, and each Group's `timeZone` (§12) |
 | `account` | `me` | query | `{}` → `{isAnonymous, email} \| null` | |
 | | `startSave` | mutation | `{}` → `{code}` | Anonymous GM only. 32 random bytes, stored hashed, 10-minute TTL. Rate limit `startSave` |
 | | `finishSave` | mutation | `{code}` → `{groupIds}` | Account only. See §5.3 |
@@ -517,22 +517,24 @@ Schema: `players.userId` and `by_userId_and_groupId` (§3), plus `groupRemovals 
 
 ```ts
 type MyGroups = {
-  running: { groupId: Id<"groups">; name: string; upcomingSessions: IsoDate[] }[];
+  running: { groupId: Id<"groups">; name: string; upcomingSessions: DatedSession[] }[];
   playing: {
     groupId: Id<"groups">;
     name: string;
     shareToken: string;
     playerId: Id<"players">;
     playerName: string;
-    upcomingSessions: IsoDate[];
+    upcomingSessions: DatedSession[];
     openDates: number;
   }[];
 };
+
+type DatedSession = { date: IsoDate; state: "scheduled" | "cancelled" };
 ```
 
 `today` is the client's UTC date from `useTodayUtc`, so the subscription reruns at midnight even when nothing is written; a Session that just passed drops out and `openDates` shrinks without a database change. The server accepts `today` only within one day of its own UTC date and otherwise uses its own, so a wrong clock cannot widen the Booking Window. A test changes `today` across midnight with no write in between and sees both values move.
 
-`upcomingSessions` are the first five Session dates from `today` on, read as an index range on `by_groupId_and_date`. `openDates` is the number of bookable dates from `today` to the end of the Booking Window minus the Claimed Player's Answers in that range, read on `by_playerId_and_date`. A Group the Account runs and plays in shows in both lists. A claim whose Group was deleted while `groups.deleteChildren` is still running is skipped.
+`upcomingSessions` are the first five Sessions from `today` on, read as an index range on `by_groupId_and_date`. A Cancelled Session counts toward the five and drops out once `today` passes its date. `openDates` is the number of bookable dates from `today` to the end of the Booking Window minus the Claimed Player's Answers in that range, read on `by_playerId_and_date`. A Group the Account runs and plays in shows in both lists. A claim whose Group was deleted while `groups.deleteChildren` is still running is skipped.
 
 Every read is bounded. Running Groups come from `by_ownerId` with `.take(50)`; invariant 7 holds that cap, now also on Save (§5.3). Playing Groups come from `by_userId_and_groupId` with `.take(50)`, the claim cap. Per running Group: the Group and at most 5 Sessions. Per playing Group: the Group, the Player, at most 5 Sessions, and at most 92 Answers. The worst case is 50 × 6 + 50 × 99, about 5,300 documents, inside Convex's per-query read limits. An Account already above 50 Groups from a Save before this change sees its oldest 50 here; the GM surface still lists them all.
 

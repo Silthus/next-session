@@ -13,14 +13,14 @@ import { mutation, query, type QueryCtx } from "./_generated/server";
 import { fail } from "./model/errors";
 import { currentAccount } from "./model/access";
 import { groupTimeOf, sessionTimeAndPlace, sessionTimeAndPlaceFields } from "./model/timeAndPlace";
-import { sessionState } from "./schema";
-import { stateOf } from "./sessionLifecycle";
+import { datedSession } from "./schema";
+import { datedSessionOf } from "./sessionLifecycle";
 
 const UPCOMING_SESSIONS = 5;
 const DAY = 86_400_000;
 
 const upcomingSessions = v.array(
-  v.object({ date: v.string(), state: sessionState, ...sessionTimeAndPlaceFields }),
+  v.object({ ...datedSession.fields, ...sessionTimeAndPlaceFields }),
 );
 const runningGroup = v.object({
   groupId: v.id("groups"),
@@ -113,11 +113,7 @@ async function upcomingSessionsOf(ctx: QueryCtx, group: Doc<"groups">, today: Is
     .withIndex("by_groupId_and_date", (q) => q.eq("groupId", group._id).gte("date", today))
     .take(UPCOMING_SESSIONS);
   const timeAndPlace = sessionTimeAndPlace(group);
-  return sessions.map((session) => ({
-    date: session.date,
-    state: stateOf(session),
-    ...timeAndPlace,
-  }));
+  return sessions.map((session) => ({ ...datedSessionOf(session), ...timeAndPlace }));
 }
 
 async function openDatesOf(ctx: QueryCtx, playerId: Id<"players">, today: IsoDate) {
