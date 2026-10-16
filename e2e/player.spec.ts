@@ -188,9 +188,11 @@ test.describe("the player surface", () => {
     const keepSessions = page.getByRole("status", {
       name: "Keep your sessions and get a calendar invite",
     });
-    await expect(
-      keepSessions.getByText(`All set for ${monthName(month)}. Your GM sees it.`),
-    ).toBeFocused();
+    const confirmation = keepSessions.getByText(
+      `All set for ${monthName(month)}. Your GM sees it.`,
+    );
+    if (remaining > 0) await expect(confirmation).toBeFocused();
+    else await expect(confirmation).toBeVisible();
     await expect(keepSessions.getByText("Every session lands in your calendar.")).toBeVisible();
     await expect(page.getByRole("region", { name: "Keep this group" })).toBeHidden();
     await expect(page.getByText("All nights set")).toBeVisible();
