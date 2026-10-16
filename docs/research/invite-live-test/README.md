@@ -65,7 +65,7 @@ Optional second Google pass: if the setting in step 3 is not **Only if the sende
 
 ## Results
 
-Filled in round by round. Evidence goes in this folder as redacted screenshots or MIME excerpts (addresses removed). The third inbox is on a custom domain in place of Outlook.com; its column names the app it is read in once Michael confirms it.
+Filled in round by round. Evidence goes in this folder as redacted screenshots or MIME excerpts (addresses removed). The third inbox is a Microsoft (Outlook) account on a custom domain in place of Outlook.com.
 
 **Resend side (`mime-check`, 2026-10-16, [evidence](mime-check-2026-10-16.md)).** Resend keeps the full `Content-Type: text/calendar; charset=utf-8; method=REQUEST` (and `PUBLISH`, `CANCEL`), adds `name=invite.ics`, and sends the part base64 with `Content-Disposition: attachment`. The structure is `multipart/mixed` holding `multipart/alternative` (text, html), then the calendar. The calendar decodes byte for byte to what was sent, with CRLF line ends, whether the API got base64 or plain text. Mail goes out through SES `eu-west-1`, DKIM `d=next-session.link`, return path on `rsend.next-session.link`. The key Michael created has sending access only, so delivery status is read in the inboxes, not the API.
 
@@ -73,15 +73,36 @@ Filled in round by round. Evidence goes in this folder as redacted screenshots o
 
 - **`REQUEST` with `ATTENDEE`:** both copies show an invite card, "Sat 24. Oct, 19:00 (4h)" with an **RSVP** button. The card comes from that mail app. The 19:00 start and 4-hour length match the CEST time sent. Spieleabend A (24.10.) landed in his calendar with no tap.
 - **`PUBLISH`:** both copies show only a paperclip, an `invite.ics` attachment with no card. Spieleabend B (25.10.) did not land in his calendar.
-- **Not settled yet:** which mail app, which inboxes and which calendar this is; the third inbox; whether Google or the mail app added A; the Gmail setting; location and reminder on the entry; Gmail's source view.
+- The mail app is **Notion Mail** (a unified inbox over several accounts), and the calendar is **Notion Calendar**.
 
-| Question                                                          | Gmail | Custom domain (app: ?) | iCloud |
-| ----------------------------------------------------------------- | ----- | ----------- | ------ |
-| 1. `method=REQUEST` / `CANCEL` reach the inbox unchanged (raw MIME) | Resend side yes (above); per-client source pending | pending | pending |
-| 2a. Invite card for `REQUEST` with `ATTENDEE`                     |       |             |        |
-| 2b. Invite card for `PUBLISH`                                     |       |             |        |
-| 3. Entry added without a tap (Google setting: …)                  |       |             |        |
-| 4a. `SEQUENCE` 1 moves the entry                                  |       |             |        |
-| 4b. `CANCEL` removes or marks the entry cancelled                 |       |             |        |
-| 5. `VALARM` imported as a 2-hour reminder                         |       |             |        |
-| 6. Location and Berlin time (CEST and CET) shown correctly        |       |             |        |
+**Round 1 follow-up (Michael, 2026-10-16).**
+
+- **Outlook auto-adds.** The third inbox is a Microsoft (Outlook) account on a custom domain. Michael: "It showed up in my Outlook calendar, not Gmail." The entry "has the address, and it has the reminder 2 hours before."
+- **The 2-hour reminder is almost certainly ours.** MS-OXCICAL §2.1.3.1.1.20.62 ([spec](https://learn.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxcical/a685a040-5b69-4c84-b084-795113fb4012)) says a duration `TRIGGER` "MUST" set `PidLidReminderDelta` to its minutes. Outlook's own default reminder is 15 minutes, and 120 is not a usual default. It stays ambiguous only if Michael's Outlook default is 2 hours.
+- **Gmail does not auto-add.** The setting is "only if the sender is known", and the invite was not added, as Google's docs predict for an unknown sender.
+- **RSVP fails.** Michael tried to accept from Notion Calendar and got an error, "Failed. Not yet sure if we…" (truncated). The invite already carries `RSVP=FALSE`, so that flag does not hide the button. The cause is not determined. Two candidates:
+  - The event was not in Google Calendar, so Notion Calendar had nothing to answer through the Google API.
+  - A reply would go to `hello@next-session.link`, which has no MX at all (the zone has none), so it bounces.
+- **iCloud:** not reported, untested.
+- **Decision (Michael):** "I would say we are good to go": the `REQUEST` path is approved. The `PUBLISH` track is dropped. Rounds 2 and 3 run for `REQUEST` only.
+
+**Round 2 (move, `SEQUENCE:1`, sent 2026-10-16 08:57 Berlin).** Spieleabend A moves from Sat 24.10. 19:00 (CEST) to Sat 31.10. 19:30 (CET). Result pending.
+
+### Options for the failing RSVP (for the architecture prototype)
+
+1. **`PARTSTAT=ACCEPTED` with `RSVP=FALSE` on the player's `ATTENDEE`.** The entry arrives already "going", and many clients then show no answer prompt. It costs nothing and is untested.
+2. **Give the organizer address a mailbox that accepts mail.** For example Cloudflare Email Routing on `next-session.link` (the zone is on Cloudflare; no MX today) with a drop or forward rule. A `METHOD:REPLY` from any client then arrives instead of bouncing. It costs one MX and one rule. Replies carry the player's address, so drop them, or name them in the Privacy Policy.
+3. **Leave it, and say "no reply needed" in the mail.** This is the cheapest option, but the failing button stays.
+
+Recommendation: 1 and 2 together, with 1 checked in the architecture prototype's own live send. RSVP sync stays out of scope; this only stops a button from failing or a reply from bouncing.
+
+| Question | Gmail (Notion Mail / Calendar) | Outlook, custom domain (Notion Mail / Calendar) | iCloud |
+| --- | --- | --- | --- |
+| 1. `method=` intact (raw MIME) | Resend side yes ([evidence](mime-check-2026-10-16.md)); the client renders the card | same; card renders | untested |
+| 2a. Card for `REQUEST` with `ATTENDEE` | Yes, with RSVP; accepting from Notion Calendar failed | Yes, with RSVP | untested |
+| 2b. Card for `PUBLISH` | No, attachment only | No, attachment only | untested |
+| 3. Added without a tap | No (setting "only if the sender is known") | Yes | untested |
+| 4a. `SEQUENCE` 1 moves the entry | pending (round 2) | pending (round 2) | untested |
+| 4b. `CANCEL` removes or marks the entry cancelled | pending (round 3) | pending (round 3) | untested |
+| 5. `VALARM` imported as a 2-hour reminder | n/a (not added) | Yes, 2 hours; almost certainly the `VALARM` (see above) | untested |
+| 6. Location and Berlin time | 19:00 (4h) on the card | Address and time shown; CET after the move pending | untested |
