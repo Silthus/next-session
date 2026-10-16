@@ -1,0 +1,10 @@
+bun run check on e8a2dfc (the code as committed), through fleet heavy: exit 0
+ Test Files  91 passed (91)
+      Tests  1470 passed (1470)
+tsc x3, eslint, prettier --check, vite build, wrangler deploy --dry-run: all passed
+
+bun run e2e: not run, the ticket touches no UI and no e2e
+
+coherence spec --check: 7 invariants, 0 problems; the new operator entrance "one-time invites" is declared in convex/Backend.spec.md
+coherence run --invariant 'calendar recipients': pass alone (run 0cf757be) and pass batched (run 55099c76).
+  One earlier batched run failed on vitest's 5 s timeout (testMs 5016) at load average 35 on 16 cores; the same test takes 190 ms in a focused run.
