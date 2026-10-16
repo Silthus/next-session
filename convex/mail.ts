@@ -26,6 +26,8 @@ const CALENDAR_SENDER = `Next Session <${CALENDAR_ADDRESS}>`;
 const CALENDAR_SEND_SPACING_MS = 600;
 const DAILY_WARNING_AT = 80;
 const DAILY_LIMIT = 100;
+const DAILY_SHARE = 50;
+const DAY_MS = 86_400_000;
 
 const retrier = new ActionRetrier(components.actionRetrier, {
   maxFailures: MAX_ATTEMPTS - 1,
@@ -264,6 +266,15 @@ function base64(text: string) {
   let binary = "";
   for (const byte of new TextEncoder().encode(text)) binary += String.fromCharCode(byte);
   return btoa(binary);
+}
+
+export function fitsTheDailyShare(roundSize: number, sentToday: number) {
+  const startsTheDay = sentToday === 0;
+  return sentToday + roundSize <= DAILY_SHARE || (startsTheDay && roundSize > DAILY_SHARE);
+}
+
+export function nextUtcMidnight() {
+  return (Math.floor(Date.now() / DAY_MS) + 1) * DAY_MS;
 }
 
 export async function calendarMailsToday(ctx: QueryCtx) {

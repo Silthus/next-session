@@ -5,15 +5,15 @@ import { internalMutation } from "./_generated/server";
 import {
   calendarMailConfigured,
   calendarMailsToday,
+  fitsTheDailyShare,
+  nextUtcMidnight,
   requestCalendarMails,
   type CalendarSend,
 } from "./mail";
 import { serverLog } from "./model/telemetry";
 import { awaitsWholeRound, setRoundOf, startWholeRound } from "./sessionMail";
 
-const DAILY_SHARE = 50;
 const PAGE_SIZE = 20;
-const DAY_MS = 86_400_000;
 
 export const inviteScheduledSessions = internalMutation({
   args: {
@@ -36,7 +36,7 @@ export const inviteScheduledSessions = internalMutation({
     for (const session of sessions.page.filter(awaitsWholeRound)) {
       const round = await setRoundOf(ctx, session);
       if (round.length === 0) continue;
-      if (!fitsTheDay(round.length, sentToday + sends.length)) {
+      if (!fitsTheDailyShare(round.length, sentToday + sends.length)) {
         dayIsFull = true;
         break;
       }
@@ -66,12 +66,3 @@ export const inviteScheduledSessions = internalMutation({
     return null;
   },
 });
-
-function fitsTheDay(roundSize: number, sentToday: number) {
-  const startsTheDay = sentToday === 0;
-  return sentToday + roundSize <= DAILY_SHARE || (startsTheDay && roundSize > DAILY_SHARE);
-}
-
-function nextUtcMidnight() {
-  return (Math.floor(Date.now() / DAY_MS) + 1) * DAY_MS;
-}

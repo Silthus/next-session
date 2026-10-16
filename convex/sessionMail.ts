@@ -11,8 +11,11 @@ import {
 import {
   CALENDAR_ADDRESS,
   calendarMailConfigured,
+  calendarMailsToday,
   calendarMessage,
   calendarSend,
+  fitsTheDailyShare,
+  nextUtcMidnight,
   requestCalendarMails,
   type CalendarSend,
 } from "./mail";
@@ -154,7 +157,8 @@ export const inviteToNights = internalMutation({
   args: { groupId: v.id("groups"), userId: v.id("users") },
   returns: v.null(),
   handler: async (ctx, recipient) => {
-    await sendEveryScheduledNight(ctx, recipient, inviteOf);
+    const nights = await scheduledNightsFor(ctx, recipient);
+    await sendNights(ctx, nights, recipient.userId, inviteOf);
     return null;
   },
 });
@@ -162,35 +166,55 @@ export const inviteToNights = internalMutation({
 export async function sessionEmailsTurnedOn(ctx: MutationCtx, userId: Id<"users">) {
   if (!calendarMailConfigured()) return;
   if (!(await withinRateLimit(ctx, "sessionEmailsCatchUp", userId))) return;
-  for (const groupId of await calendarGroupIdsOf(ctx, userId))
-    await ctx.scheduler.runAfter(0, internal.sessionMail.setNightsAgain, { groupId, userId });
+  const groupIds = await calendarGroupIdsOf(ctx, userId);
+  await ctx.scheduler.runAfter(0, internal.sessionMail.setNightsAgain, { userId, groupIds });
 }
 
 export const setNightsAgain = internalMutation({
-  args: { groupId: v.id("groups"), userId: v.id("users") },
+  args: { userId: v.id("users"), groupIds: v.array(v.id("groups")) },
   returns: v.null(),
-  handler: async (ctx, recipient) => {
-    await sendEveryScheduledNight(ctx, recipient, setAgainOf);
+  handler: async (ctx, { userId, groupIds }) => {
+    const [groupId, ...rest] = groupIds;
+    if (groupId === undefined) return null;
+    const nights = await scheduledNightsFor(ctx, { groupId, userId });
+    if (nights.length > 0 && !fitsTheDailyShare(nights.length, await calendarMailsToday(ctx))) {
+      await ctx.scheduler.runAt(nextUtcMidnight(), internal.sessionMail.setNightsAgain, {
+        userId,
+        groupIds,
+      });
+      return null;
+    }
+    const spacing = await sendNights(ctx, nights, userId, setAgainOf);
+    if (rest.length > 0)
+      await ctx.scheduler.runAfter(spacing, internal.sessionMail.setNightsAgain, {
+        userId,
+        groupIds: rest,
+      });
     return null;
   },
 });
 
-async function sendEveryScheduledNight(
+async function scheduledNightsFor(ctx: QueryCtx, { groupId, userId }: RecipientSetMember) {
+  const group = await ctx.db.get("groups", groupId);
+  if (group === null) return [];
+  if ((await calendarInviteeIn(ctx, group, await ctx.db.get("users", userId))) === null) return [];
+  const nights = await upcomingPublishedNights(ctx, groupId);
+  return nights.filter(({ entry }) => entry.state === "scheduled");
+}
+
+async function sendNights(
   ctx: MutationCtx,
-  { groupId, userId }: RecipientSetMember,
+  nights: PublishedNight[],
+  userId: Id<"users">,
   sendOf: (night: PublishedNight, send: NightSendStamp) => NightSend,
 ) {
-  const group = await ctx.db.get("groups", groupId);
-  if (group === null) return;
-  if ((await calendarInviteeIn(ctx, group, await ctx.db.get("users", userId))) === null) return;
-  const nights = await upcomingPublishedNights(ctx, groupId);
   const stamp = Date.now();
   const sends: NightSend[] = [];
-  for (const night of nights.filter(({ entry }) => entry.state === "scheduled")) {
+  for (const night of nights) {
     const sequence = await raiseSequence(ctx, night.session);
     sends.push(sendOf(night, { userId, sequence, stamp }));
   }
-  await requestCalendarMails(ctx, sends);
+  return await requestCalendarMails(ctx, sends);
 }
 
 async function withdrawFromNights(ctx: MutationCtx, { groupId, userId }: RecipientSetMember) {

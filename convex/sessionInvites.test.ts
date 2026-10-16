@@ -1019,6 +1019,55 @@ describe("the calendar follows the Roster", () => {
     expect((await robin.as.query(api.me.notificationSettings, {}))?.sessionEmails).toBe(true);
   });
 
+  async function secondGroupWithNights(ownerId: Id<"users">) {
+    const groupId = await t.run(
+      async (ctx) =>
+        await ctx.db.insert("groups", { name: "Thursday Crew", ownerId, shareToken: "second" }),
+    );
+    for (const day of [18, 25])
+      await seedSession(t, groupId, `2026-10-${day}`, {
+        published: {
+          state: "scheduled",
+          start: Date.UTC(2026, 9, day, 17),
+          end: Date.UTC(2026, 9, day, 21),
+          summary: "Thursday Crew",
+          revision: 1,
+        },
+      });
+  }
+
+  it("spaces the nights of every Group of an Account that turns Session mail back on as one row of sends", async () => {
+    const { as, userId, gmEmail } = await crewWithNights();
+    await secondGroupWithNights(userId);
+    await as.mutation(api.me.setSessionEmails, { enabled: false });
+
+    await as.mutation(api.me.setSessionEmails, { enabled: true });
+    await finish();
+
+    const times = resendRequests().map(({ at }) => at);
+    expect(mailsTo(gmEmail)).toHaveLength(4);
+    expect(times.slice(1).map((at, index) => at - times[index]! >= 500)).toEqual(
+      Array(3).fill(true),
+    );
+  });
+
+  it("waits for the next UTC midnight once the day's share of Resend sends is spent", async () => {
+    const { as, gmEmail } = await crewWithNights();
+    await t.run(async (ctx) => {
+      for (const day of await ctx.db.query("mailVolume").collect())
+        await ctx.db.patch("mailVolume", day._id, { count: 49 });
+    });
+    await as.mutation(api.me.setSessionEmails, { enabled: false });
+
+    await as.mutation(api.me.setSessionEmails, { enabled: true });
+    await finish();
+    expect(mailsTo(gmEmail)).toEqual([]);
+
+    await wait(Date.UTC(2026, 9, 8) - Date.now());
+    await finish();
+    expect(mailsTo(gmEmail)).toHaveLength(2);
+  });
+
   it("sends nothing when an Account with Session mail on turns it on again", async () => {
     const { robin } = await crewWithNights();
 
