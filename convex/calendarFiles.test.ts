@@ -526,6 +526,7 @@ describe("a rename", () => {
   it("leaves a Cancelled Session's published name alone and sends no Session update", async () => {
     const group = await crew();
     await withClaimedAccount(group);
+    const feedUrl = await feedUrlOf(group);
     await schedule(group, "2026-10-17");
     const cancelled = await schedule(group, "2026-10-24");
     await finish();
@@ -536,13 +537,12 @@ describe("a rename", () => {
     await group.as.mutation(api.groups.rename, { groupId: group.groupId, name: "Friday Crew" });
     await finish();
 
-    const published = await t.run(async (ctx) =>
-      (await ctx.db.query("sessions").collect()).map((session) => session.published),
-    );
-    expect(published).toEqual([
-      expect.objectContaining({ state: "scheduled", summary: "Friday Crew" }),
-      expect.objectContaining({ state: "cancelled", summary: "Thursday Crew" }),
-    ]);
     expect(fetchMock).not.toHaveBeenCalled();
+    expect((await feedEvents(feedUrl)).map(({ SUMMARY, STATUS }) => ({ SUMMARY, STATUS }))).toEqual(
+      [
+        { SUMMARY: "Friday Crew", STATUS: "CONFIRMED" },
+        { SUMMARY: "Thursday Crew", STATUS: "CANCELLED" },
+      ],
+    );
   });
 });
