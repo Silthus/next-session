@@ -112,7 +112,7 @@ export function toastRegion(page: Page) {
   return page.locator('[role="status"][aria-live="polite"]');
 }
 
-const UNDO_WINDOW_MS = 30_000;
+const PUBLISH_WAIT_MS = 60_000;
 
 export async function waitUntilPublished(
   gm: ConvexHttpClient,
@@ -123,5 +123,5 @@ export async function waitUntilPublished(
     const schedule = await gm.query(api.schedule.month, { groupId, month: monthOf(date) });
     return schedule?.sessions.find((session) => session.date === date)?.published ?? false;
   };
-  await expect.poll(isPublished, { timeout: 2 * UNDO_WINDOW_MS }).toBe(true);
+  await expect.poll(isPublished, { timeout: PUBLISH_WAIT_MS }).toBe(true);
 }
