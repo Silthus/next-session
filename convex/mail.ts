@@ -38,7 +38,12 @@ export type SessionSend = Infer<ReturnType<typeof v.object<typeof sessionSend>>>
 
 export const reminderLead = v.union(v.literal("day"), v.literal("hours"));
 
-export const reminderSend = { ...sessionSend, lead: reminderLead };
+export const reminderSend = {
+  sessionId: v.id("sessions"),
+  userId: v.id("users"),
+  revision: v.number(),
+  lead: reminderLead,
+};
 type ReminderSend = Infer<ReturnType<typeof v.object<typeof reminderSend>>>;
 
 const mailKind = v.union(v.literal("welcome"), v.literal("tips"));
