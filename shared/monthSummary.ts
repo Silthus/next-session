@@ -1,6 +1,6 @@
-import type { SessionState } from "../convex/schema";
 import { monthProgress, type Answer } from "./answers";
 import { isBookable, monthDays, type IsoDate, type IsoMonth } from "./dates";
+import type { SessionState } from "./sessions";
 
 export type PlayerRow = { _id: string; name: string; image?: string };
 export type AnswerRow<PlayerId extends string> = {

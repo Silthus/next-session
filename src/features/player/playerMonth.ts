@@ -1,4 +1,3 @@
-import type { SessionState } from "../../../convex/schema";
 import { fillRestDates, monthProgress, type Answer } from "../../../shared/answers";
 import {
   addMonths,
@@ -10,6 +9,7 @@ import {
   type IsoDate,
   type IsoMonth,
 } from "../../../shared/dates";
+import type { SessionState } from "../../../shared/sessions";
 
 export type PlayerDay = {
   date: IsoDate;

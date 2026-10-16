@@ -240,6 +240,21 @@ describe("HeatCalendar", () => {
     expect(night.classList).toContain("bg-free");
   });
 
+  it("sets the Cancelled mark in ink on a night tinted by free answers", () => {
+    renderCalendar({
+      players: rosterOf(2),
+      answers: [
+        { playerId: "p0", date: "2026-10-09", answer: "free" },
+        { playerId: "p1", date: "2026-10-09", answer: "maybe" },
+      ],
+      sessions: [sessionOn("2026-10-09", "cancelled")],
+    });
+    const night = screen.getByRole("button", { name: /^Friday, October 9: .*Session cancelled$/ });
+    expect(night.style.background).toContain("var(--free)");
+    expect(within(night).getByText("Cancelled").classList).toContain("text-ink");
+    expect(night.querySelector('[data-mark="cancelled"]')?.classList).toContain("text-ink");
+  });
+
   it("selects a tapped day", async () => {
     const { onSelectDay } = renderCalendar();
     await userEvent.click(screen.getByRole("button", { name: /^Friday, October 16:/ }));
