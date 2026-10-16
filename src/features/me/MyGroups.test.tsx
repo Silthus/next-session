@@ -13,13 +13,17 @@ import { track } from "../../lib/telemetry";
 import { MyGroups } from "./MyGroups";
 import type { MyGroups as MyGroupsData, PlayingGroup } from "./myGroups";
 
+const viewer = vi.hoisted(() => ({ timeZone: "Europe/Berlin" }));
+
 vi.mock(import("../../lib/telemetry"), async (original) => ({
   ...(await original()),
   track: vi.fn(),
 }));
+vi.mock("../../lib/timeZone", () => ({ browserTimeZone: () => viewer.timeZone }));
 
 beforeEach(() => {
   vi.mocked(track).mockReset();
+  viewer.timeZone = "Europe/Berlin";
 });
 
 const today = "2026-10-06";
@@ -35,7 +39,10 @@ const thursday: PlayingGroup = {
   playerId: "player-robin" as Id<"players">,
   playerName: "Robin",
   timeZone: "Europe/Berlin",
-  upcomingSessions: scheduled("2026-10-08", "2026-10-22"),
+  upcomingSessions: [
+    { date: "2026-10-08", state: "scheduled", ...USUAL, location: "Max's place" },
+    ...scheduled("2026-10-22"),
+  ],
   openDates: 12,
 };
 
@@ -54,7 +61,9 @@ const ownTable = {
   groupId: "group-own" as Id<"groups">,
   name: "Dragon Heist",
   timeZone: "Europe/Berlin",
-  upcomingSessions: scheduled("2026-10-10"),
+  upcomingSessions: [
+    { date: "2026-10-10", state: "scheduled" as const, ...USUAL, startTime: "18:30" },
+  ],
 };
 
 const everything: MyGroupsData = { running: [ownTable], playing: [thursday, sunday] };
@@ -86,21 +95,31 @@ function section(name: string) {
 }
 
 describe("MyGroups", () => {
-  it("lists the next Sessions across Groups by date, each with its Group", async () => {
+  it("lists when and where the next Sessions are across Groups, each with its Group", async () => {
     renderMyGroups();
 
     await screen.findByRole("heading", { level: 1, name: "My groups" });
     const sessions = within(section("Next sessions")).getAllByRole("link");
     expect(sessions.map((link) => link.textContent)).toEqual([
-      "Thursday, October 8in 2 daysThursday Crew",
-      "Saturday, October 10in 4 daysDragon Heist",
-      "Thursday, October 22in 16 daysThursday Crew",
+      "Thursday, October 8in 2 days · 19:00–23:00Max's placeThursday Crew",
+      "Saturday, October 10in 4 days · 18:30–22:30Dragon Heist",
+      "Thursday, October 22in 16 days · 19:00–23:00Thursday Crew",
     ]);
     expect(sessions.map((link) => link.getAttribute("href"))).toEqual([
       "/s/thursdayTk",
       "/g/group-own",
       "/s/thursdayTk",
     ]);
+  });
+
+  it("names a Group's zone when the browser is elsewhere", async () => {
+    viewer.timeZone = "America/New_York";
+    renderMyGroups({ groups: { running: [ownTable], playing: [] } });
+
+    await screen.findByRole("heading", { level: 1, name: "My groups" });
+    expect(within(section("Next sessions")).getByRole("link").textContent).toBe(
+      "Saturday, October 10in 4 days · 18:30–22:30 Berlin timeDragon Heist",
+    );
   });
 
   it("marks a Cancelled Session in Next sessions and on its Group's card", async () => {
@@ -117,7 +136,7 @@ describe("MyGroups", () => {
     const sessions = within(section("Next sessions")).getAllByRole("link");
     expect(sessions.map((link) => link.textContent)).toEqual([
       "Thursday, October 8Cancelled · in 2 daysThursday Crew",
-      "Thursday, October 22in 16 daysThursday Crew",
+      "Thursday, October 22in 16 days · 19:00–23:00Thursday Crew",
     ]);
     expect(sessions.map((link) => link.getAttribute("href"))).toEqual([
       "/s/thursdayTk",

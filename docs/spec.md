@@ -338,7 +338,7 @@ src/
     group/              GroupScreen container, GroupFrame; calendar/ (HeatCalendar, DayPanel); rail/ (GroupSwitcher,
                         BestNights, Players, Sessions, Nudge); settings/ (TimeAndPlaceScreen, TimeAndPlacePage,
                         LocationField)
-    player/             PlayerScreen, Join, PlayerCalendar, Progress, playerMonth.ts, KeepGroup
+    player/             PlayerScreen, Join, PlayerCalendar, NextSessions, Progress, playerMonth.ts, KeepGroup
     me/                 MyGroups (§12)
     legal/              LegalPage, rendered from docs/legal/*.md
   lib/                  env.ts, pageTitle.ts, storage.ts (all localStorage keys, prefixed "next-session."), errors.ts,
@@ -560,7 +560,7 @@ The no-account path keeps its steps and its fields: Join shows no new prompt, an
 
 ### 12.5 My groups (`/me`)
 
-- **Next sessions** on top: every upcoming Session across both lists, merged by date, each with its Group name, the next five shown.
+- **Next sessions** on top: every upcoming Session across both lists, merged by date, each with its Group name, the next five shown. A scheduled one shows its time range in its Group's wall clock, the zone named only when the browser's differs, and its place when it has one.
 - **You play in:** a card per Claimed Player with the Group name, the Player name, the next Session, and "N days to answer" while `openDates > 0`. The card opens `/s/<token>`, which opens as the Claimed Player. A menu offers **Remove from my groups**, with Undo through `player.claim`.
 - **You run:** a card per Group with its next Session, opening `/g/<groupId>`.
 - **Empty:** "Open your GM's link and tap Keep this group", plus Create your link.
