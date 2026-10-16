@@ -8,7 +8,7 @@ import {
   type GmClient,
   type TestBackend,
 } from "./model/test.setup";
-import { UNDO_WINDOW_MS } from "./sessionLifecycle";
+import { UNDO_WINDOW_MS } from "../shared/sessions";
 
 const SITE_URL = "http://localhost:5173";
 const SERVED_AT = Date.UTC(2026, 9, 8, 9, 30);

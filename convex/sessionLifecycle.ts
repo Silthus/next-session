@@ -4,7 +4,7 @@ import { DEFAULT_GROUP_TIME, sessionWindow } from "../shared/sessionTime";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx, type QueryCtx } from "./_generated/server";
-import type { SessionState } from "../shared/sessions";
+import { UNDO_WINDOW_MS, type SessionState } from "../shared/sessions";
 import type { publishedSession } from "./schema";
 import * as reminders from "./reminders";
 import * as sessionMail from "./sessionMail";
@@ -16,7 +16,6 @@ import {
   type SessionDetailChanges,
 } from "./model/timeAndPlace";
 
-export const UNDO_WINDOW_MS = 30_000;
 const SNAPSHOT_FIELDS = ["state", "start", "end", "location", "summary"] as const;
 
 type PublishedSession = Infer<typeof publishedSession>;
@@ -110,6 +109,10 @@ export const settle = internalMutation({
 
 function isPublishedAs(published: PublishedSession, snapshot: SessionSnapshot) {
   return SNAPSHOT_FIELDS.every((field) => published[field] === snapshot[field]);
+}
+
+export function isSettling(session: Doc<"sessions">) {
+  return session.changedAt !== undefined && Date.now() - session.changedAt <= UNDO_WINDOW_MS + 1;
 }
 
 export function stateOf(session: Doc<"sessions">): SessionState {

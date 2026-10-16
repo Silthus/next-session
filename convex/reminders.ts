@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { todayUtc } from "../shared/dates";
 import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
+import { UNDO_WINDOW_MS } from "../shared/sessions";
 import { reminderDueAt, type ReminderLead } from "../shared/sessionTime";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -16,11 +17,13 @@ import { claimedPlayerIn } from "./model/players";
 import { reminderLinkTokenFor, remindersOn } from "./model/reminderLinks";
 import { accountDistinctId, isTestAddress, PRODUCT, serverLog } from "./model/telemetry";
 import { groupTimeOf } from "./model/timeAndPlace";
+import { isSettling } from "./sessionLifecycle";
 
 const LEADS: ReminderLead[] = ["day", "hours"];
 const LATEST_SEND_MS = 5 * 60_000;
 const DAY = 24 * 60 * 60_000;
 const BACKFILL_PAGE_SIZE = 50;
+const BACKFILL_RETRY_MS = 2 * UNDO_WINDOW_MS;
 
 const reminderJob = {
   sessionId: v.id("sessions"),
@@ -57,30 +60,41 @@ export const scheduleUpcoming = internalMutation({
     cursor: v.optional(v.string()),
     from: v.optional(v.string()),
     scheduledSoFar: v.optional(v.number()),
+    settlingSoFar: v.optional(v.boolean()),
   },
   returns: v.null(),
-  handler: async (ctx, { cursor, from = todayUtc(Date.now() - DAY), scheduledSoFar = 0 }) => {
+  handler: async (
+    ctx,
+    { cursor, from = todayUtc(Date.now() - DAY), scheduledSoFar = 0, settlingSoFar = false },
+  ) => {
     if (!remindersConfigured()) return null;
     const page = await ctx.db
       .query("sessions")
       .withIndex("by_date", (q) => q.gte("date", from))
       .paginate({ cursor: cursor ?? null, numItems: BACKFILL_PAGE_SIZE });
     let scheduled = scheduledSoFar;
+    let settling = settlingSoFar;
     for (const session of page.page.filter(lacksCurrentReminders)) {
-      const group = await ctx.db.get("groups", session.groupId);
-      if (group) scheduled += await scheduleReminders(ctx, session, group);
+      if (isSettling(session)) settling = true;
+      else scheduled += await scheduleFromLiveGroup(ctx, session);
     }
-    if (page.isDone) {
+    if (!page.isDone) {
+      await ctx.scheduler.runAfter(0, internal.reminders.scheduleUpcoming, {
+        cursor: page.continueCursor,
+        from,
+        scheduledSoFar: scheduled,
+        settlingSoFar: settling,
+      });
+    } else if (settling) {
+      await ctx.scheduler.runAfter(BACKFILL_RETRY_MS, internal.reminders.scheduleUpcoming, {
+        from,
+        scheduledSoFar: scheduled,
+      });
+    } else {
       await serverLog(ctx, "info", "Reminder backfill finished", {
         reminders_scheduled: scheduled,
       });
-      return null;
     }
-    await ctx.scheduler.runAfter(0, internal.reminders.scheduleUpcoming, {
-      cursor: page.continueCursor,
-      from,
-      scheduledSoFar: scheduled,
-    });
     return null;
   },
 });
@@ -141,6 +155,11 @@ async function scheduleReminders(ctx: MutationCtx, session: Doc<"sessions">, gro
   }
   await ctx.db.patch("sessions", session._id, { remindersRevision: published.revision });
   return leadsAhead.length;
+}
+
+async function scheduleFromLiveGroup(ctx: MutationCtx, session: Doc<"sessions">) {
+  const group = await ctx.db.get("groups", session.groupId);
+  return group ? await scheduleReminders(ctx, session, group) : 0;
 }
 
 function lacksCurrentReminders(session: Doc<"sessions">) {

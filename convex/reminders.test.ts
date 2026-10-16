@@ -9,7 +9,7 @@ import {
   type GmClient,
   type TestBackend,
 } from "./model/test.setup";
-import { UNDO_WINDOW_MS } from "./sessionLifecycle";
+import { UNDO_WINDOW_MS } from "../shared/sessions";
 
 const HOUR = 3_600_000;
 const REMINDER_WEBHOOK = "https://example.test/reminder";
@@ -555,6 +555,43 @@ describe("the switch-on backfill", () => {
     expect(reminders().map(({ date_label, lead }) => [date_label, lead])).toEqual([
       ["Saturday, October 17, 2026", "day"],
       ["Saturday, October 17, 2026", "hours"],
+    ]);
+  });
+
+  it("waits out a Time and place change still inside its Undo window", async () => {
+    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "");
+    const { as, groupId } = await crew();
+    await as.mutation(api.sessions.schedule, { groupId, date });
+    await settle();
+    await vi.advanceTimersByTimeAsync(dayDue - UNDO_WINDOW_MS / 2 - Date.now());
+    await saveTimeAndPlace(as, groupId, { timeZone: "America/New_York" });
+
+    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", REMINDER_WEBHOOK);
+    await t.mutation(internal.reminders.scheduleUpcoming, {});
+    await at(start + 12 * HOUR);
+
+    expect(reminders().map(({ lead, start_label }) => [lead, start_label])).toEqual([
+      ["day", "19:00"],
+      ["hours", "19:00"],
+    ]);
+  });
+
+  it("schedules a Session whose pending change was taken back once its Undo window ends", async () => {
+    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "");
+    const { as, groupId } = await crew();
+    await as.mutation(api.sessions.schedule, { groupId, date });
+    await settle();
+    await vi.advanceTimersByTimeAsync(dayDue - 2 * 60_000 - Date.now());
+    await saveTimeAndPlace(as, groupId, { timeZone: "America/New_York" });
+    await saveTimeAndPlace(as, groupId, { timeZone: "Europe/Berlin" });
+
+    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", REMINDER_WEBHOOK);
+    await t.mutation(internal.reminders.scheduleUpcoming, {});
+    await at(start);
+
+    expect(reminders().map(({ lead, start_label }) => [lead, start_label])).toEqual([
+      ["day", "19:00"],
+      ["hours", "19:00"],
     ]);
   });
 
