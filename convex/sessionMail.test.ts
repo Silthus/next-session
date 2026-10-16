@@ -289,7 +289,10 @@ it("lets an Account turn session emails off and back on, with email on by defaul
   await account.as.mutation(api.me.setSessionEmails, { enabled: true });
   await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-18" });
   await finish();
-  expect(changes()).toEqual(["set"]);
+  expect(mailsToRobin().map(({ subject }) => subject)).toEqual([
+    "Thursday Crew: next session Saturday, October 17, 2026",
+    "Thursday Crew: next session Sunday, October 18, 2026",
+  ]);
 });
 
 it.each(["release", "remove-group", "test-email", "anonymous"])(
