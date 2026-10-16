@@ -1,5 +1,5 @@
 import { MAX_GROUPS_PER_GM } from "../../shared/limits";
-import { newShareToken, type RandomBytes } from "../../shared/shareToken";
+import { randomToken, SHARE_TOKEN_LENGTH, type RandomBytes } from "../../shared/randomToken";
 import { internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
@@ -16,7 +16,7 @@ const CHILD_DELETE_BATCH_SIZE = 200;
 
 export async function mintShareToken(ctx: QueryCtx, randomBytes?: RandomBytes) {
   for (let attempt = 0; attempt < MINT_ATTEMPTS; attempt++) {
-    const shareToken = newShareToken(randomBytes);
+    const shareToken = randomToken(SHARE_TOKEN_LENGTH, randomBytes);
     if ((await groupByShareToken(ctx, shareToken)) === null) return shareToken;
   }
   throw new Error(`No free Share Token after ${MINT_ATTEMPTS} attempts`);

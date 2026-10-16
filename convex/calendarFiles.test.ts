@@ -113,6 +113,29 @@ function eventsIn(calendar: string) {
   return events;
 }
 
+async function feedUrlOf({ as }: { as: GmClient }) {
+  return (await as.mutation(api.me.calendarFeed, {})).url;
+}
+
+async function fetchFeed(feedUrl: string) {
+  return await t.fetch(new URL(feedUrl).pathname);
+}
+
+async function feedEvents(feedUrl: string) {
+  const response = await fetchFeed(feedUrl);
+  expect(response.status).toBe(200);
+  return eventsIn(await response.text());
+}
+
+async function joinWithAccount({ as }: { as: GmClient }, group: Crew, name = "Robin") {
+  await as.mutation(api.player.join, { shareToken: await shareTokenOf(group), name });
+}
+
+async function expectNotFound(response: Response) {
+  expect(response.status).toBe(404);
+  expect(await response.text()).toBe("");
+}
+
 function startsOf(events: Record<string, string>[]) {
   return events.map((event) => event.DTSTART);
 }
@@ -260,30 +283,224 @@ describe("the calendar download", () => {
   });
 });
 
-describe("feed scoping", () => {
-  it("every calendar file holds only the published Sessions of its own token's Group", async () => {
-    const ours = await crew("Thursday Crew");
-    const theirs = await crew("Sunday Table");
-    const ourSession = await schedule(ours, "2026-10-17");
-    const theirSession = await schedule(theirs, "2026-10-17");
-    const theirOtherSession = await schedule(theirs, "2026-10-24");
+describe("the calendar feed", () => {
+  it("answers with the Sessions of every Group the Account runs or plays in", async () => {
+    const run = await crew("Thursday Crew");
+    const played = await crew("Sunday Table");
+    await joinWithAccount(run, played);
+    const runSession = await schedule(run, "2026-10-17");
+    const playedSession = await schedule(played, "2026-10-18");
     await finish();
-    const rotatedAway = await shareTokenOf(theirs);
-    await theirs.as.mutation(api.groups.rotateShareToken, { groupId: theirs.groupId });
+    const feedUrl = await feedUrlOf(run);
+    vi.setSystemTime(SERVED_AT);
 
-    const ourEvents = await downloadedEvents(await shareTokenOf(ours));
-    const theirEvents = await downloadedEvents(await shareTokenOf(theirs));
-    const rotatedAwayResponse = await download(rotatedAway);
+    const response = await fetchFeed(feedUrl);
 
-    expect(ourEvents.map((event) => [event.UID, event.SUMMARY])).toEqual([
-      [uidOf(ourSession), "Thursday Crew"],
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toBe("text/calendar; charset=utf-8");
+    expect(response.headers.get("Cache-Control")).toBe("private, max-age=900");
+    expect(response.headers.get("Content-Disposition")).toBeNull();
+    const calendar = await response.text();
+    expect(unfolded(calendar)).toContain("X-WR-CALNAME:Next Session");
+    const runLink = `${SITE_URL}/g/${run.groupId}`;
+    const playedLink = `${SITE_URL}/me`;
+    expect(eventsIn(calendar)).toEqual([
+      {
+        UID: uidOf(runSession),
+        SEQUENCE: "0",
+        DTSTAMP: "20261008T093000Z",
+        DTSTART: "20261017T170000Z",
+        DTEND: "20261017T210000Z",
+        SUMMARY: "Thursday Crew",
+        LOCATION: "Max's place",
+        DESCRIPTION: `Open the group on Next Session: ${runLink}`,
+        URL: runLink,
+        STATUS: "CONFIRMED",
+      },
+      expect.objectContaining({
+        UID: uidOf(playedSession),
+        SUMMARY: "Sunday Table",
+        DESCRIPTION: `Open the group on Next Session: ${playedLink}`,
+        URL: playedLink,
+      }),
     ]);
-    expect(theirEvents.map((event) => [event.UID, event.SUMMARY])).toEqual([
-      [uidOf(theirSession), "Sunday Table"],
-      [uidOf(theirOtherSession), "Sunday Table"],
+  });
+
+  it("lists a Group the Account runs and plays in once, linked to its GM page", async () => {
+    const group = await crew();
+    await joinWithAccount(group, group);
+    await schedule(group, "2026-10-17");
+    await finish();
+
+    expect((await feedEvents(await feedUrlOf(group))).map((event) => event.URL)).toEqual([
+      `${SITE_URL}/g/${group.groupId}`,
     ]);
-    expect(rotatedAwayResponse.status).toBe(404);
-    expect(await rotatedAwayResponse.text()).toBe("");
+  });
+
+  it("holds an empty calendar for an Account with nothing in the window", async () => {
+    const response = await fetchFeed(await feedUrlOf(await crew()));
+
+    expect(response.status).toBe(200);
+    const calendar = await response.text();
+    expect(unfolded(calendar)).toContain("X-WR-CALNAME:Next Session");
+    expect(eventsIn(calendar)).toEqual([]);
+  });
+
+  it("keeps a Cancelled Session, marked cancelled", async () => {
+    const group = await crew();
+    const cancelled = await schedule(group, "2026-10-17");
+    await finish();
+    await cancel(group, cancelled);
+    await finish();
+
+    expect(await feedEvents(await feedUrlOf(group))).toEqual([
+      expect.objectContaining({ UID: uidOf(cancelled), STATUS: "CANCELLED" }),
+    ]);
+  });
+
+  it("keeps a Session from 31 days back and leaves out one from 32", async () => {
+    vi.setSystemTime(Date.UTC(2026, 8, 6, 12));
+    const group = await crew();
+    await schedule(group, "2026-09-06");
+    await schedule(group, "2026-09-07");
+    await finish();
+    const feedUrl = await feedUrlOf(group);
+
+    vi.setSystemTime(SERVED_AT);
+
+    expect(startsOf(await feedEvents(feedUrl))).toEqual(["20260907T170000Z"]);
+  });
+
+  it("reaches to the end of the Booking Window", async () => {
+    const group = await crew();
+    await schedule(group, "2026-12-31");
+    await finish();
+
+    expect(startsOf(await feedEvents(await feedUrlOf(group)))).toEqual(["20261231T180000Z"]);
+  });
+
+  it("leaves out a Session inside its first Undo window", async () => {
+    const group = await crew();
+    const feedUrl = await feedUrlOf(group);
+    await schedule(group, "2026-10-17");
+
+    await wait(UNDO_WINDOW_MS);
+    expect(await feedEvents(feedUrl)).toEqual([]);
+
+    await wait(1);
+    expect(startsOf(await feedEvents(feedUrl))).toEqual(["20261017T170000Z"]);
+  });
+
+  it.each([
+    ["the Account releases its Player", api.player.release],
+    ["the Account removes it from My groups", api.player.removeFromMyGroups],
+  ])("drops a Group the Account plays in once %s", async (_, leave) => {
+    const account = await crew("Thursday Crew");
+    const played = await crew("Sunday Table");
+    await joinWithAccount(account, played);
+    await schedule(played, "2026-10-17");
+    await finish();
+    const feedUrl = await feedUrlOf(account);
+
+    await account.as.mutation(leave, { groupId: played.groupId });
+
+    expect(await feedEvents(feedUrl)).toEqual([]);
+  });
+
+  it("drops a deleted Group at once, its Players still being removed", async () => {
+    const account = await crew("Thursday Crew");
+    const played = await crew("Sunday Table");
+    await joinWithAccount(account, played);
+    await schedule(account, "2026-10-17");
+    await schedule(played, "2026-10-18");
+    await finish();
+    const feedUrl = await feedUrlOf(account);
+
+    await account.as.mutation(api.groups.remove, { groupId: account.groupId });
+    await played.as.mutation(api.groups.remove, { groupId: played.groupId });
+
+    expect(await feedEvents(feedUrl)).toEqual([]);
+  });
+
+  it("answers 404 with no body for the old link after a reset, and serves the new one", async () => {
+    const group = await crew();
+    await schedule(group, "2026-10-17");
+    await finish();
+    const oldUrl = await feedUrlOf(group);
+
+    const { url: newUrl } = await group.as.mutation(api.me.resetCalendarFeed, {});
+
+    await expectNotFound(await fetchFeed(oldUrl));
+    expect(startsOf(await feedEvents(newUrl))).toEqual(["20261017T170000Z"]);
+  });
+
+  it.each([
+    ["an unknown token", "UnknownFeedToken123456"],
+    ["a token outside the token alphabet", "not.a.token"],
+  ])("answers 404 with no body for %s", async (_, feedToken) => {
+    await feedUrlOf(await crew());
+
+    await expectNotFound(await t.fetch(`/cal/a/${feedToken}.ics`));
+  });
+});
+
+describe("feed scoping", () => {
+  describe("every calendar file holds only the published Sessions its own token reaches", () => {
+    it("through a Share Token", async () => {
+      const ours = await crew("Thursday Crew");
+      const theirs = await crew("Sunday Table");
+      const ourSession = await schedule(ours, "2026-10-17");
+      const theirSession = await schedule(theirs, "2026-10-17");
+      const theirOtherSession = await schedule(theirs, "2026-10-24");
+      await finish();
+      const rotatedAway = await shareTokenOf(theirs);
+      await theirs.as.mutation(api.groups.rotateShareToken, { groupId: theirs.groupId });
+
+      const ourEvents = await downloadedEvents(await shareTokenOf(ours));
+      const theirEvents = await downloadedEvents(await shareTokenOf(theirs));
+      const rotatedAwayResponse = await download(rotatedAway);
+
+      expect(ourEvents.map((event) => [event.UID, event.SUMMARY])).toEqual([
+        [uidOf(ourSession), "Thursday Crew"],
+      ]);
+      expect(theirEvents.map((event) => [event.UID, event.SUMMARY])).toEqual([
+        [uidOf(theirSession), "Sunday Table"],
+        [uidOf(theirOtherSession), "Sunday Table"],
+      ]);
+      expect(rotatedAwayResponse.status).toBe(404);
+      expect(await rotatedAwayResponse.text()).toBe("");
+    });
+
+    it("through a feed token", async () => {
+      const ours = await crew("Thursday Crew");
+      const played = await crew("Sunday Table");
+      const theirs = await crew("Monday Night");
+      await joinWithAccount(ours, played);
+      await joinWithAccount(theirs, played, "Sam");
+      const ourSession = await schedule(ours, "2026-10-17");
+      const playedSession = await schedule(played, "2026-10-17");
+      const theirSession = await schedule(theirs, "2026-10-17");
+      await finish();
+      const resetAway = await feedUrlOf(ours);
+      const ourFeed = (await ours.as.mutation(api.me.resetCalendarFeed, {})).url;
+      const theirFeed = await feedUrlOf(theirs);
+
+      const ourCalendar = await (await fetchFeed(ourFeed)).text();
+      const theirEvents = await feedEvents(theirFeed);
+
+      expect(eventsIn(ourCalendar).map((event) => [event.UID, event.SUMMARY])).toEqual([
+        [uidOf(ourSession), "Thursday Crew"],
+        [uidOf(playedSession), "Sunday Table"],
+      ]);
+      expect(theirEvents.map((event) => [event.UID, event.SUMMARY])).toEqual([
+        [uidOf(theirSession), "Monday Night"],
+        [uidOf(playedSession), "Sunday Table"],
+      ]);
+      for (const group of [ours, played, theirs]) {
+        expect(ourCalendar).not.toContain(await shareTokenOf(group));
+      }
+      await expectNotFound(await fetchFeed(resetAway));
+    });
   });
 });
 
