@@ -1,0 +1,14 @@
+2026-10-16T19:32:28.856Z scheduled 2026-11-12 (kn72xsgwyj2x7998qv8zvk50ex8gdyp3) and published; feed entry:
+SEQUENCE:0
+DTSTART:20261112T180000Z
+DTEND:20261112T220000Z
+SUMMARY:Thursday Crew
+STATUS:CONFIRMED
+2026-10-16T19:32:29.217Z GM cancels the night
+2026-10-16T19:32:39.292Z inside the cancel's Undo window: Time and place saved as 18:30 for 3 h at Max's place, Group renamed Friday Crew
+2026-10-16T19:33:14.297Z after the Undo window; feed entry:
+SEQUENCE:0
+DTSTART:20261112T180000Z
+DTEND:20261112T220000Z
+SUMMARY:Thursday Crew
+STATUS:CANCELLED

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { errorMessage } from "../../lib/errors";
 import { Button, buttonClassName } from "../../ui/Button";
 import { StatusScreen } from "../../ui/StatusScreen";
@@ -94,10 +94,6 @@ function SwitchButton({
 }) {
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
-  const button = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    if (failure !== null) button.current?.focus();
-  }, [failure]);
 
   const press = async () => {
     setBusy(true);
@@ -114,7 +110,6 @@ function SwitchButton({
   return (
     <div className="mt-2 flex w-full flex-col items-center gap-3">
       <Button
-        ref={button}
         variant={variant}
         size={size}
         busy={busy && busyLabel}

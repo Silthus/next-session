@@ -156,7 +156,9 @@ describe("AccountSheet saving a Group", () => {
 
     expect(onClose).not.toHaveBeenCalled();
     expect(closeButton.getAttribute("aria-disabled")).toBe("true");
-    expect(screen.getByRole("button", { name: "Saving…" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("button", { name: "Saving…" }).getAttribute("aria-disabled")).toBe(
+      "true",
+    );
     expect(screen.getByRole("radio", { name: "I already have one" }).matches(":disabled")).toBe(
       true,
     );
@@ -319,7 +321,9 @@ describe("AccountSheet keeping a Group as a Player", () => {
     await fillIn();
     await userEvent.click(screen.getByRole("button", { name: "Keep group" }));
 
-    expect(screen.getByRole("button", { name: "Keeping…" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("button", { name: "Keeping…" }).getAttribute("aria-disabled")).toBe(
+      "true",
+    );
     finish();
   });
 });
@@ -597,10 +601,9 @@ describe("AccountSheet with Google", () => {
     expect(screen.getByText(/By continuing with Google/).textContent).toBe(
       "By continuing with Google you agree to the Terms and Privacy Policy.",
     );
-    expect(screen.getByRole("button", { name: "Opening Google…" })).toHaveProperty(
-      "disabled",
-      true,
-    );
+    expect(
+      screen.getByRole("button", { name: "Opening Google…" }).getAttribute("aria-disabled"),
+    ).toBe("true");
     expect(screen.getByLabelText("Email")).toHaveProperty("readOnly", true);
   });
 
