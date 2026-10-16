@@ -9,8 +9,9 @@ import { cn } from "../../../ui/cn";
 import { Dot } from "../../../ui/Dot";
 import { longDayLabel, relativeDay } from "./calendarDates";
 import type { CalendarDay, CalendarSession } from "./DayCell";
-import { IconChevron, IconStar } from "../../../ui/icons";
-import { hoverRow } from "../../../ui/interactive";
+import { IconChevron, IconClock, IconStar } from "../../../ui/icons";
+import { focusRing, hoverRow } from "../../../ui/interactive";
+import { timeRange, type WallClockTime } from "../../../lib/timeAndPlace";
 
 const answerLabels: Record<Answer, string> = { free: "Free", maybe: "Maybe", busy: "Busy" };
 const answerTones: Record<Answer, string> = {
@@ -24,22 +25,26 @@ export function DayPanel({
   playerCount,
   today,
   pending,
+  timeAndPlace,
   closeLabel,
   focusHeading = false,
   onClose,
   onSchedule,
   onCancel,
+  onOpenTimeAndPlace,
   className,
 }: {
   day: CalendarDay;
   playerCount: number;
   today: IsoDate;
   pending: boolean;
+  timeAndPlace: TimeAndPlace;
   closeLabel: ReactNode;
   focusHeading?: boolean;
   onClose: () => void;
   onSchedule: () => void;
   onCancel: (session: CalendarSession) => void;
+  onOpenTimeAndPlace: () => void;
   className?: string;
 }) {
   const headingId = useId();
@@ -89,10 +94,48 @@ export function DayPanel({
           <PlayerAnswers day={day} />
         </>
       )}
-      <div className="mt-5">
+      <div className="mt-5 flex flex-col gap-2">
+        {day.bookable && !day.session && (
+          <CalendarLine
+            timeAndPlace={
+              day.cancelled ? { ...day.cancelled, timeZone: timeAndPlace.timeZone } : timeAndPlace
+            }
+            onChange={onOpenTimeAndPlace}
+          />
+        )}
         <SessionAction day={day} pending={pending} onSchedule={onSchedule} onCancel={onCancel} />
       </div>
     </Card>
+  );
+}
+
+type TimeAndPlace = WallClockTime & { location?: string };
+
+function CalendarLine({
+  timeAndPlace,
+  onChange,
+}: {
+  timeAndPlace: TimeAndPlace;
+  onChange: () => void;
+}) {
+  const range = timeRange(timeAndPlace);
+  const shown = timeAndPlace.location ? `${range} · ${timeAndPlace.location}` : range;
+  return (
+    <div className="flex items-center gap-2 rounded-md bg-surface-2 px-3 py-2 text-xs text-ink-2">
+      <IconClock className="shrink-0 text-ink-3" />
+      <p className="min-w-0 flex-1">{`Players' calendars will show ${shown}`}</p>
+      <button
+        type="button"
+        aria-label="Change time and place"
+        onClick={onChange}
+        className={cn(
+          "shrink-0 rounded-sm font-semibold text-accent-strong underline-offset-2 hover:underline",
+          focusRing,
+        )}
+      >
+        Change
+      </button>
+    </div>
   );
 }
 

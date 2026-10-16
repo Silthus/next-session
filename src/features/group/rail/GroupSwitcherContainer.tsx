@@ -6,7 +6,15 @@ import { GroupSwitcher } from "./GroupSwitcher";
 import { useIsMounted } from "./useIsMounted";
 import { browserTimeZone } from "../../../lib/timeZone";
 
-export function GroupSwitcherContainer({ group }: { group: { id: Id<"groups">; name: string } }) {
+export function GroupSwitcherContainer({
+  group,
+  timeAndPlaceIsNew,
+  onOpenTimeAndPlace,
+}: {
+  group: { id: Id<"groups">; name: string };
+  timeAndPlaceIsNew: boolean;
+  onOpenTimeAndPlace: () => void;
+}) {
   const groups = useQuery(api.groups.mine);
   const createGroup = useMutation(api.groups.create);
   const renameGroup = useMutation(api.groups.rename);
@@ -35,6 +43,8 @@ export function GroupSwitcherContainer({ group }: { group: { id: Id<"groups">; n
       }}
       onRename={(name) => renameGroup({ groupId: group.id, name })}
       onDelete={deleteGroup}
+      timeAndPlaceIsNew={timeAndPlaceIsNew}
+      onOpenTimeAndPlace={onOpenTimeAndPlace}
     />
   );
 }

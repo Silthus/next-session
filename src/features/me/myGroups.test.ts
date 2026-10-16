@@ -9,6 +9,7 @@ const owned = "group-owned" as Id<"groups">;
 type GroupSession = MyGroups["running"][number]["upcomingSessions"][number];
 
 const USUAL = { startTime: "19:00", lengthMinutes: 240 } as const;
+const BERLIN_USUAL = { ...USUAL, timeZone: "Europe/Berlin" };
 
 const scheduled = (...dates: string[]): GroupSession[] =>
   dates.map((date) => ({ date, state: "scheduled", ...USUAL }));
@@ -53,24 +54,28 @@ describe("nextSessions", () => {
       {
         date: "2026-10-08",
         cancelled: false,
+        time: BERLIN_USUAL,
         groupName: "Thursday Crew",
         to: { kind: "player", shareToken: "token-Thursday Crew" },
       },
       {
         date: "2026-10-09",
         cancelled: false,
+        time: BERLIN_USUAL,
         groupName: "My table",
         to: { kind: "gm", groupId: owned },
       },
       {
         date: "2026-10-11",
         cancelled: false,
+        time: BERLIN_USUAL,
         groupName: "Sunday Saga",
         to: { kind: "player", shareToken: "token-Sunday Saga" },
       },
       {
         date: "2026-10-15",
         cancelled: false,
+        time: BERLIN_USUAL,
         groupName: "Thursday Crew",
         to: { kind: "player", shareToken: "token-Thursday Crew" },
       },
@@ -87,12 +92,14 @@ describe("nextSessions", () => {
       {
         date: "2026-10-08",
         cancelled: true,
+        time: BERLIN_USUAL,
         groupName: "Thursday Crew",
         to: { kind: "player", shareToken: "token-Thursday Crew" },
       },
       {
         date: "2026-10-09",
         cancelled: true,
+        time: BERLIN_USUAL,
         groupName: "My table",
         to: { kind: "gm", groupId: owned },
       },
@@ -130,6 +137,7 @@ describe("nextSessions", () => {
       {
         date: "2026-10-08",
         cancelled: false,
+        time: BERLIN_USUAL,
         groupName: "Thursday Crew",
         to: { kind: "gm", groupId: thursday },
       },

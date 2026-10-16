@@ -4,8 +4,11 @@ import { describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import type { Answer } from "../../../../shared/answers";
 import { summarizeMonth } from "../../../../shared/monthSummary";
+import type { ClockTime } from "../../../../shared/sessionTime";
 import type { CalendarSession } from "./DayCell";
 import { DayPanel } from "./DayPanel";
+
+vi.mock("../../../lib/timeZone", () => ({ browserTimeZone: () => "Europe/Berlin" }));
 
 const today = "2026-10-02";
 const players = ["Ana", "Ben", "Chiara", "Dev", "Eli"].map((name) => ({ _id: name, name }));
@@ -16,6 +19,8 @@ type PanelSetup = {
   session?: CalendarSession["state"];
   pending?: boolean;
   roster?: typeof players;
+  timeAndPlace?: { startTime: string; lengthMinutes: number; timeZone: string; location?: string };
+  sessionTime?: { startTime: ClockTime; lengthMinutes: number };
 };
 
 function renderPanel({
@@ -24,6 +29,8 @@ function renderPanel({
   session,
   pending = false,
   roster = players,
+  timeAndPlace = { startTime: "19:00", lengthMinutes: 240, timeZone: "Europe/Berlin" },
+  sessionTime,
 }: PanelSetup = {}) {
   const summary = summarizeMonth({
     month: date.slice(0, 7),
@@ -39,18 +46,25 @@ function renderPanel({
             published: true,
             startTime: "19:00" as const,
             lengthMinutes: 240,
+            ...sessionTime,
           },
         ]
       : [],
   });
   const day = summary.days.find((d) => d.date === date)!;
-  const handlers = { onClose: vi.fn(), onSchedule: vi.fn(), onCancel: vi.fn() };
+  const handlers = {
+    onClose: vi.fn(),
+    onSchedule: vi.fn(),
+    onCancel: vi.fn(),
+    onOpenTimeAndPlace: vi.fn(),
+  };
   render(
     <DayPanel
       day={day}
       playerCount={roster.length}
       today={today}
       pending={pending}
+      timeAndPlace={timeAndPlace}
       closeLabel="Overview"
       {...handlers}
     />,
@@ -79,6 +93,51 @@ describe("DayPanel", () => {
     const { onSchedule } = renderPanel();
     await userEvent.click(screen.getByRole("button", { name: "Schedule session" }));
     expect(onSchedule).toHaveBeenCalledOnce();
+  });
+
+  it("says what players' calendars will show right above Schedule session", async () => {
+    const { onSchedule, onOpenTimeAndPlace } = renderPanel({
+      timeAndPlace: {
+        startTime: "18:30",
+        lengthMinutes: 180,
+        timeZone: "Europe/Berlin",
+        location: "Max's place",
+      },
+    });
+    const line = screen.getByText(/^Players' calendars will show/);
+    expect(line.textContent).toBe("Players' calendars will show 18:30–21:30 · Max's place");
+    expect(line.closest("div")?.nextElementSibling).toBe(
+      screen.getByRole("button", { name: "Schedule session" }),
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Change time and place" }));
+    expect(onOpenTimeAndPlace).toHaveBeenCalledOnce();
+    await userEvent.click(screen.getByRole("button", { name: "Schedule session" }));
+    expect(onSchedule).toHaveBeenCalledOnce();
+  });
+
+  it("names the Group's zone in the line when the GM's browser is elsewhere", () => {
+    renderPanel({
+      timeAndPlace: { startTime: "19:00", lengthMinutes: 240, timeZone: "Europe/London" },
+    });
+    expect(screen.getByText(/^Players' calendars will show/).textContent).toBe(
+      "Players' calendars will show 19:00–23:00 London time",
+    );
+  });
+
+  it("shows the time a Cancelled Session comes back with", () => {
+    renderPanel({ session: "cancelled", sessionTime: { startTime: "20:00", lengthMinutes: 120 } });
+    expect(screen.getByText(/^Players' calendars will show/).textContent).toBe(
+      "Players' calendars will show 20:00–22:00",
+    );
+  });
+
+  it.each([
+    ["a scheduled Session", { session: "scheduled" as const }],
+    ["a past night", { date: "2026-10-01" }],
+  ])("leaves the line off %s", (_, setup) => {
+    renderPanel(setup);
+    expect(screen.queryByText(/^Players' calendars will show/)).toBeNull();
   });
 
   it("cancels a Session that has not passed", async () => {

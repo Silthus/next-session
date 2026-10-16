@@ -17,6 +17,8 @@ type GroupSwitcherProps = {
   onCreate: () => Promise<unknown>;
   onRename: (name: string) => Promise<unknown>;
   onDelete: () => Promise<unknown>;
+  timeAndPlaceIsNew: boolean;
+  onOpenTimeAndPlace: () => void;
 };
 
 type Pending = "creating" | "deleting";
@@ -120,6 +122,8 @@ function SwitcherMenu({
   onOpen,
   onCreate,
   onDelete,
+  timeAndPlaceIsNew,
+  onOpenTimeAndPlace,
   pending,
   failure,
   run,
@@ -200,6 +204,7 @@ function SwitcherMenu({
         )}
       </button>
       <div className="my-1.5 border-t border-line" />
+      <TimeAndPlaceItem isNew={timeAndPlaceIsNew} onOpen={onOpenTimeAndPlace} />
       <MenuButton onSelect={onStartRename}>Rename group</MenuButton>
       {confirmingDelete ? (
         <DeleteConfirm
@@ -227,6 +232,22 @@ function SwitcherMenu({
         </p>
       )}
     </>
+  );
+}
+
+function TimeAndPlaceItem({ isNew, onOpen }: { isNew: boolean; onOpen: () => void }) {
+  if (!isNew) return <MenuButton onSelect={onOpen}>Time and place</MenuButton>;
+  return (
+    <MenuButton
+      onSelect={onOpen}
+      label="Time and place, new"
+      className="bg-accent-soft font-semibold"
+    >
+      <span className="flex-1">Time and place</span>
+      <span className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-accent-ink">
+        New
+      </span>
+    </MenuButton>
   );
 }
 
