@@ -11,7 +11,6 @@ import { MAX_CLAIMED_PLAYERS_PER_ACCOUNT, MAX_GROUPS_PER_GM } from "../shared/li
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type QueryCtx } from "./_generated/server";
 import { remindersConfigured } from "./mail";
-import { fail } from "./model/errors";
 import { currentAccount, requireAccount } from "./model/access";
 import { remindersOn } from "./model/reminderLinks";
 import { groupTimeOf, sessionTimeAndPlace, sessionTimeAndPlaceFields } from "./model/timeAndPlace";
@@ -160,8 +159,7 @@ export const setSessionEmails = mutation({
   args: { enabled: v.boolean() },
   returns: v.null(),
   handler: async (ctx, { enabled }) => {
-    const account = await currentAccount(ctx);
-    if (!account) fail({ code: "UNAUTHENTICATED" });
+    const account = await requireAccount(ctx);
     await ctx.db.patch("users", account._id, { sessionEmailsEnabled: enabled });
     return null;
   },

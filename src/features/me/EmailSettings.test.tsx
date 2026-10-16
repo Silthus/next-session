@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ConvexError } from "convex/values";
 import { describe, expect, it, vi } from "vitest";
 import { EmailSettings, type NotificationSettings } from "./EmailSettings";
 
@@ -89,16 +88,13 @@ describe("EmailSettings", () => {
     renderSettings(
       { sessionEmails: true, reminders: true },
       {
-        saveReminders: () =>
-          Promise.reject(new ConvexError({ code: "RATE_LIMITED", retryAfter: 1_000 })),
+        saveReminders: () => Promise.reject(new Error("Server Error")),
       },
     );
 
     await userEvent.click(screen.getByRole("switch", reminders));
 
-    expect((await screen.findByRole("alert")).textContent).toBe(
-      "Slow down a moment, then try again.",
-    );
+    expect((await screen.findByRole("alert")).textContent).toBe("That didn't work. Try again.");
   });
 
   it("disables the Session updates switch while the settings load", () => {
