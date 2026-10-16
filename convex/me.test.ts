@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
+  expectErrorCode,
   type GmClient,
   newBackend,
   seedSession,
@@ -200,5 +201,102 @@ describe("me.groups", () => {
     for (const wrongClock of ["2026-10-05", "2026-09-01", "2026-13-01", "today"]) {
       expect(await upcomingAsOf(wrongClock)).toEqual([TODAY]);
     }
+  });
+});
+
+const notificationSettings = (as: GmClient | TestBackend) =>
+  as.query(api.me.notificationSettings, {});
+
+function configureReminders() {
+  vi.stubEnv("POSTHOG_MAIL_WEBHOOK_SECRET", "mail-webhook-secret");
+  vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "https://webhooks.example.test/reminders");
+}
+
+describe("me.notificationSettings", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("is null for a visitor and an Anonymous GM", async () => {
+    const anonymousGm = await signInAnonymousGm(t);
+
+    expect(await notificationSettings(t)).toBeNull();
+    expect(await notificationSettings(anonymousGm.as)).toBeNull();
+  });
+
+  it("hides Reminders while they are not configured", async () => {
+    const account = await signInAccount(t);
+
+    expect(await notificationSettings(account.as)).toEqual({
+      sessionEmails: true,
+      reminders: null,
+    });
+  });
+
+  it.each(["POSTHOG_REMINDER_WEBHOOK_URL", "POSTHOG_MAIL_WEBHOOK_SECRET"])(
+    "hides Reminders without %s",
+    async (variable) => {
+      configureReminders();
+      vi.stubEnv(variable, "");
+      const account = await signInAccount(t);
+
+      expect((await notificationSettings(account.as))?.reminders).toBeNull();
+    },
+  );
+
+  it("reads Reminders as on by default once they are configured", async () => {
+    configureReminders();
+    const account = await signInAccount(t);
+
+    expect(await notificationSettings(account.as)).toEqual({
+      sessionEmails: true,
+      reminders: true,
+    });
+  });
+});
+
+describe("me.setReminders", () => {
+  beforeEach(configureReminders);
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("turns only the caller's Reminders off and back on, leaving Session updates alone", async () => {
+    const account = await signInAccount(t);
+    const other = await signInAccount(t);
+
+    await account.as.mutation(api.me.setReminders, { enabled: false });
+
+    expect(await notificationSettings(account.as)).toEqual({
+      sessionEmails: true,
+      reminders: false,
+    });
+    expect((await notificationSettings(other.as))?.reminders).toBe(true);
+
+    await account.as.mutation(api.me.setReminders, { enabled: true });
+
+    expect((await notificationSettings(account.as))?.reminders).toBe(true);
+  });
+
+  it("leaves Reminders alone when Session updates are turned off", async () => {
+    const account = await signInAccount(t);
+
+    await account.as.mutation(api.me.setSessionEmails, { enabled: false });
+
+    expect(await notificationSettings(account.as)).toEqual({
+      sessionEmails: false,
+      reminders: true,
+    });
+  });
+
+  it("refuses a visitor and an Anonymous GM", async () => {
+    const anonymousGm = await signInAnonymousGm(t);
+
+    await expectErrorCode(t.mutation(api.me.setReminders, { enabled: false }), "UNAUTHENTICATED");
+    await expectErrorCode(
+      anonymousGm.as.mutation(api.me.setReminders, { enabled: false }),
+      "UNAUTHENTICATED",
+    );
   });
 });

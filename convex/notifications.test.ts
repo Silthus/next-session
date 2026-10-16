@@ -107,9 +107,11 @@ it("cancels a Session older than the Undo window and uses the current Group name
 
 it("lets an Account turn session emails off and back on, with email on by default", async () => {
   const { account, as, groupId } = await crew();
-  expect(await account.as.query(api.me.sessionEmails, {})).toBe(true);
+  const sessionEmails = async () =>
+    (await account.as.query(api.me.notificationSettings, {}))?.sessionEmails;
+  expect(await sessionEmails()).toBe(true);
   await account.as.mutation(api.me.setSessionEmails, { enabled: false });
-  expect(await account.as.query(api.me.sessionEmails, {})).toBe(false);
+  expect(await sessionEmails()).toBe(false);
   await as.mutation(api.sessions.schedule, { groupId, date });
   await finish();
   expect(fetchMock).not.toHaveBeenCalled();
@@ -197,7 +199,7 @@ it("rejects signed-out and anonymous preference writes", async () => {
   await expect(
     anonymous.as.mutation(api.me.setSessionEmails, { enabled: false }),
   ).rejects.toThrow();
-  expect(await t.query(api.me.sessionEmails, {})).toBeNull();
+  expect(await t.query(api.me.notificationSettings, {})).toBeNull();
 });
 
 it("sends only the final cancellation when an older Session is cancelled, restored and cancelled again", async () => {
