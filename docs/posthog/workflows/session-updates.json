@@ -55,7 +55,7 @@
               "from": {
                 "integrationId": "<SENDER_INTEGRATION_ID>",
                 "email": "hello@next-session.link",
-                "name": "Michael from Next Session"
+                "name": "Next Session"
               },
               "replyTo": "<REPLY_TO>",
               "preheader": "The next game night for your group."

@@ -6,7 +6,7 @@
     "templating": "liquid",
     "email": {
       "subject": "{{ event.properties.group_name | raw }}: session {% if event.properties.change == \"scheduled\" %}set{% else %}cancelled{% endif %}",
-      "text": "Hi there,\n\n{% if event.properties.change == \"scheduled\" %}The next session for {{ event.properties.group_name | raw }} is set for {{ event.properties.date_label | raw }}.{% else %}The session for {{ event.properties.group_name | raw }} on {{ event.properties.date_label | raw }} has been cancelled.{% endif %}\n\nOpen your group: {{ event.properties.player_url | raw }}\n\nThanks!\nMichael\n\nYou get this because you keep this group. Turn session updates off in My groups: https://next-session.link/me\n",
+      "text": "Hi there,\n\n{% if event.properties.change == \"scheduled\" %}The next session for {{ event.properties.group_name | raw }} is set for {{ event.properties.date_label | raw }}.{% else %}The session for {{ event.properties.group_name | raw }} on {{ event.properties.date_label | raw }} has been cancelled.{% endif %}\n\nOpen your group: {{ event.properties.player_url | raw }}\n\nYou get this because you keep this group. Turn session updates off in My groups: https://next-session.link/me\n",
       "design": {
         "counters": {
           "u_row": 2,
@@ -202,35 +202,6 @@
                         "text": "<span style=\"font-size:16px;line-height:19px;\">Open your group</span>",
                         "calculatedWidth": 160,
                         "calculatedHeight": 47
-                      }
-                    },
-                    {
-                      "id": "u_content_text_6",
-                      "type": "text",
-                      "values": {
-                        "containerPadding": "10px 32px",
-                        "anchor": "",
-                        "textAlign": "left",
-                        "lineHeight": "160%",
-                        "linkStyle": {
-                          "inherit": false,
-                          "linkColor": "#835200",
-                          "linkHoverColor": "#835200",
-                          "linkUnderline": true,
-                          "linkHoverUnderline": true
-                        },
-                        "hideDesktop": false,
-                        "displayCondition": null,
-                        "_meta": {
-                          "htmlID": "u_content_text_6",
-                          "htmlClassNames": "u_content_text"
-                        },
-                        "selectable": true,
-                        "draggable": true,
-                        "duplicatable": true,
-                        "deletable": true,
-                        "hideable": true,
-                        "text": "<p style=\"margin:0;font-size:16px;line-height:160%;color:#1a1511;\">Thanks!<br />Michael</p>"
                       }
                     },
                     {
