@@ -1,0 +1,3 @@
+     × says how long Resend keeps session emails and their delivery logs 29ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  |shared| shared/legal.test.ts > privacy text > says how long Resend keeps session emails and their delivery logs
