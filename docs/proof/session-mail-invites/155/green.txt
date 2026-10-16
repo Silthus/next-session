@@ -1,0 +1,27 @@
+# Green: the same tests after the change, every assertion intact, none skipped
+
+$ bunx vitest run convex/sessionCancellations.test.ts convex/model/sessionMailCopy.test.ts --reporter=verbose
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > announces a set Session with when, where, the invite hint, the group link and why it came 32ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > leaves the Where line out when the Session has no location 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > says what a changed Session is now 2ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > tells a cancel without when or where, and that the calendar removes it 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > says you for a set Session 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > says you for a changed Session 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > says you for a cancelled Session 3ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > links the GM surface and says the GM runs the group 2ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the HTML part > says the same words with one button to the group 4ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the HTML part > escapes what the GM typed 2ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > writes the times in the Group's zone with its city 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the mail for entering or leaving the calendar recipient set > invites a player who entered with the night and the invite hint 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the mail for entering or leaving the calendar recipient set > invites a gm who entered with the night and the invite hint 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the mail for entering or leaving the calendar recipient set > withdraws the night from a Player who left, with no button to the group 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the mail for a deleted Group's night > tells a player the night is off, with no button to the gone group 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the mail for a deleted Group's night > tells a gm the night is off, with no button to the gone group 0ms
+ ✓ |convex| convex/sessionCancellations.test.ts > deleting a Group > cancels every upcoming published Session in each calendar it reached before the Group goes 179ms
+ ✓ |convex| convex/sessionCancellations.test.ts > deleting a Group > cancels nothing that is not an upcoming published scheduled Session 35ms
+ ✓ |convex| convex/sessionCancellations.test.ts > deleting a Group > cancels an expired Unsaved Group's nights for its Players and leaves its Anonymous GM out 25ms
+ ✓ |convex| convex/sessionCancellations.test.ts > deleting a Group > drains 100 Accounts × 20 Sessions in runs Convex accepts, spaced under Resend's rate, and forgets them 4192ms
+ ✓ |convex| convex/sessionCancellations.test.ts > deleting a Group > drops a deletion cancel once the Account turns Session mail off before it sends 47ms
+ ✓ |convex| convex/sessionCancellations.test.ts > deleting a Group > deletes as before without RESEND_API_KEY: nothing kept for later, nothing sent 23ms
+ Test Files  2 passed (2)
+      Tests  22 passed (22)

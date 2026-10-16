@@ -1,0 +1,12 @@
+# Full local gate on the landed tree (integration tip 93d14a2 merged): ~/dev/fleet/fleet heavy -- bun run check
+# tsc (app, node, convex), eslint, prettier --check, vitest run, vite build, wrangler deploy --dry-run; build sourcemap notices from posthog-js left out
+
+$ tsc -p tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p convex/tsconfig.json && eslint . && prettier --check . && vitest run && vite build && wrangler deploy --dry-run
+All matched files use Prettier code style!
+ Test Files  92 passed (92)
+      Tests  1478 passed (1478)
+✓ built in 541ms
+--dry-run: exiting now.
+exit 0
+
+bun run e2e not run: the ticket changes no UI and no e2e flow (mail and backend only)
