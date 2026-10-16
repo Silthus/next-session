@@ -18,12 +18,6 @@ const REMINDER_MINUTES_BEFORE = 120;
 const options = parseArgs(process.argv.slice(2));
 const sender = process.env.INVITE_FROM ?? "Next Session <hello@next-session.link>";
 
-if (options.command === "mime-check") {
-  await mimeCheck();
-} else {
-  await sendStep(options.command, recipientsFromEnv());
-}
-
 async function sendStep(stepName: string, recipients: string[]) {
   const ids: string[] = [];
   for (const recipient of recipients) {
@@ -145,6 +139,11 @@ async function mimeCheck() {
   if (options.dryRun) return;
 
   const sources = await waitForSources(inbox, sends.length);
+  const rawDirectory = `${process.env.HOME}/.config/next-session/invite-test-raw/${Date.now()}`;
+  await Promise.all(
+    sources.map((source, index) => Bun.write(`${rawDirectory}/${index}.eml`, source)),
+  );
+  console.log(`Raw sources saved privately to ${rawDirectory}`);
   for (const source of sources) {
     console.log(`\n=== ${subjectLine(source)}`);
     console.log(mimeSkeleton(source).replaceAll(inbox.address, "<inbox>"));
@@ -251,4 +250,10 @@ function parseArgs(args: string[]) {
 function fail(message: string): never {
   console.error(message);
   process.exit(1);
+}
+
+if (options.command === "mime-check") {
+  await mimeCheck();
+} else {
+  await sendStep(options.command, recipientsFromEnv());
 }

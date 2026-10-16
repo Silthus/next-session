@@ -65,11 +65,13 @@ Optional second Google pass: if the setting in step 3 is not **Only if the sende
 
 ## Results
 
-To fill in. One row per question and client; evidence goes in this folder as redacted screenshots or MIME excerpts (addresses removed).
+Filled in round by round. Evidence goes in this folder as redacted screenshots or MIME excerpts (addresses removed). The third inbox is on a custom domain in place of Outlook.com; its column names the app it is read in once Michael confirms it.
 
-| Question                                                          | Gmail | Outlook.com | iCloud |
+**Resend side (`mime-check`, 2026-10-16, [evidence](mime-check-2026-10-16.md)).** Resend keeps the full `Content-Type: text/calendar; charset=utf-8; method=REQUEST` (and `PUBLISH`, `CANCEL`), adds `name=invite.ics`, and sends the part base64 with `Content-Disposition: attachment`. The structure is `multipart/mixed` holding `multipart/alternative` (text, html), then the calendar. The calendar decodes byte for byte to what was sent, with CRLF line ends, whether the API got base64 or plain text. Mail goes out through SES `eu-west-1`, DKIM `d=next-session.link`, return path on `rsend.next-session.link`. The key Michael created has sending access only, so delivery status is read in the inboxes, not the API.
+
+| Question                                                          | Gmail | Custom domain (app: ?) | iCloud |
 | ----------------------------------------------------------------- | ----- | ----------- | ------ |
-| 1. `method=REQUEST` / `CANCEL` reach the inbox unchanged (raw MIME) |       |             |        |
+| 1. `method=REQUEST` / `CANCEL` reach the inbox unchanged (raw MIME) | Resend side yes (above); per-client source pending | pending | pending |
 | 2a. Invite card for `REQUEST` with `ATTENDEE`                     |       |             |        |
 | 2b. Invite card for `PUBLISH`                                     |       |             |        |
 | 3. Entry added without a tap (Google setting: …)                  |       |             |        |
