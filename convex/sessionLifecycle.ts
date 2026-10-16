@@ -44,7 +44,7 @@ export const settle = internalMutation({
   },
 });
 
-function stateOf(session: Doc<"sessions">): SessionState {
+export function stateOf(session: Doc<"sessions">): SessionState {
   return session.state ?? "scheduled";
 }
 

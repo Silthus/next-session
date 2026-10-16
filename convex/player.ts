@@ -33,9 +33,9 @@ import {
   validName,
 } from "./model/players";
 import { enforceRateLimit } from "./model/rateLimits";
-import { isScheduled } from "./sessionLifecycle";
+import { stateOf } from "./sessionLifecycle";
 import { track } from "./model/telemetry";
-import { answerValue } from "./schema";
+import { answerValue, sessionState } from "./schema";
 
 const answered = v.object({ keptNow: v.boolean() });
 
@@ -43,7 +43,7 @@ const playerGroupView = v.object({
   groupId: v.id("groups"),
   name: v.string(),
   players: v.array(v.object({ _id: v.id("players"), name: v.string() })),
-  sessionDates: v.array(v.string()),
+  sessions: v.array(v.object({ date: v.string(), state: sessionState })),
   claimedPlayerId: v.union(v.id("players"), v.null()),
   removedFromMyGroups: v.boolean(),
   opensAsGm: v.boolean(),
@@ -55,12 +55,12 @@ export const group = query({
   handler: async (ctx, { shareToken }) => {
     const group = await groupByShareToken(ctx, shareToken);
     if (group === null) return null;
-    const [players, sessionDates, caller] = await Promise.all([
+    const [players, sessions, caller] = await Promise.all([
       rosterOf(ctx, group._id),
-      sessionDatesOf(ctx, group._id),
+      sessionsOf(ctx, group._id),
       callerIn(ctx, group),
     ]);
-    return { groupId: group._id, name: group.name, players, sessionDates, ...caller };
+    return { groupId: group._id, name: group.name, players, sessions, ...caller };
   },
 });
 
@@ -227,12 +227,12 @@ async function rosterOf(ctx: QueryCtx, groupId: Id<"groups">) {
   return players.map(({ _id, name }) => ({ _id, name }));
 }
 
-async function sessionDatesOf(ctx: QueryCtx, groupId: Id<"groups">) {
+async function sessionsOf(ctx: QueryCtx, groupId: Id<"groups">) {
   const sessions = await ctx.db
     .query("sessions")
     .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId))
     .collect();
-  return sessions.filter(isScheduled).map(({ date }) => date);
+  return sessions.map((session) => ({ date: session.date, state: stateOf(session) }));
 }
 
 async function answersOfPlayerIn(ctx: QueryCtx, playerId: Id<"players">, month: IsoMonth) {

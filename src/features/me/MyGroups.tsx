@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { cn } from "../../ui/cn";
 import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react";
 import type { IsoDate } from "../../../shared/dates";
 import { track } from "../../lib/telemetry";
@@ -12,11 +13,13 @@ import { dayLabel, longDayLabel, relativeDay } from "../group/calendar/calendarD
 import { MenuButton, Popover } from "../group/rail/Popover";
 import {
   daysToAnswer,
+  isCancelled,
   nextSessions,
   type GroupPage,
   type MyGroups as MyGroupsData,
   type PlayingGroup,
   type RunningGroup,
+  type UpcomingSession,
 } from "./myGroups";
 
 type MyGroupsProps = {
@@ -125,14 +128,22 @@ function NextSessions({ groups, today }: { groups: MyGroupsData; today: IsoDate 
             <li key={`${session.date}-${pageKey(session.to)}`}>
               <GroupPageLink
                 to={session.to}
-                className={`flex items-center gap-3 rounded-md border border-accent/40 bg-accent-soft/50 px-3 py-2.5 hover:border-accent hover:bg-accent-soft ${pressable}`}
+                className={cn(
+                  "flex items-center gap-3 rounded-md border px-3 py-2.5",
+                  session.cancelled
+                    ? `border-line bg-surface ${hoverRow}`
+                    : `border-accent/40 bg-accent-soft/50 hover:border-accent hover:bg-accent-soft ${pressable}`,
+                )}
               >
-                <IconStar className="size-5 shrink-0 text-accent-strong" />
+                <IconStar
+                  className={cn(
+                    "size-5 shrink-0",
+                    session.cancelled ? "text-ink-3" : "text-accent-strong",
+                  )}
+                />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold">{longDayLabel(session.date)}</span>
-                  <span className="block text-xs text-ink-3">
-                    {relativeDay(session.date, today)}
-                  </span>
+                  <span className="block text-xs text-ink-3">{whenOf(session, today)}</span>
                 </span>
                 <span className="max-w-[45%] truncate text-sm font-medium text-ink-2">
                   {session.groupName}
@@ -164,7 +175,7 @@ function PlayingGroups({
             >
               <GroupName name={group.name} />
               <span className="text-sm text-ink-2">as {group.playerName}</span>
-              <NextSession dates={group.upcomingSessions} />
+              <NextSession sessions={group.upcomingSessions} />
               <OpenDates openDates={group.openDates} />
             </GroupPageLink>
             <div className="absolute top-1.5 right-1.5">
@@ -231,7 +242,7 @@ function RunningGroups({
                 className={`flex flex-col gap-1 rounded-xl p-4 ${focusRing}`}
               >
                 <GroupName name={group.name} />
-                <NextSession dates={group.upcomingSessions} />
+                <NextSession sessions={group.upcomingSessions} />
               </GroupPageLink>
             </li>
           ))}
@@ -275,13 +286,24 @@ function GroupName({ name }: { name: string }) {
   return <span className="font-display text-lg font-semibold break-words">{name}</span>;
 }
 
-function NextSession({ dates }: { dates: IsoDate[] }) {
-  const [next] = dates;
+function whenOf(session: UpcomingSession, today: IsoDate) {
+  const when = relativeDay(session.date, today);
+  return session.cancelled ? `Cancelled · ${when}` : when;
+}
+
+function NextSession({ sessions }: { sessions: RunningGroup["upcomingSessions"] }) {
+  const [next] = sessions;
   if (next === undefined) return <span className="text-sm text-ink-3">No session yet</span>;
+  const cancelled = isCancelled(next);
   return (
-    <span className="flex items-center gap-1.5 text-sm font-medium text-accent-strong">
+    <span
+      className={cn(
+        "flex items-center gap-1.5 text-sm font-medium",
+        cancelled ? "text-ink-2" : "text-accent-strong",
+      )}
+    >
       <IconStar className="size-3.5 shrink-0" />
-      {`Next session ${dayLabel(next)}`}
+      {`Next session ${dayLabel(next.date)}${cancelled ? " · Cancelled" : ""}`}
     </span>
   );
 }
