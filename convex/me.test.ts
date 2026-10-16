@@ -3,6 +3,7 @@ import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
   CANCELLED,
+  expectErrorCode,
   type GmClient,
   newBackend,
   seedSession,
@@ -262,5 +263,88 @@ describe("me.groups", () => {
     for (const wrongClock of ["2026-10-05", "2026-09-01", "2026-13-01", "today"]) {
       expect(await upcomingAsOf(wrongClock)).toEqual(scheduled(TODAY));
     }
+  });
+});
+
+describe("the Calendar feed link", () => {
+  const SITE_URL = "https://next-session.test";
+  const FEED_URL = new RegExp(`^${SITE_URL}/cal/a/[A-Za-z0-9_-]{22}\\.ics$`);
+  const CALENDAR_FEED_CALLS_PER_HOUR = 10;
+
+  beforeEach(() => {
+    vi.stubEnv("SITE_URL", SITE_URL);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  const calendarFeed = (as: GmClient) => as.mutation(api.me.calendarFeed, {});
+  const resetCalendarFeed = (as: GmClient) => as.mutation(api.me.resetCalendarFeed, {});
+
+  it("is minted on the first call and the same on every call after", async () => {
+    const { as } = await signInAccount(t);
+
+    const first = await calendarFeed(as);
+
+    expect(first.url).toMatch(FEED_URL);
+    expect(await calendarFeed(as)).toEqual(first);
+  });
+
+  it("is a different link for each Account", async () => {
+    const ours = await calendarFeed((await signInAccount(t)).as);
+    const theirs = await calendarFeed((await signInAccount(t)).as);
+
+    expect(ours).not.toEqual(theirs);
+  });
+
+  it("is replaced by a reset, which later calls keep returning", async () => {
+    const { as } = await signInAccount(t);
+    const before = await calendarFeed(as);
+
+    const reset = await resetCalendarFeed(as);
+
+    expect(reset.url).toMatch(FEED_URL);
+    expect(reset).not.toEqual(before);
+    expect(await calendarFeed(as)).toEqual(reset);
+  });
+
+  it("is minted by a reset when the Account had none", async () => {
+    const { as } = await signInAccount(t);
+
+    const reset = await resetCalendarFeed(as);
+
+    expect(reset.url).toMatch(FEED_URL);
+    expect(await calendarFeed(as)).toEqual(reset);
+  });
+
+  it("is refused to a visitor and an Anonymous GM", async () => {
+    const anonymousGm = await signInAnonymousGm(t);
+
+    for (const as of [t, anonymousGm.as]) {
+      await expectErrorCode(as.mutation(api.me.calendarFeed, {}), "UNAUTHENTICATED");
+      await expectErrorCode(as.mutation(api.me.resetCalendarFeed, {}), "UNAUTHENTICATED");
+    }
+  });
+
+  it("is refused once the Account spent its calls for the hour, and only for that Account", async () => {
+    const spent = await signInAccount(t);
+    const other = await signInAccount(t);
+    for (let call = 0; call < CALENDAR_FEED_CALLS_PER_HOUR; call++) {
+      await calendarFeed(spent.as);
+    }
+
+    await expectErrorCode(calendarFeed(spent.as), "RATE_LIMITED");
+    await expectErrorCode(resetCalendarFeed(spent.as), "RATE_LIMITED");
+    expect((await resetCalendarFeed(other.as)).url).toMatch(FEED_URL);
+  });
+
+  it("is served again an hour later", async () => {
+    const { as } = await signInAccount(t);
+    for (let call = 0; call < CALENDAR_FEED_CALLS_PER_HOUR; call++) await calendarFeed(as);
+
+    vi.setSystemTime(NOW + 60 * 60_000);
+
+    expect((await calendarFeed(as)).url).toMatch(FEED_URL);
   });
 });

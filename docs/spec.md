@@ -87,9 +87,12 @@ export default defineSchema({
     // Google profile picture copy, §5.7
     profileImageId: v.optional(v.id("_storage")),
     profileImageFrom: v.optional(v.string()),
+    // Calendar feed, §14.2
+    calendarFeedToken: v.optional(v.string()),
   })
     .index("email", ["email"])
-    .index("phone", ["phone"]),
+    .index("phone", ["phone"])
+    .index("by_calendarFeedToken", ["calendarFeedToken"]),
 
   groups: defineTable({
     ownerId: v.id("users"),
@@ -208,12 +211,14 @@ The name and Roster checks that `roster` and `player` share (`validName`, `ensur
 | | `answer` | mutation | `{shareToken, playerId, date, answer: Answer \| null}` → `null` | Upsert, or delete on `null`. Rate limit `answer`. Touches the Group |
 | | `fillRest` | mutation | `{shareToken, playerId, month}` → `null` | Writes `busy` to every unanswered bookable date of the month in one mutation |
 | `me` | `groups` | query | `{today}` → `MyGroups \| null` | Account only, `null` otherwise. The Groups the caller runs and the Groups where it has a Claimed Player, with the next five Sessions as of `today`, Cancelled ones included, as `{date, state}` with each one's effective `startTime`, `lengthMinutes` and `location`, and each Group's `timeZone` (§12) |
+| | `calendarFeed` | mutation | `{}` → `{url}` | Account only. Mints the Calendar feed token on the first call and returns the same URL after (§14.2). Rate limit `calendarFeed` |
+| | `resetCalendarFeed` | mutation | `{}` → `{url}` | Account only. **Reset feed link**: replaces the token at once, with no Undo (§14.2). Rate limit `calendarFeed` |
 | `account` | `me` | query | `{}` → `{isAnonymous, email} \| null` | |
 | | `startSave` | mutation | `{}` → `{code}` | Anonymous GM only. 32 random bytes, stored hashed, 10-minute TTL. Rate limit `startSave` |
 | | `finishSave` | mutation | `{code}` → `{groupIds}` | Account only. See §5.3 |
 | `auth` | `signIn`, `signOut`, `store` | Convex Auth | | |
 
-Internal: `groups.deleteChildren`, `cleanup.sweepExpiredGroups` (cron), `sessionLifecycle.settle` (§12.6), `backfill.publishLegacySessions` and `backfill.emptyRetiredMailStates` (run once after the Cancelled Session deploys), `backfill.widenPublishedSnapshots` (run once after the Time and place deploy: fills `start`, `end`, `location` and `summary` into every `published` at the same revision), `calendarFiles.groupDownload` (§14), `auth.keepFirstGroupTimeZone` (§5.2), `rateLimits` component setup in `convex/convex.config.ts` and limit definitions in `convex/model/rateLimits.ts`.
+Internal: `groups.deleteChildren`, `cleanup.sweepExpiredGroups` (cron), `sessionLifecycle.settle` (§12.6), `backfill.publishLegacySessions` and `backfill.emptyRetiredMailStates` (run once after the Cancelled Session deploys), `backfill.widenPublishedSnapshots` (run once after the Time and place deploy: fills `start`, `end`, `location` and `summary` into every `published` at the same revision), `calendarFiles.groupDownload` and `calendarFiles.accountFeed` (§14), `auth.keepFirstGroupTimeZone` (§5.2), `rateLimits` component setup in `convex/convex.config.ts` and limit definitions in `convex/model/rateLimits.ts`.
 
 Dropped from Lonir: workspace functions, `gmGetGroupRail` and `gmGetDateAvailability` (the client derives the rail counts and the day panel from `groups.mine` and `schedule.month`), `listSessions`, `getAvailability`, `claimMembership` (a client-only check against `player.group`), early access, consent, client errors, hand-off, activation telemetry.
 
@@ -278,6 +283,7 @@ Convex functions do not see the client IP, so limits key on what the server can 
 | `startSave` | GM id | fixed window, 10 per hour |
 | `gmEdit` | GM id | token bucket, 120 per minute, capacity 60 |
 | `claimPlayer` | Account id | token bucket, 30 per minute, capacity 10 (`player.claim` and `player.release`) |
+| `calendarFeed` | Account id | fixed window, 10 per hour (`me.calendarFeed` and `me.resetCalendarFeed`) |
 
 `gmEdit` covers every GM mutation without a limit of its own: `groups.rename`, `remove`, `rotateShareToken` and `undoRotateShareToken`, all of `roster` and `sessions`, and `account.finishSave`. It is sized so that no real GM reaches it.
 
@@ -344,7 +350,7 @@ src/
   lib/                  env.ts, pageTitle.ts, storage.ts (all localStorage keys, prefixed "next-session."), errors.ts,
                         keyboard.ts, timeZone.ts, timeAndPlace.ts (a Session's wall-clock range, the zone named only
                         when the browser's zone differs)
-shared/                 dates.ts, answers.ts, monthSummary.ts, names.ts, shareToken.ts, legal.ts, limits.ts
+shared/                 dates.ts, answers.ts, monthSummary.ts, names.ts, randomToken.ts, legal.ts, limits.ts
 convex/                 schema.ts, model/, groups.ts, schedule.ts, roster.ts, sessions.ts, player.ts, me.ts,
                         account.ts, auth.ts, auth.config.ts, http.ts, crons.ts, cleanup.ts, convex.config.ts
 worker/index.ts         legacy-link redirect, then static assets
@@ -411,7 +417,7 @@ The same workflow runs on `push` to `main`; a `deploy` job `needs: [check, e2e]`
 
 1. `bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL` with `CONVEX_DEPLOY_KEY`.
 2. `bunx wrangler deploy` with `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
-3. Smoke: `curl https://next-session.link`. The app, a deep link and a new Share Link answer 200; a legacy `/s/<8 chars>` and a `/groups/...` link answer 302 to the same path on Lonir; a Calendar download for an unknown `/cal/s/<token>.ics` answers 404 through the Worker and Convex.
+3. Smoke: `curl https://next-session.link`. The app, a deep link and a new Share Link answer 200; a legacy `/s/<8 chars>` and a `/groups/...` link answer 302 to the same path on Lonir; a Calendar download for an unknown `/cal/s/<token>.ics` and a Calendar feed for an unknown `/cal/a/<token>.ics` answer 404 through the Worker and Convex.
 
 Secrets, set once with `gh secret set` by the deploy ticket from the env files on Michael's machine (never echoed): `CONVEX_DEPLOY_KEY` (from `CONVEX_PROD_DEPLOY_KEY` in `~/.config/next-session/deploy-keys.env`), `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` (from `~/.config/next-session/cloudflare.env`). Convex env on prod: `SITE_URL=https://next-session.link`, `JWT_PRIVATE_KEY`, `JWKS`. On dev `helpful-mastiff-82`: the same keys with `SITE_URL=http://localhost:5173`.
 
@@ -773,7 +779,9 @@ export type ServerEvent =
   | { name: "session_scheduled"; actor: Actor; group_id: string; player_count: number; is_first_for_group: boolean }
   | { name: "session_cancelled"; actor: Actor; group_id: string }
   | { name: "share_link_rotated"; actor: Actor; group_id: string }
-  | { name: "tips_confirmed"; actor: Actor };
+  | { name: "tips_confirmed"; actor: Actor }
+  | { name: "calendar_feed_created"; actor: Actor } // the first me.calendarFeed, no token
+  | { name: "calendar_feed_reset"; actor: Actor }; // me.resetCalendarFeed, no token
 
 type Actor = Doc<"users"> | { playerId: Id<"players"> };
 
@@ -963,7 +971,20 @@ Calendar files carry a Group's published Sessions into players' own calendars. T
 - **Add to calendar** in the player page's Next sessions card links here (§12.4).
 - A rename settles the scheduled upcoming Sessions through `groupChanged` (§12.6), so the download shows the new name once the Undo window ends. A Cancelled Session keeps its old name until **Schedule again**. The rename sends no Session update, because the state didn't change.
 
-### 14.2 Worker
+### 14.2 Calendar feed
+
+`GET next-session.link/cal/a/<feed token>.ics` is the **Calendar feed**: every Session of every Group an Account runs or plays in, for whoever holds the feed link. The Account subscribes to it once in its calendar app.
+
+- The feed token is `users.calendarFeedToken`, 22 characters from the Share Token alphabet (132 bits), drawn by the same `randomToken` helper in `shared/randomToken.ts`. It is a stored bearer credential in the sense of [ADR-0004](adr/0004-share-token-is-the-player-credential.md), not an HMAC, so **Reset feed link** revokes it.
+- `me.calendarFeed({}) → {url}` mints the token on the first call and returns the same URL after. `me.resetCalendarFeed({}) → {url}` replaces it at once, with no Undo: a leaked feed wants a hard stop. Both need an Account (`UNAUTHENTICATED` for an Anonymous GM or a visitor) and spend the `calendarFeed` rate limit of the Account (§5.4). `url` is `<SITE_URL>/cal/a/<token>.ics`; the web app derives the `webcal://` form from it.
+- The first mint tracks `calendar_feed_created` and a reset tracks `calendar_feed_reset`, both with only the actor. No token reaches an event or a log, and feed polls are not tracked.
+- A Convex HTTP action (`serveAccountFeed` in `convex/calendarFiles.ts`, routed in `convex/http.ts`) reads through the internal query `calendarFiles.accountFeed` with the token and the serve time. The query finds the Account by its **current** token only, so a reset token opens nothing.
+- It holds the published Sessions dated from 31 days back (UTC) to the end of the Booking Window, of the Groups the Account runs (at most 50) and the Groups where it has a Claimed Player (at most 50), each Group once. Each Group's Sessions come from one `by_groupId_and_date` index range capped at the days in the window. A Cancelled Session carries `STATUS:CANCELLED`, so a subscribed calendar shows it as off until it drops out of the window. The past month stays because many calendar apps delete what drops out of a feed. A Group the Account released, removed from My groups or deleted is gone from the next fetch, even while a deleted Group's Players are still being removed.
+- Each entry is built as in the Calendar download (§14.1), except its `URL` and `DESCRIPTION` link carry no Share Token: `<SITE_URL>/g/<groupId>` for a Group the Account runs, and `<SITE_URL>/me` for one it plays in. A Group it runs and plays in links to its GM page. The calendar is named "Next Session".
+- `200` with `Content-Type: text/calendar; charset=utf-8` and `Cache-Control: private, max-age=900`, and no `Content-Disposition`. An Account with nothing in the window gets an empty calendar, so a subscription survives a quiet month. An unknown or reset token, or a path outside the token alphabet, gets `404` with no body.
+- No rate limit, no Expiry touch and no server event on a fetch: a calendar app polling a feed is not activity on any Group.
+
+### 14.3 Worker
 
 The Worker proxies `/cal/` the way it proxies `/ingest/`, so the URL stays on `next-session.link` and survives a Convex deployment change. `/cal/*` is in `run_worker_first`.
 

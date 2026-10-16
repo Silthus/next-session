@@ -26,6 +26,7 @@ import type * as model_groups from "../model/groups.js";
 import type * as model_players from "../model/players.js";
 import type * as model_profileImages from "../model/profileImages.js";
 import type * as model_rateLimits from "../model/rateLimits.js";
+import type * as model_siteLinks from "../model/siteLinks.js";
 import type * as model_telemetry from "../model/telemetry.js";
 import type * as model_timeAndPlace from "../model/timeAndPlace.js";
 import type * as model_tips from "../model/tips.js";
@@ -64,6 +65,7 @@ declare const fullApi: ApiFromModules<{
   "model/players": typeof model_players;
   "model/profileImages": typeof model_profileImages;
   "model/rateLimits": typeof model_rateLimits;
+  "model/siteLinks": typeof model_siteLinks;
   "model/telemetry": typeof model_telemetry;
   "model/timeAndPlace": typeof model_timeAndPlace;
   "model/tips": typeof model_tips;

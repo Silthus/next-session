@@ -1,0 +1,9 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-d21154d5
+
+
+ Test Files  6 passed (6)
+      Tests  167 passed (167)
+   Start at  10:51:59
+   Duration  1.63s (tests 59%, transform 19%, import 16%, environment 5%)
+

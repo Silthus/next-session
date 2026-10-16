@@ -1,0 +1,457 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-d21154d5
+
+ ❯ |shared| shared/randomToken.test.ts (0 test)
+ ❯ |convex| convex/me.test.ts (21 tests | 7 failed) 185ms
+   ❯ the Calendar feed link (7)
+     × is minted on the first call and the same on every call after 11ms
+     × is a different link for each Account 1ms
+     × is replaced by a reset, which later calls keep returning 1ms
+     × is minted by a reset when the Account had none 3ms
+     × is refused to a visitor and an Anonymous GM 3ms
+     × is refused once the Account spent its calls for the hour, and only for that Account 1ms
+     × is served again an hour later 1ms
+stdout | convex/sessionMail.test.ts > never announces a change before its Undo window ends
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/calendarFiles.test.ts > the calendar feed > answers with the Sessions of every Group the Account runs or plays in
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/calendarFiles.test.ts > the calendar feed > drops a Group the Account plays in once the Account releases its Player
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/calendarFiles.test.ts > the calendar feed > drops a Group the Account plays in once the Account removes it from My groups
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/calendarFiles.test.ts > the calendar feed > drops a deleted Group at once, its Players still being removed
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/calendarFiles.test.ts > feed scoping > every calendar file holds only the published Sessions its own token reaches, through a feed token
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/calendarFiles.test.ts > feed scoping > every calendar file holds only the published Sessions its own token reaches, through a feed token
+Run 0000000000000000000000010003runs succeeded.
+
+ ❯ |convex| convex/calendarFiles.test.ts (26 tests | 14 failed) 307ms
+   ❯ the calendar feed (13)
+     × answers with the Sessions of every Group the Account runs or plays in 41ms
+     × lists a Group the Account runs and plays in once, linked to its GM page 5ms
+     × holds an empty calendar for an Account with nothing in the window 3ms
+     × keeps a Cancelled Session, marked cancelled 7ms
+     × keeps a Session from 31 days back and leaves out one from 32 4ms
+     × reaches to the end of the Booking Window 3ms
+     × leaves out a Session inside its first Undo window 2ms
+     × drops a Group the Account plays in once the Account releases its Player 11ms
+     × drops a Group the Account plays in once the Account removes it from My groups 8ms
+     × drops a deleted Group at once, its Players still being removed 8ms
+     × answers 404 with no body for the old link after a reset, and serves the new one 4ms
+     × answers 404 with no body for an unknown token 2ms
+     × answers 404 with no body for a token outside the token alphabet 2ms
+   ❯ feed scoping (2)
+     × every calendar file holds only the published Sessions its own token reaches, through a feed token 17ms
+ ❯ |convex| convex/sessionMail.test.ts (33 tests | 1 failed) 531ms
+   × never announces a change before its Undo window ends 35ms
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log
+`auth:store` type: signIn
+
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log
+`auth:store` type: signIn
+
+ ❯ |convex| convex/telemetry.callSites.test.ts (34 tests | 3 failed) 1319ms
+   ❯ the Calendar feed link (2)
+     × tracks calendar_feed_created on the first call only, with no token 10ms
+     × tracks calendar_feed_reset on a reset, with neither the old nor the new token 1ms
+   ❯ the redaction contract (1)
+     × sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log 112ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/randomToken.test.ts [ shared/randomToken.test.ts ]
+Error: Cannot find module './randomToken' imported from /home/coder/.t3/worktrees/next-session/t3-d21154d5/shared/randomToken.test.ts
+ ❯ shared/randomToken.test.ts:2:1
+      1| import { afterEach, describe, expect, it, vi } from "vitest";
+      2| import { randomToken, SHARE_TOKEN_LENGTH } from "./randomToken";
+       | ^
+      3|
+      4| const bytes =
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/26]⎯
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 25 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar feed > answers with the Sessions of every Group the Account runs or plays in
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ feedUrlOf convex/calendarFiles.test.ts:117:11
+ ❯ convex/calendarFiles.test.ts:294:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/26]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar feed > lists a Group the Account runs and plays in once, linked to its GM page
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ feedUrlOf convex/calendarFiles.test.ts:117:11
+ ❯ convex/calendarFiles.test.ts:335:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/26]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar feed > holds an empty calendar for an Account with nothing in the window
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ feedUrlOf convex/calendarFiles.test.ts:117:11
+ ❯ convex/calendarFiles.test.ts:341:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/26]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar feed > keeps a Cancelled Session, marked cancelled
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ feedUrlOf convex/calendarFiles.test.ts:117:11
+ ❯ convex/calendarFiles.test.ts:356:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/26]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar feed > keeps a Session from 31 days back and leaves out one from 32
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ feedUrlOf convex/calendarFiles.test.ts:117:11
+ ❯ convex/calendarFiles.test.ts:367:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/26]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar feed > reaches to the end of the Booking Window
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ feedUrlOf convex/calendarFiles.test.ts:117:11
+ ❯ convex/calendarFiles.test.ts:379:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/26]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar feed > leaves out a Session inside its first Undo window
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ feedUrlOf convex/calendarFiles.test.ts:117:11
+ ❯ convex/calendarFiles.test.ts:384:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/26]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar feed > drops a Group the Account plays in once the Account releases its Player
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar feed > drops a Group the Account plays in once the Account removes it from My groups
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ feedUrlOf convex/calendarFiles.test.ts:117:11
+ ❯ convex/calendarFiles.test.ts:403:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/26]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar feed > drops a deleted Group at once, its Players still being removed
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ feedUrlOf convex/calendarFiles.test.ts:117:11
+ ❯ convex/calendarFiles.test.ts:417:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/26]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar feed > answers 404 with no body for the old link after a reset, and serves the new one
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ feedUrlOf convex/calendarFiles.test.ts:117:11
+ ❯ convex/calendarFiles.test.ts:429:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/26]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar feed > answers 404 with no body for an unknown token
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar feed > answers 404 with no body for a token outside the token alphabet
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ feedUrlOf convex/calendarFiles.test.ts:117:11
+ ❯ convex/calendarFiles.test.ts:441:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/26]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > feed scoping > every calendar file holds only the published Sessions its own token reaches, through a feed token
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ feedUrlOf convex/calendarFiles.test.ts:117:11
+ ❯ convex/calendarFiles.test.ts:483:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/26]⎯
+
+ FAIL  |convex| convex/me.test.ts > the Calendar feed link > is minted on the first call and the same on every call after
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/me.test.ts:288:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/26]⎯
+
+ FAIL  |convex| convex/me.test.ts > the Calendar feed link > is a different link for each Account
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/me.test.ts:295:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/26]⎯
+
+ FAIL  |convex| convex/me.test.ts > the Calendar feed link > is replaced by a reset, which later calls keep returning
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/me.test.ts:303:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/26]⎯
+
+ FAIL  |convex| convex/me.test.ts > the Calendar feed link > is minted by a reset when the Account had none
+Error: Expected a Convex function exported from module "me" as `resetCalendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/me.test.ts:315:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/26]⎯
+
+ FAIL  |convex| convex/me.test.ts > the Calendar feed link > is refused to a visitor and an Anonymous GM
+AssertionError: expected Error: Expected a Convex function exporte… to be an instance of ConvexError
+ ❯ expectErrorCode convex/model/test.setup.ts:92:17
+     90|     (reason: unknown) => reason,
+     91|   );
+     92|   expect(error).toBeInstanceOf(ConvexError);
+       |                 ^
+     93|   const { data } = error as ConvexError<AppErrorData & { code: Code }>;
+     94|   expect(data.code).toBe(code);
+ ❯ convex/me.test.ts:325:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/26]⎯
+
+ FAIL  |convex| convex/me.test.ts > the Calendar feed link > is refused once the Account spent its calls for the hour, and only for that Account
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/me.test.ts:334:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/26]⎯
+
+ FAIL  |convex| convex/me.test.ts > the Calendar feed link > is served again an hour later
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/me.test.ts:344:69
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/26]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > never announces a change before its Undo window ends
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ feedStatusOf convex/sessionMail.test.ts:92:19
+ ❯ convex/sessionMail.test.ts:145:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/26]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > the Calendar feed link > tracks calendar_feed_created on the first call only, with no token
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/telemetry.callSites.test.ts:244:14
+ ❯ sendsDuring convex/telemetry.callSites.test.ts:60:3
+ ❯ eventsDuring convex/telemetry.callSites.test.ts:65:17
+ ❯ convex/telemetry.callSites.test.ts:243:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/26]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > the Calendar feed link > tracks calendar_feed_reset on a reset, with neither the old nor the new token
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/telemetry.callSites.test.ts:260:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/26]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log
+Error: Expected a Convex function exported from module "me" as `calendarFeed`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/telemetry.callSites.test.ts:614:33
+ ❯ sendsDuring convex/telemetry.callSites.test.ts:60:3
+ ❯ convex/telemetry.callSites.test.ts:589:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/26]⎯
+
+
+ Test Files  5 failed (5)
+      Tests  25 failed | 89 passed (114)
+   Start at  10:49:33
+   Duration  1.76s (tests 63%, transform 18%, import 14%, environment 4%)
+
