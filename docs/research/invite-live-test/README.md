@@ -69,6 +69,12 @@ Filled in round by round. Evidence goes in this folder as redacted screenshots o
 
 **Resend side (`mime-check`, 2026-10-16, [evidence](mime-check-2026-10-16.md)).** Resend keeps the full `Content-Type: text/calendar; charset=utf-8; method=REQUEST` (and `PUBLISH`, `CANCEL`), adds `name=invite.ics`, and sends the part base64 with `Content-Disposition: attachment`. The structure is `multipart/mixed` holding `multipart/alternative` (text, html), then the calendar. The calendar decodes byte for byte to what was sent, with CRLF line ends, whether the API got base64 or plain text. Mail goes out through SES `eu-west-1`, DKIM `d=next-session.link`, return path on `rsend.next-session.link`. The key Michael created has sending access only, so delivery status is read in the inboxes, not the API.
 
+**Round 1 (invite, sent 2026-10-16 08:44 Berlin), Michael's first report.** He wrote: "in my calendar only the 24.10. appeared automatically". His phone screenshot (kept private, not committed; it shows no address) is a unified "Inbox" in one mail app holding four mails from "Next Session": two `request` and two `publish`, so two of the three inboxes are in that view.
+
+- **`REQUEST` with `ATTENDEE`:** both copies show an invite card, "Sat 24. Oct, 19:00 (4h)" with an **RSVP** button. The card comes from that mail app. The 19:00 start and 4-hour length match the CEST time sent. Spieleabend A (24.10.) landed in his calendar with no tap.
+- **`PUBLISH`:** both copies show only a paperclip, an `invite.ics` attachment with no card. Spieleabend B (25.10.) did not land in his calendar.
+- **Not settled yet:** which mail app, which inboxes and which calendar this is; the third inbox; whether Google or the mail app added A; the Gmail setting; location and reminder on the entry; Gmail's source view.
+
 | Question                                                          | Gmail | Custom domain (app: ?) | iCloud |
 | ----------------------------------------------------------------- | ----- | ----------- | ------ |
 | 1. `method=REQUEST` / `CANCEL` reach the inbox unchanged (raw MIME) | Resend side yes (above); per-client source pending | pending | pending |
