@@ -61,11 +61,11 @@ describe("useSessionActions", () => {
     await settle("sessions:schedule", 0, "s5");
     const undoSchedule = lastToast().undo;
 
-    act(() => void result.current.unschedule({ _id: "s5" as Id<"sessions">, date: "2026-11-05" }));
+    act(() => void result.current.cancel({ _id: "s5" as Id<"sessions">, date: "2026-11-05" }));
     act(() => undoSchedule?.());
-    expect(calls["sessions:unschedule"]).toHaveLength(1);
+    expect(calls["sessions:cancel"]).toHaveLength(1);
 
-    await settle("sessions:unschedule", 0, "null");
+    await settle("sessions:cancel", 0, "null");
     expect(result.current.isPending("2026-11-05")).toBe(false);
   });
 
@@ -76,7 +76,7 @@ describe("useSessionActions", () => {
     expect(lastToast().message).toBe("Session on Thu, Nov 5. Players see it on the link.");
 
     act(() => lastToast().undo?.());
-    expect(calls["sessions:unschedule"]![0]!.args).toEqual({ sessionId: "s5" });
+    expect(calls["sessions:cancel"]![0]!.args).toEqual({ sessionId: "s5" });
   });
 
   it("shows a scheduled night in every cached month of the Group at once", () => {
@@ -94,7 +94,7 @@ describe("useSessionActions", () => {
       "g2|2026-11": [],
     });
 
-    optimisticUpdates["sessions:unschedule"]!(store, { sessionId: "s1" });
+    optimisticUpdates["sessions:cancel"]!(store, { sessionId: "s1" });
     expect(store.sessionDates()).toEqual({
       "g1|2026-10": ["2026-11-05"],
       "g1|2026-11": ["2026-11-05"],

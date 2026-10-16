@@ -32,7 +32,7 @@ function renderPanel({
     sessions: scheduled ? [{ _id: "s1" as Id<"sessions">, date }] : [],
   });
   const day = summary.days.find((d) => d.date === date)!;
-  const handlers = { onClose: vi.fn(), onSchedule: vi.fn(), onUnschedule: vi.fn() };
+  const handlers = { onClose: vi.fn(), onSchedule: vi.fn(), onCancel: vi.fn() };
   render(
     <DayPanel
       day={day}
@@ -69,19 +69,19 @@ describe("DayPanel", () => {
     expect(onSchedule).toHaveBeenCalledOnce();
   });
 
-  it("unschedules a Session that has not passed", async () => {
-    const { onUnschedule } = renderPanel({ scheduled: true });
+  it("cancels a Session that has not passed", async () => {
+    const { onCancel } = renderPanel({ scheduled: true });
     await userEvent.click(screen.getByRole("button", { name: "Unschedule this session" }));
-    expect(onUnschedule).toHaveBeenCalledWith(expect.objectContaining({ _id: "s1" }));
+    expect(onCancel).toHaveBeenCalledWith(expect.objectContaining({ _id: "s1" }));
   });
 
-  it("still unschedules a Session today", async () => {
-    const { onUnschedule } = renderPanel({ date: today, scheduled: true });
+  it("still cancels a Session today", async () => {
+    const { onCancel } = renderPanel({ date: today, scheduled: true });
     await userEvent.click(screen.getByRole("button", { name: "Unschedule this session" }));
-    expect(onUnschedule).toHaveBeenCalledWith(expect.objectContaining({ _id: "s1", date: today }));
+    expect(onCancel).toHaveBeenCalledWith(expect.objectContaining({ _id: "s1", date: today }));
   });
 
-  it("offers no Unschedule on a past Session", () => {
+  it("offers no cancel on a past Session", () => {
     renderPanel({ date: "2026-10-01", scheduled: true });
     expect(screen.queryByRole("button", { name: /schedule/i })).toBeNull();
     expect(screen.getByText("You played this night. Past dates are read-only.")).toBeTruthy();

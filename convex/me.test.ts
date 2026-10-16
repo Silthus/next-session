@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
+  CANCELLED,
   type GmClient,
   newBackend,
   seedSession,
@@ -87,6 +88,23 @@ describe("me.groups", () => {
       ],
       playing: [],
     });
+  });
+
+  it("leaves Cancelled Sessions out of the next five", async () => {
+    const { as, groupId } = await groupWithGm();
+    for (const date of [TODAY, "2026-10-09", "2026-10-16"]) await seedSession(t, groupId, date);
+    for (const date of ["2026-10-10", "2026-10-11"]) await seedSession(t, groupId, date, CANCELLED);
+    for (const date of ["2026-10-23", "2026-10-30", "2026-11-06"]) {
+      await seedSession(t, groupId, date);
+    }
+
+    expect((await myGroups(as))?.running[0]?.upcomingSessions).toEqual([
+      TODAY,
+      "2026-10-09",
+      "2026-10-16",
+      "2026-10-23",
+      "2026-10-30",
+    ]);
   });
 
   it("lists the Groups the Account plays in with its Player and the days left to answer", async () => {

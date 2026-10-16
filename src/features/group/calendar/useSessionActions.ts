@@ -20,7 +20,7 @@ export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
         { _id: `optimistic-${date}` as Id<"sessions">, date },
       ]),
   );
-  const unscheduleSession = useMutation(api.sessions.unschedule).withOptimisticUpdate(
+  const cancelSession = useMutation(api.sessions.cancel).withOptimisticUpdate(
     (store, { sessionId }) =>
       editCachedSessions(store, groupId, (sessions) =>
         sessions.filter((session) => session._id !== sessionId),
@@ -45,15 +45,15 @@ export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
     return settle(date, async () => {
       const sessionId = await scheduleSession({ groupId, date });
       show(`Session on ${dayLabel(date)}. Players see it on the link.`, () => {
-        void unschedule({ _id: sessionId, date });
+        void cancel({ _id: sessionId, date });
         focusDay(date);
       });
     });
   }
 
-  function unschedule(session: CalendarSession) {
+  function cancel(session: CalendarSession) {
     return settle(session.date, async () => {
-      await unscheduleSession({ sessionId: session._id });
+      await cancelSession({ sessionId: session._id });
       show(`Session on ${dayLabel(session.date)} removed.`, () => {
         void schedule(session.date);
         focusDay(session.date);
@@ -63,7 +63,7 @@ export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
 
   return {
     schedule,
-    unschedule,
+    cancel,
     isPending: (date: IsoDate) => pendingDates.has(date),
   };
 }

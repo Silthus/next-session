@@ -28,7 +28,7 @@ export function DayPanel({
   focusHeading = false,
   onClose,
   onSchedule,
-  onUnschedule,
+  onCancel,
   className,
 }: {
   day: CalendarDay;
@@ -39,7 +39,7 @@ export function DayPanel({
   focusHeading?: boolean;
   onClose: () => void;
   onSchedule: () => void;
-  onUnschedule: (session: CalendarSession) => void;
+  onCancel: (session: CalendarSession) => void;
   className?: string;
 }) {
   const headingId = useId();
@@ -83,12 +83,7 @@ export function DayPanel({
         </>
       )}
       <div className="mt-5">
-        <SessionAction
-          day={day}
-          pending={pending}
-          onSchedule={onSchedule}
-          onUnschedule={onUnschedule}
-        />
+        <SessionAction day={day} pending={pending} onSchedule={onSchedule} onCancel={onCancel} />
       </div>
     </Card>
   );
@@ -139,12 +134,12 @@ function SessionAction({
   day,
   pending,
   onSchedule,
-  onUnschedule,
+  onCancel,
 }: {
   day: CalendarDay;
   pending: boolean;
   onSchedule: () => void;
-  onUnschedule: (session: CalendarSession) => void;
+  onCancel: (session: CalendarSession) => void;
 }) {
   const session = day.session;
   if (session && !day.bookable) {
@@ -152,7 +147,7 @@ function SessionAction({
   }
   const act = () => {
     if (pending) return;
-    if (session) onUnschedule(session);
+    if (session) onCancel(session);
     else onSchedule();
   };
   return (

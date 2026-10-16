@@ -33,6 +33,7 @@ import {
   validName,
 } from "./model/players";
 import { enforceRateLimit } from "./model/rateLimits";
+import { isScheduled } from "./sessionLifecycle";
 import { track } from "./model/telemetry";
 import { answerValue } from "./schema";
 
@@ -231,7 +232,7 @@ async function sessionDatesOf(ctx: QueryCtx, groupId: Id<"groups">) {
     .query("sessions")
     .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId))
     .collect();
-  return sessions.map(({ date }) => date);
+  return sessions.filter(isScheduled).map(({ date }) => date);
 }
 
 async function answersOfPlayerIn(ctx: QueryCtx, playerId: Id<"players">, month: IsoMonth) {

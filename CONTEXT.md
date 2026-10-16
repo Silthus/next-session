@@ -135,5 +135,4 @@ _Avoid_: app tag, source
 - Lonir called a roster entry a "Membership" and stored answers as `yes / maybe / no` while the UI said Free / Maybe / Busy. Next Session uses **Player** and **free / maybe / busy** everywhere, in code and in copy.
 - Lonir split "Scheduled Session" (a date) from "Session" (prep content). Next Session has no prep content, so **Session** is the picked date.
 - Lonir stored `scheduled | played | cancelled`. Next Session stores only scheduled or cancelled; played follows from the date.
-- Code still says `sessions.unschedule` and `session_unscheduled`, which deletes the Session. These mean **Cancel** and become `sessions.cancel` and `session_cancelled` when the Cancelled Session ships.
 - "Claim" means two things in code. The Save **claim code** (`saveClaims`) moves an Anonymous GM's Groups; a **Claim** links a Player to an Account. In copy, the first is "Save" and the second is "Keep this group".

@@ -29,6 +29,15 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+async function settle() {
+  await vi.advanceTimersByTimeAsync(30_001);
+  await t.finishInProgressScheduledFunctions();
+}
+
+async function sessionOf(sessionId: Id<"sessions">) {
+  return await t.run(async (ctx) => await ctx.db.get("sessions", sessionId));
+}
+
 async function sessionDatesOf(groupId: Id<"groups">) {
   return await t.run(async (ctx) =>
     (
@@ -70,6 +79,30 @@ describe("sessions.schedule", () => {
       expect(await sessionDatesOf(groupId)).toEqual([]);
     },
   );
+
+  it("restores a Cancelled Session in place, keeping its id", async () => {
+    const { as, groupId } = await signedInGmWithGroup(t);
+    const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+    await settle();
+    await as.mutation(api.sessions.cancel, { sessionId });
+
+    expect(await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" })).toBe(
+      sessionId,
+    );
+    expect(await sessionOf(sessionId)).toMatchObject({ state: "scheduled" });
+    expect(await sessionDatesOf(groupId)).toEqual(["2026-10-17"]);
+  });
+
+  it("schedules a new Session on a date whose Session was removed", async () => {
+    const { as, groupId } = await signedInGmWithGroup(t);
+    const removed = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+    await as.mutation(api.sessions.cancel, { sessionId: removed });
+
+    const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+
+    expect(sessionId).not.toBe(removed);
+    expect(await sessionDatesOf(groupId)).toEqual(["2026-10-17"]);
+  });
 
   it("allows one Session per date", async () => {
     const { as, groupId } = await signedInGmWithGroup(t);
@@ -122,42 +155,56 @@ describe("sessions.schedule", () => {
   });
 });
 
-describe("sessions.unschedule", () => {
-  it("deletes the Session", async () => {
+describe("sessions.cancel", () => {
+  it("removes a Session that was never published", async () => {
     const { as, groupId } = await signedInGmWithGroup(t);
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
     await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-24" });
 
-    await as.mutation(api.sessions.unschedule, { sessionId });
+    await as.mutation(api.sessions.cancel, { sessionId });
 
     expect(await sessionDatesOf(groupId)).toEqual(["2026-10-24"]);
   });
 
-  it("frees the date for a new Session", async () => {
+  it("keeps a published Session on its date as Cancelled", async () => {
     const { as, groupId } = await signedInGmWithGroup(t);
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
-    await as.mutation(api.sessions.unschedule, { sessionId });
+    await settle();
 
-    await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+    await as.mutation(api.sessions.cancel, { sessionId });
 
-    expect(await sessionDatesOf(groupId)).toEqual(["2026-10-17"]);
+    expect(await sessionOf(sessionId)).toMatchObject({ date: "2026-10-17", state: "cancelled" });
   });
 
-  it("unschedules a Session today", async () => {
+  it("cancels a Session today", async () => {
     const { as, groupId } = await signedInGmWithGroup(t);
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: TODAY });
+    await settle();
 
-    await as.mutation(api.sessions.unschedule, { sessionId });
+    await as.mutation(api.sessions.cancel, { sessionId });
 
-    expect(await sessionDatesOf(groupId)).toEqual([]);
+    expect(await sessionOf(sessionId)).toMatchObject({ state: "cancelled" });
+  });
+
+  it("succeeds and changes nothing for a Session already Cancelled", async () => {
+    const { as, groupId } = await signedInGmWithGroup(t);
+    const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+    await settle();
+    await as.mutation(api.sessions.cancel, { sessionId });
+    const cancelled = await sessionOf(sessionId);
+    vi.setSystemTime(NOW + 1_000);
+
+    await as.mutation(api.sessions.cancel, { sessionId });
+
+    expect(await sessionOf(sessionId)).toEqual(cancelled);
   });
 
   it("keeps a past Session, because past dates are read-only", async () => {
     const { as, groupId } = await signedInGmWithGroup(t);
     const sessionId = await seedSession(t, groupId, "2026-10-02");
 
-    await expectErrorCode(as.mutation(api.sessions.unschedule, { sessionId }), "OUT_OF_WINDOW");
-    expect(await sessionDatesOf(groupId)).toEqual(["2026-10-02"]);
+    await expectErrorCode(as.mutation(api.sessions.cancel, { sessionId }), "OUT_OF_WINDOW");
+    expect(await sessionOf(sessionId)).not.toHaveProperty("state");
   });
 
   it("pushes out the Expiry of an Unsaved Group", async () => {
@@ -165,7 +212,7 @@ describe("sessions.unschedule", () => {
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
     vi.setSystemTime(NOW + 2 * DAY);
 
-    await as.mutation(api.sessions.unschedule, { sessionId });
+    await as.mutation(api.sessions.cancel, { sessionId });
 
     expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
   });
@@ -178,28 +225,28 @@ describe("sessions.unschedule", () => {
       date: "2026-10-17",
     });
 
-    await expectErrorCode(as.mutation(api.sessions.unschedule, { sessionId }), "NOT_FOUND");
+    await expectErrorCode(as.mutation(api.sessions.cancel, { sessionId }), "NOT_FOUND");
     expect(await sessionDatesOf(stranger.groupId)).toEqual(["2026-10-17"]);
   });
 
-  it("treats an already unscheduled Session as missing", async () => {
+  it("treats a removed Session as missing", async () => {
     const { as, groupId } = await signedInGmWithGroup(t);
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
-    await as.mutation(api.sessions.unschedule, { sessionId });
+    await as.mutation(api.sessions.cancel, { sessionId });
 
-    await expectErrorCode(as.mutation(api.sessions.unschedule, { sessionId }), "NOT_FOUND");
+    await expectErrorCode(as.mutation(api.sessions.cancel, { sessionId }), "NOT_FOUND");
   });
 
   it("rejects a signed-out caller", async () => {
     const { as, groupId } = await signedInGmWithGroup(t);
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
 
-    await expectErrorCode(t.mutation(api.sessions.unschedule, { sessionId }), "UNAUTHENTICATED");
+    await expectErrorCode(t.mutation(api.sessions.cancel, { sessionId }), "UNAUTHENTICATED");
   });
 });
 
 describe("the GM edit limit", () => {
-  it("refuses scheduling and unscheduling once the GM's edits are spent, and changes nothing", async () => {
+  it("refuses scheduling and cancelling once the GM's edits are spent, and changes nothing", async () => {
     const { as, groupId, userId } = await signedInGmWithGroup(t);
     const sessionId = await seedSession(t, groupId, "2026-10-17");
     await spendGmEdits(t, userId);
@@ -208,7 +255,7 @@ describe("the GM edit limit", () => {
       as.mutation(api.sessions.schedule, { groupId, date: "2026-10-24" }),
       "RATE_LIMITED",
     );
-    await expectErrorCode(as.mutation(api.sessions.unschedule, { sessionId }), "RATE_LIMITED");
+    await expectErrorCode(as.mutation(api.sessions.cancel, { sessionId }), "RATE_LIMITED");
     expect(await sessionDatesOf(groupId)).toEqual(["2026-10-17"]);
   });
 });

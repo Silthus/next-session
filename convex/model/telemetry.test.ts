@@ -24,7 +24,7 @@ const everyEvent: ServerEvent[] = [
     player_count: 4,
     is_first_for_group: true,
   },
-  { name: "session_unscheduled", actor: account, group_id: "group1" },
+  { name: "session_cancelled", actor: account, group_id: "group1" },
   { name: "share_link_rotated", actor: account, group_id: "group1" },
   { name: "tips_confirmed", actor: account },
 ];

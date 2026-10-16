@@ -281,18 +281,37 @@ describe("GM mutations", () => {
     expect(second[0]?.properties).toMatchObject({ is_first_for_group: false });
   });
 
-  it("tracks session_unscheduled", async () => {
+  it("tracks session_cancelled", async () => {
     const { as, groupId } = await signedInGmWithGroup(t);
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
 
-    const events = await eventsDuring(() => as.mutation(api.sessions.unschedule, { sessionId }));
+    const events = await eventsDuring(() => as.mutation(api.sessions.cancel, { sessionId }));
 
     expect(events).toEqual([
       expect.objectContaining({
-        event: "next_session:session_unscheduled",
+        event: "next_session:session_cancelled",
         properties: { product: "next-session", group_id: groupId },
       }),
     ]);
+  });
+
+  it("tracks Schedule again as session_scheduled that is not the Group's first", async () => {
+    const { as, groupId } = await signedInGmWithGroup(t);
+    const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+    await vi.advanceTimersByTimeAsync(30_001);
+    await t.finishInProgressScheduledFunctions();
+    await as.mutation(api.sessions.cancel, { sessionId });
+
+    const events = await eventsDuring(() =>
+      as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" }),
+    );
+
+    expect(events).toEqual([
+      expect.objectContaining({
+        event: "next_session:session_scheduled",
+      }),
+    ]);
+    expect(events[0]?.properties).toMatchObject({ is_first_for_group: false });
   });
 
   it("tracks groups_saved with the number of Groups the Save moved", async () => {

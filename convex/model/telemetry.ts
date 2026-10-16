@@ -33,7 +33,7 @@ export type ServerEvent =
       player_count: number;
       is_first_for_group: boolean;
     }
-  | { name: "session_unscheduled"; actor: Actor; group_id: string }
+  | { name: "session_cancelled"; actor: Actor; group_id: string }
   | { name: "share_link_rotated"; actor: Actor; group_id: string }
   | { name: "tips_confirmed"; actor: Actor };
 
