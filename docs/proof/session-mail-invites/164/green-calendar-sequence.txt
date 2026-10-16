@@ -1,0 +1,68 @@
+ ✓ |convex| convex/sessionInvites.test.ts > mails every calendar recipient once after the Undo window, the GM included, and nobody before 191ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar download > answers with every upcoming scheduled Session of the Group as a calendar file 124ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar download > holds an empty calendar for a Group with nothing upcoming 6ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar download > leaves out a Session inside its first Undo window 8ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar download > shows the old time of a move until its Undo window ends 10ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar download > leaves out Cancelled and past Sessions 9ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar download > keeps a Session dated today 5ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar download > answers 404 with no body for an unknown token 4ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar download > answers 404 with no body for a token outside the Share Token alphabet 3ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar download > answers 404 with no body for a rotated-away token, even inside the rotation's Undo 7ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails only the Group's calendar recipient set, rechecked on every attempt 41ms
+ ✓ |convex| convex/sessionInvites.test.ts > puts the night into each calendar as an accepted invite without an alarm and with a token-free link 10ms
+ ✓ |convex| convex/sessionInvites.test.ts > takes a cancelled night out of every calendar 19ms
+ ✓ |convex| convex/sessionInvites.test.ts > raises SEQUENCE for every recipient across set, change, cancel and Schedule again under one UID 31ms
+ ✓ |convex| convex/sessionInvites.test.ts > gives the Calendar download and feed the SEQUENCE of the night's last invite 32ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar feed > answers with the Sessions of every Group the Account runs or plays in 30ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar feed > lists a Group the Account runs and plays in once, linked to its GM page 6ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar feed > holds an empty calendar for an Account with nothing in the window 4ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar feed > keeps a Cancelled Session, marked cancelled 6ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar feed > keeps a Session from 31 days back and leaves out one from 32 7ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar feed > reaches to the end of the Booking Window 5ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar feed > leaves out a Session inside its first Undo window 5ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar feed > drops a Group the Account plays in once the Account releases its Player 11ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar feed > drops a Group the Account plays in once the Account removes it from My groups 12ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar feed > drops a deleted Group at once, its Players still being removed 11ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar feed > answers 404 with no body for the old link after a reset, and serves the new one 6ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar feed > answers 404 with no body for an unknown token 3ms
+ ✓ |convex| convex/calendarFiles.test.ts > the calendar feed > answers 404 with no body for a token outside the token alphabet 3ms
+ ✓ |convex| convex/calendarFiles.test.ts > feed scoping > every calendar file holds only the published Sessions its own token reaches > through a Share Token 10ms
+ ✓ |convex| convex/calendarFiles.test.ts > feed scoping > every calendar file holds only the published Sessions its own token reaches > through a feed token 20ms
+ ✓ |convex| convex/calendarFiles.test.ts > a rename > reaches the download once its Undo window ends 7ms
+ ✓ |convex| convex/calendarFiles.test.ts > a rename > leaves a Cancelled Session's published name alone and sends no Session update 16ms
+ ✓ |convex| convex/sessionInvites.test.ts > spaces the sends of one fan-out at least 500 ms apart 16ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > drops a retry whose revision is no longer the published one 22ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > sends a 503 then 200 once, the same request under one Idempotency-Key 8ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > logs a 422 without the recipient and does not retry it 8ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Account with Session mail off 6ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Account with a .test address 5ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Anonymous GM 7ms
+ ✓ |convex| convex/sessionInvites.test.ts > the provider switch > leaves Session updates on Workflows and Resend untouched without RESEND_API_KEY 6ms
+ ✓ |convex| convex/sessionInvites.test.ts > the provider switch > requests no Workflows Session update while RESEND_API_KEY is set 8ms
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > counts and warns Resend sends apart from Workflows sends 206ms
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > reads a day counted before providers as Workflows 4ms
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > keeps emails, Group names and Share Tokens out of usage events and logs 16ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites a Player who keeps the Group through Join while signed in to each upcoming published scheduled Session 38ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites a Player who keeps the Group through Keep this group to each upcoming published scheduled Session 40ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites a Player who keeps the Group through the auto-keep on answer to each upcoming published scheduled Session 39ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > withdraws each upcoming published Session from a Player who leaves through Not you? 34ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > withdraws each upcoming published Session from a Player who leaves through Remove from my groups 32ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > withdraws each upcoming published Session from a Player who leaves through the GM removing the Player 36ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > still withdraws the night as it was at the release after a change and the Group's deletion 64ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > drops a withdrawal when the Player keeps the Group again before it sends 34ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > drops an invite when the Player leaves before it sends 30ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > lets a claim's invite leave another recipient's pending broadcast retry alone 15ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > sends nothing when a Player switches to another name in the same Group 22ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > sends nothing when the GM releases their own Player 23ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites the Account that Saves the Group to each upcoming published scheduled Session 31ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > neither invites nor withdraws an Account with Session mail off 22ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > neither invites nor withdraws an Account with a .test address 24ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > drops a pending withdrawal once the Account turns Session mail off 25ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > invites the whole recipient set to every upcoming Session that fits the day's share, soonest first 24ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > queues only what fits a day near its share, then finishes after the next UTC midnight 17ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > skips a Session that had a Resend send, a cancelled Session and a past Session 13ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > queues nothing on a second start after it finished 8ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > queues nothing without RESEND_API_KEY and leaves every Session for the start after the switch-on 7ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > sends a Session larger than the day's share alone, on a day with no Resend sends yet 145ms
+ Test Files  2 passed (2)
+      Tests  66 passed (66)

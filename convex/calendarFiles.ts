@@ -12,7 +12,6 @@ const DOWNLOAD_PATH = /^\/cal\/s\/([A-Za-z0-9_-]+)\.ics$/;
 const FEED_PATH = /^\/cal\/a\/([A-Za-z0-9_-]+)\.ics$/;
 const FEED_CALENDAR_NAME = "Next Session";
 const FEED_DAYS_BACK = 31;
-const UNSENT_SEQUENCE = 0;
 const DAY = 86_400_000;
 
 const CALENDAR_HEADERS = {
@@ -157,7 +156,7 @@ function publishedEntryOf(
   if (published.summary === undefined) return null;
   return {
     uid: sessionUid(session._id),
-    sequence: UNSENT_SEQUENCE,
+    sequence: session.sequence ?? 0,
     stamp,
     window: { start: published.start, end: published.end },
     status: published.state === "cancelled" ? "CANCELLED" : "CONFIRMED",

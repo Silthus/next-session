@@ -331,6 +331,31 @@ it("raises SEQUENCE for every recipient across set, change, cancel and Schedule 
   ]);
 });
 
+it("gives the Calendar download and feed the SEQUENCE of the night's last invite", async () => {
+  const { as, groupId } = await crew();
+  await as.mutation(api.sessions.schedule, { groupId, date });
+  await finish();
+  await as.mutation(api.groups.updateSettings, {
+    groupId,
+    startTime: "20:00",
+    lengthMinutes: 180,
+    timeZone: "Europe/Berlin",
+    location: "Max's place",
+  });
+  await finish();
+  const { url: feedUrl } = await as.mutation(api.me.calendarFeed, {});
+
+  const download = await t.fetch("/cal/s/crew-token.ics");
+  const feed = await t.fetch(new URL(feedUrl).pathname);
+
+  expect(sequencesIn(await download.text())).toEqual([2]);
+  expect(sequencesIn(await feed.text())).toEqual([2]);
+});
+
+function sequencesIn(calendar: string) {
+  return [...unfolded(calendar).matchAll(/^SEQUENCE:(\d+)\r$/gm)].map(([, value]) => Number(value));
+}
+
 it("spaces the sends of one fan-out at least 500 ms apart", async () => {
   const { as, groupId } = await crew();
   await t.run(async (ctx) => {
