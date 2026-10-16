@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { api } from "../convex/_generated/api";
 import { addMonths, monthOf, todayUtc } from "../shared/dates";
 import {
-  failMutation,
+  failRequest,
   interceptSync,
   openAsGm,
   seedPlayer,
@@ -104,7 +104,7 @@ test("a Save that fails leaves the GM on the Save button", async ({ page }) => {
   let fail = () => {};
   await interceptSync(page, (text, { client }) => {
     if (!text.includes('"udfPath":"groups:updateSettings"')) return false;
-    fail = () => failMutation(client, text, serverError);
+    fail = () => failRequest(client, text, serverError);
     return true;
   });
   await openAsGm(page, gm, `/g/${gm.groupId}/settings`);

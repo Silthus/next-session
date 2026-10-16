@@ -46,6 +46,7 @@ export function Button({
   busy = false,
   className,
   children,
+  disabled,
   onClick,
   ...props
 }: ButtonProps) {
@@ -53,6 +54,7 @@ export function Button({
   return (
     <button
       type="button"
+      disabled={disabled && !inFlight}
       aria-disabled={inFlight || undefined}
       aria-busy={inFlight || undefined}
       className={buttonClassName(variant, size, className)}

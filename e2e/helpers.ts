@@ -141,11 +141,14 @@ export async function interceptSync(
   });
 }
 
-export function failMutation(client: WebSocketRoute, text: string, failure: object) {
-  const { requestId } = JSON.parse(text) as { requestId: number };
+export function failRequest(client: WebSocketRoute, text: string, failure: object) {
+  const { type, requestId } = JSON.parse(text) as {
+    type: "Mutation" | "Action";
+    requestId: number;
+  };
   client.send(
     JSON.stringify({
-      type: "MutationResponse",
+      type: `${type}Response`,
       requestId,
       success: false,
       logLines: [],

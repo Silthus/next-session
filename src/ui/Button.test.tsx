@@ -25,6 +25,19 @@ describe("Button", () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it("stays out of clicks while in flight even when its caller also disables it", async () => {
+    const onClick = vi.fn();
+    render(
+      <Button disabled busy="Logging in…" onClick={onClick}>
+        Log in
+      </Button>,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Logging in…" }));
+
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
   it("keeps its form from submitting again while in flight", async () => {
     const onSubmit = vi.fn((event: { preventDefault: () => void }) => event.preventDefault());
     render(

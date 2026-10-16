@@ -22,3 +22,9 @@ Red runs before each fix (worktree fix/polish-after-s3, 2026-10-16).
    × explains the Cancelled mark in the legend when the month shows a cancelled Session
    × marks a Cancelled Session in Next sessions and on its Group's card
      (card said "Next session Thu, Oct 8 · Cancelled" while Oct 22 was scheduled)
+
+Review round 1 (GPT-6.1 Sol): callers that pass disabled={busy} beside busy still dropped focus.
+   ✘ e2e/landing.spec.ts a Log in that fails leaves the visitor on the Log in button
+     expect(locator).toBeFocused() failed - Received: inactive
+   Fixed in Button (busy takes over from disabled); green with landing, time-and-place,
+   gm-rail and player-account specs (48 passed, 20 skipped).
