@@ -6,7 +6,7 @@
     "templating": "liquid",
     "email": {
       "subject": "Pick the date",
-      "text": "Hey again,\n\nonce a few answers are in, the calendar does the math for you:\n\n- Best Nights shows the top three dates nobody marked busy.\n- Tap a day, then Schedule. Your players see the date right away.\n- Plans changed? Unschedule it, and Undo is there if you slip.\n\nThat's the last tip from me. Have a great game night 🎲\n\nOpen My groups: https://next-session.link/me\n\nThanks!\nMichael\n\nYou get this because you asked for tips. Unsubscribe: {{ unsubscribe_url }}\n",
+      "text": "Hey again,\n\nonce a few answers are in, the calendar does the math for you:\n\n- Best Nights shows the top three dates nobody marked busy.\n- Tap a day, then Schedule. Your players see the date right away.\n- Plans changed? Cancel it, and Undo is there if you slip.\n\nThat's the last tip from me. Have a great game night 🎲\n\nOpen My groups: https://next-session.link/me\n\nThanks!\nMichael\n\nYou get this because you asked for tips. Unsubscribe: {{ unsubscribe_url }}",
       "design": {
         "counters": {
           "u_row": 2,
@@ -177,7 +177,7 @@
                         "duplicatable": true,
                         "deletable": true,
                         "hideable": true,
-                        "text": "<ul style=\"margin:0;padding-left:20px;font-size:16px;line-height:160%;color:#1a1511;\"><li style=\"margin:0 0 8px;\"><strong>Best Nights</strong> shows the top three dates nobody marked busy.</li><li style=\"margin:0 0 8px;\">Tap a day, then <strong>Schedule</strong>. Your players see the date right away.</li><li style=\"margin:0 0 8px;\">Plans changed? <strong>Unschedule</strong> it, and Undo is there if you slip.</li></ul>"
+                        "text": "<ul style=\"margin:0;padding-left:20px;font-size:16px;line-height:160%;color:#1a1511;\"><li style=\"margin:0 0 8px;\"><strong>Best Nights</strong> shows the top three dates nobody marked busy.</li><li style=\"margin:0 0 8px;\">Tap a day, then <strong>Schedule</strong>. Your players see the date right away.</li><li style=\"margin:0 0 8px;\">Plans changed? <strong>Cancel</strong> it, and Undo is there if you slip.</li></ul>"
                       }
                     },
                     {

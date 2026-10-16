@@ -373,6 +373,32 @@ describe("GM mutations", () => {
     ]);
   });
 
+  it("tracks session_details_changed naming only the fields that changed", async () => {
+    const { as, groupId } = await signedInGmWithGroup(t);
+    const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+    await as.mutation(api.sessions.updateDetails, { sessionId, location: "The club" });
+
+    const events = await eventsDuring(() =>
+      as.mutation(api.sessions.updateDetails, {
+        sessionId,
+        startTime: "20:00",
+        lengthMinutes: null,
+        location: "The club",
+      }),
+    );
+
+    expect(events).toEqual([
+      expect.objectContaining({
+        event: "next_session:session_details_changed",
+        properties: {
+          product: "next-session",
+          group_id: groupId,
+          fields: ["startTime"],
+        },
+      }),
+    ]);
+  });
+
   it("tracks Schedule again as session_scheduled that is not the Group's first", async () => {
     const { as, groupId } = await signedInGmWithGroup(t);
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
@@ -582,7 +608,9 @@ describe("the redaction contract", () => {
       "Dragon Table",
       "Zoltan Vex",
       "Dragon Lair",
+      "Goblin Den",
       "20:45",
+      "21:15",
       "195",
     ];
 
@@ -602,7 +630,15 @@ describe("the redaction contract", () => {
       const shareToken = await shareTokenOf(groupId);
       secrets.push(shareToken);
       const playerId = await t.mutation(api.player.join, { shareToken, name: "Zoltan Vex" });
-      await link.as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+      const sessionId = await link.as.mutation(api.sessions.schedule, {
+        groupId,
+        date: "2026-10-17",
+      });
+      await link.as.mutation(api.sessions.updateDetails, {
+        sessionId,
+        startTime: "21:15",
+        location: "Goblin Den",
+      });
       const { code } = await link.as.mutation(api.account.startSave, {});
       secrets.push(code);
       const account = await signUpAccount(t, { ...newCredentials(), email });
@@ -626,6 +662,7 @@ describe("the redaction contract", () => {
       "next_session:share_link_rotated",
       "next_session:player_joined",
       "next_session:session_scheduled",
+      "next_session:session_details_changed",
       "next_session:account_created",
       "next_session:groups_saved",
       "next_session:player_claimed",

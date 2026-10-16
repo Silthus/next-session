@@ -1,7 +1,13 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import { describe, expect, it, vi } from "vitest";
+import {
+  AddressSuggestionsProvider,
+  suggestUntilFailure,
+  type AddressSearch,
+  type AddressSuggestions,
+} from "./addressSuggestions";
 import { TimeAndPlacePage, type TimeAndPlaceValues } from "./TimeAndPlacePage";
 
 vi.mock("../../../lib/timeZone", () => ({ browserTimeZone: () => "Europe/Berlin" }));
@@ -16,17 +22,21 @@ const usualNight: TimeAndPlaceValues = {
 function renderPage({
   initial = usualNight,
   onSave = vi.fn<(values: TimeAndPlaceValues) => Promise<void>>().mockResolvedValue(undefined),
+  suggestions = null,
 }: {
   initial?: TimeAndPlaceValues;
   onSave?: (values: TimeAndPlaceValues) => Promise<void>;
+  suggestions?: AddressSuggestions | null;
 } = {}) {
   render(
-    <TimeAndPlacePage
-      groupName="Tuesday Crew"
-      previewDate="2026-10-20"
-      initial={initial}
-      onSave={onSave}
-    />,
+    <AddressSuggestionsProvider value={suggestions}>
+      <TimeAndPlacePage
+        groupName="Tuesday Crew"
+        previewDate="2026-10-20"
+        initial={initial}
+        onSave={onSave}
+      />
+    </AddressSuggestionsProvider>,
   );
   return { onSave, preview: screen.getByRole("region", { name: "In players' calendars" }) };
 }
@@ -100,6 +110,7 @@ describe("TimeAndPlacePage", () => {
       screen.getByText(/^New York time\. Players abroad see it in their own time\./),
     ).toBeTruthy();
     expect(preview.textContent).toContain("19:00–23:00 New York time");
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Change time zone" }));
   });
 
   it("lists the cities that start with what the GM typed first", async () => {
@@ -118,6 +129,57 @@ describe("TimeAndPlacePage", () => {
     );
     expect(screen.queryByRole("searchbox")).toBeNull();
     expect(screen.getByText(/^Berlin time\./)).toBeTruthy();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Change time zone" }));
+  });
+
+  it("picks the top zone on Enter without saving, then saves it", async () => {
+    const { onSave } = renderPage();
+    await userEvent.click(screen.getByRole("button", { name: "Change time zone" }));
+    await userEvent.type(
+      screen.getByRole("searchbox", { name: "Find a time zone" }),
+      "new york{Enter}",
+    );
+
+    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.queryByRole("searchbox")).toBeNull();
+    expect(screen.getByText(/^New York time\./)).toBeTruthy();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Change time zone" }));
+
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(onSave).toHaveBeenCalledWith({ ...usualNight, timeZone: "America/New_York" });
+  });
+
+  it("does nothing on Enter when no zone matches", async () => {
+    const { onSave } = renderPage();
+    await userEvent.click(screen.getByRole("button", { name: "Change time zone" }));
+    await userEvent.type(
+      screen.getByRole("searchbox", { name: "Find a time zone" }),
+      "atlantis{Enter}",
+    );
+
+    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.getByRole("searchbox", { name: "Find a time zone" })).toBeTruthy();
+    expect(screen.getByText("No zone matches")).toBeTruthy();
+  });
+
+  it("keeps the zone on Enter before anything is typed", async () => {
+    const { onSave } = renderPage();
+    await userEvent.click(screen.getByRole("button", { name: "Change time zone" }));
+    await userEvent.type(screen.getByRole("searchbox", { name: "Find a time zone" }), "{Enter}");
+
+    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.getByRole("searchbox", { name: "Find a time zone" })).toBeTruthy();
+  });
+
+  it("waits for an Enter that ends a composition before picking a zone", async () => {
+    const { onSave } = renderPage();
+    await userEvent.click(screen.getByRole("button", { name: "Change time zone" }));
+    const search = screen.getByRole("searchbox", { name: "Find a time zone" });
+    await userEvent.type(search, "tokyo");
+    fireEvent.keyDown(search, { key: "Enter", isComposing: true });
+
+    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.getByRole("searchbox", { name: "Find a time zone" })).toBeTruthy();
   });
 
   it("says that saving moves upcoming Sessions", () => {
@@ -145,6 +207,19 @@ describe("TimeAndPlacePage", () => {
       timeZone: "Europe/Berlin",
       location: "Max's place",
     });
+  });
+
+  it("saves the typed place when address suggestions have failed", async () => {
+    const search = vi.fn<AddressSearch>().mockRejectedValue(new Error("Geoapify answered 503"));
+    const { onSave } = renderPage({ suggestions: suggestUntilFailure(search) });
+
+    await userEvent.type(screen.getByRole("combobox", { name: "Where" }), "Haupt");
+    await waitFor(() => expect(screen.queryByRole("combobox")).toBeNull());
+    await userEvent.type(screen.getByRole("textbox", { name: "Where" }), "straße 5");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(search).toHaveBeenCalledOnce();
+    expect(onSave).toHaveBeenCalledWith({ ...usualNight, location: "Hauptstraße 5" });
   });
 
   it.each([

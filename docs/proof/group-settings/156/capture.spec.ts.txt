@@ -1,0 +1,110 @@
+import { expect, test, type Page } from "@playwright/test";
+import { api } from "../convex/_generated/api";
+import { openAsGm, signInAnonymousGm } from "./helpers";
+
+const dir = process.env.PROOF_DIR ?? "/tmp/proof156";
+const withKey = !!process.env.PROOF_WITH_KEY;
+const geoapify = "https://api.geoapify.com/**";
+
+const answer = {
+  results: [
+    { address_line1: "Hauptstraße 5", address_line2: "10115 Berlin, Germany" },
+    { address_line1: "Hauptstraße 12", address_line2: "80331 Munich, Germany" },
+    { address_line1: "Hauptstraße 40", address_line2: "69117 Heidelberg, Germany" },
+  ],
+};
+
+async function openSettings(page: Page) {
+  const gm = await signInAnonymousGm();
+  await gm.client.mutation(api.groups.rename, { groupId: gm.groupId, name: "Thursday Crew" });
+  await openAsGm(page, gm, `/g/${gm.groupId}/settings`);
+  await expect(page.getByRole("heading", { name: "When and where you play" })).toBeVisible();
+  return gm;
+}
+
+for (const width of [390, 1280]) {
+  for (const colorScheme of ["light", "dark"] as const) {
+    test(`${withKey ? "with key" : "no key"} ${String(width)} ${colorScheme}`, async ({
+      browser,
+    }) => {
+      const context = await browser.newContext({
+        viewport: { width, height: width < 640 ? 844 : 900 },
+        colorScheme,
+        locale: "de-DE",
+      });
+      const page = await context.newPage();
+      const asked: string[] = [];
+      page.on("request", (request) => {
+        if (request.url().includes("geoapify")) asked.push(request.url());
+      });
+      const shot = (name: string) =>
+        page.screenshot({
+          path: `${dir}/${name}-${String(width)}-${colorScheme}.png`,
+          animations: "disabled",
+          fullPage: true,
+        });
+
+      if (!withKey) {
+        const gm = await openSettings(page);
+        await page.getByRole("textbox", { name: "Where" }).pressSequentially("Hauptstr");
+        await page.waitForTimeout(800);
+        await expect(page.getByRole("combobox")).toHaveCount(0);
+        await expect(page.getByRole("listbox")).toHaveCount(0);
+        await shot("no-key-plain");
+        await page.getByRole("button", { name: "Save" }).click();
+        await expect(page).toHaveURL(new RegExp(`/g/${gm.groupId}$`));
+        expect(asked).toEqual([]);
+        return;
+      }
+
+      let failNext = false;
+      await page.route(geoapify, (route) =>
+        failNext
+          ? route.fulfill({ status: 429, body: "" })
+          : route.fulfill({ json: route.request().url().includes("Max") ? { results: [] } : answer }),
+      );
+      const gm = await openSettings(page);
+      const where = page.getByRole("combobox", { name: "Where" });
+      await where.pressSequentially("Hauptstr");
+      await expect(page.getByRole("option", { name: /Hauptstraße 5/ })).toBeVisible();
+      await page.keyboard.press("ArrowDown");
+      await page.keyboard.press("ArrowDown");
+      await shot("suggestions");
+      expect(asked).toHaveLength(1);
+      const url = new URL(asked[0]!);
+      expect(url.searchParams.get("text")).toBe("Hauptstr");
+      expect(url.searchParams.get("limit")).toBe("5");
+      expect(url.searchParams.get("lang")).toBe("de");
+      expect(url.searchParams.get("filter")).toBeNull();
+      await page.keyboard.press("Enter");
+      await expect(where).toHaveValue("Hauptstraße 5, 10115 Berlin, Germany");
+      await expect(page.getByRole("listbox")).toHaveCount(0);
+      await shot("picked");
+
+      await where.fill("");
+      await where.pressSequentially("Max’s place");
+      await expect(page.getByText("No address matches.")).toBeVisible();
+      await shot("no-match");
+      await page.keyboard.press("Enter");
+      await expect(where).toHaveValue("Max’s place");
+      await expect(page).toHaveURL(new RegExp(`/settings$`));
+
+      failNext = true;
+      await where.fill("");
+      await where.pressSequentially("Hauptallee");
+      await expect(page.getByRole("combobox")).toHaveCount(0);
+      const plain = page.getByRole("textbox", { name: "Where" });
+      const asksBefore = asked.length;
+      await plain.pressSequentially(" 12");
+      await page.waitForTimeout(800);
+      expect(asked).toHaveLength(asksBefore);
+      await shot("after-429-plain");
+      await page.getByRole("button", { name: "Save" }).click();
+      await expect(page).toHaveURL(new RegExp(`/g/${gm.groupId}$`));
+      await expect(gm.client.query(api.groups.settings, { groupId: gm.groupId })).resolves.toMatchObject({
+        location: "Hauptallee 12",
+      });
+      await context.close();
+    });
+  }
+}

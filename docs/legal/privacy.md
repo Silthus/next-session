@@ -2,7 +2,7 @@
 
 > **Draft, pending review by a qualified German lawyer before publication.** Source text for the `/privacy` page. `{{…}}` placeholders are filled at build time (see `docs/spec.md` §7).
 
-**Version 1.8. Effective: {{EFFECTIVE_DATE}}**
+**Version 1.9. Effective: {{EFFECTIVE_DATE}}**
 
 This policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.
 
@@ -23,7 +23,8 @@ We have not appointed a data protection officer because we are not required to.
 | For an account with Google: your email address, whether Google verified it, and your Google account ID, which Google sends us when you continue with Google | Let you sign in on any device | Contract, 6(1)(b) |
 | For an account with Google: your Google profile picture and its Google address, which Google sends us when you continue with Google | Show your picture to you, and to the GM of each group where your account has a player, so the GM recognizes who answered | Legitimate interest, 6(1)(f) |
 | For a player with an account: which player in which group belongs to your account | Show your groups on any device | Contract, 6(1)(b) |
-| Group names, player names, the days players marked as free, maybe, or busy, and the scheduled dates | Provide the Service to the GM and the group | Contract, 6(1)(b) |
+| Group names, player names, the days players marked as free, maybe, or busy, the scheduled dates, a group's usual start time, length, time zone, and location, and a session's own start time, length, and location | Provide the Service to the GM and the group | Contract, 6(1)(b) |
+| Text you type into a group's location field, and your IP address, sent to Geoapify only while you type in that field, when the field suggests addresses | Suggest addresses as you type | Legitimate interest, 6(1)(f) |
 | Technical connection data (IP address, browser, time) in server logs of our hosting providers | Deliver the site and keep it secure | Legitimate interest, 6(1)(f) |
 | Pseudonymous usage events (pages viewed, steps such as creating a link, joining, scheduling), with the random ID of your user, player, or group | Learn which parts of the Service are used, fix problems | Legitimate interest, 6(1)(f) |
 | Error reports and technical logs (error message, browser, page) | Keep the Service working | Legitimate interest, 6(1)(f) |
@@ -33,6 +34,8 @@ We have not appointed a data protection officer because we are not required to.
 | If you ask for tips: your email address and your confirmation | Send the two tip mails | Consent, 6(1)(a) |
 
 Player names are whatever the GM or the player types in. A first name or nickname is enough. We do not need, and ask you not to enter, anything else about a person.
+
+A group's location is whatever the GM types in: an address, a note, or a link. Address suggestions start after three letters. Picking one stores its text and nothing else, and Geoapify keeps successful requests for at most 24 hours. The field works without suggestions, and stops asking Geoapify for the rest of your visit after a request fails.
 
 We measure use without cookies and without storing anything on your device. We show no ads and do no cross-site tracking, we do not combine your usage events with data from our other products, and we do not sell data or use it for automated decisions.
 
@@ -66,7 +69,9 @@ We use these processors under data processing agreements (Art. 28 GDPR):
 
 Transfers to the USA rely on the EU–US Data Privacy Framework and the EU Standard Contractual Clauses.
 
-Everyone who has a group's share link can see that group's name, its player names, its scheduled dates, and its answers. That is how the Service works; see the Terms.
+When the location field suggests addresses, your browser sends what you type there and your IP address to Geoapify, whose operator is registered in Cyprus (EU) and which answers from data centers in the EU, with Cloudflare and Bunny CDN in the path.
+
+Everyone who has a group's share link can see that group's name, its player names, its scheduled dates with their time and place, and its answers. That is how the Service works; see the Terms.
 
 Your Google profile picture is shown only to you and to the GM of each group where your account has a player. People with a share link do not see it.
 

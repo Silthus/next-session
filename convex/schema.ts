@@ -93,6 +93,9 @@ export default defineSchema({
     state: v.optional(sessionState),
     changedAt: v.optional(v.number()),
     published: v.optional(publishedSession),
+    startTime: v.optional(v.string()),
+    lengthMinutes: v.optional(v.number()),
+    location: v.optional(v.string()),
   }).index("by_groupId_and_date", ["groupId", "date"]),
 
   mailVolume: defineTable({ day: v.string(), count: v.number() }).index("by_day", ["day"]),

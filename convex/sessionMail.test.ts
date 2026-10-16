@@ -389,7 +389,7 @@ it.each(["release", "opt-out", "remove-group"])(
   },
 );
 
-it("drops a retry whose revision is no longer the published one", async () => {
+it("drops a retry once the Session's published state has changed", async () => {
   vi.spyOn(Math, "random").mockReturnValue(0.99);
   const { as, groupId, sessionId } = await publishedSession();
   fetchMock.mockImplementation((_url, init) =>
@@ -406,6 +406,29 @@ it("drops a retry whose revision is no longer the published one", async () => {
   await finish();
 
   expect(changes()).toEqual(["cancelled", "cancelled", "scheduled"]);
+});
+
+it("keeps retrying an update across a time-only change of the same Session", async () => {
+  vi.spyOn(Math, "random").mockReturnValue(0.99);
+  const { as, groupId } = await crew();
+  let webhookDown = true;
+  const delivered: unknown[] = [];
+  fetchMock.mockImplementation((_url, init) => {
+    if (webhookDown) return Promise.resolve(new Response(null, { status: 503 }));
+    delivered.push((JSON.parse(init!.body as string) as { change: string }).change);
+    return Promise.resolve(new Response(null, { status: 200 }));
+  });
+  const sessionId = await as.mutation(api.sessions.schedule, { groupId, date });
+  await wait(UNDO_WINDOW_MS + 1);
+  await deliver();
+
+  await as.mutation(api.sessions.updateDetails, { sessionId, startTime: "20:00" });
+  await wait(UNDO_WINDOW_MS + 1);
+  expect((await sessionRow(sessionId))?.published?.revision).toBe(2);
+  webhookDown = false;
+  await finish();
+
+  expect(delivered).toEqual(["scheduled"]);
 });
 
 it.each([

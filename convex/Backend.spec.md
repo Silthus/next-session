@@ -48,6 +48,9 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - sessions.cancel: a GM cancels a Session, which keeps it as a Cancelled Session unless it was never published
   handler: cancel in sessions.ts
   trust: signed-in user
+- sessions.updateDetails: a GM gives a scheduled upcoming Session its own start time, length or place, or sets one back to the Group's
+  handler: updateDetails in sessions.ts
+  trust: signed-in user
 - player.group: whoever holds a Share Link reads its Group's Roster and Sessions
   handler: group in player.ts
   trust: visitor
@@ -126,7 +129,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   because: a Group is one table's private plan; without the ownership check any signed-in GM could read or edit another table's Roster, Answers and Sessions, and a refusal that differs from a missing id would let ids be probed
   crossing: signed-in user -> store
   refuted: groupOwnedBy returned the Group without comparing its ownerId -> the oracle failed by name (2026-10-12)
-  entrances: groups.mine, groups.get, groups.create, groups.settings, groups.updateSettings, groups.rename, groups.remove, groups.rotateShareToken, groups.undoRotateShareToken, schedule.month, roster.addPlayer, roster.renamePlayer, roster.removePlayer, sessions.schedule, sessions.cancel
+  entrances: groups.mine, groups.get, groups.create, groups.settings, groups.updateSettings, groups.rename, groups.remove, groups.rotateShareToken, groups.undoRotateShareToken, schedule.month, roster.addPlayer, roster.renamePlayer, roster.removePlayer, sessions.schedule, sessions.cancel, sessions.updateDetails
   kinds: read, identity
   checklist: scoped-reads declared as owner-only groups
   checklist: capability-authorization declared as share link scoping
@@ -161,7 +164,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: canonical-encoding dismissed: the claim code is compared by its hash and has one encoding
   checklist: identity-continuity declared as save never replaces
 - no personal data to posthog: Every backend event and log sent to PostHog carries no Group name, Player name, Share Token, claim code, email, location or start time.
-  over: every event and log a full journey sends: create a link, rename, save a Time and place, rotate, join, schedule, Save, claim, release, get and reset the Calendar feed link, and the expiry sweep
+  over: every event and log a full journey sends: create a link, rename, save a Time and place, rotate, join, schedule, give a Session its own time and place, Save, claim, release, get and reset the Calendar feed link, and the expiry sweep
   via: sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log
   because: Next Session shares its PostHog project with Lonir and promises in the Privacy Policy to send no names or credentials; a leaked Share Token in an event would hand out a Group
   crossing: store -> egress
@@ -182,7 +185,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   refuted: the Calendar feed took each Session's live state instead of its published state -> the oracle failed by name (2026-10-16)
   kinds: output
   checklist: commit-ordered-effects declared as published only
-  checklist: revalidated-permission dismissed: every send attempt rechecks the published revision, the Group, the Claim and the Session email switch in its own query
+  checklist: revalidated-permission dismissed: every send attempt rechecks the published state, the Group, the Claim and the Session email switch in its own query
   checklist: destination-confinement dismissed: the Session update posts only to the configured Workflows webhook, never to a caller-supplied address
   checklist: redaction dismissed: the Session update body is the Workflows trigger data the recipient's own mail needs, and it never reaches telemetry
   checklist: circuit-breaker-policy dismissed: a failing webhook gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks a GM's change

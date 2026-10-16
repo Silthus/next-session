@@ -19,9 +19,8 @@ import {
 import { enforceRateLimit } from "./model/rateLimits";
 import { track } from "./model/telemetry";
 import {
-  hasSavedTimeAndPlace,
-  timeAndPlaceOf,
-  timeAndPlaceView,
+  groupTimeAndPlaceOf,
+  groupTimeAndPlaceView,
   validTimeAndPlace,
 } from "./model/timeAndPlace";
 import { groupChanged } from "./sessionLifecycle";
@@ -75,15 +74,13 @@ export const get = query({
   },
 });
 
-const settingsView = v.object({ ...timeAndPlaceView.fields, saved: v.boolean() });
-
 export const settings = query({
   args: { groupId: v.string() },
-  returns: v.union(settingsView, v.null()),
+  returns: v.union(groupTimeAndPlaceView, v.null()),
   handler: async (ctx, { groupId }) => {
     const group = await findOwnedGroup(ctx, groupId);
     if (group === null) return null;
-    return { ...timeAndPlaceOf(group), saved: hasSavedTimeAndPlace(group) };
+    return groupTimeAndPlaceOf(group);
   },
 });
 

@@ -209,7 +209,6 @@ function GroupSurface({
   const wide = useWideLayout();
   const requestedMonth = visibleMonth(search.month, today);
   const loaded = useMonthSchedule(groupId, requestedMonth);
-  const timeAndPlace = useQuery(api.groups.settings, { groupId });
   const sessions = useSessionActions(groupId, showToast);
   const rail = useRailActions(groupId, showToast);
   const [nudgeSnoozedAt, setNudgeSnoozedAt] = useState(() => nudgeDismissedAt());
@@ -261,17 +260,16 @@ function GroupSurface({
   const heading = (
     <GroupSwitcherContainer
       group={group}
-      timeAndPlaceIsNew={timeAndPlace?.saved === false}
+      timeAndPlaceIsNew={loaded?.schedule?.timeAndPlace.saved === false}
       onOpenTimeAndPlace={openTimeAndPlace}
     />
   );
-  if (loaded === undefined || timeAndPlace === undefined) {
-    return <GroupLoading heading={heading} actions={headerActions} />;
-  }
+  if (loaded === undefined) return <GroupLoading heading={heading} actions={headerActions} />;
   const { month, schedule } = loaded;
-  if (schedule === null || timeAndPlace === null) {
+  if (schedule === null) {
     return saving ? <GroupLoading heading={heading} /> : <FirstGroupFallback />;
   }
+  const { timeAndPlace } = schedule;
 
   const summary = summarizeMonth({ month, today, ...schedule });
   const day = summary.days.find((candidate) => candidate.date === selectedDay) ?? null;
@@ -295,6 +293,7 @@ function GroupSurface({
         onSchedule={() => void sessions.schedule(day.date)}
         onCancel={(session) => void sessions.cancel(session)}
         onOpenTimeAndPlace={openTimeAndPlace}
+        onSaveDetails={sessions.updateDetails}
       />
     );
   const nudging = showsNudge({

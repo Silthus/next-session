@@ -117,8 +117,10 @@ async function upcomingSessionsOf(ctx: QueryCtx, group: Doc<"groups">, today: Is
     .query("sessions")
     .withIndex("by_groupId_and_date", (q) => q.eq("groupId", group._id).gte("date", today))
     .take(UPCOMING_SESSIONS);
-  const timeAndPlace = sessionTimeAndPlace(group);
-  return sessions.map((session) => ({ ...datedSessionOf(session), ...timeAndPlace }));
+  return sessions.map((session) => ({
+    ...datedSessionOf(session),
+    ...sessionTimeAndPlace(group, session),
+  }));
 }
 
 async function openDatesOf(ctx: QueryCtx, playerId: Id<"players">, today: IsoDate) {

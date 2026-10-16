@@ -67,6 +67,17 @@ describe("Sessions", () => {
     expect(onOpenTimeAndPlace).toHaveBeenCalledOnce();
   });
 
+  it("names the Group's zone in the prompt when the GM's browser is elsewhere", () => {
+    const { card } = renderSessions([], [], {
+      ...usualNight,
+      timeZone: "Europe/London",
+      saved: false,
+    });
+    expect(
+      within(card).getByText("Calendars show 19:00 to 23:00 London time until you change it."),
+    ).toBeTruthy();
+  });
+
   it("sums up the saved time and place in one line with Edit", async () => {
     const { card, onOpenTimeAndPlace } = renderSessions([], [], {
       ...usualNight,

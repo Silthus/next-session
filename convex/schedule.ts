@@ -6,10 +6,12 @@ import { findOwnedGroup } from "./model/access";
 import { datedSessionOf } from "./sessionLifecycle";
 import { profileImageUrl } from "./model/profileImages";
 import {
+  groupTimeAndPlaceOf,
+  groupTimeAndPlaceView,
+  overriddenFields,
+  sessionDetailField,
   sessionTimeAndPlace,
   sessionTimeAndPlaceFields,
-  timeAndPlaceOf,
-  timeAndPlaceView,
 } from "./model/timeAndPlace";
 import { answerValue, datedSession } from "./schema";
 
@@ -24,9 +26,10 @@ const monthSchedule = v.object({
       ...datedSession.fields,
       published: v.boolean(),
       ...sessionTimeAndPlaceFields,
+      overrides: v.array(sessionDetailField),
     }),
   ),
-  timeAndPlace: timeAndPlaceView,
+  timeAndPlace: groupTimeAndPlaceView,
 });
 
 export const month = query({
@@ -40,7 +43,7 @@ export const month = query({
       answersIn(ctx, group._id, month),
       sessionsOf(ctx, group),
     ]);
-    return { players, answers, sessions, timeAndPlace: timeAndPlaceOf(group) };
+    return { players, answers, sessions, timeAndPlace: groupTimeAndPlaceOf(group) };
   },
 });
 
@@ -75,12 +78,12 @@ async function sessionsOf(ctx: QueryCtx, group: Doc<"groups">) {
     .query("sessions")
     .withIndex("by_groupId_and_date", (q) => q.eq("groupId", group._id))
     .collect();
-  const timeAndPlace = sessionTimeAndPlace(group);
   return sessions.map((session) => ({
     _id: session._id,
     ...datedSessionOf(session),
     published: session.published !== undefined,
-    ...timeAndPlace,
+    ...sessionTimeAndPlace(group, session),
+    overrides: overriddenFields(session),
   }));
 }
 

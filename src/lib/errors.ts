@@ -27,6 +27,8 @@ const byTopic = {
     SESSION_EXISTS: "That night is already scheduled.",
     OUT_OF_WINDOW: "That date can't change anymore.",
     NOT_FOUND: "That session is gone already.",
+    SESSION_CANCELLED: "That night is cancelled. Schedule it again to change it.",
+    INVALID_SETTINGS: "Check the start time and the place, then save again.",
   },
   roster: {
     NAME_TAKEN: "That name is already on the list.",

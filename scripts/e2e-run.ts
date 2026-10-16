@@ -98,6 +98,7 @@ async function main() {
       env: {
         ...process.env,
         VITE_POSTHOG_TOKEN: "",
+        VITE_GEOAPIFY_KEY: "",
         POSTHOG_PERSONAL_API_KEY: "",
         POSTHOG_PROJECT_ID: "",
         E2E_BASE_URL: `http://127.0.0.1:${run.ports.web}`,

@@ -1,10 +1,11 @@
 import { Navigate, useNavigate } from "@tanstack/react-router";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import { errorMessage } from "../../lib/errors";
 import { Toast } from "../../ui/Toast";
 import { useGm } from "../account/useGm";
+import { useCreateGroup } from "../group/useCreateGroup";
 import { useToast, type GroupToast } from "../group/useToast";
 import { useTodayUtc } from "../player/useTodayUtc";
 import { SessionEmailSettings } from "./SessionEmailSettings";
@@ -49,14 +50,14 @@ export function MyGroupsScreen() {
 }
 
 function useCreateLink(show: (message: string) => void) {
-  const createGroup = useMutation(api.groups.create);
+  const createGroup = useCreateGroup();
   const navigate = useNavigate();
   const [creating, setCreating] = useState(false);
 
   async function create() {
     setCreating(true);
     try {
-      const groupId = await createGroup({});
+      const groupId = await createGroup();
       await navigate({ to: "/g/$groupId", params: { groupId } });
     } catch (error) {
       show(errorMessage(error, "group"));
