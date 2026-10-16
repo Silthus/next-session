@@ -62,6 +62,27 @@ describe("Create your link", () => {
     expect(acceptance.at).toBeGreaterThanOrEqual(before);
   });
 
+  it("keeps the browser's time zone for the first Group", async () => {
+    const { as } = await createYourLink(t, { timeZone: "America/New_York" });
+
+    const [group] = await as.query(api.groups.mine, {});
+    expect(await as.query(api.groups.settings, { groupId: group!.id })).toMatchObject({
+      timeZone: "America/New_York",
+    });
+  });
+
+  it.each(["Mars/Olympus_Mons", 42])(
+    "drops the time zone %s and still creates the first Group on Berlin time",
+    async (timeZone) => {
+      const { as } = await createYourLink(t, { timeZone });
+
+      const [group] = await as.query(api.groups.mine, {});
+      expect(await as.query(api.groups.settings, { groupId: group!.id })).toMatchObject({
+        timeZone: "Europe/Berlin",
+      });
+    },
+  );
+
   it("gives every click its own GM and Group", async () => {
     const first = await createYourLink(t);
     const second = await createYourLink(t);

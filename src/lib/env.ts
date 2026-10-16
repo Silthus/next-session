@@ -34,3 +34,7 @@ export function postHogEnv(source: EnvSource = import.meta.env): PostHogEnv | nu
   const token = source.VITE_POSTHOG_TOKEN;
   return token ? { token, release: source.VITE_RELEASE } : null;
 }
+
+export function geoapifyKey(source: EnvSource = import.meta.env): string | null {
+  return source.VITE_GEOAPIFY_KEY || null;
+}

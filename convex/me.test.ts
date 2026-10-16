@@ -16,6 +16,9 @@ const NOW = Date.UTC(2026, 9, 3, 23, 30);
 const TODAY = "2026-10-03";
 const TOMORROW = "2026-10-04";
 const BOOKABLE_DAYS_FROM_TODAY = 29 + 30 + 31;
+const BERLIN = "Europe/Berlin";
+
+const USUAL = { startTime: "19:00", lengthMinutes: 240 };
 
 let t: TestBackend;
 
@@ -55,7 +58,9 @@ async function seedAnswers(groupId: Id<"groups">, playerId: Id<"players">, dates
 
 const myGroups = (as: GmClient | TestBackend, today = TODAY) => as.query(api.me.groups, { today });
 
-const scheduled = (...dates: string[]) => dates.map((date) => ({ date, state: "scheduled" }));
+const scheduled = (...dates: string[]) =>
+  dates.map((date) => ({ date, state: "scheduled", ...USUAL }));
+const cancelled = (date: string) => ({ date, state: "cancelled", ...USUAL });
 
 describe("me.groups", () => {
   it("is null for a visitor and an Anonymous GM", async () => {
@@ -85,6 +90,7 @@ describe("me.groups", () => {
         {
           groupId,
           name: "Dragon table",
+          timeZone: BERLIN,
           upcomingSessions: scheduled(
             TODAY,
             "2026-10-09",
@@ -105,12 +111,31 @@ describe("me.groups", () => {
     await seedSession(t, groupId, "2026-10-23");
 
     expect((await myGroups(as))?.running[0]?.upcomingSessions).toEqual([
-      { date: TODAY, state: "scheduled" },
-      { date: "2026-10-09", state: "scheduled" },
-      { date: "2026-10-10", state: "cancelled" },
-      { date: "2026-10-11", state: "cancelled" },
-      { date: "2026-10-16", state: "scheduled" },
+      ...scheduled(TODAY, "2026-10-09"),
+      cancelled("2026-10-10"),
+      cancelled("2026-10-11"),
+      ...scheduled("2026-10-16"),
     ]);
+  });
+
+  it("shows when and where each upcoming Session is, in the Group's time zone", async () => {
+    const { as, groupId, shareToken } = await groupWithGm();
+    const saved = { startTime: "18:30", lengthMinutes: 180, location: "Max's place" };
+    await as.mutation(api.groups.updateSettings, {
+      groupId,
+      ...saved,
+      timeZone: "America/New_York",
+    });
+    await seedSession(t, groupId, "2026-10-17");
+    const player = await signInAccount(t);
+    await joinAs(player.as, shareToken);
+    const expected = {
+      timeZone: "America/New_York",
+      upcomingSessions: [{ date: "2026-10-17", state: "scheduled", ...saved }],
+    };
+
+    expect((await myGroups(as))?.running).toMatchObject([expected]);
+    expect((await myGroups(player.as))?.playing).toMatchObject([expected]);
   });
 
   it("keeps a Cancelled Session on its date and drops it once the date has passed", async () => {
@@ -118,9 +143,7 @@ describe("me.groups", () => {
     await seedSession(t, groupId, TODAY, CANCELLED);
     const player = await signInAccount(t);
     await joinAs(player.as, shareToken);
-    expect((await myGroups(player.as))?.playing[0]?.upcomingSessions).toEqual([
-      { date: TODAY, state: "cancelled" },
-    ]);
+    expect((await myGroups(player.as))?.playing[0]?.upcomingSessions).toEqual([cancelled(TODAY)]);
 
     vi.setSystemTime(NOW + 60 * 60_000);
 
@@ -149,6 +172,7 @@ describe("me.groups", () => {
           shareToken,
           playerId: ada,
           playerName: "Ada",
+          timeZone: BERLIN,
           upcomingSessions: scheduled("2026-10-17"),
           openDates: BOOKABLE_DAYS_FROM_TODAY - 3,
         },

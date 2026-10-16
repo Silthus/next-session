@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -7,6 +7,7 @@ import { lastGroupId, returningGroupId } from "../../lib/storage";
 import { AccountSheet, type AccountIntent } from "../account/AccountSheet";
 import { isClaimInvalid, type SaveInput } from "../account/save";
 import { useGm } from "../account/useGm";
+import { useCreateGroup } from "../group/useCreateGroup";
 import { LandingView, type LandingState } from "./LandingView";
 
 type Phase = "idle" | "creating" | "created" | "failed";
@@ -19,7 +20,7 @@ export function Landing() {
   const navigate = useNavigate();
   const signedIn = gm.status === "anonymous" || gm.status === "account";
   const groups = useQuery(api.groups.mine, signedIn ? {} : "skip");
-  const createGroup = useMutation(api.groups.create);
+  const createGroup = useCreateGroup();
   const [phase, setPhase] = useState<Phase>("idle");
   const [failure, setFailure] = useState<unknown>(null);
   const [createdGroupId, setCreatedGroupId] = useState<Id<"groups"> | null>(null);
@@ -49,7 +50,7 @@ export function Landing() {
   const create = async () => {
     setPhase("creating");
     try {
-      if (signedIn) setCreatedGroupId(await createGroup({}));
+      if (signedIn) setCreatedGroupId(await createGroup());
       else await gm.createLink();
       setPhase("created");
     } catch (error) {

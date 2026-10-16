@@ -1,0 +1,25 @@
+$ bunx vitest run --project shared shared/sessionTime.test.ts   # tree at ee0fe41 plus the test, without shared/sessionTime.ts
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-010d5156
+
+ ❯ |shared| shared/sessionTime.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/sessionTime.test.ts [ shared/sessionTime.test.ts ]
+Error: Cannot find module './sessionTime' imported from /home/coder/.t3/worktrees/next-session/t3-010d5156/shared/sessionTime.test.ts
+ ❯ shared/sessionTime.test.ts:2:1
+      1| import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+      2| import {
+       | ^
+      3|   DEFAULT_GROUP_TIME,
+      4|   endClockTime,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  08:51:07
+   Duration  206ms (worker 98%, environment 2%)
+

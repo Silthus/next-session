@@ -60,7 +60,15 @@ function countsOf(day: HTMLElement) {
 }
 
 function sessionOn(date: string, state: CalendarSession["state"]): CalendarSession {
-  return { _id: `s-${date}` as Id<"sessions">, date, state, published: true };
+  return {
+    _id: `s-${date}` as Id<"sessions">,
+    date,
+    state,
+    published: true,
+    startTime: "19:00",
+    lengthMinutes: 240,
+    overrides: [],
+  };
 }
 
 function marksOf(day: HTMLElement) {

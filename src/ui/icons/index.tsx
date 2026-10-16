@@ -159,3 +159,20 @@ export function IconShare({ className }: { className?: string }) {
     </svg>
   );
 }
+
+export function IconClock({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={cn("size-4", className)}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <circle cx="10" cy="10" r="7.25" />
+      <path d="M10 6v4.2l2.6 1.6" />
+    </svg>
+  );
+}

@@ -12,6 +12,7 @@ const playerGroup = {
   name: "Thursday Crew",
   players: [{ _id: "player-ana" as Id<"players">, name: "Ana" }],
   sessions: [],
+  timeZone: "Europe/Berlin",
   claimedPlayerId: null,
   removedFromMyGroups: false,
   opensAsGm: false,

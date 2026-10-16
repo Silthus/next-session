@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
-import { LEGACY_PAGE_SIZE } from "./backfill";
+import { BACKFILL_PAGE_SIZE } from "./backfill";
 import {
   newBackend,
   seedSession,
@@ -50,7 +50,7 @@ async function mailStatesLeft() {
 }
 
 async function sessions() {
-  return await t.run(async (ctx) => await ctx.db.query("sessions").take(10 * LEGACY_PAGE_SIZE));
+  return await t.run(async (ctx) => await ctx.db.query("sessions").take(10 * BACKFILL_PAGE_SIZE));
 }
 
 async function backfill() {
@@ -68,18 +68,18 @@ async function seedLegacySessions(groupId: Id<"groups">, count: number) {
 describe("backfill.publishLegacySessions", () => {
   it("publishes every legacy Session as scheduled at revision 0, page by page", async () => {
     const { groupId } = await signedInGmWithGroup(t);
-    await seedLegacySessions(groupId, LEGACY_PAGE_SIZE + 1);
+    await seedLegacySessions(groupId, BACKFILL_PAGE_SIZE + 1);
 
     await backfill();
 
     expect((await sessions()).map((session) => session.published)).toEqual(
-      Array(LEGACY_PAGE_SIZE + 1).fill({ state: "scheduled", revision: 0 }),
+      Array(BACKFILL_PAGE_SIZE + 1).fill({ state: "scheduled", revision: 0 }),
     );
   });
 
   it("empties the retired Session mail table, page by page", async () => {
     const { groupId } = await signedInGmWithGroup(t);
-    await seedMailStates(groupId, LEGACY_PAGE_SIZE + 1);
+    await seedMailStates(groupId, BACKFILL_PAGE_SIZE + 1);
 
     await backfill();
 
@@ -115,6 +115,159 @@ describe("backfill.publishLegacySessions", () => {
     await t.finishAllScheduledFunctions(() => vi.runAllTimers());
 
     expect(bodies()).toEqual([expect.objectContaining({ change: "cancelled" })]);
+  });
+});
+
+describe("backfill.widenPublishedSnapshots", () => {
+  const OCTOBER_17_AT_SEVEN = {
+    start: Date.UTC(2026, 9, 17, 17),
+    end: Date.UTC(2026, 9, 17, 21),
+  };
+
+  async function widen() {
+    await t.mutation(internal.backfill.widenPublishedSnapshots, {});
+    await t.finishAllScheduledFunctions(() => vi.runAllTimers());
+  }
+
+  async function publishedOf(sessionId: Id<"sessions">) {
+    return await t.run(async (ctx) => (await ctx.db.get("sessions", sessionId))?.published);
+  }
+
+  async function groupNamed(name: string, fields: { location?: string } = {}) {
+    const gm = await signedInGmWithGroup(t);
+    await t.run(async (ctx) => await ctx.db.patch("groups", gm.groupId, { name, ...fields }));
+    return gm;
+  }
+
+  it("fills the usual start, end and Group name into every published Session at the same revision, page by page", async () => {
+    const { groupId } = await groupNamed("Thursday Crew");
+    for (let page = 0; page <= BACKFILL_PAGE_SIZE; page++) {
+      const date = new Date(Date.UTC(2026, 9, 17) + page * 86_400_000).toISOString().slice(0, 10);
+      await seedSession(t, groupId, date, { published: { state: "scheduled", revision: 4 } });
+    }
+
+    await widen();
+
+    const published = (await sessions()).map((session) => session.published);
+    expect(published).toHaveLength(BACKFILL_PAGE_SIZE + 1);
+    expect(published[0]).toEqual({
+      state: "scheduled",
+      ...OCTOBER_17_AT_SEVEN,
+      summary: "Thursday Crew",
+      revision: 4,
+    });
+    expect(published.at(-1)).toMatchObject({ summary: "Thursday Crew", revision: 4 });
+  });
+
+  it("widens with what was published before Time and place, so a Save before it still moves the Session", async () => {
+    const { as, groupId } = await crew();
+    const sessionId = await seedSession(t, groupId, "2026-10-17", {
+      published: { state: "scheduled", revision: 1 },
+    });
+    await as.mutation(api.groups.updateSettings, {
+      groupId,
+      startTime: "18:30",
+      lengthMinutes: 180,
+      timeZone: "Europe/Berlin",
+      location: "Max's place",
+    });
+
+    await t.mutation(internal.backfill.widenPublishedSnapshots, {});
+    expect(await publishedOf(sessionId)).toEqual({
+      state: "scheduled",
+      ...OCTOBER_17_AT_SEVEN,
+      summary: "My group",
+      revision: 1,
+    });
+    await t.finishAllScheduledFunctions(() => vi.runAllTimers());
+
+    expect(await publishedOf(sessionId)).toEqual({
+      state: "scheduled",
+      start: Date.UTC(2026, 9, 17, 16, 30),
+      end: Date.UTC(2026, 9, 17, 19, 30),
+      location: "Max's place",
+      summary: "My group",
+      revision: 2,
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("lets a settle that runs before it publish nothing for an unchanged Session", async () => {
+    const { groupId } = await groupNamed("Thursday Crew");
+    const changedAt = Date.now();
+    const sessionId = await seedSession(t, groupId, "2026-10-17", {
+      state: "scheduled",
+      changedAt,
+      published: { state: "scheduled", revision: 3 },
+    });
+
+    await t.mutation(internal.sessionLifecycle.settle, { sessionId, changedAt });
+
+    expect(await publishedOf(sessionId)).toEqual({ state: "scheduled", revision: 3 });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps a Cancelled Session cancelled", async () => {
+    const { groupId } = await groupNamed("Thursday Crew");
+    const sessionId = await seedSession(t, groupId, "2026-10-17", {
+      state: "cancelled",
+      published: { state: "cancelled", revision: 2 },
+    });
+
+    await widen();
+
+    expect(await publishedOf(sessionId)).toEqual({
+      state: "cancelled",
+      ...OCTOBER_17_AT_SEVEN,
+      summary: "Thursday Crew",
+      revision: 2,
+    });
+  });
+
+  it("leaves a Session that was never published alone", async () => {
+    const { groupId } = await groupNamed("Thursday Crew");
+    const sessionId = await seedSession(t, groupId, "2026-10-17", {
+      state: "scheduled",
+      changedAt: Date.now(),
+    });
+
+    await widen();
+
+    const session = await t.run(async (ctx) => await ctx.db.get("sessions", sessionId));
+    expect(session).not.toHaveProperty("published");
+  });
+
+  it("changes nothing on a second run", async () => {
+    const { groupId } = await groupNamed("Thursday Crew");
+    await seedSession(t, groupId, "2026-10-17", { published: { state: "scheduled", revision: 1 } });
+    await widen();
+    await t.run(async (ctx) => await ctx.db.patch("groups", groupId, { name: "Renamed Crew" }));
+    const once = await sessions();
+
+    await widen();
+
+    expect(await sessions()).toEqual(once);
+  });
+
+  it("lets the first settle after it publish nothing for an unchanged Session", async () => {
+    const { as, groupId } = await crew();
+    const sessionId = await seedSession(t, groupId, "2026-10-17", {
+      published: { state: "scheduled", revision: 1 },
+    });
+    await widen();
+    const widened = await publishedOf(sessionId);
+
+    await as.mutation(api.groups.updateSettings, {
+      groupId,
+      startTime: "19:00",
+      lengthMinutes: 240,
+      timeZone: "Europe/Berlin",
+      location: "",
+    });
+    await t.finishAllScheduledFunctions(() => vi.runAllTimers());
+
+    expect(await publishedOf(sessionId)).toEqual(widened);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
 

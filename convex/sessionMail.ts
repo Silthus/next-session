@@ -11,16 +11,21 @@ import {
 } from "./mail";
 import { accountDistinctId, isTestAddress, PRODUCT } from "./model/telemetry";
 
-export async function sessionPublished(ctx: MutationCtx, session: Doc<"sessions">) {
+export async function sessionPublished(
+  ctx: MutationCtx,
+  session: Doc<"sessions">,
+  previous: Doc<"sessions">["published"],
+) {
   const { published } = session;
-  if (published === undefined || !sessionMailConfigured()) return;
+  if (published === undefined || published.state === previous?.state) return;
+  if (!sessionMailConfigured()) return;
   const players = await ctx.db
     .query("players")
     .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", session.groupId))
     .take(MAX_PLAYERS_PER_GROUP);
   const accounts = new Set(players.flatMap((player) => (player.userId ? [player.userId] : [])));
   for (const userId of accounts) {
-    const send = { sessionId: session._id, userId, revision: published.revision };
+    const send = { sessionId: session._id, userId, change: published.state };
     if (await bodyFor(ctx, send)) await requestSessionMail(ctx, send);
   }
 }
@@ -31,10 +36,10 @@ export const recipient = internalQuery({
   handler: bodyFor,
 });
 
-async function bodyFor(ctx: QueryCtx, { sessionId, userId, revision }: SessionSend) {
+async function bodyFor(ctx: QueryCtx, { sessionId, userId, change }: SessionSend) {
   const session = await ctx.db.get("sessions", sessionId);
   const published = session?.published;
-  if (!session || published?.revision !== revision) return null;
+  if (!session || published?.state !== change) return null;
   const group = await ctx.db.get("groups", session.groupId);
   if (!group || group.ownerId === userId) return null;
   const player = await ctx.db
@@ -57,7 +62,7 @@ async function bodyFor(ctx: QueryCtx, { sessionId, userId, revision }: SessionSe
     email: account.email,
     group_name: group.name,
     date_label: dateLabel(session.date),
-    change: published.state,
+    change,
     player_url: `https://next-session.link/s/${encodeURIComponent(group.shareToken)}`,
   };
 }

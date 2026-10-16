@@ -258,6 +258,33 @@ describe("GM mutations", () => {
     ]);
   });
 
+  it.each([
+    ["Max's place", true],
+    ["", false],
+  ])(
+    "tracks group_settings_saved for the location %j as has_location %s",
+    async (location, hasLocation) => {
+      const { as, groupId } = await signedInGmWithGroup(t);
+
+      const events = await eventsDuring(() =>
+        as.mutation(api.groups.updateSettings, {
+          groupId,
+          startTime: "20:45",
+          lengthMinutes: 195,
+          timeZone: "Europe/Berlin",
+          location,
+        }),
+      );
+
+      expect(events).toEqual([
+        expect.objectContaining({
+          event: "next_session:group_settings_saved",
+          properties: { product: "next-session", group_id: groupId, has_location: hasLocation },
+        }),
+      ]);
+    },
+  );
+
   it("tracks session_scheduled with the Roster size and whether it is the Group's first", async () => {
     const { as, groupId } = await groupWithPlayer();
 
@@ -292,6 +319,32 @@ describe("GM mutations", () => {
       expect.objectContaining({
         event: "next_session:session_cancelled",
         properties: { product: "next-session", group_id: groupId },
+      }),
+    ]);
+  });
+
+  it("tracks session_details_changed naming only the fields that changed", async () => {
+    const { as, groupId } = await signedInGmWithGroup(t);
+    const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+    await as.mutation(api.sessions.updateDetails, { sessionId, location: "The club" });
+
+    const events = await eventsDuring(() =>
+      as.mutation(api.sessions.updateDetails, {
+        sessionId,
+        startTime: "20:00",
+        lengthMinutes: null,
+        location: "The club",
+      }),
+    );
+
+    expect(events).toEqual([
+      expect.objectContaining({
+        event: "next_session:session_details_changed",
+        properties: {
+          product: "next-session",
+          group_id: groupId,
+          fields: ["startTime"],
+        },
       }),
     ]);
   });
@@ -496,20 +549,45 @@ describe("refused and objected", () => {
 });
 
 describe("the redaction contract", () => {
-  it("sends no Group name, Player name, Share Token, claim code or email in any event or log", async () => {
+  it("sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log", async () => {
     const email = "redact-me@example.com";
-    const secrets: string[] = [email, "redact-me", "Dragon Table", "Zoltan Vex"];
+    const secrets: string[] = [
+      email,
+      "redact-me",
+      "Dragon Table",
+      "Zoltan Vex",
+      "Dragon Lair",
+      "Goblin Den",
+      "20:45",
+      "21:15",
+      "195",
+    ];
 
     const sends = await sendsDuring(async () => {
       const link = await createYourLink(t);
       const groupId = await firstGroupOf(link.as);
       await link.as.mutation(api.groups.rename, { groupId, name: "Dragon Table" });
+      await link.as.mutation(api.groups.updateSettings, {
+        groupId,
+        startTime: "20:45",
+        lengthMinutes: 195,
+        timeZone: "Europe/Berlin",
+        location: "Dragon Lair",
+      });
       secrets.push(await shareTokenOf(groupId));
       await link.as.mutation(api.groups.rotateShareToken, { groupId });
       const shareToken = await shareTokenOf(groupId);
       secrets.push(shareToken);
       const playerId = await t.mutation(api.player.join, { shareToken, name: "Zoltan Vex" });
-      await link.as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+      const sessionId = await link.as.mutation(api.sessions.schedule, {
+        groupId,
+        date: "2026-10-17",
+      });
+      await link.as.mutation(api.sessions.updateDetails, {
+        sessionId,
+        startTime: "21:15",
+        location: "Goblin Den",
+      });
       const { code } = await link.as.mutation(api.account.startSave, {});
       secrets.push(code);
       const account = await signUpAccount(t, { ...newCredentials(), email });
@@ -527,9 +605,11 @@ describe("the redaction contract", () => {
       ),
     ).toEqual([
       "next_session:link_created",
+      "next_session:group_settings_saved",
       "next_session:share_link_rotated",
       "next_session:player_joined",
       "next_session:session_scheduled",
+      "next_session:session_details_changed",
       "next_session:account_created",
       "next_session:groups_saved",
       "next_session:player_claimed",

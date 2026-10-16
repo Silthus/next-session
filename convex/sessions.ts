@@ -6,8 +6,14 @@ import { mutation, type QueryCtx } from "./_generated/server";
 import { ownedGroup, ownedSession, touchGroup } from "./model/access";
 import { fail } from "./model/errors";
 import { enforceRateLimit } from "./model/rateLimits";
-import { cancelSession, isScheduled, scheduleSession } from "./sessionLifecycle";
+import {
+  cancelSession,
+  isScheduled,
+  scheduleSession,
+  updateSessionDetails,
+} from "./sessionLifecycle";
 import { track, type ServerEvent } from "./model/telemetry";
+import { changedDetails, type SessionDetailField } from "./model/timeAndPlace";
 
 export const schedule = mutation({
   args: { groupId: v.id("groups"), date: v.string() },
@@ -35,6 +41,29 @@ export const cancel = mutation({
     await cancelSession(ctx, session);
     await touchGroup(ctx, group);
     await track(ctx, { name: "session_cancelled", actor: gm, group_id: group._id });
+    return null;
+  },
+});
+
+export const updateDetails = mutation({
+  args: {
+    sessionId: v.id("sessions"),
+    startTime: v.optional(v.union(v.string(), v.null())),
+    lengthMinutes: v.optional(v.union(v.number(), v.null())),
+    location: v.optional(v.union(v.string(), v.null())),
+  },
+  returns: v.null(),
+  handler: async (ctx, { sessionId, ...details }) => {
+    const { gm, group, session } = await ownedSession(ctx, sessionId);
+    ensureBookable(session.date);
+    if (!isScheduled(session)) fail({ code: "SESSION_CANCELLED" });
+    const changes = changedDetails(session, details);
+    const fields = Object.keys(changes) as SessionDetailField[];
+    if (fields.length === 0) return null;
+    await enforceRateLimit(ctx, "gmEdit", gm._id);
+    await updateSessionDetails(ctx, session, changes);
+    await touchGroup(ctx, group);
+    await track(ctx, { name: "session_details_changed", actor: gm, group_id: group._id, fields });
     return null;
   },
 });

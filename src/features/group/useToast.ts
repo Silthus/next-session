@@ -6,6 +6,18 @@ export type GroupToast = { id: number; groupId: string; message: string; undo?: 
 
 export type ShowToast = (message: string, undo?: () => void) => void;
 
+const handedOff = new Map<string, string>();
+
+export function handOffToast(groupId: string, message: string) {
+  handedOff.set(groupId, message);
+}
+
+function takeHandedOffToast(groupId: string) {
+  const message = handedOff.get(groupId);
+  handedOff.delete(groupId);
+  return message;
+}
+
 export function useToast(groupId: string) {
   const [toast, setToast] = useState<GroupToast | null>(null);
   const [heldToastId, setHeldToastId] = useState<number | null>(null);
@@ -30,6 +42,11 @@ export function useToast(groupId: string) {
     },
     [groupId],
   );
+
+  useEffect(() => {
+    const message = takeHandedOffToast(groupId);
+    if (message !== undefined) show(message);
+  }, [groupId, show]);
 
   return {
     toast: toast?.groupId === groupId ? toast : null,

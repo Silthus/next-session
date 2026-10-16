@@ -1,10 +1,18 @@
 import { v } from "convex/values";
 import { addMonths, isValidMonth, type IsoMonth } from "../shared/dates";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { query, type QueryCtx } from "./_generated/server";
 import { findOwnedGroup } from "./model/access";
 import { datedSessionOf } from "./sessionLifecycle";
 import { profileImageUrl } from "./model/profileImages";
+import {
+  groupTimeAndPlaceOf,
+  groupTimeAndPlaceView,
+  overriddenFields,
+  sessionDetailField,
+  sessionTimeAndPlace,
+  sessionTimeAndPlaceFields,
+} from "./model/timeAndPlace";
 import { answerValue, datedSession } from "./schema";
 
 const monthSchedule = v.object({
@@ -13,8 +21,15 @@ const monthSchedule = v.object({
   ),
   answers: v.array(v.object({ playerId: v.id("players"), date: v.string(), answer: answerValue })),
   sessions: v.array(
-    v.object({ _id: v.id("sessions"), ...datedSession.fields, published: v.boolean() }),
+    v.object({
+      _id: v.id("sessions"),
+      ...datedSession.fields,
+      published: v.boolean(),
+      ...sessionTimeAndPlaceFields,
+      overrides: v.array(sessionDetailField),
+    }),
   ),
+  timeAndPlace: groupTimeAndPlaceView,
 });
 
 export const month = query({
@@ -26,9 +41,9 @@ export const month = query({
     const [players, answers, sessions] = await Promise.all([
       rosterOf(ctx, group._id),
       answersIn(ctx, group._id, month),
-      sessionsOf(ctx, group._id),
+      sessionsOf(ctx, group),
     ]);
-    return { players, answers, sessions };
+    return { players, answers, sessions, timeAndPlace: groupTimeAndPlaceOf(group) };
   },
 });
 
@@ -58,15 +73,17 @@ async function answersIn(ctx: QueryCtx, groupId: Id<"groups">, month: IsoMonth) 
   return answers.map(({ playerId, date, answer }) => ({ playerId, date, answer }));
 }
 
-async function sessionsOf(ctx: QueryCtx, groupId: Id<"groups">) {
+async function sessionsOf(ctx: QueryCtx, group: Doc<"groups">) {
   const sessions = await ctx.db
     .query("sessions")
-    .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId))
+    .withIndex("by_groupId_and_date", (q) => q.eq("groupId", group._id))
     .collect();
   return sessions.map((session) => ({
     _id: session._id,
     ...datedSessionOf(session),
     published: session.published !== undefined,
+    ...sessionTimeAndPlace(group, session),
+    overrides: overriddenFields(session),
   }));
 }
 

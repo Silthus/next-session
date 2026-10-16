@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useToast } from "./useToast";
+import { handOffToast, useToast } from "./useToast";
 
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
@@ -67,5 +67,19 @@ describe("useToast", () => {
     act(() => result.current.show("Saved."));
     act(() => result.current.dismiss());
     expect(result.current.toast).toBeNull();
+  });
+
+  it("shows a toast handed off from another page of the same Group once", () => {
+    handOffToast("g1", "Time and place saved");
+    const elsewhere = renderHook(() => useToast("g2"));
+    expect(elsewhere.result.current.toast).toBeNull();
+
+    const { result } = renderHook(() => useToast("g1"));
+    expect(result.current.toast?.message).toBe("Time and place saved");
+    wait(5000);
+    expect(result.current.toast).toBeNull();
+
+    const again = renderHook(() => useToast("g1"));
+    expect(again.result.current.toast).toBeNull();
   });
 });

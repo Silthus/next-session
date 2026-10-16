@@ -25,6 +25,7 @@ const roster = {
     { _id: "player-bo" as Id<"players">, name: "Bo" },
   ],
   sessions: [],
+  timeZone: "Europe/Berlin",
   claimedPlayerId: null,
   removedFromMyGroups: false,
   opensAsGm: false,

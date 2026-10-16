@@ -1,0 +1,27 @@
+# red: the #158 backend tests on c9d9fbe plus the new tests, before sessions.updateDetails existed
+     × covers every public function of the GM modules 9ms
+     × every GM-facing function treats another GM's Group, Player and Session as missing and changes nothing 49ms
+     × publishes a burst of edits once, a window after the last one, with the Session's own values 59ms
+     × returns a field to the Group's value with null and leaves an absent field alone 5ms
+     × reads an empty place of the Session's own as no place this night 5ms
+     × keeps the Session's own values when it is cancelled and scheduled again 6ms
+     × pushes out the Expiry of an Unsaved Group 2ms
+     × refuses a Cancelled Session and keeps its values 2ms
+     × refuses a Session that has passed 3ms
+     × refuses { startTime: '7pm' } as invalid and changes nothing 4ms
+     × refuses { startTime: '24:00' } as invalid and changes nothing 4ms
+     × refuses { lengthMinutes: 15 } as invalid and changes nothing 4ms
+     × refuses { lengthMinutes: 735 } as invalid and changes nothing 7ms
+     × refuses { lengthMinutes: 250 } as invalid and changes nothing 3ms
+     × refuses { …(1) } as invalid and changes nothing 3ms
+     × refuses once the GM's edits are spent, and changes nothing 13ms
+     × keeps the Session's own start time and still follows the Group's length 5ms
+     × moves a Session that has only its own time to the new place, and leaves one with its own place alone 4ms
+     × schedule.month returns the Session's own values and which ones it overrides 2ms
+     × player.group shows the Session's own values over the Group's 2ms
+     × me.groups shows the Session's own values to the GM and to a Claimed Player 2ms
+     × tracks session_details_changed naming only the fields that changed 10ms
+     × sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log 8ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 23 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  3 failed (3)
+      Tests  23 failed | 31 passed (54)

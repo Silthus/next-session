@@ -12,16 +12,21 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type QueryCtx } from "./_generated/server";
 import { fail } from "./model/errors";
 import { currentAccount } from "./model/access";
+import { groupTimeOf, sessionTimeAndPlace, sessionTimeAndPlaceFields } from "./model/timeAndPlace";
 import { datedSession } from "./schema";
 import { datedSessionOf } from "./sessionLifecycle";
 
 const UPCOMING_SESSIONS = 5;
 const DAY = 86_400_000;
 
+const upcomingSessions = v.array(
+  v.object({ ...datedSession.fields, ...sessionTimeAndPlaceFields }),
+);
 const runningGroup = v.object({
   groupId: v.id("groups"),
   name: v.string(),
-  upcomingSessions: v.array(datedSession),
+  timeZone: v.string(),
+  upcomingSessions,
 });
 
 const playingGroup = v.object({
@@ -30,7 +35,8 @@ const playingGroup = v.object({
   shareToken: v.string(),
   playerId: v.id("players"),
   playerName: v.string(),
-  upcomingSessions: v.array(datedSession),
+  timeZone: v.string(),
+  upcomingSessions,
   openDates: v.number(),
 });
 
@@ -67,7 +73,8 @@ async function groupsRunBy(ctx: QueryCtx, account: Doc<"users">, today: IsoDate)
     groups.map(async (group) => ({
       groupId: group._id,
       name: group.name,
-      upcomingSessions: await upcomingSessionsOf(ctx, group._id, today),
+      timeZone: groupTimeOf(group).timeZone,
+      upcomingSessions: await upcomingSessionsOf(ctx, group, today),
     })),
   );
 }
@@ -85,7 +92,7 @@ async function playingCard(ctx: QueryCtx, player: Doc<"players">, today: IsoDate
   const group = await ctx.db.get("groups", player.groupId);
   if (group === null) return null;
   const [upcomingSessions, openDates] = await Promise.all([
-    upcomingSessionsOf(ctx, group._id, today),
+    upcomingSessionsOf(ctx, group, today),
     openDatesOf(ctx, player._id, today),
   ]);
   return {
@@ -94,17 +101,21 @@ async function playingCard(ctx: QueryCtx, player: Doc<"players">, today: IsoDate
     shareToken: group.shareToken,
     playerId: player._id,
     playerName: player.name,
+    timeZone: groupTimeOf(group).timeZone,
     upcomingSessions,
     openDates,
   };
 }
 
-async function upcomingSessionsOf(ctx: QueryCtx, groupId: Id<"groups">, today: IsoDate) {
+async function upcomingSessionsOf(ctx: QueryCtx, group: Doc<"groups">, today: IsoDate) {
   const sessions = await ctx.db
     .query("sessions")
-    .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId).gte("date", today))
+    .withIndex("by_groupId_and_date", (q) => q.eq("groupId", group._id).gte("date", today))
     .take(UPCOMING_SESSIONS);
-  return sessions.map(datedSessionOf);
+  return sessions.map((session) => ({
+    ...datedSessionOf(session),
+    ...sessionTimeAndPlace(group, session),
+  }));
 }
 
 async function openDatesOf(ctx: QueryCtx, playerId: Id<"players">, today: IsoDate) {

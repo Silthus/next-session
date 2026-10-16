@@ -17,6 +17,8 @@ function renderSwitcher(overrides: Partial<Parameters<typeof GroupSwitcher>[0]> 
     onCreate: vi.fn(() => Promise.resolve()),
     onRename: vi.fn(() => Promise.resolve()),
     onDelete: vi.fn(() => Promise.resolve()),
+    timeAndPlaceIsNew: false,
+    onOpenTimeAndPlace: vi.fn(),
     ...overrides,
   };
   render(<GroupSwitcher {...props} />);
@@ -47,6 +49,28 @@ describe("GroupSwitcher", () => {
     await userEvent.click(screen.getByRole("link", { name: /^Poker/ }));
     expect(onOpen).toHaveBeenCalledWith("g2");
     expect(screen.queryByRole("link")).toBeNull();
+  });
+
+  it("opens Time and place next to Rename and Delete, and closes", async () => {
+    const { onOpenTimeAndPlace } = renderSwitcher();
+    await openMenu();
+    const groupActions = screen
+      .getAllByRole("button")
+      .slice(-3)
+      .map((button) => button.textContent);
+    expect(groupActions).toEqual(["Time and place", "Rename group", "Delete group"]);
+
+    await userEvent.click(screen.getByRole("button", { name: "Time and place" }));
+    expect(onOpenTimeAndPlace).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("button", { name: "Time and place" })).toBeNull();
+  });
+
+  it("marks Time and place New until the GM has saved it once", async () => {
+    renderSwitcher({ timeAndPlaceIsNew: true });
+    await openMenu();
+    expect(screen.getByRole("button", { name: "Time and place, new" }).textContent).toBe(
+      "Time and placeNew",
+    );
   });
 
   it("makes a new Group", async () => {

@@ -1,5 +1,6 @@
 import type { OptimisticLocalStore } from "convex/browser";
 import { useMutation } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { useRef, useState } from "react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
@@ -8,6 +9,7 @@ import type { ShowToast } from "../useToast";
 import { dayLabel } from "./calendarDates";
 import { focusDay } from "./dayFocus";
 import type { CalendarSession } from "./DayCell";
+import type { SessionDetailChanges } from "./SessionDetails";
 import { errorMessage } from "../../../lib/errors";
 
 export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
@@ -15,11 +17,14 @@ export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
   const [pendingDates, setPendingDates] = useState<ReadonlySet<IsoDate>>(new Set());
   const scheduleSession = useMutation(api.sessions.schedule).withOptimisticUpdate(
     (store, { date }) =>
-      editCachedSessions(store, groupId, (sessions) => scheduled(sessions, date)),
+      editCachedSessions(store, groupId, ({ sessions, timeAndPlace }) =>
+        scheduled(sessions, date, timeAndPlace),
+      ),
   );
+  const updateSessionDetails = useMutation(api.sessions.updateDetails);
   const cancelSession = useMutation(api.sessions.cancel).withOptimisticUpdate(
     (store, { sessionId }) =>
-      editCachedSessions(store, groupId, (sessions) => cancelled(sessions, sessionId)),
+      editCachedSessions(store, groupId, ({ sessions }) => cancelled(sessions, sessionId)),
   );
 
   async function settle(date: IsoDate, change: () => Promise<void>) {
@@ -56,28 +61,57 @@ export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
     });
   }
 
+  async function updateDetails(
+    session: Pick<CalendarSession, "_id">,
+    changes: SessionDetailChanges,
+  ) {
+    await updateSessionDetails({ sessionId: session._id, ...changes });
+  }
+
   return {
     schedule,
     cancel,
+    updateDetails,
     isPending: (date: IsoDate) => pendingDates.has(date),
+  };
+}
+
+type MonthSchedule = NonNullable<FunctionReturnType<typeof api.schedule.month>>;
+
+function optimisticSession(
+  date: IsoDate,
+  { startTime, lengthMinutes, location }: MonthSchedule["timeAndPlace"],
+): CalendarSession {
+  return {
+    _id: `optimistic-${date}` as Id<"sessions">,
+    date,
+    state: "scheduled",
+    published: false,
+    startTime,
+    lengthMinutes,
+    location,
+    overrides: [],
   };
 }
 
 function editCachedSessions(
   store: OptimisticLocalStore,
   groupId: Id<"groups">,
-  edit: (sessions: CalendarSession[]) => CalendarSession[],
+  edit: (month: MonthSchedule) => MonthSchedule["sessions"],
 ) {
   for (const { args, value } of store.getAllQueries(api.schedule.month)) {
     if (args.groupId !== groupId || !value) continue;
-    store.setQuery(api.schedule.month, args, { ...value, sessions: edit(value.sessions) });
+    store.setQuery(api.schedule.month, args, { ...value, sessions: edit(value) });
   }
 }
 
-function scheduled(sessions: CalendarSession[], date: IsoDate): CalendarSession[] {
+function scheduled(
+  sessions: CalendarSession[],
+  date: IsoDate,
+  timeAndPlace: MonthSchedule["timeAndPlace"],
+): CalendarSession[] {
   if (!sessions.some((session) => session.date === date)) {
-    const optimisticId = `optimistic-${date}` as Id<"sessions">;
-    return [...sessions, { _id: optimisticId, date, state: "scheduled", published: false }];
+    return [...sessions, optimisticSession(date, timeAndPlace)];
   }
   return sessions.map((session) =>
     session.date === date ? { ...session, state: "scheduled" } : session,
