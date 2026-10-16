@@ -78,6 +78,15 @@ vi.mock("convex/react", () => ({
   },
 }));
 
+const wholeOctober = Object.fromEntries(
+  Array.from({ length: 25 }, (_, day) => [`2026-10-${String(day + 7).padStart(2, "0")}`, "busy"]),
+);
+const keepSessionsCard = { name: "Keep your sessions and get a calendar invite" };
+
+function quietKeepLine() {
+  return screen.getByRole("button", { name: "Keep this group" }).closest("p")?.textContent;
+}
+
 function updateQuery(key: string, value: unknown) {
   act(() => {
     queries[key] = value;
@@ -240,6 +249,71 @@ describe("PlayerScreen", () => {
     const nextSessions = await screen.findByRole("region", { name: "Next sessions" });
     expect(within(nextSessions).getByRole("link", { name: "Subscribe on My groups" })).toBeTruthy();
   });
+
+  it("opens the keep sheet from the done card of a visitor who finished the month", async () => {
+    queries["player:answers2026-10"] = wholeOctober;
+    renderPage();
+
+    const card = await screen.findByRole("status", keepSessionsCard);
+    expect(screen.queryByRole("region", { name: "Keep this group" })).toBeNull();
+    await userEvent.click(within(card).getByRole("button", { name: "Create account" }));
+
+    expect(await screen.findByRole("dialog", { name: "Keep Thursday Crew" })).toBeTruthy();
+  });
+
+  it("keeps through Google from the done card and explains a refusal there", async () => {
+    queries["player:answers2026-10"] = wholeOctober;
+    google.mockRejectedValue(new Error("offline"));
+    renderPage();
+
+    const card = await screen.findByRole("status", keepSessionsCard);
+    await userEvent.click(within(card).getByRole("button", { name: "Continue with Google" }));
+
+    expect(google).toHaveBeenCalledWith({ shareToken, playerId });
+    expect((await within(card).findByRole("alert")).textContent).toBe(
+      "That didn't work. Try again.",
+    );
+  });
+
+  it("lands on November with the quiet line after Not now, and October reads All set", async () => {
+    queries["player:answers2026-10"] = wholeOctober;
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Not now, fill November →" }));
+
+    expect(await screen.findByRole("heading", { name: "November 2026" })).toBeTruthy();
+    expect(quietKeepLine()).toBe("Keep this group to get calendar invites.");
+    await userEvent.click(screen.getByRole("button", { name: "Previous month" }));
+    expect(await screen.findByText("All set for October ✓")).toBeTruthy();
+    expect(screen.queryByRole("status", keepSessionsCard)).toBeNull();
+  });
+
+  it("keeps the green done card for an Account that keeps the Group", async () => {
+    account.status = "account";
+    queries["player:group"] = { ...roster, claimedPlayerId: playerId };
+    queries["player:answers2026-10"] = wholeOctober;
+    renderPage();
+
+    expect(await screen.findByText("All set for October ✓")).toBeTruthy();
+    expect(screen.queryByRole("status", keepSessionsCard)).toBeNull();
+  });
+
+  it.each([
+    ["an Anonymous GM", "anonymous", false],
+    ["an Account that removed the Group", "account", true],
+  ] as const)(
+    "gives %s the green done card and the quiet line",
+    async (_caller, status, removedFromMyGroups) => {
+      account.status = status;
+      queries["player:group"] = { ...roster, removedFromMyGroups };
+      queries["player:answers2026-10"] = wholeOctober;
+      renderPage();
+
+      expect(await screen.findByText("All set for October ✓")).toBeTruthy();
+      expect(screen.queryByRole("status", keepSessionsCard)).toBeNull();
+      expect(quietKeepLine()).toBe("Keep this group to get calendar invites.");
+    },
+  );
 
   it("shows an error if the visitor's direct Google sign-in cannot start", async () => {
     queries["player:answers2026-10"] = { "2026-10-07": "free" };

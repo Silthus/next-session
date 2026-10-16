@@ -74,8 +74,14 @@ describe("KeepGroup for a visitor", () => {
     const { onKeep, onContinueWithGoogle } = renderKeep({ invite: "nudge" });
 
     const nudge = await screen.findByRole("region", { name: KEEP_NUDGE.title });
-    expect(within(nudge).getByText("Find it and your answers on all your devices.")).toBeTruthy();
-    expect(within(nudge).getByText("Get notified when the next session is set.")).toBeTruthy();
+    const reasons = within(nudge)
+      .getAllByRole("paragraph")
+      .slice(0, 2)
+      .map((reason) => reason.textContent);
+    expect(reasons).toEqual([
+      "Get a calendar invite for every session.",
+      "Find it and your answers on all your devices.",
+    ]);
     const actions = within(nudge)
       .getAllByRole("button")
       .map((button) => button.textContent);
@@ -87,8 +93,10 @@ describe("KeepGroup for a visitor", () => {
 
     expect(onKeep).toHaveBeenCalledOnce();
     expect(onContinueWithGoogle).toHaveBeenCalledOnce();
-    expect(track).toHaveBeenCalledTimes(2);
-    expect(track).toHaveBeenCalledWith({ name: "keep_group_started", group_id: "group-keep" });
+    expect(vi.mocked(track).mock.calls).toEqual([
+      [{ name: "keep_group_started", group_id: "group-keep", surface: "keep_card" }],
+      [{ name: "keep_group_started", group_id: "group-keep", surface: "keep_card" }],
+    ]);
   });
 
   it("leaves Google out until it is switched on", async () => {
@@ -130,17 +138,18 @@ describe("KeepGroup for a visitor", () => {
 });
 
 describe("KeepGroup as a quiet line", () => {
-  it("offers Keep this group on all your devices", async () => {
+  it("offers Keep this group to get calendar invites", async () => {
     const { onKeep } = renderKeep();
 
     const keep = await screen.findByRole("button", { name: "Keep this group" });
-    expect(keep.closest("p")?.textContent).toBe("Keep this group on all your devices.");
+    expect(keep.closest("p")?.textContent).toBe("Keep this group to get calendar invites.");
     await userEvent.click(keep);
 
     expect(onKeep).toHaveBeenCalledOnce();
     expect(track).toHaveBeenCalledExactlyOnceWith({
       name: "keep_group_started",
       group_id: "group-keep",
+      surface: "keep_line",
     });
   });
 

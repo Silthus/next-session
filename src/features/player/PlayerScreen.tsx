@@ -164,6 +164,17 @@ function PlayerGroup({
     });
   }
 
+  const asksToKeep = account.status === "signedOut" && !nudgeDismissed;
+  const dismissKeepInvite = () => setNudgeDismissed(true);
+  const keepActions = {
+    onKeep: () => {
+      if (account.status !== "account") setSheet("keep");
+      else if (keep) keeper.keepThrough(() => account.keepNow(keep)).catch(keeper.refuseSave);
+    },
+    onContinueWithGoogle:
+      keepWithGoogle && keep && (() => void keepWithGoogle(keep).catch(keeper.refuseSave)),
+  };
+
   const accountControl = (
     <AccountControl
       status={account.status}
@@ -207,24 +218,14 @@ function PlayerGroup({
               keeper.refusal === null
             )
               return null;
-            const visitor = account.status === "signedOut";
             return (
               <KeepGroup
                 groupId={group.groupId}
                 state={state}
-                invite={visitor && !nudgeDismissed ? "nudge" : "line"}
+                invite={asksToKeep ? "nudge" : "line"}
                 refusal={keeper.refusal}
-                onKeep={() => {
-                  if (account.status !== "account") setSheet("keep");
-                  else if (keep)
-                    keeper.keepThrough(() => account.keepNow(keep)).catch(keeper.refuseSave);
-                }}
-                onContinueWithGoogle={
-                  keepWithGoogle &&
-                  keep &&
-                  (() => void keepWithGoogle(keep).catch(keeper.refuseSave))
-                }
-                onDismissNudge={() => setNudgeDismissed(true)}
+                {...keepActions}
+                onDismissNudge={dismissKeepInvite}
                 onRemove={
                   account.status === "account"
                     ? () => remove({ playerId: player._id, name: player.name })
@@ -233,6 +234,11 @@ function PlayerGroup({
               />
             );
           }}
+          keepSessions={
+            asksToKeep
+              ? { refusal: keeper.refusal, ...keepActions, onDismiss: dismissKeepInvite }
+              : undefined
+          }
           accountControl={accountControl}
         />
       )}
@@ -351,6 +357,7 @@ function PlayerAnswers({
   onNotYou,
   showToast,
   keepGroup,
+  keepSessions,
   accountControl,
 }: {
   shareToken: string;
@@ -361,7 +368,7 @@ function PlayerAnswers({
   onNotYou: () => void;
   showToast: ShowToast;
   keepGroup: (offered: boolean) => ReactNode;
-} & Pick<ComponentProps<typeof PlayerCalendar>, "accountControl">) {
+} & Pick<ComponentProps<typeof PlayerCalendar>, "accountControl" | "keepSessions">) {
   const [answered, setAnswered] = useState(false);
   const [loadedMonths, setLoadedMonths] = useState<ReadonlySet<IsoMonth>>(() => new Set());
   const today = useTodayUtc();
@@ -428,6 +435,7 @@ function PlayerAnswers({
       onMonthChange={onMonthChange}
       onNotYou={onNotYou}
       keepGroup={keepGroup(answered === true)}
+      keepSessions={keepSessions}
       accountControl={accountControl}
     />
   );

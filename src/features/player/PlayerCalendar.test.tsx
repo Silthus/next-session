@@ -439,6 +439,161 @@ function swipe(target: Element, from: { x: number; y: number }, to: { x: number;
   fireEvent.touchEnd(target, { changedTouches: [{ clientX: to.x, clientY: to.y }] });
 }
 
+function Visitor({
+  startMonth = "2026-10",
+  startAnswers = { "2026-10-04": "free" },
+  refusal = null,
+  onKeep = () => undefined,
+  onContinueWithGoogle,
+  onDismiss = () => undefined,
+}: {
+  startMonth?: string;
+  startAnswers?: Props["answers"];
+  refusal?: string | null;
+  onKeep?: () => void;
+  onContinueWithGoogle?: () => void;
+  onDismiss?: () => void;
+}) {
+  const [month, setMonth] = useState(startMonth);
+  const [answers, setAnswers] = useState(startAnswers);
+  const [dismissed, setDismissed] = useState(false);
+  return (
+    <PlayerCalendar
+      {...calendarProps({
+        month,
+        answers,
+        onFillRest: () => {
+          setAnswers(everyDayFrom(4, 31));
+          return Promise.resolve(null);
+        },
+        onMonthChange: (next) => {
+          setMonth(next);
+          setAnswers({});
+        },
+        keepGroup: <p>Keep card</p>,
+        keepSessions: dismissed
+          ? undefined
+          : {
+              refusal,
+              onKeep,
+              onContinueWithGoogle,
+              onDismiss: () => {
+                setDismissed(true);
+                onDismiss();
+              },
+            },
+      })}
+    />
+  );
+}
+
+const keepSessionsTitle = "Keep your sessions and get a calendar invite";
+
+describe("PlayerCalendar asks a visitor who finishes the month to keep their sessions", () => {
+  it("turns the done card into the Keep your sessions card, confirmation first and focused", async () => {
+    renderInRouter(() => <Visitor onContinueWithGoogle={() => undefined} />);
+    expect(await screen.findByText("Keep card")).toBeTruthy();
+
+    await userEvent.click(await screen.findByRole("button", { name: /^Mark the other/ }));
+
+    const card = screen.getByRole("status", { name: keepSessionsTitle });
+    const confirmation = within(card).getByText("All set for October. Your GM sees it.");
+    expect(confirmation).toBe(document.activeElement);
+    expect(confirmation).toBe(card.firstElementChild);
+    expect(within(card).getByRole("heading", { name: keepSessionsTitle })).toBeTruthy();
+    expect(within(card).getByText("Every session lands in your calendar.")).toBeTruthy();
+    expect(
+      within(card)
+        .getAllByRole("button")
+        .map((button) => button.textContent),
+    ).toEqual(["Create account", "Continue with Google", "Not now, fill November →"]);
+    expect(within(card).getByRole("link", { name: "Terms" })).toBeTruthy();
+    expect(screen.queryByText("All set for October ✓")).toBeNull();
+    expect(screen.queryByText("Keep card")).toBeNull();
+  });
+
+  it("starts the same keep from Create account and Continue with Google", async () => {
+    const onKeep = vi.fn();
+    const onContinueWithGoogle = vi.fn();
+    renderInRouter(() => (
+      <Visitor
+        startAnswers={everyDayFrom(4, 31)}
+        onKeep={onKeep}
+        onContinueWithGoogle={onContinueWithGoogle}
+      />
+    ));
+    const card = await screen.findByRole("status", { name: keepSessionsTitle });
+
+    await userEvent.click(within(card).getByRole("button", { name: "Create account" }));
+    await userEvent.click(within(card).getByRole("button", { name: "Continue with Google" }));
+
+    expect(onKeep).toHaveBeenCalledOnce();
+    expect(onContinueWithGoogle).toHaveBeenCalledOnce();
+    expect(vi.mocked(track).mock.calls).toEqual([
+      [{ name: "keep_group_started", group_id: "group-thursday", surface: "done_card" }],
+      [{ name: "keep_group_started", group_id: "group-thursday", surface: "done_card" }],
+    ]);
+  });
+
+  it("leaves Google and its legal line out until Google is switched on", async () => {
+    renderInRouter(() => <Visitor startAnswers={everyDayFrom(4, 31)} />);
+    const card = await screen.findByRole("status", { name: keepSessionsTitle });
+
+    expect(within(card).queryByRole("button", { name: "Continue with Google" })).toBeNull();
+    expect(within(card).queryByRole("link", { name: "Terms" })).toBeNull();
+  });
+
+  it("explains a refused keep on the card", async () => {
+    renderInRouter(() => (
+      <Visitor startAnswers={everyDayFrom(4, 31)} refusal="Another account keeps this name." />
+    ));
+    const card = await screen.findByRole("status", { name: keepSessionsTitle });
+
+    expect(within(card).getByRole("alert").textContent).toBe("Another account keeps this name.");
+  });
+
+  it("dismisses on Not now and lands on the next month in one tap", async () => {
+    const onDismiss = vi.fn();
+    renderInRouter(() => <Visitor startAnswers={everyDayFrom(4, 31)} onDismiss={onDismiss} />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Not now, fill November →" }));
+
+    expect(onDismiss).toHaveBeenCalledOnce();
+    expect(screen.getByRole("heading", { level: 2, name: "November 2026" })).toBe(
+      document.activeElement,
+    );
+    expect(screen.getByText("Keep card")).toBeTruthy();
+  });
+
+  it("only dismisses on the last bookable month, and the green card takes focus", async () => {
+    const onDismiss = vi.fn();
+    renderInRouter(() => (
+      <Visitor
+        startMonth="2026-12"
+        startAnswers={everyDayFrom(1, 31, "2026-12")}
+        onDismiss={onDismiss}
+      />
+    ));
+    const card = await screen.findByRole("status", { name: keepSessionsTitle });
+    expect(within(card).getByText("All set for now. Your GM sees it.")).toBeTruthy();
+
+    await userEvent.click(within(card).getByRole("button", { name: "Not now" }));
+
+    expect(onDismiss).toHaveBeenCalledOnce();
+    expect(screen.getByRole("heading", { level: 2, name: "December 2026" })).toBeTruthy();
+    expect(screen.getByText("All set for now ✓")).toBe(document.activeElement);
+  });
+
+  it("shows the green card on a finished month once the visitor said Not now", async () => {
+    const { onMonthChange } = renderCalendar({ answers: everyDayFrom(4, 31) });
+
+    expect(await screen.findByText("All set for October ✓")).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: keepSessionsTitle })).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Fill November →" }));
+    expect(onMonthChange).toHaveBeenCalledWith("2026-11");
+  });
+});
+
 describe("PlayerCalendar next sessions", () => {
   const nextSessions = () => screen.findByRole("region", { name: "Next sessions" });
 

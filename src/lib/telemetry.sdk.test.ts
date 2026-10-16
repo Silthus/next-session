@@ -151,7 +151,7 @@ describe("a real posthog-js on a Player page", () => {
     expect(Object.keys(localStorage)).toEqual(["next-session.measurementOff"]);
 
     await telemetry.turnMeasurementOn();
-    telemetry.track({ name: "keep_group_started", group_id: "back-on" });
+    telemetry.track({ name: "keep_group_started", group_id: "back-on", surface: "keep_card" });
     await sentEventually("back-on");
     await everythingDecoded();
 

@@ -517,7 +517,7 @@ Each call is a reversible default. Michael can redirect any of them in one line.
 | 8 | **Not you?** on a Claimed Player releases the claim | **Not you?** switches only on this device and keeps the claim |
 | 9 | Players never leave a Group. **Remove from my groups** releases the claim; only the GM removes a Player (Michael's rule) | A Player can delete themselves |
 | 10 | Rotating the Share Token keeps Claimed Players in: My groups returns the current token | Rotation releases every claim of the Group |
-| 11 | My groups lists Groups and Sessions; answering stays on `/s/<token>`. After the first saved answer, visitors see a dismissible Keep card with Create account first and Google when available (#96, 2026-10-07) | An inline multi-Group calendar, or a quiet Keep line that Players miss |
+| 11 | My groups lists Groups and Sessions; answering stays on `/s/<token>`. After the first saved answer, visitors see a dismissible Keep card with Create account first and Google when available (#96, 2026-10-07). A visitor who finishes the month sees the Keep your sessions card in place of the done card, which asks again with the calendar invite (#127, 2026-10-16) | An inline multi-Group calendar, or a quiet Keep line that Players miss |
 | 12 | The landing sends an Account without Groups of its own to `/me`. A GM still lands on their last Group, with a **My groups** link in the header | Every Account lands on `/me` |
 | 13 | A Player's name stays per Group. There is no Account display name | An Account name prefilled into Join |
 | 14 | The Privacy Policy gains one row and becomes 1.2. No re-acceptance gate: the new processing happens only when someone keeps a Group, and creating the Account stamps 1.2 | Build the re-acceptance gate first |
@@ -573,7 +573,9 @@ Unchanged: `roster.removePlayer` deletes the Player with its Answers, so the cla
 
 - **Header.** A small account control: **Log in** for a visitor, the email with **Log out** and **My groups** for an Account, nothing new for an Anonymous GM.
 - **Auto-open.** When `claimedPlayerId` is set, the page skips Join, opens the calendar as that Player, and writes it to `next-session.players`.
-- **Keep this group.** After the first saved answer, a signed-out visitor sees a card under the calendar: "Keep this group" and "Find it and your answers on all your devices." **Create account** opens the existing Account sheet, with **Create account** first and **Log in** second. **Continue with Google** appears when enabled, with its legal line. **Not now** dismisses the card for this visit and leaves a quiet Keep line. The card never blocks answering. After #102's live mail proof it also says "Get notified when the next session is set."
+- **Keep this group.** After the first saved answer, a signed-out visitor sees a card under the calendar: "Keep this group", then "Get a calendar invite for every session." and "Find it and your answers on all your devices." **Create account** opens the existing Account sheet, with **Create account** first and **Log in** second. **Continue with Google** appears when enabled, with its legal line. **Not now** dismisses the card for this visit and leaves the quiet line "**Keep this group** to get calendar invites." The card never blocks answering.
+  - **Keep your sessions.** When a visitor who hasn't dismissed the card finishes the month, the green done card becomes one accent card, a `status` region: "✓ All set for October. Your GM sees it." ("✓ All set for now. Your GM sees it." on the last bookable month), the heading "Keep your sessions and get a calendar invite", "Every session lands in your calendar.", **Create account**, **Continue with Google** with its legal line when enabled, and the ghost button "Not now, fill November →" ("Not now" on the last bookable month). The Keep card is hidden while it shows. Its keep buttons start the same keep as the Keep card, with the same sheet, Google redirect, pending keep and refusals. **Not now** dismisses the Keep card for this visit and lands on the next month in one tap; on the last bookable month it only dismisses, and the green "All set" card takes focus. After Not now, a finished month shows the green card. When Fill Rest finishes the month, focus moves to the card's first line, as it does for the green card. The promise leaves out "and moves when your GM moves it" until a Gmail entry added with one tap has been seen to move (#166).
+  - The quiet line reads "**Keep this group** to get calendar invites." wherever it shows: after Not now, for an Account that removed the Group, and for an Anonymous GM. An Account and an Anonymous GM see the green done card.
   - An Account is kept automatically on Join or a saved answer or Fill the rest. The page shows "Kept in My groups" with **Remove from my groups** beside it. Remove confirms with an **Undo** toast. Explicit **Keep this group** remains available after Remove or an automatic claim that could not succeed.
   - A visitor signs in through the nudge, then the existing keep path claims at once.
   - An Anonymous GM keeps the quiet line and Save-first sheet (§5.3), then claims.
@@ -716,7 +718,7 @@ export type BrowserEvent =
   | { name: "answers_started"; group_id: string } // once per page load and Group, at the first saved tap or Fill the rest
   | { name: "save_started" } // password or Google
   | { name: "sign_in_failed"; flow: "signUp" | "signIn"; code: string } // only the auth refusals: WEAK_PASSWORD, EMAIL_TAKEN, INVALID_CREDENTIALS, RATE_LIMITED
-  | { name: "keep_group_started"; group_id: string } // the tap on Keep this group
+  | { name: "keep_group_started"; group_id: string; surface: "done_card" | "keep_card" | "keep_line" } // the tap on a keep button, and which one
   | { name: "remove_group_started"; group_id: string } // Remove from my groups on /me
   | { name: "remove_group_undone"; group_id: string } // its Undo
   | { name: "create_link_started"; surface: "me" } // Create your link on /me
@@ -735,7 +737,8 @@ The committed facts behind these steps (a link or Group created, a Player claime
 | Event | Call site |
 | --- | --- |
 | `share_link_copied`, `share_link_shared` | `ShareLinkCard` (`surface` is a prop: `landing` from the landing, else `compact` or `rail`). One event per Copy press with the final method; a native share counts once it resolves |
-| `answers_started`, `fill_rest_used`, `keep_group_started` | `PlayerCalendar`, which takes `groupId` |
+| `answers_started`, `fill_rest_used` | `PlayerCalendar`, which takes `groupId` |
+| `keep_group_started` | `KeepGroup` (`keep_card` from the Keep card, `keep_line` from the quiet line) and the Keep your sessions card (`done_card`) |
 | `calendar_downloaded` | `NextSessions` on the player page, one per press on **Add to calendar** |
 | `save_started` | `saveGroups` and `saveThroughGoogle` in `save.ts` |
 | `sign_in_failed` | The Account sheet's email form |

@@ -1,19 +1,37 @@
-import { useEffect, useId, useRef, useState } from "react";
-import { track } from "../../lib/telemetry";
+import { useEffect, useId, useRef, useState, type RefObject } from "react";
+import type { IsoMonth } from "../../../shared/dates";
+import { track, type KeepSurface } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
 import { focusRing } from "../../ui/interactive";
 import { GoogleLogo, LegalLinks } from "../account/AccountSheet";
+import { monthName } from "./playerMonth";
 
 export type KeepState = "offer" | "keeping" | "kept";
+
+export type KeepSessionsOffer = {
+  refusal: string | null;
+  onKeep: () => void;
+  onContinueWithGoogle?: () => void;
+  onDismiss: () => void;
+};
 
 export const KEEP_NUDGE = {
   title: "Keep this group",
   reasons: [
+    "Get a calendar invite for every session.",
     "Find it and your answers on all your devices.",
-    "Get notified when the next session is set.",
   ],
 };
+
+export const KEEP_SESSIONS = {
+  title: "Keep your sessions and get a calendar invite",
+  promise: "Every session lands in your calendar.",
+};
+
+function trackKeepStarted(groupId: string, surface: KeepSurface) {
+  track({ name: "keep_group_started", group_id: groupId, surface });
+}
 
 export function KeepGroup({
   groupId,
@@ -40,12 +58,12 @@ export function KeepGroup({
 
   function keep() {
     setKeepTapped(true);
-    track({ name: "keep_group_started", group_id: groupId });
+    trackKeepStarted(groupId, invite === "nudge" ? "keep_card" : "keep_line");
     onKeep();
   }
 
   function continueWithGoogle() {
-    track({ name: "keep_group_started", group_id: groupId });
+    trackKeepStarted(groupId, "keep_card");
     onContinueWithGoogle?.();
   }
 
@@ -115,7 +133,7 @@ function KeepLine({
       >
         {keeping ? "Keeping…" : "Keep this group"}
       </button>{" "}
-      on all your devices.
+      to get calendar invites.
     </p>
   );
 }
@@ -185,20 +203,10 @@ function KeepNudge({
         ))}
       </div>
       <div className="flex flex-col gap-2">
-        <Button className="w-full" onClick={onCreateAccount}>
-          Create account
-        </Button>
-        {onContinueWithGoogle && (
-          <>
-            <Button variant="secondary" className="w-full" onClick={onContinueWithGoogle}>
-              <GoogleLogo />
-              Continue with Google
-            </Button>
-            <p className="text-xs text-ink-3">
-              By continuing with Google you agree to the <LegalLinks />.
-            </p>
-          </>
-        )}
+        <KeepButtons
+          onCreateAccount={onCreateAccount}
+          onContinueWithGoogle={onContinueWithGoogle}
+        />
         {onDismiss && (
           <Button variant="ghost" size="sm" className="self-center" onClick={onDismiss}>
             Not now
@@ -206,5 +214,95 @@ function KeepNudge({
         )}
       </div>
     </Card>
+  );
+}
+
+export function KeepSessionsCard({
+  groupId,
+  month,
+  nextMonth,
+  confirmationRef,
+  offer: { refusal, onKeep, onContinueWithGoogle },
+  onNotNow,
+}: {
+  groupId: string;
+  month: IsoMonth;
+  nextMonth: IsoMonth | null;
+  confirmationRef: RefObject<HTMLParagraphElement | null>;
+  offer: KeepSessionsOffer;
+  onNotNow: () => void;
+}) {
+  const title = useId();
+  return (
+    <Card
+      accent
+      role="status"
+      aria-labelledby={title}
+      className="animate-rise flex flex-col gap-3 text-left text-sm"
+    >
+      <p
+        ref={confirmationRef}
+        tabIndex={-1}
+        className="font-semibold text-ink-2 outline-none before:mr-1.5 before:text-free before:content-['✓']"
+      >
+        {`All set for ${nextMonth ? monthName(month) : "now"}. Your GM sees it.`}
+      </p>
+      <div className="flex flex-col gap-1">
+        <h2 id={title} className="font-display text-lg leading-snug font-semibold text-ink">
+          {KEEP_SESSIONS.title}
+        </h2>
+        <p className="text-ink-2">{KEEP_SESSIONS.promise}</p>
+      </div>
+      <div className="flex flex-col gap-2">
+        <KeepButtons
+          onCreateAccount={() => {
+            trackKeepStarted(groupId, "done_card");
+            onKeep();
+          }}
+          onContinueWithGoogle={
+            onContinueWithGoogle &&
+            (() => {
+              trackKeepStarted(groupId, "done_card");
+              onContinueWithGoogle();
+            })
+          }
+        />
+        <Button variant="ghost" size="sm" className="self-center" onClick={onNotNow}>
+          {nextMonth ? `Not now, fill ${monthName(nextMonth)} →` : "Not now"}
+        </Button>
+      </div>
+      {refusal !== null && (
+        <p role="alert" className="font-medium text-busy">
+          {refusal}
+        </p>
+      )}
+    </Card>
+  );
+}
+
+function KeepButtons({
+  onCreateAccount,
+  onContinueWithGoogle,
+}: {
+  onCreateAccount: () => void;
+  onContinueWithGoogle?: () => void;
+}) {
+  return (
+    <>
+      <Button className="w-full" onClick={onCreateAccount}>
+        Create account
+      </Button>
+      {onContinueWithGoogle && (
+        <>
+          <Button variant="secondary" className="w-full" onClick={onContinueWithGoogle}>
+            <GoogleLogo />
+            Continue with Google
+          </Button>
+          <p className="text-xs text-ink-3">
+            By continuing with Google you agree to the <LegalLinks />.
+          </p>
+        </>
+      )}
+    </>
   );
 }
