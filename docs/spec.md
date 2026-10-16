@@ -865,7 +865,7 @@ In Michael's voice, plain text first (every template carries a real `text` part)
 
 Session updates use the §12.6 Convex fan-out and `POSTHOG_SESSION_WEBHOOK_URL`, reusing `POSTHOG_MAIL_WEBHOOK_SECRET`, the sender and the action retrier. Michael chose this over Resend on 2026-10-07. Definitions in `docs/posthog/workflows/session-updates.json` and `templates/session-update.json` are draft-only: secret, sender, template and category placeholders must be resolved by #102.
 
-Each mail names the Group and the night, states "set" or "cancelled", and has one button to the current Share Link. The template includes real plain text and editable design blocks, with tracking off and a link to the authenticated My groups email preference. Michael confirmed on 2026-10-07 that "Session updates" is `transactional`. Its category bypasses hosted marketing opt-outs; the `/me` switch controls Session emails without changing Tips consent. No notification promise or production mail environment ships in #97.
+Each mail names the Group and the night, states "set" or "cancelled", and has one button to the current Share Link. It reads as system mail: the sender is "Next Session" and no person signs it, since the GM who scheduled the night is rarely the person who built Next Session. The template includes real plain text and editable design blocks, with tracking off and a link to the authenticated My groups email preference. Michael confirmed on 2026-10-07 that "Session updates" is `transactional`. Its category bypasses hosted marketing opt-outs; the `/me` switch controls Session emails without changing Tips consent. No notification promise or production mail environment ships in #97.
 
 ### 13.8 Credentials and switch-on
 
