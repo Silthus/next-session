@@ -68,8 +68,22 @@ async function deliver() {
 }
 
 async function at(instant: number) {
-  await vi.advanceTimersByTimeAsync(instant - Date.now());
+  for (let due = await nextJobDueBy(instant); due !== null; due = await nextJobDueBy(instant)) {
+    await vi.advanceTimersByTimeAsync(due - Date.now());
+    await deliver();
+  }
+  await vi.advanceTimersByTimeAsync(Math.max(0, instant - Date.now()));
   await deliver();
+}
+
+async function nextJobDueBy(instant: number) {
+  const due = await t.run(async (ctx) =>
+    (await ctx.db.system.query("_scheduled_functions").collect())
+      .filter(({ state, scheduledTime }) => state.kind === "pending" && scheduledTime > Date.now())
+      .map(({ scheduledTime }) => scheduledTime)
+      .filter((scheduledTime) => scheduledTime <= instant),
+  );
+  return due.length === 0 ? null : Math.min(...due);
 }
 
 function reminders() {
