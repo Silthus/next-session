@@ -3,7 +3,7 @@ import { v, type GenericId } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx } from "./_generated/server";
-import { snapshotOf } from "./sessionLifecycle";
+import { widenedSnapshot } from "./sessionLifecycle";
 
 export const BACKFILL_PAGE_SIZE = 100;
 const RETIRED_MAIL_STATES = "sessionMailStates";
@@ -51,7 +51,7 @@ async function widenPublishedSnapshot(ctx: MutationCtx, session: Doc<"sessions">
   const group = await ctx.db.get("groups", session.groupId);
   if (group === null) return;
   await ctx.db.patch("sessions", session._id, {
-    published: { ...snapshotOf(group, session, published.state), ...published },
+    published: widenedSnapshot(group, session, published),
   });
 }
 

@@ -45,6 +45,8 @@ export const sessionTimeAndPlaceFields = {
 
 export const timeAndPlaceView = v.object({ ...sessionTimeAndPlaceFields, timeZone: v.string() });
 
+export const groupTimeAndPlaceView = v.object({ ...timeAndPlaceView.fields, saved: v.boolean() });
+
 export function groupTimeOf(group: Doc<"groups">): GroupTime {
   return groupTime({
     startTime: group.startTime as ClockTime | undefined,
@@ -59,6 +61,10 @@ export function locationOf(group: Doc<"groups">): { location?: string } {
 
 export function timeAndPlaceOf(group: Doc<"groups">): TimeAndPlace {
   return { ...groupTimeOf(group), ...locationOf(group) };
+}
+
+export function groupTimeAndPlaceOf(group: Doc<"groups">) {
+  return { ...timeAndPlaceOf(group), saved: hasSavedTimeAndPlace(group) };
 }
 
 export function sessionTimeAndPlace(group: Doc<"groups">, session: Doc<"sessions">) {
@@ -121,7 +127,7 @@ function followingWhenNull<Field extends SessionDetailField>(
   return value === undefined ? {} : { [field]: value ?? undefined };
 }
 
-export function hasSavedTimeAndPlace(group: Doc<"groups">) {
+function hasSavedTimeAndPlace(group: Doc<"groups">) {
   return group.startTime !== undefined;
 }
 

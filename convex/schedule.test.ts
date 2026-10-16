@@ -14,7 +14,7 @@ import {
 const NOW = Date.UTC(2026, 9, 3, 12);
 const TODAY = "2026-10-03";
 const USUAL = { startTime: "19:00", lengthMinutes: 240 };
-const USUAL_IN_BERLIN = { ...USUAL, timeZone: "Europe/Berlin" };
+const USUAL_IN_BERLIN = { ...USUAL, timeZone: "Europe/Berlin", saved: false };
 const FOLLOWS_THE_GROUP = { ...USUAL, overrides: [] };
 
 let t: TestBackend;
@@ -156,7 +156,11 @@ describe("schedule.month", () => {
         overrides: [],
       },
     ]);
-    expect(schedule?.timeAndPlace).toEqual({ ...saved, timeZone: "America/New_York" });
+    expect(schedule?.timeAndPlace).toEqual({
+      ...saved,
+      timeZone: "America/New_York",
+      saved: true,
+    });
   });
 
   it("leaves out the Players, Answers, and Sessions of other Groups", async () => {

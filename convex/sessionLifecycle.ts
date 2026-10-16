@@ -1,6 +1,6 @@
 import { v, type Infer } from "convex/values";
 import { bookingWindow, todayUtc, type IsoDate } from "../shared/dates";
-import { sessionWindow } from "../shared/sessionTime";
+import { DEFAULT_GROUP_TIME, sessionWindow } from "../shared/sessionTime";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx, type QueryCtx } from "./_generated/server";
@@ -58,7 +58,7 @@ export async function updateSessionDetails(
   await recordChange(ctx, session._id, changes);
 }
 
-export function snapshotOf(
+function snapshotOf(
   group: Doc<"groups">,
   session: Doc<"sessions">,
   state: SessionState,
@@ -71,6 +71,22 @@ export function snapshotOf(
   };
 }
 
+export function widenedSnapshot(
+  group: Doc<"groups">,
+  session: Doc<"sessions">,
+  published: PublishedSession,
+): PublishedSession {
+  return { ...snapshotBeforeTimeAndPlace(group, session, published.state), ...published };
+}
+
+function snapshotBeforeTimeAndPlace(
+  group: Doc<"groups">,
+  session: Doc<"sessions">,
+  state: SessionState,
+): SessionSnapshot {
+  return { state, ...sessionWindow(session.date, DEFAULT_GROUP_TIME), summary: group.name };
+}
+
 export const settle = internalMutation({
   args: { sessionId: v.id("sessions"), changedAt: v.number() },
   returns: v.null(),
@@ -80,7 +96,7 @@ export const settle = internalMutation({
     const group = await ctx.db.get("groups", session.groupId);
     if (group === null) return null;
     const snapshot = snapshotOf(group, session, stateOf(session));
-    const previous = session.published;
+    const previous = session.published && widenedSnapshot(group, session, session.published);
     if (previous !== undefined && isPublishedAs(previous, snapshot)) return null;
     const published = { ...snapshot, revision: (previous?.revision ?? 0) + 1 };
     await ctx.db.patch("sessions", sessionId, { published });

@@ -169,7 +169,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   refuted: recordChange scheduled settle at once instead of after UNDO_WINDOW_MS -> the oracle failed by name (2026-10-16)
   kinds: output
   checklist: commit-ordered-effects declared as published only
-  checklist: revalidated-permission dismissed: every send attempt rechecks the published revision, the Group, the Claim and the Session email switch in its own query
+  checklist: revalidated-permission dismissed: every send attempt rechecks the published state, the Group, the Claim and the Session email switch in its own query
   checklist: destination-confinement dismissed: the Session update posts only to the configured Workflows webhook, never to a caller-supplied address
   checklist: redaction dismissed: the Session update body is the Workflows trigger data the recipient's own mail needs, and it never reaches telemetry
   checklist: circuit-breaker-policy dismissed: a failing webhook gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks a GM's change

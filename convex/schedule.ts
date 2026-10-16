@@ -6,12 +6,12 @@ import { findOwnedGroup } from "./model/access";
 import { datedSessionOf } from "./sessionLifecycle";
 import { profileImageUrl } from "./model/profileImages";
 import {
+  groupTimeAndPlaceOf,
+  groupTimeAndPlaceView,
   overriddenFields,
   sessionDetailField,
   sessionTimeAndPlace,
   sessionTimeAndPlaceFields,
-  timeAndPlaceOf,
-  timeAndPlaceView,
 } from "./model/timeAndPlace";
 import { answerValue, datedSession } from "./schema";
 
@@ -29,7 +29,7 @@ const monthSchedule = v.object({
       overrides: v.array(sessionDetailField),
     }),
   ),
-  timeAndPlace: timeAndPlaceView,
+  timeAndPlace: groupTimeAndPlaceView,
 });
 
 export const month = query({
@@ -43,7 +43,7 @@ export const month = query({
       answersIn(ctx, group._id, month),
       sessionsOf(ctx, group),
     ]);
-    return { players, answers, sessions, timeAndPlace: timeAndPlaceOf(group) };
+    return { players, answers, sessions, timeAndPlace: groupTimeAndPlaceOf(group) };
   },
 });
 
