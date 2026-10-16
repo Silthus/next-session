@@ -1,4 +1,4 @@
-import { Link, Navigate, useNavigate } from "@tanstack/react-router";
+import { Navigate, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { useCallback, useEffect, useState, type ComponentProps, type ReactNode } from "react";
 import { api } from "../../../convex/_generated/api";
@@ -9,8 +9,6 @@ import { isImeComposing } from "../../lib/keyboard";
 import { dismissNudge, nudgeDismissedAt, rememberLastGroup } from "../../lib/storage";
 import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
-import { LegalFooter } from "../../ui/LegalFooter";
-import { Logo } from "../../ui/Logo";
 import { ShareLinkCard } from "../../ui/ShareLinkCard";
 import { Skeleton } from "../../ui/Skeleton";
 import { Toast, type ToastMessage } from "../../ui/Toast";
@@ -38,6 +36,7 @@ import { Sessions } from "./rail/Sessions";
 import { useRailActions } from "./rail/useRailActions";
 import { shareLinkUrl } from "./shareLink";
 import { useWideLayout } from "./rail/useWideLayout";
+import { GroupFrame } from "./GroupFrame";
 import { useToast, type GroupToast, type ShowToast } from "./useToast";
 
 export type GroupSearch = { month?: string; day?: string };
@@ -257,43 +256,21 @@ function GroupSurface({
     focusMonthHeading();
   };
 
-  const heading = <GroupSwitcherContainer group={group} />;
-  if (loaded === undefined) return <GroupLoading heading={heading} actions={headerActions} />;
-  const { month, schedule } = loaded;
-  if (schedule === null) {
-    return saving ? <GroupLoading heading={heading} /> : <FirstGroupFallback />;
-  }
-
-  const summary = summarizeMonth({ month, today, ...schedule });
-  const day = summary.days.find((candidate) => candidate.date === selectedDay) ?? null;
+  const openTimeAndPlace = () => void navigate({ to: "/g/$groupId/settings", params: { groupId } });
+  const heading = (
+    <GroupSwitcherContainer
+      group={group}
+      timeAndPlaceIsNew={loaded?.schedule?.timeAndPlace.saved === false}
+      onOpenTimeAndPlace={openTimeAndPlace}
+    />
+  );
   const shareUrl = shareLinkUrl({
     origin: window.location.origin,
     shareToken: group.shareToken,
     month: requestedMonth,
     today,
   });
-  const dayPanel = (presentation: DayPanelPresentation) =>
-    day && (
-      <DayPanel
-        key={day.date}
-        day={day}
-        playerCount={schedule.players.length}
-        today={today}
-        pending={sessions.isPending(day.date)}
-        {...presentation}
-        onClose={closeDay}
-        onSchedule={() => void sessions.schedule(day.date)}
-        onCancel={(session) => void sessions.cancel(session)}
-      />
-    );
-  const nudging = showsNudge({
-    anonymous,
-    playerCount: schedule.players.length,
-    dismissedAt: nudgeSnoozedAt,
-    now: openedAt,
-  });
-
-  return (
+  const frame = (body: ReactNode) => (
     <GroupFrame
       heading={heading}
       actions={
@@ -303,6 +280,42 @@ function GroupSurface({
         </>
       }
     >
+      {body}
+    </GroupFrame>
+  );
+  if (loaded === undefined) return frame(<GroupLoadingBody />);
+  const { month, schedule } = loaded;
+  if (schedule === null) return saving ? frame(<GroupLoadingBody />) : <FirstGroupFallback />;
+  const { timeAndPlace } = schedule;
+
+  const summary = summarizeMonth({ month, today, ...schedule });
+  const day = summary.days.find((candidate) => candidate.date === selectedDay) ?? null;
+  const dayPanel = (presentation: DayPanelPresentation) =>
+    day && (
+      <DayPanel
+        key={day.date}
+        day={day}
+        playerCount={schedule.players.length}
+        today={today}
+        pending={sessions.isPending(day.date)}
+        timeAndPlace={timeAndPlace}
+        {...presentation}
+        onClose={closeDay}
+        onSchedule={() => void sessions.schedule(day.date)}
+        onCancel={(session) => void sessions.cancel(session)}
+        onOpenTimeAndPlace={openTimeAndPlace}
+        onSaveDetails={sessions.updateDetails}
+      />
+    );
+  const nudging = showsNudge({
+    anonymous,
+    playerCount: schedule.players.length,
+    dismissedAt: nudgeSnoozedAt,
+    now: openedAt,
+  });
+
+  return frame(
+    <>
       {nudging && (
         <Nudge
           names={schedule.players.map((player) => player.name)}
@@ -346,7 +359,15 @@ function GroupSurface({
                 onSchedule={wide ? sessions.schedule : undefined}
               />
             ),
-            sessions: <Sessions sessions={schedule.sessions} today={today} onSelectDay={openDay} />,
+            sessions: (
+              <Sessions
+                sessions={schedule.sessions}
+                today={today}
+                timeAndPlace={timeAndPlace}
+                onSelectDay={openDay}
+                onOpenTimeAndPlace={openTimeAndPlace}
+              />
+            ),
             players: (
               <Players
                 progress={summary.progress}
@@ -359,7 +380,7 @@ function GroupSurface({
           }}
         />
       </div>
-    </GroupFrame>
+    </>,
   );
 }
 
@@ -404,52 +425,25 @@ function insideDialog(target: EventTarget | null) {
   return target instanceof Element && target.closest("dialog") !== null;
 }
 
-function GroupFrame({
-  heading,
-  actions,
-  children,
-}: {
-  heading: ReactNode;
-  actions?: ReactNode;
-  children: ReactNode;
-}) {
+function GroupLoading() {
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-40 border-b border-line bg-paper/85 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
-          <Link to="/" aria-label="Next Session home" className="shrink-0">
-            <Logo />
-          </Link>
-          {heading && (
-            <span className="text-ink-3" aria-hidden="true">
-              /
-            </span>
-          )}
-          {heading}
-          {actions && <div className="ml-auto flex shrink-0 items-center gap-2">{actions}</div>}
-        </div>
-      </header>
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 overflow-x-clip px-4 py-4 sm:px-6 sm:py-6">
-        {children}
-      </main>
-      <LegalFooter className="mx-auto w-full max-w-6xl px-4 pb-6 sm:px-6" />
-    </div>
+    <GroupFrame heading={<Skeleton className="h-7 w-40" />}>
+      <GroupLoadingBody />
+    </GroupFrame>
   );
 }
 
-function GroupLoading({ heading, actions }: { heading?: ReactNode; actions?: ReactNode }) {
+function GroupLoadingBody() {
   return (
-    <GroupFrame heading={heading ?? <Skeleton className="h-7 w-40" />} actions={actions}>
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]" role="status" aria-busy="true">
-        <span className="sr-only">Loading your group</span>
-        <Skeleton className="aspect-[7/6] w-full rounded-xl" />
-        <div className="flex flex-col gap-4">
-          <Skeleton className="h-28 rounded-xl" />
-          <Skeleton className="h-40 rounded-xl" />
-          <Skeleton className="h-48 rounded-xl" />
-        </div>
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]" role="status" aria-busy="true">
+      <span className="sr-only">Loading your group</span>
+      <Skeleton className="aspect-[7/6] w-full rounded-xl" />
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-40 rounded-xl" />
+        <Skeleton className="h-48 rounded-xl" />
       </div>
-    </GroupFrame>
+    </div>
   );
 }
 

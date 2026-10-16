@@ -11,7 +11,7 @@ import {
   spendGmEdits,
   type TestBackend,
 } from "./model/test.setup";
-import { UNDO_WINDOW_MS } from "./sessionLifecycle";
+import { UNDO_WINDOW_MS } from "../shared/sessions";
 
 const DAY = 86_400_000;
 const NOW = Date.UTC(2026, 9, 3, 23, 30);

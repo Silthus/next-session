@@ -1,0 +1,31 @@
+bun run e2e (full, on 2380406): exit 0
+  39 skipped
+  96 passed (3.2m)
+
+Repeat on the menu and editor tests, no networkidle wait, 4 workers:
+bun run e2e e2e/session-details.spec.ts e2e/gm-rail.spec.ts e2e/time-and-place.spec.ts --project chromium -g 'deleting the last Group|switcher opens|own start time|time and place, schedules' --repeat-each 6 --workers 4
+  ✓   4 [chromium] › e2e/session-details.spec.ts:40:1 › the GM gives one night its own start time and place, then sets the start back to the usual 
+  ✓   1 [chromium] › e2e/time-and-place.spec.ts:13:1 › the GM sets the Group's time and place, schedules a night, and the player sees both 
+  ✓   2 [chromium] › e2e/gm-rail.spec.ts:203:1 › the switcher opens, makes, renames and deletes Groups, and the landing returns to the last one 
+  ✓   3 [chromium] › e2e/gm-rail.spec.ts:203:1 › the switcher opens, makes, renames and deletes Groups, and the landing returns to the last one 
+  ✓   5 [chromium] › e2e/session-details.spec.ts:40:1 › the GM gives one night its own start time and place, then sets the start back to the usual 
+  ✓   6 [chromium] › e2e/gm-rail.spec.ts:487:1 › deleting the last Group of an Anonymous GM returns to the landing 
+  ✓   7 [chromium] › e2e/gm-rail.spec.ts:487:1 › deleting the last Group of an Anonymous GM returns to the landing 
+  ✓   8 [chromium] › e2e/time-and-place.spec.ts:13:1 › the GM sets the Group's time and place, schedules a night, and the player sees both 
+  ✓  10 [chromium] › e2e/session-details.spec.ts:40:1 › the GM gives one night its own start time and place, then sets the start back to the usual 
+  ✓   9 [chromium] › e2e/gm-rail.spec.ts:203:1 › the switcher opens, makes, renames and deletes Groups, and the landing returns to the last one 
+  ✓  11 [chromium] › e2e/time-and-place.spec.ts:13:1 › the GM sets the Group's time and place, schedules a night, and the player sees both 
+  ✓  13 [chromium] › e2e/session-details.spec.ts:40:1 › the GM gives one night its own start time and place, then sets the start back to the usual 
+  ✓  14 [chromium] › e2e/gm-rail.spec.ts:487:1 › deleting the last Group of an Anonymous GM returns to the landing 
+  ✓  12 [chromium] › e2e/gm-rail.spec.ts:203:1 › the switcher opens, makes, renames and deletes Groups, and the landing returns to the last one 
+  ✓  17 [chromium] › e2e/session-details.spec.ts:40:1 › the GM gives one night its own start time and place, then sets the start back to the usual 
+  ✓  15 [chromium] › e2e/time-and-place.spec.ts:13:1 › the GM sets the Group's time and place, schedules a night, and the player sees both 
+  ✓  18 [chromium] › e2e/gm-rail.spec.ts:487:1 › deleting the last Group of an Anonymous GM returns to the landing 
+  ✓  16 [chromium] › e2e/gm-rail.spec.ts:203:1 › the switcher opens, makes, renames and deletes Groups, and the landing returns to the last one 
+  ✓  21 [chromium] › e2e/session-details.spec.ts:40:1 › the GM gives one night its own start time and place, then sets the start back to the usual 
+  ✓  22 [chromium] › e2e/gm-rail.spec.ts:487:1 › deleting the last Group of an Anonymous GM returns to the landing 
+  ✓  19 [chromium] › e2e/time-and-place.spec.ts:13:1 › the GM sets the Group's time and place, schedules a night, and the player sees both 
+  ✓  20 [chromium] › e2e/gm-rail.spec.ts:203:1 › the switcher opens, makes, renames and deletes Groups, and the landing returns to the last one 
+  ✓  24 [chromium] › e2e/gm-rail.spec.ts:487:1 › deleting the last Group of an Anonymous GM returns to the landing 
+  ✓  23 [chromium] › e2e/time-and-place.spec.ts:13:1 › the GM sets the Group's time and place, schedules a night, and the player sees both 
+  24 passed (25.8s)

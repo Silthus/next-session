@@ -4,7 +4,7 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { getFunctionName, type FunctionReference } from "convex/server";
 import { useState, useSyncExternalStore } from "react";
@@ -31,6 +31,12 @@ const roster = {
   opensAsGm: false,
 };
 const queries: Record<string, unknown> = {};
+const nightOn = (date: string) => ({
+  date,
+  state: "scheduled",
+  startTime: "19:00",
+  lengthMinutes: 240,
+});
 const listeners = new Set<() => void>();
 const answer = vi.fn();
 const release = vi.fn();
@@ -209,6 +215,30 @@ describe("PlayerScreen", () => {
     await userEvent.click(screen.getByRole("button", { name: "Next month" }));
 
     expect(await screen.findByRole("region", { name: "Keep this group" })).toBeTruthy();
+  });
+
+  it("gives a visitor the Group's calendar file behind its Share Link", async () => {
+    queries["player:group"] = { ...roster, sessions: [nightOn("2026-10-16")] };
+    renderPage();
+
+    const nextSessions = await screen.findByRole("region", { name: "Next sessions" });
+    expect(
+      within(nextSessions).getByRole("link", { name: "Add to calendar" }).getAttribute("href"),
+    ).toBe(`/cal/s/${shareToken}.ics`);
+    expect(within(nextSessions).getByText(/Keep this group to get moves/)).toBeTruthy();
+  });
+
+  it("points an Account that keeps the Group to My groups for moves and cancellations", async () => {
+    account.status = "account";
+    queries["player:group"] = {
+      ...roster,
+      claimedPlayerId: playerId,
+      sessions: [nightOn("2026-10-16")],
+    };
+    renderPage();
+
+    const nextSessions = await screen.findByRole("region", { name: "Next sessions" });
+    expect(within(nextSessions).getByRole("link", { name: "Subscribe on My groups" })).toBeTruthy();
   });
 
   it("shows an error if the visitor's direct Google sign-in cannot start", async () => {

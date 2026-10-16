@@ -16,7 +16,9 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TipsRouteImport } from './routes/tips'
 import { Route as GGroupIdRouteImport } from './routes/g.$groupId'
+import { Route as RemindersOffRouteImport } from './routes/reminders.off'
 import { Route as SShareTokenRouteImport } from './routes/s.$shareToken'
+import { Route as GGroupIdSettingsRouteImport } from './routes/g.$groupId_.settings'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -53,9 +55,19 @@ const GGroupIdRoute = GGroupIdRouteImport.update({
   path: '/g/$groupId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RemindersOffRoute = RemindersOffRouteImport.update({
+  id: '/reminders/off',
+  path: '/reminders/off',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SShareTokenRoute = SShareTokenRouteImport.update({
   id: '/s/$shareToken',
   path: '/s/$shareToken',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GGroupIdSettingsRoute = GGroupIdSettingsRouteImport.update({
+  id: '/g/$groupId_/settings',
+  path: '/g/$groupId/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -67,7 +79,9 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/tips': typeof TipsRoute
   '/g/$groupId': typeof GGroupIdRoute
+  '/reminders/off': typeof RemindersOffRoute
   '/s/$shareToken': typeof SShareTokenRoute
+  '/g/$groupId/settings': typeof GGroupIdSettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,7 +91,9 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/tips': typeof TipsRoute
   '/g/$groupId': typeof GGroupIdRoute
+  '/reminders/off': typeof RemindersOffRoute
   '/s/$shareToken': typeof SShareTokenRoute
+  '/g/$groupId/settings': typeof GGroupIdSettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,7 +104,9 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/tips': typeof TipsRoute
   '/g/$groupId': typeof GGroupIdRoute
+  '/reminders/off': typeof RemindersOffRoute
   '/s/$shareToken': typeof SShareTokenRoute
+  '/g/$groupId_/settings': typeof GGroupIdSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -100,7 +118,9 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tips'
     | '/g/$groupId'
+    | '/reminders/off'
     | '/s/$shareToken'
+    | '/g/$groupId/settings'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -110,7 +130,9 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tips'
     | '/g/$groupId'
+    | '/reminders/off'
     | '/s/$shareToken'
+    | '/g/$groupId/settings'
   id:
     | '__root__'
     | '/'
@@ -120,7 +142,9 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tips'
     | '/g/$groupId'
+    | '/reminders/off'
     | '/s/$shareToken'
+    | '/g/$groupId_/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -131,7 +155,9 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TipsRoute: typeof TipsRoute
   GGroupIdRoute: typeof GGroupIdRoute
+  RemindersOffRoute: typeof RemindersOffRoute
   SShareTokenRoute: typeof SShareTokenRoute
+  GGroupIdSettingsRoute: typeof GGroupIdSettingsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -185,11 +211,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GGroupIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reminders/off': {
+      id: '/reminders/off'
+      path: '/reminders/off'
+      fullPath: '/reminders/off'
+      preLoaderRoute: typeof RemindersOffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/s/$shareToken': {
       id: '/s/$shareToken'
       path: '/s/$shareToken'
       fullPath: '/s/$shareToken'
       preLoaderRoute: typeof SShareTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/g/$groupId_/settings': {
+      id: '/g/$groupId_/settings'
+      path: '/g/$groupId/settings'
+      fullPath: '/g/$groupId/settings'
+      preLoaderRoute: typeof GGroupIdSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -203,7 +243,9 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TipsRoute: TipsRoute,
   GGroupIdRoute: GGroupIdRoute,
+  RemindersOffRoute: RemindersOffRoute,
   SShareTokenRoute: SShareTokenRoute,
+  GGroupIdSettingsRoute: GGroupIdSettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

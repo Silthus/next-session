@@ -48,6 +48,9 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - sessions.cancel: a GM cancels a Session, which keeps it as a Cancelled Session unless it was never published
   handler: cancel in sessions.ts
   trust: signed-in user
+- sessions.updateDetails: a GM gives a scheduled upcoming Session its own start time, length or place, or sets one back to the Group's
+  handler: updateDetails in sessions.ts
+  trust: signed-in user
 - player.group: whoever holds a Share Link reads its Group's Roster and Sessions
   handler: group in player.ts
   trust: visitor
@@ -75,12 +78,32 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - me.groups: an Account reads My groups
   handler: groups in me.ts
   trust: signed-in user
-- me.sessionEmails: an Account reads its Session updates preference
-  handler: sessionEmails in me.ts
+- me.notificationSettings: an Account reads its Session updates and Reminders switches; Reminders read as null while they are not configured
+  handler: notificationSettings in me.ts
   trust: signed-in user
 - me.setSessionEmails: an Account turns Session updates on or off
   handler: setSessionEmails in me.ts
   trust: signed-in user
+- me.setReminders: an Account turns its Reminders on or off
+  handler: setReminders in me.ts
+  trust: signed-in user
+- reminderLinks.status: whoever holds a Reminder link reads whether its Account's Reminders are on; an unknown token reads as null
+  handler: status in reminderLinks.ts
+  trust: visitor
+- reminderLinks.turnOff: whoever holds a Reminder link turns its Account's Reminders off
+  handler: turnOff in reminderLinks.ts
+  trust: visitor
+- reminderLinks.turnOn: whoever holds a Reminder link turns its Account's Reminders back on
+  handler: turnOn in reminderLinks.ts
+  trust: visitor
+- me.calendarFeed: an Account gets its Calendar feed link, minted on the first call
+  handler: calendarFeed in me.ts
+  trust: signed-in user
+  control: none — it takes no id and reads and writes only the caller's own users row through requireAccount, so no argument reaches another Account; the calendarFeed rate limit bounds token churn
+- me.resetCalendarFeed: an Account resets its Calendar feed link, stopping the old one at once
+  handler: resetCalendarFeed in me.ts
+  trust: signed-in user
+  control: none — it takes no id and reads and writes only the caller's own users row through requireAccount, so no argument reaches another Account; the calendarFeed rate limit bounds token churn
 - account.me: a caller reads whether they are anonymous and their email
   handler: me in account.ts
   trust: signed-in user
@@ -104,11 +127,20 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - calendar download: GET /cal/s/<Share Token>.ics, whoever holds a Share Link downloads its Group's upcoming scheduled Sessions as a calendar file
   handler: downloadGroupCalendar in calendarFiles.ts
   trust: visitor
+- calendar feed: GET /cal/a/<feed token>.ics, whoever holds an Account's feed link reads the published Sessions of the Groups that Account runs or plays in as a calendar file
+  handler: serveAccountFeed in calendarFiles.ts
+  trust: visitor
 - expiry sweep: the daily cron deletes Unsaved Groups past their Expiry
   handler: sweepExpiredGroups in cleanup.ts
   trust: operator
 - one-time invites: the operator starts it once at the Resend switch-on; it invites the calendar recipient set to every upcoming Session that never had a Resend send, paced to half the daily quota
   handler: inviteScheduledSessions in oneTimeInvites.ts
+  trust: operator
+- reminder job: the scheduler fires a Reminder 1 day or 2 hours before a published Session starts, and it emails the Accounts behind the Group's Claimed Players
+  handler: fire in reminders.ts
+  trust: operator
+- reminder backfill: the operator runs it once at switch-on to schedule Reminders for upcoming Sessions published while Reminders were off
+  handler: scheduleUpcoming in reminders.ts
   trust: operator
 
 ## invariants
@@ -118,7 +150,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   because: a Group is one table's private plan; without the ownership check any signed-in GM could read or edit another table's Roster, Answers and Sessions, and a refusal that differs from a missing id would let ids be probed
   crossing: signed-in user -> store
   refuted: groupOwnedBy returned the Group without comparing its ownerId -> the oracle failed by name (2026-10-12)
-  entrances: groups.mine, groups.get, groups.create, groups.settings, groups.updateSettings, groups.rename, groups.remove, groups.rotateShareToken, groups.undoRotateShareToken, schedule.month, roster.addPlayer, roster.renamePlayer, roster.removePlayer, sessions.schedule, sessions.cancel
+  entrances: groups.mine, groups.get, groups.create, groups.settings, groups.updateSettings, groups.rename, groups.remove, groups.rotateShareToken, groups.undoRotateShareToken, schedule.month, roster.addPlayer, roster.renamePlayer, roster.removePlayer, sessions.schedule, sessions.cancel, sessions.updateDetails
   kinds: read, identity
   checklist: scoped-reads declared as owner-only groups
   checklist: capability-authorization declared as share link scoping
@@ -141,6 +173,22 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: key-rotation-compatibility dismissed: rotating the Share Token deliberately stops the old link; no reader keeps using it
   checklist: redaction dismissed: a scoped-out call returns null or NOT_FOUND with nothing of the other Group in it
   checklist: separation-of-duties dismissed: the player surface has one role; whoever holds the link answers as any Player by design (ADR-0010)
+- reminder link scoping: A Reminder link token reads and changes only its own Account's Reminders switch, and an unknown token reaches nothing.
+  over: every public function that takes a Reminder link token, called with one Account's token while another Account exists, and with unknown tokens
+  via: every Reminder link function reaches only its own Account's Reminders switch
+  because: the Reminder link works without signing in and travels in every Reminder; if it reached another Account, or anything beyond the switch, one forwarded mail would expose or change other players' settings
+  crossing: visitor -> store
+  refuted: switchRemindersWith patched every Account with a Reminder link, not only the token's -> the oracle failed by name (2026-10-16)
+  entrances: reminderLinks.status, reminderLinks.turnOff, reminderLinks.turnOn
+  kinds: read, credential
+  checklist: scoped-reads declared as reminder link scoping
+  checklist: capability-authorization declared as reminder link scoping
+  checklist: revalidated-permission dismissed: no Reminder link work is deferred; each call resolves the token inside its own transaction
+  checklist: message-authenticity dismissed: the Reminder link token is a bearer credential, not a signed message
+  checklist: encrypted-storage dismissed: every Reminder must carry the link again, so the token is stored readable by design, like the Share Token; it switches only Reminders
+  checklist: key-rotation-compatibility dismissed: the token is never rotated (spec #140); a leaked link can do no more than switch its Account's Reminders
+  checklist: redaction dismissed: status returns only whether Reminders are on, and an unknown token returns null or NOT_FOUND with nothing of any Account in it
+  checklist: separation-of-duties dismissed: the link has one role, the Reminders switch of its Account
 - save never replaces: Save adds every Group of the Anonymous GM to the Account and leaves the Account's own Groups exactly as they were.
   over: an Account that already owns Groups redeeming the claim code of an Anonymous GM that owns a Group
   via: adds to an Account's Groups and never replaces them
@@ -153,7 +201,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: canonical-encoding dismissed: the claim code is compared by its hash and has one encoding
   checklist: identity-continuity declared as save never replaces
 - no personal data to posthog: Every backend event and log sent to PostHog carries no Group name, Player name, Share Token, claim code, email, location or start time.
-  over: every event and log a full journey sends: create a link, rename, save a Time and place, rotate, join, schedule, Save, claim, release and the expiry sweep
+  over: every event and log a full journey sends: create a link, rename, save a Time and place, rotate, join, schedule, give a Session its own time and place, Save, claim, release, get and reset the Calendar feed link, and the expiry sweep
   via: sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log
   because: Next Session shares its PostHog project with Lonir and promises in the Privacy Policy to send no names or credentials; a leaked Share Token in an event would hand out a Group
   crossing: store -> egress
@@ -164,20 +212,22 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: commit-ordered-effects dismissed: track schedules send with ctx.scheduler.runAfter inside the mutation, and Convex drops what an uncommitted mutation scheduled
   checklist: circuit-breaker-policy dismissed: telemetry is fire and forget with a ten second timeout; a PostHog outage drops events and never blocks the product
   checklist: declared-target-coverage dismissed: there is one target, PostHog
-- published only: Session updates and the Calendar download never show a change before its Undo window ends.
-  over: Session updates sent for every schedule, cancel and Undo a GM makes through sessions.schedule and sessions.cancel, and the Calendar download fetched after the same changes
+- published only: Session updates, Reminders, the Calendar download and the Calendar feed never show a change before its Undo window ends.
+  over: Session updates and Reminders sent for every schedule, cancel and Undo a GM makes through sessions.schedule and sessions.cancel, and every Time and place a GM saves through groups.updateSettings, and the Calendar download and a Claimed Player's Calendar feed fetched after the same changes
   via: never announces a change before its Undo window ends
   because: the Undo window promises that a mis-tap reaches nobody (#124); a mail sent before it ends tells players about a night the GM took back, and calendars that arrive later would add and remove entries for nothing
   crossing: store -> egress
   refuted: recordChange scheduled settle at once instead of after UNDO_WINDOW_MS -> the oracle failed by name (2026-10-16)
+  refuted: the Reminder body read its start from the live Group time instead of published -> the oracle failed by name (2026-10-16)
   refuted: the Calendar download took each Session's live state instead of its published state -> the oracle failed by name (2026-10-16)
+  refuted: the Calendar feed took each Session's live state instead of its published state -> the oracle failed by name (2026-10-16)
   kinds: output
   checklist: commit-ordered-effects declared as published only
-  checklist: revalidated-permission dismissed: every send attempt rechecks the published revision, the Group, the Claim and the Session email switch in its own query
-  checklist: destination-confinement dismissed: Session mail posts only to the configured Workflows webhook or the fixed Resend API address, never to a caller-supplied address
-  checklist: redaction dismissed: the Session mail body is what the recipient's own mail needs, built at send time, and it never reaches telemetry
+  checklist: revalidated-permission dismissed: every send attempt rechecks the published snapshot (its state for a Workflows Session update, its revision for a Resend Session mail or a Reminder), the Group, the Claim or the calendar recipient set, and the Session email or Reminders switch in its own query
+  checklist: destination-confinement dismissed: Session mail and Reminders post only to their configured Workflows webhooks or the fixed Resend API address, never to a caller-supplied address
+  checklist: redaction dismissed: each body is what the recipient's own mail needs, built at send time; it carries a Share Token only in the Share Link a Player's mail links to, and it never reaches telemetry
   checklist: circuit-breaker-policy dismissed: a failing webhook or Resend gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks a GM's change
-  checklist: declared-target-coverage dismissed: one provider carries Session mail at a time, Resend while RESEND_API_KEY is set and the Workflows Session update otherwise
+  checklist: declared-target-coverage dismissed: Session mail has one provider at a time, Resend while RESEND_API_KEY is set and the Workflows Session update otherwise, and Reminders have their own webhook; the oracle's title names a test for each webhook, and the Resend sends wait for the same settle
 - calendar recipients: Session mail reaches only the calendar recipient set of its Group: the GM's Account and the Accounts behind its Claimed Players, and a withdrawal only an Account that left it.
   over: every Resend send of a broadcast round for a Group with its GM, two Claimed Players, an unclaimed Player and an Account that claims only in another Group, with one Claimed Player releasing between attempts, and of the withdrawals queued by that release and by a release a re-claim undoes before it sends
   via: mails only the Group's calendar recipient set, rechecked on every attempt
@@ -203,19 +253,20 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: commit-ordered-effects dismissed: groupDeleting writes the calendarCancellations row and schedules its drain inside the deleting mutation, so a deletion that rolls back queues no cancel, and one that commits always has its row
   checklist: circuit-breaker-policy dismissed: a failing Resend gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks the deletion
   checklist: declared-target-coverage dismissed: the row freezes the whole calendar recipient set through calendarRecipients, bounded by the 100-Player cap, and every upcoming published scheduled Session; the drain queues each pair once, 200 per run, and drops only Accounts the send-time rules exclude
-- feed scoping: A calendar file reached through a Share Token holds only the published Sessions of the Group behind that token's current value; a rotated-away or unknown token reaches nothing.
-  over: the Calendar download fetched for two Groups with Sessions on the same date, through each Group's current Share Token and through a rotated-away one
-  via: every calendar file holds only the published Sessions of its own token's Group
-  because: the Share Link is the only Player credential (ADR-0004); a download that reached another Group's Sessions would turn one leaked link into every table's plans, and one that still opened after a rotation would undo the GM's remedy for a leaked link
+- feed scoping: A calendar file reached through a Share Token holds only the published Sessions of the Group behind that token's current value, and one reached through a feed token only those of the Groups its Account runs or plays in; a rotated-away, reset or unknown token reaches nothing, and the Calendar feed never shows a Share Token.
+  over: the Calendar download fetched for two Groups with Sessions on the same date, through each Group's current Share Token and through a rotated-away one; and the Calendar feed fetched for two Accounts that run their own Groups and play in one shared Group, through each current feed token and through a reset one
+  via: every calendar file holds only the published Sessions its own token reaches
+  because: the Share Link is the only Player credential (ADR-0004) and the feed link is an Account's; a file that reached another Group's or Account's Sessions would turn one leaked link into every table's plans, one that still opened after a rotation or reset would undo the remedy for a leaked link, and a Share Token in the feed would let a leaked feed link answer as the Account's Players
   crossing: visitor -> store
   refuted: groupDownload read every Group's Sessions in the window instead of only its own Group's index range -> the oracle failed by name (2026-10-16)
-  entrances: calendar download
+  refuted: accountFeed read every Group as one the Account runs instead of only its own by_ownerId range -> the oracle failed by name (2026-10-16)
+  entrances: calendar download, calendar feed
   kinds: read, credential
   checklist: scoped-reads declared as feed scoping
   checklist: capability-authorization declared as feed scoping
-  checklist: revalidated-permission dismissed: no calendar work is deferred; each request resolves the Share Token inside its own query
-  checklist: message-authenticity dismissed: the Share Token is a bearer credential, not a signed message
-  checklist: encrypted-storage dismissed: the GM must be able to copy the Share Link again, so the token is stored readable by design (ADR-0004); rotation revokes it
-  checklist: key-rotation-compatibility dismissed: rotating the Share Token deliberately stops the old download link; no reader keeps using it
-  checklist: redaction dismissed: an unknown or rotated-away token gets 404 with no body, and a Group's own file holds only what its Share Link already shows
-  checklist: separation-of-duties dismissed: the download has one role; whoever holds the Share Link reads the Group's published Sessions by design (ADR-0010)
+  checklist: revalidated-permission dismissed: no calendar work is deferred; each request resolves its Share Token or feed token inside its own query
+  checklist: message-authenticity dismissed: the Share Token and the feed token are bearer credentials, not signed messages
+  checklist: encrypted-storage dismissed: the GM must be able to copy the Share Link again and the Account its feed link, so both tokens are stored readable by design (ADR-0004); rotation and Reset feed link revoke them
+  checklist: key-rotation-compatibility dismissed: rotating the Share Token or resetting the feed link deliberately stops the old link; no reader keeps using it
+  checklist: redaction dismissed: an unknown, rotated-away or reset token gets 404 with no body, a Group's own file holds only what its Share Link already shows, and the feed links each entry to /g/<groupId> or /me instead of a Share Link
+  checklist: separation-of-duties dismissed: each file has one role; whoever holds the Share Link reads the Group's published Sessions (ADR-0010), and whoever holds the feed link reads the Account's

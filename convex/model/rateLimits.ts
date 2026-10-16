@@ -14,6 +14,8 @@ const limits = {
   gmEdit: { kind: "token bucket", rate: 120, period: MINUTE, capacity: 60 },
   claimPlayer: { kind: "token bucket", rate: 30, period: MINUTE, capacity: 10 },
   confirmTips: { kind: "token bucket", rate: 30, period: MINUTE, capacity: 60 },
+  reminderLink: { kind: "token bucket", rate: 10, period: MINUTE, capacity: 10 },
+  calendarFeed: { kind: "fixed window", rate: 10, period: HOUR },
 } as const;
 
 export const rateLimiter = new RateLimiter(components.rateLimiter, limits);

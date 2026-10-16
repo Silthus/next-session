@@ -45,7 +45,7 @@ export const sessionMailBody = v.object({
 export const sessionSend = {
   sessionId: v.id("sessions"),
   userId: v.id("users"),
-  revision: v.number(),
+  change: sessionState,
 };
 export type SessionSend = Infer<ReturnType<typeof v.object<typeof sessionSend>>>;
 
@@ -97,6 +97,17 @@ export const calendarMessage = v.object({
 
 type MailProvider = Infer<typeof mailProvider>;
 
+export const reminderLead = v.union(v.literal("day"), v.literal("hours"));
+
+export const reminderSend = {
+  sessionId: v.id("sessions"),
+  userId: v.id("users"),
+  revision: v.number(),
+  lead: reminderLead,
+  timeZone: v.string(),
+};
+type ReminderSend = Infer<ReturnType<typeof v.object<typeof reminderSend>>>;
+
 const mailKind = v.union(v.literal("welcome"), v.literal("tips"));
 type MailKind = Infer<typeof mailKind>;
 
@@ -110,10 +121,11 @@ type WebhookBody = Infer<typeof webhookBody>;
 
 export type MailRequest = { kind: MailKind; user: Doc<"users">; tipsConfirmUrl?: string };
 
-const WEBHOOK_URL_VARIABLES: Record<MailKind | "session", string> = {
+const WEBHOOK_URL_VARIABLES: Record<MailKind | "session" | "reminder", string> = {
   welcome: "POSTHOG_WELCOME_WEBHOOK_URL",
   tips: "POSTHOG_TIPS_WEBHOOK_URL",
   session: "POSTHOG_SESSION_WEBHOOK_URL",
+  reminder: "POSTHOG_REMINDER_WEBHOOK_URL",
 };
 
 export async function requestMail(ctx: MutationCtx, { kind, user, tipsConfirmUrl }: MailRequest) {
@@ -145,7 +157,7 @@ export const send = internalAction({
   },
 });
 
-function webhookFor(kind: MailKind | "session") {
+function webhookFor(kind: keyof typeof WEBHOOK_URL_VARIABLES) {
   const secret = process.env.POSTHOG_MAIL_WEBHOOK_SECRET;
   const url = process.env[WEBHOOK_URL_VARIABLES[kind]];
   return secret && url ? { secret, url } : null;
@@ -186,8 +198,34 @@ export const sendSession = internalAction({
   },
 });
 
+export async function requestReminder(ctx: MutationCtx, send: ReminderSend) {
+  if (!webhookFor("reminder")) return;
+  await recordMailVolume(ctx, "workflows", 1);
+  await retrier.run(ctx, internal.mail.sendReminder, send);
+}
+
+export const sendReminder = internalAction({
+  args: reminderSend,
+  returns: v.null(),
+  handler: async (ctx, send) => {
+    const webhook = webhookFor("reminder");
+    if (!webhook) return null;
+    const body = await ctx.runQuery(internal.reminders.recipient, send);
+    if (!body) return null;
+    const { status } = await post(webhook, body);
+    if (status >= FIRST_SERVER_ERROR)
+      throw new Error(`The Reminder webhook answered HTTP ${status}`);
+    if (status >= 400) console.error(`The Reminder webhook refused: HTTP ${status}, dropped`);
+    return null;
+  },
+});
+
 export function sessionMailConfigured() {
   return webhookFor("session") !== null;
+}
+
+export function remindersConfigured() {
+  return webhookFor("reminder") !== null;
 }
 
 export function calendarMailConfigured() {

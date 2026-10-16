@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SHARE_TOKEN_LENGTH } from "../shared/shareToken";
+import { SHARE_TOKEN_LENGTH } from "../shared/randomToken";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { groupByShareToken } from "./model/access";

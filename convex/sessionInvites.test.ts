@@ -10,7 +10,7 @@ import {
   signInAnonymousGm,
   type TestBackend,
 } from "./model/test.setup";
-import { UNDO_WINDOW_MS } from "./sessionLifecycle";
+import { UNDO_WINDOW_MS } from "../shared/sessions";
 
 const RESEND_URL = "https://api.resend.com/emails";
 const WORKFLOWS_SESSION_URL = "https://example.test/session";
@@ -37,6 +37,7 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
   vi.stubEnv("RESEND_API_KEY", "re_test_key");
+  vi.stubEnv("SITE_URL", "https://next-session.link");
   vi.stubEnv("POSTHOG_SESSION_WEBHOOK_URL", WORKFLOWS_SESSION_URL);
   vi.stubEnv("POSTHOG_MAIL_WEBHOOK_SECRET", "secret");
   sent = [];

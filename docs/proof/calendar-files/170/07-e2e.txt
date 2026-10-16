@@ -1,0 +1,132 @@
+# bun run e2e on the landed tree e081fe3, through fleet heavy (test lines and summary; WebServer logs dropped). The 35 skips are the screenshot cases, as in S3b's 09-e2e.txt.
+
+  ✓    2 [chromium] › e2e/gm-calendar.spec.ts:30:1 › the GM reads the heat-map and sees who is free on a night (3.1s)
+  ✓    3 [chromium] › e2e/gm-calendar.spec.ts:54:3 › on a phone › a tapped night slides its detail in place of the calendar and back (4.3s)
+  ✓    4 [chromium] › e2e/gm-calendar.spec.ts:95:3 › on a phone › Undo in the night's detail keeps focus there (3.1s)
+  ✓    5 [chromium] › e2e/gm-calendar.spec.ts:109:3 › on a phone › Undo for another night keeps focus in the open detail (2.7s)
+  ✓    6 [chromium] › e2e/gm-calendar.spec.ts:129:3 › on a phone › a Session in another month opens its detail with focus on it (2.1s)
+  ✓    7 [chromium] › e2e/gm-calendar.spec.ts:145:1 › on a phone a dense day keeps two-digit counts inside its cell (5.1s)
+  ✓    8 [chromium] › e2e/gm-calendar.spec.ts:171:3 › on a 360 px phone a night shows six player bars on one line in a roomy cell (2.9s)
+  ✓    9 [chromium] › e2e/gm-calendar.spec.ts:171:3 › on a 390 px phone a night shows six player bars on one line in a roomy cell (2.2s)
+  ✓   10 [chromium] › e2e/gm-calendar.spec.ts:192:1 › on a phone a focused night's outline stays clear of its neighbour (2.5s)
+  ✓    1 [chromium] › e2e/calendar-download.spec.ts:6:1 › anyone with the Share Link downloads the Group's published night as a calendar file (30.7s)
+  ✓   12 [chromium] › e2e/calendar-download.spec.ts:35:1 › an unknown Share Token downloads nothing (19ms)
+  ✓   11 [chromium] › e2e/gm-calendar.spec.ts:221:1 › the GM schedules a Session, cancels it, and undoes that (3.3s)
+  ✓   13 [chromium] › e2e/gm-rail.spec.ts:55:1 › the GM copies, rotates, and undoes the Share Link from the rail (1.7s)
+  ✓   15 [chromium] › e2e/gm-rail.spec.ts:90:1 › the GM shares the month they are looking at, and players open on it (2.1s)
+  ✓   16 [chromium] › e2e/gm-rail.spec.ts:120:1 › the newest action owns the only toast (3.3s)
+  ✓   17 [chromium] › e2e/gm-rail.spec.ts:139:1 › the GM adds, renames, and removes Players (2.3s)
+  ✓   18 [chromium] › e2e/gm-rail.spec.ts:178:1 › Best Nights and Sessions open their day (2.9s)
+  ✓   19 [chromium] › e2e/gm-rail.spec.ts:203:1 › the switcher opens, makes, renames and deletes Groups, and the landing returns to the last one (4.0s)
+  ✓   20 [chromium] › e2e/gm-rail.spec.ts:249:1 › an Anonymous GM is nudged to save once a Player joins, until Later (4.1s)
+  ✓   21 [chromium] › e2e/gm-rail.spec.ts:273:1 › on a phone the calendar starts under the top bar, the link one tap away (2.6s)
+  ✓   22 [chromium] › e2e/gm-rail.spec.ts:306:1 › on a phone the rail sits under the calendar behind a segmented control (2.5s)
+  ✓   23 [chromium] › e2e/gm-rail.spec.ts:326:3 › 390px: the GM types three Players in a row with Enter only (1.5s)
+  ✓   24 [chromium] › e2e/gm-rail.spec.ts:326:3 › 1440px: the GM types three Players in a row with Enter only (1.5s)
+  ✓   25 [chromium] › e2e/gm-rail.spec.ts:351:3 › phone Add tap › the GM taps Add for consecutive names without blurring the field (1.8s)
+  ✓   26 [chromium] › e2e/gm-rail.spec.ts:374:1 › on a phone a fresh Group opens on Players, so the GM adds one under the calendar (1.0s)
+  ✓   27 [chromium] › e2e/gm-rail.spec.ts:390:1 › on a phone Add player stays in reach under the calendar whatever tab is open (2.4s)
+  ✓   14 [chromium] › e2e/gm-calendar.spec.ts:252:1 › after the Undo window a cancelled Session stays Cancelled until the GM schedules it again (33.8s)
+  ✓   28 [chromium] › e2e/gm-rail.spec.ts:422:1 › a Player who joins with a new name stays on the Roster as grey bars until the GM removes them (1.7s)
+  ✓   29 [chromium] › e2e/gm-calendar.spec.ts:317:1 › month navigation lives in the URL and stops at the end of the Booking Window (1.4s)
+  ✓   31 [chromium] › e2e/gm-calendar.spec.ts:350:1 › another GM's Group or a malformed id falls back to the GM's own Group (1.6s)
+  ✓   32 [chromium] › e2e/gm-calendar.spec.ts:362:1 › a signed-out visitor lands on the landing page (599ms)
+  -   33 [chromium] › e2e/gm-calendar.spec.ts:375:7 › screenshots › six players at 360px light
+  -   34 [chromium] › e2e/gm-calendar.spec.ts:375:7 › screenshots › six players at 360px dark
+  -   35 [chromium] › e2e/gm-calendar.spec.ts:375:7 › screenshots › six players at 390px light
+  -   36 [chromium] › e2e/gm-calendar.spec.ts:375:7 › screenshots › six players at 390px dark
+  -   37 [chromium] › e2e/gm-calendar.spec.ts:375:7 › screenshots › six players at 1440px light
+  -   38 [chromium] › e2e/gm-calendar.spec.ts:375:7 › screenshots › six players at 1440px dark
+  ✓   30 [chromium] › e2e/gm-rail.spec.ts:444:1 › an Anonymous GM saves into an Account from the header, stays on the Group, and its own Share Link leads back to it (3.1s)
+  ✓   39 [chromium] › e2e/landing.spec.ts:155:1 › one click puts the link in hand and lands the GM on their Group (1.5s)
+  ✓   40 [chromium] › e2e/gm-rail.spec.ts:487:1 › deleting the last Group of an Anonymous GM returns to the landing (1.6s)
+  -   42 [chromium] › e2e/gm-rail.spec.ts:504:7 › screenshots › 390px light
+  -   43 [chromium] › e2e/gm-rail.spec.ts:548:7 › screenshots › 390px light: Add player in reach, the maybe bar and a dense day
+  -   44 [chromium] › e2e/gm-rail.spec.ts:624:7 › screenshots › 390px light: a fresh Group and grey bars
+  -   45 [chromium] › e2e/gm-rail.spec.ts:504:7 › screenshots › 390px dark
+  -   46 [chromium] › e2e/gm-rail.spec.ts:548:7 › screenshots › 390px dark: Add player in reach, the maybe bar and a dense day
+  -   47 [chromium] › e2e/gm-rail.spec.ts:624:7 › screenshots › 390px dark: a fresh Group and grey bars
+  -   48 [chromium] › e2e/gm-rail.spec.ts:504:7 › screenshots › 1440px light
+  -   49 [chromium] › e2e/gm-rail.spec.ts:548:7 › screenshots › 1440px light: Add player in reach, the maybe bar and a dense day
+  -   50 [chromium] › e2e/gm-rail.spec.ts:624:7 › screenshots › 1440px light: a fresh Group and grey bars
+  -   51 [chromium] › e2e/gm-rail.spec.ts:504:7 › screenshots › 1440px dark
+  -   52 [chromium] › e2e/gm-rail.spec.ts:548:7 › screenshots › 1440px dark: Add player in reach, the maybe bar and a dense day
+  -   53 [chromium] › e2e/gm-rail.spec.ts:624:7 › screenshots › 1440px dark: a fresh Group and grey bars
+  ✓   54 [chromium] › e2e/mobile-copy.spec.ts:25:1 › a phone that refuses clipboard writes still copies the new link on the landing (1.3s)
+  ✓   55 [chromium] › e2e/mobile-copy.spec.ts:36:1 › a phone that refuses clipboard writes still copies the link from the group (1.0s)
+  ✓   41 [chromium] › e2e/landing.spec.ts:170:1 › saving to a new Account keeps the Share Link, and logging in finds the Group (3.8s)
+  ✓   56 [chromium] › e2e/mobile-copy.spec.ts:50:1 › a phone offers a selectable link when both clipboard methods refuse (1.3s)
+  ✓   58 [chromium] › e2e/mobile-copy.spec.ts:67:1 › a phone keeps the Share menu open with the link to long-press when both clipboard methods refuse (1.5s)
+  ✓   59 [chromium] › e2e/mobile-copy.spec.ts:84:1 › a phone shares its invitation and link through the native share sheet (1.2s)
+  ✓   57 [chromium] › e2e/landing.spec.ts:186:1 › saving into an Account that has older Groups keeps showing the new Group (5.2s)
+  ✓   61 [chromium] › e2e/landing.spec.ts:207:3 › a Save whose move fails after the sign-in › goes through on retry from the landing (4.0s)
+  ✓   60 [chromium] › e2e/my-groups.spec.ts:42:1 › an Account sees every Group it plays in and the Sessions across them on /me (6.1s)
+  ✓   63 [chromium] › e2e/my-groups.spec.ts:151:1 › /me sends anyone but an Account away without showing them the page (1.3s)
+  ✓   62 [chromium] › e2e/landing.spec.ts:225:3 › a Save whose move fails after the sign-in › goes through on retry from the Group header (3.1s)
+  ✓   65 [chromium] › e2e/landing.spec.ts:242:3 › a Save whose move fails after the sign-in › still goes through when the GM closes the retry from the Group header (2.9s)
+  ✓   66 [chromium] › e2e/landing.spec.ts:274:3 › a Group page that opens on a pending Save, as after Google's redirect › moves the Group, says Saved once, and stays on it (5.0s)
+  ✓   64 [chromium] › e2e/player-account.spec.ts:82:1 › a visitor keeps the Group with a new Account and plays as that Account on any device (12.5s)
+  ✓   67 [chromium] › e2e/landing.spec.ts:285:3 › a Group page that opens on a pending Save, as after Google's redirect › offers to finish when the move fails again (5.1s)
+  ✓   68 [chromium] › e2e/player-account.spec.ts:163:1 › keeping another Account's Player says so after the sign-in (3.2s)
+  ✓   69 [chromium] › e2e/landing.spec.ts:299:3 › a Save that expires › starts the landing over once its sheet is closed (2.7s)
+  ✓   70 [chromium] › e2e/player-account.spec.ts:184:1 › an Anonymous GM keeping their own link saves first, then keeps the Player (3.5s)
+  ✓   71 [chromium] › e2e/landing.spec.ts:315:3 › a Save that expires › starts the landing over when it expires after the GM dismissed the retry (2.4s)
+  ✓   72 [chromium] › e2e/player-account.spec.ts:206:1 › a signed-out visitor still joins and answers in the same steps (1.4s)
+  ✓   73 [chromium] › e2e/landing.spec.ts:332:1 › a retry dismissed, reopened, then finished in the background keeps the Save (3.2s)
+  ✓   74 [chromium] › e2e/player-account.spec.ts:219:1 › an Account can Keep again after removing a freshly joined Group before answering (3.0s)
+  ✓   75 [chromium] › e2e/landing.spec.ts:355:1 › pressing Escape again and again mid-Save keeps the sheet up until it is done (2.9s)
+  ✓   76 [chromium] › e2e/player-account.spec.ts:243:3 › Remove from player cancels a leftover Keep before reload (2.5s)
+  ✓   77 [chromium] › e2e/landing.spec.ts:377:1 › logging in to an Account without Groups lands on My groups (2.0s)
+  ✓   78 [chromium] › e2e/player-account.spec.ts:243:3 › Remove from My groups cancels a leftover Keep before reload (4.1s)
+  ✓   79 [chromium] › e2e/landing.spec.ts:392:1 › a wrong password says so and keeps the sheet open (4.4s)
+  ✓   81 [chromium] › e2e/landing.spec.ts:408:3 › on a dark OS › a cold load paints a dark canvas (446ms)
+  ✓   80 [chromium] › e2e/player-account.spec.ts:282:1 › viewing and picking claim nothing; the first Fill the rest keeps the Player (2.7s)
+  ✓   82 [chromium] › e2e/landing.spec.ts:415:3 › on a dark OS › an open sheet dims the page behind it (625ms)
+  ✓   84 [chromium] › e2e/landing.spec.ts:420:1 › an open sheet dims the page behind it in light mode (547ms)
+  -   85 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 390px light
+  -   86 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 390px dark
+  -   87 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 1440px light
+  -   88 [chromium] › e2e/landing.spec.ts:431:7 › screenshots › 1440px dark
+  ✓   83 [chromium] › e2e/player-account.spec.ts:300:1 › the visitor can dismiss the nudge and keep answering during this visit (2.2s)
+  ✓   89 [chromium] › e2e/player.spec.ts:151:3 › the player surface › a new player joins by name, answers, fills the rest, and comes back (3.1s)
+  ✓   91 [chromium] › e2e/player.spec.ts:208:3 › the player surface › taps and Fill Rest show at once, before the backend answers (2.0s)
+  ✓   92 [chromium] › e2e/player.spec.ts:234:3 › the player surface › a first Fill Rest dismisses the first-visit hint (1.9s)
+  ✓   93 [chromium] › e2e/player.spec.ts:250:3 › the player surface › a tap the backend refuses rolls back and says why (853ms)
+  ✓   94 [chromium] › e2e/player.spec.ts:264:3 › the player surface › tapping a night back to not set clears its Answer (2.0s)
+  ✓   90 [chromium] › e2e/player-account.spec.ts:313:1 › an Account at the 50 Group cap still answers, and an explicit keep explains the cap (8.5s)
+  -   96 [chromium] › e2e/player-account.spec.ts:352:7 › screenshots › 390px light
+  -   97 [chromium] › e2e/player-account.spec.ts:352:7 › screenshots › 390px dark
+  -   98 [chromium] › e2e/player-account.spec.ts:352:7 › screenshots › 1440px light
+  -   99 [chromium] › e2e/player-account.spec.ts:352:7 › screenshots › 1440px dark
+  ✓   95 [chromium] › e2e/player.spec.ts:282:3 › the player surface › a Fill Rest the backend refuses rolls back and says why (799ms)
+  ✓  100 [chromium] › e2e/session-emails.spec.ts:6:1 › an Account can save its session email preference on My groups (1.4s)
+  ✓  102 [chromium] › e2e/smoke.spec.ts:3:1 › the landing page renders the app shell without errors (407ms)
+  ✓  103 [chromium] › e2e/smoke.spec.ts:16:1 › reduced motion stops pulsing animations after one run (331ms)
+  ✓  101 [chromium] › e2e/player.spec.ts:300:3 › the player surface › a listed player answers with one tap and can switch with Not you? (1.6s)
+  ✓  105 [chromium] › e2e/player.spec.ts:316:3 › the player surface › a taken name points at the existing chip (1.0s)
+  ✓  106 [chromium] › e2e/player.spec.ts:331:3 › the player surface › a player on a long Roster finds their name with the filter (1.7s)
+  ✓  104 [chromium] › e2e/time-and-place.spec.ts:13:1 › the GM sets the Group's time and place, schedules a night, and the player sees both (3.2s)
+  ✓  107 [chromium] › e2e/player.spec.ts:353:3 › the player surface › a player the GM removed lands on the join screen (661ms)
+  ✓  108 [chromium] › e2e/time-and-place.spec.ts:85:1 › a Group the GM does not own shows the not-found screen (1.1s)
+  ✓  109 [chromium] › e2e/player.spec.ts:367:3 › the player surface › a past month is read-only (1.2s)
+  ✓  110 [chromium] › e2e/tips.spec.ts:16:1 › saves to a new Account that asked for Tips (1.8s)
+  ✓  112 [chromium] › e2e/tips.spec.ts:30:1 › /tips takes the code out of the address bar and confirms only on the press (460ms)
+  -  113 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 390 px, light
+  -  114 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 390 px, dark
+  -  115 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 1440 px, light
+  -  116 [chromium] › e2e/tips.spec.ts:67:7 › screenshots › the Tips box and /tips at 1440 px, dark
+  ✓  117 [mobile-webkit] › e2e/mobile-copy.spec.ts:25:1 › a phone that refuses clipboard writes still copies the new link on the landing (1.1s)
+  ✓  118 [mobile-webkit] › e2e/mobile-copy.spec.ts:36:1 › a phone that refuses clipboard writes still copies the link from the group (936ms)
+  ✓  119 [mobile-webkit] › e2e/mobile-copy.spec.ts:50:1 › a phone offers a selectable link when both clipboard methods refuse (1.0s)
+  ✓  120 [mobile-webkit] › e2e/mobile-copy.spec.ts:67:1 › a phone keeps the Share menu open with the link to long-press when both clipboard methods refuse (1.4s)
+  ✓  121 [mobile-webkit] › e2e/mobile-copy.spec.ts:84:1 › a phone shares its invitation and link through the native share sheet (1.0s)
+  ✓  111 [chromium] › e2e/player.spec.ts:385:3 › the player surface › a Cancelled Session stays marked and answerable until the GM schedules it again (30.9s)
+  ✓  122 [chromium] › e2e/player.spec.ts:418:3 › the player surface › an unknown link says it no longer works (418ms)
+  -  123 [chromium] › e2e/player.spec.ts:455:3 › player surface screenshots › every player screen at 390 and 1440 px, light and dark
+  -  124 [chromium] › e2e/player.spec.ts:502:3 › player surface screenshots › the past month at 390 and 1440 px, light and dark
+  -  125 [chromium] › e2e/player.spec.ts:545:3 › player surface screenshots › the first-visit hint at 390 and 1440 px, light and dark
+  -  126 [chromium] › e2e/player.spec.ts:555:3 › player surface screenshots › the done card at 390 and 1440 px, light and dark
+  -  127 [chromium] › e2e/player.spec.ts:570:3 › player surface screenshots › the long-Roster join screen at 390 and 1440 px, light and dark
+  ✓  128 [sign-up-budget] › e2e/sign-up-budget.spec.ts:30:1 › a new Account signs up even after the sign-up budget ran out (3.3s)
+  35 skipped
+  93 passed (3.0m)

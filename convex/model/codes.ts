@@ -1,7 +1,7 @@
 const SECRET_CODE_BYTES = 32;
 
-export function newSecretCode() {
-  return base64url(crypto.getRandomValues(new Uint8Array(SECRET_CODE_BYTES)));
+export function newSecretCode(bytes = SECRET_CODE_BYTES) {
+  return base64url(crypto.getRandomValues(new Uint8Array(bytes)));
 }
 
 export async function hashSecretCode(code: string) {

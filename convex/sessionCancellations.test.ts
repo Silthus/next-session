@@ -8,7 +8,7 @@ import {
   signInAnonymousGm,
   type TestBackend,
 } from "./model/test.setup";
-import { UNDO_WINDOW_MS } from "./sessionLifecycle";
+import { UNDO_WINDOW_MS } from "../shared/sessions";
 
 const RESEND_URL = "https://api.resend.com/emails";
 const ROBIN = "robin@example.com";
@@ -29,6 +29,7 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
   vi.stubEnv("RESEND_API_KEY", "re_test_key");
+  vi.stubEnv("SITE_URL", "https://next-session.link");
   sent = [];
   vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
     sent.push({ url: urlOf(input), at: Date.now(), body: init?.body as string });

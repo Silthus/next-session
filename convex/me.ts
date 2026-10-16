@@ -8,16 +8,22 @@ import {
   type IsoDate,
 } from "../shared/dates";
 import { MAX_CLAIMED_PLAYERS_PER_ACCOUNT, MAX_GROUPS_PER_GM } from "../shared/limits";
+import { randomToken } from "../shared/randomToken";
 import type { Doc, Id } from "./_generated/dataModel";
-import { mutation, query, type QueryCtx } from "./_generated/server";
-import { fail } from "./model/errors";
-import { currentAccount } from "./model/access";
+import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
+import { remindersConfigured } from "./mail";
+import { currentAccount, requireAccount } from "./model/access";
+import { enforceRateLimit } from "./model/rateLimits";
+import { remindersOn } from "./model/reminderLinks";
+import { siteLink } from "./model/siteLinks";
+import { track } from "./model/telemetry";
 import { groupTimeOf, sessionTimeAndPlace, sessionTimeAndPlaceFields } from "./model/timeAndPlace";
 import { datedSession } from "./schema";
 import { datedSessionOf } from "./sessionLifecycle";
 
 const UPCOMING_SESSIONS = 5;
 const DAY = 86_400_000;
+const CALENDAR_FEED_TOKEN_LENGTH = 22;
 
 const upcomingSessions = v.array(
   v.object({ ...datedSession.fields, ...sessionTimeAndPlaceFields }),
@@ -112,8 +118,10 @@ async function upcomingSessionsOf(ctx: QueryCtx, group: Doc<"groups">, today: Is
     .query("sessions")
     .withIndex("by_groupId_and_date", (q) => q.eq("groupId", group._id).gte("date", today))
     .take(UPCOMING_SESSIONS);
-  const timeAndPlace = sessionTimeAndPlace(group);
-  return sessions.map((session) => ({ ...datedSessionOf(session), ...timeAndPlace }));
+  return sessions.map((session) => ({
+    ...datedSessionOf(session),
+    ...sessionTimeAndPlace(group, session),
+  }));
 }
 
 async function openDatesOf(ctx: QueryCtx, playerId: Id<"players">, today: IsoDate) {
@@ -136,12 +144,19 @@ function daysBetween(first: IsoDate, last: IsoDate) {
   return days;
 }
 
-export const sessionEmails = query({
+export const notificationSettings = query({
   args: {},
-  returns: v.union(v.boolean(), v.null()),
+  returns: v.union(
+    v.object({ sessionEmails: v.boolean(), reminders: v.union(v.boolean(), v.null()) }),
+    v.null(),
+  ),
   handler: async (ctx) => {
     const account = await currentAccount(ctx);
-    return account ? account.sessionEmailsEnabled !== false : null;
+    if (!account) return null;
+    return {
+      sessionEmails: account.sessionEmailsEnabled !== false,
+      reminders: remindersConfigured() ? remindersOn(account) : null,
+    };
   },
 });
 
@@ -149,9 +164,56 @@ export const setSessionEmails = mutation({
   args: { enabled: v.boolean() },
   returns: v.null(),
   handler: async (ctx, { enabled }) => {
-    const account = await currentAccount(ctx);
-    if (!account) fail({ code: "UNAUTHENTICATED" });
+    const account = await requireAccount(ctx);
     await ctx.db.patch("users", account._id, { sessionEmailsEnabled: enabled });
     return null;
   },
 });
+
+export const setReminders = mutation({
+  args: { enabled: v.boolean() },
+  returns: v.null(),
+  handler: async (ctx, { enabled }) => {
+    const account = await requireAccount(ctx);
+    await ctx.db.patch("users", account._id, { remindersEnabled: enabled });
+    return null;
+  },
+});
+
+const calendarFeedLink = v.object({ url: v.string() });
+
+export const calendarFeed = mutation({
+  args: {},
+  returns: calendarFeedLink,
+  handler: async (ctx) => {
+    const account = await requireAccount(ctx);
+    if (account.calendarFeedToken !== undefined) {
+      return calendarFeedLinkOf(account.calendarFeedToken);
+    }
+    const feedToken = await mintCalendarFeedToken(ctx, account);
+    await track(ctx, { name: "calendar_feed_created", actor: account });
+    return calendarFeedLinkOf(feedToken);
+  },
+});
+
+export const resetCalendarFeed = mutation({
+  args: {},
+  returns: calendarFeedLink,
+  handler: async (ctx) => {
+    const account = await requireAccount(ctx);
+    const feedToken = await mintCalendarFeedToken(ctx, account);
+    await track(ctx, { name: "calendar_feed_reset", actor: account });
+    return calendarFeedLinkOf(feedToken);
+  },
+});
+
+async function mintCalendarFeedToken(ctx: MutationCtx, account: Doc<"users">) {
+  await enforceRateLimit(ctx, "calendarFeed", account._id);
+  const calendarFeedToken = randomToken(CALENDAR_FEED_TOKEN_LENGTH);
+  await ctx.db.patch("users", account._id, { calendarFeedToken });
+  return calendarFeedToken;
+}
+
+function calendarFeedLinkOf(feedToken: string) {
+  return { url: siteLink(`/cal/a/${feedToken}.ics`) };
+}

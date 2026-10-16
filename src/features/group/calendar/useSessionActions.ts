@@ -9,6 +9,7 @@ import type { ShowToast } from "../useToast";
 import { dayLabel } from "./calendarDates";
 import { focusDay } from "./dayFocus";
 import type { CalendarSession } from "./DayCell";
+import type { SessionDetailChanges } from "./SessionDetails";
 import { errorMessage } from "../../../lib/errors";
 
 export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
@@ -20,6 +21,7 @@ export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
         scheduled(sessions, date, timeAndPlace),
       ),
   );
+  const updateSessionDetails = useMutation(api.sessions.updateDetails);
   const cancelSession = useMutation(api.sessions.cancel).withOptimisticUpdate(
     (store, { sessionId }) =>
       editCachedSessions(store, groupId, ({ sessions }) => cancelled(sessions, sessionId)),
@@ -59,9 +61,17 @@ export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
     });
   }
 
+  async function updateDetails(
+    session: Pick<CalendarSession, "_id">,
+    changes: SessionDetailChanges,
+  ) {
+    await updateSessionDetails({ sessionId: session._id, ...changes });
+  }
+
   return {
     schedule,
     cancel,
+    updateDetails,
     isPending: (date: IsoDate) => pendingDates.has(date),
   };
 }
@@ -80,6 +90,7 @@ function optimisticSession(
     startTime,
     lengthMinutes,
     location,
+    overrides: [],
   };
 }
 

@@ -21,7 +21,7 @@ import {
   type GmClient,
   type TestBackend,
 } from "./model/test.setup";
-import { UNDO_WINDOW_MS } from "./sessionLifecycle";
+import { UNDO_WINDOW_MS } from "../shared/sessions";
 
 withAuthKeys();
 withGoogleCredentials();
@@ -65,6 +65,10 @@ async function eventsDuring(action: () => Promise<unknown>) {
   const sends = await sendsDuring(action);
   for (const send of sends) expect(send).toMatchObject({ events: [expect.any(String)], logs: [] });
   return sends.map(({ events }) => JSON.parse(events[0]!) as PostHogEvent);
+}
+
+function feedTokenOf(feedUrl: string) {
+  return /\/cal\/a\/(.+)\.ics$/.exec(feedUrl)![1]!;
 }
 
 async function shareTokenOf(groupId: Id<"groups">) {
@@ -227,6 +231,52 @@ describe("Tips", () => {
   });
 });
 
+describe("the Calendar feed link", () => {
+  beforeEach(() => {
+    vi.stubEnv("SITE_URL", "https://next-session.test");
+  });
+
+  it("tracks calendar_feed_created on the first call only, with no token", async () => {
+    const { as, userId } = await signInAccount(t);
+    let url = "";
+
+    const events = await eventsDuring(async () => {
+      url = (await as.mutation(api.me.calendarFeed, {})).url;
+      await as.mutation(api.me.calendarFeed, {});
+    });
+
+    expect(events).toEqual([
+      expect.objectContaining({
+        event: "next_session:calendar_feed_created",
+        distinct_id: `next-session:${userId}`,
+        properties: { product: "next-session" },
+      }),
+    ]);
+    expect(JSON.stringify(events)).not.toContain(feedTokenOf(url));
+  });
+
+  it("tracks calendar_feed_reset on a reset, with neither the old nor the new token", async () => {
+    const { as, userId } = await signInAccount(t);
+    const before = (await as.mutation(api.me.calendarFeed, {})).url;
+    let after = "";
+
+    const events = await eventsDuring(async () => {
+      after = (await as.mutation(api.me.resetCalendarFeed, {})).url;
+    });
+
+    expect(events).toEqual([
+      expect.objectContaining({
+        event: "next_session:calendar_feed_reset",
+        distinct_id: `next-session:${userId}`,
+        properties: { product: "next-session" },
+      }),
+    ]);
+    const sent = JSON.stringify(events);
+    expect(sent).not.toContain(feedTokenOf(before));
+    expect(sent).not.toContain(feedTokenOf(after));
+  });
+});
+
 describe("GM mutations", () => {
   it("tracks group_created", async () => {
     const { as, userId } = await signInAccount(t);
@@ -319,6 +369,32 @@ describe("GM mutations", () => {
       expect.objectContaining({
         event: "next_session:session_cancelled",
         properties: { product: "next-session", group_id: groupId },
+      }),
+    ]);
+  });
+
+  it("tracks session_details_changed naming only the fields that changed", async () => {
+    const { as, groupId } = await signedInGmWithGroup(t);
+    const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+    await as.mutation(api.sessions.updateDetails, { sessionId, location: "The club" });
+
+    const events = await eventsDuring(() =>
+      as.mutation(api.sessions.updateDetails, {
+        sessionId,
+        startTime: "20:00",
+        lengthMinutes: null,
+        location: "The club",
+      }),
+    );
+
+    expect(events).toEqual([
+      expect.objectContaining({
+        event: "next_session:session_details_changed",
+        properties: {
+          product: "next-session",
+          group_id: groupId,
+          fields: ["startTime"],
+        },
       }),
     ]);
   });
@@ -524,6 +600,7 @@ describe("refused and objected", () => {
 
 describe("the redaction contract", () => {
   it("sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log", async () => {
+    vi.stubEnv("SITE_URL", "https://next-session.test");
     const email = "redact-me@example.com";
     const secrets: string[] = [
       email,
@@ -531,7 +608,9 @@ describe("the redaction contract", () => {
       "Dragon Table",
       "Zoltan Vex",
       "Dragon Lair",
+      "Goblin Den",
       "20:45",
+      "21:15",
       "195",
     ];
 
@@ -551,7 +630,15 @@ describe("the redaction contract", () => {
       const shareToken = await shareTokenOf(groupId);
       secrets.push(shareToken);
       const playerId = await t.mutation(api.player.join, { shareToken, name: "Zoltan Vex" });
-      await link.as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+      const sessionId = await link.as.mutation(api.sessions.schedule, {
+        groupId,
+        date: "2026-10-17",
+      });
+      await link.as.mutation(api.sessions.updateDetails, {
+        sessionId,
+        startTime: "21:15",
+        location: "Goblin Den",
+      });
       const { code } = await link.as.mutation(api.account.startSave, {});
       secrets.push(code);
       const account = await signUpAccount(t, { ...newCredentials(), email });
@@ -560,6 +647,8 @@ describe("the redaction contract", () => {
       await account.as.mutation(api.player.release, { groupId });
       await account.as.mutation(api.player.join, { shareToken, name: "Zoltan Vex II" });
       await account.as.mutation(api.groups.create, {});
+      secrets.push(feedTokenOf((await account.as.mutation(api.me.calendarFeed, {})).url));
+      secrets.push(feedTokenOf((await account.as.mutation(api.me.resetCalendarFeed, {})).url));
       await t.mutation(internal.cleanup.sweepExpiredGroups, {});
     });
 
@@ -573,12 +662,15 @@ describe("the redaction contract", () => {
       "next_session:share_link_rotated",
       "next_session:player_joined",
       "next_session:session_scheduled",
+      "next_session:session_details_changed",
       "next_session:account_created",
       "next_session:groups_saved",
       "next_session:player_claimed",
       "next_session:player_released",
       "next_session:player_joined",
       "next_session:group_created",
+      "next_session:calendar_feed_created",
+      "next_session:calendar_feed_reset",
     ]);
     const sent = JSON.stringify(sends);
     for (const secret of secrets) expect(sent).not.toContain(secret);

@@ -29,14 +29,13 @@ import {
   type SessionMailAccount,
 } from "./model/recipients";
 import { sessionMailCopy, type MailCopy, type SessionChange } from "./model/sessionMailCopy";
+import { shareLinkOf, siteLink } from "./model/siteLinks";
 import { accountDistinctId, PRODUCT } from "./model/telemetry";
 import { groupTimeOf } from "./model/timeAndPlace";
 import { upcomingSessions } from "./model/upcomingSessions";
 import { frozenEntry } from "./schema";
 
-const SITE = "https://next-session.link";
 const CALENDAR_ADDRESS = "calendar@next-session.link";
-const PLAYER_CALENDAR_LINK = `${SITE}/me`;
 const CANCELLATION_BATCH_SIZE = 200;
 
 type Published = NonNullable<Doc<"sessions">["published"]>;
@@ -303,7 +302,7 @@ function nightMessageFor(
   send: NightSend,
 ): CalendarMessage {
   const runsGroup = group.ownerId === account._id;
-  const calendarLink = runsGroup ? `${SITE}/g/${group._id}` : PLAYER_CALENDAR_LINK;
+  const calendarLink = runsGroup ? siteLink(`/g/${group._id}`) : playerCalendarLink();
   const window = { start: entry.start, end: entry.end };
   const uid = sessionUid(session._id);
   const kind = entry.state === "cancelled" ? "cancel" : "request";
@@ -380,6 +379,7 @@ function frozenEntryMessage({
   stamp: number;
   copy: MailCopy;
 }): CalendarMessage {
+  const calendarLink = playerCalendarLink();
   const calendar = invite({
     kind,
     organizer: CALENDAR_ADDRESS,
@@ -391,8 +391,8 @@ function frozenEntryMessage({
       window: { start: entry.start, end: entry.end },
       status: "CANCELLED",
       summary: entry.summary,
-      description: `Open your group: ${PLAYER_CALENDAR_LINK}`,
-      url: PLAYER_CALENDAR_LINK,
+      description: `Open your group: ${calendarLink}`,
+      url: calendarLink,
     },
   });
   return {
@@ -407,8 +407,8 @@ function idempotencyKey(uid: string, sequence: number, account: SessionMailAccou
   return `calendar/${uid}/${sequence}/${account._id}`;
 }
 
-function shareLinkOf(group: Doc<"groups">) {
-  return `${SITE}/s/${encodeURIComponent(group.shareToken)}`;
+function playerCalendarLink() {
+  return siteLink("/me");
 }
 
 async function requestWorkflowsSessionUpdates(
@@ -424,7 +424,7 @@ async function requestWorkflowsSessionUpdates(
     .take(MAX_PLAYERS_PER_GROUP);
   const accounts = new Set(players.flatMap((player) => (player.userId ? [player.userId] : [])));
   for (const userId of accounts) {
-    const send = { sessionId: session._id, userId, revision: published.revision };
+    const send = { sessionId: session._id, userId, change: published.state };
     if (await bodyFor(ctx, send)) await requestSessionMail(ctx, send);
   }
 }
@@ -435,10 +435,10 @@ export const recipient = internalQuery({
   handler: bodyFor,
 });
 
-async function bodyFor(ctx: QueryCtx, { sessionId, userId, revision }: SessionSend) {
+async function bodyFor(ctx: QueryCtx, { sessionId, userId, change }: SessionSend) {
   const session = await ctx.db.get("sessions", sessionId);
   const published = session?.published;
-  if (!session || published?.revision !== revision) return null;
+  if (!session || published?.state !== change) return null;
   const group = await ctx.db.get("groups", session.groupId);
   if (!group || group.ownerId === userId) return null;
   const player = await ctx.db
@@ -454,7 +454,7 @@ async function bodyFor(ctx: QueryCtx, { sessionId, userId, revision }: SessionSe
     email: account.email,
     group_name: group.name,
     date_label: dateLabel(session.date),
-    change: published.state,
+    change,
     player_url: shareLinkOf(group),
   };
 }

@@ -1,0 +1,31 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-b28d594e
+
+ ❯ |ui| src/features/group/GroupScreen.test.tsx (1 test | 1 failed) 239ms
+   ❯ GroupScreen (1)
+     × keeps the group menu open when the month arrives after it was opened 238ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/group/GroupScreen.test.tsx > GroupScreen > keeps the group menu open when the month arrives after it was opened
+AssertionError: expected 'false' to be 'true' // Object.is equality
+
+Expected: "true"
+Received: "false"
+
+ ❯ src/features/group/GroupScreen.test.tsx:86:63
+     84|
+     85|     expect(await screen.findByRole("heading", { level: 2, name: monthH…
+     86|     expect((await groupMenu()).getAttribute("aria-expanded")).toBe("tr…
+       |                                                               ^
+     87|   });
+     88| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  13:50:14
+   Duration  1.23s (environment 40%, transform 22%, tests 21%, import 12%, setup 6%)
+

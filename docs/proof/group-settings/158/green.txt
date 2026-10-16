@@ -1,0 +1,123 @@
+# green: the same tests after the change, every assertion intact, none skipped
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a session { code: 'SESSION_EXISTS' } 2ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a session { code: 'OUT_OF_WINDOW' } 5ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a session { code: 'NOT_FOUND' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a session { code: 'SESSION_CANCELLED' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a session { code: 'INVALID_SETTINGS' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a roster { code: 'NAME_TAKEN', playerId: 'p1' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a roster { code: 'ROSTER_FULL' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a roster { code: 'NOT_FOUND' } 3ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a group { code: 'TOO_MANY_GROUPS' } 3ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a group { code: 'NOT_FOUND' } 3ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a shareLink { code: 'UNDO_EXPIRED' } 1ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a join { code: 'NAME_TAKEN', playerId: 'p1' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a join { code: 'ROSTER_FULL' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a join { code: 'INVALID_NAME' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a join { code: 'RATE_LIMITED', …(1) } 2ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a join { code: 'TOO_MANY_GROUPS' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a keep { code: 'PLAYER_CLAIMED' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a keep { code: 'TOO_MANY_GROUPS' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a save { code: 'TOO_MANY_GROUPS' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a save { code: 'CLAIM_INVALID' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a keep { code: 'NOT_FOUND' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a undoRemove { code: 'PLAYER_CLAIMED' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a undoRemove { code: 'NOT_FOUND' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a undoRemove { code: 'TOO_MANY_GROUPS' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a answer { code: 'RATE_LIMITED', …(1) } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a answer { code: 'OUT_OF_WINDOW' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a fillRest { code: 'RATE_LIMITED', …(1) } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a fillRest { code: 'OUT_OF_WINDOW' } 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a rate limit and a bad name the same way for a session 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a rate limit and a bad name the same way for a roster 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a rate limit and a bad name the same way for a group 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a rate limit and a bad name the same way for a shareLink 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > falls back to a retry line for anything else 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > asks to retry an unsaved answer 0ms
+ ✓ |ui| src/lib/errors.test.ts > errorMessage > asks to retry an unsaved fillRest 0ms
+ ✓ |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > reports a failure without an ErrorCode with its function name and request ID 1ms
+ ✓ |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > reports nothing of the server's message, which can carry names 24ms
+ ✓ |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > reports a failure without a request ID by its function name 0ms
+ ✓ |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > does not report a coded error: it is product flow 0ms
+ ✓ |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > does not report an error that did not come from a Convex call 0ms
+ ✓ |ui| src/lib/errors.test.ts > reporting unexpected Convex failures > reports the same failure once, however often it is read 0ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > publishes a burst of edits once, a window after the last one, with the Session's own values 291ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > returns a field to the Group's value with null and leaves an absent field alone 64ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > reads an empty place of the Session's own as no place this night 32ms
+ ✓ |convex| convex/ownerOnly.test.ts > owner-only Groups > covers every public function of the GM modules 15ms
+ ✓ |convex| convex/ownerOnly.test.ts > owner-only Groups > every GM-facing function treats another GM's Group, Player and Session as missing and changes nothing 126ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > keeps the Session's own values when it is cancelled and scheduled again 73ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > pushes out the Expiry of an Unsaved Group 15ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses a Cancelled Session and keeps its values 26ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses a Session that has passed 12ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses { startTime: '7pm' } as invalid and changes nothing 27ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses { startTime: '24:00' } as invalid and changes nothing 23ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses { lengthMinutes: 15 } as invalid and changes nothing 27ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses { lengthMinutes: 735 } as invalid and changes nothing 20ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses { lengthMinutes: 250 } as invalid and changes nothing 19ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses { …(1) } as invalid and changes nothing 18ms
+ ✓ |convex| convex/sessionDetails.test.ts > sessions.updateDetails > refuses once the GM's edits are spent, and changes nothing 91ms
+ ✓ |convex| convex/sessionDetails.test.ts > a Session's own values against a saved Time and place > keeps the Session's own start time and still follows the Group's length 21ms
+ ✓ |convex| convex/sessionDetails.test.ts > a Session's own values against a saved Time and place > moves a Session that has only its own time to the new place, and leaves one with its own place alone 32ms
+ ✓ |convex| convex/sessionDetails.test.ts > the reads > schedule.month returns the Session's own values and which ones it overrides 41ms
+ ✓ |convex| convex/sessionDetails.test.ts > the reads > player.group shows the Session's own values over the Group's 44ms
+ ✓ |convex| convex/sessionDetails.test.ts > the reads > me.groups shows the Session's own values to the GM and to a Claimed Player 41ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > lists who is free first, then maybe, busy and silent 570ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > schedules a bookable night 166ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > with the deployment's PostHog token unset > schedules nothing anywhere in the core loop 806ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > sign-in > tracks link_created with the first Group for Create your link 11ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > says what players' calendars will show right above Schedule session 88ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > names the Group's zone in the line when the GM's browser is elsewhere 22ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > leaves the line off a scheduled Session 20ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > leaves the line off a Cancelled Session 17ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > leaves the line off a past night 6ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > cancels a Session that has not passed 32ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > still cancels a Session today 32ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > marks a Cancelled Session and schedules it again 46ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > keeps a past Cancelled Session marked and read-only 25ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > offers no cancel on a past Session 38ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > cannot schedule a past night 18ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > holds the button, and its focus, while the change is on its way 49ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Password Account and nothing for its next log in 641ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in 146ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > goes back to the overview 41ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > explains an empty Roster 12ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > shows the Session's range and place, marked as only this night 17ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > leaves the mark off a Session that follows the Group 16ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > sends exactly the fields the GM changed 163ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > marks each of the Session's own values as only this night in the editor 99ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > sends null for a field the GM sets back to the usual 85ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > sign-in > flags a production proof Account under .test as a test account 171ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > marks a value the GM changes as only this night 80ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > keeps the editor open with the error when the save fails 94ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > shows the values of a Cancelled Session read-only 16ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel when and where of a Session > shows the values of a past Session read-only 11ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Tips > tracks account_created with tips_requested for a ticked box 240ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Tips > tracks account_created without tips_requested for a Google Account 301ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Tips > tracks tips_confirmed for the Account, with no email or code 12ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Tips > tracks nothing for a refused confirmation 3ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks group_created 5ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks share_link_rotated 6ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks group_settings_saved for the location "Max's place" as has_location true 17ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks group_settings_saved for the location "" as has_location false 4ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks session_scheduled with the Roster size and whether it is the Group's first 7ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks session_cancelled 6ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks session_details_changed naming only the fields that changed 5ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks Schedule again as session_scheduled that is not the Group's first 16ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks groups_saved with the number of Groups the Save moved 141ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks player_joined as the new Player for a visitor 6ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks player_joined as the Account, claimed, when an Account joins 4ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks player_claimed and player_released 5ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks nothing for a claim of a Player the Account already holds 3ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks nothing for a release without a claim 3ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks nothing for answers 6ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a Session on a taken date 4ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a Session outside the Booking Window 5ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a join under a taken name 4ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a rotation of a foreign Group 5ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a Save with a used claim code 110ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for an Account that objected 6ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log 144ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > the Expiry sweep > logs once per run with the number of Groups it expired, across pages 78ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > the Expiry sweep > logs a run that found nothing 3ms
+ Test Files  5 passed (5)
+      Tests  120 passed (120)

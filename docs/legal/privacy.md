@@ -2,7 +2,7 @@
 
 > **Draft, pending review by a qualified German lawyer before publication.** Source text for the `/privacy` page. `{{…}}` placeholders are filled at build time (see `docs/spec.md` §7).
 
-**Version 1.8. Effective: {{EFFECTIVE_DATE}}**
+**Version 1.11. Effective: {{EFFECTIVE_DATE}}**
 
 This policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.
 
@@ -23,19 +23,25 @@ We have not appointed a data protection officer because we are not required to.
 | For an account with Google: your email address, whether Google verified it, and your Google account ID, which Google sends us when you continue with Google | Let you sign in on any device | Contract, 6(1)(b) |
 | For an account with Google: your Google profile picture and its Google address, which Google sends us when you continue with Google | Show your picture to you, and to the GM of each group where your account has a player, so the GM recognizes who answered | Legitimate interest, 6(1)(f) |
 | For a player with an account: which player in which group belongs to your account | Show your groups on any device | Contract, 6(1)(b) |
-| Group names, player names, the days players marked as free, maybe, or busy, and the scheduled dates | Provide the Service to the GM and the group | Contract, 6(1)(b) |
+| Group names, player names, the days players marked as free, maybe, or busy, the scheduled dates, a group's usual start time, length, time zone, and location, and a session's own start time, length, and location | Provide the Service to the GM and the group | Contract, 6(1)(b) |
+| Text you type into a group's location field, and your IP address, sent to Geoapify only while you type in that field, when the field suggests addresses | Suggest addresses as you type | Legitimate interest, 6(1)(f) |
 | Technical connection data (IP address, browser, time) in server logs of our hosting providers | Deliver the site and keep it secure | Legitimate interest, 6(1)(f) |
 | Pseudonymous usage events (pages viewed, steps such as creating a link, joining, scheduling), with the random ID of your user, player, or group | Learn which parts of the Service are used, fix problems | Legitimate interest, 6(1)(f) |
 | Error reports and technical logs (error message, browser, page) | Keep the Service working | Legitimate interest, 6(1)(f) |
 | For an account: your email address | Send you one welcome mail | Contract, 6(1)(b) |
+| For an account that subscribes to its calendar feed: a secret feed link. The calendar app that fetches the link receives the group name, date, start and end time, and place of the sessions of your groups | Let your calendar app follow the sessions of your groups | Contract, 6(1)(b) |
 | For the account that runs a group, and for a player with an account, when session emails are enabled: your email address, group name, session date, start time and location, a link to the group (for a player, the share link), your email preference, and a calendar invite with the same details | Tell you when a session is set, changed, or cancelled, and keep the session in your calendar | Contract, 6(1)(b) |
+| For a player with an account, when reminders are on: your email address, group name, session date, start time, location and share link | Remind you 1 day and 2 hours before a session | Contract, 6(1)(b) |
+| For an account: whether you want reminders, and a secret reminder link that turns reminders off or on without signing in | Let you stop reminders from any reminder | Contract, 6(1)(b) |
 | If you ask for tips: your email address and your confirmation | Send the two tip mails | Consent, 6(1)(a) |
 
 Player names are whatever the GM or the player types in. A first name or nickname is enough. We do not need, and ask you not to enter, anything else about a person.
 
+A group's location is whatever the GM types in: an address, a note, or a link. Address suggestions start after three letters. Picking one stores its text and nothing else, and Geoapify keeps successful requests for at most 24 hours. The field works without suggestions, and stops asking Geoapify for the rest of your visit after a request fails.
+
 We measure use without cookies and without storing anything on your device. We show no ads and do no cross-site tracking, we do not combine your usage events with data from our other products, and we do not sell data or use it for automated decisions.
 
-To count visitors, PostHog forms a hash of your IP address and browser with a secret that changes every day. It does not store your IP address. Share links and sign-in codes are removed from page addresses before they are sent, so a group's share link never reaches usage measurement. When session emails are enabled, PostHog receives the share link as mail content through a separate, secret-guarded workflow, not as a usage event or person property. When session emails with calendar invites are enabled, Resend receives the share link as mail content instead; the calendar invite itself carries no share link.
+To count visitors, PostHog forms a hash of your IP address and browser with a secret that changes every day. It does not store your IP address. Share links and sign-in codes are removed from page addresses before they are sent, so a group's share link never reaches usage measurement. When session emails or reminders are on, PostHog receives the share link, and for reminders your reminder link, as mail content through a separate, secret-guarded workflow, not as a usage event or person property. When session emails with calendar invites are enabled, Resend receives the share link as mail content instead; the calendar invite itself carries no share link.
 
 ## 3. Storage on your device (§ 25 TDDDG)
 
@@ -61,12 +67,14 @@ We use these processors under data processing agreements (Art. 28 GDPR):
 | --- | --- | --- |
 | Convex, Inc. | Database, application backend, sign-in | USA |
 | Cloudflare, Inc. | Delivering the website, protection against attacks | Global network, USA |
-| PostHog Inc. | Usage measurement, error reports, technical logs, and sending the welcome mail, tips, and session updates when enabled | EU (Frankfurt) hosting, US company |
+| PostHog Inc. | Usage measurement, error reports, technical logs, and sending the welcome mail, tips, session updates, and reminders when enabled | EU (Frankfurt) hosting, US company |
 | Plus Five Five, Inc. (Resend) | Sending session emails with calendar invites, when enabled | US company, sends through Amazon Web Services in the EU (Ireland) |
 
 Transfers to the USA rely on the EU–US Data Privacy Framework and the EU Standard Contractual Clauses.
 
-Everyone who has a group's share link can see that group's name, its player names, its scheduled dates, and its answers. That is how the Service works; see the Terms.
+When the location field suggests addresses, your browser sends what you type there and your IP address to Geoapify, whose operator is registered in Cyprus (EU) and which answers from data centers in the EU, with Cloudflare and Bunny CDN in the path.
+
+Everyone who has a group's share link can see that group's name, its player names, its scheduled dates with their time and place, and its answers. That is how the Service works; see the Terms.
 
 Your Google profile picture is shown only to you and to the GM of each group where your account has a player. People with a share link do not see it.
 
@@ -81,7 +89,9 @@ Your Google profile picture is shown only to you and to the GM of each group whe
 | Usage events and error reports in PostHog | 1 year |
 | Technical logs in PostHog | 14 days |
 | Your Google profile picture | Replaced or deleted at your next Google sign-in after you change or remove it at Google; deleted with your account |
-| Your account's pseudonymous profile in PostHog, and your email address for the welcome mail, tips, and session updates | Until your account is deleted |
+| Your calendar feed link | Until you reset it on My groups or your account is deleted |
+| Your reminder setting and reminder link | Until your account is deleted |
+| Your account's pseudonymous profile in PostHog, and your email address for the welcome mail, tips, session updates, and reminders | Until your account is deleted |
 
 When you save a group to an account, the group moves to the account and the temporary user ID is deleted.
 
@@ -92,6 +102,8 @@ You have the right of access (Art. 15), rectification (Art. 16), erasure (Art. 1
 **You may object to usage measurement at any time.** While the Service measures use, this page ends with a **Turn off usage measurement in this browser** button. Press it, and the Service sends no usage events, error reports, or technical logs from that browser. At your request, the Service remembers the choice in your browser's local storage, and the button becomes **Turn it back on**. If your browser does not let the Service remember the choice, it lasts until you reload the page or leave the site. Steps such as creating a link, joining, or scheduling are recorded on our servers, so the button does not cover them. To object to those, write to {{CONTACT_EMAIL}}; for an account, we then stop them for good.
 
 When session emails are enabled, you can stop them with the "Email me when a session is set or cancelled" switch on My groups, linked from each update. Sign in to change this account-wide preference. The switch also stops calendar invites, including the ones that move or remove a session. A session that an invite already put in your calendar app stays there until a later invite changes it or you delete it there. Session updates are transactional service messages; the tips unsubscribe does not control them. Session updates carry no open or click tracking.
+
+When reminders are on, you can stop them with the "Email me 1 day and 2 hours before a session" switch on My groups, or with the link in every reminder, which works without signing in. Neither touches session updates. Reminders are transactional service messages and carry no open or click tracking.
 
 You may withdraw your consent to the tips at any time, with the unsubscribe link in every tip or by replying to it. Mails sent before you withdraw stay lawful.
 

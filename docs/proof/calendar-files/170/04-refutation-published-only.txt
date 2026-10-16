@@ -1,0 +1,41 @@
+# published only refutation (feed): the witness with the break staged (accountFeed takes each Session's live state instead of its published state)
+
+--- a/convex/calendarFiles.ts
++++ b/convex/calendarFiles.ts
+@@ -89,7 +89,14 @@
+     const entries = await Promise.all(
+       groups.map(({ group, url }) => publishedEntriesOf(ctx, group, window, url, servedAt)),
+     );
+-    return feed(FEED_CALENDAR_NAME, entries.flat());
++    const live = await ctx.db.query("sessions").collect();
++    return feed(
++      FEED_CALENDAR_NAME,
++      entries.flat().map((entry) => {
++        const session = live.find((row) => entry.uid.startsWith(row._id));
++        return session?.state === "cancelled" ? { ...entry, status: "CANCELLED" as const } : entry;
++      }),
++    );
+   },
+ });
+ 
+
+refuted convex/published only (totality oracle): the Calendar feed took each Session's live state instead of its published state
+  the detector went red: 1 of 1 tests under "never announces a change before its Undo window ends" failed: never announces a change before its Undo window ends
+  recorded in .coherence/runs/6946ef87-57fc-489a-9874-7e21bbdf9fac.jsonl at 2026-10-16T10:55:09.790Z
+now restore the code and run: run — the refutation counts as witnessed once a later run finds the same totality oracle passing
+
+ FAIL  |convex| convex/sessionMail.test.ts > never announces a change before its Undo window ends
+AssertionError: expected 'CANCELLED' to be 'CONFIRMED' // Object.is equality
+
+Expected: "CONFIRMED"
+Received: "CANCELLED"
+
+ ❯ convex/sessionMail.test.ts:145:53
+    143|   expect(fetchMock).not.toHaveBeenCalled();
+    144|   expect(await downloadedCalendar()).toContain(`UID:${sessionId}@next-…
+    145|   expect(await feedStatusOf(account.as, sessionId)).toBe("CONFIRMED");
+       |                                                     ^
+    146|
+    147|   await wait(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯

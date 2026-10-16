@@ -4,22 +4,27 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { ConvexError } from "convex/values";
 import type { ComponentProps } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { track } from "../../lib/telemetry";
 import { MyGroups } from "./MyGroups";
-import type { MyGroups as MyGroupsData, PlayingGroup } from "./myGroups";
+import type { MyGroups as MyGroupsData, PlayingGroup, RunningGroup } from "./myGroups";
+
+const viewer = vi.hoisted(() => ({ timeZone: "Europe/Berlin" }));
 
 vi.mock(import("../../lib/telemetry"), async (original) => ({
   ...(await original()),
   track: vi.fn(),
 }));
+vi.mock("../../lib/timeZone", () => ({ browserTimeZone: () => viewer.timeZone }));
 
 beforeEach(() => {
   vi.mocked(track).mockReset();
+  viewer.timeZone = "Europe/Berlin";
 });
 
 const today = "2026-10-06";
@@ -35,7 +40,10 @@ const thursday: PlayingGroup = {
   playerId: "player-robin" as Id<"players">,
   playerName: "Robin",
   timeZone: "Europe/Berlin",
-  upcomingSessions: scheduled("2026-10-08", "2026-10-22"),
+  upcomingSessions: [
+    { date: "2026-10-08", state: "scheduled", ...USUAL, location: "Max's place" },
+    ...scheduled("2026-10-22"),
+  ],
   openDates: 12,
 };
 
@@ -50,17 +58,27 @@ const sunday: PlayingGroup = {
   openDates: 0,
 };
 
-const ownTable = {
+const ownTable: RunningGroup = {
   groupId: "group-own" as Id<"groups">,
   name: "Dragon Heist",
   timeZone: "Europe/Berlin",
-  upcomingSessions: scheduled("2026-10-10"),
+  upcomingSessions: [{ date: "2026-10-10", state: "scheduled", ...USUAL, startTime: "18:30" }],
 };
 
 const everything: MyGroupsData = { running: [ownTable], playing: [thursday, sunday] };
 
+const feedUrl = "https://next-session.link/cal/a/feedTokenFeedTokenAb.ics";
+
 function renderMyGroups(props: Partial<ComponentProps<typeof MyGroups>> = {}) {
-  const handlers = { onCreate: vi.fn(), onRemove: vi.fn(), onLogOut: vi.fn() };
+  const handlers = {
+    onCreate: vi.fn(),
+    onRemove: vi.fn(),
+    onLogOut: vi.fn(),
+    calendarFeed: {
+      subscribe: vi.fn(() => Promise.resolve(feedUrl)),
+      reset: vi.fn(() => Promise.resolve(feedUrl)),
+    },
+  };
   const rootRoute = createRootRoute({
     component: () => (
       <MyGroups
@@ -86,21 +104,31 @@ function section(name: string) {
 }
 
 describe("MyGroups", () => {
-  it("lists the next Sessions across Groups by date, each with its Group", async () => {
+  it("lists when and where the next Sessions are across Groups, each with its Group", async () => {
     renderMyGroups();
 
     await screen.findByRole("heading", { level: 1, name: "My groups" });
     const sessions = within(section("Next sessions")).getAllByRole("link");
     expect(sessions.map((link) => link.textContent)).toEqual([
-      "Thursday, October 8in 2 daysThursday Crew",
-      "Saturday, October 10in 4 daysDragon Heist",
-      "Thursday, October 22in 16 daysThursday Crew",
+      "Thursday, October 8in 2 days · 19:00–23:00Max's placeThursday Crew",
+      "Saturday, October 10in 4 days · 18:30–22:30Dragon Heist",
+      "Thursday, October 22in 16 days · 19:00–23:00Thursday Crew",
     ]);
     expect(sessions.map((link) => link.getAttribute("href"))).toEqual([
       "/s/thursdayTk",
       "/g/group-own",
       "/s/thursdayTk",
     ]);
+  });
+
+  it("names a Group's zone when the browser is elsewhere", async () => {
+    viewer.timeZone = "America/New_York";
+    renderMyGroups({ groups: { running: [ownTable], playing: [] } });
+
+    await screen.findByRole("heading", { level: 1, name: "My groups" });
+    expect(within(section("Next sessions")).getByRole("link").textContent).toBe(
+      "Saturday, October 10in 4 days · 18:30–22:30 Berlin timeDragon Heist",
+    );
   });
 
   it("marks a Cancelled Session in Next sessions and on its Group's card", async () => {
@@ -117,7 +145,7 @@ describe("MyGroups", () => {
     const sessions = within(section("Next sessions")).getAllByRole("link");
     expect(sessions.map((link) => link.textContent)).toEqual([
       "Thursday, October 8Cancelled · in 2 daysThursday Crew",
-      "Thursday, October 22in 16 daysThursday Crew",
+      "Thursday, October 22in 16 days · 19:00–23:00Thursday Crew",
     ]);
     expect(sessions.map((link) => link.getAttribute("href"))).toEqual([
       "/s/thursdayTk",
@@ -227,6 +255,121 @@ describe("MyGroups", () => {
 
     expect(await screen.findByText("Loading your groups")).toBeTruthy();
     expect(screen.queryByRole("region", { name: "You play in" })).toBeNull();
+  });
+});
+
+describe("Your calendar on My groups", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("subscribes on the press only, then offers the link to copy and to open in a calendar app", async () => {
+    const { calendarFeed } = renderMyGroups();
+
+    const block = await screen.findByRole("region", { name: "Your calendar" });
+    expect(calendarFeed.subscribe).not.toHaveBeenCalled();
+    await userEvent.click(
+      within(block).getByRole("button", { name: "Subscribe in your calendar app" }),
+    );
+
+    expect(calendarFeed.subscribe).toHaveBeenCalledOnce();
+    expect(
+      await within(block).findByRole("textbox", { name: "Calendar feed link" }),
+    ).toHaveProperty("value", feedUrl);
+    expect(within(block).getByRole("button", { name: "Copy link" })).toBeTruthy();
+    expect(within(block).getByText(/Other calendars → From URL/)).toBeTruthy();
+    expect(
+      within(block).getByRole("link", { name: "Open in calendar app" }).getAttribute("href"),
+    ).toBe("webcal://next-session.link/cal/a/feedTokenFeedTokenAb.ics");
+  });
+
+  it("moves focus to the new link after a keyboard press, so the next step is copying it", async () => {
+    renderMyGroups();
+    const block = await screen.findByRole("region", { name: "Your calendar" });
+    within(block).getByRole("button", { name: "Subscribe in your calendar app" }).focus();
+
+    await userEvent.keyboard("{Enter}");
+
+    const link = await within(block).findByRole("textbox", { name: "Calendar feed link" });
+    await waitFor(() => expect(document.activeElement).toBe(link));
+  });
+
+  it("moves focus to the new link after a keyboard reset", async () => {
+    const { calendarFeed } = renderMyGroups();
+    calendarFeed.reset.mockResolvedValueOnce(
+      "https://next-session.link/cal/a/newTokenNewTokenNewTo.ics",
+    );
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Subscribe in your calendar app" }),
+    );
+    (await screen.findByRole("button", { name: "Reset feed link" })).focus();
+
+    await userEvent.keyboard("{Enter}");
+
+    const link = await screen.findByDisplayValue(
+      "https://next-session.link/cal/a/newTokenNewTokenNewTo.ics",
+    );
+    await waitFor(() => expect(document.activeElement).toBe(link));
+  });
+
+  it("resets the link at once and shows the new one", async () => {
+    const newFeedUrl = "https://next-session.link/cal/a/newTokenNewTokenNewTo.ics";
+    const { calendarFeed } = renderMyGroups();
+    calendarFeed.reset.mockResolvedValueOnce(newFeedUrl);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Subscribe in your calendar app" }),
+    );
+    const block = screen.getByRole("region", { name: "Your calendar" });
+    expect(within(block).getByText("Stops the old link at once.")).toBeTruthy();
+
+    await userEvent.click(await within(block).findByRole("button", { name: "Reset feed link" }));
+
+    expect(calendarFeed.reset).toHaveBeenCalledOnce();
+    expect(await within(block).findByDisplayValue(newFeedUrl)).toBeTruthy();
+    expect(
+      within(block).getByRole("link", { name: "Open in calendar app" }).getAttribute("href"),
+    ).toBe("webcal://next-session.link/cal/a/newTokenNewTokenNewTo.ics");
+  });
+
+  it("copies the link and counts the copy", async () => {
+    const writeText = vi.fn(() => Promise.resolve());
+    vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText } });
+    renderMyGroups();
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Subscribe in your calendar app" }),
+    );
+    await userEvent.click(await screen.findByRole("button", { name: "Copy link" }));
+
+    expect(writeText).toHaveBeenCalledExactlyOnceWith(feedUrl);
+    expect(await screen.findByRole("button", { name: "Copied" })).toBeTruthy();
+    expect(track).toHaveBeenCalledExactlyOnceWith({
+      name: "calendar_feed_copied",
+      method: "clipboard",
+    });
+  });
+
+  it("says to wait an hour when the Account made too many new links, and keeps the old one shown", async () => {
+    const { calendarFeed } = renderMyGroups();
+    calendarFeed.reset.mockRejectedValueOnce(new ConvexError({ code: "RATE_LIMITED" }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Subscribe in your calendar app" }),
+    );
+
+    await userEvent.click(await screen.findByRole("button", { name: "Reset feed link" }));
+
+    expect((await screen.findByRole("alert")).textContent).toBe(
+      "Too many new links this hour. Try again in an hour.",
+    );
+    expect(screen.getByRole("textbox", { name: "Calendar feed link" })).toHaveProperty(
+      "value",
+      feedUrl,
+    );
+  });
+
+  it("is not offered to an Account with no Groups", async () => {
+    renderMyGroups({ groups: { running: [], playing: [] } });
+
+    await screen.findByText("Open your GM's link and tap Keep this group.");
+    expect(screen.queryByRole("region", { name: "Your calendar" })).toBeNull();
   });
 });
 

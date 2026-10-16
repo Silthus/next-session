@@ -241,8 +241,10 @@ async function sessionsOf(ctx: QueryCtx, group: Doc<"groups">) {
     .query("sessions")
     .withIndex("by_groupId_and_date", (q) => q.eq("groupId", group._id))
     .collect();
-  const timeAndPlace = sessionTimeAndPlace(group);
-  return sessions.map((session) => ({ ...datedSessionOf(session), ...timeAndPlace }));
+  return sessions.map((session) => ({
+    ...datedSessionOf(session),
+    ...sessionTimeAndPlace(group, session),
+  }));
 }
 
 async function answersOfPlayerIn(ctx: QueryCtx, playerId: Id<"players">, month: IsoMonth) {

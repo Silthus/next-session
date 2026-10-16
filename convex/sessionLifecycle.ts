@@ -1,17 +1,23 @@
 import { v, type Infer } from "convex/values";
 import type { IsoDate } from "../shared/dates";
-import { sessionWindow } from "../shared/sessionTime";
+import { DEFAULT_GROUP_TIME, sessionWindow } from "../shared/sessionTime";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx, type QueryCtx } from "./_generated/server";
-import type { SessionState } from "../shared/sessions";
+import { UNDO_WINDOW_MS, type SessionState } from "../shared/sessions";
 import type { publishedSession } from "./schema";
-import { sessionPublished } from "./sessionMail";
+import * as reminders from "./reminders";
+import * as sessionMail from "./sessionMail";
 import { fail } from "./model/errors";
-import { groupTimeOf, locationOf } from "./model/timeAndPlace";
+import {
+  groupTimeOf,
+  sessionLocationOf,
+  sessionOverridesOf,
+  type SessionDetailChanges,
+} from "./model/timeAndPlace";
 import { upcomingSessions } from "./model/upcomingSessions";
 
-export const UNDO_WINDOW_MS = 30_000;
+const SETTLE_DEADLINE_MS = 2 * UNDO_WINDOW_MS;
 const SNAPSHOT_FIELDS = ["state", "start", "end", "location", "summary"] as const;
 
 type PublishedSession = Infer<typeof publishedSession>;
@@ -40,17 +46,41 @@ export async function groupChanged(ctx: MutationCtx, group: Doc<"groups">) {
   for (const session of upcoming.filter(isScheduled)) await recordChange(ctx, session._id);
 }
 
-export function snapshotOf(
+export async function updateSessionDetails(
+  ctx: MutationCtx,
+  session: Doc<"sessions">,
+  changes: SessionDetailChanges,
+) {
+  await recordChange(ctx, session._id, changes);
+}
+
+function snapshotOf(
   group: Doc<"groups">,
   session: Doc<"sessions">,
   state: SessionState,
 ): SessionSnapshot {
   return {
     state,
-    ...sessionWindow(session.date, groupTimeOf(group)),
-    ...locationOf(group),
+    ...sessionWindow(session.date, groupTimeOf(group), sessionOverridesOf(session)),
+    ...sessionLocationOf(group, session),
     summary: group.name,
   };
+}
+
+export function widenedSnapshot(
+  group: Doc<"groups">,
+  session: Doc<"sessions">,
+  published: PublishedSession,
+): PublishedSession {
+  return { ...snapshotBeforeTimeAndPlace(group, session, published.state), ...published };
+}
+
+function snapshotBeforeTimeAndPlace(
+  group: Doc<"groups">,
+  session: Doc<"sessions">,
+  state: SessionState,
+): SessionSnapshot {
+  return { state, ...sessionWindow(session.date, DEFAULT_GROUP_TIME), summary: group.name };
 }
 
 export const settle = internalMutation({
@@ -62,17 +92,23 @@ export const settle = internalMutation({
     const group = await ctx.db.get("groups", session.groupId);
     if (group === null) return null;
     const snapshot = snapshotOf(group, session, stateOf(session));
-    const previous = session.published;
+    const previous = session.published && widenedSnapshot(group, session, session.published);
     if (previous !== undefined && isPublishedAs(previous, snapshot)) return null;
     const published = { ...snapshot, revision: (previous?.revision ?? 0) + 1 };
     await ctx.db.patch("sessions", sessionId, { published });
-    await sessionPublished(ctx, { ...session, published }, previous);
+    const settled = { ...session, published };
+    await sessionMail.sessionPublished(ctx, settled, previous);
+    await reminders.sessionPublished(ctx, settled, group);
     return null;
   },
 });
 
 function isPublishedAs(published: PublishedSession, snapshot: SessionSnapshot) {
   return SNAPSHOT_FIELDS.every((field) => published[field] === snapshot[field]);
+}
+
+export function isSettling(session: Doc<"sessions">) {
+  return session.changedAt !== undefined && Date.now() - session.changedAt <= SETTLE_DEADLINE_MS;
 }
 
 export function stateOf(session: Doc<"sessions">): SessionState {
@@ -93,7 +129,7 @@ async function sessionOn(ctx: QueryCtx, groupId: Id<"groups">, date: IsoDate) {
 async function recordChange(
   ctx: MutationCtx,
   sessionId: Id<"sessions">,
-  change: { state?: SessionState } = {},
+  change: { state?: SessionState } & SessionDetailChanges = {},
 ) {
   const changedAt = Date.now();
   await ctx.db.patch("sessions", sessionId, { ...change, changedAt });

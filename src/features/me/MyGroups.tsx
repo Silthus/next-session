@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react";
 import type { IsoDate } from "../../../shared/dates";
 import { track } from "../../lib/telemetry";
+import { timeRange } from "../../lib/timeAndPlace";
 import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
 import { IconMore, IconStar, IconStarCancelled } from "../../ui/icons";
@@ -22,9 +23,11 @@ import {
   type RunningGroup,
   type UpcomingSession,
 } from "./myGroups";
+import { YourCalendar, type CalendarFeedActions } from "./YourCalendar";
 
 type MyGroupsProps = {
   settings?: ReactNode;
+  calendarFeed: CalendarFeedActions;
   email: string | undefined;
   image?: string;
   groups: MyGroupsData | undefined;
@@ -40,6 +43,7 @@ const cardClassName = `rounded-xl border border-line bg-surface shadow-card tran
 
 export function MyGroups({
   settings,
+  calendarFeed,
   email,
   image,
   groups,
@@ -73,6 +77,9 @@ export function MyGroups({
             <PlayingGroups groups={groups.playing} onRemove={onRemove} />
           )}
           <RunningGroups groups={groups.running} creating={creating} onCreate={onCreate} />
+          <Section title="Your calendar">
+            <YourCalendar calendarFeed={calendarFeed} />
+          </Section>
         </>
       )}
       {settings}
@@ -130,16 +137,21 @@ function NextSessions({ groups, today }: { groups: MyGroupsData; today: IsoDate 
               <GroupPageLink
                 to={session.to}
                 className={cn(
-                  "flex items-center gap-3 rounded-md border px-3 py-2.5",
+                  "flex items-start gap-3 rounded-md border px-3 py-2.5",
                   session.cancelled
                     ? `border-line bg-surface ${hoverRow}`
                     : `border-accent/40 bg-accent-soft/50 hover:border-accent hover:bg-accent-soft ${pressable}`,
                 )}
               >
-                <SessionStar cancelled={session.cancelled} className="size-5 shrink-0" />
+                <SessionStar cancelled={session.cancelled} className="mt-0.5 size-5 shrink-0" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold">{longDayLabel(session.date)}</span>
-                  <span className="block text-xs text-ink-3">{whenOf(session, today)}</span>
+                  <SessionWhen session={session} today={today} />
+                  {!session.cancelled && session.location && (
+                    <span className="mt-0.5 block text-sm [overflow-wrap:anywhere] text-ink-2">
+                      {session.location}
+                    </span>
+                  )}
                 </span>
                 <span className="max-w-[45%] truncate text-sm font-medium text-ink-2">
                   {session.groupName}
@@ -287,9 +299,20 @@ function SessionStar({ cancelled, className }: { cancelled: boolean; className: 
   return <IconStar className={cn(className, "text-accent-strong")} />;
 }
 
-function whenOf(session: UpcomingSession, today: IsoDate) {
+function SessionWhen({ session, today }: { session: UpcomingSession; today: IsoDate }) {
   const when = relativeDay(session.date, today);
-  return session.cancelled ? `Cancelled · ${when}` : when;
+  return (
+    <span className="block text-xs text-ink-3">
+      {session.cancelled ? (
+        `Cancelled · ${when}`
+      ) : (
+        <>
+          {`${when} · `}
+          <span className="font-mono">{timeRange(session.time)}</span>
+        </>
+      )}
+    </span>
+  );
 }
 
 function NextSession({ sessions }: { sessions: GroupSession[] }) {

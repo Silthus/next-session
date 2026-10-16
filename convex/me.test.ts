@@ -3,6 +3,7 @@ import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
   CANCELLED,
+  expectErrorCode,
   type GmClient,
   newBackend,
   seedSession,
@@ -262,5 +263,196 @@ describe("me.groups", () => {
     for (const wrongClock of ["2026-10-05", "2026-09-01", "2026-13-01", "today"]) {
       expect(await upcomingAsOf(wrongClock)).toEqual(scheduled(TODAY));
     }
+  });
+});
+
+const notificationSettings = (as: GmClient | TestBackend) =>
+  as.query(api.me.notificationSettings, {});
+
+function configureReminders() {
+  vi.stubEnv("POSTHOG_MAIL_WEBHOOK_SECRET", "mail-webhook-secret");
+  vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "https://webhooks.example.test/reminders");
+}
+
+describe("me.notificationSettings", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("is null for a visitor and an Anonymous GM", async () => {
+    const anonymousGm = await signInAnonymousGm(t);
+
+    expect(await notificationSettings(t)).toBeNull();
+    expect(await notificationSettings(anonymousGm.as)).toBeNull();
+  });
+
+  it("hides Reminders while they are not configured", async () => {
+    const account = await signInAccount(t);
+
+    expect(await notificationSettings(account.as)).toEqual({
+      sessionEmails: true,
+      reminders: null,
+    });
+  });
+
+  it.each(["POSTHOG_REMINDER_WEBHOOK_URL", "POSTHOG_MAIL_WEBHOOK_SECRET"])(
+    "hides Reminders without %s",
+    async (variable) => {
+      configureReminders();
+      vi.stubEnv(variable, "");
+      const account = await signInAccount(t);
+
+      expect((await notificationSettings(account.as))?.reminders).toBeNull();
+    },
+  );
+
+  it("reads Reminders as on by default once they are configured", async () => {
+    configureReminders();
+    const account = await signInAccount(t);
+
+    expect(await notificationSettings(account.as)).toEqual({
+      sessionEmails: true,
+      reminders: true,
+    });
+  });
+});
+
+describe("me.setReminders", () => {
+  beforeEach(configureReminders);
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("turns only the caller's Reminders off and back on, leaving Session updates alone", async () => {
+    const account = await signInAccount(t);
+    const other = await signInAccount(t);
+
+    await account.as.mutation(api.me.setReminders, { enabled: false });
+
+    expect(await notificationSettings(account.as)).toEqual({
+      sessionEmails: true,
+      reminders: false,
+    });
+    expect((await notificationSettings(other.as))?.reminders).toBe(true);
+
+    await account.as.mutation(api.me.setReminders, { enabled: true });
+
+    expect((await notificationSettings(account.as))?.reminders).toBe(true);
+  });
+
+  it("leaves Reminders alone when Session updates are turned off", async () => {
+    const account = await signInAccount(t);
+
+    await account.as.mutation(api.me.setSessionEmails, { enabled: false });
+
+    expect(await notificationSettings(account.as)).toEqual({
+      sessionEmails: false,
+      reminders: true,
+    });
+  });
+
+  it("refuses a visitor and an Anonymous GM", async () => {
+    const anonymousGm = await signInAnonymousGm(t);
+
+    await expectErrorCode(t.mutation(api.me.setReminders, { enabled: false }), "UNAUTHENTICATED");
+    await expectErrorCode(
+      anonymousGm.as.mutation(api.me.setReminders, { enabled: false }),
+      "UNAUTHENTICATED",
+    );
+  });
+});
+
+describe("the Calendar feed link", () => {
+  const SITE_URL = "https://next-session.test";
+  const FEED_URL = new RegExp(`^${SITE_URL}/cal/a/[A-Za-z0-9_-]{22}\\.ics$`);
+  const CALENDAR_FEED_CALLS_PER_HOUR = 10;
+
+  beforeEach(() => {
+    vi.stubEnv("SITE_URL", SITE_URL);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  const calendarFeed = (as: GmClient) => as.mutation(api.me.calendarFeed, {});
+  const resetCalendarFeed = (as: GmClient) => as.mutation(api.me.resetCalendarFeed, {});
+
+  it("is minted on the first call and the same on every call after", async () => {
+    const { as } = await signInAccount(t);
+
+    const first = await calendarFeed(as);
+
+    expect(first.url).toMatch(FEED_URL);
+    expect(await calendarFeed(as)).toEqual(first);
+  });
+
+  it("is a different link for each Account", async () => {
+    const ours = await calendarFeed((await signInAccount(t)).as);
+    const theirs = await calendarFeed((await signInAccount(t)).as);
+
+    expect(ours).not.toEqual(theirs);
+  });
+
+  it("is replaced by a reset, which later calls keep returning", async () => {
+    const { as } = await signInAccount(t);
+    const before = await calendarFeed(as);
+
+    const reset = await resetCalendarFeed(as);
+
+    expect(reset.url).toMatch(FEED_URL);
+    expect(reset).not.toEqual(before);
+    expect(await calendarFeed(as)).toEqual(reset);
+  });
+
+  it("is minted by a reset when the Account had none", async () => {
+    const { as } = await signInAccount(t);
+
+    const reset = await resetCalendarFeed(as);
+
+    expect(reset.url).toMatch(FEED_URL);
+    expect(await calendarFeed(as)).toEqual(reset);
+  });
+
+  it("is refused to a visitor and an Anonymous GM", async () => {
+    const anonymousGm = await signInAnonymousGm(t);
+
+    for (const as of [t, anonymousGm.as]) {
+      await expectErrorCode(as.mutation(api.me.calendarFeed, {}), "UNAUTHENTICATED");
+      await expectErrorCode(as.mutation(api.me.resetCalendarFeed, {}), "UNAUTHENTICATED");
+    }
+  });
+
+  it("is shown again however often the Account asks for the link it already has", async () => {
+    const { as } = await signInAccount(t);
+    const first = await calendarFeed(as);
+
+    for (let call = 0; call < CALENDAR_FEED_CALLS_PER_HOUR * 2; call++) {
+      expect(await calendarFeed(as)).toEqual(first);
+    }
+  });
+
+  it("is not replaced once the Account spent its new links for the hour, and only for that Account", async () => {
+    const spent = await signInAccount(t);
+    const other = await signInAccount(t);
+    let current = await calendarFeed(spent.as);
+    for (let call = 1; call < CALENDAR_FEED_CALLS_PER_HOUR; call++) {
+      current = await resetCalendarFeed(spent.as);
+    }
+
+    await expectErrorCode(resetCalendarFeed(spent.as), "RATE_LIMITED");
+    expect(await calendarFeed(spent.as)).toEqual(current);
+    expect((await resetCalendarFeed(other.as)).url).toMatch(FEED_URL);
+  });
+
+  it("is replaced again an hour later", async () => {
+    const { as } = await signInAccount(t);
+    for (let call = 0; call < CALENDAR_FEED_CALLS_PER_HOUR; call++) await resetCalendarFeed(as);
+    await expectErrorCode(resetCalendarFeed(as), "RATE_LIMITED");
+
+    vi.setSystemTime(NOW + 60 * 60_000);
+
+    expect((await resetCalendarFeed(as)).url).toMatch(FEED_URL);
   });
 });

@@ -1,0 +1,73 @@
+# green: the same #154 tests on the ticket branch, every assertion intact, none skipped
+
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > lists upcoming Sessions soonest first with how far away they are and their time 470ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > asks when and where the Group plays until the GM saves it once 405ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > sums up the saved time and place in one line with Edit 21ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > names the Group's zone when the GM's browser is elsewhere 20ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > says when the next Session is 14ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > says when the next Session is 18ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > selects a Session's day 99ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > folds played Sessions away, latest first 40ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > leaves Cancelled Sessions out of both upcoming and played 296ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > explains that nothing is scheduled 53ms
+ ✓ |ui| src/lib/timeAndPlace.test.ts > timeRange > shows the start and the wall-clock end in the Group's time 61ms
+ ✓ |ui| src/lib/timeAndPlace.test.ts > timeRange > wraps past midnight 6ms
+ ✓ |ui| src/lib/timeAndPlace.test.ts > timeRange > names the Group's zone when the viewer is somewhere else 1ms
+ ✓ |ui| src/lib/timeAndPlace.test.ts > timeRange > treats two names for the same zone as the same place 5ms
+ ✓ |ui| src/lib/timeAndPlace.test.ts > zoneName > calls Europe/Berlin by its city 0ms
+ ✓ |ui| src/lib/timeAndPlace.test.ts > zoneName > calls America/Argentina/Buenos_Aires by its city 0ms
+ ✓ |ui| src/lib/timeAndPlace.test.ts > zoneName > calls UTC by its city 0ms
+ ✓ |ui| src/features/group/useToast.test.ts > useToast > dismisses on demand 9ms
+ ✓ |ui| src/features/group/useToast.test.ts > useToast > shows one toast at a time, the latest, for five seconds 84ms
+ ✓ |ui| src/features/group/useToast.test.ts > useToast > shows a toast handed off from another page of the same Group once 5ms
+ ✓ |ui| src/features/group/useToast.test.ts > useToast > keeps a held toast, and lets it go five seconds after release 12ms
+ ✓ |ui| src/features/group/useToast.test.ts > useToast > does not carry a hold over to the next toast 9ms
+ ✓ |ui| src/features/group/useToast.test.ts > useToast > keeps a Group's toast to that Group, even when it arrives late 7ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > opens on 19:00 for 4 hours in Berlin time for a Group never saved 339ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > opens with what the GM saved 34ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > is the page heading and lists every Group with its Players 1052ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > opens another Group and closes 56ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > moves the end time and the preview as soon as the start or the length changes 129ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > never lets the start time go empty 19ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > opens Time and place next to Rename and Delete, and closes 59ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > marks Time and place New until the GM has saved it once 36ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > makes a new Group 40ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > shows the place in the preview as it is typed 94ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > lists who is free first, then maybe, busy and silent 343ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > schedules a bookable night 50ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > says what players' calendars will show right above Schedule session 44ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > makes one new Group however often the menu is reopened meanwhile 82ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > changes the zone from a searchable list and names it in the preview 123ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > names the Group's zone in the line when the GM's browser is elsewhere 13ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > shows the time a Cancelled Session comes back with 14ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > leaves the line off a scheduled Session 12ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > leaves the line off a past night 12ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > cancels a Session that has not passed 47ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > says why a new Group failed 65ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > still says why a new Group failed after the menu was closed meanwhile 68ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > lists the cities that start with what the GM typed first 96ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > keeps the zone when the GM backs out of the list 95ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > still cancels a Session today 54ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > marks a Cancelled Session and schedules it again 30ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > keeps a past Cancelled Session marked and read-only 13ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > offers no cancel on a past Session 10ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > cannot schedule a past night 10ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > forgets a failure the GM has seen once the menu closes 62ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > holds the button, and its focus, while the change is on its way 27ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > goes back to the overview 23ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > explains an empty Roster 12ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > says that saving moves upcoming Sessions 14ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > forgets a seen failure when the GM turns to renaming 77ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > holds Delete while a new Group is on its way 57ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > saves exactly the page's values once 156ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > renames the Group inline with Enter 94ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > cancels a rename with Escape and returns focus to the switcher 39ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > shows INVALID_SETTINGS inline and keeps the values 99ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > shows RATE_LIMITED inline and keeps the values 108ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > refuses a blank name 47ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > deletes the Group after a confirm that names what is lost 111ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > stays open when focus drops to the page, and Escape still closes it 22ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > offers delete only once it can name what is lost 18ms
+ ✓ |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > closes the menu with Escape or a click outside 35ms
+ Test Files  6 passed (6)
+      Tests  69 passed (69)
