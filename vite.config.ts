@@ -34,5 +34,6 @@ export default defineConfig({
       }
     : {}),
   envPrefix: ["VITE_", "LEGAL_"],
+  server: { allowedHosts: [".coder.dev.posthog.dev"] },
   build: { target: "es2022" },
 });

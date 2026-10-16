@@ -16,6 +16,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TipsRouteImport } from './routes/tips'
 import { Route as GGroupIdRouteImport } from './routes/g.$groupId'
+import { Route as PrototypeCalendarPromptRouteImport } from './routes/prototype.calendar-prompt'
 import { Route as SShareTokenRouteImport } from './routes/s.$shareToken'
 
 const IndexRoute = IndexRouteImport.update({
@@ -53,6 +54,11 @@ const GGroupIdRoute = GGroupIdRouteImport.update({
   path: '/g/$groupId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrototypeCalendarPromptRoute = PrototypeCalendarPromptRouteImport.update({
+  id: '/prototype/calendar-prompt',
+  path: '/prototype/calendar-prompt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SShareTokenRoute = SShareTokenRouteImport.update({
   id: '/s/$shareToken',
   path: '/s/$shareToken',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/tips': typeof TipsRoute
   '/g/$groupId': typeof GGroupIdRoute
+  '/prototype/calendar-prompt': typeof PrototypeCalendarPromptRoute
   '/s/$shareToken': typeof SShareTokenRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/tips': typeof TipsRoute
   '/g/$groupId': typeof GGroupIdRoute
+  '/prototype/calendar-prompt': typeof PrototypeCalendarPromptRoute
   '/s/$shareToken': typeof SShareTokenRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/tips': typeof TipsRoute
   '/g/$groupId': typeof GGroupIdRoute
+  '/prototype/calendar-prompt': typeof PrototypeCalendarPromptRoute
   '/s/$shareToken': typeof SShareTokenRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tips'
     | '/g/$groupId'
+    | '/prototype/calendar-prompt'
     | '/s/$shareToken'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tips'
     | '/g/$groupId'
+    | '/prototype/calendar-prompt'
     | '/s/$shareToken'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/tips'
     | '/g/$groupId'
+    | '/prototype/calendar-prompt'
     | '/s/$shareToken'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   TipsRoute: typeof TipsRoute
   GGroupIdRoute: typeof GGroupIdRoute
+  PrototypeCalendarPromptRoute: typeof PrototypeCalendarPromptRoute
   SShareTokenRoute: typeof SShareTokenRoute
 }
 
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GGroupIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/prototype/calendar-prompt': {
+      id: '/prototype/calendar-prompt'
+      path: '/prototype/calendar-prompt'
+      fullPath: '/prototype/calendar-prompt'
+      preLoaderRoute: typeof PrototypeCalendarPromptRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/s/$shareToken': {
       id: '/s/$shareToken'
       path: '/s/$shareToken'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   TipsRoute: TipsRoute,
   GGroupIdRoute: GGroupIdRoute,
+  PrototypeCalendarPromptRoute: PrototypeCalendarPromptRoute,
   SShareTokenRoute: SShareTokenRoute,
 }
 export const routeTree = rootRouteImport

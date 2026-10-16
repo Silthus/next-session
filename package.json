@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "test": "vitest",
     "e2e": "bun scripts/e2e-run.ts",
-    "e2e:prod": "playwright test --config playwright.prod.config.ts"
+    "e2e:prod": "playwright test --config playwright.prod.config.ts",
+    "prototype": "VITE_CONVEX_URL=${VITE_CONVEX_URL:-https://prototype-only-123.convex.cloud} vite --open /prototype/calendar-prompt"
   },
   "dependencies": {
     "@auth/core": "0.41.3",

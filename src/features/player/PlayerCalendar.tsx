@@ -61,6 +61,8 @@ export function PlayerCalendar({
   onHintToggle,
   keepGroup,
   accountControl,
+  aboveProgress,
+  doneCard,
 }: {
   groupId: string;
   groupName: string;
@@ -77,6 +79,8 @@ export function PlayerCalendar({
   onHintToggle: () => void;
   keepGroup?: ReactNode;
   accountControl?: ReactNode;
+  aboveProgress?: ReactNode;
+  doneCard?: (done: DoneSlot) => ReactNode;
 }) {
   const view = playerMonth({ month, today, answers: answers ?? {}, sessionDates });
   const [taps, setTaps] = useState(0);
@@ -196,6 +200,7 @@ export function PlayerCalendar({
       </header>
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5">
+        {aboveProgress}
         {!view.readOnly &&
           (loaded ? (
             <div className="rounded-xl border border-line bg-surface p-3.5 shadow-card">
@@ -218,7 +223,9 @@ export function PlayerCalendar({
         {!view.readOnly && !loaded && <Skeleton className="h-14 rounded-xl" />}
         {!view.readOnly &&
           loaded &&
-          (view.done ? (
+          (view.done && doneCard ? (
+            doneCard({ month, nextMonth: view.nextMonth, onFillNextMonth: fillNextMonth })
+          ) : view.done ? (
             <DoneCard
               month={month}
               nextMonth={view.nextMonth}
@@ -475,16 +482,24 @@ function FirstVisitHint({ id, column }: { id: string; column: number }) {
   );
 }
 
-function DoneCard({
+export type DoneSlot = {
+  month: IsoMonth;
+  nextMonth: IsoMonth | null;
+  onFillNextMonth: (month: IsoMonth) => void;
+};
+
+export function DoneCard({
   month,
   nextMonth,
   headingRef,
   onFillNextMonth,
+  children,
 }: {
   month: IsoMonth;
   nextMonth: IsoMonth | null;
-  headingRef: RefObject<HTMLParagraphElement | null>;
+  headingRef?: RefObject<HTMLParagraphElement | null>;
   onFillNextMonth: (month: IsoMonth) => void;
+  children?: ReactNode;
 }) {
   return (
     <div
@@ -499,6 +514,7 @@ function DoneCard({
         {nextMonth ? `All set for ${monthName(month)} ✓` : "All set for now ✓"}
       </p>
       <p className="text-sm text-ink-2">Your GM sees it already.</p>
+      {children}
       {nextMonth && (
         <Button
           variant="free"
