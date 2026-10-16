@@ -1,0 +1,85 @@
+# curl of the Calendar download through the local dev stack (Vite /cal proxy -> local Convex site), on 9aa78ae. $APP is the local web origin, which is also SITE_URL. The Share Token is redacted.
+
+# GM: renamed to Thursday Crew, Time and place 19:30 for 3.5 hours Berlin time at Max's place, back room; scheduled 2026-10-24 and 2026-11-07 just now
+# inside the first Undo window: an empty calendar
+$ curl -sS -i $APP/cal/s/<shareToken>.ics
+HTTP/1.1 200 OK
+Vary: Origin
+content-type: text/calendar; charset=utf-8
+cache-control: private, max-age=900
+content-disposition: attachment; filename="next-session.ics"
+content-length: 200
+connection: close
+date: Fri, 16 Oct 2026 10:42:43 GMT
+
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Next Session//next-session.link//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Thursday Crew
+REFRESH-INTERVAL;VALUE=DURATION:PT1H
+X-PUBLISHED-TTL:PT1H
+END:VCALENDAR
+
+# after the Undo window: both nights, UTC times (CEST, then CET)
+$ curl -sS -i $APP/cal/s/<shareToken>.ics
+HTTP/1.1 200 OK
+Vary: Origin
+content-type: text/calendar; charset=utf-8
+cache-control: private, max-age=900
+content-disposition: attachment; filename="next-session.ics"
+content-length: 940
+connection: close
+date: Fri, 16 Oct 2026 10:43:15 GMT
+
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Next Session//next-session.link//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Thursday Crew
+REFRESH-INTERVAL;VALUE=DURATION:PT1H
+X-PUBLISHED-TTL:PT1H
+BEGIN:VEVENT
+UID:kn7a7j8wvjnp085cwzkfwgryy18gd688@next-session.link
+SEQUENCE:0
+DTSTAMP:20261016T104315Z
+DTSTART:20261024T173000Z
+DTEND:20261024T210000Z
+SUMMARY:Thursday Crew
+LOCATION:Max's place\, back room
+DESCRIPTION:Open the group on Next Session: $APP/s/<shareToken> (folded at 75 octets)
+URL:$APP/s/<shareToken>
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:kn750k4dkp2d54njpaygmh8jdx8gdr8m@next-session.link
+SEQUENCE:0
+DTSTAMP:20261016T104315Z
+DTSTART:20261107T183000Z
+DTEND:20261107T220000Z
+SUMMARY:Thursday Crew
+LOCATION:Max's place\, back room
+DESCRIPTION:Open the group on Next Session: $APP/s/<shareToken> (folded at 75 octets)
+URL:$APP/s/<shareToken>
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR
+
+# an unknown token
+$ curl -sS -i $APP/cal/s/UnknownTok.ics
+HTTP/1.1 404 Not Found
+Vary: Origin
+connection: close
+date: Fri, 16 Oct 2026 10:43:15 GMT
+Content-Length: 0
+
+
+# the old token right after a rotation, inside the rotation's Undo
+$ curl -sS -i $APP/cal/s/<shareToken>.ics
+HTTP/1.1 404 Not Found
+Vary: Origin
+connection: close
+date: Fri, 16 Oct 2026 10:43:15 GMT
+Content-Length: 0
+
+
