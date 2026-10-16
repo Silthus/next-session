@@ -3,13 +3,16 @@ import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { isTestAddress } from "./telemetry";
 
-export async function calendarRecipients(ctx: QueryCtx, group: Doc<"groups">) {
+export async function claimedAccountIds(ctx: QueryCtx, groupId: Id<"groups">) {
   const players = await ctx.db
     .query("players")
-    .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", group._id))
+    .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", groupId))
     .take(MAX_PLAYERS_PER_GROUP);
-  const claimants = players.flatMap((player) => (player.userId ? [player.userId] : []));
-  return [...new Set([group.ownerId, ...claimants])];
+  return [...new Set(players.flatMap((player) => (player.userId ? [player.userId] : [])))];
+}
+
+export async function calendarRecipients(ctx: QueryCtx, group: Doc<"groups">) {
+  return [...new Set([group.ownerId, ...(await claimedAccountIds(ctx, group._id))])];
 }
 
 export async function isCalendarRecipient(
@@ -33,15 +36,12 @@ export async function isInCalendarRecipientSet(
   return group !== null && (await isCalendarRecipient(ctx, group, userId));
 }
 
-export type SessionMailAccount = Doc<"users"> & { email: string };
+export type MailableAccount = Doc<"users"> & { email: string };
 
-export function receivesSessionMail(account: Doc<"users"> | null): account is SessionMailAccount {
-  return (
-    account !== null &&
-    account.sessionEmailsEnabled !== false &&
-    account.isAnonymous !== true &&
-    account.email !== undefined &&
-    account.email !== "" &&
-    !isTestAddress(account.email)
-  );
+export function isMailable(account: Doc<"users">): account is MailableAccount {
+  return account.isAnonymous !== true && !!account.email && !isTestAddress(account.email);
+}
+
+export function receivesSessionMail(account: Doc<"users"> | null): account is MailableAccount {
+  return account !== null && account.sessionEmailsEnabled !== false && isMailable(account);
 }

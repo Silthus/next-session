@@ -72,6 +72,13 @@ async function scheduleNights({ as, groupId }: Crew, dates = ["2026-10-17", "202
   await finish();
 }
 
+async function scheduleNightIds({ as, groupId }: Crew, dates: string[]) {
+  const ids = [];
+  for (const date of dates) ids.push(await as.mutation(api.sessions.schedule, { groupId, date }));
+  await finish();
+  return ids;
+}
+
 async function finish() {
   for (let step = 0; step < 8; step++) {
     await vi.advanceTimersByTimeAsync(UNDO_WINDOW_MS + 1);
@@ -155,12 +162,36 @@ describe("deleting a Group", () => {
     }
   });
 
-  it("cancels nothing that is not an upcoming published scheduled Session", async () => {
+  it("cancels a night whose cancel was published but had not reached the calendars yet", async () => {
+    const gm = await crew();
+    const { as, groupId } = gm;
+    const [sessionId] = await scheduleNightIds(gm, ["2026-10-17"]);
+    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+      const body = init?.body as string;
+      sent.push({ url: urlOf(input), at: Date.now(), body });
+      return Promise.resolve(
+        new Response(null, { status: body.includes("cancelled") ? 503 : 200 }),
+      );
+    });
+    await as.mutation(api.sessions.cancel, { sessionId: sessionId! });
+    await vi.advanceTimersByTimeAsync(UNDO_WINDOW_MS + 1);
+    await t.finishInProgressScheduledFunctions();
+    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+      sent.push({ url: urlOf(input), at: Date.now(), body: init?.body as string });
+      return Promise.resolve(new Response(null, { status: 200 }));
+    });
+    sent = [];
+
+    await as.mutation(api.groups.remove, { groupId });
+    await finish();
+
+    expect(mailsTo(ROBIN).map(({ text }) => text.split("\n")[0])).toEqual([
+      "Thursday Crew was deleted, so its session on Saturday, October 17, 2026 is off.",
+    ]);
+  });
+
+  it("cancels nothing that is past or was never published", async () => {
     const { as, groupId } = await crew();
-    const cancelled = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
-    await finish();
-    await as.mutation(api.sessions.cancel, { sessionId: cancelled });
-    await finish();
     await seedSession(t, groupId, "2026-10-01", {
       published: {
         state: "scheduled",

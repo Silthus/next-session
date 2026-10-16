@@ -1,6 +1,5 @@
 import { type Infer, v } from "convex/values";
 import { invite, sessionUid } from "../shared/icalendar";
-import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
 import {
@@ -10,6 +9,7 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import {
+  CALENDAR_ADDRESS,
   calendarMailConfigured,
   calendarMessage,
   calendarSend,
@@ -23,19 +23,24 @@ import {
 } from "./mail";
 import {
   calendarRecipients,
+  claimedAccountIds,
   isCalendarRecipient,
   isInCalendarRecipientSet,
   receivesSessionMail,
-  type SessionMailAccount,
+  type MailableAccount,
 } from "./model/recipients";
-import { sessionMailCopy, type MailCopy, type SessionChange } from "./model/sessionMailCopy";
+import {
+  dateLabel,
+  sessionMailCopy,
+  type MailCopy,
+  type SessionChange,
+} from "./model/sessionMailCopy";
 import { shareLinkOf, siteLink } from "./model/siteLinks";
 import { accountDistinctId, PRODUCT } from "./model/telemetry";
 import { groupTimeOf } from "./model/timeAndPlace";
 import { upcomingSessions } from "./model/upcomingSessions";
 import { frozenEntry } from "./schema";
 
-const CALENDAR_ADDRESS = "calendar@next-session.link";
 const CANCELLATION_BATCH_SIZE = 200;
 
 type Published = NonNullable<Doc<"sessions">["published"]>;
@@ -46,7 +51,7 @@ type CalendarMessage = Infer<typeof calendarMessage>;
 type FrozenEntry = Infer<typeof frozenEntry>;
 type RecipientSetMember = { groupId: Id<"groups">; userId: Id<"users"> };
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
-type NightRound = DistributiveOmit<NightSend, "sessionId" | "userId" | "stamp">;
+type NightRound = DistributiveOmit<NightSend, "sessionId" | "userId" | "stamp" | "timeZone">;
 
 export async function sessionPublished(
   ctx: MutationCtx,
@@ -68,7 +73,7 @@ async function broadcast(
   const change = changeOf(previous, published);
   const group = await ctx.db.get("groups", session.groupId);
   if (change === null || group === null) return;
-  const sequence = await raiseSequence(ctx, session);
+  const sequence = await startWholeRound(ctx, session);
   const { revision } = published;
   const sends = await roundOf(ctx, session, group, {
     kind: "broadcast",
@@ -79,13 +84,14 @@ async function broadcast(
   await requestCalendarMails(ctx, sends);
 }
 
-export async function inviteRoundOf(ctx: QueryCtx, session: Doc<"sessions">) {
+export async function setRoundOf(ctx: QueryCtx, session: Doc<"sessions">) {
   const { published } = session;
   const group = await ctx.db.get("groups", session.groupId);
   if (published?.state !== "scheduled" || group === null) return [];
   const { revision } = published;
   return await roundOf(ctx, session, group, {
-    kind: "invite",
+    kind: "broadcast",
+    change: "set",
     revision,
     sequence: nextSequence(session),
   });
@@ -98,15 +104,26 @@ async function roundOf(
   round: NightRound,
 ) {
   const stamp = Date.now();
+  const { timeZone } = groupTimeOf(group);
   const sends: NightSend[] = [];
   for (const userId of await calendarRecipients(ctx, group)) {
-    const send = { ...round, sessionId: session._id, userId, stamp };
-    if (await nightTarget(ctx, send)) sends.push(send);
+    if (receivesSessionMail(await ctx.db.get("users", userId)))
+      sends.push({ ...round, sessionId: session._id, userId, stamp, timeZone });
   }
   return sends;
 }
 
-export async function raiseSequence(ctx: MutationCtx, session: Doc<"sessions">) {
+export function awaitsWholeRound(session: Doc<"sessions">) {
+  return session.wholeRoundSent !== true;
+}
+
+export async function startWholeRound(ctx: MutationCtx, session: Doc<"sessions">) {
+  const sequence = nextSequence(session);
+  await ctx.db.patch("sessions", session._id, { sequence, wholeRoundSent: true });
+  return sequence;
+}
+
+async function raiseSequence(ctx: MutationCtx, session: Doc<"sessions">) {
   const sequence = nextSequence(session);
   await ctx.db.patch("sessions", session._id, { sequence });
   return sequence;
@@ -140,17 +157,38 @@ async function recipientSetChanged(
 ) {
   if (before === after || !calendarMailConfigured()) return;
   if (!receivesSessionMail(await ctx.db.get("users", userId))) return;
-  const nights = await upcomingPublishedNights(ctx, groupId);
-  const affected = after ? nights.filter(({ entry }) => entry.state === "scheduled") : nights;
+  if (after)
+    await ctx.scheduler.runAfter(0, internal.sessionMail.inviteToNights, { groupId, userId });
+  else await withdrawFromNights(ctx, { groupId, userId });
+}
+
+export const inviteToNights = internalMutation({
+  args: { groupId: v.id("groups"), userId: v.id("users") },
+  returns: v.null(),
+  handler: async (ctx, { groupId, userId }) => {
+    const group = await ctx.db.get("groups", groupId);
+    if (!calendarMailConfigured() || group === null) return null;
+    if (!(await isCalendarRecipient(ctx, group, userId))) return null;
+    if (!receivesSessionMail(await ctx.db.get("users", userId))) return null;
+    const nights = await upcomingPublishedNights(ctx, groupId);
+    const { timeZone } = groupTimeOf(group);
+    const stamp = Date.now();
+    const sends: NightSend[] = [];
+    for (const night of nights.filter(({ entry }) => entry.state === "scheduled")) {
+      const sequence = await raiseSequence(ctx, night.session);
+      sends.push(inviteOf(night, { userId, sequence, stamp, timeZone }));
+    }
+    await requestCalendarMails(ctx, sends);
+    return null;
+  },
+});
+
+async function withdrawFromNights(ctx: MutationCtx, { groupId, userId }: RecipientSetMember) {
   const stamp = Date.now();
-  const sends: CalendarSend[] = [];
-  for (const night of affected) {
+  const sends: WithdrawSend[] = [];
+  for (const night of await upcomingPublishedNights(ctx, groupId)) {
     const sequence = await raiseSequence(ctx, night.session);
-    sends.push(
-      after
-        ? inviteOf(night, userId, sequence, stamp)
-        : withdrawalOf(night, userId, sequence, stamp),
-    );
+    sends.push(withdrawalOf(night, userId, sequence, stamp));
   }
   await requestCalendarMails(ctx, sends);
 }
@@ -165,12 +203,9 @@ async function upcomingPublishedNights(ctx: QueryCtx, groupId: Id<"groups">) {
 
 function inviteOf(
   { session, entry }: PublishedNight,
-  userId: Id<"users">,
-  sequence: number,
-  stamp: number,
+  send: { userId: Id<"users">; sequence: number; stamp: number; timeZone: string },
 ): NightSend {
-  const { revision } = entry;
-  return { kind: "invite", sessionId: session._id, userId, revision, sequence, stamp };
+  return { kind: "invite", sessionId: session._id, revision: entry.revision, ...send };
 }
 
 function withdrawalOf(
@@ -191,8 +226,8 @@ function withdrawalOf(
 
 export async function groupDeleting(ctx: MutationCtx, group: Doc<"groups">) {
   if (!calendarMailConfigured()) return;
-  const nights = (await upcomingPublishedNights(ctx, group._id)).flatMap(({ session, entry }) =>
-    entry.state === "scheduled" ? [frozenNightOf(session, entry)] : [],
+  const nights = (await upcomingPublishedNights(ctx, group._id)).map(({ session, entry }) =>
+    frozenNightOf(session, entry),
   );
   const recipients: Id<"users">[] = [];
   for (const userId of await calendarRecipients(ctx, group)) {
@@ -272,7 +307,7 @@ type PublishedNight = { session: Doc<"sessions">; entry: PublishedEntry };
 type NightTarget = {
   session: Doc<"sessions">;
   group: Doc<"groups">;
-  account: SessionMailAccount;
+  account: MailableAccount;
   entry: PublishedEntry;
 };
 
@@ -302,7 +337,7 @@ function nightMessageFor(
   send: NightSend,
 ): CalendarMessage {
   const runsGroup = group.ownerId === account._id;
-  const calendarLink = runsGroup ? siteLink(`/g/${group._id}`) : playerCalendarLink();
+  const calendarLink = runsGroup ? siteLink(`/g/${group._id}`) : myGroupsLink();
   const window = { start: entry.start, end: entry.end };
   const uid = sessionUid(session._id);
   const kind = entry.state === "cancelled" ? "cancel" : "request";
@@ -312,9 +347,10 @@ function nightMessageFor(
     groupName: entry.summary,
     date: session.date,
     window,
-    timeZone: groupTimeOf(group).timeZone,
+    timeZone: send.timeZone,
     ...(entry.location === undefined ? {} : { location: entry.location }),
     groupLink: runsGroup ? calendarLink : shareLinkOf(group),
+    myGroupsLink: myGroupsLink(),
   });
   const calendar = invite({
     kind,
@@ -347,7 +383,12 @@ async function withdrawalMail(
   if (await isInCalendarRecipientSet(ctx, { groupId, userId })) return null;
   const account = await ctx.db.get("users", userId);
   if (!receivesSessionMail(account)) return null;
-  const copy = sessionMailCopy({ change: "withdraw", groupName: entry.summary, date });
+  const copy = sessionMailCopy({
+    change: "withdraw",
+    groupName: entry.summary,
+    date,
+    myGroupsLink: myGroupsLink(),
+  });
   return frozenEntryMessage({ account, kind: "withdraw", entry, stamp, copy });
 }
 
@@ -362,6 +403,7 @@ async function deletionCancelMail(
     reader,
     groupName: entry.summary,
     date,
+    myGroupsLink: myGroupsLink(),
   });
   return frozenEntryMessage({ account, kind: "cancel", entry, stamp, copy });
 }
@@ -373,13 +415,13 @@ function frozenEntryMessage({
   stamp,
   copy,
 }: {
-  account: SessionMailAccount;
+  account: MailableAccount;
   kind: "withdraw" | "cancel";
   entry: FrozenEntry;
   stamp: number;
   copy: MailCopy;
 }): CalendarMessage {
-  const calendarLink = playerCalendarLink();
+  const calendarLink = myGroupsLink();
   const calendar = invite({
     kind,
     organizer: CALENDAR_ADDRESS,
@@ -403,11 +445,11 @@ function frozenEntryMessage({
   };
 }
 
-function idempotencyKey(uid: string, sequence: number, account: SessionMailAccount) {
+function idempotencyKey(uid: string, sequence: number, account: MailableAccount) {
   return `calendar/${uid}/${sequence}/${account._id}`;
 }
 
-function playerCalendarLink() {
+function myGroupsLink() {
   return siteLink("/me");
 }
 
@@ -418,12 +460,7 @@ async function requestWorkflowsSessionUpdates(
   previous: Published | undefined,
 ) {
   if (published.state === previous?.state || !sessionMailConfigured()) return;
-  const players = await ctx.db
-    .query("players")
-    .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", session.groupId))
-    .take(MAX_PLAYERS_PER_GROUP);
-  const accounts = new Set(players.flatMap((player) => (player.userId ? [player.userId] : [])));
-  for (const userId of accounts) {
+  for (const userId of await claimedAccountIds(ctx, session.groupId)) {
     const send = { sessionId: session._id, userId, change: published.state };
     if (await bodyFor(ctx, send)) await requestSessionMail(ctx, send);
   }
@@ -457,14 +494,4 @@ async function bodyFor(ctx: QueryCtx, { sessionId, userId, change }: SessionSend
     change,
     player_url: shareLinkOf(group),
   };
-}
-
-function dateLabel(date: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(`${date}T12:00:00Z`));
 }

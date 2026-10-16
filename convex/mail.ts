@@ -21,7 +21,8 @@ const SEND_TIMEOUT_MS = 10_000;
 const TOO_MANY_REQUESTS = 429;
 const FIRST_SERVER_ERROR = 500;
 const RESEND_URL = "https://api.resend.com/emails";
-const CALENDAR_SENDER = "Next Session <calendar@next-session.link>";
+export const CALENDAR_ADDRESS = "calendar@next-session.link";
+const CALENDAR_SENDER = `Next Session <${CALENDAR_ADDRESS}>`;
 const CALENDAR_SEND_SPACING_MS = 600;
 const DAILY_WARNING_AT = 80;
 const DAILY_LIMIT = 100;
@@ -55,6 +56,7 @@ const publishedSend = {
   revision: v.number(),
   sequence: v.number(),
   stamp: v.number(),
+  timeZone: v.string(),
 };
 
 export const calendarSend = v.union(
@@ -251,7 +253,7 @@ export const sendCalendar = internalAction({
     if (apiKey === undefined) return null;
     const mail = await ctx.runQuery(internal.sessionMail.calendarMail, { send });
     if (mail === null) return null;
-    const { status } = await postToResend(apiKey, mail);
+    const { status } = await postToResend(apiKey, mail, resendRequestOf(mail));
     if (isRetryable(status)) throw new Error(`Resend answered HTTP ${status}`);
     if (status >= 400) console.error(`Resend refused a calendar mail: HTTP ${status}, dropped`);
     return null;
@@ -262,30 +264,45 @@ function resendApiKey() {
   return process.env.RESEND_API_KEY || undefined;
 }
 
-async function postToResend(apiKey: string, mail: Infer<typeof calendarMessage>) {
+function resendRequestOf(mail: Infer<typeof calendarMessage>) {
+  return JSON.stringify({
+    from: CALENDAR_SENDER,
+    to: [mail.to],
+    subject: mail.subject,
+    text: mail.text,
+    html: mail.html,
+    attachments: [
+      {
+        filename: "invite.ics",
+        content: base64(mail.invite.calendar),
+        content_type: calendarContentType(mail.invite.kind),
+      },
+    ],
+  });
+}
+
+async function postToResend(apiKey: string, mail: Infer<typeof calendarMessage>, body: string) {
   return await fetch(RESEND_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
-      "Idempotency-Key": mail.idempotencyKey,
+      "Idempotency-Key": `${mail.idempotencyKey}/${fingerprintOf(body)}`,
     },
-    body: JSON.stringify({
-      from: CALENDAR_SENDER,
-      to: [mail.to],
-      subject: mail.subject,
-      text: mail.text,
-      html: mail.html,
-      attachments: [
-        {
-          filename: "invite.ics",
-          content: base64(mail.invite.calendar),
-          content_type: calendarContentType(mail.invite.kind),
-        },
-      ],
-    }),
+    body,
     signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
   });
+}
+
+function fingerprintOf(text: string) {
+  let high = 0xdeadbeef;
+  let low = 0x41c6ce57;
+  for (let index = 0; index < text.length; index++) {
+    const code = text.charCodeAt(index);
+    high = Math.imul(high ^ code, 2654435761);
+    low = Math.imul(low ^ code, 1597334677);
+  }
+  return [high, low].map((half) => (half >>> 0).toString(16).padStart(8, "0")).join("");
 }
 
 function base64(text: string) {

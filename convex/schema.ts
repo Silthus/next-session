@@ -113,6 +113,7 @@ export default defineSchema({
     location: v.optional(v.string()),
     remindersRevision: v.optional(v.number()),
     sequence: v.optional(v.number()),
+    wholeRoundSent: v.optional(v.boolean()),
   })
     .index("by_groupId_and_date", ["groupId", "date"])
     .index("by_date", ["date"]),

@@ -1,7 +1,6 @@
 import { v } from "convex/values";
 import { bookingWindow, todayUtc } from "../shared/dates";
 import { internal } from "./_generated/api";
-import type { Doc } from "./_generated/dataModel";
 import { internalMutation } from "./_generated/server";
 import {
   calendarMailConfigured,
@@ -10,10 +9,10 @@ import {
   type CalendarSend,
 } from "./mail";
 import { serverLog } from "./model/telemetry";
-import { inviteRoundOf, raiseSequence } from "./sessionMail";
+import { awaitsWholeRound, setRoundOf, startWholeRound } from "./sessionMail";
 
 const DAILY_SHARE = 50;
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 20;
 const DAY_MS = 86_400_000;
 
 export const inviteScheduledSessions = internalMutation({
@@ -34,14 +33,14 @@ export const inviteScheduledSessions = internalMutation({
     const sentToday = await calendarMailsToday(ctx);
     const sends: CalendarSend[] = [];
     let dayIsFull = false;
-    for (const session of sessions.page.filter(neverSent)) {
-      const round = await inviteRoundOf(ctx, session);
+    for (const session of sessions.page.filter(awaitsWholeRound)) {
+      const round = await setRoundOf(ctx, session);
       if (round.length === 0) continue;
       if (!fitsTheDay(round.length, sentToday + sends.length)) {
         dayIsFull = true;
         break;
       }
-      await raiseSequence(ctx, session);
+      await startWholeRound(ctx, session);
       sends.push(...round);
       sessionsInvited++;
     }
@@ -67,10 +66,6 @@ export const inviteScheduledSessions = internalMutation({
     return null;
   },
 });
-
-function neverSent(session: Doc<"sessions">) {
-  return (session.sequence ?? 0) === 0;
-}
 
 function fitsTheDay(roundSize: number, sentToday: number) {
   const startsTheDay = sentToday === 0;

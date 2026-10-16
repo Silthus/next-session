@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { sessionMailCopy, type SessionMailCopyInput } from "./sessionMailCopy";
+import { sessionMailCopy, type NightCopyInput } from "./sessionMailCopy";
 
-const halloween: SessionMailCopyInput = {
+const MY_GROUPS = "https://next-session.link/me";
+
+const halloween: NightCopyInput = {
   change: "set",
   reader: "player",
   groupName: "Thursday Crew",
@@ -10,6 +12,7 @@ const halloween: SessionMailCopyInput = {
   timeZone: "Europe/Berlin",
   location: "Max's place",
   groupLink: "https://next-session.link/s/share-token",
+  myGroupsLink: MY_GROUPS,
 };
 
 const WHEN = "Saturday, October 31, 2026, 19:00–23:00, Berlin time";
@@ -141,6 +144,7 @@ describe("the mail for entering or leaving the calendar recipient set", () => {
       change: "withdraw",
       groupName: "Thursday Crew",
       date: "2026-10-31",
+      myGroupsLink: MY_GROUPS,
     });
 
     expect(subject).toBe(
@@ -178,6 +182,7 @@ describe("the mail for a deleted Group's night", () => {
         reader,
         groupName: "Thursday Crew",
         date: "2026-10-31",
+        myGroupsLink: MY_GROUPS,
       });
 
       expect(subject).toBe("Thursday Crew: session on Saturday, October 31, 2026 cancelled");

@@ -136,6 +136,7 @@ export default defineSchema({
     changedAt: v.optional(v.number()), // the latest change, which the settle job compares
     published: v.optional(publishedSession), // what the outside world knows; missing means never published
     sequence: v.optional(v.number()), // the last calendar SEQUENCE sent; missing means 0 (§15)
+    wholeRoundSent: v.optional(v.boolean()), // a round went to the whole calendar recipient set (§15.3, §15.10)
   })
     .index("by_groupId_and_date", ["groupId", "date"])
     .index("by_date", ["date"]), // the one-time invites read every Group's upcoming Sessions (§15.10)
@@ -1037,7 +1038,7 @@ Every Session update is one mail through Resend that carries a calendar invite (
 ### 15.3 A broadcast round
 
 - Every publish is a round, because the invite carries the start, end, location and Group name: `set` for a first publish or **Schedule again**, `changed` for a new start, length, location or Group name, `cancelled` for a cancel. A publish that keeps a Cancelled Session cancelled sends nothing: those calendars already hold the cancel.
-- A round raises `sessions.sequence` by one (missing is 0) and queues one send per eligible recipient, each carrying `{kind: "broadcast", change, sessionId, userId, revision, sequence}`.
+- A round raises `sessions.sequence` by one (missing is 0), sets `sessions.wholeRoundSent`, and queues one send per eligible recipient, each carrying `{kind: "broadcast", change, sessionId, userId, revision, sequence, timeZone}`. The Group's time zone is frozen into the send, so a retry names the time in the zone the round was published in, even when the zone changes before it.
 - Sends are scheduled 600 ms apart within a round, under Resend's 2 requests a second. Two rounds that overlap rely on the retries.
 - Each attempt rechecks, in `sessionMail.calendarMail`, that `published.revision` still equals the send's revision and that the Account is still in the set and eligible. A send whose revision moved on drops itself, so a slow mail never overwrites a newer change. Staleness is judged by revision, never by `sequence`.
 
@@ -1045,7 +1046,7 @@ Every Session update is one mail through Resend that carries a calendar invite (
 
 - Every mutation that can move an Account into or out of a Group's set runs its change through `changeRecipientSet` in `convex/sessionMail.ts`, which compares membership before and after in the same transaction: a claim (**Join** while signed in, **Keep this group**, the auto-keep on answer) and a release (**Not you?**, **Remove from my groups**) in `convex/model/players.ts`, the GM removing a Player, and **Save**, which makes the Account the GM of the moved Groups.
 - A set that ends where it began sends nothing: a switch to another name in the same Group, or a GM releasing their own Player.
-- Entering queues an `invite` for each upcoming Session (from today, UTC, to the end of the Booking Window) whose published state is scheduled: a `request` to that Account alone, `{kind: "invite", sessionId, userId, revision, sequence}`.
+- Entering schedules `sessionMail.inviteToNights` for that Group and Account, so a Save that moves many Groups stays under Convex's 1,000 scheduled functions per mutation. It rechecks that the Account is still in the set and eligible, then queues an `invite` for each upcoming Session (from today, UTC, to the end of the Booking Window) whose published state is scheduled: a `request` to that Account alone, `{kind: "invite", sessionId, userId, revision, sequence, timeZone}`.
 - Leaving queues a `withdraw` for each upcoming published Session, Cancelled ones included, so an entry whose cancel the release dropped still leaves: `{kind: "withdraw", groupId, userId, date, entry}`, with `entry` frozen as `{uid, sequence, start, end, summary}`.
 - Each raises that Session's `sequence` by one. Staleness stays with the revision, so an invite never drops another recipient's pending broadcast.
 - An invite sends only while its revision is still published, the Session is still scheduled and the Account is still in the set. A withdrawal sends only while the Account is still out of the set, whatever the revision; a deleted Group counts as out. It is built from its frozen entry, so it lands after the Group is deleted and never shows a change made after the release. A re-claim before it sends makes it drop itself.
@@ -1054,21 +1055,21 @@ Every Session update is one mail through Resend that carries a calendar invite (
 ### 15.5 Deleting a Group
 
 - `deleteGroup` in `convex/model/groups.ts` is the one deletion path, for `groups.remove` and the Expiry sweep. Before the Group and its children go, it calls `groupDeleting` in `convex/sessionMail.ts`.
-- `groupDeleting` writes one `calendarCancellations` row: the GM's Account, the eligible Accounts of the calendar recipient set at deletion (§15.2), and each upcoming published Session whose published state is scheduled, frozen as `{date, entry}` with `entry` `{uid, sequence, start, end, summary}` and `sequence` reserved as the Session's `sequence + 1`. A Session already published as Cancelled is left out (its calendars hold the cancel), and so are never-published and past ones. With nothing to cancel, or no eligible Account, no row is written. Without `RESEND_API_KEY` nothing is written, so deletion runs exactly as before.
+- `groupDeleting` writes one `calendarCancellations` row: the GM's Account, the eligible Accounts of the calendar recipient set at deletion (§15.2), and each upcoming published Session, frozen as `{date, entry}` with `entry` `{uid, sequence, start, end, summary}` and `sequence` reserved as the Session's `sequence + 1`. A Session already published as Cancelled is cancelled again, because its cancel may still be waiting for a retry that the Group's deletion would drop. Never-published and past Sessions are left out. With nothing to cancel, or no eligible Account, no row is written. Without `RESEND_API_KEY` nothing is written, so deletion runs exactly as before.
 - `sessionMail.drainCancellations` queues at most 200 `deletionCancel`s per run, `{kind: "deletionCancel", userId, reader, date, entry}`, moves the row's `cursor`, and runs again once its sends are due, 600 ms apart, so a large Group stays under Resend's rate and far below Convex's 1,000 scheduled functions per mutation. The run that queues the last batch deletes the row.
 - A deletion cancel is a `cancel` with `STATUS:CANCELLED`, built from its frozen entry, because the Group is gone. Its `SEQUENCE` is above every invite the Session sent. It sends whenever the Account is still eligible (§15.2), so an Anonymous GM, whose Account ends with its last Group, gets nothing.
 
 ### 15.6 The Resend adapter
 
 - `POST https://api.resend.com/emails` with `from: "Next Session <calendar@next-session.link>"`, one recipient, `text` and `html`, and one attachment `invite.ics`, base64, with `content_type` from `calendarContentType` (`text/calendar; charset=utf-8; method=REQUEST|CANCEL`). No `reply_to`.
-- `Idempotency-Key: calendar/<uid>/<sequence>/<userId>`, so a retry of a request Resend accepted is not sent twice within its 24 hours.
+- `Idempotency-Key: calendar/<uid>/<sequence>/<userId>/<fingerprint>`, where the fingerprint is a hash of the request body, so a retry of a request Resend accepted is not sent twice within its 24 hours, and a retry whose body changed (a rotated Share Link) is a new request instead of one Resend refuses.
 - Network errors, 5xx and 429 retry through the action retrier: 4 attempts, backoff 5 s × 4ⁿ. Other 4xx are logged with the status only and dropped.
 
 ### 15.7 The invite
 
 - Built by `invite` in `shared/icalendar.ts` from the published snapshot: `request` for a scheduled Session, `cancel` (with `STATUS:CANCELLED`) for a cancelled one. A withdrawal is a `withdraw` (`METHOD:CANCEL` with no `STATUS`) built from its frozen entry, with the Player link. A deletion cancel is a `cancel` built from its frozen entry, with the Player link for GM and Player alike, since the Group's page is gone.
-- `UID` `<sessionId>@next-session.link` for the row's whole life, `SEQUENCE` and `DTSTAMP` the round's, so a retry repeats its request byte for byte under the same Idempotency-Key (Resend refuses a reused key with a different body), `DTSTART` and `DTEND` in UTC, `SUMMARY` the published Group name, `LOCATION` the published location.
-- `URL` is token-free: `https://next-session.link/g/<groupId>` for the GM, `https://next-session.link/me` for a Player. `DESCRIPTION` is "Open your group: <that link>".
+- `UID` `<sessionId>@next-session.link` for the row's whole life, `SEQUENCE` and `DTSTAMP` the round's, so a retry repeats its request byte for byte under the same Idempotency-Key, `DTSTART` and `DTEND` in UTC, `SUMMARY` the published Group name, `LOCATION` the published location.
+- `URL` is token-free and built from `SITE_URL` (`convex/model/siteLinks.ts`): `/g/<groupId>` for the GM, `/me` for a Player. `DESCRIPTION` is "Open your group: <that link>".
 - `ORGANIZER` is `calendar@next-session.link`; the `ATTENDEE` is the recipient with `PARTSTAT=ACCEPTED;RSVP=FALSE`. No `VALARM`.
 
 ### 15.8 Copy
@@ -1086,7 +1087,7 @@ Every Session update is one mail through Resend that carries a calendar invite (
 | Withdrawal | `{group}: session on {date} removed from your calendar` | You don't keep {group} any more, so its session on {date} leaves your calendar. | — (a GM never leaves the set) |
 | Deletion cancel | `{group}: session on {date} cancelled` | {group} was deleted, so its session on {date} is off. | You deleted {group}, so its session on {date} is off. |
 
-Then, for set, changed and invite: "It's in the calendar invite in this mail. Not in your calendar yet? Tap **Add to calendar** once." For cancelled, withdrawal and deletion cancel: "Your calendar removes it by itself. If it doesn't, delete it there." Then the button, except in a withdrawal or a deletion cancel. Footer: "You get this because you run this group.", "…because you keep this group." or, in a withdrawal or a Player's deletion cancel, "…because you kept this group.", and in the GM's deletion cancel "…because you ran this group.", then "Turn session emails off in My groups: https://next-session.link/me. Replies to this address aren't read."
+Then, for set, changed and invite: "It's in the calendar invite in this mail. Not in your calendar yet? Tap **Add to calendar** once." For cancelled, withdrawal and deletion cancel: "Your calendar removes it by itself. If it doesn't, delete it there." Then the button, except in a withdrawal or a deletion cancel. Footer: "You get this because you run this group.", "…because you keep this group." or, in a withdrawal or a Player's deletion cancel, "…because you kept this group.", and in the GM's deletion cancel "…because you ran this group.", then "Turn session emails off in My groups: <SITE_URL>/me. Replies to this address aren't read."
 
 ### 15.9 Volume
 
@@ -1096,10 +1097,10 @@ Then, for set, changed and invite: "It's in the calendar invite in this mail. No
 
 The Sessions published before the switch-on never had a Resend send. `oneTimeInvites.inviteScheduledSessions`, started once with `convex run` after `RESEND_API_KEY` is set, gives them their invites:
 
-- It reads the upcoming Sessions (today, UTC, to the end of the Booking Window) through the `by_date` index, soonest first, 100 a page, and takes those whose published state is scheduled and whose `sequence` is still 0.
-- Each gets one `invite` round to its whole calendar recipient set: `sequence` rises by one, and one `invite` send goes to each eligible recipient (§15.4's rules and copy). A Session with no eligible recipient is passed over and keeps `sequence` 0.
+- It reads the upcoming Sessions (today, UTC, to the end of the Booking Window) through the `by_date` index, soonest first, 20 a page so a page of full Rosters stays within Convex's reads per transaction, and takes those whose published state is scheduled and that never had a whole round (`wholeRoundSent` unset). A newcomer's invite or a withdrawal raises `sequence` but is not a whole round, so it doesn't make the run skip the GM and the other Players.
+- Each gets one round to its whole calendar recipient set with the "Set" copy (§15.8), because the GM and the Players have had the night for a while: `sequence` rises by one, `wholeRoundSent` is set, and one `broadcast` send with `change: "set"` goes to each eligible recipient. A Session with no eligible recipient is passed over and stays unsent.
 - Pacing: a run tops the day's Resend count up to 50 of the 100, leaving half for live Session mail, and stops before the first Session whose round wouldn't fit. It then runs again at the next UTC midnight. A round larger than 50 on its own goes alone as the first send of a day, so a big Group never stalls the rest.
-- A Session published again before its turn gets a broadcast, its `sequence` leaves 0, and the run skips it. A second start after it finished queues nothing.
+- A Session published again before its turn gets a broadcast, which is a whole round, and the run skips it. A second start after it finished queues nothing.
 - Without `RESEND_API_KEY` it does nothing and leaves every Session for the start after the switch-on.
 - It ends with one `serverLog` line, "One-time invites finished", with `sessions_invited` and `invites_queued` only.
 

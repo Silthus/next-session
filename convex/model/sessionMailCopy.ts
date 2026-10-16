@@ -13,22 +13,27 @@ export type NightCopyInput = {
   timeZone: string;
   location?: string;
   groupLink: string;
+  myGroupsLink: string;
 };
 
-export type WithdrawalCopyInput = { change: "withdraw"; groupName: string; date: IsoDate };
+export type WithdrawalCopyInput = {
+  change: "withdraw";
+  groupName: string;
+  date: IsoDate;
+  myGroupsLink: string;
+};
 
 export type DeletionCancelCopyInput = {
   change: "deletionCancel";
   reader: "gm" | "player";
   groupName: string;
   date: IsoDate;
+  myGroupsLink: string;
 };
 
 export type SessionMailCopyInput = NightCopyInput | WithdrawalCopyInput | DeletionCancelCopyInput;
 
 export type MailCopy = { subject: string; text: string; html: string };
-
-const MY_GROUPS_URL = "https://next-session.link/me";
 
 type CalendarHint = { lead: string; tap?: { button: string; tail: string } };
 
@@ -52,7 +57,12 @@ type Paragraphs = {
 
 export function sessionMailCopy(input: SessionMailCopyInput): MailCopy {
   const paragraphs = paragraphsOf(input);
-  return { subject: paragraphs.subject, text: textOf(paragraphs), html: htmlOf(paragraphs) };
+  const { myGroupsLink } = input;
+  return {
+    subject: paragraphs.subject,
+    text: textOf(paragraphs, myGroupsLink),
+    html: htmlOf(paragraphs, myGroupsLink),
+  };
 }
 
 function paragraphsOf(input: SessionMailCopyInput): Paragraphs {
@@ -133,14 +143,14 @@ function nightOf(input: NightCopyInput): Paragraphs {
   };
 }
 
-function textOf({ news, where, calendarHint, groupLink, why }: Paragraphs) {
+function textOf({ news, where, calendarHint, groupLink, why }: Paragraphs, myGroupsLink: string) {
   const { lead, tap } = calendarHint;
   return (
     [
       where === undefined ? news : `${news}\n${where}`,
       tap === undefined ? lead : `${lead}${tap.button}${tap.tail}`,
       ...(groupLink === undefined ? [] : [`Open your group: ${groupLink}`]),
-      `${why}\nTurn session emails off in My groups: ${MY_GROUPS_URL}. Replies to this address aren't read.`,
+      `${why}\nTurn session emails off in My groups: ${myGroupsLink}. Replies to this address aren't read.`,
     ].join("\n\n") + "\n"
   );
 }
@@ -148,7 +158,7 @@ function textOf({ news, where, calendarHint, groupLink, why }: Paragraphs) {
 const INK = "#1a1511";
 const LINK = "#835200";
 
-function htmlOf({ news, where, calendarHint, groupLink, why }: Paragraphs) {
+function htmlOf({ news, where, calendarHint, groupLink, why }: Paragraphs, myGroupsLink: string) {
   const { lead, tap } = calendarHint;
   const calendarLine =
     escaped(lead) +
@@ -160,7 +170,7 @@ function htmlOf({ news, where, calendarHint, groupLink, why }: Paragraphs) {
 <p style="margin:0 0 18px;font-family:'Courier New',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:${LINK};font-weight:bold;">Next Session</p>
 <p style="margin:0 0 14px;font-size:16px;line-height:160%;">${newsLine}</p>
 <p style="margin:0 0 14px;font-size:16px;line-height:160%;">${calendarLine}</p>
-${groupLink === undefined ? "" : buttonTo(groupLink)}<p style="margin:0;font-size:13px;line-height:160%;">${escaped(why)} Turn session emails off in <a href="${MY_GROUPS_URL}" style="color:${LINK};">My groups</a>. Replies to this address aren't read.</p>
+${groupLink === undefined ? "" : buttonTo(groupLink)}<p style="margin:0;font-size:13px;line-height:160%;">${escaped(why)} Turn session emails off in <a href="${escaped(myGroupsLink)}" style="color:${LINK};">My groups</a>. Replies to this address aren't read.</p>
 </div>
 </body></html>
 `;
@@ -171,7 +181,7 @@ function buttonTo(groupLink: string) {
 `;
 }
 
-function dateLabel(date: IsoDate) {
+export function dateLabel(date: IsoDate) {
   return new Intl.DateTimeFormat("en-US", {
     weekday: "long",
     month: "long",

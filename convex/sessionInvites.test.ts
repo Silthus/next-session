@@ -374,7 +374,22 @@ it("spaces the sends of one fan-out at least 500 ms apart", async () => {
     expect(times[index]! - times[index - 1]!).toBeGreaterThanOrEqual(500);
 });
 
+it("links the footer's My groups to the deployment's own site", async () => {
+  vi.stubEnv("SITE_URL", "https://preview.next-session.test");
+  const { as, groupId } = await crew();
+
+  await as.mutation(api.sessions.schedule, { groupId, date });
+  await finish();
+
+  const { text, html } = mailTo("robin@example.com");
+  expect(text).toContain(
+    "Turn session emails off in My groups: https://preview.next-session.test/me.",
+  );
+  expect(html).toContain('<a href="https://preview.next-session.test/me"');
+});
+
 describe("delivery", () => {
+  const ROBIN = "robin@example.com";
   const gmAlone = () => signedInGmWithGroup(t);
 
   it("drops a retry whose revision is no longer the published one", async () => {
@@ -411,13 +426,74 @@ describe("delivery", () => {
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date });
     await finish();
 
-    expect(resendRequests().map(({ headers }) => headers.get("Idempotency-Key"))).toEqual([
-      `calendar/${sessionId}@next-session.link/1/${userId}`,
-      `calendar/${sessionId}@next-session.link/1/${userId}`,
-    ]);
+    const [key, retryKey] = resendRequests().map(({ headers }) => headers.get("Idempotency-Key"));
+    expect(key).toMatch(
+      new RegExp(`^calendar/${sessionId}@next-session\\.link/1/${userId}/[0-9a-f]{16}$`),
+    );
+    expect(retryKey).toBe(key);
     const [first, retry] = resendRequests();
     expect(retry!.at).toBeGreaterThan(first!.at);
     expect(retry!.body).toBe(first!.body);
+  });
+
+  function failingRobinOnce() {
+    const accepted: string[] = [];
+    const bodiesByKey = new Map<string, string>();
+    let robinFailed = false;
+    fetchMock.mockImplementation((_url, init) => {
+      const key = new Headers(init!.headers).get("Idempotency-Key")!;
+      const body = init!.body as string;
+      const first = bodiesByKey.get(key) ?? body;
+      bodiesByKey.set(key, first);
+      if (first !== body) return Promise.resolve(new Response(null, { status: 409 }));
+      if (body.includes(ROBIN) && !robinFailed) {
+        robinFailed = true;
+        return Promise.resolve(new Response(null, { status: 503 }));
+      }
+      accepted.push(body);
+      return Promise.resolve(new Response(null, { status: 200 }));
+    });
+    return () => accepted.map((body) => JSON.parse(body) as ResendMail);
+  }
+
+  async function publishedWithRobinRetrying() {
+    const gm = await crew();
+    const accepted = failingRobinOnce();
+    await gm.as.mutation(api.sessions.schedule, { groupId: gm.groupId, date });
+    await wait(UNDO_WINDOW_MS + 1);
+    await wait(1_000);
+    return {
+      ...gm,
+      acceptedTo: (address: string) => accepted().filter(({ to }) => to.includes(address)),
+    };
+  }
+
+  it("still delivers a retry after the Share Token rotates, under a key that matches its new body", async () => {
+    const { as, groupId, acceptedTo } = await publishedWithRobinRetrying();
+
+    await as.mutation(api.groups.rotateShareToken, { groupId });
+    await finish();
+
+    const [mail, ...more] = acceptedTo(ROBIN);
+    expect(more).toEqual([]);
+    expect(mail!.text).not.toContain("crew-token");
+  });
+
+  it("names the night's time in the zone it was published in when the zone changes before a retry", async () => {
+    const { as, groupId, acceptedTo } = await publishedWithRobinRetrying();
+
+    await as.mutation(api.groups.updateSettings, {
+      groupId,
+      startTime: "19:00",
+      lengthMinutes: 240,
+      timeZone: "Pacific/Auckland",
+      location: "Max's place",
+    });
+    await finish();
+
+    expect(acceptedTo(ROBIN)[0]!.text.split("\n")[0]).toBe(
+      "The next session for Thursday Crew is set: Saturday, October 17, 2026, 19:00–23:00, Berlin time.",
+    );
   });
 
   it("logs a 422 without the recipient and does not retry it", async () => {
@@ -819,6 +895,38 @@ describe("the calendar follows the Roster", () => {
     );
   });
 
+  it("lets an Account Save 26 Groups with 20 published nights each, and invites it to every night", async () => {
+    t = newBackend({ transactionLimits: true });
+    const anonymous = await signedInGmWithGroup(t, signInAnonymousGm);
+    const groupIds = await t.run(async (ctx) => {
+      const { name, ownerId, expiresAt } = (await ctx.db.get("groups", anonymous.groupId))!;
+      const ids = [anonymous.groupId];
+      for (let index = 1; index < 26; index++)
+        ids.push(
+          await ctx.db.insert("groups", { name, ownerId, expiresAt, shareToken: `group-${index}` }),
+        );
+      return ids;
+    });
+    for (const groupId of groupIds)
+      for (let day = 10; day < 30; day++)
+        await seedSession(t, groupId, `2026-10-${day}`, {
+          published: {
+            state: "scheduled",
+            start: Date.UTC(2026, 9, day, 17),
+            end: Date.UTC(2026, 9, day, 21),
+            summary: "Thursday Crew",
+            revision: 1,
+          },
+        });
+    const account = await signIn(t, { email: "saved-gm@example.com" });
+
+    const { code } = await anonymous.as.mutation(api.account.startSave, {});
+    await account.as.mutation(api.account.finishSave, { code });
+    await finish();
+
+    expect(mailsTo("saved-gm@example.com")).toHaveLength(26 * 20);
+  });
+
   it.each(["Session mail off", "a .test address"])(
     "neither invites nor withdraws an Account with %s",
     async (setting) => {
@@ -906,7 +1014,10 @@ describe("the one-time invites", () => {
     for (const address of [gmEmail, ROBIN])
       expect(subjectsTo(address)).toEqual([NEXT("17"), NEXT("24"), NEXT("31")]);
     expect(mailsTo(ROBIN)[0]!.text.split("\n")[0]).toBe(
-      "You keep Thursday Crew now, so its session is in your calendar: Saturday, October 17, 2026, 19:00–23:00, Berlin time.",
+      "The next session for Thursday Crew is set: Saturday, October 17, 2026, 19:00–23:00, Berlin time.",
+    );
+    expect(mailsTo(gmEmail)[0]!.text.split("\n")[0]).toBe(
+      "You set the next session for Thursday Crew: Saturday, October 17, 2026, 19:00–23:00, Berlin time.",
     );
     expect(sequencesTo(ROBIN)).toEqual([1, 1, 1]);
     expect(logLines(FINISHED)).toEqual([{ sessions_invited: 3, invites_queued: 6 }]);
@@ -945,6 +1056,50 @@ describe("the one-time invites", () => {
     await startInvites();
 
     expect(subjectsTo(ROBIN)).toEqual([NEXT("17")]);
+  });
+
+  it("still invites the GM and every Player to a night a newcomer was invited to first", async () => {
+    const { groupId, gmEmail } = await crew();
+    await nightOn(groupId, "2026-10-17");
+    const kim = await signIn(t, { email: "kim@example.com" });
+    await kim.as.mutation(api.player.join, { shareToken: "crew-token", name: "Kim" });
+    await finish();
+    sent = [];
+
+    await startInvites();
+
+    expect(resendMails().flatMap(({ to }) => to)).toEqual(
+      expect.arrayContaining([gmEmail, ROBIN, "kim@example.com"]),
+    );
+  });
+
+  it("pages through Sessions whose recipients all turned Session mail off within Convex's limits", async () => {
+    t = newBackend({ transactionLimits: true });
+    for (let night = 0; night < 15; night++) {
+      const { groupId } = await signedInGmWithGroup(t, (backend) =>
+        signIn(backend, { email: `gm-${night}@example.com`, sessionEmailsEnabled: false }),
+      );
+      await t.run(async (ctx) => {
+        for (let index = 0; index < 100; index++) {
+          const userId = await ctx.db.insert("users", {
+            email: `player-${night}-${index}@example.com`,
+            sessionEmailsEnabled: false,
+          });
+          await ctx.db.insert("players", {
+            groupId,
+            name: `P${index}`,
+            nameKey: `p${index}`,
+            userId,
+          });
+        }
+      });
+      await nightOn(groupId, `2026-10-${10 + night}`);
+    }
+
+    await startInvites();
+
+    expect(resendRequests()).toEqual([]);
+    expect(logLines(FINISHED)).toEqual([{ sessions_invited: 0, invites_queued: 0 }]);
   });
 
   it("queues nothing on a second start after it finished", async () => {
