@@ -86,7 +86,13 @@ Filled in round by round. Evidence goes in this folder as redacted screenshots o
 - **iCloud:** not reported, untested.
 - **Decision (Michael):** "I would say we are good to go": the `REQUEST` path is approved. The `PUBLISH` track is dropped. Rounds 2 and 3 run for `REQUEST` only.
 
-**Round 2 (move, `SEQUENCE:1`, sent 2026-10-16 08:57 Berlin).** Spieleabend A moves from Sat 24.10. 19:00 (CEST) to Sat 31.10. 19:30 (CET). Result pending.
+**Round 2 (move, `SEQUENCE:1`, sent 2026-10-16 08:57 Berlin).** Spieleabend A moves from Sat 24.10. 19:00 (CEST) to Sat 31.10. 19:30 (CET). Michael, dictated: "Yes, it moved in Gmail. It didn't auto-edit, but it also didn't change the setting."
+
+- **Conductor's reading:** in Outlook, the entry moved by itself. In Gmail, the entry was never added, because the setting stayed "only if the sender is known", so there was nothing to move.
+- **Literal reading:** Gmail moved an entry Michael never added.
+- The round 3 park asks which one is right.
+
+**Round 3 (cancel, `METHOD:CANCEL`, `SEQUENCE:2`, `STATUS:CANCELLED`, sent 2026-10-16 09:20 Berlin).** Result pending.
 
 ### Options for the failing RSVP (for the architecture prototype)
 
@@ -102,7 +108,7 @@ Recommendation: 1 and 2 together, with 1 checked in the architecture prototype's
 | 2a. Card for `REQUEST` with `ATTENDEE` | Yes, with RSVP; accepting from Notion Calendar failed | Yes, with RSVP | untested |
 | 2b. Card for `PUBLISH` | No, attachment only | No, attachment only | untested |
 | 3. Added without a tap | No (setting "only if the sender is known") | Yes | untested |
-| 4a. `SEQUENCE` 1 moves the entry | pending (round 2) | pending (round 2) | untested |
+| 4a. `SEQUENCE` 1 moves the entry | unclear: likely nothing to move (never added), see round 2 | Yes, by itself (conductor's reading) | untested |
 | 4b. `CANCEL` removes or marks the entry cancelled | pending (round 3) | pending (round 3) | untested |
 | 5. `VALARM` imported as a 2-hour reminder | n/a (not added) | Yes, 2 hours; almost certainly the `VALARM` (see above) | untested |
 | 6. Location and Berlin time | 19:00 (4h) on the card | Address and time shown; CET after the move pending | untested |
