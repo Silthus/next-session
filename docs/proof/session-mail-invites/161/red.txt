@@ -1,0 +1,25 @@
++ | Your Google profile picture | Replaced or deleted at your next Google sign-in after you change or remove it at Google; deleted with your account |
++ | Your calendar feed link | Until you reset it on My groups or your account is deleted |
++ | Your reminder setting and reminder link | Until your account is deleted |
++ | Your account's pseudonymous profile in PostHog, and your email address for the welcome mail, tips, session updates, and reminders | Until your account is deleted |
++
++ When you save a group to an account, the group moves to the account and the temporary user ID is deleted.
++
++
+
+ ❯ shared/legal.test.ts:50:60
+     48|
+     49|   it("says how long Resend keeps session emails and their delivery log…
+     50|     expect(sectionOf(privacy, "5. How long we keep data")).toContain(
+       |                                                            ^
+     51|       "| Session emails with their calendar invites, and their deliver…
+     52|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 10 passed (11)
+   Start at  18:48:04
+   Duration  906ms (transform 84%, tests 9%, import 5%, worker 2%)
+
