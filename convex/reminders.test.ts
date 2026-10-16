@@ -266,6 +266,41 @@ describe("a Reminder", () => {
 
     expect(reminders()).toEqual([expect.objectContaining({ lead: "day", start_label: "19:00" })]);
   });
+
+  it("names the published time while a new time zone waits out its Undo window", async () => {
+    const { as, groupId } = await crew();
+    await as.mutation(api.sessions.schedule, { groupId, date });
+    await settle();
+
+    await vi.advanceTimersByTimeAsync(dayDue - UNDO_WINDOW_MS / 2 - Date.now());
+    await saveTimeAndPlace(as, groupId, { timeZone: "America/New_York" });
+    await at(dayDue);
+
+    expect(reminders()).toEqual([
+      expect.objectContaining({
+        lead: "day",
+        date_label: "Saturday, October 17, 2026",
+        start_label: "19:00",
+      }),
+    ]);
+  });
+
+  it("keeps the published time zone across a retry", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const { as, groupId } = await crew();
+    await as.mutation(api.sessions.schedule, { groupId, date });
+    await settle();
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 503 }));
+
+    await at(dayDue);
+    await saveTimeAndPlace(as, groupId, { timeZone: "America/New_York" });
+    await at(dayDue + 20_000);
+
+    expect(reminders()).toEqual([
+      expect.objectContaining({ lead: "day", start_label: "19:00" }),
+      expect.objectContaining({ lead: "day", start_label: "19:00" }),
+    ]);
+  });
 });
 
 it("moves the pair with a saved Time and place and shows the new location", async () => {

@@ -103,7 +103,7 @@ export const settle = internalMutation({
     await ctx.db.patch("sessions", sessionId, { published });
     const settled = { ...session, published };
     await sessionMail.sessionPublished(ctx, settled, previous);
-    await reminders.sessionPublished(ctx, settled);
+    await reminders.sessionPublished(ctx, settled, group);
     return null;
   },
 });

@@ -43,6 +43,7 @@ export const reminderSend = {
   userId: v.id("users"),
   revision: v.number(),
   lead: reminderLead,
+  timeZone: v.string(),
 };
 type ReminderSend = Infer<ReturnType<typeof v.object<typeof reminderSend>>>;
 

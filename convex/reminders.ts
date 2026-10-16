@@ -26,6 +26,7 @@ const reminderJob = {
   sessionId: v.id("sessions"),
   lead: reminderLead,
   revision: v.number(),
+  timeZone: v.string(),
 };
 
 const reminderBody = v.object({
@@ -43,8 +44,12 @@ const reminderBody = v.object({
 
 type ScheduledSnapshot = NonNullable<Doc<"sessions">["published"]> & { start: number };
 
-export async function sessionPublished(ctx: MutationCtx, session: Doc<"sessions">) {
-  if (remindersConfigured()) await scheduleReminders(ctx, session);
+export async function sessionPublished(
+  ctx: MutationCtx,
+  session: Doc<"sessions">,
+  group: Doc<"groups">,
+) {
+  if (remindersConfigured()) await scheduleReminders(ctx, session, group);
 }
 
 export const scheduleUpcoming = internalMutation({
@@ -62,7 +67,8 @@ export const scheduleUpcoming = internalMutation({
       .paginate({ cursor: cursor ?? null, numItems: BACKFILL_PAGE_SIZE });
     let scheduled = scheduledSoFar;
     for (const session of page.page.filter(lacksCurrentReminders)) {
-      scheduled += await scheduleReminders(ctx, session);
+      const group = await ctx.db.get("groups", session.groupId);
+      if (group) scheduled += await scheduleReminders(ctx, session, group);
     }
     if (page.isDone) {
       await serverLog(ctx, "info", "Reminder backfill finished", {
@@ -105,7 +111,7 @@ export const recipient = internalQuery({
     const claim = group && (await claimedPlayerIn(ctx, send.userId, group._id));
     const account = claim && (await ctx.db.get("users", send.userId));
     if (!group || !account || !isRemindable(account) || !account.reminderLinkToken) return null;
-    const { timeZone } = groupTimeOf(group);
+    const { timeZone } = send;
     return {
       distinct_id: accountDistinctId(account),
       product: PRODUCT,
@@ -121,7 +127,7 @@ export const recipient = internalQuery({
   },
 });
 
-async function scheduleReminders(ctx: MutationCtx, session: Doc<"sessions">) {
+async function scheduleReminders(ctx: MutationCtx, session: Doc<"sessions">, group: Doc<"groups">) {
   const published = scheduledSnapshotOf(session);
   if (published === null) return 0;
   const leadsAhead = LEADS.filter((lead) => reminderDueAt(published.start, lead) > Date.now());
@@ -130,6 +136,7 @@ async function scheduleReminders(ctx: MutationCtx, session: Doc<"sessions">) {
       sessionId: session._id,
       lead,
       revision: published.revision,
+      timeZone: groupTimeOf(group).timeZone,
     });
   }
   await ctx.db.patch("sessions", session._id, { remindersRevision: published.revision });
