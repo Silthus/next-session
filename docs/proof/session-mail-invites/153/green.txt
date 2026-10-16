@@ -1,0 +1,51 @@
+# Green: the same #153 tests on 5e24e95, every assertion intact, none skipped
+# bunx vitest run convex/sessionInvites.test.ts convex/model/sessionMailCopy.test.ts --reporter=verbose
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > announces a set Session with when, where, the invite hint, the group link and why it came
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > leaves the Where line out when the Session has no location
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > says what a changed Session is now
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > tells a cancel without when or where, and that the calendar removes it
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > says you for a set Session
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > says you for a changed Session
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > says you for a cancelled Session
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > links the GM surface and says the GM runs the group
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the HTML part > says the same words with one button to the group
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the HTML part > escapes what the GM typed
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > writes the times in the Group's zone with its city
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the mail for entering or leaving the calendar recipient set > invites a player who entered with the night and the invite hint
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the mail for entering or leaving the calendar recipient set > invites a gm who entered with the night and the invite hint
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the mail for entering or leaving the calendar recipient set > withdraws the night from a Player who left, with no button to the group
+ ✓ |convex| convex/sessionInvites.test.ts > mails every calendar recipient once after the Undo window, the GM included, and nobody before
+ ✓ |convex| convex/sessionInvites.test.ts > mails only the Group's calendar recipient set, rechecked on every attempt
+ ✓ |convex| convex/sessionInvites.test.ts > puts the night into each calendar as an accepted invite without an alarm and with a token-free link
+ ✓ |convex| convex/sessionInvites.test.ts > takes a cancelled night out of every calendar
+ ✓ |convex| convex/sessionInvites.test.ts > raises SEQUENCE for every recipient across set, change, cancel and Schedule again under one UID
+ ✓ |convex| convex/sessionInvites.test.ts > spaces the sends of one fan-out at least 500 ms apart
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > drops a retry whose revision is no longer the published one
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > sends a 503 then 200 once, the same request under one Idempotency-Key
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > logs a 422 without the recipient and does not retry it
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Account with Session mail off
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Account with a .test address
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Anonymous GM
+ ✓ |convex| convex/sessionInvites.test.ts > the provider switch > leaves Session updates on Workflows and Resend untouched without RESEND_API_KEY
+ ✓ |convex| convex/sessionInvites.test.ts > the provider switch > requests no Workflows Session update while RESEND_API_KEY is set
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > counts and warns Resend sends apart from Workflows sends
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > reads a day counted before providers as Workflows
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > keeps emails, Group names and Share Tokens out of usage events and logs
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites a Player who keeps the Group through Join while signed in to each upcoming published scheduled Session
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites a Player who keeps the Group through Keep this group to each upcoming published scheduled Session
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites a Player who keeps the Group through the auto-keep on answer to each upcoming published scheduled Session
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > withdraws each upcoming published Session from a Player who leaves through Not you?
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > withdraws each upcoming published Session from a Player who leaves through Remove from my groups
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > withdraws each upcoming published Session from a Player who leaves through the GM removing the Player
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > still withdraws the night as it was at the release after a change and the Group's deletion
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > drops a withdrawal when the Player keeps the Group again before it sends
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > drops an invite when the Player leaves before it sends
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > lets a claim's invite leave another recipient's pending broadcast retry alone
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > sends nothing when a Player switches to another name in the same Group
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > sends nothing when the GM releases their own Player
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites the Account that Saves the Group to each upcoming published scheduled Session
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > neither invites nor withdraws an Account with Session mail off
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > neither invites nor withdraws an Account with a .test address
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > drops a pending withdrawal once the Account turns Session mail off
+ Test Files  2 passed (2)
+      Tests  47 passed (47)
