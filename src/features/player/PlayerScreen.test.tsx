@@ -8,7 +8,7 @@ import { act, cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { getFunctionName, type FunctionReference } from "convex/server";
 import { useState, useSyncExternalStore } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { useGm } from "../account/useGm";
 import { rememberPlayer } from "../../lib/storage";
@@ -86,6 +86,25 @@ const keepSessionsCard = { name: "Keep your sessions and get a calendar invite" 
 
 function quietKeepLine() {
   return screen.getByRole("button", { name: "Keep this group" }).closest("p")?.textContent;
+}
+
+function closeDialogsLikeABrowser() {
+  const prototype = HTMLDialogElement.prototype;
+  const original = Object.getOwnPropertyDescriptors(prototype);
+  prototype.showModal = function (this: HTMLDialogElement) {
+    this.open = true;
+  };
+  prototype.close = function (this: HTMLDialogElement) {
+    this.open = false;
+    this.dispatchEvent(new Event("close"));
+  };
+  onTestFinished(() => {
+    for (const method of ["showModal", "close"] as const) {
+      const descriptor = original[method];
+      if (descriptor) Object.defineProperty(prototype, method, descriptor);
+      else delete (prototype as Partial<HTMLDialogElement>)[method];
+    }
+  });
 }
 
 function updateQuery(key: string, value: unknown) {
@@ -307,6 +326,27 @@ describe("PlayerScreen", () => {
     await userEvent.click(within(card).getByRole("button", { name: "Create account" }));
 
     expect(await screen.findByRole("dialog", { name: "Keep Thursday Crew" })).toBeTruthy();
+  });
+
+  it("moves focus to the kept line once a keep from the done card goes through the sheet", async () => {
+    closeDialogsLikeABrowser();
+    queries["player:answers2026-10"] = wholeOctober;
+    account.keepWithPassword = vi.fn(() => {
+      account.status = "account";
+      updateQuery("player:group", { ...roster, claimedPlayerId: playerId });
+      return Promise.resolve({ kept: true as const });
+    });
+    renderPage();
+    const card = await screen.findByRole("status", keepSessionsCard);
+    await userEvent.click(within(card).getByRole("button", { name: "Create account" }));
+    const sheet = await screen.findByRole("dialog", { name: "Keep Thursday Crew" });
+
+    await userEvent.type(within(sheet).getByLabelText("Email"), "ana@example.com");
+    await userEvent.type(within(sheet).getByLabelText("Password"), "game-night-2026");
+    await userEvent.click(within(sheet).getByRole("button", { name: "Keep group" }));
+
+    await vi.waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(document.activeElement?.textContent).toBe("Kept in My groups");
   });
 
   it("keeps through Google from the done card and explains a refusal there", async () => {

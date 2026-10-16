@@ -164,6 +164,7 @@ function PlayerGroup({
     });
   }
 
+  const [keepStartedOnDoneCard, setKeepStartedOnDoneCard] = useState(false);
   const asksToKeep = account.status === "signedOut" && !nudgeDismissed;
   const dismissKeepInvite = () => setNudgeDismissed(true);
   const keepActions = {
@@ -226,6 +227,7 @@ function PlayerGroup({
                 refusal={keeper.refusal}
                 calendarInvites={group.calendarInvites}
                 email={account.email}
+                keepStartedOnDoneCard={keepStartedOnDoneCard}
                 {...keepActions}
                 onDismissNudge={dismissKeepInvite}
                 onRemove={
@@ -238,7 +240,15 @@ function PlayerGroup({
           }}
           keepSessions={
             asksToKeep
-              ? { refusal: keeper.refusal, ...keepActions, onDismiss: dismissKeepInvite }
+              ? {
+                  refusal: keeper.refusal,
+                  ...keepActions,
+                  onKeep: () => {
+                    setKeepStartedOnDoneCard(true);
+                    keepActions.onKeep();
+                  },
+                  onDismiss: dismissKeepInvite,
+                }
               : undefined
           }
           accountControl={accountControl}

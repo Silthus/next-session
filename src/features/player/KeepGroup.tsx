@@ -42,6 +42,7 @@ export function KeepGroup({
   refusal,
   calendarInvites,
   email,
+  keepStartedOnDoneCard = false,
   onKeep,
   onContinueWithGoogle,
   onDismissNudge,
@@ -53,6 +54,7 @@ export function KeepGroup({
   refusal: string | null;
   calendarInvites: CalendarInvites;
   email?: string;
+  keepStartedOnDoneCard?: boolean;
   onKeep: () => void;
   onContinueWithGoogle?: () => void;
   onDismissNudge?: () => void;
@@ -77,7 +79,7 @@ export function KeepGroup({
     <div className="flex flex-col items-center gap-1 text-center text-sm">
       {state === "kept" ? (
         <>
-          <KeptLine focusOnMount={keepTapped} onRemove={onRemove} />
+          <KeptLine focusOnMount={keepTapped || keepStartedOnDoneCard} onRemove={onRemove} />
           <CalendarInvitesLine calendarInvites={calendarInvites} email={email} />
         </>
       ) : invite === "nudge" ? (
@@ -193,7 +195,9 @@ function CalendarInvitesLine({
   email: string | undefined;
 }) {
   if (calendarInvites === "on" && email !== undefined)
-    return <p className="text-ink-3">{`Calendar invites go to ${email}.`}</p>;
+    return (
+      <p className="text-ink-3 [overflow-wrap:anywhere]">{`Calendar invites go to ${email}.`}</p>
+    );
   if (calendarInvites !== "off") return null;
   return (
     <p className="text-ink-3">
