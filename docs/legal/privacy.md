@@ -2,7 +2,7 @@
 
 > **Draft, pending review by a qualified German lawyer before publication.** Source text for the `/privacy` page. `{{…}}` placeholders are filled at build time (see `docs/spec.md` §7).
 
-**Version 1.11. Effective: {{EFFECTIVE_DATE}}**
+**Version 1.12. Effective: {{EFFECTIVE_DATE}}**
 
 This policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.
 
@@ -88,6 +88,7 @@ Your Google profile picture is shown only to you and to the GM of each group whe
 | Server logs at our hosting providers | According to the providers' log retention, typically up to 30 days |
 | Usage events and error reports in PostHog | 1 year |
 | Technical logs in PostHog | 14 days |
+| Session emails with their calendar invites, and their delivery logs, at Resend | 30 days |
 | Your Google profile picture | Replaced or deleted at your next Google sign-in after you change or remove it at Google; deleted with your account |
 | Your calendar feed link | Until you reset it on My groups or your account is deleted |
 | Your reminder setting and reminder link | Until your account is deleted |
