@@ -1,8 +1,8 @@
 # Calendar sync: architecture
 
-Status: **parked for Michael's review** (prototype [#126](https://github.com/Silthus/next-session/issues/126) on map [#120](https://github.com/Silthus/next-session/issues/120)). Throwaway branch `prototype/calendar-sync-architecture`, never merged. The specs that follow copy from it.
+Status: **accepted** by Michael on 2026-10-16, with Session overrides for length and location added (prototype [#126](https://github.com/Silthus/next-session/issues/126) on map [#120](https://github.com/Silthus/next-session/issues/120)). Throwaway branch `prototype/calendar-sync-architecture`, never merged. The specs that follow copy from it.
 
-Worked AFK on recommended answers. Every call marked 🤖 is the worker's own recommendation, waiting for Michael's review. Calls marked 🔒 are already settled by a closed ticket, the code or an ADR, and the source is named next to them.
+Worked AFK on recommended answers. Every call marked 🤖 was the worker's own recommendation; Michael accepted all of them on 2026-10-16. Calls marked 🔒 are already settled by a closed ticket, the code or an ADR, and the source is named next to them.
 
 ## The question
 
@@ -18,7 +18,7 @@ How should calendar sync be shaped across modules and the data model? It covers 
 | [#124](https://github.com/Silthus/next-session/issues/124) | 🔒 A Session is scheduled or cancelled. **Schedule again** restores the same Session. A change inside the Undo window reaches nobody |
 | [#125](https://github.com/Silthus/next-session/issues/125) | 🔒 Reminders are emails 1 day and 2 hours before the start, only to Accounts behind Claimed Players, with their own switch (default on) and a footer link. No `VALARM` anywhere. Scheduled in Convex. Workflows can send them |
 | [#129](https://github.com/Silthus/next-session/issues/129) | 🔒 `METHOD:REQUEST` with the player as `ATTENDEE` lands, moves and cancels hands-free in Outlook. Gmail at "known sender" needs one tap. RSVP fails |
-| Map notes | 🔒 Usual start time, time zone and length on a new Group settings page, and a Session can override its time. One location per Group. RSVP sync and travel time are out. No explicit onboarding |
+| Map notes | 🔒 Usual start time, time zone and length on a new Group settings page. One usual location per Group. A Session can override its start time, length and location (Michael, 2026-10-16, on review of this prototype). RSVP sync and travel time are out. No explicit onboarding |
 
 Code read and checked: `convex/schema.ts:70` (`sessions` is `{groupId, date}`), `convex/sessions.ts:11` (`schedule`), `convex/sessions.ts:34` (`unschedule` hard-deletes), `convex/notifications.ts:212` (`queueSessionMail` and the `sessionMailStates` latest-change row), `convex/notifications.ts:117` (`sessionChanged` waits out the window, then `fanOut`), `convex/mail.ts:98` (`sendSession` posts to the Workflows webhook through the action retrier), `convex/mail.ts:136` (`recordMailVolume`, one counter across kinds), `convex/http.ts` (only Convex Auth routes), `convex/crons.ts` (one daily sweep), `worker/index.ts` (the `/ingest` proxy pattern), `convex/player.ts:228` and `convex/me.ts:100` (Session reads return dates only).
 
@@ -126,6 +126,8 @@ erDiagram
     string date "existing YYYY-MM-DD, read in the Group zone"
     string state "NEW scheduled|cancelled, missing = scheduled"
     string startTime "NEW HH:MM override, missing = Group's"
+    number lengthMinutes "NEW override, missing = Group's"
+    string location "NEW override, missing = Group's"
     number changedAt "NEW, the last change"
     object published "NEW, written only by settle, missing = never published"
     number sequence "NEW, last SEQUENCE sent, missing = 0"
@@ -151,7 +153,7 @@ erDiagram
 - The 4 hours match the live test. 19:00 is the usual game night start and is easy to change.
 
 ❓ **Q2.2 What can a Session override?**
-➡️ 🤖 **Its start time only (`sessions.startTime`), with "follow the Group" as the missing value.** The length, zone and location stay the Group's. Michael asked for the time, and one override keeps the day panel to one field. A restored Session keeps its override, because it is the same row. Without an override it follows the Group's current usual time (#124 follow-up).
+➡️ 🔒 (Michael, 2026-10-16, on review) **Its start time, length and location: `sessions.startTime`, `sessions.lengthMinutes` and `sessions.location`.** Each one is optional, and a missing value means "follow the Group", so each field follows the Group on its own. The time zone stays the Group's. A restored Session keeps its overrides, because it is the same row. A field without an override follows the Group's current value (#124 follow-up). The day panel offers all three, and the location field there uses the same Geoapify autocomplete as the settings page.
 
 ❓ **Q2.3 How does the Cancelled Session sit in the schema?**
 ➡️ 🤖 **`state` on the row, where missing means scheduled, plus `changedAt` and `published`.**
@@ -159,8 +161,8 @@ erDiagram
 - **Undo of a cancel** and **Schedule again** are the same call, `sessions.schedule({groupId, date})`. It restores the cancelled row by id, or inserts a new one when the row was deleted. A deleted row was never published, so a new id loses no calendar identity (#124 follow-up "Undo on a restored id").
 - **Migration:** one internal mutation backfills `published` on every existing row from its current values with `revision: 0` (a few hundred rows, in pages). It runs in the same PR, before the code that reads `published`. S4's switch-on then sends the first invites for upcoming Sessions (spec split).
 
-❓ **Q2.4 The Group location.**
-➡️ 🔒 (#123, map notes) **One optional free-text `groups.location`, at most 200 characters, trimmed.** No coordinates and no provider id. It goes into `LOCATION` and the Reminder.
+❓ **Q2.4 The location.**
+➡️ 🔒 (#123, map notes, Michael on review) **Optional free text on the Group (`groups.location`) and as a Session override (`sessions.location`), at most 200 characters, trimmed.** No coordinates and no provider id. The Session's own location wins, then the Group's. It goes into `LOCATION` and the Reminder.
 
 ❓ **Q2.5 Feed and Reminder-link tokens.**
 ➡️ 🤖 **Two random 128-bit tokens on `users`, each with its own index, minted lazily.**
@@ -184,7 +186,7 @@ flowchart TB
   end
 
   subgraph convex[convex/]
-    sessions[sessions.ts<br/>schedule, cancel, setStartTime]:::changed
+    sessions[sessions.ts<br/>schedule, cancel, updateDetails]:::changed
     groups[groups.ts<br/>settings, updateSettings, remove]:::changed
     playerMod[player.ts / roster.ts<br/>claim, release, removePlayer]:::changed
     lifecycle[model/sessionLifecycle.ts<br/>Undo window, settle, published snapshot]:::new
@@ -217,7 +219,7 @@ flowchart TB
   me --> links
 ```
 
-The deep module is **`model/sessionLifecycle.ts`**. Every change to what a Session means to the outside goes through it: schedule, cancel, restore, a time override, a Group settings edit, a rename. It owns the Undo window and the **published snapshot**. Callers say what changed, and the lifecycle decides whether anyone hears about it, and when.
+The deep module is **`model/sessionLifecycle.ts`**. Every change to what a Session means to the outside goes through it: schedule, cancel, restore, a Session override, a Group settings edit, a rename. It owns the Undo window and the **published snapshot**. Callers say what changed, and the lifecycle decides whether anyone hears about it, and when.
 
 Everything outside the GM's and players' own screens reads `published`, never the live row: Session mail, Reminders, the feed, the download and every retry. That is how the Undo window holds for every channel, the pull ones included.
 
@@ -408,7 +410,8 @@ export function groupTime(group: Partial<GroupTime>): GroupTime;
 
 export type SessionWindow = { start: number; end: number }; // epoch ms
 
-export function sessionWindow(date: IsoDate, time: GroupTime, override?: ClockTime): SessionWindow;
+export type SessionOverrides = { startTime?: ClockTime; lengthMinutes?: number };
+export function sessionWindow(date: IsoDate, time: GroupTime, overrides?: SessionOverrides): SessionWindow;
 
 export type ReminderLead = "day" | "hours";
 export function reminderDueAt(start: number, lead: ReminderLead): number; // start − 24 h / − 2 h
@@ -485,7 +488,8 @@ export async function scheduleSession(ctx: MutationCtx, group: Doc<"groups">, da
 /** Delete a never-published row, else mark it cancelled. Never decides who hears of it. */
 export async function cancelSession(ctx: MutationCtx, session: Doc<"sessions">): Promise<void>;
 
-export async function setSessionStart(ctx: MutationCtx, session: Doc<"sessions">, startTime: ClockTime | null): Promise<void>;
+/** Each field: a value overrides the Group, null follows the Group again, absent leaves it alone. */
+export async function updateSessionDetails(ctx: MutationCtx, session: Doc<"sessions">, details: { startTime?: ClockTime | null; lengthMinutes?: number | null; location?: string | null }): Promise<void>;
 
 /** After groups.updateSettings or a rename: bump changedAt and queue a settle for every upcoming Session. */
 export async function groupChanged(ctx: MutationCtx, group: Doc<"groups">): Promise<void>;
@@ -571,7 +575,7 @@ Invariants:
 | | `create` | mutation | gains `{timeZone?}` | GM |
 | `sessions` | `schedule` | mutation | unchanged args; restores a cancelled row | GM, owner only |
 | | `cancel` | mutation | `{sessionId}` → `null`; replaces `unschedule` | GM, owner only |
-| | `setStartTime` | mutation | `{sessionId, startTime: string \| null}` → `null` | GM, owner only |
+| | `updateDetails` | mutation | `{sessionId, startTime?, lengthMinutes?, location?}`, each `value \| null` → `null`; `null` follows the Group again | GM, owner only, `gmEdit` |
 | `me` | `notificationSettings` | query | `{}` → `{sessionEmails, reminders}` | Account |
 | | `setReminders` | mutation | `{enabled}` → `null` | Account |
 | | `calendarFeed` | mutation | `{}` → `{url}`; mints the token on first call | Account |
@@ -617,9 +621,9 @@ No new signing secret: both link tokens are stored.
 
 | Seam | Tested through |
 | --- | --- |
-| `shared/sessionTime.ts` | Vitest on plain data: defaults, override, a Berlin Session on each side of both DST changes and one spanning the October change (4 real hours), the spring-forward gap, reminder due times |
+| `shared/sessionTime.ts` | Vitest on plain data: defaults, start and length overrides alone and together, a Berlin Session on each side of both DST changes and one spanning the October change (4 real hours), the spring-forward gap, reminder due times |
 | `shared/icalendar.ts` | Vitest golden files: `request`, `cancel` with `STATUS:CANCELLED`, `withdraw` without `STATUS`, a feed with a cancelled entry, UTC times, folding of a long location with umlauts, escaping, no `VALARM` anywhere, `PARTSTAT=ACCEPTED;RSVP=FALSE` |
-| `sessions.*`, `groups.updateSettings` through the lifecycle | `convex-test` through `api.*` with fake timers: the #124 table (cancel inside and after the first window, Undo by id, Schedule again restores, cancel → Schedule again → cancel inside one window still publishes the cancel, cancel → Undo publishes nothing), one publish per burst of edits, a location edit republishes a Session with its own start time, a start-time edit leaves it alone |
+| `sessions.*`, `groups.updateSettings` through the lifecycle | `convex-test` through `api.*` with fake timers: the #124 table (cancel inside and after the first window, Undo by id, Schedule again restores, cancel → Schedule again → cancel inside one window still publishes the cancel, cancel → Undo publishes nothing), one publish per burst of edits, a Group location edit republishes a Session that overrides only its time and leaves one with its own location alone, a Group usual-time edit leaves a Session with its own start time alone, `null` in `updateDetails` returns a field to the Group's value |
 | Session mail | `convex-test` with a fake `fetch` that records Resend payloads and decodes `invite.ics`: one mail per recipient with the GM included, `UID` stable across restore, `SEQUENCE` strictly rising per recipient, nothing before publish, a claim's invite doesn't drop another recipient's pending retry, a release's withdrawal still sends after the claim is gone and after the Group is deleted, without any change published after the release, a GM releasing their own Player gets no withdrawal, a deletion cancel carries a higher `SEQUENCE` than the last invite, a retry on an old revision drops itself, a 503 then 200 sends once, deleting a Group with 100 Accounts × 20 Sessions drains in batches |
 | Reminders | `convex-test` with fake timers: both fire at their times, a move fires only the new pair, cancel → Schedule again at the same time sends one pair (not two), a restore undone inside its window sends none, opt-out and release send none, a late publish skips the passed Reminder, the payload holds no Share Token outside `player_url` |
 | HTTP routes | `convex-test` `t.fetch("/cal/…")`: 200 with a parseable calendar for a valid token, 404 after a reset or rotation, another Account's Sessions never appear (feed scoping), the Account feed holds no Share Token, a Session inside its first Undo window is absent |
@@ -653,10 +657,10 @@ flowchart LR
 1. **S1 Cancelled Session.** Builds `model/sessionLifecycle.ts` and the `state`, `changedAt` and `published` fields, with the backfill. `sessions.cancel` replaces `unschedule` and `session_cancelled` replaces `session_unscheduled`. The existing Workflows Session update is driven by publish, and `sessionMailStates` is dropped. Cancelled marks show on the GM, player and My groups surfaces, and **Schedule again** is added.
    - S1a: backend lifecycle and migration.
    - S1b: UI marks and Schedule again.
-2. **S2 Group settings and start times.** `shared/sessionTime.ts`, the `groups` fields, `updateSettings`, `setStartTime`, the time zone captured at create, the settings page with Geoapify and its attribution, the time shown on Sessions, and the Privacy row for Geoapify. Uses the #128 prototype.
+2. **S2 Group settings and start times.** `shared/sessionTime.ts`, the `groups` fields, the Session overrides, `updateSettings`, `sessions.updateDetails`, the time zone captured at create, the settings page with Geoapify and its attribution, the time and location shown on Sessions, and the Privacy row for Geoapify. Uses the #128 prototype.
    - S2a: backend and shared.
    - S2b: settings page.
-   - S2c: the per-Session time in the day panel.
+   - S2c: the per-Session start time, length and location in the day panel.
 3. **S3 Calendar files.** `shared/icalendar.ts`, the HTTP routes, the Worker proxy, the feed token and **Reset feed link**, the Group download on the player page and **Subscribe in your calendar app** on My groups, and the feed Privacy row. This already gives every player a working path, Gmail included, before any invite goes out.
    - S3a: builder, routes and Worker.
    - S3b: UI, placed per #127.
@@ -702,5 +706,5 @@ Considered:
 
 Consequences:
 - `sessionMailStates` goes away.
-- The Session row grows `state`, `startTime`, `changedAt`, `published` and `sequence`.
+- The Session row grows `state`, `startTime`, `lengthMinutes`, `location`, `changedAt`, `published` and `sequence`.
 - Existing rows are backfilled as published at revision 0.
