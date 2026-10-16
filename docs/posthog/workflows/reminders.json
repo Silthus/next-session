@@ -1,0 +1,93 @@
+{
+  "name": "Next Session: Reminders",
+  "description": "Draft rebuild definition for transactional Reminders 1 day and 2 hours before a Session. Resolve the verified sender, the Session updates category, template and Bearer secret before activation. Convex alone requests each Reminder when its due time comes.",
+  "exit_condition": "exit_only_at_end",
+  "actions": [
+    {
+      "id": "trigger_node",
+      "name": "Reminder due, requested by Convex",
+      "type": "trigger",
+      "config": {
+        "type": "webhook",
+        "template_id": "template-source-webhook",
+        "inputs": {
+          "event": {
+            "value": "next_session:reminder_requested"
+          },
+          "distinct_id": {
+            "value": "{request.body.distinct_id}"
+          },
+          "properties": {
+            "value": {
+              "product": "{request.body.product}",
+              "email": "{request.body.email}",
+              "group_name": "{request.body.group_name}",
+              "date_label": "{request.body.date_label}",
+              "start_label": "{request.body.start_label}",
+              "location": "{request.body.location}",
+              "lead": "{request.body.lead}",
+              "player_url": "{request.body.player_url}",
+              "reminders_off_url": "{request.body.reminders_off_url}"
+            }
+          },
+          "auth_header": {
+            "value": "Bearer <POSTHOG_MAIL_WEBHOOK_SECRET>"
+          },
+          "method": {
+            "value": "POST"
+          }
+        }
+      }
+    },
+    {
+      "id": "email_reminder",
+      "name": "Reminder",
+      "type": "function_email",
+      "config": {
+        "template_id": "template-email",
+        "template_uuid": "<TEMPLATE:reminder>",
+        "message_category_type": "transactional",
+        "tracking_enabled": false,
+        "inputs": {
+          "email": {
+            "value": {
+              "to": {
+                "email": "{{ event.properties.email }}",
+                "name": ""
+              },
+              "from": {
+                "integrationId": "<SENDER_INTEGRATION_ID>",
+                "email": "hello@next-session.link",
+                "name": "Next Session"
+              },
+              "replyTo": "<REPLY_TO>",
+              "preheader": "Your next game night is coming up."
+            }
+          }
+        },
+        "message_category_id": "<CATEGORY:session-updates>"
+      }
+    },
+    {
+      "id": "exit_node",
+      "name": "Exit",
+      "type": "exit",
+      "config": {
+        "reason": "Reminder sent"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "trigger_node",
+      "to": "email_reminder",
+      "type": "continue"
+    },
+    {
+      "from": "email_reminder",
+      "to": "exit_node",
+      "type": "continue"
+    }
+  ],
+  "status": "draft"
+}

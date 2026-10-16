@@ -21,7 +21,7 @@ import {
   type GmClient,
   type TestBackend,
 } from "./model/test.setup";
-import { UNDO_WINDOW_MS } from "./sessionLifecycle";
+import { UNDO_WINDOW_MS } from "../shared/sessions";
 
 withAuthKeys();
 withGoogleCredentials();

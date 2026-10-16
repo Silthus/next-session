@@ -1,0 +1,490 @@
+
+ RUN  v5.0.3 <tree>
+
+ ❯ |convex| convex/reminders.test.ts (38 tests | 27 failed) 296ms
+   × reminds each Claimed Account once, 1 day and again 2 hours before the start 104ms
+   × names the Group, the date, the start and the location in the Group's time zone, and links only the current Share Link 8ms
+   × writes the date and start in a Group time zone far from UTC and leaves out a missing location 6ms
+   × reminds each Account once however many Players it claims, the GM only through a Player of their own, and never an Account that can't get mail 8ms
+   ❯ a Reminder (1)
+     × never announces a change before its Undo window ends 5ms
+   × moves the pair with a saved Time and place and shows the new location 6ms
+   × fires the moved pair at the new times 6ms
+   ❯ Cancel, Undo and Schedule again (5)
+     × sends one pair, not two, for Cancel then Schedule again inside the cancel's window 5ms
+     × sends one pair, not two, for Cancel then Schedule again after the cancel settled 6ms
+   ❯ recipients resolved when the Reminder fires (7)
+     × sends no 2-hour Reminder after the day Reminder's link turned Reminders off 3ms
+     × reminds an Account that claims a Player after the Session was published 4ms
+     × keeps the Account's Reminder link the same across Reminders 3ms
+   ❯ due times (5)
+     × schedules only the 2-hour Reminder for a Session published an hour after the day Reminder was due 3ms
+     × schedules only the 2-hour Reminder for a Session published 2 minutes after the day Reminder was due 3ms
+     × a day Reminder run 4 minutes late sends ["day","hours"] 3ms
+     × a day Reminder run 6 minutes late sends ["hours"] 3ms
+   ❯ the switch-on backfill (4)
+     × schedules one pair for each upcoming scheduled Session published before switch-on, even when run twice 14ms
+     × leaves a Session published after switch-on with its one pair 5ms
+     × pages through more upcoming Sessions than one page holds 7ms
+     × skips a Session whose Reminders are already behind it 3ms
+   ❯ delivery (7)
+     × sends once after a 503 then a 200 4ms
+     × drops a Reminder the webhook refuses with HTTP 400 3ms
+     × drops a Reminder the webhook refuses with HTTP 404 2ms
+     × drops a Reminder the webhook refuses with HTTP 429 4ms
+     × rechecks the switch before retrying a failed send 3ms
+     × rechecks the release before retrying a failed send 2ms
+     × counts one delivery per Reminder in the day's mail volume 3ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 27 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/reminders.test.ts > reminds each Claimed Account once, 1 day and again 2 hours before the start
+AssertionError: expected [] to deeply equal [ 'day' ]
+
+- Expected
++ Received
+
+- [
+-   "day",
+- ]
++ []
+
+ ❯ convex/reminders.test.ts:172:19
+    170|   expect(leads()).toEqual([]);
+    171|   await at(dayDue);
+    172|   expect(leads()).toEqual(["day"]);
+       |                   ^
+    173|   await at(hoursDue - 1_000);
+    174|   expect(leads()).toEqual(["day"]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > names the Group, the date, the start and the location in the Group's time zone, and links only the current Share Link
+AssertionError: expected [] to deeply equal [ { …(10) } ]
+
+- Expected
++ Received
+
+- [
+-   {
+-     "date_label": "Saturday, October 17, 2026",
+-     "distinct_id": "next-session:000000000000000000000010003users",
+-     "email": "robin@example.com",
+-     "group_name": "Renamed Crew",
+-     "lead": "day",
+-     "location": "Max's place",
+-     "player_url": "https://next-session.link/s/new-token",
+-     "product": "next-session",
+-     "reminders_off_url": "https://next-session.link/reminders/off?t=null",
+-     "start_label": "19:00",
+-   },
+- ]
++ []
+
+ ❯ convex/reminders.test.ts:193:23
+    191|
+    192|   const token = await reminderLinkTokenOf(robin.userId);
+    193|   expect(reminders()).toEqual([
+       |                       ^
+    194|     {
+    195|       distinct_id: `next-session:${robin.userId}`,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > writes the date and start in a Group time zone far from UTC and leaves out a missing location
+AssertionError: expected [] to deeply equal [ ObjectContaining{…}, …(1) ]
+
+- Expected
++ Received
+
+- [
+-   ObjectContaining {
+-     "date_label": "Saturday, October 17, 2026",
+-     "lead": "day",
+-     "start_label": "21:30",
+-   },
+-   ObjectContaining {
+-     "date_label": "Saturday, October 17, 2026",
+-     "lead": "hours",
+-     "start_label": "21:30",
+-   },
+- ]
++ []
+
+ ❯ convex/reminders.test.ts:226:23
+    224|
+    225|   const label = { date_label: "Saturday, October 17, 2026", start_labe…
+    226|   expect(reminders()).toEqual([
+       |                       ^
+    227|     expect.objectContaining({ ...label, lead: "day" }),
+    228|     expect.objectContaining({ ...label, lead: "hours" }),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > reminds each Account once however many Players it claims, the GM only through a Player of their own, and never an Account that can't get mail
+AssertionError: expected [] to deeply equal [ …(2) ]
+
+- Expected
++ Received
+
+- [
+-   "next-session:000000000000000000000010000users",
+-   "next-session:000000000000000000000010003users",
+- ]
++ []
+
+ ❯ convex/reminders.test.ts:254:5
+    252|       .map(({ distinct_id }) => distinct_id)
+    253|       .sort(),
+    254|   ).toEqual([`next-session:${robin.userId}`, `next-session:${userId}`]…
+       |     ^
+    255| });
+    256|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > a Reminder > never announces a change before its Undo window ends
+AssertionError: expected [] to deeply equal [ ObjectContaining{…} ]
+
+- Expected
++ Received
+
+- [
+-   ObjectContaining {
+-     "lead": "day",
+-     "start_label": "19:00",
+-   },
+- ]
++ []
+
+ ❯ convex/reminders.test.ts:267:25
+    265|     await at(dayDue);
+    266|
+    267|     expect(reminders()).toEqual([expect.objectContaining({ lead: "day"…
+       |                         ^
+    268|   });
+    269| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > moves the pair with a saved Time and place and shows the new location
+AssertionError: expected [] to deeply equal [ ObjectContaining{…}, …(1) ]
+
+- Expected
++ Received
+
+- [
+-   ObjectContaining {
+-     "lead": "day",
+-     "location": "Max's place",
+-     "start_label": "20:00",
+-   },
+-   ObjectContaining {
+-     "lead": "hours",
+-     "location": "Max's place",
+-     "start_label": "20:00",
+-   },
+- ]
++ []
+
+ ❯ convex/reminders.test.ts:280:23
+    278|
+    279|   await at(start + HOUR);
+    280|   expect(reminders()).toEqual([
+       |                       ^
+    281|     expect.objectContaining({ lead: "day", start_label: "20:00", locat…
+    282|     expect.objectContaining({ lead: "hours", start_label: "20:00", loc…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > fires the moved pair at the new times
+AssertionError: expected [] to deeply equal [ 'day' ]
+
+- Expected
++ Received
+
+- [
+-   "day",
+- ]
++ []
+
+ ❯ convex/reminders.test.ts:296:19
+    294|   expect(leads()).toEqual([]);
+    295|   await at(dayDue + HOUR);
+    296|   expect(leads()).toEqual(["day"]);
+       |                   ^
+    297|   await at(hoursDue);
+    298|   expect(leads()).toEqual(["day"]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > Cancel, Undo and Schedule again > sends one pair, not two, for Cancel then Schedule again inside the cancel's window
+ FAIL  |convex| convex/reminders.test.ts > Cancel, Undo and Schedule again > sends one pair, not two, for Cancel then Schedule again after the cancel settled
+AssertionError: expected [] to deeply equal [ 'day', 'hours' ]
+
+- Expected
++ Received
+
+- [
+-   "day",
+-   "hours",
+- ]
++ []
+
+ ❯ convex/reminders.test.ts:331:21
+    329|
+    330|     await at(start + HOUR);
+    331|     expect(leads()).toEqual(["day", "hours"]);
+       |                     ^
+    332|   });
+    333|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > recipients resolved when the Reminder fires > sends no 2-hour Reminder after the day Reminder's link turned Reminders off
+TypeError: Cannot read properties of undefined (reading 'reminders_off_url')
+ ❯ convex/reminders.test.ts:389:40
+    387|     await at(dayDue);
+    388|
+    389|     const link = new URL(reminders()[0]!.reminders_off_url as string);
+       |                                        ^
+    390|     await t.mutation(api.reminderLinks.turnOff, { token: link.searchPa…
+    391|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > recipients resolved when the Reminder fires > reminds an Account that claims a Player after the Session was published
+AssertionError: expected [] to deeply equal [ 'robin@example.com', …(1) ]
+
+- Expected
++ Received
+
+- [
+-   "robin@example.com",
+-   "sam@example.com",
+- ]
++ []
+
+ ❯ convex/reminders.test.ts:412:7
+    410|         .map(({ email }) => email)
+    411|         .sort(),
+    412|     ).toEqual(["robin@example.com", "sam@example.com"]);
+       |       ^
+    413|   });
+    414|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > recipients resolved when the Reminder fires > keeps the Account's Reminder link the same across Reminders
+TypeError: Cannot read properties of undefined (reading 'reminders_off_url')
+ ❯ convex/reminders.test.ts:422:17
+    420|     await at(start + HOUR);
+    421|     const [day, hours] = reminders();
+    422|     expect(day!.reminders_off_url).toBe(hours!.reminders_off_url);
+       |                 ^
+    423|   });
+    424| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > due times > schedules only the 2-hour Reminder for a Session published an hour after the day Reminder was due
+ FAIL  |convex| convex/reminders.test.ts > due times > schedules only the 2-hour Reminder for a Session published 2 minutes after the day Reminder was due
+AssertionError: expected [] to deeply equal [ 'hours' ]
+
+- Expected
++ Received
+
+- [
+-   "hours",
+- ]
++ []
+
+ ❯ convex/reminders.test.ts:439:23
+    437|
+    438|       await at(start + HOUR);
+    439|       expect(leads()).toEqual(["hours"]);
+       |                       ^
+    440|     },
+    441|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > due times > a day Reminder run 4 minutes late sends ["day","hours"]
+AssertionError: expected [] to deeply equal [ 'day', 'hours' ]
+
+- Expected
++ Received
+
+- [
+-   "day",
+-   "hours",
+- ]
++ []
+
+ ❯ convex/reminders.test.ts:467:21
+    465|
+    466|     await at(start + HOUR);
+    467|     expect(leads()).toEqual(expected);
+       |                     ^
+    468|   });
+    469| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > due times > a day Reminder run 6 minutes late sends ["hours"]
+AssertionError: expected [] to deeply equal [ 'hours' ]
+
+- Expected
++ Received
+
+- [
+-   "hours",
+- ]
++ []
+
+ ❯ convex/reminders.test.ts:467:21
+    465|
+    466|     await at(start + HOUR);
+    467|     expect(leads()).toEqual(expected);
+       |                     ^
+    468|   });
+    469| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > the switch-on backfill > schedules one pair for each upcoming scheduled Session published before switch-on, even when run twice
+Error: Could not find module for: "reminders"
+ ❯ ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.mutationFromPath ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:2117:40
+ ❯ mutation ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:2167:41
+ ❯ ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as mutation] ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:1886:56
+ ❯ convex/reminders.test.ts:513:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > the switch-on backfill > leaves a Session published after switch-on with its one pair
+Error: Could not find module for: "reminders"
+ ❯ ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.mutationFromPath ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:2117:40
+ ❯ mutation ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:2167:41
+ ❯ ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as mutation] ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:1886:56
+ ❯ convex/reminders.test.ts:530:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > the switch-on backfill > pages through more upcoming Sessions than one page holds
+Error: Could not find module for: "reminders"
+ ❯ ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.mutationFromPath ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:2117:40
+ ❯ mutation ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:2167:41
+ ❯ ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as mutation] ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:1886:56
+ ❯ convex/reminders.test.ts:547:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > the switch-on backfill > skips a Session whose Reminders are already behind it
+Error: Could not find module for: "reminders"
+ ❯ ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:1468:19
+    1466|         const module = modulesWithoutExtension[prefix + path];
+    1467|         if (module === undefined) {
+    1468|             throw new Error(`Could not find module for: "${path}"`);
+       |                   ^
+    1469|         }
+    1470|         return await module();
+ ❯ resolveFunction ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:2402:76
+ ❯ Object.mutationFromPath ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:2117:40
+ ❯ mutation ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:2167:41
+ ❯ ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:1886:80
+ ❯ Object.result.<computed> [as mutation] ../../home/coder/.t3/worktrees/next-session/t3-9456d60f/node_modules/convex-test/dist/index.js:1886:56
+ ❯ convex/reminders.test.ts:561:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > delivery > sends once after a 503 then a 200
+AssertionError: expected "vi.fn()" to be called 2 times, but got 0 times
+ ❯ convex/reminders.test.ts:579:23
+    577|     await at(dayDue + 60_000);
+    578|
+    579|     expect(fetchMock).toHaveBeenCalledTimes(2);
+       |                       ^
+    580|     expect(reminders()[0]).toEqual(reminders()[1]);
+    581|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > delivery > drops a Reminder the webhook refuses with HTTP 400
+ FAIL  |convex| convex/reminders.test.ts > delivery > drops a Reminder the webhook refuses with HTTP 404
+ FAIL  |convex| convex/reminders.test.ts > delivery > drops a Reminder the webhook refuses with HTTP 429
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ convex/reminders.test.ts:592:23
+    590|     await at(dayDue + 3 * 60_000);
+    591|
+    592|     expect(fetchMock).toHaveBeenCalledTimes(1);
+       |                       ^
+    593|   });
+    594|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > delivery > rechecks the switch before retrying a failed send
+ FAIL  |convex| convex/reminders.test.ts > delivery > rechecks the release before retrying a failed send
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ convex/reminders.test.ts:610:25
+    608|       await at(dayDue + 3 * 60_000);
+    609|
+    610|       expect(fetchMock).toHaveBeenCalledTimes(1);
+       |                         ^
+    611|     },
+    612|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/27]⎯
+
+ FAIL  |convex| convex/reminders.test.ts > delivery > counts one delivery per Reminder in the day's mail volume
+AssertionError: expected null to be 2 // Object.is equality
+
+- Expected:
+2
+
++ Received:
+null
+
+ ❯ convex/reminders.test.ts:622:46
+    620|     await at(dayDue);
+    621|
+    622|     expect(await mailVolumeOn("2026-10-16")).toBe(2);
+       |                                              ^
+    623|   });
+    624| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/27]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  27 failed | 11 passed (38)
+   Start at  10:37:39
+   Duration  810ms (tests 42%, transform 32%, import 19%, environment 6%)
+

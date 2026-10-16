@@ -1,0 +1,485 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-0f4ed498
+
+ ✓ |convex| convex/me.test.ts > me.groups > is null for a visitor and an Anonymous GM 41ms
+ ✓ |convex| convex/me.test.ts > me.groups > is empty for an Account that runs and plays nowhere 3ms
+ ✓ |convex| convex/me.test.ts > me.groups > lists the Groups the Account runs with their next five Sessions from today 38ms
+ ✓ |convex| convex/me.test.ts > me.groups > lists the Groups the Account plays in with its Player and the days left to answer 16ms
+ ✓ |convex| convex/me.test.ts > me.groups > shows a Group the Account runs and plays in in both lists 4ms
+ ✓ |convex| convex/me.test.ts > me.groups > drops a Group once the Account releases its claim there 5ms
+ ✓ |convex| convex/me.test.ts > me.groups > drops a Group once the GM removes the Claimed Player 5ms
+ ✓ |convex| convex/me.test.ts > me.groups > skips a claim whose Group is deleted while its Players are still being removed 5ms
+ ✓ |convex| convex/me.test.ts > me.groups > returns the current Share Token after the GM rotates it 5ms
+ ✓ |convex| convex/me.test.ts > me.groups > moves on at midnight without a write 5ms
+ ✓ |convex| convex/me.test.ts > me.groups > accepts a client date one day off the server's but no further 5ms
+ ✓ |convex| convex/me.test.ts > me.notificationSettings > is null for a visitor and an Anonymous GM 1ms
+ ✓ |convex| convex/me.test.ts > me.notificationSettings > hides Reminders while they are not configured 1ms
+ ✓ |convex| convex/me.test.ts > me.notificationSettings > hides Reminders without POSTHOG_REMINDER_WEBHOOK_URL 1ms
+ ✓ |convex| convex/me.test.ts > me.notificationSettings > hides Reminders without POSTHOG_MAIL_WEBHOOK_SECRET 1ms
+ ✓ |convex| convex/me.test.ts > me.notificationSettings > reads Reminders as on by default once they are configured 1ms
+ ✓ |convex| convex/me.test.ts > me.setReminders > turns only the caller's Reminders off and back on, leaving Session updates alone 1ms
+ ✓ |convex| convex/me.test.ts > me.setReminders > leaves Reminders alone when Session updates are turned off 1ms
+ ✓ |convex| convex/me.test.ts > me.setReminders > refuses a visitor and an Anonymous GM 1ms
+stdout | convex/notifications.test.ts > returns to the GM before mail, then sends once to each current claimed Account except the actor
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/notifications.test.ts > cancels a Session older than the Undo window and uses the current Group name and Share Link
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/notifications.test.ts > cancels a Session older than the Undo window and uses the current Group name and Share Link
+Run 0000000000000000000000010003runs succeeded.
+
+stdout | convex/notifications.test.ts > lets an Account turn session emails off and back on, with email on by default
+Run 0000000000000000000000010000runs succeeded.
+
+ ✓ |convex| convex/reminderLinks.test.ts > reminderLinkTokenFor > mints a 128-bit token on first use and keeps it on the Account 9ms
+ ✓ |convex| convex/reminderLinks.test.ts > reminderLinkTokenFor > gives every Account its own token 2ms
+ ✓ |convex| convex/reminderLinks.test.ts > reminderLinks > reads Reminders as on for an Account that never chose 3ms
+ ✓ |convex| convex/reminderLinks.test.ts > reminderLinks > turns Reminders off and back on with the token, without a session 11ms
+ ✓ |convex| convex/reminderLinks.test.ts > reminderLinks > answers a second press with the same state 2ms
+ ✓ |convex| convex/reminderLinks.test.ts > reminderLinks > reads the unknown token "" as null and refuses it as NOT_FOUND 2ms
+ ✓ |convex| convex/reminderLinks.test.ts > reminderLinks > reads the unknown token "not-a-token" as null and refuses it as NOT_FOUND 1ms
+ ✓ |convex| convex/reminderLinks.test.ts > reminderLinks > reads the unknown token "AAAAAAAAAAAAAAAAAAAAAA" as null and refuses it as NOT_FOUND 1ms
+ ✓ |convex| convex/reminderLinks.test.ts > reminderLinks > refuses with RATE_LIMITED after a burst of 10 presses on one link, and others still work 7ms
+ ✓ |convex| convex/reminderLinks.test.ts > reminderLinks > lets the link work again a minute after the burst 6ms
+ ✓ |convex| convex/reminderLinks.test.ts > Reminder link scoping > covers every public function that takes a Reminder link token 2ms
+ ✓ |convex| convex/reminderLinks.test.ts > Reminder link scoping > every Reminder link function reaches only its own Account's Reminders switch 6ms
+stdout | convex/notifications.test.ts > HTTP 503 produces 2 attempts
+Run 0000000000000000000000010000runs succeeded.
+
+ ✓ |convex| convex/notifications.test.ts > returns to the GM before mail, then sends once to each current claimed Account except the actor 153ms
+ ✓ |convex| convex/notifications.test.ts > cancels a Session older than the Undo window and uses the current Group name and Share Link 13ms
+ ✓ |convex| convex/notifications.test.ts > lets an Account turn session emails off and back on, with email on by default 12ms
+ ✓ |convex| convex/notifications.test.ts > Undo after 0 ms sends neither schedule nor cancellation mail 4ms
+ ✓ |convex| convex/notifications.test.ts > Undo after 30000 ms sends neither schedule nor cancellation mail 4ms
+ ✓ |convex| convex/notifications.test.ts > sends nothing without POSTHOG_SESSION_WEBHOOK_URL 2ms
+ ✓ |convex| convex/notifications.test.ts > sends nothing without POSTHOG_MAIL_WEBHOOK_SECRET 2ms
+ ✓ |convex| convex/notifications.test.ts > rechecks release before delivery 4ms
+ ✓ |convex| convex/notifications.test.ts > rechecks remove-group before delivery 4ms
+ ✓ |convex| convex/notifications.test.ts > rechecks test-email before delivery 3ms
+ ✓ |convex| convex/notifications.test.ts > rechecks anonymous before delivery 5ms
+stdout | convex/notifications.test.ts > HTTP 400 produces 1 attempts
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/notifications.test.ts > HTTP 429 produces 1 attempts
+Run 0000000000000000000000010000runs succeeded.
+
+stderr | convex/notifications.test.ts > rechecks the preference before retrying a failed send
+Error executing 0000000000000000000000010000runs: The session mail webhook answered HTTP 503
+
+stderr | convex/notifications.test.ts > rechecks the preference before retrying a failed send
+Run 0000000000000000000000010000runs failed, retrying in 25226.47 ms: The session mail webhook answered HTTP 503
+
+stdout | convex/notifications.test.ts > rechecks the preference before retrying a failed send
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/notifications.test.ts > sends only the final cancellation when an older Session is cancelled, restored and cancelled again
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/notifications.test.ts > sends only the final cancellation when an older Session is cancelled, restored and cancelled again
+Run 0000000000000000000000010003runs succeeded.
+
+ ✓ |convex| convex/notifications.test.ts > HTTP 503 produces 2 attempts 7ms
+ ✓ |convex| convex/notifications.test.ts > HTTP 400 produces 1 attempts 5ms
+ ✓ |convex| convex/notifications.test.ts > HTTP 429 produces 1 attempts 5ms
+ ✓ |convex| convex/notifications.test.ts > rechecks the preference before retrying a failed send 8ms
+ ✓ |convex| convex/notifications.test.ts > rejects signed-out and anonymous preference writes 2ms
+ ✓ |convex| convex/notifications.test.ts > sends only the final cancellation when an older Session is cancelled, restored and cancelled again 12ms
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010003runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010006runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010009runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010012runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010015runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010018runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010021runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010024runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010027runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010030runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010033runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010036runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010039runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010042runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010045runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010048runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010051runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010054runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010057runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010060runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010063runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010066runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010069runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010072runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010075runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010078runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010081runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010084runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010087runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010090runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010093runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010096runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010099runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010102runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010105runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010108runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010111runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010114runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010117runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010120runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010123runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010126runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010129runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010132runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010135runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010138runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010141runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010144runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010147runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010150runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010153runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010156runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010159runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010162runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010165runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010168runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010171runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010174runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010177runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010180runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010183runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010186runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010189runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010192runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010195runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010198runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010201runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010204runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010207runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010210runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010213runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010216runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010219runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010222runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010225runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010228runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010231runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010234runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010237runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010240runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010243runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010246runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010249runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010252runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010255runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010258runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010261runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010264runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010267runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010270runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010273runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010276runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010279runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010282runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010285runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010288runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010291runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010294runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010297runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010300runs succeeded.
+
+stdout | convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010303runs succeeded.
+
+stdout | convex/notifications.test.ts > Undo cancellation after 1000 ms sends no update
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/notifications.test.ts > Undo cancellation after 30000 ms sends no update
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/notifications.test.ts > scheduling again after Undo of an initial schedule still announces the final Session
+Run 0000000000000000000000010000runs succeeded.
+
+ ✓ |convex| convex/notifications.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient 229ms
+ ✓ |convex| convex/notifications.test.ts > Undo cancellation after 1000 ms sends no update 6ms
+ ✓ |convex| convex/notifications.test.ts > Undo cancellation after 30000 ms sends no update 6ms
+ ✓ |convex| convex/notifications.test.ts > scheduling again after Undo of an initial schedule still announces the final Session 5ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactUrl > turns /s/AbC9_-xZ12 into /s/:shareToken 2ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactUrl > turns /s/AbC9_-xZ12/ into /s/:shareToken/ 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactUrl > turns https://next-session.link/s/AbC9_-xZ12?code=SECRETCODE1&month=2026-10&day=2026-10-12#join into https://next-session.link/s/:shareToken?month=2026-10&day=2026-10-12 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactUrl > turns https://next-session.link/tips?code=abc123 into https://next-session.link/tips 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactUrl > turns https://next-session.link/reminders/off?t=REMINDERLINK1 into https://next-session.link/reminders/off 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactUrl > turns /?code=oauth-code&state=xyz into / 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactUrl > turns /g/k57abc123?month=2026-11 into /g/k57abc123?month=2026-11 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactUrl > turns https://next-session.link/privacy into https://next-session.link/privacy 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactUrl > turns https://www.google.com/url?q=next-session.link/s/AbC9_-xZ12 into https://www.google.com/url 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactUrl > turns /S/AbC9_-xZ12?code=SECRETCODE1 into /s/:shareToken 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactUrl > turns https://next-session.link/S/AbC9_-xZ12 into https://next-session.link/s/:shareToken 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactUrl > leaves strings that are not URLs alone 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > redacts every URL and path the SDK attaches 1ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > drops what the SDK reads from the device, the page title and the search keyword 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > scrubs the page's Share Token and query values out of exception messages and frames 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > scrubs the Tips confirmation code out of an exception on /tips 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > scrubs the Reminder link token out of an exception on /reminders/off 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > scrubs a Share Token typed with a capital S 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > keeps ordinary query values intact elsewhere in the event 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > sends $pageview 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > sends $exception 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > sends next_session:answers_started 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > drops $autocapture, which Next Session never measures 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > drops $rageclick, which Next Session never measures 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > drops $dead_click, which Next Session never measures 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > drops $$heatmap, which Next Session never measures 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > drops $web_vitals, which Next Session never measures 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > drops $identify, which Next Session never measures 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactEvent > passes a dropped event on as dropped 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactLog > replaces the page URL the SDK adds after this filter runs 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > redactLog > redacts URL attributes and scrubs the body 0ms
+ ✓ |ui| src/lib/telemetry.test.ts > initTelemetry > does nothing without a token, and every export stays a no-op 2ms
+ ✓ |ui| src/lib/telemetry.test.ts > initTelemetry > starts PostHog cookieless through /ingest, with the Product Marker and no flags 2ms
+ ✓ |ui| src/lib/telemetry.test.ts > initTelemetry > starts once however often it is called 1ms
+ ✓ |ui| src/lib/telemetry.test.ts > initTelemetry > stays off in a browser that turned measurement off 1ms
+ ✓ |ui| src/lib/telemetry.test.ts > initTelemetry > stays quiet after an opt-out in a browser that cannot store the choice 1ms
+ ✓ |ui| src/lib/telemetry.test.ts > initTelemetry > keeps the opt-out for this visit and says so when the browser refuses localStorage 1ms
+ ✓ |ui| src/lib/telemetry.test.ts > initTelemetry > honours an opt-out made in another tab after this one turned measurement back on 1ms
+ ✓ |ui| src/lib/telemetry.test.ts > initTelemetry > delivers what the page sent while PostHog was still loading 1ms
+ ✓ |ui| src/lib/telemetry.test.ts > track, log and reportError > sends a browser event under the next_session: prefix 1ms
+ ✓ |ui| src/lib/telemetry.test.ts > track, log and reportError > logs through the PostHog logger 1ms
+ ✓ |ui| src/lib/telemetry.test.ts > track, log and reportError > reports what React hands to onCaughtError 1ms
+ ✓ |ui| src/lib/telemetry.test.ts > track, log and reportError > reports what React hands to onUncaughtError 1ms
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > shows the Session updates switch alone while Reminders aren't configured 110ms
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > shows the Reminders switch under Session updates once Reminders are configured 12ms
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > turns Reminders off without touching Session updates 28ms
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > turns Session updates off without touching Reminders 16ms
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > holds the Reminders switch while it saves, and keeps Session updates usable 21ms
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > says why a Reminders change failed 17ms
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > disables the Session updates switch while the settings load 4ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/reminders/RemindersOff.test.tsx > RemindersOff > asks before it turns Reminders off and calls nothing until the press 131ms
+ ✓ |ui| src/features/reminders/RemindersOff.test.tsx > RemindersOff > turns Reminders off on the press and offers to turn them back on 43ms
+ ✓ |ui| src/features/reminders/RemindersOff.test.tsx > RemindersOff > says Reminders are off when they already are, and calls nothing 18ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/reminders/RemindersOff.test.tsx > RemindersOff > turns Reminders back on from the same page and asks again 25ms
+ ✓ |ui| src/features/reminders/RemindersOff.test.tsx > RemindersOff > says an unknown link doesn't work and points to My groups 15ms
+ ✓ |ui| src/features/reminders/RemindersOff.test.tsx > RemindersOff > shows nothing to press while the link is being read 2ms
+ ✓ |ui| src/features/reminders/RemindersOff.test.tsx > RemindersOff > keeps the button for another try when the link is rate limited 37ms
+ ✓ |ui| src/features/reminders/RemindersOff.test.tsx > RemindersOff > says what went wrong without the server's words, and gives focus back to the button 24ms
+ ✓ |ui| src/features/reminders/RemindersOff.test.tsx > RemindersOff > presses once while the change is on its way 24ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/reminders/remindersOffRoute.test.tsx > /reminders/off > takes the token out of the address bar on load, reads the link and changes nothing 124ms
+ ✓ |ui| src/features/reminders/remindersOffRoute.test.tsx > /reminders/off > turns Reminders off with the token it took from the address bar 44ms
+ ✓ |ui| src/features/reminders/remindersOffRoute.test.tsx > /reminders/off > says the link doesn't work without a token and reads nothing 15ms
+
+ Test Files  7 passed (7)
+      Tests  114 passed (114)
+   Start at  09:11:11
+   Duration  1.98s (environment 54%, tests 16%, import 15%, transform 11%, setup 4%)
+

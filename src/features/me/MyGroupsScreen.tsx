@@ -8,7 +8,7 @@ import { useGm } from "../account/useGm";
 import { useCreateGroup } from "../group/useCreateGroup";
 import { useToast, type GroupToast } from "../group/useToast";
 import { useTodayUtc } from "../player/useTodayUtc";
-import { SessionEmailSettings } from "./SessionEmailSettings";
+import { EmailSettings } from "./EmailSettings";
 import { MyGroups } from "./MyGroups";
 import { useRemoval } from "./useRemoval";
 import type { CalendarFeedActions } from "./YourCalendar";
@@ -32,7 +32,7 @@ export function MyGroupsScreen() {
   return (
     <>
       <MyGroups
-        settings={<SessionEmailSettings />}
+        settings={<NotificationSettings />}
         calendarFeed={calendarFeed}
         email={gm.email}
         image={gm.image}
@@ -46,6 +46,19 @@ export function MyGroupsScreen() {
       />
       <ToastRegion toasts={toasts} onUndone={() => heading.current?.focus()} />
     </>
+  );
+}
+
+function NotificationSettings() {
+  const settings = useQuery(api.me.notificationSettings);
+  const setSessionEmails = useMutation(api.me.setSessionEmails);
+  const setReminders = useMutation(api.me.setReminders);
+  return (
+    <EmailSettings
+      settings={settings ?? undefined}
+      saveSessionEmails={(enabled) => setSessionEmails({ enabled })}
+      saveReminders={(enabled) => setReminders({ enabled })}
+    />
   );
 }
 

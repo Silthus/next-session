@@ -57,6 +57,10 @@ describe("redactUrl", () => {
       "https://next-session.link/s/:shareToken?month=2026-10&day=2026-10-12",
     ],
     ["https://next-session.link/tips?code=abc123", "https://next-session.link/tips"],
+    [
+      "https://next-session.link/reminders/off?t=REMINDERLINK1",
+      "https://next-session.link/reminders/off",
+    ],
     ["/?code=oauth-code&state=xyz", "/"],
     ["/g/k57abc123?month=2026-11", "/g/k57abc123?month=2026-11"],
     ["https://next-session.link/privacy", "https://next-session.link/privacy"],
@@ -161,6 +165,18 @@ describe("redactEvent", () => {
     );
 
     expect(serialized).not.toContain("TIPSCODE123");
+  });
+
+  it("scrubs the Reminder link token out of an exception on /reminders/off", () => {
+    const exception = event("$exception", {
+      $exception_list: [{ value: "failed with REMINDERLINK1" }],
+    });
+
+    const serialized = JSON.stringify(
+      redactEvent(exception, "https://next-session.link/reminders/off?t=REMINDERLINK1"),
+    );
+
+    expect(serialized).not.toContain("REMINDERLINK1");
   });
 
   it("scrubs a Share Token typed with a capital S", () => {

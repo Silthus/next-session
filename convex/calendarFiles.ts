@@ -6,7 +6,7 @@ import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { httpAction, internalQuery, type QueryCtx } from "./_generated/server";
 import { groupByShareToken } from "./model/access";
-import { siteLink } from "./model/siteLinks";
+import { shareLinkOf, siteLink } from "./model/siteLinks";
 
 const DOWNLOAD_PATH = /^\/cal\/s\/([A-Za-z0-9_-]+)\.ics$/;
 const FEED_PATH = /^\/cal\/a\/([A-Za-z0-9_-]+)\.ics$/;
@@ -67,7 +67,7 @@ export const groupDownload = internalQuery({
     const group = await groupByShareToken(ctx, shareToken);
     if (group === null) return null;
     const upcoming = bookingWindow(todayUtc(servedAt));
-    const shareLink = siteLink(`/s/${encodeURIComponent(group.shareToken)}`);
+    const shareLink = shareLinkOf(group);
     const entries = (await publishedEntriesOf(ctx, group, upcoming, shareLink, servedAt)).filter(
       (entry) => entry.status === "CONFIRMED",
     );

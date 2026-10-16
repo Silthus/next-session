@@ -11,9 +11,10 @@ import { MAX_CLAIMED_PLAYERS_PER_ACCOUNT, MAX_GROUPS_PER_GM } from "../shared/li
 import { randomToken } from "../shared/randomToken";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
-import { fail } from "./model/errors";
+import { remindersConfigured } from "./mail";
 import { currentAccount, requireAccount } from "./model/access";
 import { enforceRateLimit } from "./model/rateLimits";
+import { remindersOn } from "./model/reminderLinks";
 import { siteLink } from "./model/siteLinks";
 import { track } from "./model/telemetry";
 import { groupTimeOf, sessionTimeAndPlace, sessionTimeAndPlaceFields } from "./model/timeAndPlace";
@@ -143,12 +144,19 @@ function daysBetween(first: IsoDate, last: IsoDate) {
   return days;
 }
 
-export const sessionEmails = query({
+export const notificationSettings = query({
   args: {},
-  returns: v.union(v.boolean(), v.null()),
+  returns: v.union(
+    v.object({ sessionEmails: v.boolean(), reminders: v.union(v.boolean(), v.null()) }),
+    v.null(),
+  ),
   handler: async (ctx) => {
     const account = await currentAccount(ctx);
-    return account ? account.sessionEmailsEnabled !== false : null;
+    if (!account) return null;
+    return {
+      sessionEmails: account.sessionEmailsEnabled !== false,
+      reminders: remindersConfigured() ? remindersOn(account) : null,
+    };
   },
 });
 
@@ -156,9 +164,18 @@ export const setSessionEmails = mutation({
   args: { enabled: v.boolean() },
   returns: v.null(),
   handler: async (ctx, { enabled }) => {
-    const account = await currentAccount(ctx);
-    if (!account) fail({ code: "UNAUTHENTICATED" });
+    const account = await requireAccount(ctx);
     await ctx.db.patch("users", account._id, { sessionEmailsEnabled: enabled });
+    return null;
+  },
+});
+
+export const setReminders = mutation({
+  args: { enabled: v.boolean() },
+  returns: v.null(),
+  handler: async (ctx, { enabled }) => {
+    const account = await requireAccount(ctx);
+    await ctx.db.patch("users", account._id, { remindersEnabled: enabled });
     return null;
   },
 });

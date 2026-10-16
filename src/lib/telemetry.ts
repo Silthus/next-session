@@ -5,6 +5,7 @@ import type {
   PostHogConfig,
   Properties,
 } from "posthog-js/dist/module.slim";
+import { REMINDER_LINK_PARAM } from "../../shared/reminders";
 import { TIPS_CONFIRM_PARAM } from "../../shared/tips";
 import { postHogEnv, type EnvSource, type PostHogEnv } from "./env";
 import {
@@ -60,7 +61,7 @@ const PRODUCT = "next-session";
 const EVENT_PREFIX = "next_session:";
 const SENT_SDK_EVENTS = new Set(["$pageview", "$exception"]);
 const KEPT_QUERY_KEYS = ["month", "day"];
-const SECRET_QUERY_KEYS = ["code", "state", TIPS_CONFIRM_PARAM];
+const SECRET_QUERY_KEYS = ["code", "state", TIPS_CONFIRM_PARAM, REMINDER_LINK_PARAM];
 const SHARE_TOKEN = ":shareToken";
 const REDACTED = ":redacted";
 const SHARE_TOKEN_PATH = /\/s\/[A-Za-z0-9_-]+/gi;

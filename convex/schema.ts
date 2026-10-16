@@ -36,6 +36,8 @@ export default defineSchema({
     tipsConsentVersion: v.optional(v.string()),
     tipsCodeHash: v.optional(v.string()),
     sessionEmailsEnabled: v.optional(v.boolean()),
+    remindersEnabled: v.optional(v.boolean()),
+    reminderLinkToken: v.optional(v.string()),
     tipsConfirmedAt: v.optional(v.number()),
     profileImageId: v.optional(v.id("_storage")),
     profileImageFrom: v.optional(v.string()),
@@ -44,6 +46,7 @@ export default defineSchema({
     .index("email", ["email"])
     .index("phone", ["phone"])
     .index("by_tipsCodeHash", ["tipsCodeHash"])
+    .index("by_reminderLinkToken", ["reminderLinkToken"])
     .index("by_calendarFeedToken", ["calendarFeedToken"]),
 
   groups: defineTable({
@@ -96,7 +99,10 @@ export default defineSchema({
     startTime: v.optional(v.string()),
     lengthMinutes: v.optional(v.number()),
     location: v.optional(v.string()),
-  }).index("by_groupId_and_date", ["groupId", "date"]),
+    remindersRevision: v.optional(v.number()),
+  })
+    .index("by_groupId_and_date", ["groupId", "date"])
+    .index("by_date", ["date"]),
 
   mailVolume: defineTable({ day: v.string(), count: v.number() }).index("by_day", ["day"]),
 

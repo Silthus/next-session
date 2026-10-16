@@ -8,7 +8,7 @@ import {
   type GmClient,
   type TestBackend,
 } from "./model/test.setup";
-import { UNDO_WINDOW_MS } from "./sessionLifecycle";
+import { UNDO_WINDOW_MS } from "../shared/sessions";
 
 let t: TestBackend;
 let fetchMock: ReturnType<typeof vi.fn<typeof fetch>>;
@@ -127,7 +127,7 @@ it("returns to the GM before mail, then sends once to each current claimed Accou
       group_name: "Thursday Crew",
       date_label: "Saturday, October 17, 2026",
       change: "scheduled",
-      player_url: "https://next-session.link/s/old-token",
+      player_url: "http://localhost:5173/s/old-token",
     },
   ]);
   expect(new Headers(fetchMock.mock.calls[0]![1]!.headers).get("Authorization")).toBe(
@@ -305,16 +305,18 @@ it("cancels with the current Group name and Share Link", async () => {
     expect.objectContaining({
       change: "cancelled",
       group_name: "Renamed Crew",
-      player_url: "https://next-session.link/s/new-token",
+      player_url: "http://localhost:5173/s/new-token",
     }),
   ]);
 });
 
 it("lets an Account turn session emails off and back on, with email on by default", async () => {
   const { account, as, groupId } = await crew();
-  expect(await account.as.query(api.me.sessionEmails, {})).toBe(true);
+  const sessionEmails = async () =>
+    (await account.as.query(api.me.notificationSettings, {}))?.sessionEmails;
+  expect(await sessionEmails()).toBe(true);
   await account.as.mutation(api.me.setSessionEmails, { enabled: false });
-  expect(await account.as.query(api.me.sessionEmails, {})).toBe(false);
+  expect(await sessionEmails()).toBe(false);
   await as.mutation(api.sessions.schedule, { groupId, date });
   await finish();
   expect(fetchMock).not.toHaveBeenCalled();
@@ -450,7 +452,7 @@ it("rejects signed-out and anonymous preference writes", async () => {
   await expect(
     anonymous.as.mutation(api.me.setSessionEmails, { enabled: false }),
   ).rejects.toThrow();
-  expect(await t.query(api.me.sessionEmails, {})).toBeNull();
+  expect(await t.query(api.me.notificationSettings, {})).toBeNull();
 });
 
 it("warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient", async () => {
