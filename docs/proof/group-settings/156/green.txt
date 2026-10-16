@@ -1,0 +1,60 @@
+# green: the #156 tests on 8e6c86e, every assertion as in red, none skipped
+
+ ✓ |shared| shared/legal.test.ts > LEGAL_VERSIONS > matches the version the terms text shows 2ms
+ ✓ |shared| shared/legal.test.ts > LEGAL_VERSIONS > matches the version the privacy text shows 0ms
+ ✓ |shared| shared/legal.test.ts > privacy text > has no placeholder left to fill in 0ms
+ ✓ |shared| shared/legal.test.ts > privacy text > names both labels of the measurement switch on /privacy 1ms
+ ✓ |shared| shared/legal.test.ts > privacy text > says what reaches Geoapify, why, how long it keeps it, and where it runs 0ms
+ ✓ |shared| shared/legal.test.ts > privacy text > names the Group's time and place, and a Session's own, among group data 0ms
+ ✓ |ui| src/lib/env.test.ts > convexUrl > returns the Convex URL when it is set 1ms
+ ✓ |ui| src/lib/env.test.ts > convexUrl > names the missing variable instead of rendering a blank page 1ms
+ ✓ |ui| src/lib/env.test.ts > legalContact > falls back to on-request wording for a local build 1ms
+ ✓ |ui| src/lib/env.test.ts > legalContact > fills the controller details from the build variables the spec names 0ms
+ ✓ |ui| src/lib/env.test.ts > postHogEnv > is absent without a token, so measurement stays off 0ms
+ ✓ |ui| src/lib/env.test.ts > postHogEnv > carries the token and the release the build was made from 0ms
+ ✓ |ui| src/lib/env.test.ts > geoapifyKey > is absent without a key, so the location field stays plain 0ms
+ ✓ |ui| src/lib/env.test.ts > geoapifyKey > carries the key the build was given 0ms
+ ✓ |ui| src/features/group/settings/addressSuggestions.test.ts > geoapifySearch > asks for at most five addresses in the browser's language, in any country 7ms
+ ✓ |ui| src/features/group/settings/addressSuggestions.test.ts > geoapifySearch > fails when Geoapify answers 429 3ms
+ ✓ |ui| src/features/group/settings/addressSuggestions.test.ts > geoapifySearch > fails when Geoapify answers 500 1ms
+ ✓ |ui| src/features/group/settings/addressSuggestions.test.ts > geoapifySearch > fails when Geoapify answers 503 1ms
+ ✓ |ui| src/features/group/settings/addressSuggestions.test.ts > geoapifySearch > fails when Geoapify takes too long 5ms
+ ✓ |ui| src/features/group/settings/LocationField.test.tsx > LocationField with address suggestions > asks for nothing until three letters are typed 143ms
+ ✓ |ui| src/features/group/settings/LocationField.test.tsx > LocationField with address suggestions > offers to keep the typed text first, then addresses as street over town, with the credit 56ms
+ ✓ |ui| src/features/group/settings/LocationField.test.tsx > LocationField with address suggestions > waits for a pause in typing and cancels the request still in flight 46ms
+ ✓ |ui| src/features/group/settings/LocationField.test.tsx > LocationField with address suggestions > keeps the typed text on Enter when no row is chosen, without submitting the form 52ms
+ ✓ |ui| src/features/group/settings/LocationField.test.tsx > LocationField with address suggestions > replaces the text with a row picked by the arrow keys, and asks nothing more for it 87ms
+ ✓ |ui| src/features/group/settings/LocationField.test.tsx > LocationField with address suggestions > replaces the text with a clicked row 48ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > opens on 19:00 for 4 hours in Berlin time for a Group never saved 185ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > opens with what the GM saved 22ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > moves the end time and the preview as soon as the start or the length changes 58ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > never lets the start time go empty 16ms
+ ✓ |ui| src/features/group/settings/LocationField.test.tsx > LocationField with address suggestions > closes the list on Escape and keeps the text 46ms
+ ✓ |ui| src/features/group/settings/LocationField.test.tsx > LocationField with address suggestions > asks nothing more for the rest of the visit after a failed request, and still takes text 63ms
+ ✓ |ui| src/features/group/settings/LocationField.test.tsx > LocationField without address suggestions > is a plain text field that offers nothing 22ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > shows the place in the preview as it is typed 72ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > changes the zone from a searchable list and names it in the preview 91ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > lists the cities that start with what the GM typed first 65ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > keeps the zone when the GM backs out of the list 55ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > says that saving moves upcoming Sessions 8ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > saves exactly the page's values once 102ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > saves the typed place when address suggestions have failed 401ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > shows INVALID_SETTINGS inline and keeps the values 81ms
+ ✓ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx > TimeAndPlacePage > shows RATE_LIMITED inline and keeps the values 79ms
+ ✓ |ui| src/routes/routes.test.tsx > /privacy > renders the effective date, the processor table, the storage list and the authority link 96ms
+ Test Files  6 passed (6)
+      Tests  52 passed (52)
+
+# gate: bun run check (tsc x3, eslint, prettier, vitest, vite build, wrangler dry run), exit 0
+ Test Files  91 passed (91)
+      Tests  1435 passed (1435)
+✓ built in 385ms
+--dry-run: exiting now.
+
+# e2e: bun run e2e on the local backend, exit 0, no Geoapify key (VITE_GEOAPIFY_KEY blanked by the harness)
+  35 skipped
+  91 passed (3.8m)
+
+# running app: capture.spec.ts.txt on the local backend, Geoapify stubbed with page.route (no request left the machine)
+#  with a fake key: 4 passed (390/1280 x light/dark): one request per pause (text=Hauptstr, limit=5, lang=de, no filter), Keep first, ArrowDown+Enter picks street and town, no-match copy, Enter keeps Max’s place, 429 -> plain field, no further request, Save stores the typed text
+#  without a key: 4 passed: no combobox, no listbox, zero requests to geoapify, Save works
