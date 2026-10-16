@@ -33,9 +33,9 @@ import {
   validName,
 } from "./model/players";
 import { enforceRateLimit } from "./model/rateLimits";
-import { stateOf } from "./sessionLifecycle";
+import { datedSessionOf } from "./sessionLifecycle";
 import { track } from "./model/telemetry";
-import { answerValue, sessionState } from "./schema";
+import { answerValue, datedSession } from "./schema";
 
 const answered = v.object({ keptNow: v.boolean() });
 
@@ -43,7 +43,7 @@ const playerGroupView = v.object({
   groupId: v.id("groups"),
   name: v.string(),
   players: v.array(v.object({ _id: v.id("players"), name: v.string() })),
-  sessions: v.array(v.object({ date: v.string(), state: sessionState })),
+  sessions: v.array(datedSession),
   claimedPlayerId: v.union(v.id("players"), v.null()),
   removedFromMyGroups: v.boolean(),
   opensAsGm: v.boolean(),
@@ -232,7 +232,7 @@ async function sessionsOf(ctx: QueryCtx, groupId: Id<"groups">) {
     .query("sessions")
     .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId))
     .collect();
-  return sessions.map((session) => ({ date: session.date, state: stateOf(session) }));
+  return sessions.map(datedSessionOf);
 }
 
 async function answersOfPlayerIn(ctx: QueryCtx, playerId: Id<"players">, month: IsoMonth) {

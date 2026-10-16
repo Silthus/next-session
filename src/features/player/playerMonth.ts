@@ -1,4 +1,4 @@
-import type { Doc } from "../../../convex/_generated/dataModel";
+import type { SessionState } from "../../../convex/schema";
 import { fillRestDates, monthProgress, type Answer } from "../../../shared/answers";
 import {
   addMonths,
@@ -21,7 +21,7 @@ export type PlayerDay = {
   cancelled: boolean;
 };
 
-export type PlayerSession = { date: IsoDate; state: NonNullable<Doc<"sessions">["state"]> };
+export type PlayerSession = { date: IsoDate; state: SessionState };
 
 export type PlayerMonthInput = {
   month: IsoMonth;

@@ -12,18 +12,16 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type QueryCtx } from "./_generated/server";
 import { fail } from "./model/errors";
 import { currentAccount } from "./model/access";
-import { sessionState } from "./schema";
-import { stateOf } from "./sessionLifecycle";
+import { datedSession } from "./schema";
+import { datedSessionOf } from "./sessionLifecycle";
 
 const UPCOMING_SESSIONS = 5;
 const DAY = 86_400_000;
 
-const upcomingSession = v.object({ date: v.string(), state: sessionState });
-
 const runningGroup = v.object({
   groupId: v.id("groups"),
   name: v.string(),
-  upcomingSessions: v.array(upcomingSession),
+  upcomingSessions: v.array(datedSession),
 });
 
 const playingGroup = v.object({
@@ -32,7 +30,7 @@ const playingGroup = v.object({
   shareToken: v.string(),
   playerId: v.id("players"),
   playerName: v.string(),
-  upcomingSessions: v.array(upcomingSession),
+  upcomingSessions: v.array(datedSession),
   openDates: v.number(),
 });
 
@@ -106,7 +104,7 @@ async function upcomingSessionsOf(ctx: QueryCtx, groupId: Id<"groups">, today: I
     .query("sessions")
     .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId).gte("date", today))
     .take(UPCOMING_SESSIONS);
-  return sessions.map((session) => ({ date: session.date, state: stateOf(session) }));
+  return sessions.map(datedSessionOf);
 }
 
 async function openDatesOf(ctx: QueryCtx, playerId: Id<"players">, today: IsoDate) {

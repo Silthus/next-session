@@ -1,15 +1,13 @@
-import { v, type Infer } from "convex/values";
+import { v } from "convex/values";
 import type { IsoDate } from "../shared/dates";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx, type QueryCtx } from "./_generated/server";
-import type { sessionState } from "./schema";
+import type { SessionState } from "./schema";
 import { sessionPublished } from "./sessionMail";
 import { fail } from "./model/errors";
 
-const UNDO_WINDOW_MS = 30_000;
-
-type SessionState = Infer<typeof sessionState>;
+export const UNDO_WINDOW_MS = 30_000;
 
 export function isScheduled(session: Doc<"sessions">) {
   return stateOf(session) === "scheduled";
@@ -46,6 +44,10 @@ export const settle = internalMutation({
 
 export function stateOf(session: Doc<"sessions">): SessionState {
   return session.state ?? "scheduled";
+}
+
+export function datedSessionOf(session: Doc<"sessions">) {
+  return { date: session.date, state: stateOf(session) };
 }
 
 async function sessionOn(ctx: QueryCtx, groupId: Id<"groups">, date: IsoDate) {

@@ -21,6 +21,7 @@ import {
   type GmClient,
   type TestBackend,
 } from "./model/test.setup";
+import { UNDO_WINDOW_MS } from "./sessionLifecycle";
 
 withAuthKeys();
 withGoogleCredentials();
@@ -298,7 +299,7 @@ describe("GM mutations", () => {
   it("tracks Schedule again as session_scheduled that is not the Group's first", async () => {
     const { as, groupId } = await signedInGmWithGroup(t);
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
-    await vi.advanceTimersByTimeAsync(30_001);
+    await vi.advanceTimersByTimeAsync(UNDO_WINDOW_MS + 1);
     await t.finishInProgressScheduledFunctions();
     await as.mutation(api.sessions.cancel, { sessionId });
 

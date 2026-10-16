@@ -11,6 +11,7 @@ import {
   spendGmEdits,
   type TestBackend,
 } from "./model/test.setup";
+import { UNDO_WINDOW_MS } from "./sessionLifecycle";
 
 const DAY = 86_400_000;
 const NOW = Date.UTC(2026, 9, 3, 23, 30);
@@ -30,7 +31,7 @@ afterEach(() => {
 });
 
 async function settle() {
-  await vi.advanceTimersByTimeAsync(30_001);
+  await vi.advanceTimersByTimeAsync(UNDO_WINDOW_MS + 1);
   await t.finishInProgressScheduledFunctions();
 }
 
