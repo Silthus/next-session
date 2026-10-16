@@ -20,6 +20,16 @@ export const publishedSession = v.object({
   revision: v.number(),
 });
 
+export const frozenEntry = v.object({
+  uid: v.string(),
+  sequence: v.number(),
+  start: v.number(),
+  end: v.number(),
+  summary: v.string(),
+});
+
+export const frozenNight = v.object({ date: v.string(), entry: frozenEntry });
+
 export default defineSchema({
   ...authTables,
   users: defineTable({
@@ -95,6 +105,14 @@ export default defineSchema({
     published: v.optional(publishedSession),
     sequence: v.optional(v.number()),
   }).index("by_groupId_and_date", ["groupId", "date"]),
+
+  calendarCancellations: defineTable({
+    groupId: v.id("groups"),
+    ownerId: v.id("users"),
+    recipients: v.array(v.id("users")),
+    nights: v.array(frozenNight),
+    cursor: v.number(),
+  }),
 
   mailVolume: defineTable({
     day: v.string(),

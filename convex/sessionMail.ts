@@ -2,7 +2,13 @@ import { type Infer, v } from "convex/values";
 import { invite, sessionUid } from "../shared/icalendar";
 import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
 import type { Doc, Id } from "./_generated/dataModel";
-import { internalQuery, type MutationCtx, type QueryCtx } from "./_generated/server";
+import { internal } from "./_generated/api";
+import {
+  internalMutation,
+  internalQuery,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
 import {
   calendarMailConfigured,
   calendarMessage,
@@ -22,18 +28,23 @@ import {
   receivesSessionMail,
   type SessionMailAccount,
 } from "./model/recipients";
-import { sessionMailCopy, type SessionChange } from "./model/sessionMailCopy";
+import { sessionMailCopy, type MailCopy, type SessionChange } from "./model/sessionMailCopy";
 import { accountDistinctId, PRODUCT } from "./model/telemetry";
 import { groupTimeOf } from "./model/timeAndPlace";
 import { upcomingSessions } from "./model/upcomingSessions";
+import { frozenEntry } from "./schema";
 
 const SITE = "https://next-session.link";
 const CALENDAR_ADDRESS = "calendar@next-session.link";
 const PLAYER_CALENDAR_LINK = `${SITE}/me`;
+const CANCELLATION_BATCH_SIZE = 200;
 
 type Published = NonNullable<Doc<"sessions">["published"]>;
 type NightSend = Extract<CalendarSend, { kind: "broadcast" | "invite" }>;
 type WithdrawSend = Extract<CalendarSend, { kind: "withdraw" }>;
+type DeletionCancelSend = Extract<CalendarSend, { kind: "deletionCancel" }>;
+type CalendarMessage = Infer<typeof calendarMessage>;
+type FrozenEntry = Infer<typeof frozenEntry>;
 type RecipientSetMember = { groupId: Id<"groups">; userId: Id<"users"> };
 
 export async function sessionPublished(
@@ -149,11 +160,70 @@ function withdrawalOf(
   };
 }
 
+export async function groupDeleting(ctx: MutationCtx, group: Doc<"groups">) {
+  if (!calendarMailConfigured()) return;
+  const nights = (await upcomingPublishedNights(ctx, group._id)).flatMap(({ session, entry }) =>
+    entry.state === "scheduled" ? [frozenNightOf(session, entry)] : [],
+  );
+  const recipients: Id<"users">[] = [];
+  for (const userId of await calendarRecipients(ctx, group)) {
+    if (receivesSessionMail(await ctx.db.get("users", userId))) recipients.push(userId);
+  }
+  if (nights.length === 0 || recipients.length === 0) return;
+  const cancellationId = await ctx.db.insert("calendarCancellations", {
+    groupId: group._id,
+    ownerId: group.ownerId,
+    recipients,
+    nights,
+    cursor: 0,
+  });
+  await ctx.scheduler.runAfter(0, internal.sessionMail.drainCancellations, { cancellationId });
+}
+
+function frozenNightOf(session: Doc<"sessions">, { start, end, summary }: PublishedEntry) {
+  const sequence = (session.sequence ?? 0) + 1;
+  return {
+    date: session.date,
+    entry: { uid: sessionUid(session._id), sequence, start, end, summary },
+  };
+}
+
+export const drainCancellations = internalMutation({
+  args: { cancellationId: v.id("calendarCancellations") },
+  returns: v.null(),
+  handler: async (ctx, { cancellationId }) => {
+    const cancellation = await ctx.db.get("calendarCancellations", cancellationId);
+    if (cancellation === null) return null;
+    const { ownerId, recipients, nights, cursor } = cancellation;
+    const total = recipients.length * nights.length;
+    const end = Math.min(cursor + CANCELLATION_BATCH_SIZE, total);
+    const stamp = Date.now();
+    const sends: DeletionCancelSend[] = [];
+    for (let position = cursor; position < end; position++) {
+      const userId = recipients[Math.floor(position / nights.length)]!;
+      const { date, entry } = nights[position % nights.length]!;
+      const reader = userId === ownerId ? "gm" : "player";
+      sends.push({ kind: "deletionCancel", userId, reader, date, entry, stamp });
+    }
+    const span = await requestCalendarMails(ctx, sends);
+    if (end === total) {
+      await ctx.db.delete("calendarCancellations", cancellationId);
+      return null;
+    }
+    await ctx.db.patch("calendarCancellations", cancellationId, { cursor: end });
+    await ctx.scheduler.runAfter(span, internal.sessionMail.drainCancellations, {
+      cancellationId,
+    });
+    return null;
+  },
+});
+
 export const calendarMail = internalQuery({
   args: { send: calendarSend },
   returns: v.union(calendarMessage, v.null()),
   handler: async (ctx, { send }) => {
     if (send.kind === "withdraw") return await withdrawalMail(ctx, send);
+    if (send.kind === "deletionCancel") return await deletionCancelMail(ctx, send);
     const target = await nightTarget(ctx, send);
     return target === null ? null : nightMessageFor(target, send);
   },
@@ -201,7 +271,7 @@ async function nightTarget(ctx: QueryCtx, send: NightSend): Promise<NightTarget 
 function nightMessageFor(
   { session, group, account, entry }: NightTarget,
   send: NightSend,
-): Infer<typeof calendarMessage> {
+): CalendarMessage {
   const runsGroup = group.ownerId === account._id;
   const calendarLink = runsGroup ? `${SITE}/g/${group._id}` : PLAYER_CALENDAR_LINK;
   const window = { start: entry.start, end: entry.end };
@@ -244,12 +314,44 @@ function nightMessageFor(
 async function withdrawalMail(
   ctx: QueryCtx,
   { groupId, userId, date, entry, stamp }: WithdrawSend,
-): Promise<Infer<typeof calendarMessage> | null> {
+): Promise<CalendarMessage | null> {
   if (await isInCalendarRecipientSet(ctx, { groupId, userId })) return null;
   const account = await ctx.db.get("users", userId);
   if (!receivesSessionMail(account)) return null;
+  const copy = sessionMailCopy({ change: "withdraw", groupName: entry.summary, date });
+  return frozenEntryMessage({ account, kind: "withdraw", entry, stamp, copy });
+}
+
+async function deletionCancelMail(
+  ctx: QueryCtx,
+  { userId, reader, date, entry, stamp }: DeletionCancelSend,
+): Promise<CalendarMessage | null> {
+  const account = await ctx.db.get("users", userId);
+  if (!receivesSessionMail(account)) return null;
+  const copy = sessionMailCopy({
+    change: "deletionCancel",
+    reader,
+    groupName: entry.summary,
+    date,
+  });
+  return frozenEntryMessage({ account, kind: "cancel", entry, stamp, copy });
+}
+
+function frozenEntryMessage({
+  account,
+  kind,
+  entry,
+  stamp,
+  copy,
+}: {
+  account: SessionMailAccount;
+  kind: "withdraw" | "cancel";
+  entry: FrozenEntry;
+  stamp: number;
+  copy: MailCopy;
+}): CalendarMessage {
   const calendar = invite({
-    kind: "withdraw",
+    kind,
     organizer: CALENDAR_ADDRESS,
     attendee: account.email,
     entry: {
@@ -265,8 +367,8 @@ async function withdrawalMail(
   });
   return {
     to: account.email,
-    ...sessionMailCopy({ change: "withdraw", groupName: entry.summary, date }),
-    invite: { kind: "withdraw", calendar },
+    ...copy,
+    invite: { kind, calendar },
     idempotencyKey: idempotencyKey(entry.uid, entry.sequence, account),
   };
 }

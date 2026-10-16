@@ -1007,20 +1007,27 @@ Every Session update is one mail through Resend that carries a calendar invite (
 - An invite sends only while its revision is still published, the Session is still scheduled and the Account is still in the set. A withdrawal sends only while the Account is still out of the set, whatever the revision; a deleted Group counts as out. It is built from its frozen entry, so it lands after the Group is deleted and never shows a change made after the release. A re-claim before it sends makes it drop itself.
 - Both need an eligible Account (§15.2) when queued and on every attempt, so the Session emails switch stops them too.
 
-### 15.5 The Resend adapter
+### 15.5 Deleting a Group
+
+- `deleteGroup` in `convex/model/groups.ts` is the one deletion path, for `groups.remove` and the Expiry sweep. Before the Group and its children go, it calls `groupDeleting` in `convex/sessionMail.ts`.
+- `groupDeleting` writes one `calendarCancellations` row: the GM's Account, the eligible Accounts of the calendar recipient set at deletion (§15.2), and each upcoming published Session whose published state is scheduled, frozen as `{date, entry}` with `entry` `{uid, sequence, start, end, summary}` and `sequence` reserved as the Session's `sequence + 1`. A Session already published as Cancelled is left out (its calendars hold the cancel), and so are never-published and past ones. With nothing to cancel, or no eligible Account, no row is written. Without `RESEND_API_KEY` nothing is written, so deletion runs exactly as before.
+- `sessionMail.drainCancellations` queues at most 200 `deletionCancel`s per run, `{kind: "deletionCancel", userId, reader, date, entry}`, moves the row's `cursor`, and runs again once its sends are due, 600 ms apart, so a large Group stays under Resend's rate and far below Convex's 1,000 scheduled functions per mutation. The run that queues the last batch deletes the row.
+- A deletion cancel is a `cancel` with `STATUS:CANCELLED`, built from its frozen entry, because the Group is gone. Its `SEQUENCE` is above every invite the Session sent. It sends whenever the Account is still eligible (§15.2), so an Anonymous GM, whose Account ends with its last Group, gets nothing.
+
+### 15.6 The Resend adapter
 
 - `POST https://api.resend.com/emails` with `from: "Next Session <calendar@next-session.link>"`, one recipient, `text` and `html`, and one attachment `invite.ics`, base64, with `content_type` from `calendarContentType` (`text/calendar; charset=utf-8; method=REQUEST|CANCEL`). No `reply_to`.
 - `Idempotency-Key: calendar/<uid>/<sequence>/<userId>`, so a retry of a request Resend accepted is not sent twice within its 24 hours.
 - Network errors, 5xx and 429 retry through the action retrier: 4 attempts, backoff 5 s × 4ⁿ. Other 4xx are logged with the status only and dropped.
 
-### 15.6 The invite
+### 15.7 The invite
 
-- Built by `invite` in `shared/icalendar.ts` from the published snapshot: `request` for a scheduled Session, `cancel` (with `STATUS:CANCELLED`) for a cancelled one. A withdrawal is a `withdraw` (`METHOD:CANCEL` with no `STATUS`) built from its frozen entry, with the Player link.
+- Built by `invite` in `shared/icalendar.ts` from the published snapshot: `request` for a scheduled Session, `cancel` (with `STATUS:CANCELLED`) for a cancelled one. A withdrawal is a `withdraw` (`METHOD:CANCEL` with no `STATUS`) built from its frozen entry, with the Player link. A deletion cancel is a `cancel` built from its frozen entry, with the Player link for GM and Player alike, since the Group's page is gone.
 - `UID` `<sessionId>@next-session.link` for the row's whole life, `SEQUENCE` and `DTSTAMP` the round's, so a retry repeats its request byte for byte under the same Idempotency-Key (Resend refuses a reused key with a different body), `DTSTART` and `DTEND` in UTC, `SUMMARY` the published Group name, `LOCATION` the published location.
 - `URL` is token-free: `https://next-session.link/g/<groupId>` for the GM, `https://next-session.link/me` for a Player. `DESCRIPTION` is "Open your group: <that link>".
 - `ORGANIZER` is `calendar@next-session.link`; the `ATTENDEE` is the recipient with `PARTSTAT=ACCEPTED;RSVP=FALSE`. No `VALARM`.
 
-### 15.7 Copy
+### 15.8 Copy
 
 `sessionMailCopy` in `convex/model/sessionMailCopy.ts` is pure: plain text first, then the same words in HTML (the Workflows template's cream background, mono "NEXT SESSION" header and one button, no images, no tracking). System mail: nobody signs.
 
@@ -1033,17 +1040,19 @@ Every Session update is one mail through Resend that carries a calendar invite (
 | Cancelled | `{group}: session on {date} cancelled` | The session for {group} on {date} is cancelled. | You cancelled the session for {group} on {date}. |
 | Invite (entered the set) | `{group}: next session {date}` | You keep {group} now, so its session is in your calendar: {when}. {where} | {group} is yours now, so its session is in your calendar: {when}. {where} |
 | Withdrawal | `{group}: session on {date} removed from your calendar` | You don't keep {group} any more, so its session on {date} leaves your calendar. | — (a GM never leaves the set) |
+| Deletion cancel | `{group}: session on {date} cancelled` | {group} was deleted, so its session on {date} is off. | You deleted {group}, so its session on {date} is off. |
 
-Then, for set, changed and invite: "It's in the calendar invite in this mail. Not in your calendar yet? Tap **Add to calendar** once." For cancelled and withdrawal: "Your calendar removes it by itself. If it doesn't, delete it there." Then the button, except in a withdrawal. Footer: "You get this because you run this group.", "…because you keep this group." or, in a withdrawal, "…because you kept this group.", then "Turn session emails off in My groups: https://next-session.link/me. Replies to this address aren't read."
+Then, for set, changed and invite: "It's in the calendar invite in this mail. Not in your calendar yet? Tap **Add to calendar** once." For cancelled, withdrawal and deletion cancel: "Your calendar removes it by itself. If it doesn't, delete it there." Then the button, except in a withdrawal or a deletion cancel. Footer: "You get this because you run this group.", "…because you keep this group." or, in a withdrawal or a Player's deletion cancel, "…because you kept this group.", and in the GM's deletion cancel "…because you ran this group.", then "Turn session emails off in My groups: https://next-session.link/me. Replies to this address aren't read."
 
-### 15.8 Volume
+### 15.9 Volume
 
 `mailVolume` counts per provider and UTC day: Resend for Session mail (1 per send), Workflows for Welcome (1), Tips (2) and the Workflows Session update (1). A row without a provider is a Workflows count from before the split. Each provider warns once through `serverLog` ("Daily mail volume warning", with `provider`) when its day reaches 80 and once when it passes 100. Suppressed recipients aren't counted and a retry isn't counted twice. No email, Group name or Share Token reaches a usage event or log.
 
-### 15.9 Test seams
+### 15.10 Test seams
 
 | Seam | Tested through |
 | --- | --- |
 | Session mail and the Resend adapter | `convex-test` through `api.sessions.*`, `api.groups.*`, `api.player.*`, `api.roster.removePlayer` and `api.account.finishSave` with fake timers and a fake `fetch` that records Resend payloads and decodes `invite.ics` (`convex/sessionInvites.test.ts`) |
 | The provider switch and the Workflows path | the same file and `convex/sessionMail.test.ts` |
+| Deleting a Group | `convex-test` through `api.groups.remove` and `internal.cleanup.sweepExpiredGroups` with the same fake `fetch`, the 100 Accounts × 20 Sessions drain under Convex's transaction limits (`convex/sessionCancellations.test.ts`) |
 | Copy | `sessionMailCopy` on plain data with Vitest (`convex/model/sessionMailCopy.test.ts`) |

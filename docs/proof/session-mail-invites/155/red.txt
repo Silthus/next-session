@@ -1,0 +1,19 @@
+# Red: the new tests on the integration tip 9f4de3a (before the change), with only the test files and the transactionLimits option of newBackend copied in
+
+$ bunx vitest run convex/sessionCancellations.test.ts convex/model/sessionMailCopy.test.ts
+     × tells a player the night is off, with no button to the gone group 16ms
+     × tells a gm the night is off, with no button to the gone group 5ms
+     × cancels every upcoming published Session in each calendar it reached before the Group goes 212ms
+     × cancels an expired Unsaved Group's nights for its Players and leaves its Anonymous GM out 31ms
+     × drains 100 Accounts × 20 Sessions in runs Convex accepts, spaced under Resend's rate, and forgets them 23ms
+     × drops a deletion cancel once the Account turns Session mail off before it sends 41ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [] to deeply equal [ [ …(2) ], [ …(2) ] ]
+AssertionError: expected [] to deeply equal [ …(2) ]
+AssertionError: expected [] to have a length of 2000 but got +0
+AssertionError: expected [] to have a length of 2 but got +0
+TypeError: Cannot read properties of undefined (reading 'start')
+ Test Files  2 failed (2)
+      Tests  6 failed | 16 passed (22)
+
+The two guards that pass here assert that nothing is sent or kept ("cancels nothing that is not an upcoming published scheduled Session", "deletes as before without RESEND_API_KEY"); red-refutations.txt shows each going red under a staged break.

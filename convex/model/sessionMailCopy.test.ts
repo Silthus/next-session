@@ -157,3 +157,39 @@ describe("the mail for entering or leaving the calendar recipient set", () => {
     expect(html.match(/<a /g)).toHaveLength(1);
   });
 });
+
+describe("the mail for a deleted Group's night", () => {
+  it.each([
+    [
+      "player",
+      "Thursday Crew was deleted, so its session on Saturday, October 31, 2026 is off.",
+      "kept",
+    ],
+    [
+      "gm",
+      "You deleted Thursday Crew, so its session on Saturday, October 31, 2026 is off.",
+      "ran",
+    ],
+  ] as const)(
+    "tells a %s the night is off, with no button to the gone group",
+    (reader, news, why) => {
+      const { subject, text, html } = sessionMailCopy({
+        change: "deletionCancel",
+        reader,
+        groupName: "Thursday Crew",
+        date: "2026-10-31",
+      });
+
+      expect(subject).toBe("Thursday Crew: session on Saturday, October 31, 2026 cancelled");
+      expect(text).toBe(
+        [
+          news,
+          "Your calendar removes it by itself. If it doesn't, delete it there.",
+          `You get this because you ${why} this group.\nTurn session emails off in My groups: https://next-session.link/me. Replies to this address aren't read.`,
+        ].join("\n\n") + "\n",
+      );
+      expect(html).not.toContain("Open your group");
+      expect(html.match(/<a /g)).toHaveLength(1);
+    },
+  );
+});

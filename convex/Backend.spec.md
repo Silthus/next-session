@@ -188,6 +188,18 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: commit-ordered-effects declared as published only
   checklist: circuit-breaker-policy dismissed: a failing Resend gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks a GM's change
   checklist: declared-target-coverage dismissed: the fan-out reads the whole set through calendarRecipients, bounded by the 100-Player cap, and drops only Accounts the send-time rules exclude
+- deletion cancels first: Only deleting a Group removes a published Session, and before it goes it cancels each upcoming published scheduled Session in every calendar it reached: the GM's and the Accounts behind its Claimed Players.
+  over: groups.remove for a Group with its GM, a Claimed Player and two upcoming published scheduled Sessions, after each received the invites
+  via: cancels every upcoming published Session in each calendar it reached before the Group goes
+  because: an invite puts the night into a calendar that outlives the Group (architecture invariant 5); a deletion that dropped the published rows without a cancel would leave every GM and Player with nights that will never happen, and nothing could take them out later, because the Group and its Sessions are gone
+  crossing: store -> egress
+  refuted: groupDeleting returned before writing the calendarCancellations row, so deleting a Group dropped its published Sessions without a cancel -> the oracle failed by name (2026-10-16)
+  kinds: output
+  checklist: destination-confinement dismissed: the Resend adapter posts only to the fixed Resend API address, and the recipient is the Account's own stored email, never a caller-supplied address
+  checklist: redaction declared as no personal data to posthog
+  checklist: commit-ordered-effects dismissed: groupDeleting writes the calendarCancellations row and schedules its drain inside the deleting mutation, so a deletion that rolls back queues no cancel, and one that commits always has its row
+  checklist: circuit-breaker-policy dismissed: a failing Resend gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks the deletion
+  checklist: declared-target-coverage dismissed: the row freezes the whole calendar recipient set through calendarRecipients, bounded by the 100-Player cap, and every upcoming published scheduled Session; the drain queues each pair once, 200 per run, and drops only Accounts the send-time rules exclude
 - feed scoping: A calendar file reached through a Share Token holds only the published Sessions of the Group behind that token's current value; a rotated-away or unknown token reaches nothing.
   over: the Calendar download fetched for two Groups with Sessions on the same date, through each Group's current Share Token and through a rotated-away one
   via: every calendar file holds only the published Sessions of its own token's Group

@@ -3,6 +3,7 @@ import { newShareToken, type RandomBytes } from "../../shared/shareToken";
 import { internal } from "../_generated/api";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
+import { groupDeleting } from "../sessionMail";
 import { expiryFromNow, groupByShareToken } from "./access";
 import { fail } from "./errors";
 import { deleteAnonymousGm } from "./gms";
@@ -99,6 +100,7 @@ export async function undoRotateShareToken(ctx: MutationCtx, group: Doc<"groups"
 }
 
 export async function deleteGroup(ctx: MutationCtx, group: Doc<"groups">) {
+  await groupDeleting(ctx, group);
   await ctx.db.delete("groups", group._id);
   await ctx.scheduler.runAfter(0, internal.groups.deleteChildren, { groupId: group._id });
   await endAnonymousGmWithoutGroups(ctx, group.ownerId);

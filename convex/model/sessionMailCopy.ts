@@ -17,7 +17,14 @@ export type NightCopyInput = {
 
 export type WithdrawalCopyInput = { change: "withdraw"; groupName: string; date: IsoDate };
 
-export type SessionMailCopyInput = NightCopyInput | WithdrawalCopyInput;
+export type DeletionCancelCopyInput = {
+  change: "deletionCancel";
+  reader: "gm" | "player";
+  groupName: string;
+  date: IsoDate;
+};
+
+export type SessionMailCopyInput = NightCopyInput | WithdrawalCopyInput | DeletionCancelCopyInput;
 
 export type MailCopy = { subject: string; text: string; html: string };
 
@@ -44,8 +51,33 @@ type Paragraphs = {
 };
 
 export function sessionMailCopy(input: SessionMailCopyInput): MailCopy {
-  const paragraphs = input.change === "withdraw" ? withdrawalOf(input) : nightOf(input);
+  const paragraphs = paragraphsOf(input);
   return { subject: paragraphs.subject, text: textOf(paragraphs), html: htmlOf(paragraphs) };
+}
+
+function paragraphsOf(input: SessionMailCopyInput): Paragraphs {
+  if (input.change === "withdraw") return withdrawalOf(input);
+  if (input.change === "deletionCancel") return deletionCancelOf(input);
+  return nightOf(input);
+}
+
+function deletionCancelOf({
+  reader,
+  groupName: group,
+  date: isoDate,
+}: DeletionCancelCopyInput): Paragraphs {
+  const date = dateLabel(isoDate);
+  const gm = reader === "gm";
+  return {
+    subject: `${group}: session on ${date} cancelled`,
+    news: gm
+      ? `You deleted ${group}, so its session on ${date} is off.`
+      : `${group} was deleted, so its session on ${date} is off.`,
+    where: undefined,
+    calendarHint: REMOVED_BY_CALENDAR,
+    groupLink: undefined,
+    why: `You get this because you ${gm ? "ran" : "kept"} this group.`,
+  };
 }
 
 function withdrawalOf({ groupName: group, date: isoDate }: WithdrawalCopyInput): Paragraphs {

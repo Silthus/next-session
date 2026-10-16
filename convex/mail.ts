@@ -6,7 +6,7 @@ import { internalAction, internalMutation, type MutationCtx } from "./_generated
 import { calendarContentType } from "../shared/icalendar";
 import { SESSION_CHANGES } from "./model/sessionMailCopy";
 import { accountDistinctId, isTestAddress, PRODUCT, serverLog } from "./model/telemetry";
-import { mailProvider, sessionState } from "./schema";
+import { frozenEntry, mailProvider, sessionState } from "./schema";
 
 declare const process: { env: Record<string, string | undefined> };
 
@@ -51,14 +51,6 @@ const publishedSend = {
   stamp: v.number(),
 };
 
-const frozenEntry = v.object({
-  uid: v.string(),
-  sequence: v.number(),
-  start: v.number(),
-  end: v.number(),
-  summary: v.string(),
-});
-
 export const calendarSend = v.union(
   v.object({
     kind: v.literal("broadcast"),
@@ -70,6 +62,14 @@ export const calendarSend = v.union(
     kind: v.literal("withdraw"),
     groupId: v.id("groups"),
     userId: v.id("users"),
+    date: v.string(),
+    entry: frozenEntry,
+    stamp: v.number(),
+  }),
+  v.object({
+    kind: v.literal("deletionCancel"),
+    userId: v.id("users"),
+    reader: v.union(v.literal("gm"), v.literal("player")),
     date: v.string(),
     entry: frozenEntry,
     stamp: v.number(),
@@ -189,13 +189,14 @@ export function calendarMailConfigured() {
 }
 
 export async function requestCalendarMails(ctx: MutationCtx, sends: CalendarSend[]) {
-  if (!calendarMailConfigured() || sends.length === 0) return;
+  if (!calendarMailConfigured() || sends.length === 0) return 0;
   await recordMailVolume(ctx, "resend", sends.length);
   for (const [index, send] of sends.entries()) {
     await retrier.runAfter(ctx, index * CALENDAR_SEND_SPACING_MS, internal.mail.sendCalendar, {
       send,
     });
   }
+  return sends.length * CALENDAR_SEND_SPACING_MS;
 }
 
 export const sendCalendar = internalAction({
