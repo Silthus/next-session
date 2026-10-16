@@ -3,7 +3,7 @@ import type { IsoDate } from "../shared/dates";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx, type QueryCtx } from "./_generated/server";
-import type { SessionState } from "./schema";
+import type { SessionState } from "../shared/sessions";
 import { sessionPublished } from "./sessionMail";
 import { fail } from "./model/errors";
 

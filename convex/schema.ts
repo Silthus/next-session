@@ -1,12 +1,11 @@
 import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
-import { v, type Infer } from "convex/values";
+import { v } from "convex/values";
+import { SESSION_STATES } from "../shared/sessions";
 
 export const answerValue = v.union(v.literal("free"), v.literal("maybe"), v.literal("busy"));
 
-export const sessionState = v.union(v.literal("scheduled"), v.literal("cancelled"));
-
-export type SessionState = Infer<typeof sessionState>;
+export const sessionState = v.union(...SESSION_STATES.map((state) => v.literal(state)));
 
 export const datedSession = v.object({ date: v.string(), state: sessionState });
 

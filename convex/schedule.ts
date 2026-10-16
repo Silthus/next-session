@@ -3,9 +3,9 @@ import { addMonths, isValidMonth, type IsoMonth } from "../shared/dates";
 import type { Id } from "./_generated/dataModel";
 import { query, type QueryCtx } from "./_generated/server";
 import { findOwnedGroup } from "./model/access";
-import { stateOf } from "./sessionLifecycle";
+import { datedSessionOf } from "./sessionLifecycle";
 import { profileImageUrl } from "./model/profileImages";
-import { answerValue, sessionState } from "./schema";
+import { answerValue, datedSession } from "./schema";
 
 const monthSchedule = v.object({
   players: v.array(
@@ -13,12 +13,7 @@ const monthSchedule = v.object({
   ),
   answers: v.array(v.object({ playerId: v.id("players"), date: v.string(), answer: answerValue })),
   sessions: v.array(
-    v.object({
-      _id: v.id("sessions"),
-      date: v.string(),
-      state: sessionState,
-      published: v.boolean(),
-    }),
+    v.object({ _id: v.id("sessions"), ...datedSession.fields, published: v.boolean() }),
   ),
 });
 
@@ -70,8 +65,7 @@ async function sessionsOf(ctx: QueryCtx, groupId: Id<"groups">) {
     .collect();
   return sessions.map((session) => ({
     _id: session._id,
-    date: session.date,
-    state: stateOf(session),
+    ...datedSessionOf(session),
     published: session.published !== undefined,
   }));
 }
