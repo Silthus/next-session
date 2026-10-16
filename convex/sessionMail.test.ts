@@ -261,7 +261,7 @@ describe("the Undo window", () => {
   });
 });
 
-it("cancels with the current Group name and Share Link", async () => {
+it("cancels under the published Group name, linking the current Share Link", async () => {
   const { as, groupId, sessionId } = await publishedSession();
   await t.run(async (ctx) => {
     await ctx.db.patch("groups", groupId, { name: "Renamed Crew", shareToken: "new-token" });
@@ -272,7 +272,7 @@ it("cancels with the current Group name and Share Link", async () => {
 
   const [mail, ...more] = mailsToRobin();
   expect(more).toEqual([]);
-  expect(mail!.subject).toBe("Renamed Crew: session on Saturday, October 17, 2026 cancelled");
+  expect(mail!.subject).toBe("Thursday Crew: session on Saturday, October 17, 2026 cancelled");
   expect(mail!.text).toContain("http://localhost:5173/s/new-token");
 });
 
