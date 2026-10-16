@@ -1,3 +1,4 @@
+# red: the day panel tests before SessionDetails existed
  ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > lists who is free first, then maybe, busy and silent 138ms
  ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > schedules a bookable night 33ms
  ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > says what players' calendars will show right above Schedule session 29ms

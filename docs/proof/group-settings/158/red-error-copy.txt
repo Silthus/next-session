@@ -1,3 +1,4 @@
+# red: the session error copy before SESSION_CANCELLED and INVALID_SETTINGS had words
  ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a session { code: 'SESSION_EXISTS' } 2ms
  ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a session { code: 'OUT_OF_WINDOW' } 0ms
  ✓ |ui| src/lib/errors.test.ts > errorMessage > explains a session { code: 'NOT_FOUND' } 0ms
