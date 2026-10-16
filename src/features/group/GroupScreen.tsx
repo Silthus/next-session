@@ -283,7 +283,7 @@ function GroupSurface({
         {...presentation}
         onClose={closeDay}
         onSchedule={() => void sessions.schedule(day.date)}
-        onUnschedule={(session) => void sessions.unschedule(session)}
+        onCancel={(session) => void sessions.cancel(session)}
       />
     );
   const nudging = showsNudge({

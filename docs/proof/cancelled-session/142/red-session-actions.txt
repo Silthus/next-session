@@ -1,0 +1,121 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-9ffb835b
+
+ ❯ |ui| src/features/group/calendar/useSessionActions.test.tsx (8 tests | 4 failed) 54ms
+   ❯ useSessionActions (8)
+     × says a Session is cancelled and brings its date back on Undo 6ms
+     × shows a scheduled night in every cached month of the Group at once 4ms
+     × marks a cancelled Session players have heard of as Cancelled, in every cached month 2ms
+     × schedules a Cancelled night again in place 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > says a Session is cancelled and brings its date back on Undo
+AssertionError: expected 'Session on Thu, Nov 5 removed.' to be 'Session on Thu, Nov 5 cancelled.' // Object.is equality
+
+Expected: "Session on Thu, Nov 5 cancelled."
+Received: "Session on Thu, Nov 5 removed."
+
+ ❯ src/features/group/calendar/useSessionActions.test.tsx:87:33
+     85|     expect(calls["sessions:cancel"]![0]!.args).toEqual({ sessionId: "s…
+     86|     await settle("sessions:cancel", 0, "null");
+     87|     expect(lastToast().message).toBe("Session on Thu, Nov 5 cancelled.…
+       |                                 ^
+     88|
+     89|     act(() => lastToast().undo?.());
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > shows a scheduled night in every cached month of the Group at once
+AssertionError: expected { 'g1|2026-10': [ …(2) ], …(2) } to deeply equal { 'g1|2026-10': [ …(2) ], …(2) }
+
+- Expected
++ Received
+
+  {
+    "g1|2026-10": [
+      "2026-10-09 scheduled",
+-     "2026-11-05 scheduled",
++     "2026-11-05 undefined",
+    ],
+    "g1|2026-11": [
+      "2026-10-09 scheduled",
+-     "2026-11-05 scheduled",
++     "2026-11-05 undefined",
+    ],
+    "g2|2026-11": [],
+  }
+
+ ❯ src/features/group/calendar/useSessionActions.test.tsx:102:35
+    100|
+    101|     optimisticUpdates["sessions:schedule"]!(store, { groupId, date: "2…
+    102|     expect(store.sessionsShown()).toEqual({
+       |                                   ^
+    103|       "g1|2026-10": ["2026-10-09 scheduled", "2026-11-05 scheduled"],
+    104|       "g1|2026-11": ["2026-10-09 scheduled", "2026-11-05 scheduled"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > marks a cancelled Session players have heard of as Cancelled, in every cached month
+AssertionError: expected { …(2) } to deeply equal { 'g1|2026-10': [ …(2) ], …(1) }
+
+- Expected
++ Received
+
+  {
+    "g1|2026-10": [
+-     "2026-11-05 cancelled",
+      "2026-11-12 scheduled",
+    ],
+    "g1|2026-11": [
+-     "2026-11-05 cancelled",
+      "2026-11-12 scheduled",
+    ],
+  }
+
+ ❯ src/features/group/calendar/useSessionActions.test.tsx:125:35
+    123|
+    124|     optimisticUpdates["sessions:cancel"]!(store, { sessionId: "s1" });
+    125|     expect(store.sessionsShown()).toEqual({
+       |                                   ^
+    126|       "g1|2026-10": ["2026-11-05 cancelled", "2026-11-12 scheduled"],
+    127|       "g1|2026-11": ["2026-11-05 cancelled", "2026-11-12 scheduled"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > schedules a Cancelled night again in place
+AssertionError: expected [ { _id: 's1', …(3) }, { …(2) } ] to deeply equal [ { _id: 's1', …(3) } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "_id": "s1",
+      "date": "2026-11-05",
+      "published": true,
+-     "state": "scheduled",
++     "state": "cancelled",
++   },
++   {
++     "_id": "optimistic-2026-11-05",
++     "date": "2026-11-05",
+    },
+  ]
+
+ ❯ src/features/group/calendar/useSessionActions.test.tsx:138:42
+    136|
+    137|     optimisticUpdates["sessions:schedule"]!(store, { groupId, date: "2…
+    138|     expect(store.sessions("g1|2026-11")).toEqual([
+       |                                          ^
+    139|       session("s1", "2026-11-05", { state: "scheduled" }),
+    140|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 4 passed (8)
+   Start at  09:19:06
+   Duration  751ms (environment 67%, transform 11%, setup 9%, tests 8%, import 4%, worker 1%)
+

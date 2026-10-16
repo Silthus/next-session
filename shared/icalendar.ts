@@ -1,4 +1,4 @@
-export type SessionWindow = { start: number; end: number };
+import type { SessionWindow } from "./sessionTime";
 
 export type CalendarEntry = {
   uid: string;

@@ -40,6 +40,7 @@ export async function createE2eRun(source = process.cwd()) {
   try {
     const excluded = new Set([
       ".git",
+      ".coherence",
       ".convex",
       ".tanstack",
       ".wrangler",

@@ -4,6 +4,7 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { GroupSwitcher } from "./GroupSwitcher";
 import { useIsMounted } from "./useIsMounted";
+import { browserTimeZone } from "../../../lib/timeZone";
 
 export function GroupSwitcherContainer({ group }: { group: { id: Id<"groups">; name: string } }) {
   const groups = useQuery(api.groups.mine);
@@ -29,7 +30,7 @@ export function GroupSwitcherContainer({ group }: { group: { id: Id<"groups">; n
       groups={groups}
       onOpen={open}
       onCreate={async () => {
-        const groupId = await createGroup({});
+        const groupId = await createGroup({ timeZone: browserTimeZone() });
         if (isMounted()) open(groupId);
       }}
       onRename={(name) => renameGroup({ groupId: group.id, name })}

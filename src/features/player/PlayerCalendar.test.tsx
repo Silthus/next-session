@@ -57,7 +57,7 @@ function calendarProps(props: Partial<Props> = {}): Props {
     month: "2026-10",
     today,
     answers: {},
-    sessionDates: [],
+    sessions: [],
     hintVisible: false,
     onAnswer: vi.fn(() => Promise.resolve(null)),
     onFillRest: vi.fn(() => Promise.resolve(null)),
@@ -205,11 +205,25 @@ describe("PlayerCalendar", () => {
   });
 
   it("marks a Session with a star and keeps it tappable", async () => {
-    renderCalendar({ sessionDates: ["2026-10-16"] });
+    renderCalendar({ sessions: [{ date: "2026-10-16", state: "scheduled" }] });
 
     const session = await tile("Friday, October 16: Not set, Session");
     expect(session).toHaveProperty("disabled", false);
     expect(session.textContent).toContain("★");
+  });
+
+  it("marks a Cancelled Session as Cancelled and keeps it answerable", async () => {
+    const { onAnswer } = renderCalendar({
+      answers: { "2026-10-16": "free" },
+      sessions: [{ date: "2026-10-16", state: "cancelled" }],
+    });
+
+    const cancelled = await tile("Friday, October 16: Free, Session cancelled");
+    expect(cancelled.textContent).toContain("Cancelled");
+    expect(cancelled.textContent).not.toContain("★");
+    await userEvent.click(cancelled);
+
+    expect(onAnswer.mock.calls).toEqual([["2026-10-16", "maybe"]]);
   });
 
   it("shows progress over the nights left and fills the rest busy", async () => {

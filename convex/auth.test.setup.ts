@@ -15,7 +15,7 @@ export function withAuthKeys() {
 }
 
 type SignInArgs =
-  | { provider: "anonymous" }
+  | { provider: "anonymous"; params?: { timeZone?: unknown } }
   | {
       provider: "password";
       params: { email: string; password: string; flow: "signUp" | "signIn"; tips?: unknown };
@@ -38,7 +38,8 @@ async function signInWithTokens(
   return { userId, sessionId, as: t.withIdentity({ subject: sub }) };
 }
 
-export const createYourLink = (t: TestBackend) => signInThroughAuth(t, { provider: "anonymous" });
+export const createYourLink = (t: TestBackend, params: { timeZone?: unknown } = {}) =>
+  signInThroughAuth(t, { provider: "anonymous", params });
 
 let accountCount = 0;
 

@@ -1,0 +1,739 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-9ffb835b
+
+ ❯ |ui| src/features/group/calendar/HeatCalendar.test.tsx (22 tests | 2 failed) 1242ms
+   ❯ HeatCalendar (22)
+     × names everyone free and a scheduled Session 42ms
+     × marks a Cancelled Session and still shows the night everyone is free 168ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > names everyone free and a scheduled Session
+AssertionError: expected [] to deeply equal [ 'session' ]
+
+- Expected
++ Received
+
+- [
+-   "session",
+- ]
++ []
+
+ ❯ src/features/group/calendar/HeatCalendar.test.tsx:216:28
+    214|       name: "Friday, October 9: everyone free, Session scheduled",
+    215|     });
+    216|     expect(marksOf(night)).toEqual(["session"]);
+       |                            ^
+    217|   });
+    218|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > marks a Cancelled Session and still shows the night everyone is free
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Friday, October 9: everyone free, Session cancelled"
+
+Here are the accessible roles:
+
+  heading:
+
+  Name "October 2026":
+  <h2
+    class="font-display text-xl font-semibold outline-none sm:text-2xl"
+    data-month-heading="true"
+    tabindex="-1"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Previous month":
+  <button
+    aria-label="Previous month"
+    class="inline-flex shrink-0 items-center justify-center rounded-md font-medium disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong transition-[background-color,color,border-color,scale,opacity,filter] duration-150 ease-(--ease-snap) motion-safe:active:scale-[0.98] text-ink hover:bg-surface-hover h-8 px-3 text-sm gap-1.5"
+    type="button"
+  />
+
+  Name "Next month":
+  <button
+    aria-label="Next month"
+    class="inline-flex shrink-0 items-center justify-center rounded-md font-medium disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong transition-[background-color,color,border-color,scale,opacity,filter] duration-150 ease-(--ease-snap) motion-safe:active:scale-[0.98] text-ink hover:bg-surface-hover h-8 px-3 text-sm gap-1.5 aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2 aria-disabled:active:scale-100"
+    type="button"
+  />
+
+  Name "Thursday, October 1: 0 free, 0 maybe, 0 busy":
+  <button
+    aria-label="Thursday, October 1: 0 free, 0 maybe, 0 busy"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 cursor-default opacity-40"
+    data-date="2026-10-01"
+    disabled=""
+    type="button"
+  />
+
+  Name "Friday, October 2: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-current="date"
+    aria-describedby="_r_am_"
+    aria-label="Friday, October 2: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-02"
+    type="button"
+  />
+
+  Name "Saturday, October 3: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_an_"
+    aria-label="Saturday, October 3: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-03"
+    type="button"
+  />
+
+  Name "Sunday, October 4: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_ao_"
+    aria-label="Sunday, October 4: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-04"
+    type="button"
+  />
+
+  Name "Monday, October 5: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_ap_"
+    aria-label="Monday, October 5: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-05"
+    type="button"
+  />
+
+  Name "Tuesday, October 6: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_aq_"
+    aria-label="Tuesday, October 6: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-06"
+    type="button"
+  />
+
+  Name "Wednesday, October 7: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_ar_"
+    aria-label="Wednesday, October 7: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-07"
+    type="button"
+  />
+
+  Name "Thursday, October 8: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_as_"
+    aria-label="Thursday, October 8: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-08"
+    type="button"
+  />
+
+  Name "Friday, October 9: everyone free":
+  <button
+    aria-describedby="_r_at_"
+    aria-label="Friday, October 9: everyone free"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-free bg-free text-white dark:text-paper focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-09"
+    type="button"
+  />
+
+  Name "Saturday, October 10: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_au_"
+    aria-label="Saturday, October 10: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-10"
+    type="button"
+  />
+
+  Name "Sunday, October 11: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_av_"
+    aria-label="Sunday, October 11: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-11"
+    type="button"
+  />
+
+  Name "Monday, October 12: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_b0_"
+    aria-label="Monday, October 12: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-12"
+    type="button"
+  />
+
+  Name "Tuesday, October 13: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_b1_"
+    aria-label="Tuesday, October 13: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-13"
+    type="button"
+  />
+
+  Name "Wednesday, October 14: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_b2_"
+    aria-label="Wednesday, October 14: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-14"
+    type="button"
+  />
+
+  Name "Thursday, October 15: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_b3_"
+    aria-label="Thursday, October 15: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-15"
+    type="button"
+  />
+
+  Name "Friday, October 16: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_b4_"
+    aria-label="Friday, October 16: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-16"
+    type="button"
+  />
+
+  Name "Saturday, October 17: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_b5_"
+    aria-label="Saturday, October 17: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-17"
+    type="button"
+  />
+
+  Name "Sunday, October 18: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_b6_"
+    aria-label="Sunday, October 18: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-18"
+    type="button"
+  />
+
+  Name "Monday, October 19: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_b7_"
+    aria-label="Monday, October 19: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-19"
+    type="button"
+  />
+
+  Name "Tuesday, October 20: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_b8_"
+    aria-label="Tuesday, October 20: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-20"
+    type="button"
+  />
+
+  Name "Wednesday, October 21: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_b9_"
+    aria-label="Wednesday, October 21: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-21"
+    type="button"
+  />
+
+  Name "Thursday, October 22: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_ba_"
+    aria-label="Thursday, October 22: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-22"
+    type="button"
+  />
+
+  Name "Friday, October 23: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_bb_"
+    aria-label="Friday, October 23: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-23"
+    type="button"
+  />
+
+  Name "Saturday, October 24: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_bc_"
+    aria-label="Saturday, October 24: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-24"
+    type="button"
+  />
+
+  Name "Sunday, October 25: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_bd_"
+    aria-label="Sunday, October 25: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-25"
+    type="button"
+  />
+
+  Name "Monday, October 26: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_be_"
+    aria-label="Monday, October 26: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-26"
+    type="button"
+  />
+
+  Name "Tuesday, October 27: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_bf_"
+    aria-label="Tuesday, October 27: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-27"
+    type="button"
+  />
+
+  Name "Wednesday, October 28: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_bg_"
+    aria-label="Wednesday, October 28: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-28"
+    type="button"
+  />
+
+  Name "Thursday, October 29: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_bh_"
+    aria-label="Thursday, October 29: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-29"
+    type="button"
+  />
+
+  Name "Friday, October 30: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_bi_"
+    aria-label="Friday, October 30: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-30"
+    type="button"
+  />
+
+  Name "Saturday, October 31: 0 free, 0 maybe, 0 busy, 2 not answered":
+  <button
+    aria-describedby="_r_bj_"
+    aria-label="Saturday, October 31: 0 free, 0 maybe, 0 busy, 2 not answered"
+    aria-pressed="false"
+    class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 motion-safe:active:scale-[0.97]"
+    data-date="2026-10-31"
+    type="button"
+  />
+
+  --------------------------------------------------
+  tooltip:
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_am_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_an_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_ao_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_ap_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_aq_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_ar_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_as_"
+    role="tooltip"
+  />
+
+  Name "Free Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_at_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_au_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_av_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_b0_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_b1_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_b2_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_b3_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_b4_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_b5_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_b6_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_b7_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_b8_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_b9_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_ba_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_bb_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_bc_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_bd_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_be_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_bf_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_bg_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block left-0"
+    id="_r_bh_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_bi_"
+    role="tooltip"
+  />
+
+  Name "No answer Player 0, Player 1":
+  <span
+    class="pointer-events-none absolute top-full z-20 hidden w-max max-w-60 pt-1.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 lg:block right-0"
+    id="_r_bj_"
+    role="tooltip"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <section
+      class="rounded-xl border bg-surface p-4 shadow-card border-line px-1.5 py-3 max-sm:-mx-4 max-sm:rounded-none max-sm:border-x-0 sm:p-5"
+    >
+      <div
+        class="mb-3 flex items-center justify-between gap-2 max-sm:px-2.5"
+      >
+        <div
+          class="flex min-w-0 items-center gap-2"
+        >
+          <h2
+            class="font-display text-xl font-semibold outline-none sm:text-2xl"
+            data-month-heading="true"
+            tabindex="-1"
+          >
+            October 2026
+          </h2>
+        </div>
+        <div
+          class="flex items-center gap-1"
+        >
+          <button
+            aria-label="Previous month"
+            class="inline-flex shrink-0 items-center justify-center rounded-md font-medium disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong transition-[background-color,color,border-color,scale,opacity,filter] duration-150 ease-(--ease-snap) motion-safe:active:scale-[0.98] text-ink hover:bg-surface-hover h-8 px-3 text-sm gap-1.5"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="size-4 rotate-90"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M5 7.5l5 5 5-5"
+              />
+            </svg>
+          </button>
+          <button
+            aria-label="Next month"
+            class="inline-flex shrink-0 items-center justify-center rounded-md font-medium disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong transition-[background-color,color,border-color,scale,opacity,filter] duration-150 ease-(--ease-snap) motion-safe:active:scale-[0.98] text-ink hover:bg-surface-hover h-8 px-3 text-sm gap-1.5 aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:bg-transparent aria-disabled:hover:text-ink-2 aria-disabled:active:scale-100"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="size-4 -rotate-90"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M5 7.5l5 5 5-5"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div
+        class="grid grid-cols-7 gap-0.5 transition-opacity duration-150 sm:gap-1.5"
+      >
+        <span
+          aria-hidden="true"
+          class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+        >
+          Mo
+        </span>
+        <span
+          aria-hidden="true"
+          class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+        >
+          Tu
+        </span>
+        <span
+          aria-hidden="true"
+          class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+        >
+          We
+        </span>
+        <span
+          aria-hidden="true"
+          class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+        >
+          Th
+        </span>
+        <span
+          aria-hidden="true"
+          class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+        >
+          Fr
+        </span>
+        <span
+          aria-hidden="true"
+          class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+        >
+          Sa
+        </span>
+        <span
+          aria-hidden="true"
+          class="pb-1 text-center font-mono text-[10px] font-medium tracking-wider text-ink-3 uppercase"
+        >
+          Su
+        </span>
+        <span />
+        <span />
+        <span />
+        <button
+          aria-label="Thursday, October 1: 0 free, 0 maybe, 0 busy"
+          aria-pressed="false"
+          class="group relative flex aspect-square min-w-0 flex-col justify-between rounded-sm border p-1 text-left transition-[scale,background-color,border-color] duration-150 ease-(--ease-snap) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-ink/0 before:transition-colors before:duration-150 sm:rounded-md sm:p-2 sm:hover:before:bg-ink/6 border-line bg-surface hover:border-line-strong sm:hover:border-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong max-sm:focus-visible:outline-offset-0 cursor-default opacity-40"
+          data-date="2026-10-01"
+          disabled=""
+          type="button"
+        >
+          <span
+            class="flex items-center gap-1 text-sm font-semibold leading-none"
+          >
+            1
+          </span>
+          <span
+            class="flex flex-wrap gap-0.5"
+          />
+        </button>
+...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/group/calendar/HeatCalendar.test.tsx:228:26
+    226|       sessions: [sessionOn("2026-10-09", "cancelled")],
+    227|     });
+    228|     const night = screen.getByRole("button", {
+       |                          ^
+    229|       name: "Friday, October 9: everyone free, Session cancelled",
+    230|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 20 passed (22)
+   Start at  09:17:04
+   Duration  1.96s (tests 66%, environment 24%, transform 4%, setup 3%, import 2%)
+

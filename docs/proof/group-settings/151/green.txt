@@ -1,0 +1,1011 @@
+# green: the same tests after the change, every assertion intact, none skipped
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-0aeaf619
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > keeps every night pending until its own change settles 27ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > ignores a second change to a night while the first is on its way 18ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > undoes a new Session with the id the server returned 11ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > shows a scheduled night in every cached month of the Group at once 4ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > shows a scheduled night at the Group's time and place before the server answers 8ms
+ ✓ |convex| convex/ownerOnly.test.ts > owner-only Groups > covers every public function of the GM modules 15ms
+ ✓ |convex| convex/ownerOnly.test.ts > owner-only Groups > every GM-facing function treats another GM's Group, Player and Session as missing and changes nothing 83ms
+stdout | convex/backfill.test.ts > backfill.publishLegacySessions > leaves a Session inside its first Undo window to announce itself
+Run 0000000000000000000000010000runs succeeded.
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > publishes every legacy Session as scheduled at revision 0, page by page 380ms
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > empties the retired Session mail table, page by page 21ms
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > changes nothing on a second run 12ms
+stdout | convex/sessionMail.test.ts > returns to the GM before mail, then sends once to each current claimed Account but never the Group's owner
+Run 0000000000000000000000010000runs succeeded.
+ ✓ |convex| convex/me.test.ts > me.groups > is null for a visitor and an Anonymous GM 95ms
+stdout | convex/auth.test.ts > Create your link > signs in an Anonymous GM who already holds a Share Link to one Unsaved Group
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > Create your link > signs in an Anonymous GM who already holds a Share Link to one Unsaved Group
+`auth:store` type: signIn
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns the Roster, the month's Answers, and every Session of the Group 113ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > leaves Cancelled Sessions out 5ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > gives every Session the Group's saved time and place 19ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > leaves out the Players, Answers, and Sessions of other Groups 5ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > feeds summarizeMonth for the per-player progress, Best Nights, and Sessions 9ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > serves an Anonymous GM their own Group 4ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for a foreign Group, so it looks missing 5ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for a removed Group 4ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for a malformed Group id 3ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for the malformed month "2026-13" 3ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for the malformed month "2026-1" 2ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for the malformed month "October" 3ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for a signed-out caller 3ms
+stdout | convex/backfill.test.ts > backfill.publishLegacySessions > lets the first cancel of a legacy Session announce it
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/sessionMail.test.ts > never announces a change before its Undo window ends
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/sessionMail.test.ts > never announces a change before its Undo window ends
+Run 0000000000000000000000010003runs succeeded.
+stdout | convex/auth.test.ts > Create your link > records the Legal Acceptance with the click
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > Create your link > records the Legal Acceptance with the click
+`auth:store` type: signIn
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > leaves a Session inside its first Undo window to announce itself 123ms
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > lets the first cancel of a legacy Session announce it 52ms
+ ✓ |convex| convex/me.test.ts > me.groups > is empty for an Account that runs and plays nowhere 22ms
+ ✓ |convex| convex/sessionMail.test.ts > returns to the GM before mail, then sends once to each current claimed Account but never the Group's owner 302ms
+ ✓ |convex| convex/sessionMail.test.ts > never announces a change before its Undo window ends 63ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > removes a Session cancelled inside its first window and mails nobody 26ms
+stdout | convex/telemetry.callSites.test.ts > with the deployment's PostHog token unset > schedules nothing anywhere in the core loop
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > the Undo window > keeps a Session cancelled after its window as Cancelled and sends one cancelled update
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/telemetry.callSites.test.ts > with the deployment's PostHog token unset > schedules nothing anywhere in the core loop
+`auth:store` type: signIn
+ ✓ |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > fills start, end, location and Group name into every published Session at the same revision, page by page 66ms
+ ✓ |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > keeps a Cancelled Session cancelled 4ms
+ ✓ |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > leaves a Session that was never published alone 6ms
+ ✓ |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > changes nothing on a second run 6ms
+ ✓ |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > lets the first settle after it publish nothing for an unchanged Session 9ms
+stdout | convex/sessionMail.test.ts > the Undo window > keeps a Session cancelled after its window as Cancelled and sends one cancelled update
+Run 0000000000000000000000010003runs succeeded.
+ ✓ |convex| convex/player.test.ts > player.group > shows the Group's name, its Roster, and every Session with its time 210ms
+ ✓ |convex| convex/player.test.ts > player.group > leaves Cancelled Sessions out 5ms
+ ✓ |convex| convex/player.test.ts > player.group > shows when and where each Session is, in the Group's time zone 78ms
+ ✓ |convex| convex/player.test.ts > player.group > opens the GM view for the GM's Account, and for no one else 13ms
+stdout | convex/sessionMail.test.ts > the Undo window > keeps the id on Undo of a cancel and mails nobody
+Run 0000000000000000000000010000runs succeeded.
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.settings > reads a Group nobody has set up as 19:00 for 4 hours, Berlin time, with no location 118ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.settings > reads back what the GM saved 21ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.settings > reads a missing id as null 5ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.create > keeps the browser's time zone for the new Group 4ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.create > keeps the time zone in its usual spelling 3ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.create > drops a time zone it doesn't know and follows Berlin time 19ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > trims the location 6ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > clears the location when it is left empty 5ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > keeps the time zone in its usual spelling 7ms
+ ✓ |convex| convex/auth.test.ts > Create your link > signs in an Anonymous GM who already holds a Share Link to one Unsaved Group 302ms
+stdout | convex/telemetry.callSites.test.ts > with the deployment's PostHog token unset > schedules nothing anywhere in the core loop
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > the Undo window > restores the same id on Schedule again and sends one scheduled update
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/sessionMail.test.ts > the Undo window > restores the same id on Schedule again and sends one scheduled update
+Run 0000000000000000000000010003runs succeeded.
+ ✓ |convex| convex/me.test.ts > me.groups > lists the Groups the Account runs with their next five Sessions from today 117ms
+ ✓ |convex| convex/me.test.ts > me.groups > leaves Cancelled Sessions out of the next five 17ms
+ ✓ |convex| convex/me.test.ts > me.groups > shows when and where each upcoming Session is, in the Group's time zone 65ms
+ ✓ |convex| convex/me.test.ts > me.groups > lists the Groups the Account plays in with its Player and the days left to answer 8ms
+ ✓ |convex| convex/me.test.ts > me.groups > shows a Group the Account runs and plays in in both lists 4ms
+stdout | convex/sessionMail.test.ts > the Undo window > restores the same id on Schedule again and sends one scheduled update
+Run 0000000000000000000000010006runs succeeded.
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > keeps a Session cancelled after its window as Cancelled and sends one cancelled update 54ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > keeps the id on Undo of a cancel and mails nobody 25ms
+stdout | convex/sessionMail.test.ts > the Undo window > sends exactly one cancelled update for cancel, Schedule again and cancel inside one window
+Run 0000000000000000000000010000runs succeeded.
+ ✓ |convex| convex/me.test.ts > me.groups > drops a Group once the Account releases its claim there 8ms
+ ✓ |convex| convex/me.test.ts > me.groups > drops a Group once the GM removes the Claimed Player 9ms
+ ✓ |convex| convex/me.test.ts > me.groups > skips a claim whose Group is deleted while its Players are still being removed 7ms
+ ✓ |convex| convex/me.test.ts > me.groups > returns the current Share Token after the GM rotates it 12ms
+ ✓ |convex| convex/me.test.ts > me.groups > moves on at midnight without a write 5ms
+ ✓ |convex| convex/me.test.ts > me.groups > accepts a client date one day off the server's but no further 6ms
+stdout | convex/sessionMail.test.ts > the Undo window > sends exactly one cancelled update for cancel, Schedule again and cancel inside one window
+Run 0000000000000000000000010003runs succeeded.
+ ✓ |convex| convex/player.test.ts > player.group > keeps the player view for a GM's Account that plays in its own Group 14ms
+ ✓ |convex| convex/player.test.ts > player.group > keeps the player view for an Anonymous GM opening their own Share Link 4ms
+ ✓ |convex| convex/player.test.ts > player.group > shows the Account's Claimed Player on its other devices and to no one else 17ms
+ ✓ |convex| convex/player.test.ts > player.group > shows only the Group behind the Share Token 12ms
+ ✓ |convex| convex/player.test.ts > player.group > returns null for the unknown Share Token "" 6ms
+ ✓ |convex| convex/player.test.ts > player.group > returns null for the unknown Share Token "unknown123" 3ms
+ ✓ |convex| convex/player.test.ts > player.group > returns null for the unknown Share Token "toolongtoken123456" 2ms
+ ✓ |convex| convex/player.test.ts > player.group > returns null for a Share Token the GM rotated away, even while Undo is open 20ms
+ ✓ |convex| convex/player.test.ts > player.answers > returns the Player's Answers of the month by date 7ms
+ ✓ |convex| convex/player.test.ts > player.answers > still shows the Answers of a past month 2ms
+ ✓ |convex| convex/player.test.ts > player.answers > never reads a Player of another Group through this Share Token 6ms
+ ✓ |convex| convex/player.test.ts > player.answers > returns null for an unknown or rotated-away Share Token 5ms
+ ✓ |convex| convex/player.test.ts > player.answers > returns null for a removed Player 6ms
+ ✓ |convex| convex/player.test.ts > player.answers > returns null for the malformed arguments {"playerId":"not-an-id","month":"2026-10"} 2ms
+ ✓ |convex| convex/player.test.ts > player.answers > returns null for the malformed arguments {"playerId":"PLAYER","month":"2026-13"} 2ms
+ ✓ |convex| convex/player.test.ts > player.answers > returns null for the malformed arguments {"playerId":"PLAYER","month":"Oct"} 2ms
+ ✓ |convex| convex/player.test.ts > player.join > adds the Player to the Roster under the normalized name 2ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > takes a location of 200 characters 28ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { startTime: '7pm' } as invalid settings and changes nothing 8ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { startTime: '7:30' } as invalid settings and changes nothing 3ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { startTime: '24:00' } as invalid settings and changes nothing 15ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { lengthMinutes: 15 } as invalid settings and changes nothing 4ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { lengthMinutes: 735 } as invalid settings and changes nothing 2ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { lengthMinutes: 250 } as invalid settings and changes nothing 3ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { timeZone: 'Mars/Olympus_Mons' } as invalid settings and changes nothing 15ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { …(1) } as invalid settings and changes nothing 6ms
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses once the GM's edits are spent, and changes nothing 34ms
+stdout | convex/sessionMail.test.ts > the Undo window > publishes a burst of changes once, a window after the last
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/sessionMail.test.ts > the Undo window > publishes a burst of changes once, a window after the last
+Run 0000000000000000000000010003runs succeeded.
+stdout | convex/sessionMail.test.ts > the Undo window > announces the final Session after a new one is undone and scheduled again
+Run 0000000000000000000000010000runs succeeded.
+ ✓ |convex| convex/timeAndPlace.test.ts > groups.updateSettings > pushes out the Expiry of an Unsaved Group 14ms
+ ✓ |convex| convex/timeAndPlace.test.ts > a saved Time and place > publishes each upcoming Session once, a window after the last save, at the new time and place 18ms
+ ✓ |convex| convex/timeAndPlace.test.ts > a saved Time and place > follows a new time zone 4ms
+ ✓ |convex| convex/timeAndPlace.test.ts > a saved Time and place > publishes nothing when the save changes nothing 5ms
+ ✓ |convex| convex/timeAndPlace.test.ts > a saved Time and place > leaves a Cancelled Session's published time alone 2ms
+ ✓ |convex| convex/timeAndPlace.test.ts > a saved Time and place > leaves a past Session's published time alone 3ms
+ ✓ |convex| convex/timeAndPlace.test.ts > a saved Time and place > publishes a Cancelled Session at the new time once it is scheduled again 7ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > restores the same id on Schedule again and sends one scheduled update 58ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > sends exactly one cancelled update for cancel, Schedule again and cancel inside one window 34ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > publishes a burst of changes once, a window after the last 27ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > announces the final Session after a new one is undone and scheduled again 17ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > sends nothing for a new Session undone after 0 ms 8ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > sends nothing for a new Session undone after 30000 ms 11ms
+stdout | convex/sessionMail.test.ts > the Undo window > sends nothing for a cancel undone after 1000 ms
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/sessionMail.test.ts > the Undo window > sends nothing for a cancel undone after 30000 ms
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/sessionMail.test.ts > the Undo window > does not move a pending settle when a Cancelled Session is cancelled again
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/sessionMail.test.ts > the Undo window > does not move a pending settle when a Cancelled Session is cancelled again
+Run 0000000000000000000000010003runs succeeded.
+ ✓ |convex| convex/player.test.ts > player.join > rejects the name "" 3ms
+ ✓ |convex| convex/player.test.ts > player.join > rejects the name "   " 3ms
+ ✓ |convex| convex/player.test.ts > player.join > rejects the name "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" 2ms
+ ✓ |convex| convex/player.test.ts > player.join > refuses a name already on the Roster and points at its Player 3ms
+ ✓ |convex| convex/player.test.ts > player.join > lets the same name join two Groups 3ms
+ ✓ |convex| convex/player.test.ts > player.join > refuses a Player beyond 100 19ms
+ ✓ |convex| convex/player.test.ts > player.join > refuses an unknown or rotated-away Share Token 3ms
+ ✓ |convex| convex/player.test.ts > player.join > rate limits a Group to 30 joins per hour 52ms
+stdout | convex/sessionMail.test.ts > sends no Session update when a saved Time and place moves a Session
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/sessionMail.test.ts > cancels with the current Group name and Share Link
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/sessionMail.test.ts > cancels with the current Group name and Share Link
+Run 0000000000000000000000010003runs succeeded.
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > sends nothing for a cancel undone after 1000 ms 29ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > sends nothing for a cancel undone after 30000 ms 16ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > does not move a pending settle when a Cancelled Session is cancelled again 19ms
+ ✓ |convex| convex/sessionMail.test.ts > sends no Session update when a saved Time and place moves a Session 20ms
+stdout | convex/telemetry.callSites.test.ts > with the deployment's PostHog token unset > schedules nothing anywhere in the core loop
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > Create your link > keeps the browser's time zone for the first Group
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > lets an Account turn session emails off and back on, with email on by default
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks link_created with the first Group for Create your link
+`auth:store` type: createAccountFromCredentials
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks link_created with the first Group for Create your link
+`auth:store` type: signIn
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Password Account and nothing for its next log in
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > Create your link > keeps the browser's time zone for the first Group
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > Create your link > drops the time zone Mars/Olympus_Mons and still creates the first Group on Berlin time
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > Create your link > drops the time zone Mars/Olympus_Mons and still creates the first Group on Berlin time
+`auth:store` type: signIn
+stderr | convex/sessionMail.test.ts > rechecks release before retrying a failed send
+Error executing 0000000000000000000000010000runs: The session mail webhook answered HTTP 503
+stderr | convex/sessionMail.test.ts > rechecks release before retrying a failed send
+Run 0000000000000000000000010000runs failed, retrying in 25717.44 ms: The session mail webhook answered HTTP 503
+stdout | convex/sessionMail.test.ts > rechecks release before retrying a failed send
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/auth.test.ts > Create your link > drops the time zone 42 and still creates the first Group on Berlin time
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > Create your link > drops the time zone 42 and still creates the first Group on Berlin time
+`auth:store` type: signIn
+stderr | convex/sessionMail.test.ts > rechecks opt-out before retrying a failed send
+Error executing 0000000000000000000000010000runs: The session mail webhook answered HTTP 503
+stderr | convex/sessionMail.test.ts > rechecks opt-out before retrying a failed send
+Run 0000000000000000000000010000runs failed, retrying in 19563.33 ms: The session mail webhook answered HTTP 503
+stdout | convex/sessionMail.test.ts > rechecks opt-out before retrying a failed send
+Run 0000000000000000000000010000runs succeeded.
+ ✓ |convex| convex/sessionMail.test.ts > cancels with the current Group name and Share Link 30ms
+ ✓ |convex| convex/sessionMail.test.ts > lets an Account turn session emails off and back on, with email on by default 24ms
+ ✓ |convex| convex/sessionMail.test.ts > sends nothing without POSTHOG_SESSION_WEBHOOK_URL 5ms
+ ✓ |convex| convex/sessionMail.test.ts > sends nothing without POSTHOG_MAIL_WEBHOOK_SECRET 5ms
+ ✓ |convex| convex/sessionMail.test.ts > publishes without mail configured and queues no send 4ms
+ ✓ |convex| convex/sessionMail.test.ts > rechecks release before delivery 5ms
+ ✓ |convex| convex/sessionMail.test.ts > rechecks remove-group before delivery 6ms
+ ✓ |convex| convex/sessionMail.test.ts > rechecks test-email before delivery 7ms
+ ✓ |convex| convex/sessionMail.test.ts > rechecks anonymous before delivery 6ms
+ ✓ |convex| convex/sessionMail.test.ts > rechecks release before retrying a failed send 33ms
+ ✓ |convex| convex/auth.test.ts > Create your link > records the Legal Acceptance with the click 373ms
+ ✓ |convex| convex/auth.test.ts > Create your link > keeps the browser's time zone for the first Group 57ms
+ ✓ |convex| convex/auth.test.ts > Create your link > drops the time zone Mars/Olympus_Mons and still creates the first Group on Berlin time 25ms
+ ✓ |convex| convex/auth.test.ts > Create your link > drops the time zone 42 and still creates the first Group on Berlin time 17ms
+ ✓ |convex| convex/player.test.ts > player.join > rate limits each Group separately 42ms
+ ✓ |convex| convex/player.test.ts > player.join > pushes out the Expiry of an Unsaved Group 4ms
+ ✓ |convex| convex/player.test.ts > player.answer > records, changes, and clears the Player's Answer for a date 8ms
+ ✓ |convex| convex/player.test.ts > player.answer > stores the Answer under the Player's Group 2ms
+ ✓ |convex| convex/player.test.ts > player.answer > clears an unanswered date without complaint 4ms
+ ✓ |convex| convex/player.test.ts > player.answer > accepts 2026-10-03 at the edge of the Booking Window 3ms
+ ✓ |convex| convex/player.test.ts > player.answer > accepts 2026-12-31 at the edge of the Booking Window 3ms
+ ✓ |convex| convex/player.test.ts > player.answer > rejects 2026-10-02 outside the Booking Window 2ms
+ ✓ |convex| convex/player.test.ts > player.answer > rejects 2027-01-01 outside the Booking Window 2ms
+ ✓ |convex| convex/player.test.ts > player.answer > rejects 2026-11-31 outside the Booking Window 1ms
+ ✓ |convex| convex/player.test.ts > player.answer > rejects 2026-10-3 outside the Booking Window 2ms
+ ✓ |convex| convex/player.test.ts > player.answer > rejects tomorrow outside the Booking Window 1ms
+ ✓ |convex| convex/player.test.ts > player.answer > keeps a past Answer read-only 3ms
+ ✓ |convex| convex/player.test.ts > player.answer > never writes for a Player of another Group through this Share Token 4ms
+ ✓ |convex| convex/player.test.ts > player.answer > refuses an unknown or rotated-away Share Token 2ms
+stderr | convex/sessionMail.test.ts > rechecks remove-group before retrying a failed send
+Error executing 0000000000000000000000010000runs: The session mail webhook answered HTTP 503
+stderr | convex/sessionMail.test.ts > rechecks remove-group before retrying a failed send
+Run 0000000000000000000000010000runs failed, retrying in 29578.24 ms: The session mail webhook answered HTTP 503
+stdout | convex/auth.test.ts > Create your link > gives every click its own GM and Group
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > Create your link > gives every click its own GM and Group
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > rechecks remove-group before retrying a failed send
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/auth.test.ts > Create your link > gives every click its own GM and Group
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > Create your link > gives every click its own GM and Group
+`auth:store` type: signIn
+stderr | convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one
+Error executing 0000000000000000000000010003runs: The session mail webhook answered HTTP 503
+stderr | convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one
+Run 0000000000000000000000010003runs failed, retrying in 29800.00 ms: The session mail webhook answered HTTP 503
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stderr | convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one
+Error executing 0000000000000000000000010003runs: The session mail webhook answered HTTP 503
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stderr | convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one
+Run 0000000000000000000000010003runs failed, retrying in 119200.00 ms: The session mail webhook answered HTTP 503
+stdout | convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one
+Run 0000000000000000000000010010runs succeeded.
+stdout | convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one
+Run 0000000000000000000000010003runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > HTTP 503 produces 2 attempts
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/sessionMail.test.ts > HTTP 400 produces 1 attempts
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > HTTP 429 produces 1 attempts
+Run 0000000000000000000000010000runs succeeded.
+ ✓ |convex| convex/telemetry.callSites.test.ts > with the deployment's PostHog token unset > schedules nothing anywhere in the core loop 449ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > sign-in > tracks link_created with the first Group for Create your link 10ms
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Password Account and nothing for its next log in
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Password Account and nothing for its next log in
+`auth:store` type: retrieveAccountWithCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+ ✓ |convex| convex/auth.test.ts > Create your link > gives every click its own GM and Group 26ms
+ ✓ |convex| convex/sessionMail.test.ts > rechecks opt-out before retrying a failed send 11ms
+ ✓ |convex| convex/sessionMail.test.ts > rechecks remove-group before retrying a failed send 14ms
+ ✓ |convex| convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one 33ms
+ ✓ |convex| convex/sessionMail.test.ts > HTTP 503 produces 2 attempts 7ms
+ ✓ |convex| convex/sessionMail.test.ts > HTTP 400 produces 1 attempts 6ms
+ ✓ |convex| convex/sessionMail.test.ts > HTTP 429 produces 1 attempts 5ms
+ ✓ |convex| convex/sessionMail.test.ts > rejects signed-out and anonymous preference writes 2ms
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010000runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010003runs succeeded.
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Password Account and nothing for its next log in
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010006runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010009runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010012runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010015runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: verifier
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010018runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010021runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010024runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010027runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010030runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010033runs succeeded.
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: verifierSignature
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010036runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010039runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010042runs succeeded.
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: userOAuth
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010045runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010048runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: verifyCodeAndSignIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010051runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010054runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010057runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010060runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010063runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010066runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010069runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010072runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010075runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010078runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010081runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010084runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010087runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010090runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010093runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010096runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010099runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010102runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010105runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010108runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010111runs succeeded.
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: verifier
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: verifierSignature
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010114runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010117runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010120runs succeeded.
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: userOAuth
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010123runs succeeded.
+stdout | convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in
+`auth:store` type: verifyCodeAndSignIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010126runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010129runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010132runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010135runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010138runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010141runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010144runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010147runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010150runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010153runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010156runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010159runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010162runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010165runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010168runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010171runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010174runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010177runs succeeded.
+ ✓ |convex| convex/player.test.ts > player.answer > rate limits a Player to a burst of 60 Answers, refilling 120 per minute 121ms
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010180runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010183runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+ ✓ |convex| convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Password Account and nothing for its next log in 272ms
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010186runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010189runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010192runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010195runs succeeded.
+stdout | convex/telemetry.callSites.test.ts > sign-in > flags a production proof Account under .test as a test account
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010198runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010201runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010204runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010207runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010210runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010213runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010216runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010219runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010222runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010225runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010228runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010231runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010234runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010237runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010240runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010243runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010246runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010249runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010252runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010255runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010258runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010261runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010264runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010267runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010270runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010273runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010276runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010279runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010282runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010285runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010288runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010291runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010294runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010297runs succeeded.
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010300runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient
+Run 0000000000000000000000010303runs succeeded.
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+ ✓ |convex| convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient 333ms
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > Accounts > creates an Account with no Groups and the Legal Acceptance of its sheet
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > Accounts > creates an Account with no Groups and the Legal Acceptance of its sheet
+`auth:store` type: signIn
+ ✓ |convex| convex/auth.test.ts > the anonymous sign-up limit > refuses the click after a burst of 60 and creates nothing for it 416ms
+stdout | convex/auth.test.ts > Accounts > logs in to the same Account however the email is cased or padded
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/auth.test.ts > Accounts > creates an Account with no Groups and the Legal Acceptance of its sheet 151ms
+stdout | convex/auth.test.ts > Accounts > logs in to the same Account however the email is cased or padded
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > Accounts > logs in to the same Account however the email is cased or padded
+`auth:store` type: retrieveAccountWithCredentials
+ ✓ |convex| convex/player.test.ts > player.answer > rate limits a Group to a burst of at most 300 Answers across its Players 293ms
+ ✓ |convex| convex/player.test.ts > player.answer > pushes out the Expiry of an Unsaved Group 4ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > answers busy on every unanswered bookable date of the month 7ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > fills the whole last month of the Booking Window 5ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > follows the Booking Window across New Year 7ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > writes nothing more when called again 7ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > leaves other Players untouched 3ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > rejects 2026-09 outside the Booking Window 2ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > rejects 2027-01 outside the Booking Window 1ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > rejects 2026-13 outside the Booking Window 1ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > rejects Oct outside the Booking Window 1ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > never writes for a Player of another Group through this Share Token 2ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > refuses an unknown or rotated-away Share Token 4ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > spends one token of the Player's Answer rate limit 41ms
+stdout | convex/auth.test.ts > Accounts > logs in to the same Account however the email is cased or padded
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > Accounts > refuses a wrong password as invalid credentials
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/player.test.ts > player.fillRest > spends one token of the Group's Answer rate limit, however many dates it fills 533ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > pushes out the Expiry of an Unsaved Group 4ms
+ ✓ |convex| convex/player.test.ts > joining while signed in > claims the new Player for an Account 2ms
+ ✓ |convex| convex/player.test.ts > joining while signed in > claims nothing for a visitor or an Anonymous GM 3ms
+ ✓ |convex| convex/player.test.ts > joining while signed in > moves the Account's claim in the Group to the new name 4ms
+ ✓ |convex| convex/player.test.ts > joining while signed in > joins no one when the Account already claims 50 Players 5ms
+ ✓ |convex| convex/player.test.ts > joining while signed in > keeps a joined Player on the Roster until the GM removes it 4ms
+ ✓ |convex| convex/player.test.ts > player.claim > claims a Player picked from the Roster 3ms
+ ✓ |convex| convex/player.test.ts > player.claim > leaves the Account's own claim as it is 2ms
+ ✓ |convex| convex/player.test.ts > player.claim > moves the Account's claim to another Player of the same Group 3ms
+ ✓ |convex| convex/player.test.ts > player.claim > refuses a Player another Account claimed 3ms
+ ✓ |convex| convex/player.test.ts > player.claim > refuses a Player of another Group and a rotated-away Share Token 3ms
+ ✓ |convex| convex/player.test.ts > player.claim > lets only an Account claim 4ms
+ ✓ |convex| convex/player.test.ts > player.claim > caps an Account at 50 Claimed Players but still moves a claim within a Group 8ms
+ ✓ |convex| convex/player.test.ts > player.claim > rate limits an Account to a burst of 10 claims 4ms
+ ✓ |convex| convex/player.test.ts > player.claim > pushes out the Expiry of an Unsaved Group 2ms
+ ✓ |convex| convex/player.test.ts > player.claim > locks nothing: the Share Link still answers as a Claimed Player 4ms
+ ✓ |convex| convex/player.test.ts > player.release > releases the claim and keeps the Player with its Answers 4ms
+ ✓ |convex| convex/player.test.ts > player.release > returns null for a Group without the Account's claim and leaves other claims alone 5ms
+ ✓ |convex| convex/player.test.ts > player.release > pushes out the Expiry of an Unsaved Group 2ms
+ ✓ |convex| convex/player.test.ts > player.release > lets only an Account release 1ms
+ ✓ |convex| convex/player.test.ts > player.release > shares the claim rate limit with player.claim 4ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > keeps an Account's picked Player on its first answer, and only then 3ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > keeps an Account's picked Player on Fill the rest 4ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > keeps nothing while the Account only views the link 2ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > keeps nothing for a visitor or an Anonymous GM 3ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > keeps the GM only once they answer on their own link 2ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > saves the answer and leaves another Account's Player with them 3ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > moves the Account's claim to the Player they answer as 2ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > saves the answer but keeps nothing past 50 Claimed Players 4ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in 103ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > keeps again after Not you? and the next answer 3ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > releases the claim and keeps the Player with its Answers 4ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > keeps the Group out of My groups when the Account answers again, as any Player 5ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > forgets the removal once the Account keeps the Group on purpose 4ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > forgets the removal when the Account joins the Group with a new name 10ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > removes the Group for this Account only 13ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > remembers both Accounts' removals when they used the same Player 5ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > remembers Remove after the GM removes the Player 4ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > reports the Group opt-out only to the Account that deliberately removed it 4ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > lets only an Account remove 4ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > returns null for a Group without the Account's claim 2ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > shares the claim rate limit with player.claim 6ms
+ ✓ |convex| convex/auth.test.ts > Accounts > logs in to the same Account however the email is cased or padded 385ms
+stdout | convex/auth.test.ts > Accounts > refuses a wrong password as invalid credentials
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > Accounts > refuses a wrong password as invalid credentials
+`auth:store` type: retrieveAccountWithCredentials
+stdout | convex/telemetry.callSites.test.ts > sign-in > flags a production proof Account under .test as a test account
+`auth:store` type: signIn
+stdout | convex/telemetry.callSites.test.ts > Tips > tracks account_created with tips_requested for a ticked box
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > Accounts > refuses an unknown email as invalid credentials
+`auth:store` type: retrieveAccountWithCredentials
+stdout | convex/auth.test.ts > Accounts > never signs in through a sign-up for a taken email, so guesses meet the sign-in throttle
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/auth.test.ts > Accounts > refuses a wrong password as invalid credentials 213ms
+ ✓ |convex| convex/auth.test.ts > Accounts > refuses an unknown email as invalid credentials 1ms
+ ✓ |convex| convex/auth.test.ts > Accounts > refuses a sign-up or a log in with the email "" as invalid credentials 1ms
+ ✓ |convex| convex/auth.test.ts > Accounts > refuses a sign-up or a log in with the email "   " as invalid credentials 1ms
+ ✓ |convex| convex/auth.test.ts > Accounts > refuses a password shorter than 8 characters as weak 0ms
+stdout | convex/auth.test.ts > Accounts > never signs in through a sign-up for a taken email, so guesses meet the sign-in throttle
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > Accounts > refuses a second Account for the same email
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/telemetry.callSites.test.ts > sign-in > flags a production proof Account under .test as a test account 868ms
+stdout | convex/telemetry.callSites.test.ts > Tips > tracks account_created with tips_requested for a ticked box
+`auth:store` type: signIn
+stdout | convex/telemetry.callSites.test.ts > Tips > tracks account_created without tips_requested for a Google Account
+`auth:store` type: verifier
+stdout | convex/telemetry.callSites.test.ts > Tips > tracks account_created without tips_requested for a Google Account
+`auth:store` type: verifierSignature
+stdout | convex/telemetry.callSites.test.ts > Tips > tracks account_created without tips_requested for a Google Account
+`auth:store` type: userOAuth
+ ✓ |convex| convex/auth.test.ts > Accounts > never signs in through a sign-up for a taken email, so guesses meet the sign-in throttle 126ms
+stdout | convex/telemetry.callSites.test.ts > Tips > tracks account_created without tips_requested for a Google Account
+`auth:store` type: verifyCodeAndSignIn
+stdout | convex/auth.test.ts > Accounts > refuses a second Account for the same email
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/auth.test.ts > Accounts > refuses a second Account for the same email 467ms
+stdout | convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one
+`auth:store` type: retrieveAccountWithCredentials
+ ✓ |convex| convex/telemetry.callSites.test.ts > Tips > tracks account_created with tips_requested for a ticked box 505ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Tips > tracks account_created without tips_requested for a Google Account 298ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Tips > tracks tips_confirmed for the Account, with no email or code 149ms
+stdout | convex/telemetry.callSites.test.ts > GM mutations > tracks groups_saved with the number of Groups the Save moved
+`auth:store` type: createAccountFromCredentials
+stdout | convex/telemetry.callSites.test.ts > GM mutations > tracks groups_saved with the number of Groups the Save moved
+`auth:store` type: signIn
+stdout | convex/telemetry.callSites.test.ts > GM mutations > tracks groups_saved with the number of Groups the Save moved
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/telemetry.callSites.test.ts > Tips > tracks nothing for a refused confirmation 405ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks group_created 4ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks share_link_rotated 8ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks group_settings_saved for the location "Max's place" as has_location true 16ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks group_settings_saved for the location "" as has_location false 4ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks session_scheduled with the Roster size and whether it is the Group's first 8ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks session_cancelled 5ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks Schedule again as session_scheduled that is not the Group's first 11ms
+stdout | convex/telemetry.callSites.test.ts > GM mutations > tracks groups_saved with the number of Groups the Save moved
+`auth:store` type: signIn
+stdout | convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a Save with a used claim code
+`auth:store` type: createAccountFromCredentials
+stdout | convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a Save with a used claim code
+`auth:store` type: signIn
+stdout | convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a Save with a used claim code
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one
+`auth:store` type: retrieveAccountWithCredentials
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks groups_saved with the number of Groups the Save moved 136ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks player_joined as the new Player for a visitor 3ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks player_joined as the Account, claimed, when an Account joins 3ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks player_claimed and player_released 5ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks nothing for a claim of a Player the Account already holds 3ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks nothing for a release without a claim 2ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks nothing for answers 6ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a Session on a taken date 4ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a Session outside the Booking Window 5ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a join under a taken name 4ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a rotation of a foreign Group 6ms
+stdout | convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a Save with a used claim code
+`auth:store` type: signIn
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log
+`auth:store` type: createAccountFromCredentials
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log
+`auth:store` type: signIn
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one
+`auth:store` type: retrieveAccountWithCredentials
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log
+`auth:store` type: signIn
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a Save with a used claim code 121ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for an Account that objected 6ms
+stdout | convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one
+`auth:store` type: retrieveAccountWithCredentials
+ ✓ |convex| convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log 143ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > the Expiry sweep > logs once per run with the number of Groups it expired, across pages 83ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > the Expiry sweep > logs a run that found nothing 5ms
+stdout | convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one
+`auth:store` type: retrieveAccountWithCredentials
+stdout | convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one
+`auth:store` type: retrieveAccountWithCredentials
+stdout | convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one
+`auth:store` type: retrieveAccountWithCredentials
+stdout | convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one
+`auth:store` type: retrieveAccountWithCredentials
+stdout | convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one
+`auth:store` type: retrieveAccountWithCredentials
+stdout | convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one
+`auth:store` type: retrieveAccountWithCredentials
+stdout | convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one
+`auth:store` type: retrieveAccountWithCredentials
+stdout | convex/auth.test.ts > a deployment without Google's credentials > reports Google off, and Anonymous and Password still sign in
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > a deployment without Google's credentials > reports Google off, and Anonymous and Password still sign in
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > a deployment without Google's credentials > reports Google off, and Anonymous and Password still sign in
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/auth.test.ts > Accounts > locks an Account after 10 wrong passwords, even against the right one 2102ms
+stdout | convex/auth.test.ts > a deployment without Google's credentials > reports Google off, and Anonymous and Password still sign in
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > a deployment without Google's credentials > reports Google off, and Anonymous and Password still sign in
+`auth:store` type: retrieveAccountWithCredentials
+stdout | convex/auth.test.ts > a deployment without Google's credentials > reports Google off, and Anonymous and Password still sign in
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the Account sign-up limit > admits one more sign-up every 12 seconds after the burst, and not a moment sooner
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/auth.test.ts > a deployment without Google's credentials > reports Google off, and Anonymous and Password still sign in 261ms
+ ✓ |convex| convex/auth.test.ts > the Account sign-up limit > refuses a sign-up after a burst of 20 and creates no Account for it 11ms
+stdout | convex/auth.test.ts > the Account sign-up limit > admits one more sign-up every 12 seconds after the burst, and not a moment sooner
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the Account sign-up limit > spends nothing on sign-ups refused for a weak password or a taken email
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/auth.test.ts > the Account sign-up limit > admits one more sign-up every 12 seconds after the burst, and not a moment sooner 152ms
+stdout | convex/auth.test.ts > the Account sign-up limit > spends nothing on sign-ups refused for a weak password or a taken email
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the session lifetime > keeps a GM signed in until a minute before the year is up, even one who never returns
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the session lifetime > keeps a GM signed in until a minute before the year is up, even one who never returns
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the session lifetime > keeps a GM signed in until a minute before the year is up, even one who never returns
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: createAccountFromCredentials
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: signIn
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+`auth:store` type: refreshSession
+stdout | convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is
+Expired refresh token session
+ ✓ |convex| convex/auth.test.ts > the Account sign-up limit > spends nothing on sign-ups refused for a weak password or a taken email 158ms
+ ✓ |convex| convex/auth.test.ts > the session lifetime > keeps a GM signed in until a minute before the year is up, even one who never returns 9ms
+ ✓ |convex| convex/auth.test.ts > the session lifetime > ends the session a minute after the year is up, however active the GM is 42ms
+ Test Files  10 passed (10)
+      Tests  258 passed (258)
+   Start at  09:37:44
+   Duration  7.21s (tests 47%, transform 33%, import 15%, environment 5%)

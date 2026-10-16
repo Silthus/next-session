@@ -4,7 +4,7 @@ import { playerMonth, visibleMonth } from "./playerMonth";
 const today = "2026-10-04";
 
 function october(overrides: Partial<Parameters<typeof playerMonth>[0]> = {}) {
-  return playerMonth({ month: "2026-10", today, answers: {}, sessionDates: [], ...overrides });
+  return playerMonth({ month: "2026-10", today, answers: {}, sessions: [], ...overrides });
 }
 
 describe("visibleMonth", () => {
@@ -62,8 +62,26 @@ describe("playerMonth", () => {
   });
 
   it("marks Sessions inside the Booking Window and drops the past ones", () => {
-    const view = october({ sessionDates: ["2026-10-02", "2026-10-16", "2026-11-06"] });
+    const view = october({
+      sessions: ["2026-10-02", "2026-10-16", "2026-11-06"].map((date) => ({
+        date,
+        state: "scheduled",
+      })),
+    });
 
+    expect(view.days.filter((day) => day.session).map((day) => day.date)).toEqual(["2026-10-16"]);
+  });
+
+  it("marks a Cancelled Session as cancelled rather than as a Session", () => {
+    const view = october({
+      sessions: [
+        { date: "2026-10-02", state: "cancelled" },
+        { date: "2026-10-09", state: "cancelled" },
+        { date: "2026-10-16", state: "scheduled" },
+      ],
+    });
+
+    expect(view.days.filter((day) => day.cancelled).map((day) => day.date)).toEqual(["2026-10-09"]);
     expect(view.days.filter((day) => day.session).map((day) => day.date)).toEqual(["2026-10-16"]);
   });
 
@@ -72,7 +90,7 @@ describe("playerMonth", () => {
       month: "2026-09",
       today,
       answers: { "2026-09-10": "free" },
-      sessionDates: [],
+      sessions: [],
     });
 
     expect(view.readOnly).toBe(true);
@@ -84,7 +102,7 @@ describe("playerMonth", () => {
   it("navigates back freely and forward up to two months ahead", () => {
     expect(october().previousMonth).toBe("2026-09");
     expect(october().nextMonth).toBe("2026-11");
-    expect(playerMonth({ month: "2026-12", today, answers: {}, sessionDates: [] }).nextMonth).toBe(
+    expect(playerMonth({ month: "2026-12", today, answers: {}, sessions: [] }).nextMonth).toBe(
       null,
     );
   });

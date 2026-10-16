@@ -1,0 +1,35 @@
+$ bunx vitest run --project shared --reporter verbose shared/sessionTime.test.ts   # with shared/sessionTime.ts
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-010d5156
+
+ ✓ |shared| shared/sessionTime.test.ts > groupTime > is 19:00 for 4 hours in Berlin for a Group that never set its time 2ms
+ ✓ |shared| shared/sessionTime.test.ts > groupTime > fills each missing value on its own 0ms
+ ✓ |shared| shared/sessionTime.test.ts > sessionWindow > starts at the Group's start time in the Group's zone and lasts its length 12ms
+ ✓ |shared| shared/sessionTime.test.ts > sessionWindow > reads the start time on the clock of a Group elsewhere 1ms
+ ✓ |shared| shared/sessionTime.test.ts > sessionWindow > lets a start-time override replace only the start 0ms
+ ✓ |shared| shared/sessionTime.test.ts > sessionWindow > lets a length override replace only the length 0ms
+ ✓ |shared| shared/sessionTime.test.ts > sessionWindow > takes both overrides together 0ms
+ ✓ |shared| shared/sessionTime.test.ts > sessionWindow > starts at 19:00 Berlin time on each side of the March change 0ms
+ ✓ |shared| shared/sessionTime.test.ts > sessionWindow > starts at 19:00 Berlin time on each side of the October change 0ms
+ ✓ |shared| shared/sessionTime.test.ts > sessionWindow > lasts 4 real hours across the October change 0ms
+ ✓ |shared| shared/sessionTime.test.ts > sessionWindow > moves a start in the spring-forward gap to the next valid minute 0ms
+ ✓ |shared| shared/sessionTime.test.ts > sessionWindow > takes the first occurrence of an ambiguous fall-back start 0ms
+ ✓ |shared| shared/sessionTime.test.ts > reminderDueAt > is due a day before as 24 hours before the start 0ms
+ ✓ |shared| shared/sessionTime.test.ts > reminderDueAt > is due 2 hours before the start 0ms
+ ✓ |shared| shared/sessionTime.test.ts > reminderDueAt > stays 24 real hours before a Session the night after a clock change 0ms
+ ✓ |shared| shared/sessionTime.test.ts > isClockTime > accepts every minute of the day from 00:00 to 23:59 0ms
+ ✓ |shared| shared/sessionTime.test.ts > isClockTime > refuses times past the end of the day 0ms
+ ✓ |shared| shared/sessionTime.test.ts > isClockTime > refuses anything but two-digit hours and minutes 0ms
+ ✓ |shared| shared/sessionTime.test.ts > isTimeZone > accepts the zones Intl knows 0ms
+ ✓ |shared| shared/sessionTime.test.ts > isTimeZone > refuses zones Intl doesn't know 0ms
+ ✓ |shared| shared/sessionTime.test.ts > isLengthMinutes > accepts 30 minutes to 12 hours 0ms
+ ✓ |shared| shared/sessionTime.test.ts > isLengthMinutes > refuses lengths outside 30 minutes to 12 hours 0ms
+ ✓ |shared| shared/sessionTime.test.ts > isLengthMinutes > refuses lengths off the 15-minute step 0ms
+ ✓ |shared| shared/sessionTime.test.ts > endClockTime > is the start plus the length on the clock 0ms
+ ✓ |shared| shared/sessionTime.test.ts > endClockTime > wraps past midnight 0ms
+
+ Test Files  1 passed (1)
+      Tests  25 passed (25)
+   Start at  08:51:07
+   Duration  227ms (transform 52%, tests 28%, import 17%, worker 4%)
+

@@ -1,7 +1,14 @@
 {
   "name": "next-session",
   "language": "typescript",
-  "ignore": ["convex/_generated", "public", "dist", "playwright-report", "test-results"],
+  "ignore": [
+    "convex/_generated",
+    "public",
+    "dist",
+    "playwright-report",
+    "test-results",
+    "docs/proof"
+  ],
   "test": "bunx vitest run -t {filter}",
   "testMatch": "Tests +[1-9][0-9]* passed",
   "testJson": "bunx vitest run -t {filter} --reporter=json --outputFile={out}",

@@ -34,6 +34,7 @@ const group: PlayingGroup = {
   shareToken: "thursdayTk",
   playerId: "player-robin" as Id<"players">,
   playerName: "Robin",
+  timeZone: "Europe/Berlin",
   upcomingSessions: [],
   openDates: 0,
 };

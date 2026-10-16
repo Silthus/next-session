@@ -13,6 +13,7 @@ import type { DataModel, Id } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx } from "./_generated/server";
 import { fail } from "./model/errors";
 import { insertGroup } from "./model/groups";
+import { knownTimeZone } from "./model/timeAndPlace";
 import { syncProfileImage } from "./model/profileImages";
 import { enforceRateLimit } from "./model/rateLimits";
 import { requestMail } from "./mail";
@@ -35,13 +36,17 @@ function legalAcceptance() {
 
 const Anonymous = ConvexCredentials<DataModel>({
   id: ANONYMOUS,
-  authorize: async (_params, ctx) => {
+  authorize: async (params, ctx) => {
     await ctx.runMutation(internal.auth.admitAnonymousSignUp, {});
     const { user } = await createAccount<DataModel>(ctx, {
       provider: ANONYMOUS,
       account: { id: crypto.randomUUID() },
       profile: { isAnonymous: true, ...legalAcceptance() },
     });
+    const timeZone = knownTimeZone(params.timeZone);
+    if (timeZone !== undefined) {
+      await ctx.runMutation(internal.auth.keepFirstGroupTimeZone, { userId: user._id, timeZone });
+    }
     return { userId: user._id };
   },
 });
@@ -135,6 +140,19 @@ async function insertFirstGroup(ctx: MutationCtx, userId: Id<"users">) {
   const groupId = await insertGroup(ctx, gm);
   await track(ctx, { name: "link_created", actor: gm, group_id: groupId });
 }
+
+export const keepFirstGroupTimeZone = internalMutation({
+  args: { userId: v.id("users"), timeZone: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { userId, timeZone }) => {
+    const firstGroup = await ctx.db
+      .query("groups")
+      .withIndex("by_ownerId", (q) => q.eq("ownerId", userId))
+      .first();
+    if (firstGroup !== null) await ctx.db.patch("groups", firstGroup._id, { timeZone });
+    return null;
+  },
+});
 
 async function welcomeNewAccount(
   ctx: MutationCtx,

@@ -6,6 +6,7 @@ import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { expiryFromNow, groupByShareToken } from "./access";
 import { fail } from "./errors";
 import { deleteAnonymousGm } from "./gms";
+import { knownTimeZone } from "./timeAndPlace";
 
 const DEFAULT_GROUP_NAME = "My group";
 
@@ -21,13 +22,19 @@ export async function mintShareToken(ctx: QueryCtx, randomBytes?: RandomBytes) {
   throw new Error(`No free Share Token after ${MINT_ATTEMPTS} attempts`);
 }
 
-export async function insertGroup(ctx: MutationCtx, owner: Doc<"users">) {
+export async function insertGroup(
+  ctx: MutationCtx,
+  owner: Doc<"users">,
+  browserTimeZone?: unknown,
+) {
   const shareToken = await mintShareToken(ctx);
+  const timeZone = knownTimeZone(browserTimeZone);
   return await ctx.db.insert("groups", {
     ownerId: owner._id,
     name: DEFAULT_GROUP_NAME,
     shareToken,
     ...(owner.isAnonymous === true ? { expiresAt: expiryFromNow() } : {}),
+    ...(timeZone === undefined ? {} : { timeZone }),
   });
 }
 
