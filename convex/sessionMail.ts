@@ -9,7 +9,7 @@ import {
   sessionSend,
   type SessionSend,
 } from "./mail";
-import { shareLinkOf } from "./model/links";
+import { shareLinkOf } from "./model/siteLinks";
 import { accountDistinctId, isTestAddress, PRODUCT } from "./model/telemetry";
 
 export async function sessionPublished(

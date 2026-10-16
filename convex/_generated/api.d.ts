@@ -23,7 +23,6 @@ import type * as model_codes from "../model/codes.js";
 import type * as model_errors from "../model/errors.js";
 import type * as model_gms from "../model/gms.js";
 import type * as model_groups from "../model/groups.js";
-import type * as model_links from "../model/links.js";
 import type * as model_players from "../model/players.js";
 import type * as model_profileImages from "../model/profileImages.js";
 import type * as model_rateLimits from "../model/rateLimits.js";
@@ -66,7 +65,6 @@ declare const fullApi: ApiFromModules<{
   "model/errors": typeof model_errors;
   "model/gms": typeof model_gms;
   "model/groups": typeof model_groups;
-  "model/links": typeof model_links;
   "model/players": typeof model_players;
   "model/profileImages": typeof model_profileImages;
   "model/rateLimits": typeof model_rateLimits;

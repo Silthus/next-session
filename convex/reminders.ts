@@ -11,7 +11,7 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import { reminderLead, reminderSend, remindersConfigured, requestReminder } from "./mail";
-import { remindersOffLinkOf, shareLinkOf } from "./model/links";
+import { remindersOffLinkOf, shareLinkOf } from "./model/siteLinks";
 import { claimedPlayerIn } from "./model/players";
 import { reminderLinkTokenFor, remindersOn } from "./model/reminderLinks";
 import { accountDistinctId, isTestAddress, PRODUCT, serverLog } from "./model/telemetry";

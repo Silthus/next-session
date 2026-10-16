@@ -26,6 +26,7 @@ beforeEach(() => {
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
   vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", REMINDER_WEBHOOK);
   vi.stubEnv("POSTHOG_MAIL_WEBHOOK_SECRET", "secret");
+  vi.stubEnv("SITE_URL", "https://next-session.link");
   fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(new Response(null, { status: 200 })));
   vi.stubGlobal("fetch", fetchMock);
   t = newBackend();
