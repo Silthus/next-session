@@ -18,7 +18,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - groups.updateSettings: a GM saves the Time and place of a Group they own, which moves its upcoming scheduled Sessions
   handler: updateSettings in groups.ts
   trust: signed-in user
-- groups.rename: a GM renames a Group they own
+- groups.rename: a GM renames a Group they own, which renames its upcoming scheduled Sessions in calendars
   handler: rename in groups.ts
   trust: signed-in user
 - groups.remove: a GM deletes a Group they own and its children
@@ -101,6 +101,9 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   handler: auth in auth.ts
   trust: visitor
   control: none — the Convex Auth library owns these routes and their token checks; sign-ups pass the project's rate limits in admitAnonymousSignUp and admitAccountSignUp
+- calendar download: GET /cal/s/<Share Token>.ics, whoever holds a Share Link downloads its Group's upcoming scheduled Sessions as a calendar file
+  handler: downloadGroupCalendar in calendarFiles.ts
+  trust: visitor
 - expiry sweep: the daily cron deletes Unsaved Groups past their Expiry
   handler: sweepExpiredGroups in cleanup.ts
   trust: operator
@@ -158,8 +161,8 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: commit-ordered-effects dismissed: track schedules send with ctx.scheduler.runAfter inside the mutation, and Convex drops what an uncommitted mutation scheduled
   checklist: circuit-breaker-policy dismissed: telemetry is fire and forget with a ten second timeout; a PostHog outage drops events and never blocks the product
   checklist: declared-target-coverage dismissed: there is one target, PostHog
-- published only: Session updates never announce a change before its Undo window ends.
-  over: Session updates sent for every schedule, cancel and Undo a GM makes through sessions.schedule and sessions.cancel
+- published only: Session updates and the Calendar download never show a change before its Undo window ends.
+  over: Session updates sent for every schedule, cancel and Undo a GM makes through sessions.schedule and sessions.cancel, and the Calendar download fetched after the same changes
   via: never announces a change before its Undo window ends
   because: the Undo window promises that a mis-tap reaches nobody (#124); a mail sent before it ends tells players about a night the GM took back, and calendars that arrive later would add and remove entries for nothing
   crossing: store -> egress
@@ -171,3 +174,18 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: redaction dismissed: the Session update body is the Workflows trigger data the recipient's own mail needs, and it never reaches telemetry
   checklist: circuit-breaker-policy dismissed: a failing webhook gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks a GM's change
   checklist: declared-target-coverage dismissed: there is one target, the Workflows Session update webhook
+- feed scoping: A calendar file reached through a Share Token holds only the published Sessions of the Group behind that token's current value; a rotated-away or unknown token reaches nothing.
+  over: the Calendar download fetched for two Groups with Sessions on the same date, through each Group's current Share Token and through a rotated-away one
+  via: every calendar file holds only the published Sessions of its own token's Group
+  because: the Share Link is the only Player credential (ADR-0004); a download that reached another Group's Sessions would turn one leaked link into every table's plans, and one that still opened after a rotation would undo the GM's remedy for a leaked link
+  crossing: visitor -> store
+  entrances: calendar download
+  kinds: read, credential
+  checklist: scoped-reads declared as feed scoping
+  checklist: capability-authorization declared as feed scoping
+  checklist: revalidated-permission dismissed: no calendar work is deferred; each request resolves the Share Token inside its own query
+  checklist: message-authenticity dismissed: the Share Token is a bearer credential, not a signed message
+  checklist: encrypted-storage dismissed: the GM must be able to copy the Share Link again, so the token is stored readable by design (ADR-0004); rotation revokes it
+  checklist: key-rotation-compatibility dismissed: rotating the Share Token deliberately stops the old download link; no reader keeps using it
+  checklist: redaction dismissed: an unknown or rotated-away token gets 404 with no body, and a Group's own file holds only what its Share Link already shows
+  checklist: separation-of-duties dismissed: the download has one role; whoever holds the Share Link reads the Group's published Sessions by design (ADR-0010)

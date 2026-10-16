@@ -45,6 +45,7 @@ async function main() {
     CONVEX_AGENT_MODE: "",
     CONVEX_DEPLOYMENT: `anonymous:anonymous-e2e-${randomUUID()}`,
     VITE_CONVEX_URL: convexURL,
+    VITE_CONVEX_SITE_URL: `http://127.0.0.1:${sitePort}`,
   };
   const children = new Map<ChildProcess, Promise<number>>();
   let interrupted = false;

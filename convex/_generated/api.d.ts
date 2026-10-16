@@ -11,6 +11,7 @@
 import type * as account from "../account.js";
 import type * as auth from "../auth.js";
 import type * as backfill from "../backfill.js";
+import type * as calendarFiles from "../calendarFiles.js";
 import type * as cleanup from "../cleanup.js";
 import type * as crons from "../crons.js";
 import type * as groups from "../groups.js";
@@ -48,6 +49,7 @@ declare const fullApi: ApiFromModules<{
   account: typeof account;
   auth: typeof auth;
   backfill: typeof backfill;
+  calendarFiles: typeof calendarFiles;
   cleanup: typeof cleanup;
   crons: typeof crons;
   groups: typeof groups;

@@ -136,6 +136,7 @@ export const rename = mutation({
     await enforceRateLimit(ctx, "gmEdit", gm._id);
     await ctx.db.patch("groups", group._id, { name: normalized.name });
     await touchGroup(ctx, group);
+    await groupChanged(ctx, group);
     return null;
   },
 });

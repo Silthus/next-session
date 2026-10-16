@@ -98,6 +98,10 @@ _Avoid_: top days, recommendations
 A Player's action that answers busy for every unanswered date left in the month.
 _Avoid_: mark all, bulk no
 
+**Calendar download**:
+The one-time `.ics` copy of a Group's upcoming scheduled Sessions that **Add to calendar** on the player page gives anyone holding the Share Link. It shows each Session as it stood after its last Undo window and doesn't follow later changes. Rotating the Share Token stops its link.
+_Avoid_: export, ICS link (in copy)
+
 ### Legal
 
 **Legal Acceptance**:
