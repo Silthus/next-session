@@ -66,6 +66,7 @@ const byTopic = {
     TOO_MANY_GROUPS: `Your own groups didn't move: an account holds up to ${String(MAX_GROUPS_PER_GM)}. Delete some to make room.`,
     CLAIM_INVALID: "Your own groups didn't move: the save expired.",
   },
+  calendarFeed: {},
   answer,
   fillRest: { ...answer, OUT_OF_WINDOW: "Those nights are locked now." },
 } satisfies Record<string, Copy>;

@@ -695,7 +695,8 @@ export type BrowserEvent =
   | { name: "keep_group_started"; group_id: string } // the tap on Keep this group
   | { name: "remove_group_started"; group_id: string } // Remove from my groups on /me
   | { name: "remove_group_undone"; group_id: string } // its Undo
-  | { name: "create_link_started"; surface: "me" }; // Create your link on /me
+  | { name: "create_link_started"; surface: "me" } // Create your link on /me
+  | { name: "calendar_feed_copied"; method: "clipboard" | "fallback" | "failed" }; // Copy link of the Calendar feed on /me
 
 export function initTelemetry(source?: EnvSource): Promise<void>; // no-op without VITE_POSTHOG_TOKEN
 export function track(event: BrowserEvent): void; // sends `next_session:<name>`
@@ -714,6 +715,7 @@ The committed facts behind these steps (a link or Group created, a Player claime
 | `sign_in_failed` | The Account sheet's email form |
 | `remove_group_started`, `remove_group_undone` | `useRemoval` on `/me` |
 | `create_link_started` | `MyGroups`' Create your link |
+| `calendar_feed_copied` | `YourCalendar`'s Copy link on `/me`, one event per press with the final method |
 
 Init, called from `src/main.tsx` before the router renders:
 
@@ -979,6 +981,8 @@ Calendar files carry a Group's published Sessions into players' own calendars. T
 - Each entry is built as in the Calendar download (§14.1), except its `URL` and `DESCRIPTION` link carry no Share Token: `<SITE_URL>/g/<groupId>` for a Group the Account runs, and `<SITE_URL>/me` for one it plays in. A Group it runs and plays in links to its GM page. The calendar is named "Next Session".
 - `200` with `Content-Type: text/calendar; charset=utf-8` and `Cache-Control: private, max-age=900`, and no `Content-Disposition`. An Account with nothing in the window gets an empty calendar, so a subscription survives a quiet month. An unknown or reset token, or a path outside the token alphabet, gets `404` with no body.
 - No rate limit, no Expiry touch and no server event on a fetch: a calendar app polling a feed is not activity on any Group.
+- My groups offers it in a **Your calendar** block right above the Session emails switch, shown to an Account with at least one Group it runs or plays in. **Subscribe in your calendar app** calls `me.calendarFeed` on the press, never on load, so opening My groups mints nothing. The block then shows the link in a read-only field with **Copy link**, **Open in calendar app** (the `webcal://` form) and a help line for Google Calendar. **Reset feed link** ("Stops the old link at once.") calls `me.resetCalendarFeed` with no confirmation and no Undo, shows the new link, and a toast says calendars on the old link stop updating.
+- The Privacy Policy (1.8) names the feed link, what the calendar app receives, and that the link is kept until the Account resets it or is deleted.
 
 ### 14.3 Worker
 
