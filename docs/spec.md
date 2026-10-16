@@ -60,7 +60,14 @@ import { v } from "convex/values";
 
 export const answerValue = v.union(v.literal("free"), v.literal("maybe"), v.literal("busy"));
 export const sessionState = v.union(v.literal("scheduled"), v.literal("cancelled"));
-export const publishedSession = v.object({ state: sessionState, revision: v.number() });
+export const publishedSession = v.object({
+  state: sessionState,
+  start: v.optional(v.number()), // epoch ms, from shared/sessionTime.ts
+  end: v.optional(v.number()),
+  location: v.optional(v.string()),
+  summary: v.optional(v.string()), // the Group name at publish time
+  revision: v.number(),
+}); // start, end and summary are missing only on rows published before the Time and place deploy
 
 export default defineSchema({
   ...authTables,
@@ -91,6 +98,11 @@ export default defineSchema({
     previousShareToken: v.optional(v.string()), // for Undo after a rotation
     shareTokenRotatedAt: v.optional(v.number()),
     expiresAt: v.optional(v.number()), // set only while the Group is unsaved
+    // Time and place; a missing field means 19:00, 240 minutes, Europe/Berlin, no location
+    startTime: v.optional(v.string()), // "HH:MM"; stored means the GM saved the page once
+    lengthMinutes: v.optional(v.number()),
+    timeZone: v.optional(v.string()), // the creator's browser zone, then the GM's choice
+    location: v.optional(v.string()), // trimmed, at most 200 characters
   })
     .index("by_ownerId", ["ownerId"])
     .index("by_shareToken", ["shareToken"])
@@ -175,31 +187,33 @@ The name and Roster checks that `roster` and `player` share (`validName`, `ensur
 | --- | --- | --- | --- | --- |
 | `groups` | `mine` | query | `{}` → `GroupListItem[]` (id, name, playerCount) | Owner's Groups, oldest first |
 | | `get` | query | `{groupId}` → `GroupView \| null` | id, name, shareToken, expiresAt, canUndoRotate. `null` for missing or foreign ids, so the UI falls back to the first Group |
-| | `create` | mutation | `{}` → `Id<"groups">` | "My group", fresh token, `expiresAt` for an Anonymous GM. Rate limit `createGroup` |
+| | `create` | mutation | `{timeZone?}` → `Id<"groups">` | "My group", fresh token, `expiresAt` for an Anonymous GM, and the browser's time zone when `Intl` knows it (an unknown zone is dropped, never refused). Rate limit `createGroup` |
+| | `settings` | query | `{groupId}` → `{startTime, lengthMinutes, timeZone, location?, saved} \| null` | The Group's Time and place with the defaults filled; `saved` once the GM saved it. `null` for missing or foreign ids |
+| | `updateSettings` | mutation | `{groupId, startTime, lengthMinutes, timeZone, location}` → `null` | `INVALID_SETTINGS` for a start time off `HH:MM`, a length off 30–720 or the 15-minute step, a zone `Intl` doesn't know, or a location over 200 characters. Trims the location and clears it when empty. Writes all four fields, touches the Group, and settles its scheduled upcoming Sessions through `groupChanged` (§12.6). Rate limit `gmEdit` |
 | | `rename` | mutation | `{groupId, name}` → `null` | Name rules |
 | | `remove` | mutation | `{groupId}` → `null` | Deletes the Group row, then schedules `internal.groups.deleteChildren` (batches of 200). Ends an Anonymous GM that owned only this Group |
 | | `rotateShareToken` | mutation | `{groupId}` → `null` | Keeps `previousShareToken` and `shareTokenRotatedAt` |
 | | `undoRotateShareToken` | mutation | `{groupId}` → `null` | Within 30 s of the rotation, else `UNDO_EXPIRED` |
-| `schedule` | `month` | query | `{groupId, month: "YYYY-MM"}` → `{players, answers, sessions}` | The Roster, the month's Answers, and every scheduled Session of the Group (a few dozen at most), as raw rows. Cancelled Sessions are left out until the GM screens show them (#142). All derivation happens in `shared/monthSummary.ts` on the client |
+| `schedule` | `month` | query | `{groupId, month: "YYYY-MM"}` → `{players, answers, sessions, timeAndPlace}` | The Roster, the month's Answers, and every scheduled Session of the Group (a few dozen at most), as raw rows, each with its effective `startTime`, `lengthMinutes` and `location`. `timeAndPlace` is the Group's own, with its `timeZone`. Cancelled Sessions are left out until the GM screens show them (#142). All derivation happens in `shared/monthSummary.ts` on the client |
 | `roster` | `addPlayer` | mutation | `{groupId, name}` → `Id<"players">` | Name rules, `NAME_TAKEN`, `ROSTER_FULL` |
 | | `renamePlayer` | mutation | `{playerId, name}` → `null` | Owner check through the Player's Group |
 | | `removePlayer` | mutation | `{playerId}` → `null` | Deletes the Player's Answers too |
 | `sessions` | `schedule` | mutation | `{groupId, date}` → `Id<"sessions">` | `OUT_OF_WINDOW` for past or outside dates, `SESSION_EXISTS` for a scheduled Session. Restores a Cancelled Session in place with its id: Undo of a cancel and Schedule again are this call |
 | | `cancel` | mutation | `{sessionId}` → `null` | `OUT_OF_WINDOW` for a past date (today still counts). Deletes a Session that was never published, else marks it Cancelled. A Cancelled Session is a no-op success |
-| `player` | `group` | query | `{shareToken}` → `PlayerGroupView \| null` | groupId, name, Players (id, name), every scheduled Session date of the Group (the client filters them by the Booking Window), `claimedPlayerId`: the caller's Claimed Player in this Group, or `null`, and `opensAsGm`: whether the caller's Account runs this Group without a Claimed Player in it, which sends the Share Link on to `/g/<groupId>`. `null` renders the not-found page |
+| `player` | `group` | query | `{shareToken}` → `PlayerGroupView \| null` | groupId, name, Players (id, name), every scheduled Session of the Group with its date and effective `startTime`, `lengthMinutes` and `location` (the client filters them by the Booking Window), the Group's `timeZone`, `claimedPlayerId`: the caller's Claimed Player in this Group, or `null`, and `opensAsGm`: whether the caller's Account runs this Group without a Claimed Player in it, which sends the Share Link on to `/g/<groupId>`. `null` renders the not-found page |
 | | `answers` | query | `{shareToken, playerId, month}` → `Record<date, Answer> \| null` | `null` for an unknown token, a foreign or removed Player, or a malformed id or month |
 | | `join` | mutation | `{shareToken, name}` → `Id<"players">` | `NAME_TAKEN` carries the existing `playerId` so the UI can highlight the chip. Rate limit `joinGroup`. An Account caller claims the new Player (§12) |
 | | `claim` | mutation | `{shareToken, playerId}` → `null` | Account only. Moves the caller's claim in this Group to the Player. `PLAYER_CLAIMED` if another Account holds it. Rate limit `claimPlayer` |
 | | `release` | mutation | `{groupId}` → `null` | Account only. Clears the caller's claim in that Group, if any. Rate limit `claimPlayer` |
 | | `answer` | mutation | `{shareToken, playerId, date, answer: Answer \| null}` → `null` | Upsert, or delete on `null`. Rate limit `answer`. Touches the Group |
 | | `fillRest` | mutation | `{shareToken, playerId, month}` → `null` | Writes `busy` to every unanswered bookable date of the month in one mutation |
-| `me` | `groups` | query | `{today}` → `MyGroups \| null` | Account only, `null` otherwise. The Groups the caller runs and the Groups where it has a Claimed Player, with the next five scheduled Sessions as of `today` (§12) |
+| `me` | `groups` | query | `{today}` → `MyGroups \| null` | Account only, `null` otherwise. The Groups the caller runs and the Groups where it has a Claimed Player, with the next five scheduled Sessions as of `today`, each with its effective `startTime`, `lengthMinutes` and `location`, and each Group's `timeZone` (§12) |
 | `account` | `me` | query | `{}` → `{isAnonymous, email} \| null` | |
 | | `startSave` | mutation | `{}` → `{code}` | Anonymous GM only. 32 random bytes, stored hashed, 10-minute TTL. Rate limit `startSave` |
 | | `finishSave` | mutation | `{code}` → `{groupIds}` | Account only. See §5.3 |
 | `auth` | `signIn`, `signOut`, `store` | Convex Auth | | |
 
-Internal: `groups.deleteChildren`, `cleanup.sweepExpiredGroups` (cron), `sessionLifecycle.settle` (§12.6), `backfill.publishLegacySessions` and `backfill.emptyRetiredMailStates` (run once after the Cancelled Session deploys), `rateLimits` component setup in `convex/convex.config.ts` and limit definitions in `convex/model/rateLimits.ts`.
+Internal: `groups.deleteChildren`, `cleanup.sweepExpiredGroups` (cron), `sessionLifecycle.settle` (§12.6), `backfill.publishLegacySessions` and `backfill.emptyRetiredMailStates` (run once after the Cancelled Session deploys), `backfill.widenPublishedSnapshots` (run once after the Time and place deploy: fills `start`, `end`, `location` and `summary` into every `published` at the same revision), `auth.keepFirstGroupTimeZone` (§5.2), `rateLimits` component setup in `convex/convex.config.ts` and limit definitions in `convex/model/rateLimits.ts`.
 
 Dropped from Lonir: workspace functions, `gmGetGroupRail` and `gmGetDateAvailability` (the client derives the rail counts and the day panel from `groups.mine` and `schedule.month`), `listSessions`, `getAvailability`, `claimMembership` (a client-only check against `player.group`), early access, consent, client errors, hand-off, activation telemetry.
 
@@ -221,7 +235,8 @@ The Share Token is the only Player credential ([ADR-0004](adr/0004-share-token-i
 1. The client calls `signIn("anonymous")`.
 2. The custom `anonymous` provider (a `ConvexCredentials` provider, about 20 lines, modelled on Convex Auth's `Anonymous`) consumes the global `anonymousSignUp` limit through `ctx.runMutation`, then creates the user with `isAnonymous: true` and the current Legal Acceptance stamps from `shared/legal.ts`.
 3. `callbacks.afterUserCreatedOrUpdated` sees a new anonymous user and inserts the first Group ("My group", fresh token, `expiresAt`) in the same mutation. The user, the Group, and the Legal Acceptance commit together or not at all.
-4. The client reads `groups.mine` and shows the Share Link in place of the button.
+4. The client passes the browser's time zone as `signIn("anonymous", {timeZone})`. When `Intl` knows it, the provider stores it on that first Group with `internal.auth.keepFirstGroupTimeZone`. Convex Auth writes every profile field onto the user, so the zone can't ride along in step 3. An unknown or missing zone leaves the Group on Berlin time, and the sign-in never fails on it.
+5. The client reads `groups.mine` and shows the Share Link in place of the button.
 
 A signed-in GM who creates another Group calls `groups.create` directly.
 
@@ -551,7 +566,8 @@ The no-account path keeps its steps and its fields: Join shows no new prompt, an
 Michael chose Workflows on 2026-10-07; Resend from Convex was the alternative. Implementation (#97) shipped disabled. #102 owns sender verification, the transactional "Session updates" category, activation, mail environment and inbox proof. The visitor nudge promises notifications only after #102.
 
 - Session updates follow the published snapshot ([ADR-0013](adr/0013-sessions-publish-a-snapshot-after-the-undo-window.md)). `sessions.schedule` and `sessions.cancel` change the Session through `convex/sessionLifecycle.ts`, which sets `changedAt` and schedules `internal.sessionLifecycle.settle` 30 seconds and 1 ms later. The GM never waits for a webhook.
-- `settle` does nothing when the Session is gone or has changed since. Otherwise it compares the Session's state with `published`. When they differ, it writes `published` with the next revision and calls `sessionPublished` in `convex/sessionMail.ts`. So a cancel inside the first Undo window, which deletes the Session, sends nothing; Undo of a cancel sends nothing; and a burst of changes sends only its final state, once. `change` is the published state: `scheduled` for a first publish or a Schedule again, `cancelled` for a cancel. `settle` publishes whether or not mail is configured. With either `POSTHOG_SESSION_WEBHOOK_URL` or `POSTHOG_MAIL_WEBHOOK_SECRET` missing, no send is queued.
+- `groups.updateSettings` goes through `groupChanged`, which bumps `changedAt` and queues a settle for every **scheduled** Session in the Booking Window. A Cancelled Session keeps its published time until **Schedule again**, and a past Session is never touched.
+- `settle` does nothing when the Session is gone or has changed since. Otherwise it builds the snapshot the Session means now: its state, its start and end from `sessionWindow` in the Group's time zone, the Group's location and the Group name. When that differs from `published`, it writes `published` with the next revision and calls `sessionPublished` in `convex/sessionMail.ts`. A publish that leaves the state as it was, such as a Group's new start time, sends no Session update, because the update can only say set or cancelled. So a cancel inside the first Undo window, which deletes the Session, sends nothing; Undo of a cancel sends nothing; and a burst of changes sends only its final state, once. `change` is the published state: `scheduled` for a first publish or a Schedule again, `cancelled` for a cancel. `settle` publishes whether or not mail is configured. With either `POSTHOG_SESSION_WEBHOOK_URL` or `POSTHOG_MAIL_WEBHOOK_SECRET` missing, no send is queued.
 - Recipients are the current Accounts behind the Group's Claimed Players, read through indexed queries and deduplicated by Account. Exclude the Group's owner, who made the change, Anonymous GMs, missing emails, `.test` addresses and opted-out Accounts. Each send carries the revision it announces and drops itself when `published.revision` has moved on, the Session or Group is gone, the Account no longer claims a Player in the Group, or Session emails are off. Read the email, Group name and current Share Token at each send attempt. Cancellation uses the current Share Link, never a deleted Session URL.
 - One secret-guarded webhook per eligible Account, through the existing action retrier: at most four attempts for network failures and 5xx; 4xx, including 429, log refusal without retry. The webhook carries `{distinct_id, product, email, group_name, date_label, change, player_url}` as workflow trigger data only. Personal mail data stays out of application usage events and person properties. Provider operational delivery records may contain recipient email and subject metadata. A timeout after acceptance can still duplicate a mail, as with Welcome Mail.
 - `/me` stores `users.sessionEmailsEnabled`, defaulting to true when absent. Only the authenticated Account can change its own preference. It applies to all Groups. Session updates are transactional. PostHog omits transactional categories from hosted preferences and does not apply category unsubscribe; the authenticated switch is the Session email opt-out. Tips consent and its hosted unsubscribe are separate.

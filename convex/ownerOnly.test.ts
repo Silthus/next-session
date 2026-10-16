@@ -38,6 +38,18 @@ const foreignCalls: Record<string, ForeignCall> = {
     expect((await as.query(api.groups.mine, {})).map(({ id }) => id)).not.toContain(groupId),
   "groups.create": async (as, { groupId }) =>
     expect(await as.mutation(api.groups.create, {})).not.toBe(groupId),
+  "groups.settings": readsAsMissing((as, { groupId }) =>
+    as.query(api.groups.settings, { groupId }),
+  ),
+  "groups.updateSettings": refusedAsMissing((as, { groupId }) =>
+    as.mutation(api.groups.updateSettings, {
+      groupId,
+      startTime: "20:00",
+      lengthMinutes: 180,
+      timeZone: "Europe/Berlin",
+      location: "Taken over",
+    }),
+  ),
   "groups.rename": refusedAsMissing((as, { groupId }) =>
     as.mutation(api.groups.rename, { groupId, name: "Taken over" }),
   ),

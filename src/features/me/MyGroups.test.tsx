@@ -24,13 +24,18 @@ beforeEach(() => {
 
 const today = "2026-10-06";
 
+function atSeven(...dates: string[]) {
+  return dates.map((date) => ({ date, startTime: "19:00", lengthMinutes: 240 }) as const);
+}
+
 const thursday: PlayingGroup = {
   groupId: "group-thursday" as Id<"groups">,
   name: "Thursday Crew",
   shareToken: "thursdayTk",
   playerId: "player-robin" as Id<"players">,
   playerName: "Robin",
-  upcomingSessions: ["2026-10-08", "2026-10-22"],
+  timeZone: "Europe/Berlin",
+  upcomingSessions: atSeven("2026-10-08", "2026-10-22"),
   openDates: 12,
 };
 
@@ -40,6 +45,7 @@ const sunday: PlayingGroup = {
   shareToken: "sundaySaga",
   playerId: "player-rob" as Id<"players">,
   playerName: "Rob",
+  timeZone: "Europe/Berlin",
   upcomingSessions: [],
   openDates: 0,
 };
@@ -47,7 +53,8 @@ const sunday: PlayingGroup = {
 const ownTable = {
   groupId: "group-own" as Id<"groups">,
   name: "Dragon Heist",
-  upcomingSessions: ["2026-10-10"],
+  timeZone: "Europe/Berlin",
+  upcomingSessions: atSeven("2026-10-10"),
 };
 
 const everything: MyGroupsData = { running: [ownTable], playing: [thursday, sunday] };

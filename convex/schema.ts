@@ -6,7 +6,14 @@ export const answerValue = v.union(v.literal("free"), v.literal("maybe"), v.lite
 
 export const sessionState = v.union(v.literal("scheduled"), v.literal("cancelled"));
 
-export const publishedSession = v.object({ state: sessionState, revision: v.number() });
+export const publishedSession = v.object({
+  state: sessionState,
+  start: v.optional(v.number()),
+  end: v.optional(v.number()),
+  location: v.optional(v.string()),
+  summary: v.optional(v.string()),
+  revision: v.number(),
+});
 
 export default defineSchema({
   ...authTables,
@@ -41,6 +48,10 @@ export default defineSchema({
     previousShareToken: v.optional(v.string()),
     shareTokenRotatedAt: v.optional(v.number()),
     expiresAt: v.optional(v.number()),
+    startTime: v.optional(v.string()),
+    lengthMinutes: v.optional(v.number()),
+    timeZone: v.optional(v.string()),
+    location: v.optional(v.string()),
   })
     .index("by_ownerId", ["ownerId"])
     .index("by_shareToken", ["shareToken"])

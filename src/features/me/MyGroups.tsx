@@ -164,7 +164,7 @@ function PlayingGroups({
             >
               <GroupName name={group.name} />
               <span className="text-sm text-ink-2">as {group.playerName}</span>
-              <NextSession dates={group.upcomingSessions} />
+              <NextSession sessions={group.upcomingSessions} />
               <OpenDates openDates={group.openDates} />
             </GroupPageLink>
             <div className="absolute top-1.5 right-1.5">
@@ -231,7 +231,7 @@ function RunningGroups({
                 className={`flex flex-col gap-1 rounded-xl p-4 ${focusRing}`}
               >
                 <GroupName name={group.name} />
-                <NextSession dates={group.upcomingSessions} />
+                <NextSession sessions={group.upcomingSessions} />
               </GroupPageLink>
             </li>
           ))}
@@ -275,13 +275,13 @@ function GroupName({ name }: { name: string }) {
   return <span className="font-display text-lg font-semibold break-words">{name}</span>;
 }
 
-function NextSession({ dates }: { dates: IsoDate[] }) {
-  const [next] = dates;
+function NextSession({ sessions }: { sessions: { date: IsoDate }[] }) {
+  const [next] = sessions;
   if (next === undefined) return <span className="text-sm text-ink-3">No session yet</span>;
   return (
     <span className="flex items-center gap-1.5 text-sm font-medium text-accent-strong">
       <IconStar className="size-3.5 shrink-0" />
-      {`Next session ${dayLabel(next)}`}
+      {`Next session ${dayLabel(next.date)}`}
     </span>
   );
 }

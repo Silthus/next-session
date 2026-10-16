@@ -1,0 +1,1074 @@
+# red: the S2b tests on the base tree dec5601 (no groups.settings, updateSettings, wider snapshot, backfill or zone)
+
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-0aeaf619
+
+ ❯ |convex| convex/ownerOnly.test.ts (2 tests | 2 failed) 192ms
+   ❯ owner-only Groups (2)
+     × covers every public function of the GM modules 10ms
+     × every GM-facing function treats another GM's Group, Player and Session as missing and changes nothing 181ms
+ ❯ |convex| convex/schedule.test.ts (13 tests | 5 failed) 149ms
+   ❯ schedule.month (13)
+     × returns the Roster, the month's Answers, and every Session of the Group 77ms
+     × leaves Cancelled Sessions out 9ms
+     × gives every Session the Group's saved time and place 17ms
+     × leaves out the Players, Answers, and Sessions of other Groups 9ms
+     × serves an Anonymous GM their own Group 4ms
+ ❯ |convex| convex/timeAndPlace.test.ts (24 tests | 24 failed) 296ms
+   ❯ groups.settings (3)
+     × reads a Group nobody has set up as 19:00 for 4 hours, Berlin time, with no location 56ms
+     × reads back what the GM saved 8ms
+     × reads a missing id as null 15ms
+   ❯ groups.create (2)
+     × keeps the browser's time zone for the new Group 2ms
+     × drops a time zone it doesn't know and follows Berlin time 3ms
+   ❯ groups.updateSettings (13)
+     × trims the location 3ms
+     × clears the location when it is left empty 2ms
+     × takes a location of 200 characters 3ms
+     × refuses { startTime: '7pm' } as invalid settings and changes nothing 6ms
+     × refuses { startTime: '7:30' } as invalid settings and changes nothing 4ms
+     × refuses { startTime: '24:00' } as invalid settings and changes nothing 4ms
+     × refuses { lengthMinutes: 15 } as invalid settings and changes nothing 3ms
+     × refuses { lengthMinutes: 735 } as invalid settings and changes nothing 2ms
+     × refuses { lengthMinutes: 250 } as invalid settings and changes nothing 3ms
+     × refuses { timeZone: 'Mars/Olympus_Mons' } as invalid settings and changes nothing 2ms
+     × refuses { …(1) } as invalid settings and changes nothing 8ms
+     × refuses once the GM's edits are spent, and changes nothing 30ms
+     × pushes out the Expiry of an Unsaved Group 2ms
+   ❯ a saved Time and place (6)
+     × publishes each upcoming Session once, a window after the last save, at the new time and place 129ms
+     × follows a new time zone 2ms
+     × publishes nothing when the save changes nothing 2ms
+     × leaves a Cancelled Session's published time alone 1ms
+     × leaves a past Session's published time alone 1ms
+     × publishes a Cancelled Session at the new time once it is scheduled again 3ms
+ ❯ |convex| convex/backfill.test.ts (10 tests | 5 failed) 357ms
+   ❯ backfill.widenPublishedSnapshots (5)
+     × fills start, end, location and Group name into every published Session at the same revision, page by page 15ms
+     × keeps a Cancelled Session cancelled 3ms
+     × leaves a Session that was never published alone 3ms
+     × changes nothing on a second run 2ms
+     × lets the first settle after it publish nothing for an unchanged Session 2ms
+ ❯ |convex| convex/me.test.ts (13 tests | 6 failed) 321ms
+   ❯ me.groups (13)
+     × lists the Groups the Account runs with their next five Sessions from today 215ms
+     × leaves Cancelled Sessions out of the next five 5ms
+     × shows when and where each upcoming Session is, in the Group's time zone 11ms
+     × lists the Groups the Account plays in with its Player and the days left to answer 12ms
+     × moves on at midnight without a write 12ms
+     × accepts a client date one day off the server's but no further 4ms
+stdout | convex/auth.test.ts > Create your link > keeps the browser's time zone for the first Group
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/auth.test.ts > Create your link > keeps the browser's time zone for the first Group
+`auth:store` type: signIn
+
+stdout | convex/auth.test.ts > Create your link > drops the time zone Mars/Olympus_Mons and still creates the first Group on Berlin time
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/auth.test.ts > Create your link > drops the time zone Mars/Olympus_Mons and still creates the first Group on Berlin time
+`auth:store` type: signIn
+
+stdout | convex/auth.test.ts > Create your link > drops the time zone 42 and still creates the first Group on Berlin time
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/auth.test.ts > Create your link > drops the time zone 42 and still creates the first Group on Berlin time
+`auth:store` type: signIn
+
+stdout | convex/sessionMail.test.ts > sends no Session update when a saved Time and place moves a Session
+Run 0000000000000000000000010000runs succeeded.
+
+ ❯ |convex| convex/sessionMail.test.ts (33 tests | 1 failed) 782ms
+   × sends no Session update when a saved Time and place moves a Session 17ms
+ ❯ |convex| convex/player.test.ts (101 tests | 4 failed) 1179ms
+   ❯ player.group (12)
+     × shows the Group's name, its Roster, and every Session with its time 285ms
+     × leaves Cancelled Sessions out 4ms
+     × shows when and where each Session is, in the Group's time zone 15ms
+     × shows only the Group behind the Share Token 6ms
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code or email in any event or log
+`auth:store` type: createAccountFromCredentials
+
+stdout | convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code or email in any event or log
+`auth:store` type: signIn
+
+ ❯ |convex| convex/telemetry.callSites.test.ts (32 tests | 3 failed) 1370ms
+   ❯ GM mutations (8)
+     × tracks group_settings_saved for the location "Max's place" as has_location true 13ms
+     × tracks group_settings_saved for the location "" as has_location false 2ms
+   ❯ the redaction contract (1)
+     × sends no Group name, Player name, Share Token, claim code or email in any event or log 5ms
+ ❯ |convex| convex/auth.test.ts (23 tests | 3 failed) 2812ms
+   ❯ Create your link (6)
+     × keeps the browser's time zone for the first Group 21ms
+     × drops the time zone Mars/Olympus_Mons and still creates the first Group on Berlin time 15ms
+     × drops the time zone 42 and still creates the first Group on Berlin time 15ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 53 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/auth.test.ts > Create your link > keeps the browser's time zone for the first Group
+Error: Expected a Convex function exported from module "groups" as `settings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:34
+ ❯ query node_modules/convex-test/dist/index.js:2158:20
+ ❯ convex/auth.test.ts:69:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/53]⎯
+
+ FAIL  |convex| convex/auth.test.ts > Create your link > drops the time zone Mars/Olympus_Mons and still creates the first Group on Berlin time
+ FAIL  |convex| convex/auth.test.ts > Create your link > drops the time zone 42 and still creates the first Group on Berlin time
+Error: Expected a Convex function exported from module "groups" as `settings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:34
+ ❯ query node_modules/convex-test/dist/index.js:2158:20
+ ❯ convex/auth.test.ts:80:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/53]⎯
+
+ FAIL  |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > fills start, end, location and Group name into every published Session at the same revision, page by page
+Error: Validator error: Unexpected field `location` in object
+ ❯ performAsyncSyscall node_modules/convex/src/server/impl/syscall.ts:52:11
+ ❯ patch node_modules/convex/src/server/impl/database_impl.ts:113:3
+ ❯ Object.patch node_modules/convex/src/server/impl/database_impl.ts:151:11
+ ❯ convex/backfill.test.ts:138:32
+    136|   async function groupNamed(name: string, fields: { location?: string …
+    137|     const gm = await signedInGmWithGroup(t);
+    138|     await t.run(async (ctx) => await ctx.db.patch("groups", gm.groupId…
+       |                                ^
+    139|     return gm;
+    140|   }
+ ❯ invokeFunction node_modules/convex/src/server/impl/registration_impl.ts:90:14
+ ❯ invokeMutation node_modules/convex/src/server/impl/registration_impl.ts:70:18
+ ❯ runMutationWithHandler node_modules/convex-test/dist/index.js:1975:31
+ ❯ handler node_modules/convex-test/dist/index.js:2181:24
+ ❯ invokeFunction node_modules/convex/src/server/impl/registration_impl.ts:90:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/53]⎯
+
+ FAIL  |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > keeps a Cancelled Session cancelled
+Error: Expected a Convex function exported from module "backfill" as `widenPublishedSnapshots`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ widen convex/backfill.test.ts:128:5
+ ❯ convex/backfill.test.ts:170:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/53]⎯
+
+ FAIL  |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > leaves a Session that was never published alone
+Error: Expected a Convex function exported from module "backfill" as `widenPublishedSnapshots`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ widen convex/backfill.test.ts:128:5
+ ❯ convex/backfill.test.ts:187:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/53]⎯
+
+ FAIL  |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > changes nothing on a second run
+Error: Expected a Convex function exported from module "backfill" as `widenPublishedSnapshots`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ widen convex/backfill.test.ts:128:5
+ ❯ convex/backfill.test.ts:195:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/53]⎯
+
+ FAIL  |convex| convex/backfill.test.ts > backfill.widenPublishedSnapshots > lets the first settle after it publish nothing for an unchanged Session
+Error: Expected a Convex function exported from module "backfill" as `widenPublishedSnapshots`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ widen convex/backfill.test.ts:128:5
+ ❯ convex/backfill.test.ts:209:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/53]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > lists the Groups the Account runs with their next five Sessions from today
+AssertionError: expected { playing: [], running: [ { …(3) } ] } to deeply equal { running: [ { …(4) } ], playing: [] }
+
+- Expected
++ Received
+
+@@ -2,36 +2,15 @@
+    "playing": [],
+    "running": [
+      {
+        "groupId": "00000000000000000000010002groups",
+        "name": "Dragon table",
+-       "timeZone": "Europe/Berlin",
+        "upcomingSessions": [
+-         {
+-           "date": "2026-10-03",
+-           "lengthMinutes": 240,
+-           "startTime": "19:00",
+-         },
+-         {
+-           "date": "2026-10-09",
+-           "lengthMinutes": 240,
+-           "startTime": "19:00",
+-         },
+-         {
+-           "date": "2026-10-16",
+-           "lengthMinutes": 240,
+-           "startTime": "19:00",
+-         },
+-         {
+-           "date": "2026-10-23",
+-           "lengthMinutes": 240,
+-           "startTime": "19:00",
+-         },
+-         {
+-           "date": "2026-10-30",
+-           "lengthMinutes": 240,
+-           "startTime": "19:00",
+-         },
++         "2026-10-03",
++         "2026-10-09",
++         "2026-10-16",
++         "2026-10-23",
++         "2026-10-30",
+        ],
+      },
+    ],
+  }
+
+ ❯ convex/me.test.ts:85:32
+     83|     }
+     84|
+     85|     expect(await myGroups(as)).toEqual({
+       |                                ^
+     86|       running: [
+     87|         {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/53]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > leaves Cancelled Sessions out of the next five
+AssertionError: expected [ '2026-10-03', '2026-10-09', …(3) ] to deeply equal [ { date: '2026-10-03', …(2) }, …(4) ]
+
+- Expected
++ Received
+
+  [
+-   {
+-     "date": "2026-10-03",
+-     "lengthMinutes": 240,
+-     "startTime": "19:00",
+-   },
+-   {
+-     "date": "2026-10-09",
+-     "lengthMinutes": 240,
+-     "startTime": "19:00",
+-   },
+-   {
+-     "date": "2026-10-16",
+-     "lengthMinutes": 240,
+-     "startTime": "19:00",
+-   },
+-   {
+-     "date": "2026-10-23",
+-     "lengthMinutes": 240,
+-     "startTime": "19:00",
+-   },
+-   {
+-     "date": "2026-10-30",
+-     "lengthMinutes": 240,
+-     "startTime": "19:00",
+-   },
++   "2026-10-03",
++   "2026-10-09",
++   "2026-10-16",
++   "2026-10-23",
++   "2026-10-30",
+  ]
+
+ ❯ convex/me.test.ts:112:64
+    110|     }
+    111|
+    112|     expect((await myGroups(as))?.running[0]?.upcomingSessions).toEqual(
+       |                                                                ^
+    113|       atTheUsualTime(TODAY, "2026-10-09", "2026-10-16", "2026-10-23", …
+    114|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/53]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > shows when and where each upcoming Session is, in the Group's time zone
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/me.test.ts:120:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/53]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > lists the Groups the Account plays in with its Player and the days left to answer
+AssertionError: expected { playing: [ { …(7) } ], running: [] } to deeply equal { running: [], playing: [ { …(8) } ] }
+
+- Expected
++ Received
+
+@@ -5,17 +5,12 @@
+        "name": "Dragon table",
+        "openDates": 87,
+        "playerId": "0000000000000000000010006players",
+        "playerName": "Ada",
+        "shareToken": "eDuXoD5m-X",
+-       "timeZone": "Europe/Berlin",
+        "upcomingSessions": [
+-         {
+-           "date": "2026-10-17",
+-           "lengthMinutes": 240,
+-           "startTime": "19:00",
+-         },
++         "2026-10-17",
+        ],
+      },
+    ],
+    "running": [],
+  }
+
+ ❯ convex/me.test.ts:150:39
+    148|     ]);
+    149|
+    150|     expect(await myGroups(player.as)).toEqual({
+       |                                       ^
+    151|       running: [],
+    152|       playing: [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/53]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > moves on at midnight without a write
+AssertionError: expected [ { …(7) } ] to match object [ Array(1) ]
+(5 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  [
+    {
+      "openDates": 90,
+      "upcomingSessions": [
+-       {
+-         "date": "2026-10-03",
+-         "lengthMinutes": 240,
+-         "startTime": "19:00",
+-       },
+-       {
+-         "date": "2026-10-17",
+-         "lengthMinutes": 240,
+-         "startTime": "19:00",
+-       },
++       "2026-10-03",
++       "2026-10-17",
+      ],
+    },
+  ]
+
+ ❯ convex/me.test.ts:225:50
+    223|     const player = await signInAccount(t);
+    224|     await joinAs(player.as, shareToken);
+    225|     expect((await myGroups(player.as))?.playing).toMatchObject([
+       |                                                  ^
+    226|       { upcomingSessions: atTheUsualTime(TODAY, "2026-10-17"), openDat…
+    227|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/53]⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > accepts a client date one day off the server's but no further
+AssertionError: expected [ '2026-10-03' ] to deeply equal [ { date: '2026-10-03', …(2) } ]
+
+- Expected
++ Received
+
+  [
+-   {
+-     "date": "2026-10-03",
+-     "lengthMinutes": 240,
+-     "startTime": "19:00",
+-   },
++   "2026-10-03",
+  ]
+
+ ❯ convex/me.test.ts:245:46
+    243|
+    244|     expect(await upcomingAsOf(TOMORROW)).toEqual([]);
+    245|     expect(await upcomingAsOf("2026-10-02")).toEqual(atTheUsualTime(TO…
+       |                                              ^
+    246|     for (const wrongClock of ["2026-10-05", "2026-09-01", "2026-13-01"…
+    247|       expect(await upcomingAsOf(wrongClock)).toEqual(atTheUsualTime(TO…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/53]⎯
+
+ FAIL  |convex| convex/ownerOnly.test.ts > owner-only Groups > covers every public function of the GM modules
+AssertionError: expected [ Array(15) ] to deeply equal [ Array(13) ]
+
+- Expected
++ Received
+
+@@ -3,11 +3,13 @@
+    "groups.get",
+    "groups.mine",
+    "groups.remove",
+    "groups.rename",
+    "groups.rotateShareToken",
++   "groups.settings",
+    "groups.undoRotateShareToken",
++   "groups.updateSettings",
+    "roster.addPlayer",
+    "roster.removePlayer",
+    "roster.renamePlayer",
+    "schedule.month",
+    "sessions.cancel",
+
+ ❯ convex/ownerOnly.test.ts:118:46
+    116| describe("owner-only Groups", () => {
+    117|   it("covers every public function of the GM modules", () => {
+    118|     expect(Object.keys(foreignCalls).sort()).toEqual(publicFunctionsOf…
+       |                                              ^
+    119|   });
+    120|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/53]⎯
+
+ FAIL  |convex| convex/ownerOnly.test.ts > owner-only Groups > every GM-facing function treats another GM's Group, Player and Session as missing and changes nothing
+Error: Expected a Convex function exported from module "groups" as `settings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:34
+ ❯ query node_modules/convex-test/dist/index.js:2158:20
+ ❯ convex/ownerOnly.test.ts:33:12
+ ❯ convex/ownerOnly.test.ts:126:53
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/53]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.group > shows the Group's name, its Roster, and every Session with its time
+AssertionError: expected { claimedPlayerId: null, …(6) } to deeply equal { …(8) }
+
+- Expected
++ Received
+
+@@ -12,34 +12,13 @@
+        "_id": "0000000000000000000010003players",
+        "name": "Bo",
+      },
+    ],
+    "removedFromMyGroups": false,
+-   "sessions": [
+-     {
+-       "date": "2026-10-02",
+-       "lengthMinutes": 240,
+-       "startTime": "19:00",
+-     },
+-     {
+-       "date": "2026-10-03",
+-       "lengthMinutes": 240,
+-       "startTime": "19:00",
+-     },
+-     {
+-       "date": "2026-10-17",
+-       "lengthMinutes": 240,
+-       "startTime": "19:00",
+-     },
+-     {
+-       "date": "2026-12-31",
+-       "lengthMinutes": 240,
+-       "startTime": "19:00",
+-     },
+-     {
+-       "date": "2027-01-01",
+-       "lengthMinutes": 240,
+-       "startTime": "19:00",
+-     },
++   "sessionDates": [
++     "2026-10-02",
++     "2026-10-03",
++     "2026-10-17",
++     "2026-12-31",
++     "2027-01-01",
+    ],
+-   "timeZone": "Europe/Berlin",
+  }
+
+ ❯ convex/player.test.ts:157:61
+    155|     }
+    156|
+    157|     expect(await t.query(api.player.group, { shareToken })).toEqual({
+       |                                                             ^
+    158|       groupId,
+    159|       name: "My group",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/53]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.group > leaves Cancelled Sessions out
+AssertionError: expected undefined to deeply equal [ { date: '2026-10-17', …(2) } ]
+
+- Expected:
+[
+  {
+    "date": "2026-10-17",
+    "lengthMinutes": 240,
+    "startTime": "19:00",
+  },
+]
+
++ Received:
+undefined
+
+ ❯ convex/player.test.ts:179:73
+    177|     await seedSession(t, groupId, "2026-10-17", { state: "scheduled" }…
+    178|
+    179|     expect((await t.query(api.player.group, { shareToken }))?.sessions…
+       |                                                                         ^
+    180|       { date: "2026-10-17", ...USUAL },
+    181|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/53]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.group > shows when and where each Session is, in the Group's time zone
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/player.test.ts:187:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/53]⎯
+
+ FAIL  |convex| convex/player.test.ts > player.group > shows only the Group behind the Share Token
+AssertionError: expected { claimedPlayerId: null, …(6) } to match object { …(3) }
+(5 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "groupId": "00000000000000000000010002groups",
+    "players": [],
+-   "sessions": [],
+  }
+
+ ❯ convex/player.test.ts:251:78
+    249|     await seedSession(t, other.groupId, "2026-10-17");
+    250|
+    251|     expect(await t.query(api.player.group, { shareToken: mine.shareTok…
+       |                                                                              ^
+    252|       groupId: mine.groupId,
+    253|       players: [],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/53]⎯
+
+ FAIL  |convex| convex/schedule.test.ts > schedule.month > returns the Roster, the month's Answers, and every Session of the Group
+AssertionError: expected { answers: [ { …(3) }, …(2) ], …(2) } to deeply equal { …(4) }
+
+- Expected
++ Received
+
+@@ -28,27 +28,16 @@
+    ],
+    "sessions": [
+      {
+        "_id": "000000000000000000010010sessions",
+        "date": "2026-09-12",
+-       "lengthMinutes": 240,
+-       "startTime": "19:00",
+      },
+      {
+        "_id": "000000000000000000010011sessions",
+        "date": "2026-10-17",
+-       "lengthMinutes": 240,
+-       "startTime": "19:00",
+      },
+      {
+        "_id": "000000000000000000010012sessions",
+        "date": "2026-12-05",
+-       "lengthMinutes": 240,
+-       "startTime": "19:00",
+      },
+    ],
+-   "timeAndPlace": {
+-     "lengthMinutes": 240,
+-     "startTime": "19:00",
+-     "timeZone": "Europe/Berlin",
+-   },
+  }
+
+ ❯ convex/schedule.test.ts:63:22
+     61|     const schedule = await as.query(api.schedule.month, { groupId, mon…
+     62|
+     63|     expect(schedule).toEqual({
+       |                      ^
+     64|       players: [
+     65|         { _id: ada, name: "Ada" },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/53]⎯
+
+ FAIL  |convex| convex/schedule.test.ts > schedule.month > leaves Cancelled Sessions out
+AssertionError: expected [ { …(2) } ] to deeply equal [ { …(4) } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "_id": "000000000000000000010004sessions",
+      "date": "2026-10-17",
+-     "lengthMinutes": 240,
+-     "startTime": "19:00",
+    },
+  ]
+
+ ❯ convex/schedule.test.ts:89:32
+     87|     const schedule = await as.query(api.schedule.month, { groupId, mon…
+     88|
+     89|     expect(schedule?.sessions).toEqual([{ _id: scheduled, date: "2026-…
+       |                                ^
+     90|   });
+     91|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/53]⎯
+
+ FAIL  |convex| convex/schedule.test.ts > schedule.month > gives every Session the Group's saved time and place
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/schedule.test.ts:95:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/53]⎯
+
+ FAIL  |convex| convex/schedule.test.ts > schedule.month > leaves out the Players, Answers, and Sessions of other Groups
+AssertionError: expected { answers: [], players: [], …(1) } to deeply equal { players: [], answers: [], …(2) }
+
+- Expected
++ Received
+
+  {
+    "answers": [],
+    "players": [],
+    "sessions": [],
+-   "timeAndPlace": {
+-     "lengthMinutes": 240,
+-     "startTime": "19:00",
+-     "timeZone": "Europe/Berlin",
+-   },
+  }
+
+ ❯ convex/schedule.test.ts:120:22
+    118|     const schedule = await as.query(api.schedule.month, { groupId, mon…
+    119|
+    120|     expect(schedule).toEqual({
+       |                      ^
+    121|       players: [],
+    122|       answers: [],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/53]⎯
+
+ FAIL  |convex| convex/schedule.test.ts > schedule.month > serves an Anonymous GM their own Group
+AssertionError: expected { answers: [], …(2) } to deeply equal { players: [ { …(2) } ], …(3) }
+
+- Expected
++ Received
+
+@@ -5,11 +5,6 @@
+        "_id": "0000000000000000000010003players",
+        "name": "Ada",
+      },
+    ],
+    "sessions": [],
+-   "timeAndPlace": {
+-     "lengthMinutes": 240,
+-     "startTime": "19:00",
+-     "timeZone": "Europe/Berlin",
+-   },
+  }
+
+ ❯ convex/schedule.test.ts:157:22
+    155|     const schedule = await as.query(api.schedule.month, { groupId, mon…
+    156|
+    157|     expect(schedule).toEqual({
+       |                      ^
+    158|       players: [{ _id: ada, name: "Ada" }],
+    159|       answers: [],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/53]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > sends no Session update when a saved Time and place moves a Session
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:255:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/53]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks group_settings_saved for the location "Max's place" as has_location true
+ FAIL  |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks group_settings_saved for the location "" as has_location false
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ sendsDuring convex/telemetry.callSites.test.ts:59:3
+ ❯ eventsDuring convex/telemetry.callSites.test.ts:64:17
+ ❯ convex/telemetry.callSites.test.ts:268:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/53]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code or email in any event or log
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/telemetry.callSites.test.ts:541:7
+ ❯ sendsDuring convex/telemetry.callSites.test.ts:59:3
+ ❯ convex/telemetry.callSites.test.ts:537:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.settings > reads a Group nobody has set up as 19:00 for 4 hours, Berlin time, with no location
+Error: Expected a Convex function exported from module "groups" as `settings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:34
+ ❯ query node_modules/convex-test/dist/index.js:2158:20
+ ❯ convex/timeAndPlace.test.ts:67:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.settings > reads back what the GM saved
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/timeAndPlace.test.ts:78:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.settings > reads a missing id as null
+Error: Expected a Convex function exported from module "groups" as `settings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.queryFromPath node_modules/convex-test/dist/index.js:2071:34
+ ❯ query node_modules/convex-test/dist/index.js:2158:20
+ ❯ convex/timeAndPlace.test.ts:89:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.create > keeps the browser's time zone for the new Group
+Error: Validator error: Unexpected field `timeZone` in object
+ ❯ validateValidator node_modules/convex-test/dist/index.js:926:27
+    924|             for (const k of Object.keys(value)) {
+    925|                 if (validator.value[k] === undefined) {
+    926|                     throw new Error(`Validator error: Unexpected field…
+       |                           ^
+    927|                 }
+    928|             }
+ ❯ validateFunctionArgs node_modules/convex-test/dist/index.js:2341:5
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2118:17
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/timeAndPlace.test.ts:97:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.create > drops a time zone it doesn't know and follows Berlin time
+Error: Validator error: Unexpected field `timeZone` in object
+ ❯ validateValidator node_modules/convex-test/dist/index.js:926:27
+    924|             for (const k of Object.keys(value)) {
+    925|                 if (validator.value[k] === undefined) {
+    926|                     throw new Error(`Validator error: Unexpected field…
+       |                           ^
+    927|                 }
+    928|             }
+ ❯ validateFunctionArgs node_modules/convex-test/dist/index.js:2341:5
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2118:17
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/timeAndPlace.test.ts:108:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.updateSettings > trims the location
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/timeAndPlace.test.ts:120:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.updateSettings > clears the location when it is left empty
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/timeAndPlace.test.ts:133:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.updateSettings > takes a location of 200 characters
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/timeAndPlace.test.ts:149:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { startTime: '7pm' } as invalid settings and changes nothing
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { startTime: '7:30' } as invalid settings and changes nothing
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { startTime: '24:00' } as invalid settings and changes nothing
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { lengthMinutes: 15 } as invalid settings and changes nothing
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { lengthMinutes: 735 } as invalid settings and changes nothing
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { lengthMinutes: 250 } as invalid settings and changes nothing
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { timeZone: 'Mars/Olympus_Mons' } as invalid settings and changes nothing
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses { …(1) } as invalid settings and changes nothing
+AssertionError: expected Error: Expected a Convex function exporte… to be an instance of ConvexError
+ ❯ expectErrorCode convex/model/test.setup.ts:92:17
+     90|     (reason: unknown) => reason,
+     91|   );
+     92|   expect(error).toBeInstanceOf(ConvexError);
+       |                 ^
+     93|   const { data } = error as ConvexError<AppErrorData & { code: Code }>;
+     94|   expect(data.code).toBe(code);
+ ❯ convex/timeAndPlace.test.ts:166:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[36/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.updateSettings > refuses once the GM's edits are spent, and changes nothing
+AssertionError: expected Error: Expected a Convex function exporte… to be an instance of ConvexError
+ ❯ expectErrorCode convex/model/test.setup.ts:92:17
+     90|     (reason: unknown) => reason,
+     91|   );
+     92|   expect(error).toBeInstanceOf(ConvexError);
+       |                 ^
+     93|   const { data } = error as ConvexError<AppErrorData & { code: Code }>;
+     94|   expect(data.code).toBe(code);
+ ❯ convex/timeAndPlace.test.ts:177:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[37/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > groups.updateSettings > pushes out the Expiry of an Unsaved Group
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/timeAndPlace.test.ts:188:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[38/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > a saved Time and place > publishes each upcoming Session once, a window after the last save, at the new time and place
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/timeAndPlace.test.ts:200:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > a saved Time and place > follows a new time zone
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/timeAndPlace.test.ts:229:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[40/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > a saved Time and place > publishes nothing when the save changes nothing
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/timeAndPlace.test.ts:247:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[41/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > a saved Time and place > leaves a Cancelled Session's published time alone
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/timeAndPlace.test.ts:257:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[42/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > a saved Time and place > leaves a past Session's published time alone
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/timeAndPlace.test.ts:268:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[43/53]⎯
+
+ FAIL  |convex| convex/timeAndPlace.test.ts > a saved Time and place > publishes a Cancelled Session at the new time once it is scheduled again
+Error: Expected a Convex function exported from module "groups" as `updateSettings`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/timeAndPlace.test.ts:278:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[44/53]⎯
+
+
+ Test Files  9 failed (9)
+      Tests  53 failed | 198 passed (251)
+   Start at  09:23:05
+   Duration  3.99s (tests 44%, transform 44%, import 9%, environment 3%)
+
+     × keeps the time zone in its usual spelling 11ms
+     × keeps the time zone in its usual spelling 7ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 24 passed (26)

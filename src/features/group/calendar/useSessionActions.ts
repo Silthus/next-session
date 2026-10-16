@@ -1,5 +1,6 @@
 import type { OptimisticLocalStore } from "convex/browser";
 import { useMutation } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { useRef, useState } from "react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
@@ -15,14 +16,14 @@ export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
   const [pendingDates, setPendingDates] = useState<ReadonlySet<IsoDate>>(new Set());
   const scheduleSession = useMutation(api.sessions.schedule).withOptimisticUpdate(
     (store, { date }) =>
-      editCachedSessions(store, groupId, (sessions) => [
+      editCachedSessions(store, groupId, ({ sessions, timeAndPlace }) => [
         ...sessions,
-        { _id: `optimistic-${date}` as Id<"sessions">, date },
+        optimisticSession(date, timeAndPlace),
       ]),
   );
   const cancelSession = useMutation(api.sessions.cancel).withOptimisticUpdate(
     (store, { sessionId }) =>
-      editCachedSessions(store, groupId, (sessions) =>
+      editCachedSessions(store, groupId, ({ sessions }) =>
         sessions.filter((session) => session._id !== sessionId),
       ),
   );
@@ -68,13 +69,22 @@ export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
   };
 }
 
+type MonthSchedule = NonNullable<FunctionReturnType<typeof api.schedule.month>>;
+
+function optimisticSession(
+  date: IsoDate,
+  { startTime, lengthMinutes, location }: MonthSchedule["timeAndPlace"],
+): MonthSchedule["sessions"][number] {
+  return { _id: `optimistic-${date}` as Id<"sessions">, date, startTime, lengthMinutes, location };
+}
+
 function editCachedSessions(
   store: OptimisticLocalStore,
   groupId: Id<"groups">,
-  edit: (sessions: CalendarSession[]) => CalendarSession[],
+  edit: (month: MonthSchedule) => MonthSchedule["sessions"],
 ) {
   for (const { args, value } of store.getAllQueries(api.schedule.month)) {
     if (args.groupId !== groupId || !value) continue;
-    store.setQuery(api.schedule.month, args, { ...value, sessions: edit(value.sessions) });
+    store.setQuery(api.schedule.month, args, { ...value, sessions: edit(value) });
   }
 }

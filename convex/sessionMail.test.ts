@@ -249,6 +249,22 @@ describe("the Undo window", () => {
   });
 });
 
+it("sends no Session update when a saved Time and place moves a Session", async () => {
+  const { as, groupId, sessionId } = await publishedSession();
+
+  await as.mutation(api.groups.updateSettings, {
+    groupId,
+    startTime: "20:00",
+    lengthMinutes: 180,
+    timeZone: "Europe/Berlin",
+    location: "Max's place",
+  });
+  await finish();
+
+  expect((await sessionRow(sessionId))?.published?.revision).toBe(2);
+  expect(fetchMock).not.toHaveBeenCalled();
+});
+
 it("cancels with the current Group name and Share Link", async () => {
   const { as, groupId, sessionId } = await publishedSession();
   await t.run(async (ctx) => {

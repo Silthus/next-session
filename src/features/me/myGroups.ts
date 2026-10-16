@@ -31,10 +31,10 @@ export function daysToAnswer(openDates: number): string | null {
 }
 
 function sessionsOf(
-  group: { name: string; upcomingSessions: IsoDate[] },
+  group: { name: string; upcomingSessions: { date: IsoDate }[] },
   to: GroupPage,
 ): UpcomingSession[] {
-  return group.upcomingSessions.map((date) => ({ date, groupName: group.name, to }));
+  return group.upcomingSessions.map(({ date }) => ({ date, groupName: group.name, to }));
 }
 
 function byDateThenGroupName(a: UpcomingSession, b: UpcomingSession) {

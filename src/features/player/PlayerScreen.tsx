@@ -407,7 +407,7 @@ function PlayerAnswers({
       month={month}
       today={today}
       answers={answers}
-      sessionDates={group.sessionDates}
+      sessionDates={group.sessions.map(({ date }) => date)}
       hintVisible={hintVisible}
       onHintToggle={() => (hintVisible ? dismissHint() : setHintVisible(true))}
       onAnswer={(date, answer) => {

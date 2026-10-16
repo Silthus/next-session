@@ -11,9 +11,14 @@ import {
 } from "./mail";
 import { accountDistinctId, isTestAddress, PRODUCT } from "./model/telemetry";
 
-export async function sessionPublished(ctx: MutationCtx, session: Doc<"sessions">) {
+export async function sessionPublished(
+  ctx: MutationCtx,
+  session: Doc<"sessions">,
+  previous: Doc<"sessions">["published"],
+) {
   const { published } = session;
-  if (published === undefined || !sessionMailConfigured()) return;
+  if (published === undefined || published.state === previous?.state) return;
+  if (!sessionMailConfigured()) return;
   const players = await ctx.db
     .query("players")
     .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", session.groupId))

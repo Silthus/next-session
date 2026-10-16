@@ -143,8 +143,10 @@ function datesFrom(first: number, last: number, month = "2026-10") {
   );
 }
 
+const USUAL = { startTime: "19:00", lengthMinutes: 240 };
+
 describe("player.group", () => {
-  it("shows the Group's name, its Roster, and every Session date", async () => {
+  it("shows the Group's name, its Roster, and every Session with its time", async () => {
     const { groupId, shareToken } = await sharedGroup();
     const bo = await seedPlayer(groupId, "Bo");
     const ada = await seedPlayer(groupId, "Ada");
@@ -159,7 +161,10 @@ describe("player.group", () => {
         { _id: ada, name: "Ada" },
         { _id: bo, name: "Bo" },
       ],
-      sessionDates: ["2026-10-02", TODAY, "2026-10-17", LAST_BOOKABLE_DATE, "2027-01-01"],
+      sessions: ["2026-10-02", TODAY, "2026-10-17", LAST_BOOKABLE_DATE, "2027-01-01"].map(
+        (date) => ({ date, ...USUAL }),
+      ),
+      timeZone: "Europe/Berlin",
       claimedPlayerId: null,
       removedFromMyGroups: false,
       opensAsGm: false,
@@ -171,7 +176,25 @@ describe("player.group", () => {
     await seedSession(t, groupId, "2026-10-10", CANCELLED);
     await seedSession(t, groupId, "2026-10-17", { state: "scheduled" });
 
-    expect((await t.query(api.player.group, { shareToken }))?.sessionDates).toEqual(["2026-10-17"]);
+    expect((await t.query(api.player.group, { shareToken }))?.sessions).toEqual([
+      { date: "2026-10-17", ...USUAL },
+    ]);
+  });
+
+  it("shows when and where each Session is, in the Group's time zone", async () => {
+    const { as, groupId, shareToken } = await sharedGroup();
+    const saved = { startTime: "18:30", lengthMinutes: 180, location: "Max's place" };
+    await as.mutation(api.groups.updateSettings, {
+      groupId,
+      ...saved,
+      timeZone: "America/New_York",
+    });
+    await seedSession(t, groupId, "2026-10-17");
+
+    expect(await t.query(api.player.group, { shareToken })).toMatchObject({
+      sessions: [{ date: "2026-10-17", ...saved }],
+      timeZone: "America/New_York",
+    });
   });
 
   it("opens the GM view for the GM's Account, and for no one else", async () => {
@@ -228,7 +251,7 @@ describe("player.group", () => {
     expect(await t.query(api.player.group, { shareToken: mine.shareToken })).toMatchObject({
       groupId: mine.groupId,
       players: [],
-      sessionDates: [],
+      sessions: [],
     });
   });
 

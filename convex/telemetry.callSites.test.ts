@@ -257,6 +257,33 @@ describe("GM mutations", () => {
     ]);
   });
 
+  it.each([
+    ["Max's place", true],
+    ["", false],
+  ])(
+    "tracks group_settings_saved for the location %j as has_location %s",
+    async (location, hasLocation) => {
+      const { as, groupId } = await signedInGmWithGroup(t);
+
+      const events = await eventsDuring(() =>
+        as.mutation(api.groups.updateSettings, {
+          groupId,
+          startTime: "20:45",
+          lengthMinutes: 195,
+          timeZone: "Europe/Berlin",
+          location,
+        }),
+      );
+
+      expect(events).toEqual([
+        expect.objectContaining({
+          event: "next_session:group_settings_saved",
+          properties: { product: "next-session", group_id: groupId, has_location: hasLocation },
+        }),
+      ]);
+    },
+  );
+
   it("tracks session_scheduled with the Roster size and whether it is the Group's first", async () => {
     const { as, groupId } = await groupWithPlayer();
 
@@ -495,14 +522,29 @@ describe("refused and objected", () => {
 });
 
 describe("the redaction contract", () => {
-  it("sends no Group name, Player name, Share Token, claim code or email in any event or log", async () => {
+  it("sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log", async () => {
     const email = "redact-me@example.com";
-    const secrets: string[] = [email, "redact-me", "Dragon Table", "Zoltan Vex"];
+    const secrets: string[] = [
+      email,
+      "redact-me",
+      "Dragon Table",
+      "Zoltan Vex",
+      "Dragon Lair",
+      "20:45",
+      "195",
+    ];
 
     const sends = await sendsDuring(async () => {
       const link = await createYourLink(t);
       const groupId = await firstGroupOf(link.as);
       await link.as.mutation(api.groups.rename, { groupId, name: "Dragon Table" });
+      await link.as.mutation(api.groups.updateSettings, {
+        groupId,
+        startTime: "20:45",
+        lengthMinutes: 195,
+        timeZone: "Europe/Berlin",
+        location: "Dragon Lair",
+      });
       secrets.push(await shareTokenOf(groupId));
       await link.as.mutation(api.groups.rotateShareToken, { groupId });
       const shareToken = await shareTokenOf(groupId);
@@ -526,6 +568,7 @@ describe("the redaction contract", () => {
       ),
     ).toEqual([
       "next_session:link_created",
+      "next_session:group_settings_saved",
       "next_session:share_link_rotated",
       "next_session:player_joined",
       "next_session:session_scheduled",

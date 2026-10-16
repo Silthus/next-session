@@ -18,6 +18,13 @@ import {
 } from "./model/groups";
 import { enforceRateLimit } from "./model/rateLimits";
 import { track } from "./model/telemetry";
+import {
+  hasSavedTimeAndPlace,
+  timeAndPlaceOf,
+  timeAndPlaceView,
+  validTimeAndPlace,
+} from "./model/timeAndPlace";
+import { groupChanged } from "./sessionLifecycle";
 
 const groupListItem = v.object({
   id: v.id("groups"),
@@ -68,14 +75,52 @@ export const get = query({
   },
 });
 
+const settingsView = v.object({ ...timeAndPlaceView.fields, saved: v.boolean() });
+
+export const settings = query({
+  args: { groupId: v.string() },
+  returns: v.union(settingsView, v.null()),
+  handler: async (ctx, { groupId }) => {
+    const group = await findOwnedGroup(ctx, groupId);
+    if (group === null) return null;
+    return { ...timeAndPlaceOf(group), saved: hasSavedTimeAndPlace(group) };
+  },
+});
+
+export const updateSettings = mutation({
+  args: {
+    groupId: v.id("groups"),
+    startTime: v.string(),
+    lengthMinutes: v.number(),
+    timeZone: v.string(),
+    location: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, { groupId, ...input }) => {
+    const { gm, group } = await ownedGroup(ctx, groupId);
+    const timeAndPlace = validTimeAndPlace(input);
+    await enforceRateLimit(ctx, "gmEdit", gm._id);
+    await ctx.db.patch("groups", group._id, { ...timeAndPlace, location: timeAndPlace.location });
+    await touchGroup(ctx, group);
+    await groupChanged(ctx, group);
+    await track(ctx, {
+      name: "group_settings_saved",
+      actor: gm,
+      group_id: group._id,
+      has_location: timeAndPlace.location !== undefined,
+    });
+    return null;
+  },
+});
+
 export const create = mutation({
-  args: {},
+  args: { timeZone: v.optional(v.string()) },
   returns: v.id("groups"),
-  handler: async (ctx) => {
+  handler: async (ctx, { timeZone }) => {
     const gm = await requireGm(ctx);
     await ensureRoomForAnotherGroup(ctx, gm);
     await enforceRateLimit(ctx, "createGroup", gm._id);
-    const groupId = await insertGroup(ctx, gm);
+    const groupId = await insertGroup(ctx, gm, timeZone);
     await track(ctx, { name: "group_created", actor: gm, group_id: groupId });
     return groupId;
   },

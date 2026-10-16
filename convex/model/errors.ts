@@ -16,7 +16,8 @@ export type ErrorCode =
   | "EMAIL_TAKEN"
   | "INVALID_CREDENTIALS"
   | "WEAK_PASSWORD"
-  | "PLAYER_CLAIMED";
+  | "PLAYER_CLAIMED"
+  | "INVALID_SETTINGS";
 
 export type AppErrorData =
   | { code: "RATE_LIMITED"; retryAfter: number }

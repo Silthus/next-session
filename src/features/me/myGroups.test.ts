@@ -6,6 +6,18 @@ const thursday = "group-thursday" as Id<"groups">;
 const sunday = "group-sunday" as Id<"groups">;
 const owned = "group-owned" as Id<"groups">;
 
+function atSeven(dates: string[]) {
+  return dates.map((date) => ({ date, startTime: "19:00", lengthMinutes: 240 }) as const);
+}
+
+function running(
+  groupId: Id<"groups">,
+  name: string,
+  upcomingSessions: string[],
+): MyGroups["running"][number] {
+  return { groupId, name, timeZone: "Europe/Berlin", upcomingSessions: atSeven(upcomingSessions) };
+}
+
 function playing(
   groupId: Id<"groups">,
   name: string,
@@ -17,7 +29,8 @@ function playing(
     shareToken: `token-${name}`,
     playerId: `player-${name}` as Id<"players">,
     playerName: "Robin",
-    upcomingSessions,
+    timeZone: "Europe/Berlin",
+    upcomingSessions: atSeven(upcomingSessions),
     openDates: 0,
   };
 }
@@ -25,7 +38,7 @@ function playing(
 describe("nextSessions", () => {
   it("merges every Group's Sessions by date, each with its Group name and its page", () => {
     const groups: MyGroups = {
-      running: [{ groupId: owned, name: "My table", upcomingSessions: ["2026-10-09"] }],
+      running: [running(owned, "My table", ["2026-10-09"])],
       playing: [
         playing(thursday, "Thursday Crew", ["2026-10-08", "2026-10-15"]),
         playing(sunday, "Sunday Saga", ["2026-10-11"]),
@@ -55,11 +68,13 @@ describe("nextSessions", () => {
   it("shows the next five", () => {
     const groups: MyGroups = {
       running: [
-        {
-          groupId: owned,
-          name: "My table",
-          upcomingSessions: ["2026-10-07", "2026-10-09", "2026-10-11", "2026-10-13", "2026-10-15"],
-        },
+        running(owned, "My table", [
+          "2026-10-07",
+          "2026-10-09",
+          "2026-10-11",
+          "2026-10-13",
+          "2026-10-15",
+        ]),
       ],
       playing: [playing(thursday, "Thursday Crew", ["2026-10-08", "2026-10-10"])],
     };
@@ -75,7 +90,7 @@ describe("nextSessions", () => {
 
   it("lists a Session once when the Account runs the Group and plays in it", () => {
     const groups: MyGroups = {
-      running: [{ groupId: thursday, name: "Thursday Crew", upcomingSessions: ["2026-10-08"] }],
+      running: [running(thursday, "Thursday Crew", ["2026-10-08"])],
       playing: [playing(thursday, "Thursday Crew", ["2026-10-08"])],
     };
 
@@ -86,7 +101,7 @@ describe("nextSessions", () => {
 
   it("orders two Groups' Sessions on the same night by Group name", () => {
     const groups: MyGroups = {
-      running: [{ groupId: owned, name: "Zeta", upcomingSessions: ["2026-10-08"] }],
+      running: [running(owned, "Zeta", ["2026-10-08"])],
       playing: [playing(thursday, "Alpha", ["2026-10-08"])],
     };
 

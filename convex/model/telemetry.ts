@@ -35,6 +35,7 @@ export type ServerEvent =
     }
   | { name: "session_cancelled"; actor: Actor; group_id: string }
   | { name: "share_link_rotated"; actor: Actor; group_id: string }
+  | { name: "group_settings_saved"; actor: Actor; group_id: string; has_location: boolean }
   | { name: "tips_confirmed"; actor: Actor };
 
 type PropertyValue = string | number | boolean | Record<string, boolean>;

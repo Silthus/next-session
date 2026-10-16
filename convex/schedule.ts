@@ -1,10 +1,16 @@
 import { v } from "convex/values";
 import { addMonths, isValidMonth, type IsoMonth } from "../shared/dates";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { query, type QueryCtx } from "./_generated/server";
 import { findOwnedGroup } from "./model/access";
 import { isScheduled } from "./sessionLifecycle";
 import { profileImageUrl } from "./model/profileImages";
+import {
+  sessionTimeAndPlace,
+  sessionTimeAndPlaceFields,
+  timeAndPlaceOf,
+  timeAndPlaceView,
+} from "./model/timeAndPlace";
 import { answerValue } from "./schema";
 
 const monthSchedule = v.object({
@@ -12,7 +18,10 @@ const monthSchedule = v.object({
     v.object({ _id: v.id("players"), name: v.string(), image: v.optional(v.string()) }),
   ),
   answers: v.array(v.object({ playerId: v.id("players"), date: v.string(), answer: answerValue })),
-  sessions: v.array(v.object({ _id: v.id("sessions"), date: v.string() })),
+  sessions: v.array(
+    v.object({ _id: v.id("sessions"), date: v.string(), ...sessionTimeAndPlaceFields }),
+  ),
+  timeAndPlace: timeAndPlaceView,
 });
 
 export const month = query({
@@ -24,9 +33,9 @@ export const month = query({
     const [players, answers, sessions] = await Promise.all([
       rosterOf(ctx, group._id),
       answersIn(ctx, group._id, month),
-      sessionsOf(ctx, group._id),
+      sessionsOf(ctx, group),
     ]);
-    return { players, answers, sessions };
+    return { players, answers, sessions, timeAndPlace: timeAndPlaceOf(group) };
   },
 });
 
@@ -56,12 +65,13 @@ async function answersIn(ctx: QueryCtx, groupId: Id<"groups">, month: IsoMonth) 
   return answers.map(({ playerId, date, answer }) => ({ playerId, date, answer }));
 }
 
-async function sessionsOf(ctx: QueryCtx, groupId: Id<"groups">) {
+async function sessionsOf(ctx: QueryCtx, group: Doc<"groups">) {
   const sessions = await ctx.db
     .query("sessions")
-    .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId))
+    .withIndex("by_groupId_and_date", (q) => q.eq("groupId", group._id))
     .collect();
-  return sessions.filter(isScheduled).map(({ _id, date }) => ({ _id, date }));
+  const timeAndPlace = sessionTimeAndPlace(group);
+  return sessions.filter(isScheduled).map(({ _id, date }) => ({ _id, date, ...timeAndPlace }));
 }
 
 function firstDayOf(month: IsoMonth) {

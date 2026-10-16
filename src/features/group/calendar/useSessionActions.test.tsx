@@ -101,6 +101,22 @@ describe("useSessionActions", () => {
       "g2|2026-11": [],
     });
   });
+
+  it("shows a scheduled night at the Group's time and place before the server answers", () => {
+    renderHook(() => useSessionActions(groupId, show));
+    const store = fakeStore({ "g1|2026-11": [] });
+
+    optimisticUpdates["sessions:schedule"]!(store, { groupId, date: "2026-11-05" });
+
+    expect(store.sessionsIn("g1|2026-11")).toEqual([
+      expect.objectContaining({
+        date: "2026-11-05",
+        startTime: "18:30",
+        lengthMinutes: 180,
+        location: "Max's place",
+      }),
+    ]);
+  });
 });
 
 async function settle(name: string, index: number, value: string) {
@@ -112,11 +128,19 @@ async function settle(name: string, index: number, value: string) {
 
 type Session = { _id: string; date: string };
 
+const TUESDAYS_AT_MAX = {
+  startTime: "18:30",
+  lengthMinutes: 180,
+  timeZone: "Europe/Berlin",
+  location: "Max's place",
+};
+
 function fakeStore(cached: Record<string, Session[]>) {
   const entries = new Map(
     Object.entries(cached).map(([key, sessions]) => {
       const [groupId, month] = key.split("|");
-      return [key, { args: { groupId, month }, value: { players: [], answers: [], sessions } }];
+      const value = { players: [], answers: [], sessions, timeAndPlace: TUESDAYS_AT_MAX };
+      return [key, { args: { groupId, month }, value }];
     }),
   );
   const store = {
@@ -133,6 +157,8 @@ function fakeStore(cached: Record<string, Session[]>) {
       Object.fromEntries(
         [...entries].map(([key, entry]) => [key, entry.value.sessions.map((s) => s.date)]),
       ),
+    sessionsIn: (key: string) => entries.get(key)!.value.sessions,
   };
-  return store as unknown as OptimisticLocalStore & { sessionDates: typeof store.sessionDates };
+  return store as unknown as OptimisticLocalStore &
+    Pick<typeof store, "sessionDates" | "sessionsIn">;
 }
