@@ -94,7 +94,10 @@ export default defineSchema({
     state: v.optional(sessionState),
     changedAt: v.optional(v.number()),
     published: v.optional(publishedSession),
-  }).index("by_groupId_and_date", ["groupId", "date"]),
+    remindersRevision: v.optional(v.number()),
+  })
+    .index("by_groupId_and_date", ["groupId", "date"])
+    .index("by_date", ["date"]),
 
   mailVolume: defineTable({ day: v.string(), count: v.number() }).index("by_day", ["day"]),
 

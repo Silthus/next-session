@@ -116,6 +116,12 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - expiry sweep: the daily cron deletes Unsaved Groups past their Expiry
   handler: sweepExpiredGroups in cleanup.ts
   trust: operator
+- reminder job: the scheduler fires a Reminder 1 day or 2 hours before a published Session starts, and it emails the Accounts behind the Group's Claimed Players
+  handler: fire in reminders.ts
+  trust: operator
+- reminder backfill: the operator runs it once at switch-on to schedule Reminders for upcoming Sessions published while Reminders were off
+  handler: scheduleUpcoming in reminders.ts
+  trust: operator
 
 ## invariants
 - owner-only groups: A GM reads or changes a Group, its Players and its Sessions only when they own the Group; another GM's ids read as missing and nothing changes.
@@ -186,16 +192,17 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: commit-ordered-effects dismissed: track schedules send with ctx.scheduler.runAfter inside the mutation, and Convex drops what an uncommitted mutation scheduled
   checklist: circuit-breaker-policy dismissed: telemetry is fire and forget with a ten second timeout; a PostHog outage drops events and never blocks the product
   checklist: declared-target-coverage dismissed: there is one target, PostHog
-- published only: Session updates never announce a change before its Undo window ends.
-  over: Session updates sent for every schedule, cancel and Undo a GM makes through sessions.schedule and sessions.cancel
+- published only: Session updates and Reminders never announce a change before its Undo window ends.
+  over: Session updates and Reminders sent for every schedule, cancel and Undo a GM makes through sessions.schedule and sessions.cancel, and every Time and place a GM saves through groups.updateSettings
   via: never announces a change before its Undo window ends
   because: the Undo window promises that a mis-tap reaches nobody (#124); a mail sent before it ends tells players about a night the GM took back, and calendars that arrive later would add and remove entries for nothing
   crossing: store -> egress
   refuted: recordChange scheduled settle at once instead of after UNDO_WINDOW_MS -> the oracle failed by name (2026-10-16)
+  refuted: the Reminder body read its start from the live Group time instead of published -> the oracle failed by name (2026-10-16)
   kinds: output
   checklist: commit-ordered-effects declared as published only
-  checklist: revalidated-permission dismissed: every send attempt rechecks the published revision, the Group, the Claim and the Session email switch in its own query
-  checklist: destination-confinement dismissed: the Session update posts only to the configured Workflows webhook, never to a caller-supplied address
-  checklist: redaction dismissed: the Session update body is the Workflows trigger data the recipient's own mail needs, and it never reaches telemetry
+  checklist: revalidated-permission dismissed: every send attempt rechecks the published revision, the Group, the Claim and the Session email or Reminders switch in its own query
+  checklist: destination-confinement dismissed: Session updates and Reminders post only to their configured Workflows webhooks, never to a caller-supplied address
+  checklist: redaction dismissed: each body is the Workflows trigger data the recipient's own mail needs, it carries a Share Token only in player_url, and it never reaches telemetry
   checklist: circuit-breaker-policy dismissed: a failing webhook gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks a GM's change
-  checklist: declared-target-coverage dismissed: there is one target, the Workflows Session update webhook
+  checklist: declared-target-coverage dismissed: there are two targets, the Workflows Session update and Reminder webhooks, and the oracle's title names a test for each

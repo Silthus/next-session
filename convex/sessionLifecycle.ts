@@ -6,7 +6,8 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx, type QueryCtx } from "./_generated/server";
 import type { SessionState } from "../shared/sessions";
 import type { publishedSession } from "./schema";
-import { sessionPublished } from "./sessionMail";
+import * as reminders from "./reminders";
+import * as sessionMail from "./sessionMail";
 import { fail } from "./model/errors";
 import { groupTimeOf, locationOf } from "./model/timeAndPlace";
 
@@ -71,7 +72,9 @@ export const settle = internalMutation({
     if (previous !== undefined && isPublishedAs(previous, snapshot)) return null;
     const published = { ...snapshot, revision: (previous?.revision ?? 0) + 1 };
     await ctx.db.patch("sessions", sessionId, { published });
-    await sessionPublished(ctx, { ...session, published }, previous);
+    const settled = { ...session, published };
+    await sessionMail.sessionPublished(ctx, settled, previous);
+    await reminders.sessionPublished(ctx, settled);
     return null;
   },
 });

@@ -36,6 +36,11 @@ export const sessionSend = {
 };
 export type SessionSend = Infer<ReturnType<typeof v.object<typeof sessionSend>>>;
 
+export const reminderLead = v.union(v.literal("day"), v.literal("hours"));
+
+export const reminderSend = { ...sessionSend, lead: reminderLead };
+type ReminderSend = Infer<ReturnType<typeof v.object<typeof reminderSend>>>;
+
 const mailKind = v.union(v.literal("welcome"), v.literal("tips"));
 type MailKind = Infer<typeof mailKind>;
 
@@ -122,6 +127,28 @@ export const sendSession = internalAction({
     if (status >= FIRST_SERVER_ERROR)
       throw new Error(`The session mail webhook answered HTTP ${status}`);
     if (status >= 400) console.error(`The session mail webhook refused: HTTP ${status}, dropped`);
+    return null;
+  },
+});
+
+export async function requestReminder(ctx: MutationCtx, send: ReminderSend) {
+  if (!webhookFor("reminder")) return;
+  await recordMailVolume(ctx, 1);
+  await retrier.run(ctx, internal.mail.sendReminder, send);
+}
+
+export const sendReminder = internalAction({
+  args: reminderSend,
+  returns: v.null(),
+  handler: async (ctx, send) => {
+    const webhook = webhookFor("reminder");
+    if (!webhook) return null;
+    const body = await ctx.runQuery(internal.reminders.recipient, send);
+    if (!body) return null;
+    const { status } = await post(webhook, body);
+    if (status >= FIRST_SERVER_ERROR)
+      throw new Error(`The Reminder webhook answered HTTP ${status}`);
+    if (status >= 400) console.error(`The Reminder webhook refused: HTTP ${status}, dropped`);
     return null;
   },
 });
