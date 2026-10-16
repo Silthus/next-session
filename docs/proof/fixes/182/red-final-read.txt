@@ -1,0 +1,10 @@
+     × keeps a Session on the usual start time when the GM types no time and leaves the field 78ms
+     × leaves a start time being composed alone on the Enter that confirms the composition 27ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected <span …(1)></span> to be null
+- Expected:
++ Received:
+AssertionError: expected '19:00' to be '20' // Object.is equality
+Expected: "20"
+Received: "19:00"
+      Tests  2 failed | 53 passed (55)
