@@ -1,0 +1,13 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-e6aa6b1c
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+
+ Test Files  4 passed (4)
+      Tests  29 passed (29)
+   Start at  19:40:32
+   Duration  2.05s (environment 49%, tests 35%, setup 6%, transform 5%, import 4%)
+

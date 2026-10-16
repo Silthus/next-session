@@ -12,7 +12,7 @@ import { todayUtc } from "../shared/dates";
 import { calendarContentType } from "../shared/icalendar";
 import { SESSION_CHANGES } from "./model/sessionMailCopy";
 import { accountDistinctId, isTestAddress, PRODUCT, serverLog } from "./model/telemetry";
-import { frozenEntry, mailProvider, sessionState } from "./schema";
+import { frozenEntry, mailProvider } from "./schema";
 
 declare const process: { env: Record<string, string | undefined> };
 
@@ -32,23 +32,6 @@ const retrier = new ActionRetrier(components.actionRetrier, {
   initialBackoffMs: 5_000,
   base: 4,
 });
-
-export const sessionMailBody = v.object({
-  distinct_id: v.string(),
-  product: v.string(),
-  email: v.string(),
-  group_name: v.string(),
-  date_label: v.string(),
-  change: sessionState,
-  player_url: v.string(),
-});
-
-export const sessionSend = {
-  sessionId: v.id("sessions"),
-  userId: v.id("users"),
-  change: sessionState,
-};
-export type SessionSend = Infer<ReturnType<typeof v.object<typeof sessionSend>>>;
 
 const publishedSend = {
   sessionId: v.id("sessions"),
@@ -122,10 +105,9 @@ type WebhookBody = Infer<typeof webhookBody>;
 
 export type MailRequest = { kind: MailKind; user: Doc<"users">; tipsConfirmUrl?: string };
 
-const WEBHOOK_URL_VARIABLES: Record<MailKind | "session" | "reminder", string> = {
+const WEBHOOK_URL_VARIABLES: Record<MailKind | "reminder", string> = {
   welcome: "POSTHOG_WELCOME_WEBHOOK_URL",
   tips: "POSTHOG_TIPS_WEBHOOK_URL",
-  session: "POSTHOG_SESSION_WEBHOOK_URL",
   reminder: "POSTHOG_REMINDER_WEBHOOK_URL",
 };
 
@@ -177,28 +159,6 @@ function isRetryable(status: number) {
   return status === TOO_MANY_REQUESTS || status >= FIRST_SERVER_ERROR;
 }
 
-export async function requestSessionMail(ctx: MutationCtx, send: SessionSend) {
-  if (!webhookFor("session")) return;
-  await recordMailVolume(ctx, "workflows", 1);
-  await retrier.run(ctx, internal.mail.sendSession, send);
-}
-
-export const sendSession = internalAction({
-  args: sessionSend,
-  returns: v.null(),
-  handler: async (ctx, send) => {
-    const webhook = webhookFor("session");
-    if (!webhook) return null;
-    const body = await ctx.runQuery(internal.sessionMail.recipient, send);
-    if (!body) return null;
-    const { status } = await post(webhook, body);
-    if (status >= FIRST_SERVER_ERROR)
-      throw new Error(`The session mail webhook answered HTTP ${status}`);
-    if (status >= 400) console.error(`The session mail webhook refused: HTTP ${status}, dropped`);
-    return null;
-  },
-});
-
 export async function requestReminder(ctx: MutationCtx, send: ReminderSend) {
   if (!webhookFor("reminder")) return;
   await recordMailVolume(ctx, "workflows", 1);
@@ -220,10 +180,6 @@ export const sendReminder = internalAction({
     return null;
   },
 });
-
-export function sessionMailConfigured() {
-  return webhookFor("session") !== null;
-}
 
 export function remindersConfigured() {
   return webhookFor("reminder") !== null;

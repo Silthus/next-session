@@ -181,7 +181,7 @@ function buttonTo(groupLink: string) {
 `;
 }
 
-export function dateLabel(date: IsoDate) {
+function dateLabel(date: IsoDate) {
   return new Intl.DateTimeFormat("en-US", {
     weekday: "long",
     month: "long",

@@ -20,8 +20,6 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
   vi.stubEnv("SITE_URL", SITE_URL);
-  vi.stubEnv("POSTHOG_SESSION_WEBHOOK_URL", "https://example.test/session");
-  vi.stubEnv("POSTHOG_MAIL_WEBHOOK_SECRET", "secret");
   fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(new Response(null, { status: 200 })));
   vi.stubGlobal("fetch", fetchMock);
   t = newBackend();
@@ -77,6 +75,12 @@ async function wait(milliseconds: number) {
   await t.finishInProgressScheduledFunctions();
   await vi.advanceTimersByTimeAsync(milliseconds);
   await t.finishInProgressScheduledFunctions();
+}
+
+function mailedSubjects() {
+  return fetchMock.mock.calls.map(
+    ([, init]) => (JSON.parse(init!.body as string) as { subject: string }).subject,
+  );
 }
 
 async function finish() {
@@ -523,7 +527,8 @@ describe("a rename", () => {
     ]);
   });
 
-  it("leaves a Cancelled Session's published name alone and sends no Session update", async () => {
+  it("leaves a Cancelled Session's published name alone and mails nothing about it", async () => {
+    vi.stubEnv("RESEND_API_KEY", "re_test_key");
     const group = await crew();
     await withClaimedAccount(group);
     const feedUrl = await feedUrlOf(group);
@@ -537,7 +542,9 @@ describe("a rename", () => {
     await group.as.mutation(api.groups.rename, { groupId: group.groupId, name: "Friday Crew" });
     await finish();
 
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(new Set(mailedSubjects())).toEqual(
+      new Set(["Friday Crew: session on Saturday, October 17, 2026 changed"]),
+    );
     expect((await feedEvents(feedUrl)).map(({ SUMMARY, STATUS }) => ({ SUMMARY, STATUS }))).toEqual(
       [
         { SUMMARY: "Friday Crew", STATUS: "CONFIRMED" },
