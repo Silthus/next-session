@@ -133,7 +133,9 @@ export default defineSchema({
     changedAt: v.optional(v.number()), // the latest change, which the settle job compares
     published: v.optional(publishedSession), // what the outside world knows; missing means never published
     sequence: v.optional(v.number()), // the last calendar SEQUENCE sent; missing means 0 (§15)
-  }).index("by_groupId_and_date", ["groupId", "date"]),
+  })
+    .index("by_groupId_and_date", ["groupId", "date"])
+    .index("by_date", ["date"]), // the one-time invites read every Group's upcoming Sessions (§15.9)
 
   mailVolume: defineTable({
     day: v.string(), // UTC day
@@ -220,7 +222,7 @@ The name and Roster checks that `roster` and `player` share (`validName`, `ensur
 | | `finishSave` | mutation | `{code}` → `{groupIds}` | Account only. See §5.3 |
 | `auth` | `signIn`, `signOut`, `store` | Convex Auth | | |
 
-Internal: `groups.deleteChildren`, `cleanup.sweepExpiredGroups` (cron), `sessionLifecycle.settle` (§12.6), `backfill.publishLegacySessions` and `backfill.emptyRetiredMailStates` (run once after the Cancelled Session deploys), `backfill.widenPublishedSnapshots` (run once after the Time and place deploy: fills `start`, `end`, `location` and `summary` into every `published` at the same revision), `calendarFiles.groupDownload` (§14), `auth.keepFirstGroupTimeZone` (§5.2), `rateLimits` component setup in `convex/convex.config.ts` and limit definitions in `convex/model/rateLimits.ts`.
+Internal: `groups.deleteChildren`, `cleanup.sweepExpiredGroups` (cron), `sessionLifecycle.settle` (§12.6), `backfill.publishLegacySessions` and `backfill.emptyRetiredMailStates` (run once after the Cancelled Session deploys), `backfill.widenPublishedSnapshots` (run once after the Time and place deploy: fills `start`, `end`, `location` and `summary` into every `published` at the same revision), `calendarFiles.groupDownload` (§14), `oneTimeInvites.inviteScheduledSessions` (run once at the Resend switch-on, §15.9), `auth.keepFirstGroupTimeZone` (§5.2), `rateLimits` component setup in `convex/convex.config.ts` and limit definitions in `convex/model/rateLimits.ts`.
 
 Dropped from Lonir: workspace functions, `gmGetGroupRail` and `gmGetDateAvailability` (the client derives the rail counts and the day panel from `groups.mine` and `schedule.month`), `listSessions`, `getAvailability`, `claimMembership` (a client-only check against `player.group`), early access, consent, client errors, hand-off, activation telemetry.
 
@@ -1040,10 +1042,22 @@ Then, for set, changed and invite: "It's in the calendar invite in this mail. No
 
 `mailVolume` counts per provider and UTC day: Resend for Session mail (1 per send), Workflows for Welcome (1), Tips (2) and the Workflows Session update (1). A row without a provider is a Workflows count from before the split. Each provider warns once through `serverLog` ("Daily mail volume warning", with `provider`) when its day reaches 80 and once when it passes 100. Suppressed recipients aren't counted and a retry isn't counted twice. No email, Group name or Share Token reaches a usage event or log.
 
-### 15.9 Test seams
+### 15.9 One-time invites
+
+The Sessions published before the switch-on never had a Resend send. `oneTimeInvites.inviteScheduledSessions`, started once with `convex run` after `RESEND_API_KEY` is set, gives them their invites:
+
+- It reads the upcoming Sessions (today, UTC, to the end of the Booking Window) through the `by_date` index, soonest first, 100 a page, and takes those whose published state is scheduled and whose `sequence` is still 0.
+- Each gets one `invite` round to its whole calendar recipient set: `sequence` rises by one, and one `invite` send goes to each eligible recipient (§15.4's rules and copy). A Session with no eligible recipient is passed over and keeps `sequence` 0.
+- Pacing: a run tops the day's Resend count up to 50 of the 100, leaving half for live Session mail, and stops before the first Session whose round wouldn't fit. It then runs again at the next UTC midnight. A round larger than 50 on its own goes alone as the first send of a day, so a big Group never stalls the rest.
+- A Session published again before its turn gets a broadcast, its `sequence` leaves 0, and the run skips it. A second start after it finished queues nothing.
+- Without `RESEND_API_KEY` it does nothing and leaves every Session for the start after the switch-on.
+- It ends with one `serverLog` line, "One-time invites finished", with `sessions_invited` and `invites_queued` only.
+
+### 15.10 Test seams
 
 | Seam | Tested through |
 | --- | --- |
 | Session mail and the Resend adapter | `convex-test` through `api.sessions.*`, `api.groups.*`, `api.player.*`, `api.roster.removePlayer` and `api.account.finishSave` with fake timers and a fake `fetch` that records Resend payloads and decodes `invite.ics` (`convex/sessionInvites.test.ts`) |
 | The provider switch and the Workflows path | the same file and `convex/sessionMail.test.ts` |
 | Copy | `sessionMailCopy` on plain data with Vitest (`convex/model/sessionMailCopy.test.ts`) |
+| One-time invites | `convex-test` through `internal.oneTimeInvites.inviteScheduledSessions` with the same fake `fetch` and fake timers, the day's Resend count seeded in `mailVolume` (`convex/sessionInvites.test.ts`) |

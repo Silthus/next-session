@@ -31,6 +31,7 @@ import type * as model_sessionMailCopy from "../model/sessionMailCopy.js";
 import type * as model_telemetry from "../model/telemetry.js";
 import type * as model_timeAndPlace from "../model/timeAndPlace.js";
 import type * as model_tips from "../model/tips.js";
+import type * as oneTimeInvites from "../oneTimeInvites.js";
 import type * as player from "../player.js";
 import type * as profileImages from "../profileImages.js";
 import type * as roster from "../roster.js";
@@ -71,6 +72,7 @@ declare const fullApi: ApiFromModules<{
   "model/telemetry": typeof model_telemetry;
   "model/timeAndPlace": typeof model_timeAndPlace;
   "model/tips": typeof model_tips;
+  oneTimeInvites: typeof oneTimeInvites;
   player: typeof player;
   profileImages: typeof profileImages;
   roster: typeof roster;

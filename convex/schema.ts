@@ -94,7 +94,9 @@ export default defineSchema({
     changedAt: v.optional(v.number()),
     published: v.optional(publishedSession),
     sequence: v.optional(v.number()),
-  }).index("by_groupId_and_date", ["groupId", "date"]),
+  })
+    .index("by_groupId_and_date", ["groupId", "date"])
+    .index("by_date", ["date"]),
 
   mailVolume: defineTable({
     day: v.string(),

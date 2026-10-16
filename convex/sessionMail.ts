@@ -35,6 +35,8 @@ type Published = NonNullable<Doc<"sessions">["published"]>;
 type NightSend = Extract<CalendarSend, { kind: "broadcast" | "invite" }>;
 type WithdrawSend = Extract<CalendarSend, { kind: "withdraw" }>;
 type RecipientSetMember = { groupId: Id<"groups">; userId: Id<"users"> };
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+type NightRound = DistributiveOmit<NightSend, "sessionId" | "userId" | "stamp">;
 
 export async function sessionPublished(
   ctx: MutationCtx,
@@ -56,23 +58,52 @@ async function broadcast(
   const change = changeOf(previous, published);
   const group = await ctx.db.get("groups", session.groupId);
   if (change === null || group === null) return;
-  const sequence = (session.sequence ?? 0) + 1;
-  await ctx.db.patch("sessions", session._id, { sequence });
+  const sequence = await raiseSequence(ctx, session);
+  const { revision } = published;
+  const sends = await roundOf(ctx, session, group, {
+    kind: "broadcast",
+    change,
+    revision,
+    sequence,
+  });
+  await requestCalendarMails(ctx, sends);
+}
+
+export async function inviteRoundOf(ctx: QueryCtx, session: Doc<"sessions">) {
+  const { published } = session;
+  const group = await ctx.db.get("groups", session.groupId);
+  if (published?.state !== "scheduled" || group === null) return [];
+  const { revision } = published;
+  return await roundOf(ctx, session, group, {
+    kind: "invite",
+    revision,
+    sequence: nextSequence(session),
+  });
+}
+
+async function roundOf(
+  ctx: QueryCtx,
+  session: Doc<"sessions">,
+  group: Doc<"groups">,
+  round: NightRound,
+) {
   const stamp = Date.now();
-  const sends: CalendarSend[] = [];
+  const sends: NightSend[] = [];
   for (const userId of await calendarRecipients(ctx, group)) {
-    const send = {
-      kind: "broadcast",
-      change,
-      sessionId: session._id,
-      userId,
-      revision: published.revision,
-      sequence,
-      stamp,
-    } as const;
+    const send = { ...round, sessionId: session._id, userId, stamp };
     if (await nightTarget(ctx, send)) sends.push(send);
   }
-  await requestCalendarMails(ctx, sends);
+  return sends;
+}
+
+export async function raiseSequence(ctx: MutationCtx, session: Doc<"sessions">) {
+  const sequence = nextSequence(session);
+  await ctx.db.patch("sessions", session._id, { sequence });
+  return sequence;
+}
+
+function nextSequence(session: Doc<"sessions">) {
+  return (session.sequence ?? 0) + 1;
 }
 
 function changeOf(previous: Published | undefined, published: Published): SessionChange | null {
@@ -104,8 +135,7 @@ async function recipientSetChanged(
   const stamp = Date.now();
   const sends: CalendarSend[] = [];
   for (const night of affected) {
-    const sequence = (night.session.sequence ?? 0) + 1;
-    await ctx.db.patch("sessions", night.session._id, { sequence });
+    const sequence = await raiseSequence(ctx, night.session);
     sends.push(
       after
         ? inviteOf(night, userId, sequence, stamp)
