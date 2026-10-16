@@ -108,7 +108,11 @@ _Avoid_: onboarding email, confirmation email
 
 **Session updates**:
 Emails to the Accounts behind a Group's Claimed Players when a Session is set or cancelled, excluding the actor. The Account preference on My groups and the hosted unsubscribe both stop them. Implementation ships disabled until live activation.
-_Avoid_: alerts, reminders (these do not remind before a Session)
+_Avoid_: alerts, reminders (a Reminder is its own email)
+
+**Reminder**:
+An email to the Account behind a Claimed Player, 1 day and again 2 hours before a scheduled Session starts. Reminders are on by default. The link in every Reminder and the Reminders switch on My groups stop them, and neither touches Session updates. A Cancelled Session reminds nobody, and a Reminder is never sent once its time has passed. Calendar entries from Next Session carry no reminder of their own, though the player's calendar app may add one.
+_Avoid_: notification, alert, calendar alarm
 
 **Tips**:
 Two short emails on getting the first game night scheduled, sent only to an Account that ticked the box in the Save sheet and then pressed **Yes, send me the tips** on the page the Welcome Mail links to. Unsubscribing stops them.
