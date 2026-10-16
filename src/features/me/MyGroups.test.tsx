@@ -292,6 +292,24 @@ describe("Your calendar on My groups", () => {
     await waitFor(() => expect(document.activeElement).toBe(link));
   });
 
+  it("moves focus to the new link after a keyboard reset", async () => {
+    const { calendarFeed } = renderMyGroups();
+    calendarFeed.reset.mockResolvedValueOnce(
+      "https://next-session.link/cal/a/newTokenNewTokenNewTo.ics",
+    );
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Subscribe in your calendar app" }),
+    );
+    (await screen.findByRole("button", { name: "Reset feed link" })).focus();
+
+    await userEvent.keyboard("{Enter}");
+
+    const link = await screen.findByDisplayValue(
+      "https://next-session.link/cal/a/newTokenNewTokenNewTo.ics",
+    );
+    await waitFor(() => expect(document.activeElement).toBe(link));
+  });
+
   it("resets the link at once and shows the new one", async () => {
     const newFeedUrl = "https://next-session.link/cal/a/newTokenNewTokenNewTo.ics";
     const { calendarFeed } = renderMyGroups();
@@ -329,18 +347,22 @@ describe("Your calendar on My groups", () => {
     });
   });
 
-  it("says to wait an hour when the Account made too many new links", async () => {
+  it("says to wait an hour when the Account made too many new links, and keeps the old one shown", async () => {
     const { calendarFeed } = renderMyGroups();
-    calendarFeed.subscribe.mockRejectedValueOnce(new ConvexError({ code: "RATE_LIMITED" }));
-
+    calendarFeed.reset.mockRejectedValueOnce(new ConvexError({ code: "RATE_LIMITED" }));
     await userEvent.click(
       await screen.findByRole("button", { name: "Subscribe in your calendar app" }),
     );
 
+    await userEvent.click(await screen.findByRole("button", { name: "Reset feed link" }));
+
     expect((await screen.findByRole("alert")).textContent).toBe(
       "Too many new links this hour. Try again in an hour.",
     );
-    expect(screen.getByRole("button", { name: "Subscribe in your calendar app" })).toBeTruthy();
+    expect(screen.getByRole("textbox", { name: "Calendar feed link" })).toHaveProperty(
+      "value",
+      feedUrl,
+    );
   });
 
   it("is not offered to an Account with no Groups", async () => {

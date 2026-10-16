@@ -69,7 +69,7 @@ export function YourCalendar({ calendarFeed }: { calendarFeed: CalendarFeedActio
 
 function FeedLink({ url }: { url: string }) {
   const field = useRef<HTMLInputElement>(null);
-  useEffect(() => field.current?.focus(), []);
+  useEffect(() => field.current?.focus(), [url]);
   const { copyState, copy } = useCopy(url, "me", (method) => ({
     name: "calendar_feed_copied",
     method,
