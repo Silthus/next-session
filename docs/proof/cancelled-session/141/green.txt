@@ -1,0 +1,315 @@
+# Green: the same test files after the change, every assertion intact, none skipped
+
+$ bunx vitest run <the same test files> --reporter=verbose
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-0d92197f
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > names the event under next_session, marks the product, and keeps the event's fields 2ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > keeps an Anonymous GM out of person profiles 1ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > identifies a Player without an Account by the Player, without a person profile 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > sets only next_session_account on the person of a new Account 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > flags prod-proof+1@example.test as a test account 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > flags e2e@Next-Session.TEST as a test account 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > does not flag ada@example.com as a test account 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > does not flag ada@test.example.com as a test account 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > does not flag ada@contest as a test account 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > never carries the actor's email in link_created 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > never carries the actor's email in group_created 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > never carries the actor's email in account_created 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > never carries the actor's email in groups_saved 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > never carries the actor's email in player_joined 1ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > never carries the actor's email in player_claimed 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > never carries the actor's email in player_released 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > never carries the actor's email in session_scheduled 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > never carries the actor's email in session_cancelled 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > never carries the actor's email in share_link_rotated 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toPostHogEvent > never carries the actor's email in tips_confirmed 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toOtlpLogs > wraps log records in one OTLP/JSON resource marked as Next Session's Convex service 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toOtlpLogs > maps info to severity 9 0ms
+ ✓ |convex| convex/model/telemetry.test.ts > toOtlpLogs > maps error to severity 17 0ms
+ ✓ |convex| convex/ownerOnly.test.ts > owner-only Groups > covers every public function of the GM modules 5ms
+ ✓ |convex| convex/ownerOnly.test.ts > owner-only Groups > every GM-facing function treats another GM's Group, Player and Session as missing and changes nothing 96ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > records the Session 93ms
+ ✓ |convex| convex/me.test.ts > me.groups > is null for a visitor and an Anonymous GM 48ms
+ ✓ |convex| convex/me.test.ts > me.groups > is empty for an Account that runs and plays nowhere 4ms
+ ✓ |convex| convex/me.test.ts > me.groups > lists the Groups the Account runs with their next five Sessions from today 26ms
+ ✓ |convex| convex/me.test.ts > me.groups > leaves Cancelled Sessions out of the next five 4ms
+ ✓ |convex| convex/me.test.ts > me.groups > lists the Groups the Account plays in with its Player and the days left to answer 15ms
+`auth:store` type: createAccountFromCredentials
+`auth:store` type: signIn
+ ✓ |convex| convex/me.test.ts > me.groups > shows a Group the Account runs and plays in in both lists 5ms
+ ✓ |convex| convex/me.test.ts > me.groups > drops a Group once the Account releases its claim there 7ms
+ ✓ |convex| convex/me.test.ts > me.groups > drops a Group once the GM removes the Claimed Player 11ms
+ ✓ |convex| convex/me.test.ts > me.groups > skips a claim whose Group is deleted while its Players are still being removed 7ms
+ ✓ |convex| convex/me.test.ts > me.groups > returns the current Share Token after the GM rotates it 6ms
+ ✓ |convex| convex/me.test.ts > me.groups > moves on at midnight without a write 10ms
+ ✓ |convex| convex/me.test.ts > me.groups > accepts a client date one day off the server's but no further 9ms
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > publishes every legacy Session as scheduled at revision 0, page by page 102ms
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > empties the retired Session mail table, page by page 11ms
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > changes nothing on a second run 3ms
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > leaves a Session inside its first Undo window to announce itself 49ms
+ ✓ |convex| convex/backfill.test.ts > backfill.publishLegacySessions > lets the first cancel of a legacy Session announce it 8ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns the Roster, the month's Answers, and every Session of the Group 148ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > leaves Cancelled Sessions out 5ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > leaves out the Players, Answers, and Sessions of other Groups 10ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > feeds summarizeMonth for the per-player progress, Best Nights, and Sessions 8ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > serves an Anonymous GM their own Group 5ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for a foreign Group, so it looks missing 3ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for a removed Group 4ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for a malformed Group id 2ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for the malformed month "2026-13" 3ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for the malformed month "2026-1" 2ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for the malformed month "October" 2ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for a signed-out caller 2ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > accepts 2026-10-03 at the edge of the Booking Window 12ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > accepts 2026-12-31 at the edge of the Booking Window 5ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > rejects 2026-10-02 outside the Booking Window 3ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > rejects 2027-01-01 outside the Booking Window 4ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > rejects 2026-11-31 outside the Booking Window 2ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > rejects 2026-10-3 outside the Booking Window 2ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > rejects tomorrow outside the Booking Window 2ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > restores a Cancelled Session in place, keeping its id 7ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > schedules a new Session on a date whose Session was removed 5ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > allows one Session per date 5ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > lets two Groups play on the same date 5ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > pushes out the Expiry of an Unsaved Group 2ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > treats a foreign Group as missing 3ms
+ ✓ |convex| convex/sessions.test.ts > sessions.schedule > rejects a signed-out caller 1ms
+ ✓ |convex| convex/sessions.test.ts > sessions.cancel > removes a Session that was never published 5ms
+ ✓ |convex| convex/sessions.test.ts > sessions.cancel > keeps a published Session on its date as Cancelled 6ms
+ ✓ |convex| convex/sessions.test.ts > sessions.cancel > cancels a Session today 4ms
+ ✓ |convex| convex/sessions.test.ts > sessions.cancel > succeeds and changes nothing for a Session already Cancelled 4ms
+ ✓ |convex| convex/sessions.test.ts > sessions.cancel > keeps a past Session, because past dates are read-only 3ms
+ ✓ |convex| convex/sessions.test.ts > sessions.cancel > pushes out the Expiry of an Unsaved Group 3ms
+ ✓ |convex| convex/sessions.test.ts > sessions.cancel > treats a Session of a foreign Group as missing 6ms
+ ✓ |convex| convex/sessions.test.ts > sessions.cancel > treats a removed Session as missing 3ms
+ ✓ |convex| convex/sessions.test.ts > sessions.cancel > rejects a signed-out caller 2ms
+ ✓ |convex| convex/sessions.test.ts > the GM edit limit > refuses scheduling and cancelling once the GM's edits are spent, and changes nothing 28ms
+ ✓ |convex| convex/player.test.ts > player.group > shows the Group's name, its Roster, and every Session date 121ms
+ ✓ |convex| convex/player.test.ts > player.group > leaves Cancelled Sessions out 5ms
+ ✓ |convex| convex/player.test.ts > player.group > opens the GM view for the GM's Account, and for no one else 15ms
+ ✓ |convex| convex/player.test.ts > player.group > keeps the player view for a GM's Account that plays in its own Group 5ms
+ ✓ |convex| convex/player.test.ts > player.group > keeps the player view for an Anonymous GM opening their own Share Link 5ms
+ ✓ |convex| convex/player.test.ts > player.group > shows the Account's Claimed Player on its other devices and to no one else 11ms
+ ✓ |convex| convex/player.test.ts > player.group > shows only the Group behind the Share Token 5ms
+ ✓ |convex| convex/player.test.ts > player.group > returns null for the unknown Share Token "" 3ms
+ ✓ |convex| convex/player.test.ts > player.group > returns null for the unknown Share Token "unknown123" 4ms
+ ✓ |convex| convex/player.test.ts > player.group > returns null for the unknown Share Token "toolongtoken123456" 3ms
+ ✓ |convex| convex/player.test.ts > player.group > returns null for a Share Token the GM rotated away, even while Undo is open 5ms
+ ✓ |convex| convex/player.test.ts > player.answers > returns the Player's Answers of the month by date 7ms
+ ✓ |convex| convex/player.test.ts > player.answers > still shows the Answers of a past month 4ms
+ ✓ |convex| convex/player.test.ts > player.answers > never reads a Player of another Group through this Share Token 3ms
+ ✓ |convex| convex/player.test.ts > player.answers > returns null for an unknown or rotated-away Share Token 3ms
+ ✓ |convex| convex/sessionMail.test.ts > returns to the GM before mail, then sends once to each current claimed Account but never the Group's owner 167ms
+ ✓ |convex| convex/sessionMail.test.ts > never announces a change before its Undo window ends 13ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > removes a Session cancelled inside its first window and mails nobody 7ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > keeps a Session cancelled after its window as Cancelled and sends one cancelled update 18ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > keeps the id on Undo of a cancel and mails nobody 10ms
+`auth:store` type: signIn
+`auth:store` type: createAccountFromCredentials
+`auth:store` type: signIn
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/player.test.ts > player.answers > returns null for a removed Player 12ms
+ ✓ |convex| convex/player.test.ts > player.answers > returns null for the malformed arguments {"playerId":"not-an-id","month":"2026-10"} 2ms
+ ✓ |convex| convex/player.test.ts > player.answers > returns null for the malformed arguments {"playerId":"PLAYER","month":"2026-13"} 2ms
+ ✓ |convex| convex/player.test.ts > player.answers > returns null for the malformed arguments {"playerId":"PLAYER","month":"Oct"} 3ms
+ ✓ |convex| convex/player.test.ts > player.join > adds the Player to the Roster under the normalized name 2ms
+ ✓ |convex| convex/player.test.ts > player.join > rejects the name "" 2ms
+ ✓ |convex| convex/player.test.ts > player.join > rejects the name "   " 2ms
+ ✓ |convex| convex/player.test.ts > player.join > rejects the name "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" 2ms
+ ✓ |convex| convex/player.test.ts > player.join > refuses a name already on the Roster and points at its Player 2ms
+ ✓ |convex| convex/player.test.ts > player.join > lets the same name join two Groups 3ms
+ ✓ |convex| convex/player.test.ts > player.join > refuses a Player beyond 100 14ms
+ ✓ |convex| convex/player.test.ts > player.join > refuses an unknown or rotated-away Share Token 3ms
+ ✓ |convex| convex/player.test.ts > player.join > rate limits a Group to 30 joins per hour 26ms
+ ✓ |convex| convex/player.test.ts > player.join > rate limits each Group separately 20ms
+ ✓ |convex| convex/player.test.ts > player.join > pushes out the Expiry of an Unsaved Group 2ms
+ ✓ |convex| convex/player.test.ts > player.answer > records, changes, and clears the Player's Answer for a date 5ms
+ ✓ |convex| convex/player.test.ts > player.answer > stores the Answer under the Player's Group 3ms
+ ✓ |convex| convex/player.test.ts > player.answer > clears an unanswered date without complaint 2ms
+ ✓ |convex| convex/player.test.ts > player.answer > accepts 2026-10-03 at the edge of the Booking Window 2ms
+ ✓ |convex| convex/player.test.ts > player.answer > accepts 2026-12-31 at the edge of the Booking Window 2ms
+ ✓ |convex| convex/player.test.ts > player.answer > rejects 2026-10-02 outside the Booking Window 2ms
+stderr | convex/sessionMail.test.ts > rechecks release before retrying a failed send
+Error executing 0000000000000000000000010000runs: The session mail webhook answered HTTP 503
+stderr | convex/sessionMail.test.ts > rechecks release before retrying a failed send
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > restores the same id on Schedule again and sends one scheduled update 13ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > sends exactly one cancelled update for cancel, Schedule again and cancel inside one window 13ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > publishes a burst of changes once, a window after the last 11ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > announces the final Session after a new one is undone and scheduled again 6ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > sends nothing for a new Session undone after 0 ms 3ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > sends nothing for a new Session undone after 30000 ms 2ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > sends nothing for a cancel undone after 1000 ms 7ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > sends nothing for a cancel undone after 30000 ms 6ms
+ ✓ |convex| convex/sessionMail.test.ts > the Undo window > does not move a pending settle when a Cancelled Session is cancelled again 7ms
+ ✓ |convex| convex/sessionMail.test.ts > cancels with the current Group name and Share Link 8ms
+ ✓ |convex| convex/sessionMail.test.ts > lets an Account turn session emails off and back on, with email on by default 9ms
+ ✓ |convex| convex/sessionMail.test.ts > sends nothing without POSTHOG_SESSION_WEBHOOK_URL 2ms
+ ✓ |convex| convex/sessionMail.test.ts > sends nothing without POSTHOG_MAIL_WEBHOOK_SECRET 3ms
+ ✓ |convex| convex/sessionMail.test.ts > publishes without mail configured and queues no send 3ms
+ ✓ |convex| convex/sessionMail.test.ts > rechecks release before delivery 3ms
+ ✓ |convex| convex/sessionMail.test.ts > rechecks remove-group before delivery 2ms
+ ✓ |convex| convex/sessionMail.test.ts > rechecks test-email before delivery 2ms
+ ✓ |convex| convex/sessionMail.test.ts > rechecks anonymous before delivery 2ms
+stderr | convex/sessionMail.test.ts > rechecks opt-out before retrying a failed send
+Error executing 0000000000000000000000010000runs: The session mail webhook answered HTTP 503
+stderr | convex/sessionMail.test.ts > rechecks opt-out before retrying a failed send
+stderr | convex/sessionMail.test.ts > rechecks remove-group before retrying a failed send
+Error executing 0000000000000000000000010000runs: The session mail webhook answered HTTP 503
+stderr | convex/sessionMail.test.ts > rechecks remove-group before retrying a failed send
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > keeps every night pending until its own change settles 25ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > ignores a second change to a night while the first is on its way 12ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > undoes a new Session with the id the server returned 4ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > shows a scheduled night in every cached month of the Group at once 4ms
+stderr | convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one
+Error executing 0000000000000000000000010003runs: The session mail webhook answered HTTP 503
+stderr | convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one
+stderr | convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one
+Error executing 0000000000000000000000010003runs: The session mail webhook answered HTTP 503
+stderr | convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one
+ ✓ |convex| convex/telemetry.callSites.test.ts > with the deployment's PostHog token unset > schedules nothing anywhere in the core loop 282ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > sign-in > tracks link_created with the first Group for Create your link 8ms
+`auth:store` type: signIn
+`auth:store` type: retrieveAccountWithCredentials
+ ✓ |convex| convex/sessionMail.test.ts > rechecks release before retrying a failed send 13ms
+ ✓ |convex| convex/sessionMail.test.ts > rechecks opt-out before retrying a failed send 11ms
+ ✓ |convex| convex/sessionMail.test.ts > rechecks remove-group before retrying a failed send 9ms
+ ✓ |convex| convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one 18ms
+ ✓ |convex| convex/sessionMail.test.ts > HTTP 503 produces 2 attempts 6ms
+ ✓ |convex| convex/sessionMail.test.ts > HTTP 400 produces 1 attempts 5ms
+ ✓ |convex| convex/sessionMail.test.ts > HTTP 429 produces 1 attempts 4ms
+ ✓ |convex| convex/sessionMail.test.ts > rejects signed-out and anonymous preference writes 2ms
+`auth:store` type: signIn
+`auth:store` type: verifier
+`auth:store` type: verifierSignature
+`auth:store` type: userOAuth
+`auth:store` type: verifyCodeAndSignIn
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > lists who is free first, then maybe, busy and silent 152ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > schedules a bookable night 33ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > cancels a Session that has not passed 20ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > still cancels a Session today 20ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > offers no cancel on a past Session 12ms
+ ✓ |convex| convex/player.test.ts > player.answer > rejects 2027-01-01 outside the Booking Window 1ms
+ ✓ |convex| convex/player.test.ts > player.answer > rejects 2026-11-31 outside the Booking Window 1ms
+ ✓ |convex| convex/player.test.ts > player.answer > rejects 2026-10-3 outside the Booking Window 1ms
+ ✓ |convex| convex/player.test.ts > player.answer > rejects tomorrow outside the Booking Window 1ms
+ ✓ |convex| convex/player.test.ts > player.answer > keeps a past Answer read-only 3ms
+ ✓ |convex| convex/player.test.ts > player.answer > never writes for a Player of another Group through this Share Token 2ms
+ ✓ |convex| convex/player.test.ts > player.answer > refuses an unknown or rotated-away Share Token 4ms
+ ✓ |convex| convex/player.test.ts > player.answer > rate limits a Player to a burst of 60 Answers, refilling 120 per minute 44ms
+`auth:store` type: verifier
+`auth:store` type: verifierSignature
+`auth:store` type: userOAuth
+`auth:store` type: verifyCodeAndSignIn
+`auth:store` type: createAccountFromCredentials
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > cannot schedule a past night 15ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > holds the button, and its focus, while the change is on its way 29ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > goes back to the overview 20ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > explains an empty Roster 7ms
+ ✓ |convex| convex/sessionMail.test.ts > warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient 244ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Password Account and nothing for its next log in 203ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > sign-in > tracks account_created for a new Google Account and nothing for its next sign-in 83ms
+`auth:store` type: signIn
+`auth:store` type: createAccountFromCredentials
+`auth:store` type: signIn
+ ✓ |convex| convex/telemetry.callSites.test.ts > sign-in > flags a production proof Account under .test as a test account 139ms
+`auth:store` type: verifier
+`auth:store` type: verifierSignature
+`auth:store` type: userOAuth
+`auth:store` type: verifyCodeAndSignIn
+`auth:store` type: createAccountFromCredentials
+`auth:store` type: signIn
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/player.test.ts > player.answer > rate limits a Group to a burst of at most 300 Answers across its Players 173ms
+ ✓ |convex| convex/player.test.ts > player.answer > pushes out the Expiry of an Unsaved Group 3ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > answers busy on every unanswered bookable date of the month 7ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > fills the whole last month of the Booking Window 6ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > follows the Booking Window across New Year 6ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > writes nothing more when called again 9ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > leaves other Players untouched 3ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > rejects 2026-09 outside the Booking Window 2ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > rejects 2027-01 outside the Booking Window 1ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > rejects 2026-13 outside the Booking Window 1ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > rejects Oct outside the Booking Window 1ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > never writes for a Player of another Group through this Share Token 3ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > refuses an unknown or rotated-away Share Token 2ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > spends one token of the Player's Answer rate limit 38ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Tips > tracks account_created with tips_requested for a ticked box 97ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Tips > tracks account_created without tips_requested for a Google Account 32ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Tips > tracks tips_confirmed for the Account, with no email or code 9ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Tips > tracks nothing for a refused confirmation 2ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks group_created 2ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks share_link_rotated 3ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks session_scheduled with the Roster size and whether it is the Group's first 5ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks session_cancelled 3ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks Schedule again as session_scheduled that is not the Group's first 8ms
+`auth:store` type: signIn
+`auth:store` type: createAccountFromCredentials
+`auth:store` type: signIn
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/player.test.ts > player.fillRest > spends one token of the Group's Answer rate limit, however many dates it fills 314ms
+ ✓ |convex| convex/player.test.ts > player.fillRest > pushes out the Expiry of an Unsaved Group 3ms
+ ✓ |convex| convex/player.test.ts > joining while signed in > claims the new Player for an Account 2ms
+ ✓ |convex| convex/player.test.ts > joining while signed in > claims nothing for a visitor or an Anonymous GM 3ms
+ ✓ |convex| convex/player.test.ts > joining while signed in > moves the Account's claim in the Group to the new name 3ms
+ ✓ |convex| convex/player.test.ts > joining while signed in > joins no one when the Account already claims 50 Players 6ms
+ ✓ |convex| convex/player.test.ts > joining while signed in > keeps a joined Player on the Roster until the GM removes it 4ms
+ ✓ |convex| convex/player.test.ts > player.claim > claims a Player picked from the Roster 2ms
+ ✓ |convex| convex/player.test.ts > player.claim > leaves the Account's own claim as it is 2ms
+ ✓ |convex| convex/player.test.ts > player.claim > moves the Account's claim to another Player of the same Group 5ms
+ ✓ |convex| convex/player.test.ts > player.claim > refuses a Player another Account claimed 3ms
+ ✓ |convex| convex/player.test.ts > player.claim > refuses a Player of another Group and a rotated-away Share Token 3ms
+ ✓ |convex| convex/player.test.ts > player.claim > lets only an Account claim 2ms
+ ✓ |convex| convex/player.test.ts > player.claim > caps an Account at 50 Claimed Players but still moves a claim within a Group 8ms
+ ✓ |convex| convex/player.test.ts > player.claim > rate limits an Account to a burst of 10 claims 5ms
+ ✓ |convex| convex/player.test.ts > player.claim > pushes out the Expiry of an Unsaved Group 2ms
+ ✓ |convex| convex/player.test.ts > player.claim > locks nothing: the Share Link still answers as a Claimed Player 2ms
+ ✓ |convex| convex/player.test.ts > player.release > releases the claim and keeps the Player with its Answers 3ms
+ ✓ |convex| convex/player.test.ts > player.release > returns null for a Group without the Account's claim and leaves other claims alone 5ms
+ ✓ |convex| convex/player.test.ts > player.release > pushes out the Expiry of an Unsaved Group 2ms
+ ✓ |convex| convex/player.test.ts > player.release > lets only an Account release 2ms
+ ✓ |convex| convex/player.test.ts > player.release > shares the claim rate limit with player.claim 4ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > keeps an Account's picked Player on its first answer, and only then 3ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > keeps an Account's picked Player on Fill the rest 3ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > keeps nothing while the Account only views the link 2ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > keeps nothing for a visitor or an Anonymous GM 2ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > keeps the GM only once they answer on their own link 2ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > saves the answer and leaves another Account's Player with them 4ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > moves the Account's claim to the Player they answer as 2ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > saves the answer but keeps nothing past 50 Claimed Players 4ms
+ ✓ |convex| convex/player.test.ts > keeping the Group on an answer > keeps again after Not you? and the next answer 3ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > releases the claim and keeps the Player with its Answers 3ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > keeps the Group out of My groups when the Account answers again, as any Player 5ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > forgets the removal once the Account keeps the Group on purpose 3ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > forgets the removal when the Account joins the Group with a new name 3ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > removes the Group for this Account only 3ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > remembers both Accounts' removals when they used the same Player 4ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > remembers Remove after the GM removes the Player 3ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > reports the Group opt-out only to the Account that deliberately removed it 4ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > lets only an Account remove 2ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > returns null for a Group without the Account's claim 2ms
+ ✓ |convex| convex/player.test.ts > player.removeFromMyGroups > shares the claim rate limit with player.claim 4ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks groups_saved with the number of Groups the Save moved 107ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks player_joined as the new Player for a visitor 3ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks player_joined as the Account, claimed, when an Account joins 3ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks player_claimed and player_released 5ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks nothing for a claim of a Player the Account already holds 4ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks nothing for a release without a claim 2ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > Player mutations > tracks nothing for answers 6ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a Session on a taken date 4ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a Session outside the Booking Window 3ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a join under a taken name 4ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a rotation of a foreign Group 4ms
+`auth:store` type: signIn
+`auth:store` type: createAccountFromCredentials
+`auth:store` type: signIn
+`auth:store` type: createAccountFromCredentials
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for a Save with a used claim code 105ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > refused and objected > schedules nothing for an Account that objected 4ms
+`auth:store` type: signIn
+ ✓ |convex| convex/telemetry.callSites.test.ts > the redaction contract > sends no Group name, Player name, Share Token, claim code or email in any event or log 108ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > the Expiry sweep > logs once per run with the number of Groups it expired, across pages 74ms
+ ✓ |convex| convex/telemetry.callSites.test.ts > the Expiry sweep > logs a run that found nothing 1ms
+ Test Files  11 passed (11)
+      Tests  254 passed (254)
+   Start at  09:04:16
+   Duration  1.95s (tests 44%, transform 21%, environment 17%, import 16%, setup 2%, worker 1%)

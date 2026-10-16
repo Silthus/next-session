@@ -1,17 +1,19 @@
 import { useId, useState, type CSSProperties, type KeyboardEvent } from "react";
 import type { Answer } from "../../../../shared/answers";
-import type { Id } from "../../../../convex/_generated/dataModel";
-import type { IsoDate } from "../../../../shared/dates";
+import type { FunctionReturnType } from "convex/server";
+import type { api } from "../../../../convex/_generated/api";
 import type { DaySummary, PlayerRow } from "../../../../shared/monthSummary";
 import { cn } from "../../../ui/cn";
 import { longDayLabel, weekdayColumn } from "./calendarDates";
-import { IconStar } from "../../../ui/icons";
+import { IconStar, IconStarCancelled } from "../../../ui/icons";
 
-export type CalendarSession = { _id: Id<"sessions">; date: IsoDate };
+export type CalendarSession = NonNullable<
+  FunctionReturnType<typeof api.schedule.month>
+>["sessions"][number];
 export type CalendarDay = DaySummary<PlayerRow, CalendarSession>;
 
 export const MAX_PLAYERS_WITH_BARS = 8;
-const MAX_TINT_PERCENT = 55;
+export const MAX_TINT_PERCENT = 55;
 
 export function DayCell({
   day,
@@ -75,13 +77,44 @@ export function DayCell({
           />
         )}
       </span>
-      {day.session && (
-        <IconStar className="absolute top-1 right-1 size-3 text-accent-strong sm:top-1.5 sm:right-1.5 sm:size-4" />
-      )}
+      <SessionMark day={day} onSolidFree={perfect} />
       <DayAnswers day={day} players={players} onSolidFree={perfect} />
       {who && <DayWho id={whoId} day={day} />}
     </button>
   );
+}
+
+function SessionMark({ day, onSolidFree }: { day: CalendarDay; onSolidFree: boolean }) {
+  const corner = "absolute top-1 right-1 sm:top-1.5 sm:right-1.5";
+  if (day.session) {
+    return (
+      <span data-mark="session" className={corner}>
+        <IconStar className="size-3 text-accent-strong sm:size-4" />
+      </span>
+    );
+  }
+  if (!day.cancelled) return null;
+  const tone = cancelledTone(day, onSolidFree);
+  return (
+    <>
+      <span data-mark="cancelled" className={cn(corner, tone)}>
+        <IconStarCancelled className="size-3 sm:size-4" />
+      </span>
+      <span
+        className={cn(
+          "font-mono text-[10px] leading-none font-semibold tracking-wide uppercase max-sm:hidden",
+          tone,
+        )}
+      >
+        Cancelled
+      </span>
+    </>
+  );
+}
+
+function cancelledTone(day: CalendarDay, onSolidFree: boolean) {
+  if (onSolidFree) return "text-current";
+  return day.heat > 0 ? "text-ink" : "text-ink-3";
 }
 
 const NAMES_SHOWN = 6;
@@ -248,11 +281,15 @@ function tintOf(day: CalendarDay): CSSProperties | undefined {
 }
 
 export function dayCellLabel(day: CalendarDay, playerCount: number): string {
-  const parts = [answerSummary(day, playerCount), day.session && "Session scheduled"].filter(
-    Boolean,
-  );
+  const parts = [answerSummary(day, playerCount), sessionSummary(day)].filter(Boolean);
   const date = longDayLabel(day.date);
   return parts.length === 0 ? date : `${date}: ${parts.join(", ")}`;
+}
+
+function sessionSummary(day: CalendarDay) {
+  if (day.session) return "Session scheduled";
+  if (day.cancelled) return "Session cancelled";
+  return null;
 }
 
 function answerSummary(day: CalendarDay, playerCount: number) {

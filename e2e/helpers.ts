@@ -1,10 +1,11 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { ConvexHttpClient } from "convex/browser";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { api } from "../convex/_generated/api";
 import type { Id } from "../convex/_generated/dataModel";
 import type { Answer } from "../shared/answers";
+import { monthOf, type IsoDate } from "../shared/dates";
 
 export const convexUrl = process.env.E2E_CONVEX_URL!;
 export const password = "game-night-2026";
@@ -109,4 +110,18 @@ export async function openAsGm(page: Page, gm: Pick<Gm, "tokens">, path: string)
 
 export function toastRegion(page: Page) {
   return page.locator('[role="status"][aria-live="polite"]');
+}
+
+const PUBLISH_WAIT_MS = 60_000;
+
+export async function waitUntilPublished(
+  gm: ConvexHttpClient,
+  groupId: Id<"groups">,
+  date: IsoDate,
+) {
+  const isPublished = async () => {
+    const schedule = await gm.query(api.schedule.month, { groupId, month: monthOf(date) });
+    return schedule?.sessions.find((session) => session.date === date)?.published ?? false;
+  };
+  await expect.poll(isPublished, { timeout: PUBLISH_WAIT_MS }).toBe(true);
 }

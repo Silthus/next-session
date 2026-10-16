@@ -1,7 +1,14 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { api } from "../convex/_generated/api";
 import { addMonths, monthOf, todayUtc } from "../shared/dates";
-import { openAsGm, seedPlayer, signInAnonymousGm, toastRegion, type Gm } from "./helpers";
+import {
+  openAsGm,
+  seedPlayer,
+  signInAnonymousGm,
+  toastRegion,
+  waitUntilPublished,
+  type Gm,
+} from "./helpers";
 
 let today = todayUtc(Date.now());
 let nextMonth = addMonths(monthOf(today), 1);
@@ -208,7 +215,7 @@ async function isInside(inner: Locator, outer: Locator) {
   );
 }
 
-test("the GM schedules a Session, unschedules it, and undoes that", async ({ page }) => {
+test("the GM schedules a Session, cancels it, and undoes that", async ({ page }) => {
   const gm = await signInAnonymousGm();
   await seedThreePlayers(gm);
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
@@ -229,8 +236,8 @@ test("the GM schedules a Session, unschedules it, and undoes that", async ({ pag
   await panel.getByRole("button", { name: "Schedule session" }).click();
   await expect.poll(() => sessionDates(gm)).toEqual([night(5)]);
 
-  await panel.getByRole("button", { name: "Unschedule this session" }).click();
-  await expect(toast).toContainText("removed");
+  await panel.getByRole("button", { name: "Cancel session" }).click();
+  await expect(toast).toContainText("cancelled.");
   await expect(dayCell(page, /, \w+ 5: everyone free$/)).toBeVisible();
   await expect.poll(() => sessionDates(gm)).toEqual([]);
 
@@ -238,6 +245,63 @@ test("the GM schedules a Session, unschedules it, and undoes that", async ({ pag
   await expect(dayCell(page, /, \w+ 5: everyone free, Session scheduled$/)).toBeVisible();
   await expect.poll(() => sessionDates(gm)).toEqual([night(5)]);
 });
+
+test("after the Undo window a cancelled Session stays Cancelled until the GM schedules it again", async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  const gm = await signInAnonymousGm();
+  await seedThreePlayers(gm);
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
+  const panel = page.getByRole("region", { name: /, \w+ 5$/ });
+  const toast = toastRegion(page);
+  await panel.getByRole("button", { name: "Schedule session" }).click();
+  await expect.poll(() => sessionStates(gm)).toHaveLength(1);
+  const [scheduled] = await sessionStates(gm);
+  const sessionId = scheduled?._id;
+  await waitUntilPublished(gm.client, gm.groupId, night(5));
+
+  await panel.getByRole("button", { name: "Cancel session" }).click();
+  await expect(toast).toContainText(/^Session on \w+, \w+ 5 cancelled\./);
+  await expect(dayCell(page, /, \w+ 5: everyone free, Session cancelled$/)).toBeVisible();
+  await expect(panel.getByText("Cancelled", { exact: true })).toBeVisible();
+  await expect.poll(() => sessionStates(gm)).toEqual([{ _id: sessionId, state: "cancelled" }]);
+  await screenshot(page, "cancelled-with-undo.png");
+
+  await toast.getByRole("button", { name: "Undo" }).click();
+  await expect(dayCell(page, /, \w+ 5: everyone free, Session scheduled$/)).toBeVisible();
+  await expect.poll(() => sessionStates(gm)).toEqual([{ _id: sessionId, state: "scheduled" }]);
+
+  await panel.getByRole("button", { name: "Cancel session" }).click();
+  await expect(dayCell(page, /, \w+ 5: everyone free, Session cancelled$/)).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Best nights" }).getByRole("button", {
+      name: /^Schedule again /,
+    }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await screenshot(page, "cancelled.png");
+  await dayCell(page, /, \w+ 5: /).click();
+
+  await panel.getByRole("button", { name: "Schedule again" }).click();
+  await expect(toast).toContainText("Players see it on the link.");
+  await expect(dayCell(page, /, \w+ 5: everyone free, Session scheduled$/)).toBeVisible();
+  await expect(panel.getByText("Cancelled", { exact: true })).toBeHidden();
+  await expect.poll(() => sessionStates(gm)).toEqual([{ _id: sessionId, state: "scheduled" }]);
+  await screenshot(page, "scheduled-again.png");
+});
+
+async function screenshot(page: Page, name: string) {
+  if (screenshotDir) await page.screenshot({ path: `${screenshotDir}/${name}` });
+}
+
+async function sessionStates(gm: Gm) {
+  const schedule = await gm.client.query(api.schedule.month, {
+    groupId: gm.groupId,
+    month: nextMonth,
+  });
+  return schedule?.sessions.map(({ _id, state }) => ({ _id, state })) ?? [];
+}
 
 async function sessionDates(gm: Gm) {
   const schedule = await gm.client.query(api.schedule.month, {

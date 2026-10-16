@@ -10,6 +10,7 @@
 
 import type * as account from "../account.js";
 import type * as auth from "../auth.js";
+import type * as backfill from "../backfill.js";
 import type * as cleanup from "../cleanup.js";
 import type * as crons from "../crons.js";
 import type * as groups from "../groups.js";
@@ -26,13 +27,15 @@ import type * as model_profileImages from "../model/profileImages.js";
 import type * as model_rateLimits from "../model/rateLimits.js";
 import type * as model_reminderLinks from "../model/reminderLinks.js";
 import type * as model_telemetry from "../model/telemetry.js";
+import type * as model_timeAndPlace from "../model/timeAndPlace.js";
 import type * as model_tips from "../model/tips.js";
-import type * as notifications from "../notifications.js";
 import type * as player from "../player.js";
 import type * as profileImages from "../profileImages.js";
 import type * as reminderLinks from "../reminderLinks.js";
 import type * as roster from "../roster.js";
 import type * as schedule from "../schedule.js";
+import type * as sessionLifecycle from "../sessionLifecycle.js";
+import type * as sessionMail from "../sessionMail.js";
 import type * as sessions from "../sessions.js";
 import type * as signInOptions from "../signInOptions.js";
 import type * as telemetry from "../telemetry.js";
@@ -46,6 +49,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   account: typeof account;
   auth: typeof auth;
+  backfill: typeof backfill;
   cleanup: typeof cleanup;
   crons: typeof crons;
   groups: typeof groups;
@@ -62,13 +66,15 @@ declare const fullApi: ApiFromModules<{
   "model/rateLimits": typeof model_rateLimits;
   "model/reminderLinks": typeof model_reminderLinks;
   "model/telemetry": typeof model_telemetry;
+  "model/timeAndPlace": typeof model_timeAndPlace;
   "model/tips": typeof model_tips;
-  notifications: typeof notifications;
   player: typeof player;
   profileImages: typeof profileImages;
   reminderLinks: typeof reminderLinks;
   roster: typeof roster;
   schedule: typeof schedule;
+  sessionLifecycle: typeof sessionLifecycle;
+  sessionMail: typeof sessionMail;
   sessions: typeof sessions;
   signInOptions: typeof signInOptions;
   telemetry: typeof telemetry;

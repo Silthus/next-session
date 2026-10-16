@@ -10,6 +10,7 @@ import {
 import type { FunctionReturnType } from "convex/server";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../../../convex/_generated/api";
+import { browserTimeZone } from "../../lib/timeZone";
 import {
   forgetPendingKeep,
   keepAfterRedirect,
@@ -160,7 +161,7 @@ export function useGm() {
 
   const actions = useMemo(
     () => ({
-      createLink: () => signIn("anonymous"),
+      createLink: () => signIn("anonymous", { timeZone: browserTimeZone() }),
       logIn: ({ email, password }: Omit<SaveInput, "mode">) =>
         signIn("password", { email, password, flow: "signIn" }),
       save,

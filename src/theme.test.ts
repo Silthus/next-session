@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { MAX_TINT_PERCENT } from "./features/group/calendar/DayCell";
 import css from "./index.css?raw";
 
 type Lab = { L: number; a: number; b: number };
@@ -69,6 +70,11 @@ describe.each(["light", "dark"] as const)("the %s theme", (theme) => {
     ["ink-2", "free-soft", 4.5],
   ])("reads %s on %s at %s:1 or better", (text, background, floor) => {
     expect(contrast(token(text), token(background))).toBeGreaterThanOrEqual(floor);
+  });
+
+  it("reads ink on the deepest free tint of a calendar cell", () => {
+    const tint = mix(lab(token("free")), lab(token("surface")), MAX_TINT_PERCENT / 100);
+    expect(contrastOf(lab(token("ink")), tint)).toBeGreaterThanOrEqual(4.5);
   });
 
   it("lifts a hovered row clear of the surface and the paper", () => {
@@ -154,10 +160,17 @@ function tokensIn(block: string) {
 }
 
 function contrast(first: string, second: string) {
-  const [lighter, darker] = [first, second]
-    .map((color) => luminance(lab(color)))
-    .sort((x, y) => y - x);
+  return contrastOf(lab(first), lab(second));
+}
+
+function contrastOf(first: Lab, second: Lab) {
+  const [lighter, darker] = [first, second].map(luminance).sort((x, y) => y - x);
   return (lighter! + 0.05) / (darker! + 0.05);
+}
+
+function mix(color: Lab, base: Lab, share: number): Lab {
+  const blend = (from: number, to: number) => from * share + to * (1 - share);
+  return { L: blend(color.L, base.L), a: blend(color.a, base.a), b: blend(color.b, base.b) };
 }
 
 function polar(color: string) {

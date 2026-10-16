@@ -60,6 +60,10 @@ _Avoid_: draft group, temporary group
 Moving every Group of an Anonymous GM to an Account. The Share Link stays the same, and an Account's existing Groups are never touched.
 _Avoid_: upgrade, convert, link account, merge (in copy)
 
+**Time and place**:
+A Group's usual start time, length, time zone and location. A new Group starts at 19:00 for 4 hours, in the time zone of the GM's browser (Berlin time for Groups from before), with no location. A Session follows it unless it has its own start time, length or location. Saving it moves every upcoming scheduled Session in players' calendars.
+_Avoid_: settings (in copy), event details, venue, all-day
+
 **Expiry**:
 The moment an Unsaved Group is deleted for inactivity. Any GM or Player activity on the Group pushes it out again.
 _Avoid_: TTL, timeout, cleanup date
@@ -135,5 +139,4 @@ _Avoid_: app tag, source
 - Lonir called a roster entry a "Membership" and stored answers as `yes / maybe / no` while the UI said Free / Maybe / Busy. Next Session uses **Player** and **free / maybe / busy** everywhere, in code and in copy.
 - Lonir split "Scheduled Session" (a date) from "Session" (prep content). Next Session has no prep content, so **Session** is the picked date.
 - Lonir stored `scheduled | played | cancelled`. Next Session stores only scheduled or cancelled; played follows from the date.
-- Code still says `sessions.unschedule` and `session_unscheduled`, which deletes the Session. These mean **Cancel** and become `sessions.cancel` and `session_cancelled` when the Cancelled Session ships.
 - "Claim" means two things in code. The Save **claim code** (`saveClaims`) moves an Anonymous GM's Groups; a **Claim** links a Player to an Account. In copy, the first is "Save" and the second is "Keep this group".

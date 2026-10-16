@@ -33,8 +33,10 @@ import {
   validName,
 } from "./model/players";
 import { enforceRateLimit } from "./model/rateLimits";
+import { datedSessionOf } from "./sessionLifecycle";
 import { track } from "./model/telemetry";
-import { answerValue } from "./schema";
+import { groupTimeOf, sessionTimeAndPlace, sessionTimeAndPlaceFields } from "./model/timeAndPlace";
+import { answerValue, datedSession } from "./schema";
 
 const answered = v.object({ keptNow: v.boolean() });
 
@@ -42,7 +44,8 @@ const playerGroupView = v.object({
   groupId: v.id("groups"),
   name: v.string(),
   players: v.array(v.object({ _id: v.id("players"), name: v.string() })),
-  sessionDates: v.array(v.string()),
+  sessions: v.array(v.object({ ...datedSession.fields, ...sessionTimeAndPlaceFields })),
+  timeZone: v.string(),
   claimedPlayerId: v.union(v.id("players"), v.null()),
   removedFromMyGroups: v.boolean(),
   opensAsGm: v.boolean(),
@@ -54,12 +57,19 @@ export const group = query({
   handler: async (ctx, { shareToken }) => {
     const group = await groupByShareToken(ctx, shareToken);
     if (group === null) return null;
-    const [players, sessionDates, caller] = await Promise.all([
+    const [players, sessions, caller] = await Promise.all([
       rosterOf(ctx, group._id),
-      sessionDatesOf(ctx, group._id),
+      sessionsOf(ctx, group),
       callerIn(ctx, group),
     ]);
-    return { groupId: group._id, name: group.name, players, sessionDates, ...caller };
+    return {
+      groupId: group._id,
+      name: group.name,
+      players,
+      sessions,
+      timeZone: groupTimeOf(group).timeZone,
+      ...caller,
+    };
   },
 });
 
@@ -226,12 +236,13 @@ async function rosterOf(ctx: QueryCtx, groupId: Id<"groups">) {
   return players.map(({ _id, name }) => ({ _id, name }));
 }
 
-async function sessionDatesOf(ctx: QueryCtx, groupId: Id<"groups">) {
+async function sessionsOf(ctx: QueryCtx, group: Doc<"groups">) {
   const sessions = await ctx.db
     .query("sessions")
-    .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId))
+    .withIndex("by_groupId_and_date", (q) => q.eq("groupId", group._id))
     .collect();
-  return sessions.map(({ date }) => date);
+  const timeAndPlace = sessionTimeAndPlace(group);
+  return sessions.map((session) => ({ ...datedSessionOf(session), ...timeAndPlace }));
 }
 
 async function answersOfPlayerIn(ctx: QueryCtx, playerId: Id<"players">, month: IsoMonth) {

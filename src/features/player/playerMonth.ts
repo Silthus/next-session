@@ -9,6 +9,7 @@ import {
   type IsoDate,
   type IsoMonth,
 } from "../../../shared/dates";
+import type { SessionState } from "../../../shared/sessions";
 
 export type PlayerDay = {
   date: IsoDate;
@@ -17,13 +18,16 @@ export type PlayerDay = {
   locked: boolean;
   isToday: boolean;
   session: boolean;
+  cancelled: boolean;
 };
+
+export type PlayerSession = { date: IsoDate; state: SessionState };
 
 export type PlayerMonthInput = {
   month: IsoMonth;
   today: IsoDate;
   answers: Record<IsoDate, Answer>;
-  sessionDates: IsoDate[];
+  sessions: PlayerSession[];
 };
 
 export function visibleMonth(requested: string | undefined, today: IsoDate): IsoMonth {
@@ -31,9 +35,11 @@ export function visibleMonth(requested: string | undefined, today: IsoDate): Iso
   return valid && requested <= lastBookableMonth(today) ? requested : monthOf(today);
 }
 
-export function playerMonth({ month, today, answers, sessionDates }: PlayerMonthInput) {
+export function playerMonth({ month, today, answers, sessions }: PlayerMonthInput) {
   const answered = new Set(Object.keys(answers));
-  const sessions = new Set(sessionDates.filter((date) => isBookable(date, today)));
+  const stateOn = new Map(
+    sessions.filter(({ date }) => isBookable(date, today)).map(({ date, state }) => [date, state]),
+  );
   const progress = monthProgress(month, today, answered);
   return {
     month,
@@ -46,7 +52,8 @@ export function playerMonth({ month, today, answers, sessionDates }: PlayerMonth
       answer: answers[date] ?? null,
       locked: !isBookable(date, today),
       isToday: date === today,
-      session: sessions.has(date),
+      session: stateOn.get(date) === "scheduled",
+      cancelled: stateOn.get(date) === "cancelled",
     })),
     progress,
     done: progress.fillable > 0 && progress.answered === progress.fillable,

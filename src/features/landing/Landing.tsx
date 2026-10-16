@@ -8,6 +8,7 @@ import { AccountSheet, type AccountIntent } from "../account/AccountSheet";
 import { isClaimInvalid, type SaveInput } from "../account/save";
 import { useGm } from "../account/useGm";
 import { LandingView, type LandingState } from "./LandingView";
+import { browserTimeZone } from "../../lib/timeZone";
 
 type Phase = "idle" | "creating" | "created" | "failed";
 
@@ -49,7 +50,7 @@ export function Landing() {
   const create = async () => {
     setPhase("creating");
     try {
-      if (signedIn) setCreatedGroupId(await createGroup({}));
+      if (signedIn) setCreatedGroupId(await createGroup({ timeZone: browserTimeZone() }));
       else await gm.createLink();
       setPhase("created");
     } catch (error) {
