@@ -29,8 +29,9 @@ export function StartTimeField({
       onChange={(event) => {
         const before = draft?.before ?? value;
         setDraft({ typed: event.target.value, before });
-        const startTime = readClockTime(event.target.value) ?? before;
-        if (startTime !== value) onChange(startTime);
+        const startTime = readClockTime(event.target.value);
+        if (startTime) onChange(startTime);
+        else if (before !== value) onChange(before);
       }}
       onKeyDown={(event) => {
         if (event.key !== "Enter" || draft === null || isImeComposing(event.nativeEvent)) return;
