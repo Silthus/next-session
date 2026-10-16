@@ -1,0 +1,272 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-9ffb835b
+
+ ❯ |ui| src/features/group/rail/BestNights.test.tsx (19 tests | 3 failed) 335ms
+   ❯ BestNights (19)
+     × marks a night that already has a Session 12ms
+     × ranks a Cancelled night on its Answers, without the Session star 17ms
+     ❯ scheduling straight from the rail (5)
+       × schedules a Cancelled night again 16ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/group/rail/BestNights.test.tsx > BestNights > marks a night that already has a Session
+AssertionError: expected null not to be null
+ ❯ src/features/group/rail/BestNights.test.tsx:133:60
+    131|     );
+    132|     const night = screen.getByRole("button", { name: /Session schedule…
+    133|     expect(night.querySelector("[data-mark=session]")).not.toBeNull();
+       |                                                            ^
+    134|   });
+    135|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |ui| src/features/group/rail/BestNights.test.tsx > BestNights > ranks a Cancelled night on its Answers, without the Session star
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Friday, Oct 9, 2 of 5 free. Free: Ana, Ben. Session cancelled"
+
+Here are the accessible roles:
+
+  button:
+
+  Name "Friday, Oct 9, 2 of 5 free. Free: Ana, Ben":
+  <button
+    aria-label="Friday, Oct 9, 2 of 5 free. Free: Ana, Ben"
+    class="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left lg:flex-wrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong transition-[background-color,color,border-color,scale,opacity,filter] duration-150 ease-(--ease-snap) motion-safe:active:scale-[0.98] hover:bg-surface-hover"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<li
+  class="group relative"
+>
+  <button
+    aria-label="Friday, Oct 9, 2 of 5 free. Free: Ana, Ben"
+    class="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left lg:flex-wrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong transition-[background-color,color,border-color,scale,opacity,filter] duration-150 ease-(--ease-snap) motion-safe:active:scale-[0.98] hover:bg-surface-hover"
+    type="button"
+  >
+    <span
+      class="inline-flex size-7 shrink-0 items-center justify-center rounded-full font-display text-sm font-semibold bg-free text-white dark:text-paper"
+    >
+      1
+    </span>
+    <span
+      class="min-w-0 flex-1"
+    >
+      <span
+        class="flex items-center gap-1.5 font-semibold text-sm lg:font-display lg:text-lg lg:leading-tight"
+      >
+        Friday, Oct 9
+      </span>
+      <span
+        class="block text-xs text-ink-3"
+      >
+        2 of 5 free
+      </span>
+    </span>
+    <span
+      class="flex shrink-0 items-center -space-x-1 lg:basis-full lg:justify-end"
+    >
+      <span
+        aria-hidden="true"
+        class="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px] ring-2 ring-surface"
+      >
+        AN
+      </span>
+      <span
+        aria-hidden="true"
+        class="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full font-bold bg-accent text-accent-ink size-7 text-[11px] ring-2 ring-surface"
+      >
+        BE
+      </span>
+    </span>
+  </button>
+</li>
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/group/rail/BestNights.test.tsx:144:34
+    142|     );
+    143|     const [first] = within(card).getAllByRole("listitem");
+    144|     const night = within(first!).getByRole("button", {
+       |                                  ^
+    145|       name: "Friday, Oct 9, 2 of 5 free. Free: Ana, Ben. Session cance…
+    146|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |ui| src/features/group/rail/BestNights.test.tsx > BestNights > scheduling straight from the rail > schedules a Cancelled night again
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Schedule again Friday, Oct 9"
+
+Here are the accessible roles:
+
+  region:
+
+  Name "Best nights":
+  <section
+    aria-labelledby="_r_d_"
+    class="rounded-xl border bg-surface p-4 shadow-card border-line"
+  />
+
+  --------------------------------------------------
+  heading:
+
+  Name "Best nights":
+  <h2
+    class="font-mono outline-none text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"
+    id="_r_d_"
+    tabindex="-1"
+  />
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  <p
+    class="mt-1 font-display text-base font-semibold text-ink"
+  />
+
+  --------------------------------------------------
+  list:
+
+  Name "":
+  <ol
+    class="mt-3 flex flex-col gap-1"
+  />
+
+  --------------------------------------------------
+  listitem:
+
+  Name "":
+  <li
+    class="group relative"
+  />
+
+  --------------------------------------------------
+  button:
+
+  Name "Friday, Oct 9, 1 of 5 free. Free: Ana":
+  <button
+    aria-label="Friday, Oct 9, 1 of 5 free. Free: Ana"
+    class="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left lg:flex-wrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong transition-[background-color,color,border-color,scale,opacity,filter] duration-150 ease-(--ease-snap) motion-safe:active:scale-[0.98] hover:bg-surface-hover"
+    type="button"
+  />
+
+  Name "Schedule Friday, Oct 9":
+  <button
+    aria-label="Schedule Friday, Oct 9"
+    class="inline-flex shrink-0 items-center justify-center rounded-md font-medium disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong transition-[background-color,color,border-color,scale,opacity,filter] duration-150 ease-(--ease-snap) motion-safe:active:scale-[0.98] bg-accent text-accent-ink hover:brightness-[1.08] active:brightness-95 h-8 px-3 text-sm gap-1.5 mt-1 mb-1 ml-10"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <section
+      aria-labelledby="_r_d_"
+      class="rounded-xl border bg-surface p-4 shadow-card border-line"
+    >
+      <div
+        class="flex min-h-5 items-center justify-between gap-3"
+      >
+        <h2
+          class="font-mono outline-none text-[11px] font-medium uppercase tracking-[0.18em] text-ink-3"
+          id="_r_d_"
+          tabindex="-1"
+        >
+          Best nights
+        </h2>
+      </div>
+      <p
+        class="mt-1 font-display text-base font-semibold text-ink"
+      >
+        1 night works
+      </p>
+      <ol
+        class="mt-3 flex flex-col gap-1"
+      >
+        <li
+          class="group relative"
+        >
+          <button
+            aria-label="Friday, Oct 9, 1 of 5 free. Free: Ana"
+            class="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left lg:flex-wrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong transition-[background-color,color,border-color,scale,opacity,filter] duration-150 ease-(--ease-snap) motion-safe:active:scale-[0.98] hover:bg-surface-hover"
+            type="button"
+          >
+            <span
+              class="inline-flex size-7 shrink-0 items-center justify-center rounded-full font-display text-sm font-semibold bg-free text-white dark:text-paper"
+            >
+              1
+            </span>
+            <span
+              class="min-w-0 flex-1"
+            >
+              <span
+                class="flex items-center gap-1.5 font-semibold text-sm lg:font-display lg:text-lg lg:leading-tight"
+              >
+                Friday, Oct 9
+              </span>
+              <span
+                class="block text-xs text-ink-3"
+              >
+                1 of 5 free
+              </span>
+            </span>
+            <span
+              class="flex shrink-0 items-center -space-x-1 lg:basis-full lg:justify-end"
+            >
+              <span
+                aria-hidden="true"
+                class="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full font-bold bg-accent-soft text-accent-strong size-7 text-[11px] ring-2 ring-surface"
+              >
+                AN
+              </span>
+            </span>
+          </button>
+          <button
+            aria-label="Schedule Friday, Oct 9"
+            class="inline-flex shrink-0 items-center justify-center rounded-md font-medium disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-strong transition-[background-color,color,border-color,scale,opacity,filter] duration-150 ease-(--ease-snap) motion-safe:active:scale-[0.98] bg-accent text-accent-ink hover:brightness-[1.08] active:brightness-95 h-8 px-3 text-sm gap-1.5 mt-1 mb-1 ml-10"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="size-4 size-3.5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M10 1.8l2.5 5.3 5.8.7-4.3 4 1.1 5.8L10 14.8l-5.1 2.8 1.1-5.8-4.3-4 5.8-.7z"
+              />
+            </svg>
+            Schedule
+          </button>
+        </li>
+      </ol>
+    </section>
+  </div>
+</body>
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/features/group/rail/BestNights.test.tsx:193:28
+    191|         { onSchedule },
+    192|       );
+    193|       const again = screen.getByRole("button", { name: "Schedule again…
+       |                            ^
+    194|       expect(again.textContent).toBe("Schedule again");
+    195|       await userEvent.click(again);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 16 passed (19)
+   Start at  09:18:22
+   Duration  1.03s (environment 47%, tests 36%, transform 7%, setup 6%, import 4%)
+

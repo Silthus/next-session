@@ -15,16 +15,11 @@ export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
   const [pendingDates, setPendingDates] = useState<ReadonlySet<IsoDate>>(new Set());
   const scheduleSession = useMutation(api.sessions.schedule).withOptimisticUpdate(
     (store, { date }) =>
-      editCachedSessions(store, groupId, (sessions) => [
-        ...sessions,
-        { _id: `optimistic-${date}` as Id<"sessions">, date },
-      ]),
+      editCachedSessions(store, groupId, (sessions) => scheduled(sessions, date)),
   );
   const cancelSession = useMutation(api.sessions.cancel).withOptimisticUpdate(
     (store, { sessionId }) =>
-      editCachedSessions(store, groupId, (sessions) =>
-        sessions.filter((session) => session._id !== sessionId),
-      ),
+      editCachedSessions(store, groupId, (sessions) => cancelled(sessions, sessionId)),
   );
 
   async function settle(date: IsoDate, change: () => Promise<void>) {
@@ -51,10 +46,10 @@ export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
     });
   }
 
-  function cancel(session: CalendarSession) {
+  function cancel(session: Pick<CalendarSession, "_id" | "date">) {
     return settle(session.date, async () => {
       await cancelSession({ sessionId: session._id });
-      show(`Session on ${dayLabel(session.date)} removed.`, () => {
+      show(`Session on ${dayLabel(session.date)} cancelled.`, () => {
         void schedule(session.date);
         focusDay(session.date);
       });
@@ -77,4 +72,21 @@ function editCachedSessions(
     if (args.groupId !== groupId || !value) continue;
     store.setQuery(api.schedule.month, args, { ...value, sessions: edit(value.sessions) });
   }
+}
+
+function scheduled(sessions: CalendarSession[], date: IsoDate): CalendarSession[] {
+  if (!sessions.some((session) => session.date === date)) {
+    const optimisticId = `optimistic-${date}` as Id<"sessions">;
+    return [...sessions, { _id: optimisticId, date, state: "scheduled", published: false }];
+  }
+  return sessions.map((session) =>
+    session.date === date ? { ...session, state: "scheduled" } : session,
+  );
+}
+
+function cancelled(sessions: CalendarSession[], sessionId: Id<"sessions">): CalendarSession[] {
+  return sessions.flatMap((session) => {
+    if (session._id !== sessionId) return [session];
+    return session.published ? [{ ...session, state: "cancelled" }] : [];
+  });
 }

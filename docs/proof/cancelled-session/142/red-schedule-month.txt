@@ -1,0 +1,93 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-9ffb835b
+
+ ❯ |convex| convex/schedule.test.ts (12 tests | 2 failed) 193ms
+   ❯ schedule.month (12)
+     × returns the Roster, the month's Answers, and every Session of the Group 149ms
+     × returns Cancelled Sessions too, and whether players have heard of each 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/schedule.test.ts > schedule.month > returns the Roster, the month's Answers, and every Session of the Group
+AssertionError: expected { answers: [ { …(3) }, …(2) ], …(2) } to deeply equal { …(3) }
+
+- Expected
++ Received
+
+@@ -28,22 +28,16 @@
+    ],
+    "sessions": [
+      {
+        "_id": "000000000000000000010010sessions",
+        "date": "2026-09-12",
+-       "published": false,
+-       "state": "scheduled",
+      },
+      {
+        "_id": "000000000000000000010011sessions",
+        "date": "2026-10-17",
+-       "published": false,
+-       "state": "scheduled",
+      },
+      {
+        "_id": "000000000000000000010012sessions",
+        "date": "2026-12-05",
+-       "published": false,
+-       "state": "scheduled",
+      },
+    ],
+  }
+
+ ❯ convex/schedule.test.ts:61:22
+     59|     const schedule = await as.query(api.schedule.month, { groupId, mon…
+     60|
+     61|     expect(schedule).toEqual({
+       |                      ^
+     62|       players: [
+     63|         { _id: ada, name: "Ada" },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |convex| convex/schedule.test.ts > schedule.month > returns Cancelled Sessions too, and whether players have heard of each
+AssertionError: expected [ { …(2) }, { …(2) } ] to deeply equal [ { …(4) }, { …(4) }, { …(4) } ]
+
+- Expected
++ Received
+
+  [
+    {
+-     "_id": "000000000000000000010003sessions",
+-     "date": "2026-10-10",
+-     "published": true,
+-     "state": "cancelled",
+-   },
+-   {
+      "_id": "000000000000000000010004sessions",
+      "date": "2026-10-17",
+-     "published": true,
+-     "state": "scheduled",
+    },
+    {
+      "_id": "000000000000000000010005sessions",
+      "date": "2026-10-24",
+-     "published": false,
+-     "state": "scheduled",
+    },
+  ]
+
+ ❯ convex/schedule.test.ts:90:32
+     88|     const schedule = await as.query(api.schedule.month, { groupId, mon…
+     89|
+     90|     expect(schedule?.sessions).toEqual([
+       |                                ^
+     91|       { _id: cancelled, date: "2026-10-10", state: "cancelled", publis…
+     92|       { _id: announced, date: "2026-10-17", state: "scheduled", publis…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 10 passed (12)
+   Start at  09:16:00
+   Duration  771ms (transform 39%, tests 29%, import 23%, environment 7%, worker 1%)
+

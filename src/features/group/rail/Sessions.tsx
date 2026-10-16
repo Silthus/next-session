@@ -16,7 +16,9 @@ export function Sessions({
   today: IsoDate;
   onSelectDay: (date: IsoDate) => void;
 }) {
-  const byDate = [...sessions].sort((a, b) => a.date.localeCompare(b.date));
+  const byDate = sessions
+    .filter((session) => session.state === "scheduled")
+    .sort((a, b) => a.date.localeCompare(b.date));
   const upcoming = byDate.filter((session) => session.date >= today);
   const played = byDate.filter((session) => session.date < today).reverse();
   const next = upcoming[0];

@@ -113,14 +113,14 @@ function NightRow({
   const counts = countsLine(night, playerCount);
   const freeNames = night.free.map((player) => player.name).join(", ");
   const free = freeNames ? `. Free: ${freeNames}` : "";
-  const scheduled = night.session ? ". Session scheduled" : "";
+  const session = sessionNote(night);
   const hidden = night.free.length - SHOWN_AVATARS;
   return (
     <button
       ref={ref}
       type="button"
       onClick={onSelect}
-      aria-label={`${label}, ${counts}${free}${scheduled}`}
+      aria-label={`${label}, ${counts}${free}${session}`}
       className={cn(
         "flex w-full items-center gap-3 rounded-md px-2 py-2 text-left",
         rank === 1 && "lg:flex-wrap",
@@ -146,7 +146,11 @@ function NightRow({
           )}
         >
           {label}
-          {night.session && <IconStar className="size-3.5 text-accent-strong" />}
+          {night.session && (
+            <span data-mark="session">
+              <IconStar className="size-3.5 text-accent-strong" />
+            </span>
+          )}
         </span>
         <span className={cn("block text-xs", night.perfect ? "text-ink-2" : "text-ink-3")}>
           {counts}
@@ -191,6 +195,7 @@ function QuickSchedule({
   const [scheduling, setScheduling] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
   const label = nightLabel(night.date);
+  const action = night.cancelled ? "Schedule again" : "Schedule";
   useLayoutEffect(
     () => () => {
       if (document.activeElement === button.current) focusAfter.current?.focus();
@@ -210,7 +215,7 @@ function QuickSchedule({
     <Button
       ref={button}
       size="sm"
-      aria-label={`${scheduling ? "Scheduling" : "Schedule"} ${label}`}
+      aria-label={`${scheduling ? "Scheduling" : action} ${label}`}
       aria-disabled={scheduling || undefined}
       aria-busy={scheduling || undefined}
       onClick={() => void schedule()}
@@ -221,9 +226,15 @@ function QuickSchedule({
       }
     >
       <IconStar className="size-3.5" />
-      {scheduling ? "Scheduling…" : "Schedule"}
+      {scheduling ? "Scheduling…" : action}
     </Button>
   );
+}
+
+function sessionNote(night: CalendarDay) {
+  if (night.session) return ". Session scheduled";
+  if (night.cancelled) return ". Session cancelled";
+  return "";
 }
 
 function countsLine(night: CalendarDay, playerCount: number) {
