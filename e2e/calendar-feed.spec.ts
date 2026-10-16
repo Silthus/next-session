@@ -85,7 +85,7 @@ test("an Account subscribes its calendar app on My groups and resets the link", 
 });
 
 test("Subscribe on My groups opens My groups at Your calendar", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 700 });
+  await page.setViewportSize({ width: 390, height: 480 });
   const gm = await signInAnonymousGm();
   const night = `${addMonths(monthOf(todayUtc(Date.now())), 1)}-12`;
   await gm.client.mutation(api.sessions.schedule, { groupId: gm.groupId, date: night });
