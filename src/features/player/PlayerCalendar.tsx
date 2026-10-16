@@ -20,6 +20,7 @@ import { IconChevron } from "../../ui/icons";
 import { focusRing, pressable } from "../../ui/interactive";
 import { Skeleton } from "../../ui/Skeleton";
 import { useFocusOnMount } from "../../ui/useFocusOnMount";
+import { NextSessions } from "./NextSessions";
 import { Progress } from "./Progress";
 import {
   dayLabel,
@@ -60,6 +61,7 @@ export function PlayerCalendar({
   today,
   answers,
   sessions,
+  timeZone,
   hintVisible,
   onAnswer,
   onFillRest,
@@ -76,6 +78,7 @@ export function PlayerCalendar({
   today: IsoDate;
   answers: Record<IsoDate, Answer> | undefined;
   sessions: PlayerSession[];
+  timeZone: string;
   hintVisible: boolean;
   onAnswer: (date: IsoDate, answer: Answer | null) => Promise<unknown>;
   onFillRest: (month: IsoMonth) => Promise<unknown>;
@@ -203,6 +206,7 @@ export function PlayerCalendar({
       </header>
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5">
+        <NextSessions sessions={sessions} timeZone={timeZone} today={today} />
         {!view.readOnly &&
           (loaded ? (
             <div className="rounded-xl border border-line bg-surface p-3.5 shadow-card">
