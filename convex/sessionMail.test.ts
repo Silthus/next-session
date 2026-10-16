@@ -445,7 +445,8 @@ it("warns as daily estimated mail reaches 80 and exceeds 100 across different Gr
   expect(
     fetchMock.mock.calls.filter(([url]) => url === "https://example.test/session"),
   ).toHaveLength(102);
-  expect(JSON.stringify(logs)).toContain("Session mail daily volume warning");
+  expect(JSON.stringify(logs)).toContain("Daily mail volume warning");
+  expect(JSON.stringify(logs)).toContain('"workflows"');
   expect(JSON.stringify(logs)).toContain("80");
   expect(JSON.stringify(logs)).toContain("101");
   expect(JSON.stringify(logs)).not.toContain("@example.com");

@@ -1,0 +1,30 @@
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > announces a set Session with when, where, the invite hint, the group link and why it came 14ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > leaves the Where line out when the Session has no location 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > says what a changed Session is now 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > tells a cancel without when or where, and that the calendar removes it 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > says you for a set Session 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > says you for a changed Session 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > says you for a cancelled Session 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > links the GM surface and says the GM runs the group 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the HTML part > says the same words with one button to the group 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the HTML part > escapes what the GM typed 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > writes the times in the Group's zone with its city 0ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails every calendar recipient once after the Undo window, the GM included, and nobody before 115ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails only the Group's calendar recipient set, rechecked on every attempt 29ms
+ ✓ |convex| convex/sessionInvites.test.ts > puts the night into each calendar as an accepted invite without an alarm and with a token-free link 12ms
+ ✓ |convex| convex/sessionInvites.test.ts > takes a cancelled night out of every calendar 16ms
+ ✓ |convex| convex/sessionInvites.test.ts > raises SEQUENCE for every recipient across set, change, cancel and Schedule again under one UID 29ms
+ ✓ |convex| convex/sessionInvites.test.ts > spaces the sends of one fan-out at least 500 ms apart 13ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > drops a retry whose revision is no longer the published one 19ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > sends a 503 then 200 once, the same request under one Idempotency-Key 8ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > logs a 422 without the recipient and does not retry it 8ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Account with Session mail off 11ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Account with a .test address 5ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Anonymous GM 7ms
+ ✓ |convex| convex/sessionInvites.test.ts > the provider switch > leaves Session updates on Workflows and Resend untouched without RESEND_API_KEY 5ms
+ ✓ |convex| convex/sessionInvites.test.ts > the provider switch > requests no Workflows Session update while RESEND_API_KEY is set 7ms
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > counts and warns Resend sends apart from Workflows sends 189ms
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > reads a day counted before providers as Workflows 3ms
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > keeps emails, Group names and Share Tokens out of usage events and logs 15ms
+ Test Files  2 passed (2)
+      Tests  28 passed (28)

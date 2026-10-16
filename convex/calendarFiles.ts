@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { bookingWindow, todayUtc } from "../shared/dates";
-import { feed, type CalendarEntry } from "../shared/icalendar";
+import { feed, sessionUid, type CalendarEntry } from "../shared/icalendar";
 import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
 import { httpAction, internalQuery } from "./_generated/server";
@@ -63,7 +63,7 @@ function publishedEntryOf(
   if (published?.start === undefined || published.end === undefined) return null;
   if (published.summary === undefined) return null;
   return {
-    uid: `${session._id}@next-session.link`,
+    uid: sessionUid(session._id),
     sequence: UNSENT_SEQUENCE,
     stamp,
     window: { start: published.start, end: published.end },

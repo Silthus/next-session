@@ -1,0 +1,15 @@
+ ❯ convex/model/sessionMailCopy.test.ts:2:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { sessionMailCopy, type SessionMailCopyInput } from "./sessionM…
+       | ^
+      3|
+      4| const halloween: SessionMailCopyInput = {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  10:48:17
+   Duration  161ms (environment 93%, worker 7%)
+

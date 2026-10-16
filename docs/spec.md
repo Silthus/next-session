@@ -132,7 +132,14 @@ export default defineSchema({
     state: v.optional(sessionState), // missing means scheduled
     changedAt: v.optional(v.number()), // the latest change, which the settle job compares
     published: v.optional(publishedSession), // what the outside world knows; missing means never published
+    sequence: v.optional(v.number()), // the last calendar SEQUENCE sent; missing means 0 (§15)
   }).index("by_groupId_and_date", ["groupId", "date"]),
+
+  mailVolume: defineTable({
+    day: v.string(), // UTC day
+    count: v.number(),
+    provider: v.optional(mailProvider), // "resend" | "workflows"; missing reads as workflows
+  }).index("by_provider_and_day", ["provider", "day"]),
 
   saveClaims: defineTable({
     anonymousUserId: v.id("users"),
@@ -565,6 +572,8 @@ The no-account path keeps its steps and its fields: Join shows no new prompt, an
 
 ### 12.6 Session emails through PostHog Workflows
 
+> Superseded by §15 once `RESEND_API_KEY` is set. Until then this path runs unchanged.
+
 Michael chose Workflows on 2026-10-07; Resend from Convex was the alternative. Implementation (#97) shipped disabled. #102 owns sender verification, the transactional "Session updates" category, activation, mail environment and inbox proof. The visitor nudge promises notifications only after #102.
 
 - Session updates follow the published snapshot ([ADR-0013](adr/0013-sessions-publish-a-snapshot-after-the-undo-window.md)). `sessions.schedule` and `sessions.cancel` change the Session through `convex/sessionLifecycle.ts`, which sets `changedAt` and schedules `internal.sessionLifecycle.settle` 30 seconds and 1 ms later. The GM never waits for a webhook.
@@ -888,6 +897,8 @@ In Michael's voice, plain text first (every template carries a real `text` part)
 
 ### 13.7 Session updates share the Workflows mail path
 
+> Superseded by §15 ([ADR-0012](adr/0012-session-mail-goes-through-resend-and-carries-the-calendar-invite.md)) once `RESEND_API_KEY` is set.
+
 Session updates use the §12.6 Convex fan-out and `POSTHOG_SESSION_WEBHOOK_URL`, reusing `POSTHOG_MAIL_WEBHOOK_SECRET`, the sender and the action retrier. Michael chose this over Resend on 2026-10-07. Definitions in `docs/posthog/workflows/session-updates.json` and `templates/session-update.json` are draft-only: secret, sender, template and category placeholders must be resolved by #102.
 
 Each mail names the Group and the night, states "set" or "cancelled", and has one button to the current Share Link. It reads as system mail: the sender is "Next Session" and no person signs it, since the GM who scheduled the night is rarely the person who built Next Session. The template includes real plain text and editable design blocks, with tracking off and a link to the authenticated My groups email preference. Michael confirmed on 2026-10-07 that "Session updates" is `transactional`. Its category bypasses hosted marketing opt-outs; the `/me` switch controls Session emails without changing Tips consent. No notification promise or production mail environment ships in #97.
@@ -954,7 +965,7 @@ Calendar files carry a Group's published Sessions into players' own calendars. T
 - Each entry: `UID` `<sessionId>@next-session.link`, `SEQUENCE` 0 until the invites add a sequence, `DTSTAMP` the serve time, `DTSTART` and `DTEND` in UTC, `SUMMARY` the published Group name, `LOCATION` the published location, `STATUS:CONFIRMED`, and the Share Link (built from `SITE_URL`) as `URL` and in `DESCRIPTION`. The calendar is named after the Group.
 - `200` with `Content-Type: text/calendar; charset=utf-8`, `Cache-Control: private, max-age=900` and `Content-Disposition: attachment; filename="next-session.ics"`. A Group with nothing upcoming gets an empty calendar. An unknown or rotated-away token, or a path outside the Share Token alphabet, gets `404` with no body.
 - No rate limit, no Expiry touch and no server event: reads are cheap and cached for 15 minutes, and a download is not activity on the Group.
-- A rename settles the scheduled upcoming Sessions through `groupChanged` (§12.6), so the download shows the new name once the Undo window ends. A Cancelled Session keeps its old name until **Schedule again**. The rename sends no Session update, because the state didn't change.
+- A rename settles the scheduled upcoming Sessions through `groupChanged` (§12.6), so the download shows the new name once the Undo window ends. A Cancelled Session keeps its old name until **Schedule again**. Without `RESEND_API_KEY` the rename sends no Session update, because the state didn't change; with it, Session mail (§15) sends a "changed" mail with the new name.
 
 ### 14.2 Worker
 
@@ -964,3 +975,63 @@ The Worker proxies `/cal/` the way it proxies `/ingest/`, so the URL stays on `n
 - The Convex site origin is the `CONVEX_SITE_URL` var in `wrangler.jsonc` (`https://pleasant-sockeye-672.convex.site`).
 - The upstream request carries no cookies and no client headers. The response keeps the status, `content-type`, `cache-control` and `content-disposition`, and drops every other header, `set-cookie` included.
 - The Vite dev server proxies `/cal/` to `VITE_CONVEX_SITE_URL`, which `convex dev` writes to `.env.local` and the e2e server sets to the local site port. So the relative link `/cal/s/<token>.ics` works locally, in e2e and in production.
+
+## 15. Session mail
+
+Every Session update is one mail through Resend that carries a calendar invite ([ADR-0012](adr/0012-session-mail-goes-through-resend-and-carries-the-calendar-invite.md)). It supersedes §12.6 and §13.7 once `RESEND_API_KEY` is set. S4 of the calendar sync map (#146) specifies it; this section holds what has shipped.
+
+### 15.1 The provider switch
+
+- `calendarMailConfigured()` in `convex/mail.ts` is true when `RESEND_API_KEY` is set. CI and dev never set it.
+- `settle` (§12.6) calls `sessionPublished` in `convex/sessionMail.ts` on every publish. With the key, it starts a broadcast round and requests no Workflows Session update. Without it, the §12.6 Workflows path runs exactly as before, and nothing reaches Resend or is counted for it. So a change never mails twice.
+
+### 15.2 Who gets it
+
+- The **calendar recipient set** of a Group is the GM's Account plus the Accounts behind its Claimed Players, deduplicated (`convex/model/recipients.ts`). The GM who made the change is included.
+- Every send also needs, at queue time and again on every attempt, an Account that is not anonymous, has an email, isn't a `.test` address, and hasn't turned Session emails off on My groups.
+
+### 15.3 A broadcast round
+
+- Every publish is a round, because the invite carries the start, end, location and Group name: `set` for a first publish or **Schedule again**, `changed` for a new start, length, location or Group name, `cancelled` for a cancel. A publish that keeps a Cancelled Session cancelled sends nothing: those calendars already hold the cancel.
+- A round raises `sessions.sequence` by one (missing is 0) and queues one send per eligible recipient, each carrying `{kind: "broadcast", change, sessionId, userId, revision, sequence}`.
+- Sends are scheduled 600 ms apart within a round, under Resend's 2 requests a second. Two rounds that overlap rely on the retries.
+- Each attempt rechecks, in `sessionMail.calendarMail`, that `published.revision` still equals the send's revision and that the Account is still in the set and eligible. A send whose revision moved on drops itself, so a slow mail never overwrites a newer change. Staleness is judged by revision, never by `sequence`.
+
+### 15.4 The Resend adapter
+
+- `POST https://api.resend.com/emails` with `from: "Next Session <calendar@next-session.link>"`, one recipient, `text` and `html`, and one attachment `invite.ics`, base64, with `content_type` from `calendarContentType` (`text/calendar; charset=utf-8; method=REQUEST|CANCEL`). No `reply_to`.
+- `Idempotency-Key: calendar/<uid>/<sequence>/<userId>`, so a retry of a request Resend accepted is not sent twice within its 24 hours.
+- Network errors, 5xx and 429 retry through the action retrier: 4 attempts, backoff 5 s × 4ⁿ. Other 4xx are logged with the status only and dropped.
+
+### 15.5 The invite
+
+- Built by `invite` in `shared/icalendar.ts` from the published snapshot: `request` for a scheduled Session, `cancel` (with `STATUS:CANCELLED`) for a cancelled one.
+- `UID` `<sessionId>@next-session.link` for the row's whole life, `SEQUENCE` and `DTSTAMP` the round's, so a retry repeats its request byte for byte under the same Idempotency-Key (Resend refuses a reused key with a different body), `DTSTART` and `DTEND` in UTC, `SUMMARY` the published Group name, `LOCATION` the published location.
+- `URL` is token-free: `https://next-session.link/g/<groupId>` for the GM, `https://next-session.link/me` for a Player. `DESCRIPTION` is "Open your group: <that link>".
+- `ORGANIZER` is `calendar@next-session.link`; the `ATTENDEE` is the recipient with `PARTSTAT=ACCEPTED;RSVP=FALSE`. No `VALARM`.
+
+### 15.6 Copy
+
+`sessionMailCopy` in `convex/model/sessionMailCopy.ts` is pure: plain text first, then the same words in HTML (the Workflows template's cream background, mono "NEXT SESSION" header and one button, no images, no tracking). System mail: nobody signs.
+
+`{when}` is "Saturday, October 31, 2026, 19:00–23:00, Berlin time", in the Group's zone with its city. `{where}` is the line "Where: <location>" when there is one. The button "Open your group" goes to the Share Link for a Player and to `/g/<groupId>` for the GM.
+
+| Change | Subject | Player | GM |
+| --- | --- | --- | --- |
+| Set | `{group}: next session {date}` | The next session for {group} is set: {when}. {where} | You set the next session for {group}: {when}. {where} |
+| Changed | `{group}: session on {date} changed` | The session for {group} on {date} changed. It's now {when}. {where} | You changed the session for {group} on {date}. It's now {when}. {where} |
+| Cancelled | `{group}: session on {date} cancelled` | The session for {group} on {date} is cancelled. | You cancelled the session for {group} on {date}. |
+
+Then, for set and changed: "It's in the calendar invite in this mail. Not in your calendar yet? Tap **Add to calendar** once." For cancelled: "Your calendar removes it by itself. If it doesn't, delete it there." Then the button. Footer: "You get this because you run this group." or "…because you keep this group.", then "Turn session emails off in My groups: https://next-session.link/me. Replies to this address aren't read."
+
+### 15.7 Volume
+
+`mailVolume` counts per provider and UTC day: Resend for Session mail (1 per send), Workflows for Welcome (1), Tips (2) and the Workflows Session update (1). A row without a provider is a Workflows count from before the split. Each provider warns once through `serverLog` ("Daily mail volume warning", with `provider`) when its day reaches 80 and once when it passes 100. Suppressed recipients aren't counted and a retry isn't counted twice. No email, Group name or Share Token reaches a usage event or log.
+
+### 15.8 Test seams
+
+| Seam | Tested through |
+| --- | --- |
+| Session mail and the Resend adapter | `convex-test` through `api.sessions.*` and `api.groups.updateSettings` with fake timers and a fake `fetch` that records Resend payloads and decodes `invite.ics` (`convex/sessionInvites.test.ts`) |
+| The provider switch and the Workflows path | the same file and `convex/sessionMail.test.ts` |
+| Copy | `sessionMailCopy` on plain data with Vitest (`convex/model/sessionMailCopy.test.ts`) |
