@@ -6,7 +6,7 @@
     "templating": "liquid",
     "email": {
       "subject": "{% if event.properties.lead == \"day\" %}Tomorrow{% else %}In 2 hours{% endif %}: {{ event.properties.group_name | raw }} at {{ event.properties.start_label | raw }}",
-      "text": "Hi there,\n\n{{ event.properties.group_name | raw }} plays {% if event.properties.lead == \"day\" %}tomorrow{% else %}today{% endif %}, {{ event.properties.date_label | raw }}, at {{ event.properties.start_label | raw }}.\n{% if event.properties.location %}\nWhere: {{ event.properties.location | raw }}\n{% endif %}\nOpen your group: {{ event.properties.player_url | raw }}\n\nYou get this because you keep this group. Turn off reminders: {{ event.properties.reminders_off_url | raw }}\n",
+      "text": "Hi there,\n\n{{ event.properties.group_name | raw }} plays {% if event.properties.lead == \"day\" %}tomorrow{% else %}in 2 hours{% endif %}, {{ event.properties.date_label | raw }}, at {{ event.properties.start_label | raw }}.\n{% if event.properties.location %}\nWhere: {{ event.properties.location | raw }}\n{% endif %}\nOpen your group: {{ event.properties.player_url | raw }}\n\nYou get this because you keep this group. Turn off reminders: {{ event.properties.reminders_off_url | raw }}\n",
       "design": {
         "counters": {
           "u_row": 2,
@@ -148,36 +148,7 @@
                         "duplicatable": true,
                         "deletable": true,
                         "hideable": true,
-                        "text": "<p style=\"margin:0;font-size:16px;line-height:160%;color:#1a1511;\">{{ event.properties.group_name }} plays {% if event.properties.lead == \"day\" %}tomorrow{% else %}today{% endif %}, {{ event.properties.date_label }}, at {{ event.properties.start_label }}.</p>"
-                      }
-                    },
-                    {
-                      "id": "u_content_text_4",
-                      "type": "text",
-                      "values": {
-                        "containerPadding": "10px 32px",
-                        "anchor": "",
-                        "textAlign": "left",
-                        "lineHeight": "160%",
-                        "linkStyle": {
-                          "inherit": false,
-                          "linkColor": "#835200",
-                          "linkHoverColor": "#835200",
-                          "linkUnderline": true,
-                          "linkHoverUnderline": true
-                        },
-                        "hideDesktop": false,
-                        "displayCondition": null,
-                        "_meta": {
-                          "htmlID": "u_content_text_4",
-                          "htmlClassNames": "u_content_text"
-                        },
-                        "selectable": true,
-                        "draggable": true,
-                        "duplicatable": true,
-                        "deletable": true,
-                        "hideable": true,
-                        "text": "<p style=\"margin:0;font-size:16px;line-height:160%;color:#1a1511;\">{% if event.properties.location %}Where: {{ event.properties.location }}{% endif %}</p>"
+                        "text": "<p style=\"margin:0;font-size:16px;line-height:160%;color:#1a1511;\">{{ event.properties.group_name }} plays {% if event.properties.lead == \"day\" %}tomorrow{% else %}in 2 hours{% endif %}, {{ event.properties.date_label }}, at {{ event.properties.start_label }}.{% if event.properties.location %}<br>Where: {{ event.properties.location }}{% endif %}</p>"
                       }
                     },
                     {

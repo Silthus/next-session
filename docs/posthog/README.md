@@ -87,8 +87,8 @@ Convex posts one Reminder per Account, 24 hours (`lead: "day"`) and 2 hours (`le
 | --- | --- |
 | `distinct_id`, `product`, `email` | As Session updates send them |
 | `group_name` | The Group's name at send time |
-| `date_label` | The start's date in the Group's time zone, "Saturday, October 17, 2026" |
-| `start_label` | The start in the Group's time zone, 24-hour "19:00" |
+| `date_label` | The start's date in the Group's time zone at publish, "Saturday, October 17, 2026" |
+| `start_label` | The start in the Group's time zone at publish, 24-hour "19:00" |
 | `location` | The published location. Left out when the Session has none |
 | `lead` | `day` or `hours` |
 | `player_url` | The current Share Link, read at send time. No other field carries a Share Token |
@@ -101,7 +101,7 @@ Placeholders, beside the shared ones above:
 | `<TEMPLATE:reminder>` | The library template ID of `templates/reminder.json` |
 | `<CATEGORY:session-updates>` | The existing transactional Session updates category, `01a115ad-3d17-0000-c6cc-ec3e891a4e82`. Reminders reuse it, because categories need the UI and a transactional category changes no delivery. A dedicated "Reminders" category is a later rename in the UI |
 
-The email step is `transactional` with `tracking_enabled: false`. It has no hosted unsubscribe link: the footer links to the Account's Reminders-off page, which asks before it changes anything. The subject is "Tomorrow: …" or "In 2 hours: … at 19:00". Subject and plain text use `raw`, as Session updates do.
+The email step is `transactional` with `tracking_enabled: false`. It has no hosted unsubscribe link: the footer links to the Account's Reminders-off page, which asks before it changes anything. The subject is "Tomorrow: …" or "In 2 hours: … at 19:00", and the body says the Group "plays tomorrow" or "plays in 2 hours", so a Session just after midnight never reads "today" the evening before. Subject and plain text use `raw`, as Session updates do.
 
 Switch on in this order:
 
@@ -109,10 +109,10 @@ Switch on in this order:
 2. Create the template and the workflow from the rebuild files, inactive. Exercise both leads, with and without a location, through `mock_async_functions=true`: each reaches one mocked sender, the Group name is escaped once in HTML, and the footer link is the body's `reminders_off_url`.
 3. Activate the workflow and check that a missing or wrong Bearer gets 401.
 4. Set `POSTHOG_REMINDER_WEBHOOK_URL` in Convex prod. It reuses `POSTHOG_MAIL_WEBHOOK_SECRET`.
-5. Run the backfill once: `npx convex run --prod reminders:scheduleUpcoming '{}'`. It schedules the pair for every upcoming scheduled Session that has none for its current revision, so running it twice schedules nothing new. It logs "Reminder backfill finished" with the number of Reminders it scheduled.
+5. Run the backfill once: `bunx convex run --prod reminders:scheduleUpcoming '{}'`. It schedules the pair for every upcoming scheduled Session that has none for its current revision, so running it twice schedules nothing new. It logs "Reminder backfill finished" with the number of Reminders it scheduled.
 6. Take the live proof: a real Reminder in an owned inbox, its footer link turning Reminders off, and the My groups switch showing it off.
 
-Each Reminder counts 1 in the daily mail estimate when its job fires, never per retry. A job that runs more than 5 minutes after its due time sends nothing. A due time already past at publish is never scheduled. Network errors and 5xx retry 4 times with backoff; every attempt rechecks the published revision, the Claim, the Reminders switch and the current Share Link. Other 4xx, 429 included, are logged and dropped.
+Each Reminder counts 1 in the daily mail estimate when its job fires, never per retry. A job that runs more than 5 minutes after its due time sends nothing. A due time already past at publish is never scheduled. Network errors and 5xx get four attempts in all, with backoff; every attempt rechecks the published revision, the Claim, the Reminders switch and the current Share Link. Other 4xx, 429 included, are logged and dropped.
 
 ## Delivery limits
 
