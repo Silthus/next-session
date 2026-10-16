@@ -964,6 +964,37 @@ describe("the calendar follows the Roster", () => {
     expect(firstLinesTo(KIM).slice(0, 2)).toEqual([INVITED("17"), INVITED("24")]);
   });
 
+  it("puts every upcoming scheduled night of its Groups in the calendar of an Account that turns Session mail back on", async () => {
+    const { as, groupId, gmEmail, robin } = await crewWithNights();
+    await robin.as.mutation(api.me.setSessionEmails, { enabled: false });
+    await as.mutation(api.me.setSessionEmails, { enabled: false });
+    await as.mutation(api.sessions.schedule, { groupId, date: "2026-11-07" });
+    await finish();
+    sent = [];
+
+    await robin.as.mutation(api.me.setSessionEmails, { enabled: true });
+    await as.mutation(api.me.setSessionEmails, { enabled: true });
+    await finish();
+
+    const nextSessions = [
+      "Thursday Crew: next session Saturday, October 17, 2026",
+      "Thursday Crew: next session Saturday, October 24, 2026",
+      "Thursday Crew: next session Saturday, November 7, 2026",
+    ];
+    for (const address of [ROBIN, gmEmail])
+      expect(mailsTo(address).map(({ subject }) => subject)).toEqual(nextSessions);
+    expect(resendMails().every(({ attachments }) => attachments.length === 1)).toBe(true);
+  });
+
+  it("sends nothing when an Account with Session mail on turns it on again", async () => {
+    const { robin } = await crewWithNights();
+
+    await robin.as.mutation(api.me.setSessionEmails, { enabled: true });
+    await finish();
+
+    expect(resendRequests()).toEqual([]);
+  });
+
   it("drops a pending withdrawal once the Account turns Session mail off", async () => {
     const { groupId, robin } = await crewWithNights();
 

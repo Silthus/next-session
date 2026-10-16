@@ -1037,7 +1037,7 @@ Every Session update is one mail through Resend that carries a calendar invite (
 ### 15.2 Who gets it
 
 - The **calendar recipient set** of a Group is the GM's Account plus the Accounts behind its Claimed Players, deduplicated (`convex/model/recipients.ts`). The GM who made the change is included.
-- Every send also needs, at queue time and again on every attempt, an Account that is not anonymous, has an email, isn't a `.test` address, and hasn't turned Session emails off on My groups, whose switch reads "Email me a calendar invite when a session is set, changed or cancelled".
+- Every send also needs, at queue time and again on every attempt, an Account that is not anonymous, has an email, isn't a `.test` address, and hasn't turned Session emails off on My groups, whose switch reads "Email me a calendar invite when a session is set, changed or cancelled". Turning that switch back on sends the Account each upcoming published scheduled Session of every Group it runs or keeps as a "next session" mail with its invite (`sessionMail.setNightsAgain`), so the player page's **✓ Invite sent** holds for nights published while it was off.
 
 ### 15.3 A broadcast round
 

@@ -1,4 +1,8 @@
-import { MAX_PLAYERS_PER_GROUP } from "../../shared/limits";
+import {
+  MAX_CLAIMED_PLAYERS_PER_ACCOUNT,
+  MAX_GROUPS_PER_GM,
+  MAX_PLAYERS_PER_GROUP,
+} from "../../shared/limits";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { isTestAddress } from "./telemetry";
@@ -26,6 +30,20 @@ export async function isCalendarRecipient(
     .withIndex("by_userId_and_groupId", (q) => q.eq("userId", userId).eq("groupId", group._id))
     .first();
   return claim !== null;
+}
+
+export async function calendarGroupIdsOf(ctx: QueryCtx, userId: Id<"users">) {
+  const [run, claims] = await Promise.all([
+    ctx.db
+      .query("groups")
+      .withIndex("by_ownerId", (q) => q.eq("ownerId", userId))
+      .take(MAX_GROUPS_PER_GM),
+    ctx.db
+      .query("players")
+      .withIndex("by_userId_and_groupId", (q) => q.eq("userId", userId))
+      .take(MAX_CLAIMED_PLAYERS_PER_ACCOUNT),
+  ]);
+  return [...new Set([...run.map(({ _id }) => _id), ...claims.map(({ groupId }) => groupId)])];
 }
 
 export async function isInCalendarRecipientSet(

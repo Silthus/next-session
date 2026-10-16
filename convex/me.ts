@@ -16,6 +16,7 @@ import { currentAccount, requireAccount } from "./model/access";
 import { enforceRateLimit } from "./model/rateLimits";
 import { remindersOn } from "./model/reminderLinks";
 import { siteLink } from "./model/siteLinks";
+import { sessionEmailsTurnedOn } from "./sessionMail";
 import { track } from "./model/telemetry";
 import { groupTimeOf, sessionTimeAndPlace, sessionTimeAndPlaceFields } from "./model/timeAndPlace";
 import { datedSession } from "./schema";
@@ -166,6 +167,8 @@ export const setSessionEmails = mutation({
   handler: async (ctx, { enabled }) => {
     const account = await requireAccount(ctx);
     await ctx.db.patch("users", account._id, { sessionEmailsEnabled: enabled });
+    if (enabled && account.sessionEmailsEnabled === false)
+      await sessionEmailsTurnedOn(ctx, account._id);
     return null;
   },
 });
