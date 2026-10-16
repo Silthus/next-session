@@ -8,7 +8,7 @@ export function RemindersOffScreen({ token }: { token: string | undefined }) {
   const turnOn = useMutation(api.reminderLinks.turnOn);
   return (
     <RemindersOff
-      status={token === undefined ? null : status}
+      status={token === undefined ? "no link" : status}
       turnOff={() => turnOff({ token: token ?? "" })}
       turnOn={() => turnOn({ token: token ?? "" })}
     />

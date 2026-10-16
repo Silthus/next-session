@@ -4,7 +4,7 @@ import { errorMessage } from "../../lib/errors";
 import { Button, buttonClassName } from "../../ui/Button";
 import { StatusScreen } from "../../ui/StatusScreen";
 
-export type RemindersStatus = { enabled: boolean } | null | undefined;
+export type RemindersStatus = { enabled: boolean } | null | "no link" | undefined;
 
 type Switch = () => Promise<unknown>;
 
@@ -17,9 +17,17 @@ export function RemindersOff({
   turnOff: Switch;
   turnOn: Switch;
 }) {
-  const [switchedTo, setSwitchedTo] = useState<boolean>();
-
   if (status === undefined) return <div className="min-h-dvh" />;
+  if (status === "no link") {
+    return (
+      <StatusScreen
+        headline="Open the link in your Reminder"
+        explanation="Use the link at the foot of a Reminder again, or sign in to turn Reminders off or on from My groups."
+      >
+        <MyGroupsLink />
+      </StatusScreen>
+    );
+  }
   if (status === null) {
     return (
       <StatusScreen
@@ -30,7 +38,7 @@ export function RemindersOff({
       </StatusScreen>
     );
   }
-  if (switchedTo ?? status.enabled) {
+  if (status.enabled) {
     return (
       <StatusScreen
         key="on"
@@ -42,7 +50,6 @@ export function RemindersOff({
           busyLabel="Turning off…"
           size="lg"
           onSwitch={turnOff}
-          onSwitched={() => setSwitchedTo(false)}
         />
       </StatusScreen>
     );
@@ -58,7 +65,6 @@ export function RemindersOff({
         busyLabel="Turning on…"
         variant="secondary"
         onSwitch={turnOn}
-        onSwitched={() => setSwitchedTo(true)}
       />
       <MyGroupsLink />
     </StatusScreen>
@@ -79,14 +85,12 @@ function SwitchButton({
   variant = "primary",
   size = "md",
   onSwitch,
-  onSwitched,
 }: {
   label: string;
   busyLabel: string;
   variant?: "primary" | "secondary";
   size?: "md" | "lg";
   onSwitch: Switch;
-  onSwitched: () => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
@@ -100,7 +104,6 @@ function SwitchButton({
     setFailure(null);
     try {
       await onSwitch();
-      onSwitched();
     } catch (error) {
       setFailure(errorMessage(error, "reminderLink"));
       setBusy(false);

@@ -4,9 +4,10 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
+import { useSyncExternalStore } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { reportError } from "../../lib/telemetry";
 import { RemindersOff, type RemindersStatus } from "./RemindersOff";
@@ -22,21 +23,49 @@ beforeEach(() => {
 
 type Switch = () => Promise<null>;
 
+function liveStatus(initial: RemindersStatus) {
+  let current = initial;
+  const listeners = new Set<() => void>();
+  return {
+    read: () => current,
+    subscribe: (listener: () => void) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    change: (next: RemindersStatus) => {
+      current = next;
+      listeners.forEach((listener) => listener());
+    },
+  };
+}
+
 function renderPage(
-  status: RemindersStatus,
+  initial: RemindersStatus,
   {
     turnOff = vi.fn<Switch>(),
     turnOn = vi.fn<Switch>(),
   }: { turnOff?: Switch; turnOn?: Switch } = {},
 ) {
+  const status = liveStatus(initial);
+  const switchTo = (enabled: boolean, press: Switch) => async () => {
+    await press();
+    status.change({ enabled });
+  };
+  function Page() {
+    return (
+      <RemindersOff
+        status={useSyncExternalStore(status.subscribe, status.read)}
+        turnOff={switchTo(false, turnOff)}
+        turnOn={switchTo(true, turnOn)}
+      />
+    );
+  }
   const router = createRouter({
-    routeTree: createRootRoute({
-      component: () => <RemindersOff status={status} turnOff={turnOff} turnOn={turnOn} />,
-    }),
+    routeTree: createRootRoute({ component: Page }),
     history: createMemoryHistory({ initialEntries: ["/reminders/off"] }),
   });
   render(<RouterProvider router={router} />);
-  return { turnOff, turnOn };
+  return { turnOff, turnOn, status };
 }
 
 const turnOffButton = { name: "Turn off Reminders" };
@@ -113,6 +142,36 @@ describe("RemindersOff", () => {
     expect(screen.getByRole("link", myGroupsLink).getAttribute("href")).toBe("/me");
     expect(turnOff).not.toHaveBeenCalled();
     expect(turnOn).not.toHaveBeenCalled();
+  });
+
+  it("asks for the link again when the page has none, and calls nothing", async () => {
+    const { turnOff, turnOn } = renderPage("no link");
+
+    expect((await heading()).textContent).toBe("Open the link in your Reminder");
+    expect(
+      screen.getByText(
+        "Use the link at the foot of a Reminder again, or sign in to turn Reminders off or on from My groups.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByRole("button")).toBeNull();
+    expect(screen.getByRole("link", myGroupsLink).getAttribute("href")).toBe("/me");
+    expect(turnOff).not.toHaveBeenCalled();
+    expect(turnOn).not.toHaveBeenCalled();
+  });
+
+  it("follows a change made elsewhere after the press", async () => {
+    const { status } = renderPage(
+      { enabled: true },
+      { turnOff: vi.fn<Switch>(() => Promise.resolve(null)) },
+    );
+    await userEvent.click(await screen.findByRole("button", turnOffButton));
+    await screen.findByRole("heading", { level: 1, name: "Reminders are off" });
+
+    act(() => status.change({ enabled: true }));
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Turn off Reminders?" }),
+    ).toBeTruthy();
   });
 
   it("shows nothing to press while the link is being read", () => {

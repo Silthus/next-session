@@ -57,11 +57,11 @@ describe("/reminders/off", () => {
     });
   });
 
-  it("says the link doesn't work without a token and reads nothing", async () => {
+  it("asks for the link again without a token and reads nothing", async () => {
     renderAt("/reminders/off");
 
     expect(
-      await screen.findByRole("heading", { level: 1, name: "This link doesn't work" }),
+      await screen.findByRole("heading", { level: 1, name: "Open the link in your Reminder" }),
     ).toBeTruthy();
     expect(status).not.toHaveBeenCalled();
   });
