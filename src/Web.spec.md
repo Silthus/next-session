@@ -11,6 +11,10 @@ The single-page web app: the landing, the GM surface, the player surface on the 
   handler: Route in routes/g.$groupId.tsx
   trust: signed-in user
   control: none — the route only renders client code; every read and write it triggers enters through a Backend entrance that carries its own control
+- route /g/$groupId/settings: the Time and place page, where the GM sets when and where the Group plays
+  handler: Route in routes/g.$groupId_.settings.tsx
+  trust: signed-in user
+  control: none — the route only renders client code; every read and write it triggers enters through a Backend entrance that carries its own control
 - route /s/$shareToken: the player surface behind a Share Link
   handler: Route in routes/s.$shareToken.tsx
   trust: visitor

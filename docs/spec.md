@@ -316,6 +316,7 @@ Convex Auth's Google provider sits next to Password and Anonymous, always regist
 | --- | --- | --- | --- |
 | `/` | | Landing with Create your link; the link-created moment in place | A GM with Groups is redirected to the last visited Group (or the first). An Account without Groups of its own is redirected to `/me` |
 | `/g/$groupId` | `month` (YYYY-MM), `day` (YYYY-MM-DD) | GM group surface | Signed out → `/`. Missing or foreign id → the first Group, without an error boundary |
+| `/g/$groupId/settings` | | Time and place: "When and where you play", the Group's start time, length, time zone and location next to a preview of the calendar entry players get. Save returns to `/g/$groupId` with the toast "Time and place saved" | Signed out → `/`. Missing or foreign id → not found ("Nothing here") |
 | `/s/$shareToken` | `month` | Player join, then the player calendar; not-found for an unknown token | None. The Group's GM, signed in with an Account and not playing in the Group, opening the link is sent on to `/g/<groupId>` (replacing the history entry, keeping a valid `month`). A Group that becomes the Account's own while the page is open, as when an Anonymous GM keeps their own link, stays on the player view. A signed-in Account with a Claimed Player in the Group skips Join |
 | `/me` | | My groups (§12) | Not an Account → `/` |
 | `/terms`, `/privacy`, `/imprint` | | Legal pages | None |
@@ -334,13 +335,15 @@ src/
   features/
     landing/            Landing, link-created moment
     account/            AccountSheet (save / log in), save.ts (claim orchestration), keep.ts (Keep this group), useGm()
-    group/              GroupScreen container; calendar/ (HeatCalendar, DayPanel); rail/ (GroupSwitcher,
-                        BestNights, Players, Sessions, Nudge)
+    group/              GroupScreen container, GroupFrame; calendar/ (HeatCalendar, DayPanel); rail/ (GroupSwitcher,
+                        BestNights, Players, Sessions, Nudge); settings/ (TimeAndPlaceScreen, TimeAndPlacePage,
+                        LocationField)
     player/             PlayerScreen, Join, PlayerCalendar, Progress, playerMonth.ts, KeepGroup
     me/                 MyGroups (§12)
     legal/              LegalPage, rendered from docs/legal/*.md
   lib/                  env.ts, pageTitle.ts, storage.ts (all localStorage keys, prefixed "next-session."), errors.ts,
-                        keyboard.ts
+                        keyboard.ts, timeZone.ts, timeAndPlace.ts (a Session's wall-clock range, the zone named only
+                        when the browser's zone differs)
 shared/                 dates.ts, answers.ts, monthSummary.ts, names.ts, shareToken.ts, legal.ts, limits.ts
 convex/                 schema.ts, model/, groups.ts, schedule.ts, roster.ts, sessions.ts, player.ts, me.ts,
                         account.ts, auth.ts, auth.config.ts, http.ts, crons.ts, cleanup.ts, convex.config.ts

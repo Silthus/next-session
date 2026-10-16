@@ -1,0 +1,55 @@
+# red: the #154 tests on the base tree 377bb1a (no Time and place page, menu item, Sessions prompt, day panel line or toast handoff)
+
+ ❯ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx (0 test)
+ ❯ |ui| src/lib/timeAndPlace.test.ts (0 test)
+ ❯ |ui| src/features/group/useToast.test.ts (6 tests | 1 failed) 27ms
+     × shows a toast handed off from another page of the same Group once 3ms
+ ❯ |ui| src/features/group/rail/Sessions.test.tsx (10 tests | 4 failed) 279ms
+     × lists upcoming Sessions soonest first with how far away they are and their time 147ms
+     × asks when and where the Group plays until the GM saves it once 11ms
+     × sums up the saved time and place in one line with Edit 10ms
+     × names the Group's zone when the GM's browser is elsewhere 15ms
+ ❯ |ui| src/features/group/calendar/DayPanel.test.tsx (16 tests | 3 failed) 320ms
+     × says what players' calendars will show right above Schedule session 12ms
+     × names the Group's zone in the line when the GM's browser is elsewhere 7ms
+     × shows the time a Cancelled Session comes back with 7ms
+ ❯ |ui| src/features/group/rail/GroupSwitcher.test.tsx (18 tests | 2 failed) 811ms
+     × opens Time and place next to Rename and Delete, and closes 25ms
+     × marks Time and place New until the GM has saved it once 33ms
+ FAIL  |ui| src/lib/timeAndPlace.test.ts [ src/lib/timeAndPlace.test.ts ]
+Error: Failed to resolve import "./timeAndPlace" from "src/lib/timeAndPlace.test.ts". Does the file exist?
+ FAIL  |ui| src/features/group/settings/TimeAndPlacePage.test.tsx [ src/features/group/settings/TimeAndPlacePage.test.tsx ]
+Error: Failed to resolve import "./TimeAndPlacePage" from "src/features/group/settings/TimeAndPlacePage.test.tsx". Does the file exist?
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  |ui| src/features/group/useToast.test.ts > useToast > shows a toast handed off from another page of the same Group once
+TypeError: handOffToast is not a function
+ ❯ src/features/group/useToast.test.ts:73:5
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > says what players' calendars will show right above Schedule session
+TestingLibraryElementError: Unable to find an element with the text: /^Players' calendars will show/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+ ❯ src/features/group/calendar/DayPanel.test.tsx:107:25
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > names the Group's zone in the line when the GM's browser is elsewhere
+TestingLibraryElementError: Unable to find an element with the text: /^Players' calendars will show/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+ ❯ src/features/group/calendar/DayPanel.test.tsx:123:19
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > shows the time a Cancelled Session comes back with
+TestingLibraryElementError: Unable to find an element with the text: /^Players' calendars will show/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+ ❯ src/features/group/calendar/DayPanel.test.tsx:130:19
+ FAIL  |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > opens Time and place next to Rename and Delete, and closes
+AssertionError: expected [ '+New group', 'Rename group', …(1) ] to deeply equal [ 'Time and place', …(2) ]
+ ❯ src/features/group/rail/GroupSwitcher.test.tsx:61:26
+ FAIL  |ui| src/features/group/rail/GroupSwitcher.test.tsx > GroupSwitcher > marks Time and place New until the GM has saved it once
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name "Time and place, new"
+ ❯ src/features/group/rail/GroupSwitcher.test.tsx:71:19
+ FAIL  |ui| src/features/group/rail/Sessions.test.tsx > Sessions > lists upcoming Sessions soonest first with how far away they are and their time
+AssertionError: expected [ 'Friday, October 2today', …(2) ] to deeply equal [ …(3) ]
+ ❯ src/features/group/rail/Sessions.test.tsx:48:52
+ FAIL  |ui| src/features/group/rail/Sessions.test.tsx > Sessions > asks when and where the Group plays until the GM saves it once
+TestingLibraryElementError: Unable to find an element with the text: When and where do you play?. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+ ❯ src/features/group/rail/Sessions.test.tsx:60:25
+ FAIL  |ui| src/features/group/rail/Sessions.test.tsx > Sessions > sums up the saved time and place in one line with Edit
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/^Edit time and place/`
+ ❯ src/features/group/rail/Sessions.test.tsx:78:31
+ FAIL  |ui| src/features/group/rail/Sessions.test.tsx > Sessions > names the Group's zone when the GM's browser is elsewhere
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/^Edit time and place/`
+ ❯ src/features/group/rail/Sessions.test.tsx:90:25
+ Test Files  6 failed (6)
+      Tests  10 failed | 40 passed (50)
