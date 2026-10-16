@@ -859,7 +859,7 @@ In Michael's voice, plain text first (every template carries a real `text` part)
 >
 > - **Best Nights** shows the top three dates nobody marked busy.
 > - Tap a day, then **Schedule**. Your players see the date right away.
-> - Plans changed? **Unschedule** it, and Undo is there if you slip.
+> - Plans changed? **Cancel** it, and Undo is there if you slip.
 >
 > That's the last tip from me. Have a great game night 🎲
 >
