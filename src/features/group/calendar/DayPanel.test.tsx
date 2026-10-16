@@ -268,6 +268,20 @@ describe("DayPanel when and where of a Session", () => {
     expect(screen.queryByRole("button", { name: "Save" })).toBeNull();
   });
 
+  it("keeps a Session on the usual start time when the GM types no time and leaves the field", async () => {
+    const { onSaveDetails } = renderPanel({ session: "scheduled", timeAndPlace: USUAL_AT_MAX });
+
+    await userEvent.click(screen.getByRole("button", { name: "Edit when and where" }));
+    const typed = within(fieldRow("Starts at")).getByRole("textbox");
+    await userEvent.clear(typed);
+    await userEvent.type(typed, "25{Tab}");
+    await userEvent.click(screen.getByRole("radio", { name: "3 h" }));
+
+    expect(within(fieldRow("Starts at")).queryByText("Only this night")).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(onSaveDetails).toHaveBeenCalledWith(expect.anything(), { lengthMinutes: 180 });
+  });
+
   it("moves focus into the editor on Edit and back to Edit once saved", async () => {
     renderPanel({ session: "scheduled", timeAndPlace: USUAL_AT_MAX });
 

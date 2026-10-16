@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { endClockTime, isClockTime, type ClockTime } from "../../../../shared/sessionTime";
+import { isImeComposing } from "../../../lib/keyboard";
 import { cn } from "../../../ui/cn";
 import { focusRing, pressable } from "../../../ui/interactive";
 
@@ -28,10 +29,11 @@ export function StartTimeField({
       onChange={(event) => {
         const before = draft?.before ?? value;
         setDraft({ typed: event.target.value, before });
-        onChange(readClockTime(event.target.value) ?? before);
+        const startTime = readClockTime(event.target.value) ?? before;
+        if (startTime !== value) onChange(startTime);
       }}
       onKeyDown={(event) => {
-        if (event.key !== "Enter" || draft === null) return;
+        if (event.key !== "Enter" || draft === null || isImeComposing(event.nativeEvent)) return;
         if (!readClockTime(draft.typed)) event.preventDefault();
         settle();
       }}

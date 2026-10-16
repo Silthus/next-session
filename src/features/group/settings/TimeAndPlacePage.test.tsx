@@ -140,6 +140,14 @@ describe("TimeAndPlacePage", () => {
     expect(startTime().value).toBe("19:00");
   });
 
+  it("leaves a start time being composed alone on the Enter that confirms the composition", () => {
+    const { onSave } = renderPage();
+    fireEvent.change(startTime(), { target: { value: "20" } });
+    fireEvent.keyDown(startTime(), { key: "Enter", isComposing: true });
+    expect(startTime().value).toBe("20");
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
   it("saves on Enter the start time just typed", async () => {
     const { onSave } = renderPage();
     await userEvent.clear(startTime());
