@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState, type RefObject } from "react";
+import type { CalendarInvites } from "../../../convex/sessionMail";
 import type { IsoMonth } from "../../../shared/dates";
 import { track, type KeepSurface } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
@@ -9,8 +10,6 @@ import { GoogleLogo, LegalLinks } from "../account/AccountSheet";
 import { monthName } from "./playerMonth";
 
 export type KeepState = "offer" | "keeping" | "kept";
-
-export type CalendarInvites = "on" | "off" | null;
 
 export type KeepSessionsOffer = {
   refusal: string | null;
