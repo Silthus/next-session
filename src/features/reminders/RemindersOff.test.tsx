@@ -4,7 +4,7 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -149,7 +149,9 @@ describe("RemindersOff", () => {
     fail(new Error("Server Error"));
 
     expect((await screen.findByRole("alert")).textContent).toBe("That didn't work. Try again.");
-    expect(document.activeElement).toBe(screen.getByRole("button", turnOffButton));
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("button", turnOffButton)),
+    );
   });
 
   it("presses once while the change is on its way", async () => {
