@@ -4,6 +4,8 @@ import { Button, buttonClassName } from "../../ui/Button";
 import { IconCheck, IconCopy } from "../../ui/icons";
 import { useCopy } from "../../ui/ShareLinkCard";
 
+export const YOUR_CALENDAR = "your-calendar";
+
 export type CalendarFeedActions = {
   subscribe: () => Promise<string>;
   reset: () => Promise<string>;

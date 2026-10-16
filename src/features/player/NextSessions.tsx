@@ -4,6 +4,7 @@ import type { IsoDate } from "../../../shared/dates";
 import { track } from "../../lib/telemetry";
 import { timeRange } from "../../lib/timeAndPlace";
 import { buttonClassName } from "../../ui/Button";
+import { YOUR_CALENDAR } from "../me/YourCalendar";
 import { IconStar } from "../../ui/icons";
 import { focusRing } from "../../ui/interactive";
 import { longDayLabel, relativeDay } from "../group/calendar/calendarDates";
@@ -114,6 +115,7 @@ function CalendarDownload({
           <>
             <Link
               to="/me"
+              hash={YOUR_CALENDAR}
               className={`-my-3.5 rounded-sm py-3.5 font-semibold text-accent-strong underline underline-offset-2 hover:text-ink ${focusRing}`}
             >
               Subscribe on My groups

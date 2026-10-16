@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Page, type WebSocketRoute } from "@playwright/test";
 import { ConvexHttpClient } from "convex/browser";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -125,3 +125,36 @@ export async function waitUntilPublished(
   };
   await expect.poll(isPublished, { timeout: PUBLISH_WAIT_MS }).toBe(true);
 }
+
+type Sync = { client: WebSocketRoute; server: WebSocketRoute };
+
+export async function interceptSync(
+  page: Page,
+  onClientMessage: (text: string, sync: Sync) => boolean,
+) {
+  await page.routeWebSocket(/\/api\/.*\/sync/, (client) => {
+    const server = client.connectToServer();
+    client.onMessage((message) => {
+      if (!onClientMessage(String(message), { client, server })) server.send(message);
+    });
+    server.onMessage((message) => client.send(message));
+  });
+}
+
+export function failRequest(client: WebSocketRoute, text: string, failure: object) {
+  const { type, requestId } = JSON.parse(text) as {
+    type: "Mutation" | "Action";
+    requestId: number;
+  };
+  client.send(
+    JSON.stringify({
+      type: `${type}Response`,
+      requestId,
+      success: false,
+      logLines: [],
+      ...failure,
+    }),
+  );
+}
+
+export const serverError = { result: "Server Error" };

@@ -243,6 +243,18 @@ describe("PlayerCalendar", () => {
     expect(onAnswer.mock.calls).toEqual([["2026-10-16", "maybe"]]);
   });
 
+  it.each([
+    ["explains the Cancelled mark in the legend", "cancelled", true],
+    ["leaves the Cancelled mark out of the legend", "scheduled", false],
+  ] as const)("%s when the month shows a %s Session", async (_, state, explained) => {
+    renderCalendar({ sessions: [sessionOn("2026-10-16", state)] });
+
+    await tile(/^Friday, October 16: Not set, Session/);
+
+    const legend = screen.getAllByRole("listitem").map((item) => item.textContent);
+    expect(legend.includes("Cancelled")).toBe(explained);
+  });
+
   it("shows progress over the nights left and fills the rest busy", async () => {
     const { onFillRest } = renderCalendar({
       answers: { "2026-10-01": "free", "2026-10-04": "free", "2026-10-05": "maybe" },
@@ -657,7 +669,7 @@ describe("PlayerCalendar next sessions", () => {
     const card = within(await nextSessions());
     expect(card.getByRole("link", { name: "Add to calendar" })).toBeTruthy();
     expect(card.getByRole("link", { name: "Subscribe on My groups" }).getAttribute("href")).toBe(
-      "/me",
+      "/me#your-calendar",
     );
     expect(card.getByText(/^A one-time copy\./).textContent).toBe(
       "A one-time copy. Subscribe on My groups to follow moves and cancellations.",
