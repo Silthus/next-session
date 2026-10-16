@@ -1,7 +1,13 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import { describe, expect, it, vi } from "vitest";
+import {
+  AddressSuggestionsProvider,
+  suggestUntilFailure,
+  type AddressSearch,
+  type AddressSuggestions,
+} from "./addressSuggestions";
 import { TimeAndPlacePage, type TimeAndPlaceValues } from "./TimeAndPlacePage";
 
 vi.mock("../../../lib/timeZone", () => ({ browserTimeZone: () => "Europe/Berlin" }));
@@ -16,17 +22,21 @@ const usualNight: TimeAndPlaceValues = {
 function renderPage({
   initial = usualNight,
   onSave = vi.fn<(values: TimeAndPlaceValues) => Promise<void>>().mockResolvedValue(undefined),
+  suggestions = null,
 }: {
   initial?: TimeAndPlaceValues;
   onSave?: (values: TimeAndPlaceValues) => Promise<void>;
+  suggestions?: AddressSuggestions | null;
 } = {}) {
   render(
-    <TimeAndPlacePage
-      groupName="Tuesday Crew"
-      previewDate="2026-10-20"
-      initial={initial}
-      onSave={onSave}
-    />,
+    <AddressSuggestionsProvider value={suggestions}>
+      <TimeAndPlacePage
+        groupName="Tuesday Crew"
+        previewDate="2026-10-20"
+        initial={initial}
+        onSave={onSave}
+      />
+    </AddressSuggestionsProvider>,
   );
   return { onSave, preview: screen.getByRole("region", { name: "In players' calendars" }) };
 }
@@ -145,6 +155,19 @@ describe("TimeAndPlacePage", () => {
       timeZone: "Europe/Berlin",
       location: "Max's place",
     });
+  });
+
+  it("saves the typed place when address suggestions have failed", async () => {
+    const search = vi.fn<AddressSearch>().mockRejectedValue(new Error("Geoapify answered 503"));
+    const { onSave } = renderPage({ suggestions: suggestUntilFailure(search) });
+
+    await userEvent.type(screen.getByRole("combobox", { name: "Where" }), "Haupt");
+    await waitFor(() => expect(screen.queryByRole("combobox")).toBeNull());
+    await userEvent.type(screen.getByRole("textbox", { name: "Where" }), "straße 5");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(search).toHaveBeenCalledOnce();
+    expect(onSave).toHaveBeenCalledWith({ ...usualNight, location: "Hauptstraße 5" });
   });
 
   it.each([

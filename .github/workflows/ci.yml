@@ -102,6 +102,7 @@ jobs:
           LEGAL_CONTACT_EMAIL: ${{ vars.LEGAL_CONTACT_EMAIL }}
           VITE_POSTHOG_TOKEN: ${{ vars.VITE_POSTHOG_TOKEN }}
           VITE_RELEASE: ${{ github.sha }}
+          VITE_GEOAPIFY_KEY: ${{ vars.VITE_GEOAPIFY_KEY }}
           POSTHOG_PROJECT_ID: ${{ vars.POSTHOG_PROJECT_ID }}
           POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
       - name: Deploy the Worker

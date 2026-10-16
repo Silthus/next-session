@@ -1,0 +1,40 @@
+# red: the #156 tests on the base tree c9d9fbe (no geoapifyKey, no address suggestions module, plain LocationField, Privacy Policy 1.7 without Geoapify)
+
+ ❯ |shared| shared/legal.test.ts (6 tests | 2 failed) 8ms
+     × says what reaches Geoapify, why, how long it keeps it, and where it runs 4ms
+     × names the Group's time and place, and a Session's own, among group data 1ms
+ ❯ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx (0 test)
+ ❯ |ui| src/features/group/settings/LocationField.test.tsx (0 test)
+ ❯ |ui| src/features/group/settings/addressSuggestions.test.ts (0 test)
+ ❯ |ui| src/lib/env.test.ts (8 tests | 2 failed) 7ms
+     × is absent without a key, so the location field stays plain 2ms
+     × carries the key the build was given 0ms
+Error: Failed to resolve import "./addressSuggestions" from "src/features/group/settings/LocationField.test.tsx". Does the file exist?
+Error: Failed to resolve import "./addressSuggestions" from "src/features/group/settings/TimeAndPlacePage.test.tsx". Does the file exist?
+Error: Failed to resolve import "./addressSuggestions" from "src/features/group/settings/addressSuggestions.test.ts". Does the file exist?
+TypeError: geoapifyKey is not a function
+TypeError: geoapifyKey is not a function
+ Test Files  5 failed (5)
+      Tests  4 failed | 10 passed (14)
+
+# red, step 2: with addressSuggestions.ts and geoapifyKey in place, the field still has no suggestions
+
+ ❯ |shared| shared/legal.test.ts (6 tests | 2 failed) 8ms
+     × says what reaches Geoapify, why, how long it keeps it, and where it runs 4ms
+     × names the Group's time and place, and a Session's own, among group data 1ms
+ ❯ |ui| src/features/group/settings/LocationField.test.tsx (9 tests | 8 failed) 195ms
+     × asks for nothing until three letters are typed 114ms
+     × offers to keep the typed text first, then addresses as street over town, with the credit 10ms
+     × waits for a pause in typing and cancels the request still in flight 8ms
+     × keeps the typed text on Enter when no row is chosen, without submitting the form 7ms
+     × replaces the text with a row picked by the arrow keys, and asks nothing more for it 7ms
+     × replaces the text with a clicked row 6ms
+     × closes the list on Escape and keeps the text 6ms
+     × asks nothing more for the rest of the visit after a failed request, and still takes text 6ms
+ ❯ |ui| src/features/group/settings/TimeAndPlacePage.test.tsx (13 tests | 1 failed) 721ms
+     × saves the typed place when address suggestions have failed 40ms
+ Test Files  3 failed | 2 passed (5)
+      Tests  11 failed | 30 passed (41)
+TestingLibraryElementError: Unable to find an accessible element with the role "combobox" and name "Where"
+TestingLibraryElementError: Unable to find an accessible element with the role "combobox" and name "Where"
+TestingLibraryElementError: Unable to find an accessible element with the role "combobox" and name "Where"
