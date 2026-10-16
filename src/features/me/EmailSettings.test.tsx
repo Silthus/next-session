@@ -84,7 +84,7 @@ describe("EmailSettings", () => {
     expect(screen.getByText("Saving…")).toBeTruthy();
   });
 
-  it("says why a Reminders change failed", async () => {
+  it("says a Reminders change failed and offers another try", async () => {
     renderSettings(
       { sessionEmails: true, reminders: true },
       {

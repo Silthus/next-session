@@ -44,12 +44,13 @@ function renderPage(
   {
     turnOff = vi.fn<Switch>(),
     turnOn = vi.fn<Switch>(),
-  }: { turnOff?: Switch; turnOn?: Switch } = {},
+    landsOn,
+  }: { turnOff?: Switch; turnOn?: Switch; landsOn?: RemindersStatus } = {},
 ) {
   const status = liveStatus(initial);
   const switchTo = (enabled: boolean, press: Switch) => async () => {
     await press();
-    status.change({ enabled });
+    status.change(landsOn ?? { enabled });
   };
   function Page() {
     return (
@@ -172,6 +173,19 @@ describe("RemindersOff", () => {
     expect(
       await screen.findByRole("heading", { level: 1, name: "Turn off Reminders?" }),
     ).toBeTruthy();
+  });
+
+  it("offers the button again when another device switched Reminders back meanwhile", async () => {
+    renderPage(
+      { enabled: true },
+      { turnOff: vi.fn<Switch>(() => Promise.resolve(null)), landsOn: { enabled: true } },
+    );
+
+    await userEvent.click(await screen.findByRole("button", turnOffButton));
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", turnOffButton).hasAttribute("disabled")).toBe(false),
+    );
   });
 
   it("shows nothing to press while the link is being read", () => {

@@ -106,6 +106,7 @@ function SwitchButton({
       await onSwitch();
     } catch (error) {
       setFailure(errorMessage(error, "reminderLink"));
+    } finally {
       setBusy(false);
     }
   };
