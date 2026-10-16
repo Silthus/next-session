@@ -11,7 +11,7 @@ function renderSettings(
   {
     saveSessionEmails = vi.fn<Save>(() => Promise.resolve(null)),
     saveReminders = vi.fn<Save>(() => Promise.resolve(null)),
-  } = {},
+  }: { saveSessionEmails?: Save; saveReminders?: Save } = {},
 ) {
   render(
     <EmailSettings
@@ -25,6 +25,8 @@ function renderSettings(
 
 const sessionUpdates = { name: "Email me when a session is set or cancelled" };
 const reminders = { name: "Email me 1 day and 2 hours before a session" };
+
+const switchNamed = (name: { name: string }) => screen.getByRole<HTMLInputElement>("switch", name);
 
 describe("EmailSettings", () => {
   it("shows the Session updates switch alone while Reminders aren't configured", () => {
@@ -42,8 +44,8 @@ describe("EmailSettings", () => {
       screen.getByRole("switch", sessionUpdates),
       screen.getByRole("switch", reminders),
     ]);
-    expect((screen.getByRole("switch", sessionUpdates) as HTMLInputElement).checked).toBe(true);
-    expect((screen.getByRole("switch", reminders) as HTMLInputElement).checked).toBe(false);
+    expect(switchNamed(sessionUpdates).checked).toBe(true);
+    expect(switchNamed(reminders).checked).toBe(false);
   });
 
   it("turns Reminders off without touching Session updates", async () => {
@@ -78,8 +80,8 @@ describe("EmailSettings", () => {
 
     await userEvent.click(screen.getByRole("switch", reminders));
 
-    expect((screen.getByRole("switch", reminders) as HTMLInputElement).disabled).toBe(true);
-    expect((screen.getByRole("switch", sessionUpdates) as HTMLInputElement).disabled).toBe(false);
+    expect(switchNamed(reminders).disabled).toBe(true);
+    expect(switchNamed(sessionUpdates).disabled).toBe(false);
     expect(screen.getByText("Saving…")).toBeTruthy();
   });
 
@@ -102,7 +104,7 @@ describe("EmailSettings", () => {
   it("disables the Session updates switch while the settings load", () => {
     renderSettings(undefined);
 
-    expect((screen.getByRole("switch", sessionUpdates) as HTMLInputElement).disabled).toBe(true);
+    expect(switchNamed(sessionUpdates).disabled).toBe(true);
     expect(screen.queryByRole("switch", reminders)).toBeNull();
   });
 });

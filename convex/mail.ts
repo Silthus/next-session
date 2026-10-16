@@ -42,10 +42,11 @@ type WebhookBody = Infer<typeof webhookBody>;
 
 export type MailRequest = { kind: MailKind; user: Doc<"users">; tipsConfirmUrl?: string };
 
-const WEBHOOK_URL_VARIABLES: Record<MailKind | "session", string> = {
+const WEBHOOK_URL_VARIABLES: Record<MailKind | "session" | "reminder", string> = {
   welcome: "POSTHOG_WELCOME_WEBHOOK_URL",
   tips: "POSTHOG_TIPS_WEBHOOK_URL",
   session: "POSTHOG_SESSION_WEBHOOK_URL",
+  reminder: "POSTHOG_REMINDER_WEBHOOK_URL",
 };
 
 export async function requestMail(ctx: MutationCtx, { kind, user, tipsConfirmUrl }: MailRequest) {
@@ -77,7 +78,7 @@ export const send = internalAction({
   },
 });
 
-function webhookFor(kind: MailKind | "session") {
+function webhookFor(kind: keyof typeof WEBHOOK_URL_VARIABLES) {
   const secret = process.env.POSTHOG_MAIL_WEBHOOK_SECRET;
   const url = process.env[WEBHOOK_URL_VARIABLES[kind]];
   return secret && url ? { secret, url } : null;
@@ -132,6 +133,10 @@ export const sendSession = internalAction({
 
 export function sessionMailConfigured() {
   return webhookFor("session") !== null;
+}
+
+export function remindersConfigured() {
+  return webhookFor("reminder") !== null;
 }
 
 async function recordMailVolume(ctx: MutationCtx, count: number) {

@@ -10,8 +10,10 @@ import {
 import { MAX_CLAIMED_PLAYERS_PER_ACCOUNT, MAX_GROUPS_PER_GM } from "../shared/limits";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type QueryCtx } from "./_generated/server";
+import { remindersConfigured } from "./mail";
 import { fail } from "./model/errors";
-import { currentAccount } from "./model/access";
+import { currentAccount, requireAccount } from "./model/access";
+import { remindersOn } from "./model/reminderLinks";
 
 const UPCOMING_SESSIONS = 5;
 const DAY = 86_400_000;
@@ -125,12 +127,19 @@ function daysBetween(first: IsoDate, last: IsoDate) {
   return days;
 }
 
-export const sessionEmails = query({
+export const notificationSettings = query({
   args: {},
-  returns: v.union(v.boolean(), v.null()),
+  returns: v.union(
+    v.object({ sessionEmails: v.boolean(), reminders: v.union(v.boolean(), v.null()) }),
+    v.null(),
+  ),
   handler: async (ctx) => {
     const account = await currentAccount(ctx);
-    return account ? account.sessionEmailsEnabled !== false : null;
+    if (!account) return null;
+    return {
+      sessionEmails: account.sessionEmailsEnabled !== false,
+      reminders: remindersConfigured() ? remindersOn(account) : null,
+    };
   },
 });
 
@@ -141,6 +150,16 @@ export const setSessionEmails = mutation({
     const account = await currentAccount(ctx);
     if (!account) fail({ code: "UNAUTHENTICATED" });
     await ctx.db.patch("users", account._id, { sessionEmailsEnabled: enabled });
+    return null;
+  },
+});
+
+export const setReminders = mutation({
+  args: { enabled: v.boolean() },
+  returns: v.null(),
+  handler: async (ctx, { enabled }) => {
+    const account = await requireAccount(ctx);
+    await ctx.db.patch("users", account._id, { remindersEnabled: enabled });
     return null;
   },
 });

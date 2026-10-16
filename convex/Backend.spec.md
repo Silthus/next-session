@@ -69,12 +69,24 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - me.groups: an Account reads My groups
   handler: groups in me.ts
   trust: signed-in user
-- me.sessionEmails: an Account reads its Session updates preference
-  handler: sessionEmails in me.ts
+- me.notificationSettings: an Account reads its Session updates and Reminders switches; Reminders read as null while they are not configured
+  handler: notificationSettings in me.ts
   trust: signed-in user
 - me.setSessionEmails: an Account turns Session updates on or off
   handler: setSessionEmails in me.ts
   trust: signed-in user
+- me.setReminders: an Account turns its Reminders on or off
+  handler: setReminders in me.ts
+  trust: signed-in user
+- reminderLinks.status: whoever holds a Reminder link reads whether its Account's Reminders are on; an unknown token reads as null
+  handler: status in reminderLinks.ts
+  trust: visitor
+- reminderLinks.turnOff: whoever holds a Reminder link turns its Account's Reminders off
+  handler: turnOff in reminderLinks.ts
+  trust: visitor
+- reminderLinks.turnOn: whoever holds a Reminder link turns its Account's Reminders back on
+  handler: turnOn in reminderLinks.ts
+  trust: visitor
 - account.me: a caller reads whether they are anonymous and their email
   handler: me in account.ts
   trust: signed-in user
@@ -129,6 +141,22 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: key-rotation-compatibility dismissed: rotating the Share Token deliberately stops the old link; no reader keeps using it
   checklist: redaction dismissed: a scoped-out call returns null or NOT_FOUND with nothing of the other Group in it
   checklist: separation-of-duties dismissed: the player surface has one role; whoever holds the link answers as any Player by design (ADR-0010)
+- reminder link scoping: A Reminder link token reads and changes only its own Account's Reminders switch, and an unknown token reaches nothing.
+  over: every public function that takes a Reminder link token, called with one Account's token while another Account exists, and with unknown tokens
+  via: every Reminder link function reaches only its own Account's Reminders switch
+  because: the Reminder link works without signing in and travels in every Reminder; if it reached another Account, or anything beyond the switch, one forwarded mail would expose or change other players' settings
+  crossing: visitor -> store
+  refuted: switchRemindersWith patched every Account with a Reminder link, not only the token's -> the oracle failed by name (2026-10-16)
+  entrances: reminderLinks.status, reminderLinks.turnOff, reminderLinks.turnOn
+  kinds: read, credential
+  checklist: scoped-reads declared as reminder link scoping
+  checklist: capability-authorization declared as reminder link scoping
+  checklist: revalidated-permission dismissed: no Reminder link work is deferred; each call resolves the token inside its own transaction
+  checklist: message-authenticity dismissed: the Reminder link token is a bearer credential, not a signed message
+  checklist: encrypted-storage dismissed: every Reminder must carry the link again, so the token is stored readable by design, like the Share Token; it switches only Reminders
+  checklist: key-rotation-compatibility dismissed: the token is never rotated (spec #140); a leaked link can do no more than switch its Account's Reminders
+  checklist: redaction dismissed: status returns only whether Reminders are on, and an unknown token returns null or NOT_FOUND with nothing of any Account in it
+  checklist: separation-of-duties dismissed: the link has one role, the Reminders switch of its Account
 - save never replaces: Save adds every Group of the Anonymous GM to the Account and leaves the Account's own Groups exactly as they were.
   over: an Account that already owns Groups redeeming the claim code of an Anonymous GM that owns a Group
   via: adds to an Account's Groups and never replaces them

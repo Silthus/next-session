@@ -155,8 +155,8 @@ function publicFunctionsTakingAReminderLinkToken() {
   );
 }
 
-function withoutRemindersSwitch({ remindersEnabled: _switch, ...rest }: Doc<"users">) {
-  return rest;
+function withoutRemindersSwitch(account: Doc<"users">) {
+  return { ...account, remindersEnabled: undefined };
 }
 
 describe("Reminder link scoping", () => {

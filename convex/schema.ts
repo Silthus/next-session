@@ -22,13 +22,16 @@ export default defineSchema({
     tipsConsentVersion: v.optional(v.string()),
     tipsCodeHash: v.optional(v.string()),
     sessionEmailsEnabled: v.optional(v.boolean()),
+    remindersEnabled: v.optional(v.boolean()),
+    reminderLinkToken: v.optional(v.string()),
     tipsConfirmedAt: v.optional(v.number()),
     profileImageId: v.optional(v.id("_storage")),
     profileImageFrom: v.optional(v.string()),
   })
     .index("email", ["email"])
     .index("phone", ["phone"])
-    .index("by_tipsCodeHash", ["tipsCodeHash"]),
+    .index("by_tipsCodeHash", ["tipsCodeHash"])
+    .index("by_reminderLinkToken", ["reminderLinkToken"]),
 
   groups: defineTable({
     ownerId: v.id("users"),

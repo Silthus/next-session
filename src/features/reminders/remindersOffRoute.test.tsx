@@ -9,7 +9,9 @@ const mutations = {
   "reminderLinks:turnOff": vi.fn(() => Promise.resolve(null)),
   "reminderLinks:turnOn": vi.fn(() => Promise.resolve(null)),
 };
-const status = vi.fn((_name: string, _args: unknown) => ({ enabled: true }));
+const status = vi.fn<(name: string, args: unknown) => { enabled: boolean }>(() => ({
+  enabled: true,
+}));
 
 vi.mock("convex/react", () => ({
   useQuery: (query: FunctionReference<"query">, args: unknown) =>

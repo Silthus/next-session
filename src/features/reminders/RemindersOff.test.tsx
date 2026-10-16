@@ -24,7 +24,10 @@ type Switch = () => Promise<null>;
 
 function renderPage(
   status: RemindersStatus,
-  { turnOff = vi.fn<Switch>(), turnOn = vi.fn<Switch>() } = {},
+  {
+    turnOff = vi.fn<Switch>(),
+    turnOn = vi.fn<Switch>(),
+  }: { turnOff?: Switch; turnOn?: Switch } = {},
 ) {
   const router = createRouter({
     routeTree: createRootRoute({
