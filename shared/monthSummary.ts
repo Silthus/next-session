@@ -1,5 +1,6 @@
 import { monthProgress, type Answer } from "./answers";
 import { isBookable, monthDays, type IsoDate, type IsoMonth } from "./dates";
+import type { SessionState } from "./sessions";
 
 export type PlayerRow = { _id: string; name: string; image?: string };
 export type AnswerRow<PlayerId extends string> = {
@@ -7,7 +8,7 @@ export type AnswerRow<PlayerId extends string> = {
   date: IsoDate;
   answer: Answer;
 };
-export type SessionRow = { _id: string; date: IsoDate };
+export type SessionRow = { _id: string; date: IsoDate; state: SessionState };
 
 export type MonthSummaryInput<Player extends PlayerRow, Session extends SessionRow> = {
   month: IsoMonth;
@@ -28,6 +29,7 @@ export type DaySummary<Player extends PlayerRow, Session extends SessionRow> = {
   heat: number;
   perfect: boolean;
   session: Session | null;
+  cancelled: Session | null;
 };
 
 export type MonthSummary<Player extends PlayerRow, Session extends SessionRow> = {
@@ -48,7 +50,7 @@ export function summarizeMonth<Player extends PlayerRow, Session extends Session
   const answerOf = answerLookup(input.answers);
   const sessionOn = sessionsByDate(input.sessions);
   const days = monthDays(input.month).map((date) =>
-    summarizeDay(date, input, answerOf, sessionOn.get(date) ?? null),
+    summarizeDay(date, input, answerOf, sessionOn.get(date)),
   );
   return { days, bestNights: bestNights(days), progress: progressOf(input) };
 }
@@ -81,7 +83,7 @@ function summarizeDay<Player extends PlayerRow, Session extends SessionRow>(
   date: IsoDate,
   { today, players }: MonthSummaryInput<Player, Session>,
   answerOf: AnswerLookup<Player["_id"]>,
-  session: Session | null,
+  session: Session | undefined,
 ): DaySummary<Player, Session> {
   const playersAnswering = (value: Answer | null) =>
     players.filter((player) => answerOf(player._id, date) === value);
@@ -98,7 +100,8 @@ function summarizeDay<Player extends PlayerRow, Session extends SessionRow>(
     unanswered: playersAnswering(null),
     heat: busy.length > 0 || players.length === 0 ? 0 : free.length / players.length,
     perfect: everyoneFree,
-    session,
+    session: session?.state === "scheduled" ? session : null,
+    cancelled: session?.state === "cancelled" ? session : null,
   };
 }
 

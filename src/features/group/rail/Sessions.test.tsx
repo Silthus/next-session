@@ -1,16 +1,17 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import type { Id } from "../../../../convex/_generated/dataModel";
-import { today } from "./railFixtures";
+import type { CalendarSession } from "../calendar/DayCell";
+import { sessionOn, today } from "./railFixtures";
 import { Sessions } from "./Sessions";
 
-const sessionsOn = (...dates: string[]) =>
-  dates.map((date) => ({ _id: `s-${date}` as Id<"sessions">, date }));
-
-function renderSessions(dates: string[]) {
+function renderSessions(dates: string[], cancelled: string[] = []) {
   const onSelectDay = vi.fn();
-  render(<Sessions sessions={sessionsOn(...dates)} today={today} onSelectDay={onSelectDay} />);
+  const sessions: CalendarSession[] = [
+    ...dates.map((date) => sessionOn(date, "scheduled")),
+    ...cancelled.map((date) => sessionOn(date, "cancelled")),
+  ];
+  render(<Sessions sessions={sessions} today={today} onSelectDay={onSelectDay} />);
   return { onSelectDay, card: screen.getByRole("region", { name: "Sessions" }) };
 }
 
@@ -53,6 +54,14 @@ describe("Sessions", () => {
         .slice(1)
         .map((item) => item.textContent),
     ).toEqual(["Friday, Sep 25", "Friday, Sep 4"]);
+  });
+
+  it("leaves Cancelled Sessions out of both upcoming and played", async () => {
+    const { card } = renderSessions(["2026-09-04", "2026-10-16"], ["2026-09-25", "2026-10-09"]);
+    expect(within(card).getAllByRole("button", { name: /day,/ })).toHaveLength(1);
+    expect(within(card).getByText("Next in 14 days")).toBeTruthy();
+    await userEvent.click(within(card).getByRole("button", { name: "1 played" }));
+    expect(within(card).getAllByRole("listitem").at(-1)?.textContent).toBe("Friday, Sep 4");
   });
 
   it("explains that nothing is scheduled", () => {

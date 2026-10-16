@@ -129,7 +129,22 @@ describe("BestNights", () => {
     renderBestNights(
       monthWith({ answers: { "2026-10-16": { Ana: "free" } }, sessions: ["2026-10-16"] }),
     );
-    expect(screen.getByRole("button", { name: /Session scheduled/ })).toBeTruthy();
+    const night = screen.getByRole("button", { name: /Session scheduled/ });
+    expect(night.querySelector("[data-mark=session]")).not.toBeNull();
+  });
+
+  it("ranks a Cancelled night on its Answers, without the Session star", () => {
+    const { card } = renderBestNights(
+      monthWith({
+        answers: { "2026-10-16": { Ana: "free" }, "2026-10-09": { Ana: "free", Ben: "free" } },
+        cancelled: ["2026-10-09"],
+      }),
+    );
+    const [first] = within(card).getAllByRole("listitem");
+    const night = within(first!).getByRole("button", {
+      name: "Friday, Oct 9, 2 of 5 free. Free: Ana, Ben. Session cancelled",
+    });
+    expect(night.querySelector("[data-mark=session]")).toBeNull();
   });
 
   describe("scheduling straight from the rail", () => {
@@ -167,6 +182,18 @@ describe("BestNights", () => {
       );
       expect(screen.queryByRole("button", { name: "Schedule Friday, Oct 9" })).toBeNull();
       expect(document.activeElement).toBe(screen.getByRole("button", { name: /^Friday, Oct 9,/ }));
+    });
+
+    it("schedules a Cancelled night again", async () => {
+      const onSchedule = vi.fn(() => Promise.resolve());
+      renderBestNights(
+        monthWith({ answers: { "2026-10-09": { Ana: "free" } }, cancelled: ["2026-10-09"] }),
+        { onSchedule },
+      );
+      const again = screen.getByRole("button", { name: "Schedule again Friday, Oct 9" });
+      expect(again.textContent).toBe("Schedule again");
+      await userEvent.click(again);
+      expect(onSchedule).toHaveBeenCalledWith("2026-10-09");
     });
 
     it("offers no quick action for a night that already has a Session", () => {

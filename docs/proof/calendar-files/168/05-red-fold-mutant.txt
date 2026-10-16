@@ -1,0 +1,58 @@
+Mutant: fold counts character.length (UTF-16 units) instead of UTF-8 octets. The fold test must fail.
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-7ec46f65
+
+ ❯ |shared| shared/icalendar.test.ts (5 tests | 1 failed) 11ms
+   ❯ calendar text (1)
+     × folds a long location at 75 octets without splitting its two-byte umlaut 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > calendar text > folds a long location at 75 octets without splitting its two-byte umlaut
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to contain '\r\nLOCATION:Spielebar Würfelglück\, …'
+
+- Expected
++ Received
+
+- 
++ BEGIN:VCALENDAR
++ VERSION:2.0
++ PRODID:-//Next Session//next-session.link//EN
++ CALSCALE:GREGORIAN
++ X-WR-CALNAME:Next Session
++ REFRESH-INTERVAL;VALUE=DURATION:PT1H
++ X-PUBLISHED-TTL:PT1H
++ BEGIN:VEVENT
++ UID:j57c9w2qx8@next-session.link
++ SEQUENCE:2
++ DTSTAMP:20261016T092800Z
++ DTSTART:20261031T180000Z
++ DTEND:20261031T220000Z
++ SUMMARY:Spieleabend C
+- LOCATION:Spielebar Würfelglück\, Hinterzimmer im ersten Stock\, Ecke Sch
++ LOCATION:Spielebar Würfelglück\, Hinterzimmer im ersten Stock\, Ecke Schönh
+-  önhauser Allee 12\, Berlin
++  auser Allee 12\, Berlin
++ DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
++ URL:https://next-session.link/me
++ STATUS:CONFIRMED
++ END:VEVENT
++ END:VCALENDAR
+
+
+ ❯ shared/icalendar.test.ts:61:44
+     59|
+     60|   it("folds a long location at 75 octets without splitting its two-byt…
+     61|     expect(feed("Next Session", [corner])).toContain(
+       |                                            ^
+     62|       "\r\nLOCATION:Spielebar Würfelglück\\, Hinterzimmer im ersten St…
+     63|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  08:56:12
+   Duration  141ms (transform 55%, tests 21%, import 19%, worker 5%)
+

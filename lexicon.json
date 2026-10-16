@@ -108,6 +108,10 @@
     {
       "name": "Privacy Policy",
       "definition": "The Next Session Privacy Policy a GM accepts, drafted in docs/legal/privacy.md."
+    },
+    {
+      "name": "Cancelled Session",
+      "definition": "A Session the GM called off after its Undo window. It stays on its date marked Cancelled, never counts as played, and Schedule again restores the same Session until the date passes."
     }
   ]
 }

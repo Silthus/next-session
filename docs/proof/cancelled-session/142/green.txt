@@ -1,0 +1,107 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-9ffb835b
+
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth days > has one day per date of the month 3ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth days > marks dates before today as past and not bookable 1ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth days > marks dates after the Booking Window as neither past nor bookable 1ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth days > attaches the Session on its date 1ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth days > keeps a Cancelled Session apart, so its date is open again 1ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth answers per day > sorts the Roster into free, maybe, busy, and unanswered 1ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth answers per day > ignores Answers of Players no longer on the Roster 0ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth answers per day > heats a day by the share of Players who are free 0ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth answers per day > gives a day with any busy Answer no heat 0ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth answers per day > calls a day perfect when every Player is free 0ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth answers per day > never calls a day perfect for an empty Roster 0ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth Best Nights > ranks every date that works by free Players, with maybe counting half and ties going to the earlier date 7ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth Best Nights > ranks three Players on maybe above one Player free 1ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth Best Nights > leaves out any date a Player answered busy 0ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth Best Nights > leaves out past dates 0ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth Best Nights > leaves out dates nobody is free or maybe on 0ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth Best Nights > ranks a Cancelled date on its Answers like any open date 0ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth Best Nights > carries the day so the GM sees who is free 0ms
+ ✓ |shared| shared/monthSummary.test.ts > summarizeMonth progress > counts each Player's answered dates out of the dates still open this month 0ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > keeps every night pending until its own change settles 24ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > ignores a second change to a night while the first is on its way 10ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > undoes a new Session with the id the server returned 3ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > says a Session is cancelled and brings its date back on Undo 2ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > shows a scheduled night in every cached month of the Group at once 2ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > drops a cancelled Session players never heard of, so Undo right after a schedule leaves no mark 1ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > marks a cancelled Session players have heard of as Cancelled, in every cached month 1ms
+ ✓ |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > schedules a Cancelled night again in place 1ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns the Roster, the month's Answers, and every Session of the Group 362ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns Cancelled Sessions too, and whether players have heard of each 3ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > leaves out the Players, Answers, and Sessions of other Groups 3ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > feeds summarizeMonth for the per-player progress, Best Nights, and Sessions 5ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > serves an Anonymous GM their own Group 3ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for a foreign Group, so it looks missing 2ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for a removed Group 3ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for a malformed Group id 2ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for the malformed month "2026-13" 2ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for the malformed month "2026-1" 2ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for the malformed month "October" 1ms
+ ✓ |convex| convex/schedule.test.ts > schedule.month > returns null for a signed-out caller 1ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > ranks the nights and says who is free 129ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > says what matters now 11ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > says what matters now 10ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > says what matters now 7ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > says what matters now 6ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > counts every night that works but lists the top three 12ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > selects a night's day 23ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > shows at most four free players and counts the rest 8ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > names no one free on a night of maybes 6ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > marks a night that already has a Session 8ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > lists upcoming Sessions soonest first with how far away they are 137ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > says when the next Session is 9ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > says when the next Session is 6ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > selects a Session's day 25ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > folds played Sessions away, latest first 27ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > leaves Cancelled Sessions out of both upcoming and played 21ms
+ ✓ |ui| src/features/group/rail/Sessions.test.tsx > Sessions > explains that nothing is scheduled 5ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > lists who is free first, then maybe, busy and silent 137ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > schedules a bookable night 31ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > cancels a Session that has not passed 18ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > still cancels a Session today 15ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > marks a Cancelled Session and schedules it again 17ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > keeps a past Cancelled Session marked and read-only 10ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > offers no cancel on a past Session 10ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > cannot schedule a past night 9ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > holds the button, and its focus, while the change is on its way 15ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > goes back to the overview 14ms
+ ✓ |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > explains an empty Roster 5ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > ranks a Cancelled night on its Answers, without the Session star 9ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > scheduling straight from the rail > schedules a night without opening its day 58ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > scheduling straight from the rail > keeps focus on the night once it is scheduled and the quick action goes 23ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > scheduling straight from the rail > schedules a Cancelled night again 12ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > who is behind a night > names each Player's answer beside the night, for hover, focus and screen readers 177ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > who is behind a night > hides the names on Escape until the night is hovered or focused again 97ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > scheduling straight from the rail > offers no quick action for a night that already has a Session 8ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > scheduling straight from the rail > offers no quick action where the rail cannot schedule 7ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > explains an empty list for { playerCount: 0 } 4ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > explains an empty list for { playerCount: 5 } 3ms
+ ✓ |ui| src/features/group/rail/BestNights.test.tsx > BestNights > explains an empty list for { playerCount: 5, monthOver: true } 3ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > who is behind a night > says nothing beside a past night 42ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > who is behind a night > says nothing beside a night while the Roster is empty 26ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > steps from the requested month and holds the old grid while the next month loads 63ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > shows a loaded grid as settled 43ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > shows the month and sums up each day for screen readers 50ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > marks today as the current date 39ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > colours each Player's bar by their answer and tints a day by its free share 44ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > draws a grey bar for each Player who hasn't answered a bookable day 54ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > names everyone free and a scheduled Session 39ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > marks a Cancelled Session and still shows the night everyone is free 32ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > selects a tapped day 38ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > clears the selection when the selected day is tapped again 40ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > keeps past days read-only 39ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > marks a past month and dims every day 28ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > moves between months up to the end of the Booking Window 51ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > stops at the last month of the Booking Window and keeps the button focusable 40ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > draws one bar per Player up to eight Players 45ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > switches to free, busy and not-answered counts above eight Players 48ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > counts no one as missing on a dense past day or a day everyone answered 35ms
+ ✓ |ui| src/features/group/calendar/HeatCalendar.test.tsx > HeatCalendar > shows no bars or counts for a Group without Players 20ms
+
+ Test Files  7 passed (7)
+      Tests  98 passed (98)
+   Start at  09:23:46
+   Duration  2.04s (tests 34%, environment 34%, transform 22%, import 5%, setup 4%)
+

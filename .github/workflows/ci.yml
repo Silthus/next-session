@@ -129,3 +129,4 @@ jobs:
           expect_response /s/AAAAAAAA "302 $LONIR_URL/s/AAAAAAAA"
           expect_response "/groups/smoke?month=2026-01" "302 $LONIR_URL/groups/smoke?month=2026-01"
           expect_response /ingest/ "204 "
+          expect_response /cal/s/AAAAAAAAAA.ics "404 "

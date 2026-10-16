@@ -5,7 +5,7 @@ import { Card } from "../../../ui/Card";
 import { cn } from "../../../ui/cn";
 import { lastVisibleMonth, leadingBlanks, monthLabel, WEEKDAYS } from "./calendarDates";
 import { DayCell, MAX_PLAYERS_WITH_BARS, unansweredBarTone, type CalendarDay } from "./DayCell";
-import { IconChevron, IconStar } from "../../../ui/icons";
+import { IconChevron, IconStar, IconStarCancelled } from "../../../ui/icons";
 
 export function HeatCalendar({
   month,
@@ -132,6 +132,9 @@ function Legend({ dense }: { dense: boolean }) {
       </span>
       <span className="flex items-center gap-1.5">
         <IconStar className="size-3 text-accent-strong" /> session
+      </span>
+      <span className="flex items-center gap-1.5">
+        <IconStarCancelled className="size-3" /> cancelled
       </span>
       {dense ? (
         <span className="flex items-center gap-1.5">

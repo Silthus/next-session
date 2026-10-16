@@ -1,0 +1,27 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-7ec46f65
+
+ ❯ |shared| shared/icalendar.test.ts (8 tests | 1 failed) 10ms
+   ❯ calendarContentType (1)
+     × names the iMIP method each invite kind carries 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > calendarContentType > names the iMIP method each invite kind carries
+TypeError: calendarContentType is not a function
+ ❯ shared/icalendar.test.ts:87:12
+     85| describe("calendarContentType", () => {
+     86|   it("names the iMIP method each invite kind carries", () => {
+     87|     expect(calendarContentType("request")).toBe("text/calendar; charse…
+       |            ^
+     88|     expect(calendarContentType("cancel")).toBe("text/calendar; charset…
+     89|     expect(calendarContentType("withdraw")).toBe("text/calendar; chars…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  08:56:54
+   Duration  138ms (transform 56%, import 19%, tests 19%, worker 5%)
+

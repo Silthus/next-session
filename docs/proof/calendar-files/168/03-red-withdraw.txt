@@ -1,0 +1,44 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-7ec46f65
+
+ ❯ |shared| shared/icalendar.test.ts (3 tests | 1 failed) 8ms
+   ❯ invite (3)
+     × uninvites only this attendee, leaving the Session's status unsaid 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > invite > uninvites only this attendee, leaving the Session's status unsaid
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to be 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' // Object.is equality
+
+- Expected
++ Received
+
+@@ -11,10 +11,11 @@
+  DTEND:20261031T220000Z
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
+  URL:https://next-session.link/me
++ STATUS:CONFIRMED
+  ORGANIZER;CN=Next Session:mailto:calendar@next-session.link
+  ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=FALSE:mailto:player@ex
+   ample.com
+  END:VEVENT
+  END:VCALENDAR
+
+ ❯ shared/icalendar.test.ts:31:74
+     29|
+     30|   it("uninvites only this attendee, leaving the Session's status unsai…
+     31|     expect(invite({ kind: "withdraw", ...addresses, entry: halloween }…
+       |                                                                          ^
+     32|   });
+     33| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  08:54:51
+   Duration  129ms (transform 56%, import 19%, tests 18%, worker 6%)
+

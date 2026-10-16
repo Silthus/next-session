@@ -50,9 +50,21 @@ export async function signedInGmWithGroup(t: TestBackend, signInGm = signInAccou
   return { ...gm, groupId };
 }
 
-export async function seedSession(t: TestBackend, groupId: Id<"groups">, date: string) {
-  return await t.run(async (ctx) => await ctx.db.insert("sessions", { groupId, date }));
+type SessionFields = Omit<Doc<"sessions">, "_id" | "_creationTime" | "groupId" | "date">;
+
+export async function seedSession(
+  t: TestBackend,
+  groupId: Id<"groups">,
+  date: string,
+  fields: SessionFields = {},
+) {
+  return await t.run(async (ctx) => await ctx.db.insert("sessions", { groupId, date, ...fields }));
 }
+
+export const CANCELLED = {
+  state: "cancelled",
+  published: { state: "cancelled", revision: 2 },
+} satisfies SessionFields;
 
 export async function expiryOf(t: TestBackend, groupId: Id<"groups">) {
   return await t.run(async (ctx) => (await ctx.db.get("groups", groupId))?.expiresAt);

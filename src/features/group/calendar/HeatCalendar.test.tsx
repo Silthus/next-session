@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../../convex/_generated/dataModel";
@@ -57,6 +57,21 @@ function countsOf(day: HTMLElement) {
       count.textContent,
     ]),
   );
+}
+
+function sessionOn(date: string, state: CalendarSession["state"]): CalendarSession {
+  return {
+    _id: `s-${date}` as Id<"sessions">,
+    date,
+    state,
+    published: true,
+    startTime: "19:00",
+    lengthMinutes: 240,
+  };
+}
+
+function marksOf(day: HTMLElement) {
+  return [...day.querySelectorAll("[data-mark]")].map((mark) => mark.getAttribute("data-mark"));
 }
 
 function barsOf(day: HTMLElement) {
@@ -200,13 +215,44 @@ describe("HeatCalendar", () => {
         { playerId: "p0", date: "2026-10-09", answer: "free" },
         { playerId: "p1", date: "2026-10-09", answer: "free" },
       ],
-      sessions: [{ _id: "s1" as Id<"sessions">, date: "2026-10-09" }],
+      sessions: [sessionOn("2026-10-09", "scheduled")],
     });
-    expect(
-      screen.getByRole("button", {
-        name: "Friday, October 9: everyone free, Session scheduled",
-      }),
-    ).toBeTruthy();
+    const night = screen.getByRole("button", {
+      name: "Friday, October 9: everyone free, Session scheduled",
+    });
+    expect(marksOf(night)).toEqual(["session"]);
+  });
+
+  it("marks a Cancelled Session and still shows the night everyone is free", () => {
+    renderCalendar({
+      players: rosterOf(2),
+      answers: [
+        { playerId: "p0", date: "2026-10-09", answer: "free" },
+        { playerId: "p1", date: "2026-10-09", answer: "free" },
+      ],
+      sessions: [sessionOn("2026-10-09", "cancelled")],
+    });
+    const night = screen.getByRole("button", {
+      name: "Friday, October 9: everyone free, Session cancelled",
+    });
+    expect(marksOf(night)).toEqual(["cancelled"]);
+    expect(within(night).getByText("Cancelled")).toBeTruthy();
+    expect(night.classList).toContain("bg-free");
+  });
+
+  it("sets the Cancelled mark in ink on a night tinted by free answers", () => {
+    renderCalendar({
+      players: rosterOf(2),
+      answers: [
+        { playerId: "p0", date: "2026-10-09", answer: "free" },
+        { playerId: "p1", date: "2026-10-09", answer: "maybe" },
+      ],
+      sessions: [sessionOn("2026-10-09", "cancelled")],
+    });
+    const night = screen.getByRole("button", { name: /^Friday, October 9: .*Session cancelled$/ });
+    expect(night.style.background).toContain("var(--free)");
+    expect(within(night).getByText("Cancelled").classList).toContain("text-ink");
+    expect(night.querySelector('[data-mark="cancelled"]')?.classList).toContain("text-ink");
   });
 
   it("selects a tapped day", async () => {

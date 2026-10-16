@@ -12,7 +12,13 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - groups.create: a GM creates a Group with a fresh Share Token
   handler: create in groups.ts
   trust: signed-in user
-- groups.rename: a GM renames a Group they own
+- groups.settings: a GM reads the Time and place of a Group they own; a foreign or missing id reads as null
+  handler: settings in groups.ts
+  trust: signed-in user
+- groups.updateSettings: a GM saves the Time and place of a Group they own, which moves its upcoming scheduled Sessions
+  handler: updateSettings in groups.ts
+  trust: signed-in user
+- groups.rename: a GM renames a Group they own, which renames its upcoming scheduled Sessions in calendars
   handler: rename in groups.ts
   trust: signed-in user
 - groups.remove: a GM deletes a Group they own and its children
@@ -36,11 +42,11 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - roster.removePlayer: a GM removes a Player and their Answers
   handler: removePlayer in roster.ts
   trust: signed-in user
-- sessions.schedule: a GM picks a date in the Booking Window as a Session
+- sessions.schedule: a GM picks a date in the Booking Window as a Session, or restores its Cancelled Session
   handler: schedule in sessions.ts
   trust: signed-in user
-- sessions.unschedule: a GM cancels a Session
-  handler: unschedule in sessions.ts
+- sessions.cancel: a GM cancels a Session, which keeps it as a Cancelled Session unless it was never published
+  handler: cancel in sessions.ts
   trust: signed-in user
 - player.group: whoever holds a Share Link reads its Group's Roster and Sessions
   handler: group in player.ts
@@ -95,6 +101,9 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   handler: auth in auth.ts
   trust: visitor
   control: none — the Convex Auth library owns these routes and their token checks; sign-ups pass the project's rate limits in admitAnonymousSignUp and admitAccountSignUp
+- calendar download: GET /cal/s/<Share Token>.ics, whoever holds a Share Link downloads its Group's upcoming scheduled Sessions as a calendar file
+  handler: downloadGroupCalendar in calendarFiles.ts
+  trust: visitor
 - expiry sweep: the daily cron deletes Unsaved Groups past their Expiry
   handler: sweepExpiredGroups in cleanup.ts
   trust: operator
@@ -106,7 +115,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   because: a Group is one table's private plan; without the ownership check any signed-in GM could read or edit another table's Roster, Answers and Sessions, and a refusal that differs from a missing id would let ids be probed
   crossing: signed-in user -> store
   refuted: groupOwnedBy returned the Group without comparing its ownerId -> the oracle failed by name (2026-10-12)
-  entrances: groups.mine, groups.get, groups.create, groups.rename, groups.remove, groups.rotateShareToken, groups.undoRotateShareToken, schedule.month, roster.addPlayer, roster.renamePlayer, roster.removePlayer, sessions.schedule, sessions.unschedule
+  entrances: groups.mine, groups.get, groups.create, groups.settings, groups.updateSettings, groups.rename, groups.remove, groups.rotateShareToken, groups.undoRotateShareToken, schedule.month, roster.addPlayer, roster.renamePlayer, roster.removePlayer, sessions.schedule, sessions.cancel
   kinds: read, identity
   checklist: scoped-reads declared as owner-only groups
   checklist: capability-authorization declared as share link scoping
@@ -140,9 +149,9 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: capability-authorization dismissed: the claim code is single use, hashed and expires after ten minutes; its acceptance is covered by the account tests, not by this merge rule
   checklist: canonical-encoding dismissed: the claim code is compared by its hash and has one encoding
   checklist: identity-continuity declared as save never replaces
-- no personal data to posthog: Every backend event and log sent to PostHog carries no Group name, Player name, Share Token, claim code or email.
-  over: every event and log a full journey sends: create a link, rename, rotate, join, schedule, Save, claim, release and the expiry sweep
-  via: sends no Group name, Player name, Share Token, claim code or email in any event or log
+- no personal data to posthog: Every backend event and log sent to PostHog carries no Group name, Player name, Share Token, claim code, email, location or start time.
+  over: every event and log a full journey sends: create a link, rename, save a Time and place, rotate, join, schedule, Save, claim, release and the expiry sweep
+  via: sends no Group name, Player name, Share Token, claim code, email, location or start time in any event or log
   because: Next Session shares its PostHog project with Lonir and promises in the Privacy Policy to send no names or credentials; a leaked Share Token in an event would hand out a Group
   crossing: store -> egress
   refuted: toPostHogEvent added the actor's email to every event -> the oracle failed by name (2026-10-12)
@@ -152,3 +161,33 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: commit-ordered-effects dismissed: track schedules send with ctx.scheduler.runAfter inside the mutation, and Convex drops what an uncommitted mutation scheduled
   checklist: circuit-breaker-policy dismissed: telemetry is fire and forget with a ten second timeout; a PostHog outage drops events and never blocks the product
   checklist: declared-target-coverage dismissed: there is one target, PostHog
+- published only: Session updates and the Calendar download never show a change before its Undo window ends.
+  over: Session updates sent for every schedule, cancel and Undo a GM makes through sessions.schedule and sessions.cancel, and the Calendar download fetched after the same changes
+  via: never announces a change before its Undo window ends
+  because: the Undo window promises that a mis-tap reaches nobody (#124); a mail sent before it ends tells players about a night the GM took back, and calendars that arrive later would add and remove entries for nothing
+  crossing: store -> egress
+  refuted: recordChange scheduled settle at once instead of after UNDO_WINDOW_MS -> the oracle failed by name (2026-10-16)
+  refuted: the Calendar download took each Session's live state instead of its published state -> the oracle failed by name (2026-10-16)
+  kinds: output
+  checklist: commit-ordered-effects declared as published only
+  checklist: revalidated-permission dismissed: every send attempt rechecks the published revision, the Group, the Claim and the Session email switch in its own query
+  checklist: destination-confinement dismissed: the Session update posts only to the configured Workflows webhook, never to a caller-supplied address
+  checklist: redaction dismissed: the Session update body is the Workflows trigger data the recipient's own mail needs, and it never reaches telemetry
+  checklist: circuit-breaker-policy dismissed: a failing webhook gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks a GM's change
+  checklist: declared-target-coverage dismissed: there is one target, the Workflows Session update webhook
+- feed scoping: A calendar file reached through a Share Token holds only the published Sessions of the Group behind that token's current value; a rotated-away or unknown token reaches nothing.
+  over: the Calendar download fetched for two Groups with Sessions on the same date, through each Group's current Share Token and through a rotated-away one
+  via: every calendar file holds only the published Sessions of its own token's Group
+  because: the Share Link is the only Player credential (ADR-0004); a download that reached another Group's Sessions would turn one leaked link into every table's plans, and one that still opened after a rotation would undo the GM's remedy for a leaked link
+  crossing: visitor -> store
+  refuted: groupDownload read every Group's Sessions in the window instead of only its own Group's index range -> the oracle failed by name (2026-10-16)
+  entrances: calendar download
+  kinds: read, credential
+  checklist: scoped-reads declared as feed scoping
+  checklist: capability-authorization declared as feed scoping
+  checklist: revalidated-permission dismissed: no calendar work is deferred; each request resolves the Share Token inside its own query
+  checklist: message-authenticity dismissed: the Share Token is a bearer credential, not a signed message
+  checklist: encrypted-storage dismissed: the GM must be able to copy the Share Link again, so the token is stored readable by design (ADR-0004); rotation revokes it
+  checklist: key-rotation-compatibility dismissed: rotating the Share Token deliberately stops the old download link; no reader keeps using it
+  checklist: redaction dismissed: an unknown or rotated-away token gets 404 with no body, and a Group's own file holds only what its Share Link already shows
+  checklist: separation-of-duties dismissed: the download has one role; whoever holds the Share Link reads the Group's published Sessions by design (ADR-0010)

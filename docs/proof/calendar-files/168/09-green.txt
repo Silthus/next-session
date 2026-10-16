@@ -1,0 +1,19 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-7ec46f65
+
+ ✓ |shared| shared/icalendar.test.ts > invite > asks the attendee's calendar to add the Session as confirmed and already accepted 2ms
+ ✓ |shared| shared/icalendar.test.ts > invite > tells every attendee's calendar that the Session is off 1ms
+ ✓ |shared| shared/icalendar.test.ts > invite > uninvites only this attendee, leaving the Session's status unsaid 1ms
+ ✓ |shared| shared/icalendar.test.ts > feed > lists scheduled and cancelled Sessions for a subscribed calendar, without invite headers 1ms
+ ✓ |shared| shared/icalendar.test.ts > calendar text > folds a long location at 75 octets without splitting its two-byte umlaut 1ms
+ ✓ |shared| shared/icalendar.test.ts > calendar text > escapes commas, semicolons, backslashes and line breaks in text 0ms
+ ✓ |shared| shared/icalendar.test.ts > calendar text > ends every line, the last one included, with CRLF 2ms
+ ✓ |shared| shared/icalendar.test.ts > every calendar > writes every time in UTC and carries no time zone and no alarm 3ms
+ ✓ |shared| shared/icalendar.test.ts > every calendar > is the same text for the same entries, whatever the clock says 4ms
+ ✓ |shared| shared/icalendar.test.ts > calendarContentType > names the iMIP method each invite kind carries 0ms
+
+ Test Files  1 passed (1)
+      Tests  10 passed (10)
+   Start at  08:58:04
+   Duration  141ms (transform 52%, tests 26%, import 18%, worker 5%)
+

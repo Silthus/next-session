@@ -1,0 +1,45 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-7ec46f65
+
+ ❯ |shared| shared/icalendar.test.ts (2 tests | 1 failed) 8ms
+   ❯ invite (2)
+     × tells every attendee's calendar that the Session is off 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > invite > tells every attendee's calendar that the Session is off
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to be 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' // Object.is equality
+
+- Expected
++ Received
+
+@@ -11,11 +11,11 @@
+  DTEND:20261031T220000Z
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
+  URL:https://next-session.link/me
+- STATUS:CANCELLED
++ STATUS:CONFIRMED
+  ORGANIZER;CN=Next Session:mailto:calendar@next-session.link
+  ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=FALSE:mailto:player@ex
+   ample.com
+  END:VEVENT
+  END:VCALENDAR
+
+ ❯ shared/icalendar.test.ts:26:72
+     24|
+     25|   it("tells every attendee's calendar that the Session is off", () => {
+     26|     expect(invite({ kind: "cancel", ...addresses, entry: halloween }))…
+       |                                                                        ^
+     27|   });
+     28| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  08:54:40
+   Duration  132ms (transform 55%, import 20%, tests 18%, worker 7%)
+
