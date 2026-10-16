@@ -15,10 +15,10 @@ In PostHog EU project `13216`, open **Workflows → Channels → hello@next-sess
 | Project | Lonir's shared project on EU Cloud (`eu.posthog.com`), project ID `13216`. Free plan: events kept 1 year, logs 14 days |
 | Sender | Workflows → Channels: `Michael from Next Session <hello@next-session.link>`. Its SES records (three `*._domainkey` CNAMEs, `feedback` MX and SPF, `_amazonses` TXT, the root SPF, `_dmarc`) are in the `next-session.link` zone, next to Resend's `send`, `rsend` and `resend._domainkey`. Channel ID `88088`. Someone must press **Verify** on the channel once: PostHog sends nothing from an unverified sender, and its verify endpoint refuses personal API keys |
 | Email templates | Workflows → Library. Definitions in [`templates/`](templates) |
-| Workflows | "Next Session: Welcome Mail", "Next Session: Tips" and "Next Session: Session updates". Rebuild definitions in [`workflows/`](workflows) remain draft with placeholders |
+| Workflows | "Next Session: Welcome Mail", "Next Session: Tips", "Next Session: Session updates" and "Next Session: Reminders". Rebuild definitions in [`workflows/`](workflows) remain draft with placeholders |
 | Browser token | Repo variable `VITE_POSTHOG_TOKEN`, read by the deploy job's build |
 | Source maps | Repo variable `POSTHOG_PROJECT_ID` and repo secret `POSTHOG_PERSONAL_API_KEY`. The deploy job installs `posthog-cli` pinned by its release checksum |
-| Server token and mail | Convex prod env: `POSTHOG_PROJECT_TOKEN` is set. `POSTHOG_MAIL_WEBHOOK_SECRET`, `POSTHOG_WELCOME_WEBHOOK_URL`, `POSTHOG_TIPS_WEBHOOK_URL` and `POSTHOG_SESSION_WEBHOOK_URL` are configured privately |
+| Server token and mail | Convex prod env: `POSTHOG_PROJECT_TOKEN` is set. `POSTHOG_MAIL_WEBHOOK_SECRET`, `POSTHOG_WELCOME_WEBHOOK_URL`, `POSTHOG_TIPS_WEBHOOK_URL`, `POSTHOG_SESSION_WEBHOOK_URL` and `POSTHOG_REMINDER_WEBHOOK_URL` are configured privately |
 | Local copies | `~/.config/next-session/posthog.env` (token, personal API key) and `posthog-mail.env` (webhook secret) on devbox-michaelr-1. Never commit them |
 
 ## Templates
@@ -79,7 +79,9 @@ Convex estimates planned deliveries per UTC day across Welcome (1), Tips (2) and
 
 ## Reminders
 
-Reminders are built but switched off: no "Next Session: Reminders" workflow exists in PostHog yet, and Convex prod has no `POSTHOG_REMINDER_WEBHOOK_URL`. Without it, or without `POSTHOG_MAIL_WEBHOOK_SECRET`, Convex schedules no Reminder and calls no webhook. The switch-on and its live proof are #149. `workflows/reminders.json` and `templates/reminder.json` are the rebuild definitions, in the shape of the Session updates pair.
+As of 2026-10-16, Reminders are on in production (#149). The [Reminders workflow](https://eu.posthog.com/project/13216/workflows/01a1451e-8468-0000-412a-96da466da377/workflow?node=email_reminder) is active and uses template `01a1451e-7c94-0000-d5b4-8e922ecd4738`, sender `88088` and the Session updates category. Convex prod has `POSTHOG_REMINDER_WEBHOOK_URL`, set after Privacy Policy 1.10 went live. Without it, or without `POSTHOG_MAIL_WEBHOOK_SECRET`, Convex schedules no Reminder and calls no webhook. `workflows/reminders.json` and `templates/reminder.json` are the rebuild definitions, in the shape of the Session updates pair.
+
+The switch-on proof is on #149. Four mocked runs covered both leads, with and without a location. The workflow refused a missing or wrong Bearer with 401. The backfill ran once and left no Session with two pairs. In production, a disposable Group scheduled for the same evening got only its 2-hour Reminder, because its 1-day time had already passed. PostHog sent it with tracking off, the provider reported it delivered, and Michael confirmed it in his inbox with the right Group, time, place, button and footer link. A second disposable Session, cancelled before its 2-hour job, sent nothing. The footer link, opened signed out, changed nothing until **Turn off Reminders**; My groups then showed the switch off, and turning it back on held through a reload. Both Groups were deleted, and the proof Account's preferences were restored.
 
 Convex posts one Reminder per Account, 24 hours (`lead: "day"`) and 2 hours (`lead: "hours"`) before the Session starts, with event `next_session:reminder_requested`:
 
@@ -106,10 +108,10 @@ The email step is `transactional` with `tracking_enabled: false`. It has no host
 Switch on in this order:
 
 1. The Privacy Policy with the Reminders row is live.
-2. Create the template and the workflow from the rebuild files, inactive. Exercise both leads, with and without a location, through `mock_async_functions=true`: each reaches one mocked sender, the Group name is escaped once in HTML, and the footer link is the body's `reminders_off_url`.
+2. Create the template and the workflow from the rebuild files, inactive. A step created through the API keeps its own copy of the template, so read the saved template back (PostHog renders its `html` from the `design`) and copy its `subject`, `text`, `html` and `design` into the step's `inputs.email.value`. Exercise both leads, with and without a location, through `mock_async_functions=true`: each reaches one mocked sender, the Group name is escaped once in HTML, and the footer link is the body's `reminders_off_url`. Give the mock recipient a domain with mail servers, or PostHog skips the step before it reaches the mock.
 3. Activate the workflow and check that a missing or wrong Bearer gets 401.
 4. Set `POSTHOG_REMINDER_WEBHOOK_URL` in Convex prod. It reuses `POSTHOG_MAIL_WEBHOOK_SECRET`.
-5. Run the backfill once: `bunx convex run --prod reminders:scheduleUpcoming '{}'`. It schedules the pair for every upcoming scheduled Session that has none for its current revision, so running it twice schedules nothing new. A Session changed in the last minute waits, because its change may not have settled yet: the backfill runs itself again 90 seconds later, after that change has published or been taken back. It logs "Reminder backfill finished" with the number of Reminders it scheduled.
+5. Run the backfill once: `bunx convex run --prod reminders:scheduleUpcoming '{}'`. It schedules the pair for every upcoming scheduled Session that has none for its current revision, so running it twice schedules nothing new. A Session changed in the last minute waits, because its change may not have settled yet: the backfill runs itself again 90 seconds later, after that change has published or been taken back. It logs "Reminder backfill finished" with the number of Reminders it scheduled. That log, like "Session mail daily volume warning", goes to PostHog logs, not the Convex console: query `logs` by `body` in project `13216`.
 6. Take the live proof: a real Reminder in an owned inbox, its footer link turning Reminders off, and the My groups switch showing it off.
 
 Each Reminder counts 1 in the daily mail estimate when its job fires, never per retry. A job that runs more than 5 minutes after its due time sends nothing. A due time already past at publish is never scheduled. Network errors and 5xx get four attempts in all, with backoff; every attempt rechecks the published revision, the Claim, the Reminders switch and the current Share Link. Other 4xx, 429 included, are logged and dropped.
