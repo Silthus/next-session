@@ -92,8 +92,8 @@ export const settle = internalMutation({
     if (session === null || session.changedAt !== changedAt) return null;
     const group = await ctx.db.get("groups", session.groupId);
     if (group === null) return null;
-    const snapshot = snapshotOf(group, session, stateOf(session));
     const previous = session.published && widenedSnapshot(group, session, session.published);
+    const snapshot = snapshotToPublish(group, session, previous);
     if (previous !== undefined && isPublishedAs(previous, snapshot)) return null;
     const published = { ...snapshot, revision: (previous?.revision ?? 0) + 1 };
     await ctx.db.patch("sessions", sessionId, { published });
@@ -103,6 +103,16 @@ export const settle = internalMutation({
     return null;
   },
 });
+
+function snapshotToPublish(
+  group: Doc<"groups">,
+  session: Doc<"sessions">,
+  previous: PublishedSession | undefined,
+): SessionSnapshot {
+  const state = stateOf(session);
+  if (state === "cancelled" && previous !== undefined) return { ...previous, state };
+  return snapshotOf(group, session, state);
+}
 
 function isPublishedAs(published: PublishedSession, snapshot: SessionSnapshot) {
   return SNAPSHOT_FIELDS.every((field) => published[field] === snapshot[field]);

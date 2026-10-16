@@ -1,0 +1,44 @@
+import { api } from "./convex/_generated/api";
+import { addMonths, monthOf, todayUtc } from "./shared/dates";
+import { signInAnonymousGm, signUpAccount, waitUntilPublished } from "./e2e/helpers";
+
+const site = `http://127.0.0.1:${process.env.E2E_SITE_PORT}`;
+const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const stamp = () => new Date().toISOString();
+
+async function feedEntry(feedPath: string) {
+  const text = await (await fetch(`${site}${feedPath}`)).text();
+  return text
+    .replace(/\r\n /g, "")
+    .split("\r\n")
+    .filter((line) => /^(DTSTART|DTEND|SUMMARY|LOCATION|STATUS|SEQUENCE)/.test(line));
+}
+
+const gm = await signInAnonymousGm();
+await gm.client.mutation(api.groups.rename, { groupId: gm.groupId, name: "Thursday Crew" });
+const night = `${addMonths(monthOf(todayUtc(Date.now())), 1)}-12`;
+const sessionId = await gm.client.mutation(api.sessions.schedule, { groupId: gm.groupId, date: night });
+const account = await signUpAccount();
+await account.client.mutation(api.player.join, { shareToken: gm.shareToken, name: "Robin" });
+await waitUntilPublished(gm.client, gm.groupId, night);
+const { url } = (await account.client.mutation(api.me.calendarFeed, {})) as { url: string };
+const feedPath = new URL(url).pathname;
+console.log(`${stamp()} scheduled ${night} (${sessionId}) and published; feed entry:`);
+console.log((await feedEntry(feedPath)).join("\n"));
+
+await gm.client.mutation(api.sessions.cancel, { sessionId });
+console.log(`${stamp()} GM cancels the night`);
+await pause(10_000);
+await gm.client.mutation(api.groups.updateSettings, {
+  groupId: gm.groupId,
+  startTime: "18:30",
+  lengthMinutes: 180,
+  timeZone: "Europe/Berlin",
+  location: "Max's place",
+});
+await gm.client.mutation(api.groups.rename, { groupId: gm.groupId, name: "Friday Crew" });
+console.log(`${stamp()} inside the cancel's Undo window: Time and place saved as 18:30 for 3 h at Max's place, Group renamed Friday Crew`);
+await pause(35_000);
+console.log(`${stamp()} after the Undo window; feed entry:`);
+console.log((await feedEntry(feedPath)).join("\n"));
+

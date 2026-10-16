@@ -83,3 +83,20 @@ test("an Account subscribes its calendar app on My groups and resets the link", 
     expect.arrayContaining([`UID:${sessionId}@next-session.link`]),
   );
 });
+
+test("Subscribe on My groups opens My groups at Your calendar", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 480 });
+  const gm = await signInAnonymousGm();
+  const night = `${addMonths(monthOf(todayUtc(Date.now())), 1)}-12`;
+  await gm.client.mutation(api.sessions.schedule, { groupId: gm.groupId, date: night });
+  const account = await signUpAccount();
+  await account.client.mutation(api.player.join, { shareToken: gm.shareToken, name: "Robin" });
+  await openAsGm(page, account, `/s/${gm.shareToken}`);
+
+  await page.getByRole("link", { name: "Subscribe on My groups" }).click();
+
+  const calendar = page.getByRole("heading", { level: 2, name: "Your calendar" });
+  await expect(calendar).toBeFocused();
+  await expect(calendar).toBeInViewport();
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+});

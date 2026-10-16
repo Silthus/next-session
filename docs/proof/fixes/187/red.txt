@@ -1,0 +1,30 @@
+Red runs before each fix (worktree fix/polish-after-s3, 2026-10-16).
+
+1. settle, convex/timeAndPlace.test.ts
+   × publishes a Session cancelled before a saved Time and place at its published time and place
+   × publishes a Session cancelled before a rename at its published time and place
+     - "summary": "My group"
+     + "summary": "Thursday crew"
+     (the Save case moved start and end to the new 18:30 time and gained "Max's place")
+
+2. Busy Button focus, e2e/time-and-place.spec.ts (Chromium, local backend)
+   ✘ a Save that fails leaves the GM on the Save button
+     Expect "toBeFocused" getByRole('button', { name: 'Save' }) - unexpected value "inactive"
+   (jsdom keeps focus on a disabled button, so this red only shows in a real browser)
+
+3. Subscribe on My groups
+   × points an Account that keeps the Group to My groups to follow moves   (href was "/me")
+   × lands on Your calendar when opened to subscribe
+   ✘ e2e/calendar-feed.spec.ts Subscribe on My groups opens My groups at Your calendar
+     expect(locator).toBeFocused() failed - Received: inactive   (landing hook disabled)
+
+4. Cancelled marks
+   × explains the Cancelled mark in the legend when the month shows a cancelled Session
+   × marks a Cancelled Session in Next sessions and on its Group's card
+     (card said "Next session Thu, Oct 8 · Cancelled" while Oct 22 was scheduled)
+
+Review round 1 (GPT-6.1 Sol): callers that pass disabled={busy} beside busy still dropped focus.
+   ✘ e2e/landing.spec.ts a Log in that fails leaves the visitor on the Log in button
+     expect(locator).toBeFocused() failed - Received: inactive
+   Fixed in Button (busy takes over from disabled); green with landing, time-and-place,
+   gm-rail and player-account specs (48 passed, 20 skipped).

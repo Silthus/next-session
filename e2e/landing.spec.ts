@@ -1,12 +1,13 @@
+import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 import {
-  expect,
-  test,
-  type Browser,
-  type Locator,
-  type Page,
-  type WebSocketRoute,
-} from "@playwright/test";
-import { reserveAccountSignUp, password, signUpAccount, toastRegion } from "./helpers";
+  failRequest,
+  interceptSync,
+  password,
+  reserveAccountSignUp,
+  serverError,
+  signUpAccount,
+  toastRegion,
+} from "./helpers";
 
 const shareLinkPattern = /^127\.0\.0\.1:\d+\/s\/[A-Za-z0-9_-]{10}$/;
 
@@ -49,36 +50,10 @@ async function seedAccount(browser: Browser) {
   return { email, groupPath };
 }
 
-type Sync = { client: WebSocketRoute; server: WebSocketRoute };
-
-async function interceptSync(page: Page, onClientMessage: (text: string, sync: Sync) => boolean) {
-  await page.routeWebSocket(/\/api\/.*\/sync/, (client) => {
-    const server = client.connectToServer();
-    client.onMessage((message) => {
-      if (!onClientMessage(String(message), { client, server })) server.send(message);
-    });
-    server.onMessage((message) => client.send(message));
-  });
-}
-
 function isFinishSave(text: string) {
   return text.includes('"udfPath":"account:finishSave"');
 }
 
-function failMutation(client: WebSocketRoute, text: string, failure: object) {
-  const { requestId } = JSON.parse(text) as { requestId: number };
-  client.send(
-    JSON.stringify({
-      type: "MutationResponse",
-      requestId,
-      success: false,
-      logLines: [],
-      ...failure,
-    }),
-  );
-}
-
-const serverError = { result: "Server Error" };
 const claimInvalid = { result: "", errorData: { code: "CLAIM_INVALID" } };
 
 async function failThenHoldFinishSave(page: Page) {
@@ -87,7 +62,7 @@ async function failThenHoldFinishSave(page: Page) {
   await interceptSync(page, (text, { client, server }) => {
     if (!isFinishSave(text)) return false;
     finishes += 1;
-    if (finishes === 1) failMutation(client, text, serverError);
+    if (finishes === 1) failRequest(client, text, serverError);
     else if (finishes === 2) release = () => server.send(text);
     else return false;
     return true;
@@ -100,7 +75,7 @@ async function failFinishSaves(page: Page, failures: object[]) {
   await interceptSync(page, (text, { client }) => {
     const failure = isFinishSave(text) ? pending.shift() : undefined;
     if (!failure) return false;
-    failMutation(client, text, failure);
+    failRequest(client, text, failure);
     return true;
   });
 }
@@ -400,6 +375,26 @@ test("a wrong password says so and keeps the sheet open", async ({ page, browser
   await expect(sheet.getByRole("alert")).toHaveText("Wrong email or password.");
   await expect(sheet.getByLabel("Email", { exact: true })).toHaveValue(email);
   await expect(sheet.getByLabel("Password")).toBeFocused();
+});
+
+test("a Log in that fails leaves the visitor on the Log in button", async ({ page, browser }) => {
+  const { email } = await seedAccount(browser);
+  let fail = () => {};
+  await interceptSync(page, (text, { client }) => {
+    if (!text.includes('"udfPath":"auth:signIn"') || !text.includes('"provider":"password"')) {
+      return false;
+    }
+    fail = () => failRequest(client, text, serverError);
+    return true;
+  });
+  const sheet = await openLogIn(page);
+
+  await logIn(sheet, email);
+  await expect(sheet.getByRole("button", { name: "Logging in…" })).toBeVisible();
+  fail();
+
+  await expect(sheet.getByRole("alert")).toBeVisible();
+  await expect(sheet.getByRole("button", { name: "Log in" })).toBeFocused();
 });
 
 test.describe("on a dark OS", () => {

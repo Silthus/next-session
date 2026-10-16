@@ -16,7 +16,7 @@ import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
 import { LegalFooter } from "../../ui/LegalFooter";
 import { Logo } from "../../ui/Logo";
-import { IconChevron } from "../../ui/icons";
+import { IconChevron, IconStarCancelled } from "../../ui/icons";
 import { focusRing, pressable } from "../../ui/interactive";
 import { Skeleton } from "../../ui/Skeleton";
 import { useFocusOnMount } from "../../ui/useFocusOnMount";
@@ -265,7 +265,7 @@ export function PlayerCalendar({
             </div>
           ))}
 
-        <Legend />
+        <Legend showsCancelled={view.days.some((day) => day.cancelled)} />
         <p className="text-center text-xs text-ink-3">
           {view.readOnly ? LOCK_TIP : TIPS[Math.floor(taps / 3) % TIPS.length]}
         </p>
@@ -462,12 +462,19 @@ function DayTile({
           ★
         </span>
       )}
-      {day.cancelled && (
-        <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full border border-line-strong bg-surface-2 px-1 text-[8px] leading-3.5 font-semibold text-ink-2 sm:text-[9px]">
-          Cancelled
-        </span>
-      )}
+      {day.cancelled && <CancelledMark />}
     </button>
+  );
+}
+
+function CancelledMark() {
+  return (
+    <>
+      <IconStarCancelled className="absolute top-1 right-1 size-3 opacity-80 sm:top-1.5 sm:right-1.5 sm:size-4" />
+      <span className="text-[10px] leading-none font-semibold opacity-80 max-sm:hidden">
+        Cancelled
+      </span>
+    </>
   );
 }
 
@@ -540,7 +547,7 @@ function DoneCard({
   );
 }
 
-function Legend() {
+function Legend({ showsCancelled }: { showsCancelled: boolean }) {
   return (
     <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-sm text-ink-2">
       {ANSWERS.map((answer) => (
@@ -564,6 +571,12 @@ function Legend() {
         />
         Not set
       </li>
+      {showsCancelled && (
+        <li className="flex items-center gap-1.5">
+          <IconStarCancelled className="size-4 text-ink-3" />
+          Cancelled
+        </li>
+      )}
     </ul>
   );
 }
