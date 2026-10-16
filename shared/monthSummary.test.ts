@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Answer } from "./answers";
-import { summarizeMonth, type DaySummary } from "./monthSummary";
+import { summarizeMonth, type DaySummary, type SessionRow } from "./monthSummary";
 
 const ana = { _id: "p-ana", name: "Ana" };
 const ben = { _id: "p-ben", name: "Ben" };
@@ -20,7 +20,7 @@ const october = {
   sessions: [],
 };
 
-function day(days: readonly DaySummary<typeof ana, { _id: string; date: string }>[], date: string) {
+function day(days: readonly DaySummary<typeof ana, SessionRow>[], date: string) {
   const found = days.find((d) => d.date === date);
   if (!found) throw new Error(`no summary for ${date}`);
   return found;
@@ -45,13 +45,23 @@ describe("summarizeMonth days", () => {
   });
 
   it("attaches the Session on its date", () => {
-    const session = { _id: "s-1", date: "2026-10-30" };
+    const session = { _id: "s-1", date: "2026-10-30", state: "scheduled" } as const;
     const { days } = summarizeMonth({
       ...october,
-      sessions: [{ _id: "s-0", date: "2026-11-02" }, session],
+      sessions: [{ _id: "s-0", date: "2026-11-02", state: "scheduled" }, session],
     });
-    expect(day(days, "2026-10-30").session).toBe(session);
-    expect(day(days, "2026-10-29").session).toBeNull();
+    expect(day(days, "2026-10-30")).toMatchObject({ session, cancelled: null });
+    expect(day(days, "2026-10-29")).toMatchObject({ session: null, cancelled: null });
+  });
+
+  it("keeps a Cancelled Session apart, so its date is open again", () => {
+    const cancelled = { _id: "s-1", date: "2026-10-30", state: "cancelled" } as const;
+    const { days } = summarizeMonth({
+      ...october,
+      answers: [ana, ben, cy].map((p) => answer(p, "2026-10-30", "free")),
+      sessions: [cancelled],
+    });
+    expect(day(days, "2026-10-30")).toMatchObject({ session: null, cancelled, perfect: true });
   });
 });
 
@@ -178,6 +188,18 @@ describe("summarizeMonth Best Nights", () => {
   it("leaves out dates nobody is free or maybe on", () => {
     const { bestNights } = summarizeMonth(midOctober);
     expect(bestNights).toEqual([]);
+  });
+
+  it("ranks a Cancelled date on its Answers like any open date", () => {
+    const { bestNights } = summarizeMonth({
+      ...midOctober,
+      answers: [answer(ana, "2026-10-21", "free"), ...allFree("2026-10-25")],
+      sessions: [{ _id: "s-1", date: "2026-10-25", state: "cancelled" }],
+    });
+    expect(bestNights.map((night) => [night.date, night.session])).toEqual([
+      ["2026-10-25", null],
+      ["2026-10-21", null],
+    ]);
   });
 
   it("carries the day so the GM sees who is free", () => {

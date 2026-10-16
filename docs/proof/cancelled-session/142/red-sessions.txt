@@ -1,0 +1,34 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-9ffb835b
+
+ ❯ |ui| src/features/group/rail/Sessions.test.tsx (7 tests | 1 failed) 207ms
+   ❯ Sessions (7)
+     × leaves Cancelled Sessions out of both upcoming and played 16ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |ui| src/features/group/rail/Sessions.test.tsx > Sessions > leaves Cancelled Sessions out of both upcoming and played
+AssertionError: expected [ <button …(2)>…(2)</button>, …(1) ] to have a length of 1 but got 2
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ src/features/group/rail/Sessions.test.tsx:61:67
+     59|   it("leaves Cancelled Sessions out of both upcoming and played", asyn…
+     60|     const { card } = renderSessions(["2026-09-04", "2026-10-16"], ["20…
+     61|     expect(within(card).getAllByRole("button", { name: /day,/ })).toHa…
+       |                                                                   ^
+     62|     expect(within(card).getByText("Next in 14 days")).toBeTruthy();
+     63|     await userEvent.click(within(card).getByRole("button", { name: "1 …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  09:18:41
+   Duration  896ms (environment 55%, tests 26%, setup 8%, transform 7%, import 4%)
+
