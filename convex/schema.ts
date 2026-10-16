@@ -94,6 +94,9 @@ export default defineSchema({
     state: v.optional(sessionState),
     changedAt: v.optional(v.number()),
     published: v.optional(publishedSession),
+    startTime: v.optional(v.string()),
+    lengthMinutes: v.optional(v.number()),
+    location: v.optional(v.string()),
     remindersRevision: v.optional(v.number()),
   })
     .index("by_groupId_and_date", ["groupId", "date"])

@@ -26,7 +26,7 @@ export async function sessionPublished(
     .take(MAX_PLAYERS_PER_GROUP);
   const accounts = new Set(players.flatMap((player) => (player.userId ? [player.userId] : [])));
   for (const userId of accounts) {
-    const send = { sessionId: session._id, userId, revision: published.revision };
+    const send = { sessionId: session._id, userId, change: published.state };
     if (await bodyFor(ctx, send)) await requestSessionMail(ctx, send);
   }
 }
@@ -37,10 +37,10 @@ export const recipient = internalQuery({
   handler: bodyFor,
 });
 
-async function bodyFor(ctx: QueryCtx, { sessionId, userId, revision }: SessionSend) {
+async function bodyFor(ctx: QueryCtx, { sessionId, userId, change }: SessionSend) {
   const session = await ctx.db.get("sessions", sessionId);
   const published = session?.published;
-  if (!session || published?.revision !== revision) return null;
+  if (!session || published?.state !== change) return null;
   const group = await ctx.db.get("groups", session.groupId);
   if (!group || group.ownerId === userId) return null;
   const player = await ctx.db
@@ -63,7 +63,7 @@ async function bodyFor(ctx: QueryCtx, { sessionId, userId, revision }: SessionSe
     email: account.email,
     group_name: group.name,
     date_label: dateLabel(session.date),
-    change: published.state,
+    change,
     player_url: shareLinkOf(group),
   };
 }

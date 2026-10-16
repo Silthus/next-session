@@ -80,6 +80,9 @@ const foreignCalls: Record<string, ForeignCall> = {
   "sessions.cancel": refusedAsMissing((as, { sessionId }) =>
     as.mutation(api.sessions.cancel, { sessionId }),
   ),
+  "sessions.updateDetails": refusedAsMissing((as, { sessionId }) =>
+    as.mutation(api.sessions.updateDetails, { sessionId, startTime: "21:00" }),
+  ),
 };
 
 const gmModules = { groups, roster, schedule, sessions };

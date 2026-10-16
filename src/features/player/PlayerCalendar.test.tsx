@@ -11,19 +11,32 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Answer } from "../../../shared/answers";
 import { track } from "../../lib/telemetry";
 import { PlayerCalendar } from "./PlayerCalendar";
+import type { PlayerSession } from "./playerMonth";
+
+const viewer = vi.hoisted(() => ({ timeZone: "Europe/Berlin" }));
 
 vi.mock(import("../../lib/telemetry"), async (original) => ({
   ...(await original()),
   track: vi.fn(),
 }));
+vi.mock("../../lib/timeZone", () => ({ browserTimeZone: () => viewer.timeZone }));
 
 beforeEach(() => {
   vi.mocked(track).mockReset();
+  viewer.timeZone = "Europe/Berlin";
 });
 
 type Props = ComponentProps<typeof PlayerCalendar>;
 
 const today = "2026-10-04";
+
+function sessionOn(
+  date: string,
+  state: PlayerSession["state"] = "scheduled",
+  details: Partial<PlayerSession> = {},
+): PlayerSession {
+  return { date, state, startTime: "19:00", lengthMinutes: 240, ...details };
+}
 
 function withAnswer(answers: Record<string, Answer>, date: string, answer: Answer | null) {
   const next = { ...answers };
@@ -58,6 +71,7 @@ function calendarProps(props: Partial<Props> = {}): Props {
     today,
     answers: {},
     sessions: [],
+    timeZone: "Europe/Berlin",
     hintVisible: false,
     onAnswer: vi.fn(() => Promise.resolve(null)),
     onFillRest: vi.fn(() => Promise.resolve(null)),
@@ -205,7 +219,7 @@ describe("PlayerCalendar", () => {
   });
 
   it("marks a Session with a star and keeps it tappable", async () => {
-    renderCalendar({ sessions: [{ date: "2026-10-16", state: "scheduled" }] });
+    renderCalendar({ sessions: [sessionOn("2026-10-16")] });
 
     const session = await tile("Friday, October 16: Not set, Session");
     expect(session).toHaveProperty("disabled", false);
@@ -215,7 +229,7 @@ describe("PlayerCalendar", () => {
   it("marks a Cancelled Session as Cancelled and keeps it answerable", async () => {
     const { onAnswer } = renderCalendar({
       answers: { "2026-10-16": "free" },
-      sessions: [{ date: "2026-10-16", state: "cancelled" }],
+      sessions: [sessionOn("2026-10-16", "cancelled")],
     });
 
     const cancelled = await tile("Friday, October 16: Free, Session cancelled");
@@ -422,6 +436,58 @@ function swipe(target: Element, from: { x: number; y: number }, to: { x: number;
   fireEvent.touchStart(target, { touches: [{ clientX: from.x, clientY: from.y }] });
   fireEvent.touchEnd(target, { changedTouches: [{ clientX: to.x, clientY: to.y }] });
 }
+
+describe("PlayerCalendar next sessions", () => {
+  const nextSessions = () => screen.findByRole("region", { name: "Next sessions" });
+
+  it("shows when and where each upcoming Session is, soonest first", async () => {
+    renderCalendar({
+      sessions: [
+        sessionOn("2026-10-22", "scheduled", { startTime: "20:00", lengthMinutes: 180 }),
+        sessionOn("2026-10-16", "scheduled", {
+          startTime: "18:30",
+          lengthMinutes: 180,
+          location: "Max's place",
+        }),
+      ],
+    });
+
+    const rows = within(await nextSessions()).getAllByRole("listitem");
+    expect(rows.map((row) => row.textContent)).toEqual([
+      "Friday, October 16in 12 days · 18:30–21:30Max's place",
+      "Thursday, October 22in 18 days · 20:00–23:00",
+    ]);
+  });
+
+  it("leaves out played and Cancelled Sessions", async () => {
+    renderCalendar({
+      sessions: [
+        sessionOn("2026-10-01"),
+        sessionOn("2026-10-04"),
+        sessionOn("2026-10-09", "cancelled"),
+      ],
+    });
+
+    const rows = within(await nextSessions()).getAllByRole("listitem");
+    expect(rows.map((row) => row.textContent)).toEqual(["Sunday, October 4today · 19:00–23:00"]);
+  });
+
+  it("names the Group's zone when the player's browser is elsewhere", async () => {
+    viewer.timeZone = "America/New_York";
+    renderCalendar({ sessions: [sessionOn("2026-10-16")] });
+
+    expect(within(await nextSessions()).getByRole("listitem").textContent).toBe(
+      "Friday, October 16in 12 days · 19:00–23:00 Berlin time",
+    );
+  });
+
+  it("shows no Next sessions while nothing is scheduled ahead", async () => {
+    renderCalendar({ sessions: [sessionOn("2026-10-02"), sessionOn("2026-10-20", "cancelled")] });
+
+    await screen.findByRole("group", { name: "October 2026" });
+    expect(screen.queryByRole("region", { name: "Next sessions" })).toBeNull();
+  });
+});
 
 describe("PlayerCalendar header and keep slot", () => {
   it("shows the account control in the header", async () => {

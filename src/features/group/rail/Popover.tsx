@@ -114,12 +114,23 @@ export function Popover({
 
 export const menuItemClassName = `flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm disabled:opacity-50 ${hoverRow}`;
 
-export function MenuButton({ onSelect, children }: { onSelect: () => void; children: ReactNode }) {
+export function MenuButton({
+  onSelect,
+  label,
+  className,
+  children,
+}: {
+  onSelect: () => void;
+  label?: string;
+  className?: string;
+  children: ReactNode;
+}) {
   const close = useClosePopover();
   return (
     <button
       type="button"
-      className={menuItemClassName}
+      aria-label={label}
+      className={cn(menuItemClassName, className)}
       onClick={() => {
         close({ refocus: false });
         onSelect();

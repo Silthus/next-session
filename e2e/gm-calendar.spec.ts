@@ -133,7 +133,10 @@ test.describe("on a phone", () => {
     await openAsGm(page, gm, `/g/${gm.groupId}?month=${monthOf(today)}`);
 
     await page.getByRole("tab", { name: "Sessions" }).tap();
-    await page.getByRole("region", { name: "Sessions" }).getByRole("button").first().tap();
+    await page
+      .getByRole("region", { name: "Sessions" })
+      .getByRole("button", { name: /, \w+ 6/ })
+      .tap();
     await expect(page).toHaveURL(new RegExp(`month=${nextMonth}&day=${night(6)}`));
     await expect(page.getByRole("region", { name: /, \w+ 6$/ }).getByRole("heading")).toBeFocused();
   });

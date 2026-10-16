@@ -17,7 +17,8 @@ export type ErrorCode =
   | "INVALID_CREDENTIALS"
   | "WEAK_PASSWORD"
   | "PLAYER_CLAIMED"
-  | "INVALID_SETTINGS";
+  | "INVALID_SETTINGS"
+  | "SESSION_CANCELLED";
 
 export type AppErrorData =
   | { code: "RATE_LIMITED"; retryAfter: number }

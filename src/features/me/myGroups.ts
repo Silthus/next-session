@@ -2,6 +2,7 @@ import type { FunctionReturnType } from "convex/server";
 import type { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { IsoDate } from "../../../shared/dates";
+import type { WallClockTime } from "../../lib/timeAndPlace";
 
 export type MyGroups = NonNullable<FunctionReturnType<typeof api.me.groups>>;
 export type PlayingGroup = MyGroups["playing"][number];
@@ -15,6 +16,8 @@ export type GroupSession = RunningGroup["upcomingSessions"][number];
 export type UpcomingSession = {
   date: IsoDate;
   cancelled: boolean;
+  time: WallClockTime;
+  location?: string;
   groupName: string;
   to: GroupPage;
 };
@@ -42,12 +45,18 @@ export function isCancelled(session: GroupSession) {
 }
 
 function sessionsOf(
-  group: { name: string; upcomingSessions: GroupSession[] },
+  group: { name: string; timeZone: string; upcomingSessions: GroupSession[] },
   to: GroupPage,
 ): UpcomingSession[] {
   return group.upcomingSessions.map((session) => ({
     date: session.date,
     cancelled: isCancelled(session),
+    time: {
+      startTime: session.startTime,
+      lengthMinutes: session.lengthMinutes,
+      timeZone: group.timeZone,
+    },
+    location: session.location,
     groupName: group.name,
     to,
   }));

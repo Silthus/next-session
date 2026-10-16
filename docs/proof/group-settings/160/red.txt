@@ -1,0 +1,70 @@
+# red: the #160 tests on the base tree c9d9fbe (no Next sessions card on the player page, no time or place on My groups' Next sessions)
+
+ ❯ |ui| src/features/me/MyGroups.test.tsx (16 tests | 2 failed) 456ms
+     × lists when and where the next Sessions are across Groups, each with its Group 158ms
+     × names a Group's zone when the browser is elsewhere 20ms
+ ❯ |ui| src/features/player/PlayerCalendar.test.tsx (35 tests | 3 failed) 4987ms
+     × shows when and where each upcoming Session is, soonest first 1007ms
+     × leaves out played and Cancelled Sessions 1005ms
+     × names the Group's zone when the player's browser is elsewhere 1004ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  |ui| src/features/me/MyGroups.test.tsx > MyGroups > lists when and where the next Sessions are across Groups, each with its Group
+AssertionError: expected [ …(3) ] to deeply equal [ …(3) ]
++ Received
+-   "Thursday, October 8in 2 days · 19:00–23:00Max's placeThursday Crew",
+-   "Saturday, October 10in 4 days · 18:30–22:30Dragon Heist",
+-   "Thursday, October 22in 16 days · 19:00–23:00Thursday Crew",
++   "Thursday, October 8in 2 daysThursday Crew",
++   "Saturday, October 10in 4 daysDragon Heist",
++   "Thursday, October 22in 16 daysThursday Crew",
+ ❯ src/features/me/MyGroups.test.tsx:103:54
+ FAIL  |ui| src/features/me/MyGroups.test.tsx > MyGroups > names a Group's zone when the browser is elsewhere
+AssertionError: expected 'Saturday, October 10in 4 daysDragon H…' to be 'Saturday, October 10in 4 days · 18:30…' // Object.is equality
+ ❯ src/features/me/MyGroups.test.tsx:120:76
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar next sessions > shows when and where each upcoming Session is, soonest first
+TestingLibraryElementError: Unable to find role="region" and name "Next sessions"
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ nextSessions src/features/player/PlayerCalendar.test.tsx:441:37
+ ❯ src/features/player/PlayerCalendar.test.tsx:455:31
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar next sessions > leaves out played and Cancelled Sessions
+TestingLibraryElementError: Unable to find role="region" and name "Next sessions"
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ nextSessions src/features/player/PlayerCalendar.test.tsx:441:37
+ ❯ src/features/player/PlayerCalendar.test.tsx:471:31
+ FAIL  |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar next sessions > names the Group's zone when the player's browser is elsewhere
+TestingLibraryElementError: Unable to find role="region" and name "Next sessions"
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ nextSessions src/features/player/PlayerCalendar.test.tsx:441:37
+ ❯ src/features/player/PlayerCalendar.test.tsx:479:25
+ Test Files  2 failed (2)
+      Tests  5 failed | 46 passed (51)
+
+# red: the extended Playwright flow on the base tree's player page (bun run e2e -- e2e/time-and-place.spec.ts --project chromium)
+
+  1) [chromium] › e2e/time-and-place.spec.ts:13:1 › the GM sets the Group's time and place, schedules a night, and the player sees both 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('region', { name: 'Next sessions' }).getByRole('listitem').filter({ hasText: /\w+ 12/ })
+    Expected substring: "18:30–21:30"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" getByRole('region', { name: 'Next sessions' }).getByRole('listitem').filter({ hasText: /\w+ 12/ }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Next sessions' }).getByRole('listitem').filter({ hasText: /\w+ 12/ })
+
+
+      78 |     .getByRole("listitem")
+      79 |     .filter({ hasText: new RegExp(`\\w+ 12`) });
+    > 80 |   await expect(nextSession).toContainText("18:30–21:30");
+         |                             ^
+      81 |   await expect(nextSession).toContainText("Max's place");
+      82 |   await playerContext.close();
+      83 | });
+
+  1 failed
+  1 passed (15.5s)

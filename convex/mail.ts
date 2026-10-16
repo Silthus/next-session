@@ -32,7 +32,7 @@ export const sessionMailBody = v.object({
 export const sessionSend = {
   sessionId: v.id("sessions"),
   userId: v.id("users"),
-  revision: v.number(),
+  change: sessionState,
 };
 export type SessionSend = Infer<ReturnType<typeof v.object<typeof sessionSend>>>;
 

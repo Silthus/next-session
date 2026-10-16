@@ -44,5 +44,6 @@ export function sessionOn(date: string, state: CalendarSession["state"]): Calend
     published: true,
     startTime: "19:00",
     lengthMinutes: 240,
+    overrides: [],
   };
 }

@@ -27,6 +27,16 @@ describe("errorMessage", () => {
     ["session", { code: "SESSION_EXISTS" }, "That night is already scheduled."],
     ["session", { code: "OUT_OF_WINDOW" }, "That date can't change anymore."],
     ["session", { code: "NOT_FOUND" }, "That session is gone already."],
+    [
+      "session",
+      { code: "SESSION_CANCELLED" },
+      "That night is cancelled. Schedule it again to change it.",
+    ],
+    [
+      "session",
+      { code: "INVALID_SETTINGS" },
+      "Check the start time and the place, then save again.",
+    ],
     ["roster", { code: "NAME_TAKEN", playerId: "p1" }, "That name is already on the list."],
     ["roster", { code: "ROSTER_FULL" }, "This group is full. It holds 100 players."],
     ["roster", { code: "NOT_FOUND" }, "That player is gone already."],

@@ -1,20 +1,29 @@
 import { useId, useState } from "react";
 import type { IsoDate } from "../../../../shared/dates";
+import { endClockTime, type ClockTime } from "../../../../shared/sessionTime";
+import { timeRange, zoneSuffix, type WallClockTime } from "../../../lib/timeAndPlace";
+import { Button } from "../../../ui/Button";
 import { cn } from "../../../ui/cn";
-import { IconChevron, IconStar } from "../../../ui/icons";
-import { focusRing, pressable } from "../../../ui/interactive";
+import { IconChevron, IconClock, IconStar } from "../../../ui/icons";
+import { focusRing, hoverRow, pressable } from "../../../ui/interactive";
 import { longDayLabel, nightLabel, relativeDay } from "../calendar/calendarDates";
 import type { CalendarSession } from "../calendar/DayCell";
 import { EmptyLine, RailCard } from "./RailCard";
 
+export type SessionsTimeAndPlace = WallClockTime & { location?: string; saved: boolean };
+
 export function Sessions({
   sessions,
   today,
+  timeAndPlace,
   onSelectDay,
+  onOpenTimeAndPlace,
 }: {
   sessions: readonly CalendarSession[];
   today: IsoDate;
+  timeAndPlace: SessionsTimeAndPlace;
   onSelectDay: (date: IsoDate) => void;
+  onOpenTimeAndPlace: () => void;
 }) {
   const byDate = sessions
     .filter((session) => session.state === "scheduled")
@@ -24,6 +33,11 @@ export function Sessions({
   const next = upcoming[0];
   return (
     <RailCard title="Sessions" status={next && `Next ${relativeDay(next.date, today)}`}>
+      {timeAndPlace.saved ? (
+        <UsualNight timeAndPlace={timeAndPlace} onEdit={onOpenTimeAndPlace} />
+      ) : (
+        <TimeAndPlacePrompt timeAndPlace={timeAndPlace} onSet={onOpenTimeAndPlace} />
+      )}
       {upcoming.length === 0 ? (
         <EmptyLine>Nothing scheduled. Pick a night from the calendar or the best nights.</EmptyLine>
       ) : (
@@ -42,7 +56,10 @@ export function Sessions({
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold">{longDayLabel(session.date)}</span>
                   <span className="block text-xs text-ink-3">
-                    {relativeDay(session.date, today)}
+                    {`${relativeDay(session.date, today)} · `}
+                    <span className="font-mono">
+                      {timeRange({ ...session, timeZone: timeAndPlace.timeZone })}
+                    </span>
                   </span>
                 </span>
               </button>
@@ -52,6 +69,56 @@ export function Sessions({
       )}
       {played.length > 0 && <PlayedSessions sessions={played} />}
     </RailCard>
+  );
+}
+
+function TimeAndPlacePrompt({
+  timeAndPlace,
+  onSet,
+}: {
+  timeAndPlace: WallClockTime;
+  onSet: () => void;
+}) {
+  const end = endClockTime(timeAndPlace.startTime as ClockTime, timeAndPlace.lengthMinutes);
+  return (
+    <div className="mt-3 rounded-md border border-dashed border-line-strong px-3 py-2.5">
+      <p className="text-sm font-semibold">When and where do you play?</p>
+      <p className="mt-0.5 text-xs text-ink-3">
+        {`Calendars show ${timeAndPlace.startTime} to ${end}${zoneSuffix(timeAndPlace.timeZone)} until you change it.`}
+      </p>
+      <Button size="sm" variant="soft" className="mt-2" onClick={onSet}>
+        Set time and place
+      </Button>
+    </div>
+  );
+}
+
+function UsualNight({
+  timeAndPlace,
+  onEdit,
+}: {
+  timeAndPlace: SessionsTimeAndPlace;
+  onEdit: () => void;
+}) {
+  const range = timeRange(timeAndPlace);
+  const summary = timeAndPlace.location ? `${range} · ${timeAndPlace.location}` : range;
+  return (
+    <button
+      type="button"
+      aria-label={`Edit time and place, ${summary}`}
+      onClick={onEdit}
+      className={cn(
+        "-mx-2 mt-2 flex w-[calc(100%+1rem)] items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-ink-2",
+        hoverRow,
+      )}
+    >
+      <IconClock className="size-4 shrink-0 text-ink-3" />
+      <span className="min-w-0 flex-1 truncate">
+        <span className="font-mono text-[13px] text-ink">{range}</span>
+        {timeAndPlace.location && ` · ${timeAndPlace.location}`}
+      </span>
+      <span className="text-xs font-semibold text-accent-strong">Edit</span>
+    </button>
   );
 }
 
