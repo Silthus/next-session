@@ -587,6 +587,33 @@ describe("mail volume", () => {
     ]);
   });
 
+  it("warns as Resend sends reach 80 and pass 100 across Groups, without dropping a recipient", async () => {
+    for (const [groupIndex, players] of [79, 20].entries()) {
+      const { as, groupId } = await signedInGmWithGroup(t);
+      await t.run(async (ctx) => {
+        for (let index = 0; index < players; index++) {
+          const userId = await ctx.db.insert("users", {
+            email: `player-${groupIndex}-${index}@example.com`,
+          });
+          await ctx.db.insert("players", {
+            groupId,
+            name: `Player ${index}`,
+            nameKey: `${index}`,
+            userId,
+          });
+        }
+      });
+      await as.mutation(api.sessions.schedule, { groupId, date });
+      await finish();
+    }
+
+    expect(resendRequests()).toHaveLength(101);
+    expect(volumeWarnings()).toEqual([
+      expect.objectContaining({ provider: "resend", estimated_deliveries: 80 }),
+      expect.objectContaining({ provider: "resend", estimated_deliveries: 101, daily_limit: 100 }),
+    ]);
+  });
+
   it("reads a day counted before providers as Workflows", async () => {
     vi.stubEnv("POSTHOG_WELCOME_WEBHOOK_URL", "https://example.test/welcome");
     await t.run(async (ctx) => {

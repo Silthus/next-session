@@ -84,7 +84,11 @@ async function deliver() {
 function mailsToRobin() {
   return fetchMock.mock.calls
     .map(([, init]) => JSON.parse(init!.body as string) as ResendMail)
-    .filter(({ to }) => to.includes(ROBIN));
+    .filter(({ to }) => to.some(isRobin));
+}
+
+function isRobin(address: string) {
+  return address.toLowerCase().startsWith("robin@");
 }
 
 function changes() {

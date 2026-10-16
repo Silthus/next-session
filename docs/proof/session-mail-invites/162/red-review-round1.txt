@@ -1,0 +1,8 @@
+## mutation: isMailable no longer drops .test addresses
+   × rechecks test-email before delivery 379ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 22 skipped (23)
+## mutation: no warning past DAILY_LIMIT
+     × warns as Resend sends reach 80 and pass 100 across Groups, without dropping a recipient 751ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 46 skipped (47)
