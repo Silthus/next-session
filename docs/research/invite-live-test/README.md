@@ -90,9 +90,9 @@ Filled in round by round. Evidence goes in this folder as redacted screenshots o
 
 - **Conductor's reading:** in Outlook, the entry moved by itself. In Gmail, the entry was never added, because the setting stayed "only if the sender is known", so there was nothing to move.
 - **Literal reading:** Gmail moved an entry Michael never added.
-- The round 3 park asks which one is right.
+- Settled by round 3: the conductor's reading is right. Gmail never held the entry.
 
-**Round 3 (cancel, `METHOD:CANCEL`, `SEQUENCE:2`, `STATUS:CANCELLED`, sent 2026-10-16 09:20 Berlin).** Result pending.
+**Round 3 (cancel, `METHOD:CANCEL`, `SEQUENCE:2`, `STATUS:CANCELLED`, sent 2026-10-16 09:20 Berlin).** Michael: "Yes, it disappeared in Outlook, and in Gmail, it was never in the calendar."
 
 ### Options for the failing RSVP (for the architecture prototype)
 
@@ -108,7 +108,7 @@ Recommendation: 1 and 2 together, with 1 checked in the architecture prototype's
 | 2a. Card for `REQUEST` with `ATTENDEE` | Yes, with RSVP; accepting from Notion Calendar failed | Yes, with RSVP | untested |
 | 2b. Card for `PUBLISH` | No, attachment only | No, attachment only | untested |
 | 3. Added without a tap | No (setting "only if the sender is known") | Yes | untested |
-| 4a. `SEQUENCE` 1 moves the entry | unclear: likely nothing to move (never added), see round 2 | Yes, by itself (conductor's reading) | untested |
-| 4b. `CANCEL` removes or marks the entry cancelled | pending (round 3) | pending (round 3) | untested |
+| 4a. `SEQUENCE` 1 moves the entry | n/a (never in the calendar) | Yes, by itself | untested |
+| 4b. `CANCEL` removes or marks the entry cancelled | n/a (never in the calendar) | Removed, by itself | untested |
 | 5. `VALARM` imported as a 2-hour reminder | n/a (not added) | Yes, 2 hours; almost certainly the `VALARM` (see above) | untested |
-| 6. Location and Berlin time | 19:00 (4h) on the card | Address and time shown; CET after the move pending | untested |
+| 6. Location and Berlin time | 19:00 (4h) on the card | Address and time shown; moved across the DST change to 19:30 | untested |
