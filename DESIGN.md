@@ -127,7 +127,7 @@ All presentational; data arrives through props. Prototype equivalents in [`proto
 | `Sessions` | status line "Next in 14 days"; upcoming as accent cards with relative date; history collapsed as "n played" | none scheduled |
 | `Nudge` | orange banner after the first player joins: Save group / Later | dismissed (per browser) |
 | `SaveSheet` | bottom sheet (mobile) / centered dialog (desktop): Google, email code, merge reassurance | — |
-| `PlayerCalendar` | tap-cycle grid of big tiles with glyphs, month nav, progress bar, fill-rest button, done card, legend, cycling tip | read-only past month, done, scheduled tile (accent ring + ★ badge) |
+| `PlayerCalendar` | tap-cycle grid of big tiles with glyphs, month nav, progress bar, fill-rest button, done card, legend, cycling tip | read-only past month, done, scheduled tile (accent ring + ★ badge), cancelled tile (neutral "Cancelled" pill on its top edge, no ring or ★, still tappable) |
 | `Progress` | "16 of 30 nights set · 53 %" bar, turns green at 100 % | done |
 | `Join` | invited-to header, name chips, type-a-name + Join | no roster yet (field only) |
 | `Toast` | ink pill at the bottom with optional action (Undo) | — |
@@ -203,7 +203,7 @@ Header: mark, group name, "Answering as Ana · Not you?", a `?` for the non-moda
 
 Tap cycle: unanswered → free → maybe → busy → unanswered, optimistic, `pop` + haptic + particles; a failure reverts with a toast. Swipe left/right changes month. `Mark the other N nights busy` writes `no` to every remaining future day.
 
-States: **fresh** (0 %, progress bar accent, fill button muted), **in progress** (fill button outlined in busy), **done** (green card "All set for October ✓ — Your GM sees it already." with `Fill November →`, or "All set for now" at the forward limit), **read-only past month** ("Past · read only" pill, tiles at 45 % desaturated, no progress or fill controls), **past days in the current month** (same dimming per tile), **scheduled day** (accent ring + ★ badge, still tappable), **loading** (skeletons), **first visit** (tutorial popover anchored to the first tile, dismiss by tapping any tile), **desktop** (same single column at 36 rem; tiles grow, nothing rearranges).
+States: **fresh** (0 %, progress bar accent, fill button muted), **in progress** (fill button outlined in busy), **done** (green card "All set for October ✓ — Your GM sees it already." with `Fill November →`, or "All set for now" at the forward limit), **read-only past month** ("Past · read only" pill, tiles at 45 % desaturated, no progress or fill controls), **past days in the current month** (same dimming per tile), **scheduled day** (accent ring + ★ badge, still tappable), **cancelled day** (a neutral "Cancelled" pill on the tile's top edge, no ring or ★, still tappable; its accessible name ends "Session cancelled"), **loading** (skeletons), **first visit** (tutorial popover anchored to the first tile, dismiss by tapping any tile), **desktop** (same single column at 36 rem; tiles grow, nothing rearranges).
 
 After the first saved answer, a visitor sees a card under the calendar: **Keep this group**, then "Find it and your answers on all your devices." Use the existing accented Card and full-width buttons: **Create account** first, **Continue with Google** when available, and **Not now** to dismiss for the visit. No modal opens until the Player chooses an account action. Promise only keeping the Group; #97 adds notifications after sending is live.
 
