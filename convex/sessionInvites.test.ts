@@ -13,7 +13,6 @@ import {
 import { UNDO_WINDOW_MS } from "../shared/sessions";
 
 const RESEND_URL = "https://api.resend.com/emails";
-const WORKFLOWS_SESSION_URL = "https://example.test/session";
 const POSTHOG_LOGS = "/i/v1/logs";
 const date = "2026-10-17";
 
@@ -38,7 +37,6 @@ beforeEach(() => {
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
   vi.stubEnv("RESEND_API_KEY", "re_test_key");
   vi.stubEnv("SITE_URL", "https://next-session.link");
-  vi.stubEnv("POSTHOG_SESSION_WEBHOOK_URL", WORKFLOWS_SESSION_URL);
   vi.stubEnv("POSTHOG_MAIL_WEBHOOK_SECRET", "secret");
   sent = [];
   fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(new Response(null, { status: 200 })));
@@ -537,25 +535,20 @@ it("mails nothing to an Anonymous GM", async () => {
   expect(resendMails().flatMap(({ to }) => to)).toEqual(["robin@example.com"]);
 });
 
-describe("the provider switch", () => {
-  it("leaves Session updates on Workflows and Resend untouched without RESEND_API_KEY", async () => {
-    vi.stubEnv("RESEND_API_KEY", "");
-    const { as, groupId } = await crew();
+it("publishes without RESEND_API_KEY but mails nobody and counts nothing, whatever Workflows has set", async () => {
+  vi.stubEnv("RESEND_API_KEY", "");
+  for (const workflow of ["WELCOME", "TIPS", "REMINDER"])
+    vi.stubEnv(`POSTHOG_${workflow}_WEBHOOK_URL`, `https://example.test/${workflow}`);
+  const { as, groupId } = await crew();
 
-    await as.mutation(api.sessions.schedule, { groupId, date });
-    await finish();
+  const sessionId = await as.mutation(api.sessions.schedule, { groupId, date });
+  await finish();
 
-    expect(sent.map(({ url }) => url)).toEqual([WORKFLOWS_SESSION_URL]);
+  expect(await t.run(async (ctx) => await ctx.db.get("sessions", sessionId))).toMatchObject({
+    published: { state: "scheduled", revision: 1 },
   });
-
-  it("requests no Workflows Session update while RESEND_API_KEY is set", async () => {
-    const { as, groupId } = await crew();
-
-    await as.mutation(api.sessions.schedule, { groupId, date });
-    await finish();
-
-    expect(sent.map(({ url }) => url)).toEqual([RESEND_URL, RESEND_URL]);
-  });
+  expect(sent).toEqual([]);
+  expect(await t.run(async (ctx) => await ctx.db.query("mailVolume").first())).toBeNull();
 });
 
 describe("mail volume", () => {

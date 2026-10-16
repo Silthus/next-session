@@ -223,11 +223,11 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   refuted: the Calendar feed took each Session's live state instead of its published state -> the oracle failed by name (2026-10-16)
   kinds: output
   checklist: commit-ordered-effects declared as published only
-  checklist: revalidated-permission dismissed: every send attempt rechecks the published snapshot (its state for a Workflows Session update, its revision for a Resend Session mail or a Reminder), the Group, the Claim or the calendar recipient set, and the Session email or Reminders switch in its own query
-  checklist: destination-confinement dismissed: Session mail and Reminders post only to their configured Workflows webhooks or the fixed Resend API address, never to a caller-supplied address
+  checklist: revalidated-permission dismissed: every send attempt rechecks the published revision, the Group, the Claim or the calendar recipient set, and the Session email or Reminders switch in its own query
+  checklist: destination-confinement dismissed: Session mail posts only to the fixed Resend API address and Reminders only to their configured Workflows webhook, never to a caller-supplied address
   checklist: redaction dismissed: each body is what the recipient's own mail needs, built at send time; it carries a Share Token only in the Share Link a Player's mail links to, and it never reaches telemetry
   checklist: circuit-breaker-policy dismissed: a failing webhook or Resend gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks a GM's change
-  checklist: declared-target-coverage dismissed: Session mail has one provider at a time, Resend while RESEND_API_KEY is set and the Workflows Session update otherwise, and Reminders have their own webhook; the oracle's title names a test for each webhook, and the Resend sends wait for the same settle
+  checklist: declared-target-coverage dismissed: Session mail goes only through Resend, and only while RESEND_API_KEY is set, and Reminders have their own webhook; the oracle's title names a test for each, and both wait for the same settle
 - calendar recipients: Session mail reaches only the calendar recipient set of its Group: the GM's Account and the Accounts behind its Claimed Players, and a withdrawal only an Account that left it.
   over: every Resend send of a broadcast round for a Group with its GM, two Claimed Players, an unclaimed Player and an Account that claims only in another Group, with one Claimed Player releasing between attempts, and of the withdrawals queued by that release and by a release a re-claim undoes before it sends
   via: mails only the Group's calendar recipient set, rechecked on every attempt

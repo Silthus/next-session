@@ -10,6 +10,16 @@ import {
 } from "./model/test.setup";
 import { UNDO_WINDOW_MS } from "../shared/sessions";
 
+type ResendMail = { to: string[]; subject: string; text: string };
+
+const ROBIN = "robin@example.com";
+const SEND_SPACING_MS = 1_000;
+const CHANGE_ENDINGS = {
+  cancelled: / cancelled$/,
+  changed: / changed$/,
+  withdrawn: / removed from your calendar$/,
+};
+
 let t: TestBackend;
 let fetchMock: ReturnType<typeof vi.fn<typeof fetch>>;
 const date = "2026-10-17";
@@ -17,8 +27,7 @@ const date = "2026-10-17";
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
-  vi.stubEnv("POSTHOG_SESSION_WEBHOOK_URL", "https://example.test/session");
-  vi.stubEnv("POSTHOG_MAIL_WEBHOOK_SECRET", "secret");
+  vi.stubEnv("RESEND_API_KEY", "re_test_key");
   vi.stubEnv("SITE_URL", "http://localhost:5173");
   fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(new Response(null, { status: 200 })));
   vi.stubGlobal("fetch", fetchMock);
@@ -34,7 +43,7 @@ afterEach(() => {
 
 async function crew() {
   const gm = await signedInGmWithGroup(t);
-  const account = await signIn(t, { email: "robin@example.com" });
+  const account = await signIn(t, { email: ROBIN });
   await t.run(async (ctx) => {
     await ctx.db.patch("groups", gm.groupId, { name: "Thursday Crew", shareToken: "old-token" });
     await ctx.db.insert("players", {
@@ -69,17 +78,22 @@ async function wait(milliseconds: number) {
 }
 
 async function deliver() {
-  for (let hop = 0; hop < 8; hop++) await wait(1);
+  for (let hop = 0; hop < 8; hop++) await wait(SEND_SPACING_MS);
 }
 
-function bodies() {
-  return fetchMock.mock.calls.map(
-    ([, init]) => JSON.parse(init!.body as string) as Record<string, unknown>,
-  );
+function mailsToRobin() {
+  return fetchMock.mock.calls
+    .map(([, init]) => JSON.parse(init!.body as string) as ResendMail)
+    .filter(({ to }) => to.includes(ROBIN));
 }
 
 function changes() {
-  return bodies().map(({ change }) => change);
+  return mailsToRobin().map(({ subject }) => changeIn(subject));
+}
+
+function changeIn(subject: string) {
+  const ending = Object.entries(CHANGE_ENDINGS).find(([, pattern]) => pattern.test(subject));
+  return ending?.[0] ?? "set";
 }
 
 async function downloadedCalendar() {
@@ -101,39 +115,6 @@ async function feedStatusOf(as: GmClient, sessionId: Id<"sessions">) {
 async function sessionRow(sessionId: Id<"sessions">) {
   return await t.run(async (ctx) => await ctx.db.get("sessions", sessionId));
 }
-
-it("returns to the GM before mail, then sends once to each current claimed Account but never the Group's owner", async () => {
-  const { as, groupId, userId, account } = await crew();
-  await t.run(async (ctx) => {
-    await ctx.db.insert("players", {
-      groupId,
-      name: "Duplicate",
-      nameKey: "duplicate",
-      userId: account.userId,
-    });
-    await ctx.db.insert("players", { groupId, name: "GM", nameKey: "gm", userId });
-    await ctx.db.insert("players", { groupId, name: "Visitor", nameKey: "visitor" });
-  });
-  await as.mutation(api.sessions.schedule, { groupId, date });
-  expect(fetchMock).not.toHaveBeenCalled();
-  await wait(UNDO_WINDOW_MS);
-  expect(fetchMock).not.toHaveBeenCalled();
-  await finish();
-  expect(bodies()).toEqual([
-    {
-      distinct_id: `next-session:${account.userId}`,
-      product: "next-session",
-      email: "robin@example.com",
-      group_name: "Thursday Crew",
-      date_label: "Saturday, October 17, 2026",
-      change: "scheduled",
-      player_url: "http://localhost:5173/s/old-token",
-    },
-  ]);
-  expect(new Headers(fetchMock.mock.calls[0]![1]!.headers).get("Authorization")).toBe(
-    "Bearer secret",
-  );
-});
 
 it("never announces a change before its Undo window ends", async () => {
   const { as, account, sessionId } = await publishedSession();
@@ -164,7 +145,7 @@ describe("the Undo window", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("keeps a Session cancelled after its window as Cancelled and sends one cancelled update", async () => {
+  it("keeps a Session cancelled after its window as Cancelled and sends one cancelled mail", async () => {
     const { as, sessionId } = await publishedSession();
 
     await as.mutation(api.sessions.cancel, { sessionId });
@@ -185,7 +166,7 @@ describe("the Undo window", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("restores the same id on Schedule again and sends one scheduled update", async () => {
+  it("restores the same id on Schedule again and sends one set mail", async () => {
     const { as, groupId, sessionId } = await publishedSession();
     await as.mutation(api.sessions.cancel, { sessionId });
     await finish();
@@ -195,10 +176,10 @@ describe("the Undo window", () => {
     await finish();
 
     expect(await sessionRow(sessionId)).toMatchObject({ state: "scheduled" });
-    expect(changes()).toEqual(["scheduled"]);
+    expect(changes()).toEqual(["set"]);
   });
 
-  it("sends exactly one cancelled update for cancel, Schedule again and cancel inside one window", async () => {
+  it("sends exactly one cancelled mail for cancel, Schedule again and cancel inside one window", async () => {
     const { as, groupId, sessionId } = await publishedSession();
 
     await as.mutation(api.sessions.cancel, { sessionId });
@@ -232,7 +213,7 @@ describe("the Undo window", () => {
     await as.mutation(api.sessions.schedule, { groupId, date });
     await finish();
 
-    expect(changes()).toEqual(["scheduled"]);
+    expect(changes()).toEqual(["set"]);
   });
 
   it.each([0, UNDO_WINDOW_MS])(
@@ -276,22 +257,6 @@ describe("the Undo window", () => {
   });
 });
 
-it("sends no Session update when a saved Time and place moves a Session", async () => {
-  const { as, groupId, sessionId } = await publishedSession();
-
-  await as.mutation(api.groups.updateSettings, {
-    groupId,
-    startTime: "20:00",
-    lengthMinutes: 180,
-    timeZone: "Europe/Berlin",
-    location: "Max's place",
-  });
-  await finish();
-
-  expect((await sessionRow(sessionId))?.published?.revision).toBe(2);
-  expect(fetchMock).not.toHaveBeenCalled();
-});
-
 it("cancels with the current Group name and Share Link", async () => {
   const { as, groupId, sessionId } = await publishedSession();
   await t.run(async (ctx) => {
@@ -301,13 +266,10 @@ it("cancels with the current Group name and Share Link", async () => {
   await as.mutation(api.sessions.cancel, { sessionId });
   await finish();
 
-  expect(bodies()).toEqual([
-    expect.objectContaining({
-      change: "cancelled",
-      group_name: "Renamed Crew",
-      player_url: "http://localhost:5173/s/new-token",
-    }),
-  ]);
+  const [mail, ...more] = mailsToRobin();
+  expect(more).toEqual([]);
+  expect(mail!.subject).toBe("Renamed Crew: session on Saturday, October 17, 2026 cancelled");
+  expect(mail!.text).toContain("http://localhost:5173/s/new-token");
 });
 
 it("lets an Account turn session emails off and back on, with email on by default", async () => {
@@ -319,35 +281,11 @@ it("lets an Account turn session emails off and back on, with email on by defaul
   expect(await sessionEmails()).toBe(false);
   await as.mutation(api.sessions.schedule, { groupId, date });
   await finish();
-  expect(fetchMock).not.toHaveBeenCalled();
+  expect(mailsToRobin()).toEqual([]);
   await account.as.mutation(api.me.setSessionEmails, { enabled: true });
   await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-18" });
   await finish();
-  expect(fetchMock).toHaveBeenCalledTimes(1);
-});
-
-it.each(["POSTHOG_SESSION_WEBHOOK_URL", "POSTHOG_MAIL_WEBHOOK_SECRET"])(
-  "sends nothing without %s",
-  async (variable) => {
-    const { as, groupId } = await crew();
-    vi.stubEnv(variable, "");
-    await as.mutation(api.sessions.schedule, { groupId, date });
-    await finish();
-    expect(fetchMock).not.toHaveBeenCalled();
-  },
-);
-
-it("publishes without mail configured and queues no send", async () => {
-  const { as, groupId } = await crew();
-  vi.stubEnv("POSTHOG_SESSION_WEBHOOK_URL", "");
-
-  const sessionId = await as.mutation(api.sessions.schedule, { groupId, date });
-  await finish();
-
-  expect(await sessionRow(sessionId)).toMatchObject({
-    published: { state: "scheduled", revision: 1 },
-  });
-  expect(await t.run(async (ctx) => await ctx.db.query("mailVolume").first())).toBeNull();
+  expect(changes()).toEqual(["set"]);
 });
 
 it.each(["release", "remove-group", "test-email", "anonymous"])(
@@ -370,7 +308,7 @@ it.each(["release", "remove-group", "test-email", "anonymous"])(
         await ctx.db.patch("users", account.userId, { isAnonymous: true });
     });
     await finish();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(mailsToRobin()).toEqual([]);
   },
 );
 
@@ -378,7 +316,11 @@ it.each(["release", "opt-out", "remove-group"])(
   "rechecks %s before retrying a failed send",
   async (change) => {
     const { as, groupId, account } = await crew();
-    fetchMock.mockImplementationOnce(async () => {
+    let robinFailed = false;
+    fetchMock.mockImplementation(async (_url, init) => {
+      if (robinFailed || !(init!.body as string).includes(ROBIN))
+        return new Response(null, { status: 200 });
+      robinFailed = true;
       if (change === "release") await account.as.mutation(api.player.release, { groupId });
       if (change === "opt-out")
         await account.as.mutation(api.me.setSessionEmails, { enabled: false });
@@ -387,64 +329,9 @@ it.each(["release", "opt-out", "remove-group"])(
     });
     await as.mutation(api.sessions.schedule, { groupId, date });
     await finish();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(changes().filter((sent) => sent === "set")).toHaveLength(1);
   },
 );
-
-it("drops a retry once the Session's published state has changed", async () => {
-  vi.spyOn(Math, "random").mockReturnValue(0.99);
-  const { as, groupId, sessionId } = await publishedSession();
-  fetchMock.mockImplementation((_url, init) =>
-    Promise.resolve(
-      new Response(null, { status: (init!.body as string).includes("cancelled") ? 503 : 200 }),
-    ),
-  );
-  await as.mutation(api.sessions.cancel, { sessionId });
-  await wait(UNDO_WINDOW_MS + 1);
-  await deliver();
-  expect(changes()).toEqual(["cancelled"]);
-
-  await as.mutation(api.sessions.schedule, { groupId, date });
-  await finish();
-
-  expect(changes()).toEqual(["cancelled", "cancelled", "scheduled"]);
-});
-
-it("keeps retrying an update across a time-only change of the same Session", async () => {
-  vi.spyOn(Math, "random").mockReturnValue(0.99);
-  const { as, groupId } = await crew();
-  let webhookDown = true;
-  const delivered: unknown[] = [];
-  fetchMock.mockImplementation((_url, init) => {
-    if (webhookDown) return Promise.resolve(new Response(null, { status: 503 }));
-    delivered.push((JSON.parse(init!.body as string) as { change: string }).change);
-    return Promise.resolve(new Response(null, { status: 200 }));
-  });
-  const sessionId = await as.mutation(api.sessions.schedule, { groupId, date });
-  await wait(UNDO_WINDOW_MS + 1);
-  await deliver();
-
-  await as.mutation(api.sessions.updateDetails, { sessionId, startTime: "20:00" });
-  await wait(UNDO_WINDOW_MS + 1);
-  expect((await sessionRow(sessionId))?.published?.revision).toBe(2);
-  webhookDown = false;
-  await finish();
-
-  expect(delivered).toEqual(["scheduled"]);
-});
-
-it.each([
-  [503, 2],
-  [400, 1],
-  [429, 1],
-])("HTTP %i produces %i attempts", async (status, attempts) => {
-  const { as, groupId } = await crew();
-  fetchMock.mockResolvedValueOnce(new Response(null, { status }));
-  vi.spyOn(console, "error").mockImplementation(() => undefined);
-  await as.mutation(api.sessions.schedule, { groupId, date });
-  await finish();
-  expect(fetchMock).toHaveBeenCalledTimes(attempts);
-});
 
 it("rejects signed-out and anonymous preference writes", async () => {
   const anonymous = await signIn(t, { isAnonymous: true });
@@ -453,44 +340,4 @@ it("rejects signed-out and anonymous preference writes", async () => {
     anonymous.as.mutation(api.me.setSessionEmails, { enabled: false }),
   ).rejects.toThrow();
   expect(await t.query(api.me.notificationSettings, {})).toBeNull();
-});
-
-it("warns as daily estimated mail reaches 80 and exceeds 100 across different Groups without dropping a recipient", async () => {
-  vi.stubEnv("POSTHOG_PROJECT_TOKEN", "test-project-token");
-  const logs: Record<string, unknown>[] = [];
-  fetchMock.mockImplementation((url, init) => {
-    if (
-      (typeof url === "string" ? url : url instanceof URL ? url.href : url.url).includes(
-        "/i/v1/logs",
-      )
-    )
-      logs.push(JSON.parse(init!.body as string) as Record<string, unknown>);
-    return Promise.resolve(new Response(null, { status: 200 }));
-  });
-  for (let groupIndex = 0; groupIndex < 2; groupIndex++) {
-    const { as, groupId } = await signedInGmWithGroup(t);
-    await t.run(async (ctx) => {
-      for (let playerIndex = 0; playerIndex < 51; playerIndex++) {
-        const userId = await ctx.db.insert("users", {
-          email: `player-${groupIndex}-${playerIndex}@example.com`,
-        });
-        await ctx.db.insert("players", {
-          groupId,
-          name: `Player ${playerIndex}`,
-          nameKey: `${playerIndex}`,
-          userId,
-        });
-      }
-    });
-    await as.mutation(api.sessions.schedule, { groupId, date });
-  }
-  await finish();
-  expect(
-    fetchMock.mock.calls.filter(([url]) => url === "https://example.test/session"),
-  ).toHaveLength(102);
-  expect(JSON.stringify(logs)).toContain("Daily mail volume warning");
-  expect(JSON.stringify(logs)).toContain('"workflows"');
-  expect(JSON.stringify(logs)).toContain("80");
-  expect(JSON.stringify(logs)).toContain("101");
-  expect(JSON.stringify(logs)).not.toContain("@example.com");
 });

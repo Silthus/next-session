@@ -1,0 +1,3 @@
+   × never announces a change before its Undo window ends 322ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 22 skipped (23)

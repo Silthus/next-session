@@ -1,0 +1,43 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-e6aa6b1c
+
+stdout | convex/sessionInvites.test.ts > publishes without RESEND_API_KEY but mails nobody and counts nothing, whatever Workflows has set
+Run 0000000000000000000000010000runs succeeded.
+
+ ❯ |convex| convex/sessionInvites.test.ts (46 tests | 1 failed | 45 skipped) 279ms
+   × publishes without RESEND_API_KEY but mails nobody and counts nothing, whatever Workflows has set 275ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/sessionInvites.test.ts > publishes without RESEND_API_KEY but mails nobody and counts nothing, whatever Workflows has set
+AssertionError: expected [ { …(4) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "at": 1791374430001,
++     "body": "{\"change\":\"scheduled\",\"date_label\":\"Saturday, October 17, 2026\",\"distinct_id\":\"next-session:000000000000000000000010003users\",\"email\":\"robin@example.com\",\"group_name\":\"Thursday Crew\",\"player_url\":\"https://next-session.link/s/crew-token\",\"product\":\"next-session\"}",
++     "headers": Headers {},
++     "url": "https://example.test/session",
++   },
++ ]
+
+ ❯ convex/sessionInvites.test.ts:550:16
+    548|     published: { state: "scheduled", revision: 1 },
+    549|   });
+    550|   expect(sent).toEqual([]);
+       |                ^
+    551|   expect(await t.run(async (ctx) => await ctx.db.query("mailVolume").f…
+    552| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 45 skipped (46)
+   Start at  19:33:12
+   Duration  1.16s (transform 43%, tests 27%, import 22%, environment 6%)
+

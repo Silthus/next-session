@@ -12,14 +12,15 @@ import {
   type TestBackend,
 } from "./model/test.setup";
 
+const ROBIN = "robin@example.com";
+
 let t: TestBackend;
 let fetchMock: ReturnType<typeof vi.fn<typeof fetch>>;
 
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
-  vi.stubEnv("POSTHOG_SESSION_WEBHOOK_URL", "https://example.test/session");
-  vi.stubEnv("POSTHOG_MAIL_WEBHOOK_SECRET", "secret");
+  vi.stubEnv("RESEND_API_KEY", "re_test_key");
   vi.stubEnv("SITE_URL", "https://next-session.link");
   fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(new Response(null, { status: 200 })));
   vi.stubGlobal("fetch", fetchMock);
@@ -104,7 +105,7 @@ describe("backfill.publishLegacySessions", () => {
 
     await backfill();
 
-    expect(bodies()).toEqual([expect.objectContaining({ change: "scheduled" })]);
+    expect(subjectsToRobin()).toEqual(["My group: next session Saturday, October 17, 2026"]);
   });
 
   it("lets the first cancel of a legacy Session announce it", async () => {
@@ -115,7 +116,9 @@ describe("backfill.publishLegacySessions", () => {
     await as.mutation(api.sessions.cancel, { sessionId });
     await t.finishAllScheduledFunctions(() => vi.runAllTimers());
 
-    expect(bodies()).toEqual([expect.objectContaining({ change: "cancelled" })]);
+    expect(subjectsToRobin()).toEqual([
+      "My group: session on Saturday, October 17, 2026 cancelled",
+    ]);
   });
 });
 
@@ -191,7 +194,7 @@ describe("backfill.widenPublishedSnapshots", () => {
       timeZone: "Europe/Berlin",
       revision: 2,
     });
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(subjectsToRobin()).toEqual(["My group: session on Saturday, October 17, 2026 changed"]);
   });
 
   it("lets a settle that runs before it publish nothing for an unchanged Session", async () => {
@@ -275,7 +278,7 @@ describe("backfill.widenPublishedSnapshots", () => {
 
 async function crew() {
   const gm = await signedInGmWithGroup(t);
-  const account = await signIn(t, { email: "robin@example.com" });
+  const account = await signIn(t, { email: ROBIN });
   await t.run(async (ctx) => {
     await ctx.db.insert("players", {
       groupId: gm.groupId,
@@ -287,8 +290,9 @@ async function crew() {
   return gm;
 }
 
-function bodies() {
-  return fetchMock.mock.calls.map(
-    ([, init]) => JSON.parse(init!.body as string) as Record<string, unknown>,
-  );
+function subjectsToRobin() {
+  return fetchMock.mock.calls
+    .map(([, init]) => JSON.parse(init!.body as string) as { to: string[]; subject: string })
+    .filter(({ to }) => to.includes(ROBIN))
+    .map(({ subject }) => subject);
 }
