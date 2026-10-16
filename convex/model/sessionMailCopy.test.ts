@@ -120,3 +120,40 @@ it("writes the times in the Group's zone with its city", () => {
 
   expect(firstParagraph(text)).toContain("Saturday, October 31, 2026, 19:00–23:00, New York time.");
 });
+
+describe("the mail for entering or leaving the calendar recipient set", () => {
+  it.each([
+    ["player", `You keep Thursday Crew now, so its session is in your calendar: ${WHEN}.`],
+    ["gm", `Thursday Crew is yours now, so its session is in your calendar: ${WHEN}.`],
+  ] as const)("invites a %s who entered with the night and the invite hint", (reader, news) => {
+    const { subject, text } = sessionMailCopy({ ...halloween, change: "invite", reader });
+
+    expect(subject).toBe("Thursday Crew: next session Saturday, October 31, 2026");
+    expect(text.split("\n\n").slice(0, 3)).toEqual([
+      `${news}\nWhere: Max's place`,
+      "It's in the calendar invite in this mail. Not in your calendar yet? Tap Add to calendar once.",
+      "Open your group: https://next-session.link/s/share-token",
+    ]);
+  });
+
+  it("withdraws the night from a Player who left, with no button to the group", () => {
+    const { subject, text, html } = sessionMailCopy({
+      change: "withdraw",
+      groupName: "Thursday Crew",
+      date: "2026-10-31",
+    });
+
+    expect(subject).toBe(
+      "Thursday Crew: session on Saturday, October 31, 2026 removed from your calendar",
+    );
+    expect(text).toBe(
+      [
+        "You don't keep Thursday Crew any more, so its session on Saturday, October 31, 2026 leaves your calendar.",
+        "Your calendar removes it by itself. If it doesn't, delete it there.",
+        "You get this because you kept this group.\nTurn session emails off in My groups: https://next-session.link/me. Replies to this address aren't read.",
+      ].join("\n\n") + "\n",
+    );
+    expect(html).not.toContain("Open your group");
+    expect(html.match(/<a /g)).toHaveLength(1);
+  });
+});

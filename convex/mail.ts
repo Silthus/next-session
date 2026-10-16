@@ -43,15 +43,38 @@ export const sessionSend = {
 };
 export type SessionSend = Infer<ReturnType<typeof v.object<typeof sessionSend>>>;
 
-export const calendarSend = v.object({
-  kind: v.literal("broadcast"),
-  change: v.union(...SESSION_CHANGES.map((change) => v.literal(change))),
+const publishedSend = {
   sessionId: v.id("sessions"),
   userId: v.id("users"),
   revision: v.number(),
   sequence: v.number(),
   stamp: v.number(),
+};
+
+const frozenEntry = v.object({
+  uid: v.string(),
+  sequence: v.number(),
+  start: v.number(),
+  end: v.number(),
+  summary: v.string(),
 });
+
+export const calendarSend = v.union(
+  v.object({
+    kind: v.literal("broadcast"),
+    change: v.union(...SESSION_CHANGES.map((change) => v.literal(change))),
+    ...publishedSend,
+  }),
+  v.object({ kind: v.literal("invite"), ...publishedSend }),
+  v.object({
+    kind: v.literal("withdraw"),
+    groupId: v.id("groups"),
+    userId: v.id("users"),
+    date: v.string(),
+    entry: frozenEntry,
+    stamp: v.number(),
+  }),
+);
 export type CalendarSend = Infer<typeof calendarSend>;
 
 export const calendarMessage = v.object({
@@ -60,7 +83,7 @@ export const calendarMessage = v.object({
   text: v.string(),
   html: v.string(),
   invite: v.object({
-    kind: v.union(v.literal("request"), v.literal("cancel")),
+    kind: v.union(v.literal("request"), v.literal("cancel"), v.literal("withdraw")),
     calendar: v.string(),
   }),
   idempotencyKey: v.string(),

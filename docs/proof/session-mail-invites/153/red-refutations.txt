@@ -1,0 +1,36 @@
+# Red by staged break: the guard tests that pass on the old tree (they assert that nothing is sent)
+
+## Break 1: changeRecipientSet treats every Account as outside the set before the change (const before = false)
+     × sends nothing when a Player switches to another name in the same Group 164ms
+     × sends nothing when the GM releases their own Player 40ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ { …(4) }, { …(4) } ] to deeply equal []
+AssertionError: expected [ { …(4) }, { …(4) }, { …(4) }, …(1) ] to deeply equal []
+      Tests  2 failed | 31 skipped (33)
+
+## Break 2: receivesSessionMail ignores the Session mail switch (sessionEmailsEnabled check removed)
+ convex/model/recipients.ts | 2 +-
+   × mails nothing to an Account with Session mail off 184ms
+     × neither invites nor withdraws an Account with Session mail off 117ms
+     × drops a pending withdrawal once the Account turns Session mail off 49ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ 'gm-1@example.com', …(1) ] to deeply equal [ 'gm-1@example.com' ]
+AssertionError: expected [ { …(4) }, { …(4) }, { …(4) }, …(2) ] to deeply equal []
+AssertionError: expected [ { …(4) }, { …(4) }, { …(4) } ] to deeply equal []
+      Tests  3 failed | 30 skipped (33)
+
+## Break 3: receivesSessionMail mails .test addresses (isTestAddress check removed)
+ convex/model/recipients.ts | 2 +-
+   × mails nothing to an Account with a .test address 145ms
+     × neither invites nor withdraws an Account with a .test address 87ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ 'gm-1@example.com', …(1) ] to deeply equal [ 'gm-1@example.com' ]
+AssertionError: expected [ { …(4) }, { …(4) }, { …(4) }, …(2) ] to deeply equal []
+      Tests  2 failed | 31 skipped (33)
+
+## Break 4: a withdrawal no longer rechecks the recipient set at send time
+ convex/sessionMail.ts | 2 +-
+     × drops a withdrawal when the Player keeps the Group again before it sends 274ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ …(5) ] to deeply equal [ …(2) ]
+      Tests  1 failed | 32 skipped (33)

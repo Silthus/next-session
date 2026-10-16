@@ -1,5 +1,5 @@
 import { v, type Infer } from "convex/values";
-import { bookingWindow, todayUtc, type IsoDate } from "../shared/dates";
+import type { IsoDate } from "../shared/dates";
 import { sessionWindow } from "../shared/sessionTime";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -9,6 +9,7 @@ import type { publishedSession } from "./schema";
 import { sessionPublished } from "./sessionMail";
 import { fail } from "./model/errors";
 import { groupTimeOf, locationOf } from "./model/timeAndPlace";
+import { upcomingSessions } from "./model/upcomingSessions";
 
 export const UNDO_WINDOW_MS = 30_000;
 const SNAPSHOT_FIELDS = ["state", "start", "end", "location", "summary"] as const;
@@ -35,13 +36,7 @@ export async function cancelSession(ctx: MutationCtx, session: Doc<"sessions">) 
 }
 
 export async function groupChanged(ctx: MutationCtx, group: Doc<"groups">) {
-  const { first, last } = bookingWindow(todayUtc(Date.now()));
-  const upcoming = await ctx.db
-    .query("sessions")
-    .withIndex("by_groupId_and_date", (q) =>
-      q.eq("groupId", group._id).gte("date", first).lte("date", last),
-    )
-    .collect();
+  const upcoming = await upcomingSessions(ctx, group._id);
   for (const session of upcoming.filter(isScheduled)) await recordChange(ctx, session._id);
 }
 

@@ -4,8 +4,8 @@ import type { SessionWindow } from "../../shared/sessionTime";
 export const SESSION_CHANGES = ["set", "changed", "cancelled"] as const;
 export type SessionChange = (typeof SESSION_CHANGES)[number];
 
-export type SessionMailCopyInput = {
-  change: SessionChange;
+export type NightCopyInput = {
+  change: SessionChange | "invite";
   reader: "gm" | "player";
   groupName: string;
   date: IsoDate;
@@ -14,6 +14,10 @@ export type SessionMailCopyInput = {
   location?: string;
   groupLink: string;
 };
+
+export type WithdrawalCopyInput = { change: "withdraw"; groupName: string; date: IsoDate };
+
+export type SessionMailCopyInput = NightCopyInput | WithdrawalCopyInput;
 
 export type MailCopy = { subject: string; text: string; html: string };
 
@@ -35,24 +39,33 @@ type Paragraphs = {
   news: string;
   where: string | undefined;
   calendarHint: CalendarHint;
+  groupLink: string | undefined;
   why: string;
 };
 
 export function sessionMailCopy(input: SessionMailCopyInput): MailCopy {
-  const paragraphs = paragraphsOf(input);
+  const paragraphs = input.change === "withdraw" ? withdrawalOf(input) : nightOf(input);
+  return { subject: paragraphs.subject, text: textOf(paragraphs), html: htmlOf(paragraphs) };
+}
+
+function withdrawalOf({ groupName: group, date: isoDate }: WithdrawalCopyInput): Paragraphs {
+  const date = dateLabel(isoDate);
   return {
-    subject: paragraphs.subject,
-    text: textOf(paragraphs, input.groupLink),
-    html: htmlOf(paragraphs, input.groupLink),
+    subject: `${group}: session on ${date} removed from your calendar`,
+    news: `You don't keep ${group} any more, so its session on ${date} leaves your calendar.`,
+    where: undefined,
+    calendarHint: REMOVED_BY_CALENDAR,
+    groupLink: undefined,
+    why: "You get this because you kept this group.",
   };
 }
 
-function paragraphsOf(input: SessionMailCopyInput): Paragraphs {
+function nightOf(input: NightCopyInput): Paragraphs {
   const { change, reader, groupName: group } = input;
   const date = dateLabel(input.date);
   const when = `${date}, ${clockRange(input)}, ${cityOf(input.timeZone)} time`;
   const gm = reader === "gm";
-  const news: Record<SessionChange, { subject: string; news: string }> = {
+  const news: Record<NightCopyInput["change"], { subject: string; news: string }> = {
     set: {
       subject: `${group}: next session ${date}`,
       news: gm
@@ -71,23 +84,30 @@ function paragraphsOf(input: SessionMailCopyInput): Paragraphs {
         ? `You cancelled the session for ${group} on ${date}.`
         : `The session for ${group} on ${date} is cancelled.`,
     },
+    invite: {
+      subject: `${group}: next session ${date}`,
+      news: gm
+        ? `${group} is yours now, so its session is in your calendar: ${when}.`
+        : `You keep ${group} now, so its session is in your calendar: ${when}.`,
+    },
   };
   const cancelled = change === "cancelled";
   return {
     ...news[change],
     where: cancelled || input.location === undefined ? undefined : `Where: ${input.location}`,
     calendarHint: cancelled ? REMOVED_BY_CALENDAR : ADD_TO_CALENDAR,
+    groupLink: input.groupLink,
     why: `You get this because you ${gm ? "run" : "keep"} this group.`,
   };
 }
 
-function textOf({ news, where, calendarHint, why }: Paragraphs, groupLink: string) {
+function textOf({ news, where, calendarHint, groupLink, why }: Paragraphs) {
   const { lead, tap } = calendarHint;
   return (
     [
       where === undefined ? news : `${news}\n${where}`,
       tap === undefined ? lead : `${lead}${tap.button}${tap.tail}`,
-      `Open your group: ${groupLink}`,
+      ...(groupLink === undefined ? [] : [`Open your group: ${groupLink}`]),
       `${why}\nTurn session emails off in My groups: ${MY_GROUPS_URL}. Replies to this address aren't read.`,
     ].join("\n\n") + "\n"
   );
@@ -96,7 +116,7 @@ function textOf({ news, where, calendarHint, why }: Paragraphs, groupLink: strin
 const INK = "#1a1511";
 const LINK = "#835200";
 
-function htmlOf({ news, where, calendarHint, why }: Paragraphs, groupLink: string) {
+function htmlOf({ news, where, calendarHint, groupLink, why }: Paragraphs) {
   const { lead, tap } = calendarHint;
   const calendarLine =
     escaped(lead) +
@@ -108,10 +128,14 @@ function htmlOf({ news, where, calendarHint, why }: Paragraphs, groupLink: strin
 <p style="margin:0 0 18px;font-family:'Courier New',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:${LINK};font-weight:bold;">Next Session</p>
 <p style="margin:0 0 14px;font-size:16px;line-height:160%;">${newsLine}</p>
 <p style="margin:0 0 14px;font-size:16px;line-height:160%;">${calendarLine}</p>
-<p style="margin:22px 0;"><a href="${escaped(groupLink)}" style="display:inline-block;padding:14px 24px;border-radius:10px;background:#c5953b;color:#221811;font-size:16px;text-decoration:none;">Open your group</a></p>
-<p style="margin:0;font-size:13px;line-height:160%;">${escaped(why)} Turn session emails off in <a href="${MY_GROUPS_URL}" style="color:${LINK};">My groups</a>. Replies to this address aren't read.</p>
+${groupLink === undefined ? "" : buttonTo(groupLink)}<p style="margin:0;font-size:13px;line-height:160%;">${escaped(why)} Turn session emails off in <a href="${MY_GROUPS_URL}" style="color:${LINK};">My groups</a>. Replies to this address aren't read.</p>
 </div>
 </body></html>
+`;
+}
+
+function buttonTo(groupLink: string) {
+  return `<p style="margin:22px 0;"><a href="${escaped(groupLink)}" style="display:inline-block;padding:14px 24px;border-radius:10px;background:#c5953b;color:#221811;font-size:16px;text-decoration:none;">Open your group</a></p>
 `;
 }
 
@@ -125,7 +149,7 @@ function dateLabel(date: IsoDate) {
   }).format(new Date(`${date}T12:00:00Z`));
 }
 
-function clockRange({ window, timeZone }: SessionMailCopyInput) {
+function clockRange({ window, timeZone }: NightCopyInput) {
   const clock = new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",
     minute: "2-digit",

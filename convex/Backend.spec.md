@@ -175,12 +175,13 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: redaction dismissed: the Session mail body is what the recipient's own mail needs, built at send time, and it never reaches telemetry
   checklist: circuit-breaker-policy dismissed: a failing webhook or Resend gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks a GM's change
   checklist: declared-target-coverage dismissed: one provider carries Session mail at a time, Resend while RESEND_API_KEY is set and the Workflows Session update otherwise
-- calendar recipients: Session mail reaches only the calendar recipient set of its Group: the GM's Account and the Accounts behind its Claimed Players.
-  over: every Resend send of a broadcast round for a Group with its GM, two Claimed Players, an unclaimed Player and an Account that claims only in another Group, with one Claimed Player releasing between attempts
+- calendar recipients: Session mail reaches only the calendar recipient set of its Group: the GM's Account and the Accounts behind its Claimed Players, and a withdrawal only an Account that left it.
+  over: every Resend send of a broadcast round for a Group with its GM, two Claimed Players, an unclaimed Player and an Account that claims only in another Group, with one Claimed Player releasing between attempts, and of the withdrawals queued by that release and by a release a re-claim undoes before it sends
   via: mails only the Group's calendar recipient set, rechecked on every attempt
-  because: a Session mail carries the Group's name, the night, its location and a Share Link; sent beyond the GM and the Accounts that keep the Group it would hand a table's plans and its Player credential to strangers, and a release that still got the next retry would mail someone who just left
+  because: a Session mail carries the Group's name, the night, its location and a Share Link; sent beyond the GM and the Accounts that keep the Group it would hand a table's plans and its Player credential to strangers, and a release that still got the next retry would mail someone who just left; a withdrawal that reached an Account back in the set would take a night it keeps out of its calendar
   crossing: store -> egress
   refuted: isCalendarRecipient answered true for every Account, so a send no longer rechecked the Claim -> the oracle failed by name (2026-10-16)
+  refuted: withdrawalMail stopped rechecking the calendar recipient set at send time, so a withdrawal a re-claim undid still sent -> the oracle failed by name (2026-10-16)
   kinds: output
   checklist: destination-confinement dismissed: the Resend adapter posts only to the fixed Resend API address, and the recipient is the Account's own stored email, never a caller-supplied address
   checklist: redaction declared as no personal data to posthog

@@ -10,6 +10,7 @@ import { ensureRoomForGroups, groupsOwnedBy } from "./model/groups";
 import { enforceRateLimit } from "./model/rateLimits";
 import { track } from "./model/telemetry";
 import { confirmTipsWith } from "./model/tips";
+import { changeRecipientSet } from "./sessionMail";
 
 const CLAIM_TTL_MS = 10 * 60_000;
 
@@ -100,7 +101,9 @@ async function moveGroups(ctx: MutationCtx, from: Doc<"users">, to: Doc<"users">
   const groups = await groupsOwnedBy(ctx, from._id);
   await ensureRoomForGroups(ctx, to, groups.length);
   for (const group of groups) {
-    await ctx.db.patch("groups", group._id, { ownerId: to._id, expiresAt: undefined });
+    await changeRecipientSet(ctx, { groupId: group._id, userId: to._id }, () =>
+      ctx.db.patch("groups", group._id, { ownerId: to._id, expiresAt: undefined }),
+    );
   }
   return groups.map((group) => group._id);
 }

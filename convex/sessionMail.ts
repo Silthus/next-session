@@ -1,7 +1,7 @@
 import { type Infer, v } from "convex/values";
 import { invite, sessionUid } from "../shared/icalendar";
 import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
-import type { Doc } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { internalQuery, type MutationCtx, type QueryCtx } from "./_generated/server";
 import {
   calendarMailConfigured,
@@ -18,17 +18,23 @@ import {
 import {
   calendarRecipients,
   isCalendarRecipient,
+  isInCalendarRecipientSet,
   receivesSessionMail,
   type SessionMailAccount,
 } from "./model/recipients";
 import { sessionMailCopy, type SessionChange } from "./model/sessionMailCopy";
 import { accountDistinctId, PRODUCT } from "./model/telemetry";
 import { groupTimeOf } from "./model/timeAndPlace";
+import { upcomingSessions } from "./model/upcomingSessions";
 
 const SITE = "https://next-session.link";
 const CALENDAR_ADDRESS = "calendar@next-session.link";
+const PLAYER_CALENDAR_LINK = `${SITE}/me`;
 
 type Published = NonNullable<Doc<"sessions">["published"]>;
+type NightSend = Extract<CalendarSend, { kind: "broadcast" | "invite" }>;
+type WithdrawSend = Extract<CalendarSend, { kind: "withdraw" }>;
+type RecipientSetMember = { groupId: Id<"groups">; userId: Id<"users"> };
 
 export async function sessionPublished(
   ctx: MutationCtx,
@@ -64,7 +70,7 @@ async function broadcast(
       sequence,
       stamp,
     } as const;
-    if (await broadcastTarget(ctx, send)) sends.push(send);
+    if (await nightTarget(ctx, send)) sends.push(send);
   }
   await requestCalendarMails(ctx, sends);
 }
@@ -75,50 +81,134 @@ function changeOf(previous: Published | undefined, published: Published): Sessio
   return wasScheduled ? "changed" : "set";
 }
 
+export async function changeRecipientSet<Result>(
+  ctx: MutationCtx,
+  member: RecipientSetMember,
+  change: () => Promise<Result>,
+): Promise<Result> {
+  const before = await isInCalendarRecipientSet(ctx, member);
+  const result = await change();
+  const after = await isInCalendarRecipientSet(ctx, member);
+  await recipientSetChanged(ctx, { ...member, before, after });
+  return result;
+}
+
+async function recipientSetChanged(
+  ctx: MutationCtx,
+  { groupId, userId, before, after }: RecipientSetMember & { before: boolean; after: boolean },
+) {
+  if (before === after || !calendarMailConfigured()) return;
+  if (!receivesSessionMail(await ctx.db.get("users", userId))) return;
+  const nights = await upcomingPublishedNights(ctx, groupId);
+  const affected = after ? nights.filter(({ entry }) => entry.state === "scheduled") : nights;
+  const stamp = Date.now();
+  const sends: CalendarSend[] = [];
+  for (const night of affected) {
+    const sequence = (night.session.sequence ?? 0) + 1;
+    await ctx.db.patch("sessions", night.session._id, { sequence });
+    sends.push(
+      after
+        ? inviteOf(night, userId, sequence, stamp)
+        : withdrawalOf(night, userId, sequence, stamp),
+    );
+  }
+  await requestCalendarMails(ctx, sends);
+}
+
+async function upcomingPublishedNights(ctx: QueryCtx, groupId: Id<"groups">) {
+  const sessions = await upcomingSessions(ctx, groupId);
+  return sessions.flatMap((session): PublishedNight[] => {
+    const entry = entryOf(session.published);
+    return entry === null ? [] : [{ session, entry }];
+  });
+}
+
+function inviteOf(
+  { session, entry }: PublishedNight,
+  userId: Id<"users">,
+  sequence: number,
+  stamp: number,
+): NightSend {
+  const { revision } = entry;
+  return { kind: "invite", sessionId: session._id, userId, revision, sequence, stamp };
+}
+
+function withdrawalOf(
+  { session, entry: { start, end, summary } }: PublishedNight,
+  userId: Id<"users">,
+  sequence: number,
+  stamp: number,
+): WithdrawSend {
+  return {
+    kind: "withdraw",
+    groupId: session.groupId,
+    userId,
+    date: session.date,
+    entry: { uid: sessionUid(session._id), sequence, start, end, summary },
+    stamp,
+  };
+}
+
 export const calendarMail = internalQuery({
   args: { send: calendarSend },
   returns: v.union(calendarMessage, v.null()),
   handler: async (ctx, { send }) => {
-    const target = await broadcastTarget(ctx, send);
-    return target === null ? null : calendarMessageFor(target, send);
+    if (send.kind === "withdraw") return await withdrawalMail(ctx, send);
+    const target = await nightTarget(ctx, send);
+    return target === null ? null : nightMessageFor(target, send);
   },
 });
 
-type BroadcastTarget = {
+type PublishedEntry = {
+  start: number;
+  end: number;
+  summary: string;
+  location?: string;
+  state: Published["state"];
+  revision: number;
+};
+
+type PublishedNight = { session: Doc<"sessions">; entry: PublishedEntry };
+
+type NightTarget = {
   session: Doc<"sessions">;
   group: Doc<"groups">;
   account: SessionMailAccount;
-  entry: { start: number; end: number; summary: string; location?: string; state: string };
+  entry: PublishedEntry;
 };
 
-async function broadcastTarget(
-  ctx: QueryCtx,
-  { sessionId, userId, revision }: CalendarSend,
-): Promise<BroadcastTarget | null> {
-  const session = await ctx.db.get("sessions", sessionId);
-  const published = session?.published;
-  if (!session || published?.revision !== revision) return null;
-  const { start, end, summary, location, state } = published;
+function entryOf(published: Published | undefined): PublishedEntry | null {
+  if (published === undefined) return null;
+  const { start, end, summary, location, state, revision } = published;
   if (start === undefined || end === undefined || summary === undefined) return null;
+  return { start, end, summary, state, revision, ...(location === undefined ? {} : { location }) };
+}
+
+async function nightTarget(ctx: QueryCtx, send: NightSend): Promise<NightTarget | null> {
+  const session = await ctx.db.get("sessions", send.sessionId);
+  const published = session?.published;
+  if (!session || published?.revision !== send.revision) return null;
+  if (send.kind === "invite" && published.state !== "scheduled") return null;
+  const entry = entryOf(published);
+  if (entry === null) return null;
   const group = await ctx.db.get("groups", session.groupId);
-  if (!group || !(await isCalendarRecipient(ctx, group, userId))) return null;
-  const account = await ctx.db.get("users", userId);
+  if (!group || !(await isCalendarRecipient(ctx, group, send.userId))) return null;
+  const account = await ctx.db.get("users", send.userId);
   if (!receivesSessionMail(account)) return null;
-  const entry = { start, end, summary, state, ...(location === undefined ? {} : { location }) };
   return { session, group, account, entry };
 }
 
-function calendarMessageFor(
-  { session, group, account, entry }: BroadcastTarget,
-  { change, sequence, stamp }: CalendarSend,
+function nightMessageFor(
+  { session, group, account, entry }: NightTarget,
+  send: NightSend,
 ): Infer<typeof calendarMessage> {
   const runsGroup = group.ownerId === account._id;
-  const calendarLink = runsGroup ? `${SITE}/g/${group._id}` : `${SITE}/me`;
+  const calendarLink = runsGroup ? `${SITE}/g/${group._id}` : PLAYER_CALENDAR_LINK;
   const window = { start: entry.start, end: entry.end };
   const uid = sessionUid(session._id);
   const kind = entry.state === "cancelled" ? "cancel" : "request";
   const copy = sessionMailCopy({
-    change,
+    change: send.kind === "invite" ? "invite" : send.change,
     reader: runsGroup ? "gm" : "player",
     groupName: entry.summary,
     date: session.date,
@@ -133,8 +223,8 @@ function calendarMessageFor(
     attendee: account.email,
     entry: {
       uid,
-      sequence,
-      stamp,
+      sequence: send.sequence,
+      stamp: send.stamp,
       window,
       status: kind === "cancel" ? "CANCELLED" : "CONFIRMED",
       summary: entry.summary,
@@ -147,8 +237,42 @@ function calendarMessageFor(
     to: account.email,
     ...copy,
     invite: { kind, calendar },
-    idempotencyKey: `calendar/${uid}/${sequence}/${account._id}`,
+    idempotencyKey: idempotencyKey(uid, send.sequence, account),
   };
+}
+
+async function withdrawalMail(
+  ctx: QueryCtx,
+  { groupId, userId, date, entry, stamp }: WithdrawSend,
+): Promise<Infer<typeof calendarMessage> | null> {
+  if (await isInCalendarRecipientSet(ctx, { groupId, userId })) return null;
+  const account = await ctx.db.get("users", userId);
+  if (!receivesSessionMail(account)) return null;
+  const calendar = invite({
+    kind: "withdraw",
+    organizer: CALENDAR_ADDRESS,
+    attendee: account.email,
+    entry: {
+      uid: entry.uid,
+      sequence: entry.sequence,
+      stamp,
+      window: { start: entry.start, end: entry.end },
+      status: "CANCELLED",
+      summary: entry.summary,
+      description: `Open your group: ${PLAYER_CALENDAR_LINK}`,
+      url: PLAYER_CALENDAR_LINK,
+    },
+  });
+  return {
+    to: account.email,
+    ...sessionMailCopy({ change: "withdraw", groupName: entry.summary, date }),
+    invite: { kind: "withdraw", calendar },
+    idempotencyKey: idempotencyKey(entry.uid, entry.sequence, account),
+  };
+}
+
+function idempotencyKey(uid: string, sequence: number, account: SessionMailAccount) {
+  return `calendar/${uid}/${sequence}/${account._id}`;
 }
 
 function shareLinkOf(group: Doc<"groups">) {

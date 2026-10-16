@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
 import { requestMail } from "./mail";
 import {
   newBackend,
+  seedSession,
   signedInGmWithGroup,
   signIn,
   signInAnonymousGm,
@@ -82,6 +84,16 @@ async function crew(signInGm?: Parameters<typeof signedInGmWithGroup>[1]) {
   return { ...gm, gmEmail, robin };
 }
 
+async function claimOf(userId: Id<"users">) {
+  return await t.run(
+    async (ctx) =>
+      (await ctx.db
+        .query("players")
+        .withIndex("by_userId_and_groupId", (q) => q.eq("userId", userId))
+        .first())!._id,
+  );
+}
+
 async function finish() {
   for (let step = 0; step < 8; step++) {
     await vi.advanceTimersByTimeAsync(UNDO_WINDOW_MS + 1);
@@ -103,8 +115,12 @@ function resendMails() {
   return resendRequests().map(({ body }) => JSON.parse(body) as ResendMail);
 }
 
+function mailsTo(address: string) {
+  return resendMails().filter(({ to }) => to.includes(address));
+}
+
 function mailTo(address: string) {
-  const mails = resendMails().filter(({ to }) => to.includes(address));
+  const mails = mailsTo(address);
   expect(mails).toHaveLength(1);
   return mails[0]!;
 }
@@ -166,7 +182,7 @@ it("mails every calendar recipient once after the Undo window, the GM included, 
 });
 
 it("mails only the Group's calendar recipient set, rechecked on every attempt", async () => {
-  const { as, groupId, gmEmail } = await crew();
+  const { as, groupId, gmEmail, robin } = await crew();
   const kim = await signIn(t, { email: "kim@example.com" });
   const stranger = await signIn(t, { email: "stranger@example.com" });
   const otherGroup = await signedInGmWithGroup(t);
@@ -180,21 +196,34 @@ it("mails only the Group's calendar recipient set, rechecked on every attempt", 
       userId: stranger.userId,
     });
   });
+  let kimLeft = false;
   fetchMock.mockImplementation(async (_url, init) => {
-    if (!(init!.body as string).includes("kim@example.com"))
+    if (kimLeft || !(init!.body as string).includes("kim@example.com"))
       return new Response(null, { status: 200 });
+    kimLeft = true;
     await kim.as.mutation(api.player.release, { groupId });
     return new Response(null, { status: 503 });
   });
 
   await as.mutation(api.sessions.schedule, { groupId, date });
   await finish();
+  const robinPlayer = await claimOf(robin.userId);
+  await robin.as.mutation(api.player.release, { groupId });
+  await robin.as.mutation(api.player.claim, { shareToken: "crew-token", playerId: robinPlayer });
+  await finish();
 
-  expect(
-    resendMails()
-      .flatMap(({ to }) => to)
-      .sort(),
-  ).toEqual([gmEmail, "kim@example.com", "robin@example.com"].sort());
+  const set = "Thursday Crew: next session Saturday, October 17, 2026";
+  const removed = "Thursday Crew: session on Saturday, October 17, 2026 removed from your calendar";
+  expect(resendMails().map(({ to, subject }) => `${to[0]} ${subject}`)).toEqual(
+    expect.arrayContaining([
+      `${gmEmail} ${set}`,
+      `kim@example.com ${set}`,
+      `robin@example.com ${set}`,
+      `kim@example.com ${removed}`,
+    ]),
+  );
+  expect(mailsTo("robin@example.com").map(({ subject }) => subject)).toEqual([set, set]);
+  expect(resendMails()).toHaveLength(5);
 });
 
 it("puts the night into each calendar as an accepted invite without an alarm and with a token-free link", async () => {
@@ -485,5 +514,308 @@ describe("mail volume", () => {
     for (const { body } of telemetry)
       for (const secret of [gmEmail, "robin@example.com", "Thursday Crew", "crew-token"])
         expect(body).not.toContain(secret);
+  });
+});
+
+describe("the calendar follows the Roster", () => {
+  const SHARE_TOKEN = "crew-token";
+  const KIM = "kim@example.com";
+  const ROBIN = "robin@example.com";
+  const WITHDRAWN = (day: string) =>
+    `You don't keep Thursday Crew any more, so its session on Saturday, October ${day}, 2026 leaves your calendar.`;
+  const INVITED = (day: string) =>
+    `You keep Thursday Crew now, so its session is in your calendar: Saturday, October ${day}, 2026, 19:00–23:00, Berlin time.`;
+
+  async function crewWithNights() {
+    const gm = await crew();
+    const { as, groupId } = gm;
+    await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+    await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-24" });
+    const cancelled = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-31" });
+    await finish();
+    await as.mutation(api.sessions.cancel, { sessionId: cancelled });
+    await finish();
+    sent = [];
+    return gm;
+  }
+
+  async function unclaimedPlayer(groupId: Id<"groups">, name: string) {
+    return await t.run(
+      async (ctx) => await ctx.db.insert("players", { groupId, name, nameKey: name.toLowerCase() }),
+    );
+  }
+
+  function firstLinesTo(address: string) {
+    return resendMails()
+      .filter(({ to }) => to.includes(address))
+      .map(({ text }) => text.split("\n")[0]);
+  }
+
+  type Keeper = Awaited<ReturnType<typeof signIn>>;
+
+  const KEEPS: Record<string, (kim: Keeper, groupId: Id<"groups">) => Promise<unknown>> = {
+    "Join while signed in": (kim) =>
+      kim.as.mutation(api.player.join, { shareToken: SHARE_TOKEN, name: "Kim" }),
+    "Keep this group": async (kim, groupId) =>
+      kim.as.mutation(api.player.claim, {
+        shareToken: SHARE_TOKEN,
+        playerId: await unclaimedPlayer(groupId, "Kim"),
+      }),
+    "the auto-keep on answer": async (kim, groupId) =>
+      kim.as.mutation(api.player.answer, {
+        shareToken: SHARE_TOKEN,
+        playerId: await unclaimedPlayer(groupId, "Kim"),
+        date: "2026-10-20",
+        answer: "free",
+      }),
+  };
+
+  it.each(Object.keys(KEEPS))(
+    "invites a Player who keeps the Group through %s to each upcoming published scheduled Session",
+    async (keep) => {
+      const { as, groupId } = await crewWithNights();
+      await seedSession(t, groupId, "2026-10-01", {
+        published: {
+          state: "scheduled",
+          start: Date.UTC(2026, 9, 1, 17),
+          end: Date.UTC(2026, 9, 1, 21),
+          summary: "Thursday Crew",
+          revision: 1,
+        },
+      });
+      await as.mutation(api.sessions.schedule, { groupId, date: "2026-11-07" });
+      const kim = await signIn(t, { email: KIM });
+
+      await KEEPS[keep]!(kim, groupId);
+      await finish();
+
+      expect(firstLinesTo(KIM)).toEqual([
+        INVITED("17"),
+        INVITED("24"),
+        "The next session for Thursday Crew is set: Saturday, November 7, 2026, 19:00–23:00, Berlin time.",
+      ]);
+      expect(sequencesTo(KIM)).toEqual([2, 2, 1]);
+      const [invite] = resendMails().filter(({ to }) => to.includes(KIM));
+      expect(invite).toMatchObject({
+        subject: "Thursday Crew: next session Saturday, October 17, 2026",
+        attachments: [{ content_type: "text/calendar; charset=utf-8; method=REQUEST" }],
+      });
+      expect(invite!.text).toContain("Where: Max's place\n");
+      expect(unfolded(inviteOf(invite!))).toContain(
+        `ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=FALSE:mailto:${KIM}\r\n`,
+      );
+    },
+  );
+
+  type Crew = Awaited<ReturnType<typeof crew>>;
+
+  const LEAVES: Record<string, (crew: Crew) => Promise<unknown>> = {
+    "Not you?": ({ robin, groupId }) => robin.as.mutation(api.player.release, { groupId }),
+    "Remove from my groups": ({ robin, groupId }) =>
+      robin.as.mutation(api.player.removeFromMyGroups, { groupId }),
+    "the GM removing the Player": async ({ as, robin }) =>
+      as.mutation(api.roster.removePlayer, { playerId: await claimOf(robin.userId) }),
+  };
+
+  it.each(Object.keys(LEAVES))(
+    "withdraws each upcoming published Session from a Player who leaves through %s",
+    async (leave) => {
+      const gm = await crewWithNights();
+
+      await LEAVES[leave]!(gm);
+      await finish();
+
+      expect(resendMails().flatMap(({ to }) => to)).toEqual([ROBIN, ROBIN, ROBIN]);
+      expect(firstLinesTo(ROBIN)).toEqual([WITHDRAWN("17"), WITHDRAWN("24"), WITHDRAWN("31")]);
+      expect(sequencesTo(ROBIN)).toEqual([2, 2, 3]);
+      for (const mail of resendMails()) {
+        expect(mail.subject).toMatch(/removed from your calendar$/);
+        expect(mail.attachments[0]!.content_type).toBe(
+          "text/calendar; charset=utf-8; method=CANCEL",
+        );
+        const calendar = unfolded(inviteOf(mail));
+        expect(calendar).toContain("METHOD:CANCEL\r\n");
+        expect(calendar).toContain(
+          `ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=FALSE:mailto:${ROBIN}\r\n`,
+        );
+        expect(calendar).not.toContain("STATUS:");
+        expect(calendar).not.toContain("crew-token");
+      }
+    },
+  );
+
+  it("still withdraws the night as it was at the release after a change and the Group's deletion", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.99);
+    const { as, groupId, gmEmail, robin } = await crewWithNights();
+    let groupDeleted = false;
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(new Response(null, { status: groupDeleted ? 200 : 503 })),
+    );
+
+    await robin.as.mutation(api.player.release, { groupId });
+    await as.mutation(api.groups.updateSettings, {
+      groupId,
+      startTime: "20:00",
+      lengthMinutes: 180,
+      timeZone: "Europe/Berlin",
+      location: "Max's place",
+    });
+    await as.mutation(api.groups.rename, { groupId, name: "Friday Crew" });
+    await wait(UNDO_WINDOW_MS + 1);
+    await wait(1_000);
+    await as.mutation(api.groups.remove, { groupId });
+    groupDeleted = true;
+    const deletedAt = Date.now();
+    await finish();
+
+    expect(
+      resendMails().some(
+        ({ to, subject }) => to[0] === gmEmail && subject.startsWith("Friday Crew"),
+      ),
+    ).toBe(true);
+    const afterDeletion = resendRequests()
+      .filter(({ at, body }) => at >= deletedAt && body.includes(ROBIN))
+      .map(({ body }) => JSON.parse(body) as ResendMail);
+    expect(afterDeletion.map(({ subject }) => subject)).toEqual([
+      "Thursday Crew: session on Saturday, October 17, 2026 removed from your calendar",
+      "Thursday Crew: session on Saturday, October 24, 2026 removed from your calendar",
+      "Thursday Crew: session on Saturday, October 31, 2026 removed from your calendar",
+    ]);
+    const night = unfolded(inviteOf(afterDeletion[0]!));
+    expect(night).toContain("DTSTART:20261017T170000Z\r\n");
+    expect(night).toContain("DTEND:20261017T210000Z\r\n");
+    expect(night).toContain("SUMMARY:Thursday Crew\r\n");
+  });
+
+  it("drops a withdrawal when the Player keeps the Group again before it sends", async () => {
+    const { groupId, robin } = await crewWithNights();
+    const playerId = await claimOf(robin.userId);
+
+    await robin.as.mutation(api.player.release, { groupId });
+    await robin.as.mutation(api.player.claim, { shareToken: SHARE_TOKEN, playerId });
+    await finish();
+
+    expect(firstLinesTo(ROBIN)).toEqual([INVITED("17"), INVITED("24")]);
+    expect(sequencesTo(ROBIN)).toEqual([3, 3]);
+  });
+
+  it("drops an invite when the Player leaves before it sends", async () => {
+    const { groupId } = await crewWithNights();
+    const kim = await signIn(t, { email: KIM });
+
+    await kim.as.mutation(api.player.join, { shareToken: SHARE_TOKEN, name: "Kim" });
+    await kim.as.mutation(api.player.release, { groupId });
+    await finish();
+
+    expect(firstLinesTo(KIM)).toEqual([WITHDRAWN("17"), WITHDRAWN("24"), WITHDRAWN("31")]);
+  });
+
+  it("lets a claim's invite leave another recipient's pending broadcast retry alone", async () => {
+    const { as, groupId } = await crew();
+    const kim = await signIn(t, { email: KIM });
+    let robinFailedOnce = false;
+    fetchMock.mockImplementation(async (_url, init) => {
+      if (robinFailedOnce || !(init!.body as string).includes(ROBIN))
+        return new Response(null, { status: 200 });
+      robinFailedOnce = true;
+      await kim.as.mutation(api.player.join, { shareToken: SHARE_TOKEN, name: "Kim" });
+      return new Response(null, { status: 503 });
+    });
+
+    await as.mutation(api.sessions.schedule, { groupId, date });
+    await finish();
+
+    expect(robinFailedOnce).toBe(true);
+    expect(firstLinesTo(ROBIN)).toEqual([
+      "The next session for Thursday Crew is set: Saturday, October 17, 2026, 19:00–23:00, Berlin time.",
+      "The next session for Thursday Crew is set: Saturday, October 17, 2026, 19:00–23:00, Berlin time.",
+    ]);
+    expect(sequencesTo(ROBIN)).toEqual([1, 1]);
+    expect(firstLinesTo(KIM)).toEqual([INVITED("17")]);
+    expect(sequencesTo(KIM)).toEqual([2]);
+  });
+
+  it("sends nothing when a Player switches to another name in the same Group", async () => {
+    const { groupId, robin } = await crewWithNights();
+
+    await robin.as.mutation(api.player.claim, {
+      shareToken: SHARE_TOKEN,
+      playerId: await unclaimedPlayer(groupId, "Robin Two"),
+    });
+    await finish();
+
+    expect(resendRequests()).toEqual([]);
+  });
+
+  it("sends nothing when the GM releases their own Player", async () => {
+    const { as, groupId } = await crewWithNights();
+
+    await as.mutation(api.player.join, { shareToken: SHARE_TOKEN, name: "Max" });
+    await as.mutation(api.player.release, { groupId });
+    await finish();
+
+    expect(resendRequests()).toEqual([]);
+  });
+
+  it("invites the Account that Saves the Group to each upcoming published scheduled Session", async () => {
+    const anonymous = await crew(signInAnonymousGm);
+    const { groupId } = anonymous;
+    await anonymous.as.mutation(api.sessions.schedule, { groupId, date: "2026-10-17" });
+    await anonymous.as.mutation(api.sessions.schedule, { groupId, date: "2026-10-24" });
+    const cancelled = await anonymous.as.mutation(api.sessions.schedule, {
+      groupId,
+      date: "2026-10-31",
+    });
+    await finish();
+    await anonymous.as.mutation(api.sessions.cancel, { sessionId: cancelled });
+    await finish();
+    sent = [];
+    const account = await signIn(t, { email: "saved-gm@example.com" });
+
+    const { code } = await anonymous.as.mutation(api.account.startSave, {});
+    await account.as.mutation(api.account.finishSave, { code });
+    await finish();
+
+    expect(resendMails().flatMap(({ to }) => to)).toEqual([
+      "saved-gm@example.com",
+      "saved-gm@example.com",
+    ]);
+    expect(firstLinesTo("saved-gm@example.com")).toEqual([
+      "Thursday Crew is yours now, so its session is in your calendar: Saturday, October 17, 2026, 19:00–23:00, Berlin time.",
+      "Thursday Crew is yours now, so its session is in your calendar: Saturday, October 24, 2026, 19:00–23:00, Berlin time.",
+    ]);
+    expect(unfolded(inviteOf(resendMails()[0]!))).toContain(
+      `URL:https://next-session.link/g/${groupId}\r\n`,
+    );
+  });
+
+  it.each(["Session mail off", "a .test address"])(
+    "neither invites nor withdraws an Account with %s",
+    async (setting) => {
+      const { groupId } = await crewWithNights();
+      const kim = await signIn(
+        t,
+        setting === "Session mail off"
+          ? { email: KIM, sessionEmailsEnabled: false }
+          : { email: "kim@example.test" },
+      );
+
+      await kim.as.mutation(api.player.join, { shareToken: SHARE_TOKEN, name: "Kim" });
+      await finish();
+      await kim.as.mutation(api.player.release, { groupId });
+      await finish();
+
+      expect(resendRequests()).toEqual([]);
+    },
+  );
+
+  it("drops a pending withdrawal once the Account turns Session mail off", async () => {
+    const { groupId, robin } = await crewWithNights();
+
+    await robin.as.mutation(api.player.release, { groupId });
+    await robin.as.mutation(api.me.setSessionEmails, { enabled: false });
+    await finish();
+
+    expect(resendRequests()).toEqual([]);
   });
 });

@@ -25,6 +25,14 @@ export async function isCalendarRecipient(
   return claim !== null;
 }
 
+export async function isInCalendarRecipientSet(
+  ctx: QueryCtx,
+  { groupId, userId }: { groupId: Id<"groups">; userId: Id<"users"> },
+) {
+  const group = await ctx.db.get("groups", groupId);
+  return group !== null && (await isCalendarRecipient(ctx, group, userId));
+}
+
 export type SessionMailAccount = Doc<"users"> & { email: string };
 
 export function receivesSessionMail(account: Doc<"users"> | null): account is SessionMailAccount {

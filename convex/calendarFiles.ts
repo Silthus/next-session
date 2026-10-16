@@ -1,10 +1,10 @@
 import { v } from "convex/values";
-import { bookingWindow, todayUtc } from "../shared/dates";
 import { feed, sessionUid, type CalendarEntry } from "../shared/icalendar";
 import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
 import { httpAction, internalQuery } from "./_generated/server";
 import { groupByShareToken } from "./model/access";
+import { upcomingSessions } from "./model/upcomingSessions";
 
 declare const process: { env: Record<string, string | undefined> };
 
@@ -36,13 +36,7 @@ export const groupDownload = internalQuery({
   handler: async (ctx, { shareToken, servedAt }) => {
     const group = await groupByShareToken(ctx, shareToken);
     if (group === null) return null;
-    const { first, last } = bookingWindow(todayUtc(servedAt));
-    const upcoming = await ctx.db
-      .query("sessions")
-      .withIndex("by_groupId_and_date", (q) =>
-        q.eq("groupId", group._id).gte("date", first).lte("date", last),
-      )
-      .collect();
+    const upcoming = await upcomingSessions(ctx, group._id, servedAt);
     const shareLink = shareLinkOf(group);
     const entries = upcoming
       .map((session) => publishedEntryOf(session, { url: shareLink, stamp: servedAt }))

@@ -1,0 +1,30 @@
+# Red: the #153 tests on origin/spec/session-mail-invites at 08aa11f, before the change
+# bunx vitest run convex/sessionInvites.test.ts convex/model/sessionMailCopy.test.ts
+     × invites a player who entered with the night and the invite hint 3ms
+     × invites a gm who entered with the night and the invite hint 1ms
+     × withdraws the night from a Player who left, with no button to the group 1ms
+   × mails only the Group's calendar recipient set, rechecked on every attempt 35ms
+     × invites a Player who keeps the Group through Join while signed in to each upcoming published scheduled Session 30ms
+     × invites a Player who keeps the Group through Keep this group to each upcoming published scheduled Session 28ms
+     × invites a Player who keeps the Group through the auto-keep on answer to each upcoming published scheduled Session 30ms
+     × withdraws each upcoming published Session from a Player who leaves through Not you? 23ms
+     × withdraws each upcoming published Session from a Player who leaves through Remove from my groups 24ms
+     × withdraws each upcoming published Session from a Player who leaves through the GM removing the Player 24ms
+     × still withdraws the night as it was at the release after a change and the Group's deletion 37ms
+     × drops a withdrawal when the Player keeps the Group again before it sends 21ms
+     × drops an invite when the Player leaves before it sends 23ms
+     × lets a claim's invite leave another recipient's pending broadcast retry alone 9ms
+     × invites the Account that Saves the Group to each upcoming published scheduled Session 29ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ …(3) ] to deeply equal ArrayContaining{…}
+AssertionError: expected [ Array(1) ] to deeply equal [ …(3) ]
+AssertionError: expected [] to deeply equal [ 'robin@example.com', …(2) ]
+AssertionError: expected [] to deeply equal [ …(3) ]
+AssertionError: expected [] to deeply equal [ …(2) ]
+AssertionError: expected [] to deeply equal [ …(3) ]
+AssertionError: expected [] to deeply equal [ Array(1) ]
+AssertionError: expected [] to deeply equal [ 'saved-gm@example.com', …(1) ]
+TypeError: Cannot read properties of undefined (reading 'replace')
+TypeError: Cannot read properties of undefined (reading 'start')
+ Test Files  2 failed (2)
+      Tests  15 failed | 32 passed (47)
