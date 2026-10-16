@@ -119,7 +119,7 @@ The one email every new Account gets right after it is created, confirming the A
 _Avoid_: onboarding email, confirmation email
 
 **Session updates**:
-Emails to the GM's Account and the Accounts behind a Group's Claimed Players when a Session is set, changed or cancelled, each carrying a calendar invite. The GM who made the change gets one too, written as "you". The Session emails switch on My groups stops them. They go through Resend once its key is set; until then they go without the invite, through Workflows, to the Claimed Players only.
+Emails to the GM's Account and the Accounts behind a Group's Claimed Players when a Session is set, changed or cancelled, each carrying a calendar invite. The GM who made the change gets one too, written as "you". The Session emails switch on My groups stops them.
 _Avoid_: alerts, reminders (a Reminder is its own email), invite email
 
 **Reminder**:

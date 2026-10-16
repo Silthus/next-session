@@ -2,7 +2,7 @@
 
 > **Draft, pending review by a qualified German lawyer before publication.** Source text for the `/privacy` page. `{{…}}` placeholders are filled at build time (see `docs/spec.md` §7).
 
-**Version 1.12. Effective: {{EFFECTIVE_DATE}}**
+**Version 1.13. Effective: {{EFFECTIVE_DATE}}**
 
 This policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.
 
@@ -41,7 +41,7 @@ A group's location is whatever the GM types in: an address, a note, or a link. A
 
 We measure use without cookies and without storing anything on your device. We show no ads and do no cross-site tracking, we do not combine your usage events with data from our other products, and we do not sell data or use it for automated decisions.
 
-To count visitors, PostHog forms a hash of your IP address and browser with a secret that changes every day. It does not store your IP address. Share links and sign-in codes are removed from page addresses before they are sent, so a group's share link never reaches usage measurement. When session emails or reminders are on, PostHog receives the share link, and for reminders your reminder link, as mail content through a separate, secret-guarded workflow, not as a usage event or person property. When session emails with calendar invites are enabled, Resend receives the share link as mail content instead; the calendar invite itself carries no share link.
+To count visitors, PostHog forms a hash of your IP address and browser with a secret that changes every day. It does not store your IP address. Share links and sign-in codes are removed from page addresses before they are sent, so a group's share link never reaches usage measurement. When reminders are on, PostHog receives the share link and your reminder link as mail content through a separate, secret-guarded workflow, not as a usage event or person property. When session emails are enabled, Resend receives the share link as mail content; the calendar invite itself carries no share link.
 
 ## 3. Storage on your device (§ 25 TDDDG)
 
@@ -67,7 +67,7 @@ We use these processors under data processing agreements (Art. 28 GDPR):
 | --- | --- | --- |
 | Convex, Inc. | Database, application backend, sign-in | USA |
 | Cloudflare, Inc. | Delivering the website, protection against attacks | Global network, USA |
-| PostHog Inc. | Usage measurement, error reports, technical logs, and sending the welcome mail, tips, session updates, and reminders when enabled | EU (Frankfurt) hosting, US company |
+| PostHog Inc. | Usage measurement, error reports, technical logs, and sending the welcome mail, tips, and reminders when enabled | EU (Frankfurt) hosting, US company |
 | Plus Five Five, Inc. (Resend) | Sending session emails with calendar invites, when enabled | US company, sends through Amazon Web Services in the EU (Ireland) |
 
 Transfers to the USA rely on the EU–US Data Privacy Framework and the EU Standard Contractual Clauses.
@@ -92,7 +92,7 @@ Your Google profile picture is shown only to you and to the GM of each group whe
 | Your Google profile picture | Replaced or deleted at your next Google sign-in after you change or remove it at Google; deleted with your account |
 | Your calendar feed link | Until you reset it on My groups or your account is deleted |
 | Your reminder setting and reminder link | Until your account is deleted |
-| Your account's pseudonymous profile in PostHog, and your email address for the welcome mail, tips, session updates, and reminders | Until your account is deleted |
+| Your account's pseudonymous profile in PostHog, and your email address for the welcome mail, tips, and reminders | Until your account is deleted |
 
 When you save a group to an account, the group moves to the account and the temporary user ID is deleted.
 

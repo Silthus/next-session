@@ -1,0 +1,4 @@
+ Test Files  104 passed (104)
+      Tests  1745 passed (1745)
+bun run check: exit 0 (2026-10-16T19:43:33Z)
+bun run e2e: exit 0 —  39 skipped, 96 passed (4.1m),

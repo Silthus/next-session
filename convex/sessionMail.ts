@@ -14,30 +14,18 @@ import {
   calendarMessage,
   calendarSend,
   requestCalendarMails,
-  requestSessionMail,
-  sessionMailBody,
-  sessionMailConfigured,
-  sessionSend,
   type CalendarSend,
-  type SessionSend,
 } from "./mail";
 import {
   calendarGroupIdsOf,
   calendarRecipients,
-  claimedAccountIds,
   isCalendarRecipient,
   isInCalendarRecipientSet,
   receivesSessionMail,
   type MailableAccount,
 } from "./model/recipients";
-import {
-  dateLabel,
-  sessionMailCopy,
-  type MailCopy,
-  type SessionChange,
-} from "./model/sessionMailCopy";
+import { sessionMailCopy, type MailCopy, type SessionChange } from "./model/sessionMailCopy";
 import { shareLinkOf, siteLink } from "./model/siteLinks";
-import { accountDistinctId, PRODUCT } from "./model/telemetry";
 import { groupTimeOf } from "./model/timeAndPlace";
 import { upcomingSessions } from "./model/upcomingSessions";
 import { frozenEntry } from "./schema";
@@ -60,9 +48,8 @@ export async function sessionPublished(
   previous: Doc<"sessions">["published"],
 ) {
   const { published } = session;
-  if (published === undefined) return;
-  if (calendarMailConfigured()) await broadcast(ctx, session, published, previous);
-  else await requestWorkflowsSessionUpdates(ctx, session, published, previous);
+  if (published === undefined || !calendarMailConfigured()) return;
+  await broadcast(ctx, session, published, previous);
 }
 
 async function broadcast(
@@ -498,47 +485,4 @@ function idempotencyKey(uid: string, sequence: number, account: MailableAccount)
 
 function myGroupsLink() {
   return siteLink("/me");
-}
-
-async function requestWorkflowsSessionUpdates(
-  ctx: MutationCtx,
-  session: Doc<"sessions">,
-  published: Published,
-  previous: Published | undefined,
-) {
-  if (published.state === previous?.state || !sessionMailConfigured()) return;
-  for (const userId of await claimedAccountIds(ctx, session.groupId)) {
-    const send = { sessionId: session._id, userId, change: published.state };
-    if (await bodyFor(ctx, send)) await requestSessionMail(ctx, send);
-  }
-}
-
-export const recipient = internalQuery({
-  args: sessionSend,
-  returns: v.union(sessionMailBody, v.null()),
-  handler: bodyFor,
-});
-
-async function bodyFor(ctx: QueryCtx, { sessionId, userId, change }: SessionSend) {
-  const session = await ctx.db.get("sessions", sessionId);
-  const published = session?.published;
-  if (!session || published?.state !== change) return null;
-  const group = await ctx.db.get("groups", session.groupId);
-  if (!group || group.ownerId === userId) return null;
-  const player = await ctx.db
-    .query("players")
-    .withIndex("by_userId_and_groupId", (q) => q.eq("userId", userId).eq("groupId", group._id))
-    .first();
-  if (!player) return null;
-  const account = await ctx.db.get("users", userId);
-  if (!receivesSessionMail(account)) return null;
-  return {
-    distinct_id: accountDistinctId(account),
-    product: PRODUCT,
-    email: account.email,
-    group_name: group.name,
-    date_label: dateLabel(session.date),
-    change,
-    player_url: shareLinkOf(group),
-  };
 }

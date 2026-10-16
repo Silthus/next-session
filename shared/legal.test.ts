@@ -52,6 +52,18 @@ describe("privacy text", () => {
     );
   });
 
+  it("leaves session emails to Resend alone, so PostHog neither sends them nor keeps an address for them", () => {
+    const postHogRow = /\| PostHog Inc\. \|[^\n]*/.exec(sectionOf(privacy, "4. Recipients"))?.[0];
+    const postHogProfile = /\| Your account's pseudonymous profile in PostHog[^\n]*/.exec(
+      sectionOf(privacy, "5. How long we keep data"),
+    )?.[0];
+    const shareLinkReach = sectionOf(privacy, "2. What we process")
+      .split("\n\n")
+      .find((paragraph) => paragraph.includes("secret-guarded workflow"));
+    for (const text of [postHogRow, postHogProfile, shareLinkReach])
+      expect(text).not.toMatch(/session (updates|emails or)/i);
+  });
+
   describe("Reminders", () => {
     it("says what a Reminder carries, why, and on which legal basis", () => {
       expect(sectionOf(privacy, "2. What we process")).toContain(
