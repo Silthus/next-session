@@ -23,7 +23,7 @@ const LEADS: ReminderLead[] = ["day", "hours"];
 const LATEST_SEND_MS = 5 * 60_000;
 const DAY = 24 * 60 * 60_000;
 const BACKFILL_PAGE_SIZE = 50;
-const BACKFILL_RETRY_MS = 2 * UNDO_WINDOW_MS;
+const BACKFILL_RETRY_MS = 3 * UNDO_WINDOW_MS;
 
 const reminderJob = {
   sessionId: v.id("sessions"),

@@ -16,6 +16,7 @@ import {
   type SessionDetailChanges,
 } from "./model/timeAndPlace";
 
+const SETTLE_DEADLINE_MS = 2 * UNDO_WINDOW_MS;
 const SNAPSHOT_FIELDS = ["state", "start", "end", "location", "summary"] as const;
 
 type PublishedSession = Infer<typeof publishedSession>;
@@ -112,7 +113,7 @@ function isPublishedAs(published: PublishedSession, snapshot: SessionSnapshot) {
 }
 
 export function isSettling(session: Doc<"sessions">) {
-  return session.changedAt !== undefined && Date.now() - session.changedAt <= UNDO_WINDOW_MS + 1;
+  return session.changedAt !== undefined && Date.now() - session.changedAt <= SETTLE_DEADLINE_MS;
 }
 
 export function stateOf(session: Doc<"sessions">): SessionState {

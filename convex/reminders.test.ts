@@ -576,6 +576,21 @@ describe("the switch-on backfill", () => {
     ]);
   });
 
+  it("waits for a settle that runs late", async () => {
+    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "");
+    const { as, groupId } = await crew();
+    await as.mutation(api.sessions.schedule, { groupId, date });
+    await settle();
+    await vi.advanceTimersByTimeAsync(dayDue - 2 * 60_000 - Date.now());
+    await saveTimeAndPlace(as, groupId, { timeZone: "America/New_York" });
+    vi.setSystemTime(Date.now() + UNDO_WINDOW_MS + 5_000);
+
+    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", REMINDER_WEBHOOK);
+    await t.mutation(internal.reminders.scheduleUpcoming, {});
+
+    expect((await scheduledReminders()).filter(({ name }) => name.includes("fire"))).toEqual([]);
+  });
+
   it("schedules a Session whose pending change was taken back once its Undo window ends", async () => {
     vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "");
     const { as, groupId } = await crew();
