@@ -1,5 +1,5 @@
-# bun run check on 180f56b (spec/calendar-files tip 5e599d5 merged: already up to date), through fleet heavy
-# first run: 1 failure in src/features/tips/ConfirmTips.test.tsx (focus after a failed press), untouched by this diff; it passed 3 of 3 runs alone and the rerun below is green
+# bun run check on the landed tree e081fe3 (spec/calendar-files tip 8dd3522 merged), through fleet heavy
+# an earlier run on 180f56b had 1 failure in src/features/tips/ConfirmTips.test.tsx (focus after a failed press), untouched by this diff; it passed 3 of 3 runs alone, and both later runs are green
 
 Fleet heavy: 2 heavy jobs run already; waiting for a free slot.
 $ tsc -p tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p convex/tsconfig.json && eslint . && prettier --check . && vitest run && vite build && wrangler deploy --dry-run
@@ -189,13 +189,18 @@ Not implemented: Window's scrollTo() method
 Not implemented: Window's scrollTo() method
 Not implemented: Window's scrollTo() method
 Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
 
- Test Files  89 passed (89)
-      Tests  1442 passed (1442)
-   Start at  11:02:06
-   Duration  16.02s (tests 46%, environment 31%, transform 9%, import 9%, setup 4%)
+ Test Files  91 passed (91)
+      Tests  1493 passed (1493)
+   Start at  11:14:13
+   Duration  9.94s (tests 46%, environment 28%, import 13%, transform 8%, setup 4%)
 
-Environment  |ui| jsdom was created 53 times · 61.39s total, 40% of tracked time
+Environment  |ui| jsdom was created 55 times · 33.32s total, 39% of tracked time
              create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
              learn more: https://vitest.dev/guide/improving-performance#test-environments
 
@@ -210,10 +215,10 @@ Current configuration:
   routeFileIgnorePattern: undefined
 vite v8.3.2 building client environment for production...
 transforming...
-✓ 296 modules transformed.
+✓ 307 modules transformed.
 rendering chunks...
 computing gzip size...
-dist/index.html                                                   1.14 kB │ gzip:  0.47 kB
+dist/index.html                                                   1.22 kB │ gzip:  0.48 kB
 dist/assets/jetbrains-mono-greek-500-normal-JpySY46c.woff2        4.28 kB
 dist/assets/jetbrains-mono-cyrillic-500-normal-DmUKJPL_.woff2     5.35 kB
 dist/assets/jetbrains-mono-vietnamese-500-normal-DNRqzVM1.woff    5.47 kB
@@ -231,42 +236,47 @@ dist/assets/jetbrains-mono-latin-500-normal-CJOVTJB7.woff        28.20 kB
 dist/assets/geist-latin-wght-normal-BgDaEnEv.woff2               29.40 kB
 dist/assets/fraunces-latin-ext-opsz-normal-CJcjJNj7.woff2        59.38 kB
 dist/assets/fraunces-latin-opsz-normal-DihXLNYH.woff2            67.30 kB
-dist/assets/index-vieKHN3M.css                                   66.08 kB │ gzip: 18.94 kB
+dist/assets/index-BNq4Oyjz.css                                   67.81 kB │ gzip: 19.24 kB
 dist/assets/terms-B7mpTnHh.js                                     0.15 kB │ gzip:  0.14 kB
 dist/assets/imprint-rScowOne.js                                   0.15 kB │ gzip:  0.15 kB
 dist/assets/privacy---F9nfIt.js                                   0.15 kB │ gzip:  0.15 kB
-dist/assets/g._groupId-DVJdl0p_.js                                0.22 kB │ gzip:  0.19 kB
+dist/assets/g._groupId-CF3tyFf1.js                                0.22 kB │ gzip:  0.19 kB
 dist/assets/Eyebrow-Cm-NjePZ.js                                   0.22 kB │ gzip:  0.19 kB
-dist/assets/g._groupId-CppFRviy.js                                0.25 kB │ gzip:  0.20 kB
-dist/assets/useTodayUtc-BPBioaiW.js                               0.46 kB │ gzip:  0.28 kB
+dist/assets/Card-BxATSUMN.js                                      0.25 kB │ gzip:  0.20 kB
+dist/assets/g._groupId-DZFXsYoe.js                                0.25 kB │ gzip:  0.20 kB
+dist/assets/useTodayUtc-Dhgt8GLu.js                               0.46 kB │ gzip:  0.28 kB
 dist/assets/Wordmark-ovQQyEB_.js                                  0.49 kB │ gzip:  0.33 kB
 dist/assets/PageShell-B5b-m7cd.js                                 0.60 kB │ gzip:  0.37 kB
+dist/assets/useToast-BFaGJ3Li.js                                  0.72 kB │ gzip:  0.42 kB
 dist/assets/StatusScreen-DQIjP3ad.js                              0.72 kB │ gzip:  0.44 kB
-dist/assets/useToast-Dp6gfuhK.js                                  1.63 kB │ gzip:  0.79 kB
-dist/assets/tips-Q8oELuQ9.js                                      2.22 kB │ gzip:  1.13 kB
-dist/assets/Popover-CvNaZ3N4.js                                   2.66 kB │ gzip:  1.24 kB
-dist/assets/HeaderAccount-DRzRbMYj.js                             2.67 kB │ gzip:  1.22 kB
-dist/assets/errors-CfnE5OUn.js                                    3.36 kB │ gzip:  1.64 kB
+dist/assets/dates-Bzsu1zUS.js                                     1.01 kB │ gzip:  0.50 kB
+dist/assets/GroupFrame-CAgrAuKx.js                                1.31 kB │ gzip:  0.65 kB
+dist/assets/timeAndPlace-ffk-uwdA.js                              1.94 kB │ gzip:  0.95 kB
+dist/assets/tips-BDzk8snG.js                                      2.22 kB │ gzip:  1.13 kB
+dist/assets/HeaderAccount-DmJi_CBI.js                             2.49 kB │ gzip:  1.15 kB
+dist/assets/Popover-CSw2YVTB.js                                   2.56 kB │ gzip:  1.21 kB
+dist/assets/errors-CjHFNwQC.js                                    3.49 kB │ gzip:  1.68 kB
 dist/assets/pageTitle-BPK1dLoV.js                                 4.35 kB │ gzip:  1.63 kB
-dist/assets/ShareLinkCard-vKi71adp.js                             6.49 kB │ gzip:  3.06 kB
-dist/assets/routes-CFxafc7r.js                                    7.62 kB │ gzip:  2.95 kB
-dist/assets/useGm-DF4J1eyA.js                                     8.89 kB │ gzip:  3.11 kB
-dist/assets/me-B8lSyz-G.js                                       10.30 kB │ gzip:  3.64 kB
-dist/assets/AccountSheet-Bqrdw5-v.js                             11.56 kB │ gzip:  4.47 kB
+dist/assets/ShareLinkCard-DQtpOZDv.js                             6.50 kB │ gzip:  3.07 kB
+dist/assets/routes-Bf0GAzcB.js                                    7.62 kB │ gzip:  2.95 kB
+dist/assets/g._groupId_.settings-Dj7z_w6H.js                      8.80 kB │ gzip:  3.17 kB
+dist/assets/useGm-C8xFDAem.js                                     9.19 kB │ gzip:  3.15 kB
+dist/assets/me-x5xVaLdb.js                                       10.74 kB │ gzip:  3.79 kB
+dist/assets/AccountSheet-Cv3iDUwV.js                             11.56 kB │ gzip:  4.47 kB
 dist/assets/LegalPage-Btg1zlhI.js                                18.21 kB │ gzip:  7.00 kB
-dist/assets/s._shareToken-CWe045ia.js                            27.04 kB │ gzip:  9.21 kB
+dist/assets/s._shareToken-CxNnpoCP.js                            28.40 kB │ gzip:  9.52 kB
 dist/assets/LegalFooter-C83F2zHf.js                              35.16 kB │ gzip: 14.84 kB
-dist/assets/GroupScreen-jkuIcaxs.js                              46.18 kB │ gzip: 14.01 kB
+dist/assets/GroupScreen-IRIkHu1L.js                              48.05 kB │ gzip: 14.45 kB
 dist/assets/useNavigate-BcGbE07h.js                              70.39 kB │ gzip: 19.81 kB
 dist/assets/module.slim-ChG__E8X.js                             146.43 kB │ gzip: 51.24 kB
 dist/assets/extension-bundles-C1Hp9JeO.js                       172.90 kB │ gzip: 56.97 kB
-dist/assets/index-jGRLVBtw.js                                   296.16 kB │ gzip: 94.92 kB
+dist/assets/index-i7jdlPQ0.js                                   295.69 kB │ gzip: 94.64 kB
 
-✓ built in 596ms
+✓ built in 1.00s
 
  ⛅️ wrangler 4.147.0 (update available 4.151.1)
 ───────────────────────────────────────────────
-✨ Read 52 files from the assets directory /home/coder/.t3/worktrees/next-session/t3-d21154d5/dist
+✨ Read 57 files from the assets directory /home/coder/.t3/worktrees/next-session/t3-d21154d5/dist
 Total Upload: 4.29 KiB / gzip: 1.43 KiB
 Your Worker has access to the following bindings:
 Binding                                                               Resource                  
