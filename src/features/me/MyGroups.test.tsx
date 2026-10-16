@@ -329,7 +329,7 @@ describe("Your calendar on My groups", () => {
     });
   });
 
-  it("says to slow down when the Account churned its link too often", async () => {
+  it("says to wait an hour when the Account made too many new links", async () => {
     const { calendarFeed } = renderMyGroups();
     calendarFeed.subscribe.mockRejectedValueOnce(new ConvexError({ code: "RATE_LIMITED" }));
 
@@ -338,7 +338,7 @@ describe("Your calendar on My groups", () => {
     );
 
     expect((await screen.findByRole("alert")).textContent).toBe(
-      "Slow down a moment, then try again.",
+      "Too many new links this hour. Try again in an hour.",
     );
     expect(screen.getByRole("button", { name: "Subscribe in your calendar app" })).toBeTruthy();
   });

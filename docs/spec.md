@@ -418,7 +418,7 @@ The same workflow runs on `push` to `main`; a `deploy` job `needs: [check, e2e]`
 
 1. `bunx convex deploy --cmd 'bun run build' --cmd-url-env-var-name VITE_CONVEX_URL` with `CONVEX_DEPLOY_KEY`.
 2. `bunx wrangler deploy` with `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
-3. Smoke: `curl https://next-session.link`. The app, a deep link and a new Share Link answer 200; a legacy `/s/<8 chars>` and a `/groups/...` link answer 302 to the same path on Lonir; a Calendar download for an unknown `/cal/s/<token>.ics` and a Calendar feed for an unknown `/cal/a/<token>.ics` answer 404 through the Worker and Convex.
+3. Smoke: `curl https://next-session.link`. The app, a deep link and a new Share Link answer 200; a legacy `/s/<8 chars>` and a `/groups/...` link answer 302 to the same path on Lonir; a Calendar download for an unknown `/cal/s/<token>.ics` and a Calendar feed for an unknown `/cal/a/<token>.ics` answer 404 with an empty body through the Worker and Convex. The empty body is what tells the calendar routes apart from Convex's own 404 for an unrouted path, which carries a message.
 
 Secrets, set once with `gh secret set` by the deploy ticket from the env files on Michael's machine (never echoed): `CONVEX_DEPLOY_KEY` (from `CONVEX_PROD_DEPLOY_KEY` in `~/.config/next-session/deploy-keys.env`), `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` (from `~/.config/next-session/cloudflare.env`). Convex env on prod: `SITE_URL=https://next-session.link`, `JWT_PRIVATE_KEY`, `JWKS`. On dev `helpful-mastiff-82`: the same keys with `SITE_URL=http://localhost:5173`.
 
