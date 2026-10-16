@@ -68,6 +68,7 @@ const byTopic = {
     TOO_MANY_GROUPS: `Your own groups didn't move: an account holds up to ${String(MAX_GROUPS_PER_GM)}. Delete some to make room.`,
     CLAIM_INVALID: "Your own groups didn't move: the save expired.",
   },
+  reminderLink: { NOT_FOUND: "This link doesn't work anymore." },
   calendarFeed: { RATE_LIMITED: "Too many new links this hour. Try again in an hour." },
   answer,
   fillRest: { ...answer, OUT_OF_WINDOW: "Those nights are locked now." },

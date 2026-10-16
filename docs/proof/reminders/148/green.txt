@@ -1,0 +1,9 @@
+
+ RUN  v5.0.3 <tree>
+
+
+ Test Files  3 passed (3)
+      Tests  83 passed (83)
+   Start at  10:37:48
+   Duration  1.52s (tests 51%, transform 25%, import 19%, environment 5%)
+

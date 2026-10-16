@@ -27,6 +27,10 @@ The single-page web app: the landing, the GM surface, the player surface on the 
   handler: Route in routes/tips.tsx
   trust: signed-in user
   control: none — the route only renders client code; every read and write it triggers enters through a Backend entrance that carries its own control
+- route /reminders/off: the page every Reminder links to, where whoever holds the link turns Reminders off or back on
+  handler: Route in routes/reminders.off.tsx
+  trust: visitor
+  control: none — the route only renders client code; every read and write it triggers enters through a Backend entrance that carries its own control
 - route /terms: the Terms
   handler: Route in routes/terms.tsx
   trust: visitor

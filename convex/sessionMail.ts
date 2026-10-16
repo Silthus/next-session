@@ -9,6 +9,7 @@ import {
   sessionSend,
   type SessionSend,
 } from "./mail";
+import { shareLinkOf } from "./model/siteLinks";
 import { accountDistinctId, isTestAddress, PRODUCT } from "./model/telemetry";
 
 export async function sessionPublished(
@@ -63,7 +64,7 @@ async function bodyFor(ctx: QueryCtx, { sessionId, userId, change }: SessionSend
     group_name: group.name,
     date_label: dateLabel(session.date),
     change,
-    player_url: `https://next-session.link/s/${encodeURIComponent(group.shareToken)}`,
+    player_url: shareLinkOf(group),
   };
 }
 

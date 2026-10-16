@@ -4,9 +4,10 @@ import { DEFAULT_GROUP_TIME, sessionWindow } from "../shared/sessionTime";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, type MutationCtx, type QueryCtx } from "./_generated/server";
-import type { SessionState } from "../shared/sessions";
+import { UNDO_WINDOW_MS, type SessionState } from "../shared/sessions";
 import type { publishedSession } from "./schema";
-import { sessionPublished } from "./sessionMail";
+import * as reminders from "./reminders";
+import * as sessionMail from "./sessionMail";
 import { fail } from "./model/errors";
 import {
   groupTimeOf,
@@ -15,7 +16,7 @@ import {
   type SessionDetailChanges,
 } from "./model/timeAndPlace";
 
-export const UNDO_WINDOW_MS = 30_000;
+const SETTLE_DEADLINE_MS = 2 * UNDO_WINDOW_MS;
 const SNAPSHOT_FIELDS = ["state", "start", "end", "location", "summary"] as const;
 
 type PublishedSession = Infer<typeof publishedSession>;
@@ -100,13 +101,19 @@ export const settle = internalMutation({
     if (previous !== undefined && isPublishedAs(previous, snapshot)) return null;
     const published = { ...snapshot, revision: (previous?.revision ?? 0) + 1 };
     await ctx.db.patch("sessions", sessionId, { published });
-    await sessionPublished(ctx, { ...session, published }, previous);
+    const settled = { ...session, published };
+    await sessionMail.sessionPublished(ctx, settled, previous);
+    await reminders.sessionPublished(ctx, settled, group);
     return null;
   },
 });
 
 function isPublishedAs(published: PublishedSession, snapshot: SessionSnapshot) {
   return SNAPSHOT_FIELDS.every((field) => published[field] === snapshot[field]);
+}
+
+export function isSettling(session: Doc<"sessions">) {
+  return session.changedAt !== undefined && Date.now() - session.changedAt <= SETTLE_DEADLINE_MS;
 }
 
 export function stateOf(session: Doc<"sessions">): SessionState {

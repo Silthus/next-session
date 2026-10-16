@@ -77,6 +77,43 @@ The webhook carries names, email and the current Share Link only as the run's tr
 
 Convex estimates planned deliveries per UTC day across Welcome (1), Tips (2) and session recipients (1 each). It warns at 80 and above 100, but queues every eligible recipient. Delayed Tips, hosted suppression, timeout duplicates and other products mean this is not the provider's actual send count. Inspect the shared project's real quota before activation; a per-Group check cannot warn meaningfully with a 100-Player Roster cap and the actor excluded.
 
+## Reminders
+
+Reminders are built but switched off: no "Next Session: Reminders" workflow exists in PostHog yet, and Convex prod has no `POSTHOG_REMINDER_WEBHOOK_URL`. Without it, or without `POSTHOG_MAIL_WEBHOOK_SECRET`, Convex schedules no Reminder and calls no webhook. The switch-on and its live proof are #149. `workflows/reminders.json` and `templates/reminder.json` are the rebuild definitions, in the shape of the Session updates pair.
+
+Convex posts one Reminder per Account, 24 hours (`lead: "day"`) and 2 hours (`lead: "hours"`) before the Session starts, with event `next_session:reminder_requested`:
+
+| Field | Value |
+| --- | --- |
+| `distinct_id`, `product`, `email` | As Session updates send them |
+| `group_name` | The Group's name at send time |
+| `date_label` | The start's date in the Group's time zone at publish, "Saturday, October 17, 2026" |
+| `start_label` | The start in the Group's time zone at publish, 24-hour "19:00" |
+| `location` | The published location. Left out when the Session has none |
+| `lead` | `day` or `hours` |
+| `player_url` | The current Share Link, read at send time. No other field carries a Share Token |
+| `reminders_off_url` | `https://next-session.link/reminders/off?t=<token>`, the Account's own Reminder link |
+
+Placeholders, beside the shared ones above:
+
+| Placeholder | Value |
+| --- | --- |
+| `<TEMPLATE:reminder>` | The library template ID of `templates/reminder.json` |
+| `<CATEGORY:session-updates>` | The existing transactional Session updates category, `01a115ad-3d17-0000-c6cc-ec3e891a4e82`. Reminders reuse it, because categories need the UI and a transactional category changes no delivery. A dedicated "Reminders" category is a later rename in the UI |
+
+The email step is `transactional` with `tracking_enabled: false`. It has no hosted unsubscribe link: the footer links to the Account's Reminders-off page, which asks before it changes anything. The subject is "Tomorrow: …" or "In 2 hours: … at 19:00", and the body says the Group "plays tomorrow" or "plays in 2 hours", so a Session just after midnight never reads "today" the evening before. Subject and plain text use `raw`, as Session updates do.
+
+Switch on in this order:
+
+1. The Privacy Policy with the Reminders row is live.
+2. Create the template and the workflow from the rebuild files, inactive. Exercise both leads, with and without a location, through `mock_async_functions=true`: each reaches one mocked sender, the Group name is escaped once in HTML, and the footer link is the body's `reminders_off_url`.
+3. Activate the workflow and check that a missing or wrong Bearer gets 401.
+4. Set `POSTHOG_REMINDER_WEBHOOK_URL` in Convex prod. It reuses `POSTHOG_MAIL_WEBHOOK_SECRET`.
+5. Run the backfill once: `bunx convex run --prod reminders:scheduleUpcoming '{}'`. It schedules the pair for every upcoming scheduled Session that has none for its current revision, so running it twice schedules nothing new. A Session changed in the last minute waits, because its change may not have settled yet: the backfill runs itself again 90 seconds later, after that change has published or been taken back. It logs "Reminder backfill finished" with the number of Reminders it scheduled.
+6. Take the live proof: a real Reminder in an owned inbox, its footer link turning Reminders off, and the My groups switch showing it off.
+
+Each Reminder counts 1 in the daily mail estimate when its job fires, never per retry. A job that runs more than 5 minutes after its due time sends nothing. A due time already past at publish is never scheduled. Network errors and 5xx get four attempts in all, with backoff; every attempt rechecks the published revision, the Claim, the Reminders switch and the current Share Link. Other 4xx, 429 included, are logged and dropped.
+
 ## Delivery limits
 
 The observed enforced tier-0 allowance is 50 emails per hour and 100 per day. Current project usage is private. Provider worker source reschedules accepted mail on sending-cap denial and SES throttling. The Session backend treats an ingress webhook 429 as a 4xx refusal and logs without retry; it is not proof of provider queuing. Network/5xx retries can duplicate mail after an accepted timeout. No live quota-exhaustion test was performed, and mocks do not prove quota behavior. Investigate any 429 or absent callback before claiming delivery; do not silently change backend retry semantics.
