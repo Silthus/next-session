@@ -42,6 +42,7 @@ function renderKeep(overrides: Partial<Props> = {}) {
     state: "offer",
     invite: "line",
     refusal: null,
+    calendarInvites: null,
     ...handlers,
     ...overrides,
   };
@@ -57,6 +58,7 @@ function Keeping({ initial, ...props }: Partial<Props> & { initial: KeepState })
         groupId="group-keep"
         invite="line"
         refusal={null}
+        calendarInvites={null}
         state={state}
         onKeep={() => setState("kept")}
         onRemove={() => setState("offer")}
@@ -74,8 +76,14 @@ describe("KeepGroup for a visitor", () => {
     const { onKeep, onContinueWithGoogle } = renderKeep({ invite: "nudge" });
 
     const nudge = await screen.findByRole("region", { name: KEEP_NUDGE.title });
-    expect(within(nudge).getByText("Find it and your answers on all your devices.")).toBeTruthy();
-    expect(within(nudge).getByText("Get notified when the next session is set.")).toBeTruthy();
+    const reasons = within(nudge)
+      .getAllByRole("paragraph")
+      .slice(0, 2)
+      .map((reason) => reason.textContent);
+    expect(reasons).toEqual([
+      "Get a calendar invite for every session.",
+      "Find it and your answers on all your devices.",
+    ]);
     const actions = within(nudge)
       .getAllByRole("button")
       .map((button) => button.textContent);
@@ -87,8 +95,10 @@ describe("KeepGroup for a visitor", () => {
 
     expect(onKeep).toHaveBeenCalledOnce();
     expect(onContinueWithGoogle).toHaveBeenCalledOnce();
-    expect(track).toHaveBeenCalledTimes(2);
-    expect(track).toHaveBeenCalledWith({ name: "keep_group_started", group_id: "group-keep" });
+    expect(vi.mocked(track).mock.calls).toEqual([
+      [{ name: "keep_group_started", group_id: "group-keep", surface: "keep_card" }],
+      [{ name: "keep_group_started", group_id: "group-keep", surface: "keep_card" }],
+    ]);
   });
 
   it("leaves Google out until it is switched on", async () => {
@@ -108,6 +118,7 @@ describe("KeepGroup for a visitor", () => {
           state="offer"
           invite={invite}
           refusal={null}
+          calendarInvites={null}
           onKeep={() => undefined}
           onDismissNudge={() => setInvite("line")}
         />
@@ -130,17 +141,18 @@ describe("KeepGroup for a visitor", () => {
 });
 
 describe("KeepGroup as a quiet line", () => {
-  it("offers Keep this group on all your devices", async () => {
+  it("offers Keep this group to get calendar invites", async () => {
     const { onKeep } = renderKeep();
 
     const keep = await screen.findByRole("button", { name: "Keep this group" });
-    expect(keep.closest("p")?.textContent).toBe("Keep this group on all your devices.");
+    expect(keep.closest("p")?.textContent).toBe("Keep this group to get calendar invites.");
     await userEvent.click(keep);
 
     expect(onKeep).toHaveBeenCalledOnce();
     expect(track).toHaveBeenCalledExactlyOnceWith({
       name: "keep_group_started",
       group_id: "group-keep",
+      surface: "keep_line",
     });
   });
 
@@ -170,6 +182,29 @@ describe("KeepGroup once kept", () => {
     await userEvent.click(screen.getByRole("button", { name: "Remove from my groups" }));
 
     expect(onRemove).toHaveBeenCalledOnce();
+  });
+
+  it("names the inbox calendar invites go to under the kept line", async () => {
+    renderKeep({ state: "kept", calendarInvites: "on", email: "ada@example.com" });
+
+    expect(await screen.findByText("Calendar invites go to ada@example.com.")).toBeTruthy();
+    expect(screen.queryByText(/Calendar invites are off/)).toBeNull();
+  });
+
+  it("says calendar invites are off and where to turn them on", async () => {
+    renderKeep({ state: "kept", calendarInvites: "off", email: "ada@example.com" });
+
+    const line = (await screen.findByText(/^Calendar invites are off\./)).closest("p");
+    expect(line?.textContent).toBe("Calendar invites are off. Turn them on in My groups.");
+    expect(within(line!).getByRole("link", { name: "My groups" }).getAttribute("href")).toBe("/me");
+    expect(screen.queryByText(/Calendar invites go to/)).toBeNull();
+  });
+
+  it("says nothing about calendar invites when the Account gets none for this Group", async () => {
+    renderKeep({ state: "kept", calendarInvites: null, email: "ada@example.com" });
+
+    await screen.findByText("Kept in My groups");
+    expect(screen.queryByText(/Calendar invites/)).toBeNull();
   });
 
   it("explains a refusal under the kept line too", async () => {

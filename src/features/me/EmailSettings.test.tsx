@@ -22,7 +22,9 @@ function renderSettings(
   return { saveSessionEmails, saveReminders };
 }
 
-const sessionUpdates = { name: "Email me when a session is set or cancelled" };
+const sessionUpdates = {
+  name: "Email me a calendar invite when a session is set, changed or cancelled",
+};
 const reminders = { name: "Email me 1 day and 2 hours before a session" };
 
 const switchNamed = (name: { name: string }) => screen.getByRole<HTMLInputElement>("switch", name);

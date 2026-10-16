@@ -1,6 +1,6 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { api } from "../convex/_generated/api";
-import { todayUtc, type IsoDate } from "../shared/dates";
+import { addMonths, monthOf, todayUtc, type IsoDate } from "../shared/dates";
 import {
   reserveAccountSignUp,
   openAsGm,
@@ -58,11 +58,14 @@ async function logIn(page: Page, email: string) {
   await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
 }
 
-async function keepByCreatingAccount(page: Page, email: string) {
-  await page
+function keepInvite(page: Page) {
+  return page
     .getByRole("region", { name: "Keep this group" })
-    .getByRole("button", { name: "Create account" })
-    .click();
+    .or(page.getByRole("status", { name: "Keep your sessions and get a calendar invite" }));
+}
+
+async function keepByCreatingAccount(page: Page, email: string) {
+  await keepInvite(page).getByRole("button", { name: "Create account" }).click();
   const sheet = await fillAccount(page, email);
   await sheet.getByRole("button", { name: "Keep group" }).click();
   await expect(page.getByRole("dialog")).toBeHidden();
@@ -93,7 +96,7 @@ test("a visitor keeps the Group with a new Account and plays as that Account on 
     await join(page, "Ana");
     await expect(page.getByRole("region", { name: "Keep this group" })).toBeHidden();
     await answerToday(page);
-    await expect(page.getByRole("region", { name: "Keep this group" })).toBeVisible();
+    await expect(keepInvite(page)).toBeVisible();
     await page.getByRole("button", { name: "Next month" }).click();
     await expect(page.getByRole("region", { name: "Keep this group" })).toBeVisible();
     await page.getByRole("button", { name: "Previous month" }).click();
@@ -299,13 +302,18 @@ test("viewing and picking claim nothing; the first Fill the rest keeps the Playe
 
 test("the visitor can dismiss the nudge and keep answering during this visit", async ({ page }) => {
   const { link } = await seedGroup("Open Crew");
-  await page.goto(link);
+  const nextMonth = addMonths(monthOf(todayUtc(Date.now())), 1);
+  const night = page.getByRole("button", {
+    name: new RegExp(`^${dayLabel(`${nextMonth}-01`)}:`),
+  });
+  await page.goto(`${link}?month=${nextMonth}`);
   await join(page, "Eli");
   await expect(page.getByRole("region", { name: "Keep this group" })).toBeHidden();
-  await answerToday(page);
-  await page.getByRole("button", { name: "Not now" }).click();
-  await todayTile(page).click();
-  await expect(todayTile(page)).toHaveAccessibleName(/: Maybe$/);
+  await night.click();
+  await expect(night).toHaveAccessibleName(/: Free$/);
+  await page.getByRole("button", { name: "Not now", exact: true }).click();
+  await night.click();
+  await expect(night).toHaveAccessibleName(/: Maybe$/);
   await expect(page.getByRole("region", { name: "Keep this group" })).toBeHidden();
   await expect(page.getByRole("dialog")).toBeHidden();
 });

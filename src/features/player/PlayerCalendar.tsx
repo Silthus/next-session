@@ -20,6 +20,7 @@ import { IconChevron, IconStarCancelled } from "../../ui/icons";
 import { focusRing, pressable } from "../../ui/interactive";
 import { Skeleton } from "../../ui/Skeleton";
 import { useFocusOnMount } from "../../ui/useFocusOnMount";
+import { KeepSessionsCard, type KeepSessionsOffer } from "./KeepGroup";
 import { NextSessions } from "./NextSessions";
 import { Progress } from "./Progress";
 import {
@@ -58,6 +59,7 @@ export function PlayerCalendar({
   groupName,
   shareToken,
   keptInMyGroups,
+  inviteSent,
   playerName,
   month,
   today,
@@ -71,12 +73,14 @@ export function PlayerCalendar({
   onNotYou,
   onHintToggle,
   keepGroup,
+  keepSessions,
   accountControl,
 }: {
   groupId: string;
   groupName: string;
   shareToken: string;
   keptInMyGroups: boolean;
+  inviteSent: boolean;
   playerName: string;
   month: IsoMonth;
   today: IsoDate;
@@ -90,6 +94,7 @@ export function PlayerCalendar({
   onNotYou: () => void;
   onHintToggle: () => void;
   keepGroup?: ReactNode;
+  keepSessions?: KeepSessionsOffer;
   accountControl?: ReactNode;
 }) {
   const view = playerMonth({ month, today, answers: answers ?? {}, sessions });
@@ -104,12 +109,14 @@ export function PlayerCalendar({
   const focusMonthHeadingWhenShown = useRef(false);
   const refusedFillRestMonth = useRef<IsoMonth | null>(null);
   const [refusedFillRests, setRefusedFillRests] = useState(0);
+  const askingToKeep = keepSessions !== undefined;
+  const keepSessionsShown = askingToKeep && !view.readOnly && loaded && view.done;
 
   useEffect(() => {
     if (!view.done || !focusDoneCardWhenDone.current) return;
     focusDoneCardWhenDone.current = false;
     doneHeading.current?.focus();
-  }, [view.done]);
+  }, [view.done, askingToKeep]);
 
   useEffect(() => {
     const refusedMonth = refusedFillRestMonth.current;
@@ -156,6 +163,30 @@ export function PlayerCalendar({
     focusMonthHeadingWhenShown.current = true;
     onMonthChange(next);
   }
+
+  function notNow({ onDismiss }: KeepSessionsOffer) {
+    if (view.nextMonth) fillNextMonth(view.nextMonth);
+    else focusDoneCardWhenDone.current = true;
+    onDismiss();
+  }
+
+  const doneCard = keepSessions ? (
+    <KeepSessionsCard
+      groupId={groupId}
+      month={month}
+      nextMonth={view.nextMonth}
+      confirmationRef={doneHeading}
+      offer={keepSessions}
+      onNotNow={() => notNow(keepSessions)}
+    />
+  ) : (
+    <DoneCard
+      month={month}
+      nextMonth={view.nextMonth}
+      headingRef={doneHeading}
+      onFillNextMonth={fillNextMonth}
+    />
+  );
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -214,6 +245,7 @@ export function PlayerCalendar({
           groupId={groupId}
           shareToken={shareToken}
           keptInMyGroups={keptInMyGroups}
+          inviteSent={inviteSent}
           sessions={sessions}
           timeZone={timeZone}
           today={today}
@@ -241,12 +273,7 @@ export function PlayerCalendar({
         {!view.readOnly &&
           loaded &&
           (view.done ? (
-            <DoneCard
-              month={month}
-              nextMonth={view.nextMonth}
-              headingRef={doneHeading}
-              onFillNextMonth={fillNextMonth}
-            />
+            doneCard
           ) : (
             <div ref={fillRestSlot}>
               <Button
@@ -269,7 +296,7 @@ export function PlayerCalendar({
         <p className="text-center text-xs text-ink-3">
           {view.readOnly ? LOCK_TIP : TIPS[Math.floor(taps / 3) % TIPS.length]}
         </p>
-        {keepGroup}
+        {!keepSessionsShown && keepGroup}
       </main>
 
       <footer className="mx-auto flex w-full max-w-xl flex-col items-center gap-2 px-4 pb-6 sm:px-5">

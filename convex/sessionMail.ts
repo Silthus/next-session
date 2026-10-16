@@ -11,12 +11,16 @@ import {
 import {
   CALENDAR_ADDRESS,
   calendarMailConfigured,
+  calendarMailsToday,
   calendarMessage,
   calendarSend,
+  fitsTheDailyShare,
+  nextUtcMidnight,
   requestCalendarMails,
   type CalendarSend,
 } from "./mail";
 import {
+  calendarGroupIdsOf,
   calendarRecipients,
   isCalendarRecipient,
   isInCalendarRecipientSet,
@@ -24,6 +28,7 @@ import {
   type MailableAccount,
 } from "./model/recipients";
 import { sessionMailCopy, type MailCopy, type SessionChange } from "./model/sessionMailCopy";
+import { withinRateLimit } from "./model/rateLimits";
 import { shareLinkOf, siteLink } from "./model/siteLinks";
 import { groupTimeOf } from "./model/timeAndPlace";
 import { upcomingSessions } from "./model/upcomingSessions";
@@ -151,22 +156,66 @@ async function recipientSetChanged(
 export const inviteToNights = internalMutation({
   args: { groupId: v.id("groups"), userId: v.id("users") },
   returns: v.null(),
-  handler: async (ctx, { groupId, userId }) => {
-    const group = await ctx.db.get("groups", groupId);
-    if (!calendarMailConfigured() || group === null) return null;
-    if (!(await isCalendarRecipient(ctx, group, userId))) return null;
-    if (!receivesSessionMail(await ctx.db.get("users", userId))) return null;
-    const nights = await upcomingPublishedNights(ctx, groupId);
-    const stamp = Date.now();
-    const sends: NightSend[] = [];
-    for (const night of nights.filter(({ entry }) => entry.state === "scheduled")) {
-      const sequence = await raiseSequence(ctx, night.session);
-      sends.push(inviteOf(night, { userId, sequence, stamp }));
-    }
-    await requestCalendarMails(ctx, sends);
+  handler: async (ctx, recipient) => {
+    const nights = await scheduledNightsFor(ctx, recipient);
+    await sendNights(ctx, nights, recipient.userId, inviteOf);
     return null;
   },
 });
+
+export async function sessionEmailsTurnedOn(ctx: MutationCtx, userId: Id<"users">) {
+  if (!calendarMailConfigured()) return;
+  if (!(await withinRateLimit(ctx, "sessionEmailsCatchUp", userId))) return;
+  const groupIds = await calendarGroupIdsOf(ctx, userId);
+  await ctx.scheduler.runAfter(0, internal.sessionMail.setNightsAgain, { userId, groupIds });
+}
+
+export const setNightsAgain = internalMutation({
+  args: { userId: v.id("users"), groupIds: v.array(v.id("groups")) },
+  returns: v.null(),
+  handler: async (ctx, { userId, groupIds }) => {
+    const [groupId, ...rest] = groupIds;
+    if (groupId === undefined) return null;
+    const nights = await scheduledNightsFor(ctx, { groupId, userId });
+    if (nights.length > 0 && !fitsTheDailyShare(nights.length, await calendarMailsToday(ctx))) {
+      await ctx.scheduler.runAt(nextUtcMidnight(), internal.sessionMail.setNightsAgain, {
+        userId,
+        groupIds,
+      });
+      return null;
+    }
+    const spacing = await sendNights(ctx, nights, userId, setAgainOf);
+    if (rest.length > 0)
+      await ctx.scheduler.runAfter(spacing, internal.sessionMail.setNightsAgain, {
+        userId,
+        groupIds: rest,
+      });
+    return null;
+  },
+});
+
+async function scheduledNightsFor(ctx: QueryCtx, { groupId, userId }: RecipientSetMember) {
+  const group = await ctx.db.get("groups", groupId);
+  if (group === null) return [];
+  if ((await calendarInviteeIn(ctx, group, await ctx.db.get("users", userId))) === null) return [];
+  const nights = await upcomingPublishedNights(ctx, groupId);
+  return nights.filter(({ entry }) => entry.state === "scheduled");
+}
+
+async function sendNights(
+  ctx: MutationCtx,
+  nights: PublishedNight[],
+  userId: Id<"users">,
+  sendOf: (night: PublishedNight, send: NightSendStamp) => NightSend,
+) {
+  const stamp = Date.now();
+  const sends: NightSend[] = [];
+  for (const night of nights) {
+    const sequence = await raiseSequence(ctx, night.session);
+    sends.push(sendOf(night, { userId, sequence, stamp }));
+  }
+  return await requestCalendarMails(ctx, sends);
+}
 
 async function withdrawFromNights(ctx: MutationCtx, { groupId, userId }: RecipientSetMember) {
   const stamp = Date.now();
@@ -186,11 +235,15 @@ async function upcomingPublishedNights(ctx: QueryCtx, groupId: Id<"groups">) {
   });
 }
 
-function inviteOf(
-  { session, entry }: PublishedNight,
-  send: { userId: Id<"users">; sequence: number; stamp: number },
-): NightSend {
+type NightSendStamp = { userId: Id<"users">; sequence: number; stamp: number };
+
+function inviteOf({ session, entry }: PublishedNight, send: NightSendStamp): NightSend {
   return { kind: "invite", sessionId: session._id, revision: entry.revision, ...send };
+}
+
+function setAgainOf({ session, entry }: PublishedNight, send: NightSendStamp): NightSend {
+  const { revision } = entry;
+  return { kind: "broadcast", change: "set", sessionId: session._id, revision, ...send };
 }
 
 function withdrawalOf(
@@ -312,10 +365,31 @@ async function nightTarget(ctx: QueryCtx, send: NightSend): Promise<NightTarget 
   const entry = entryOf(published);
   if (entry === null) return null;
   const group = await ctx.db.get("groups", session.groupId);
-  if (!group || !(await isCalendarRecipient(ctx, group, send.userId))) return null;
-  const account = await ctx.db.get("users", send.userId);
-  if (!receivesSessionMail(account)) return null;
+  if (!group) return null;
+  const account = await calendarInviteeIn(ctx, group, await ctx.db.get("users", send.userId));
+  if (account === null) return null;
   return { session, group, account, entry };
+}
+
+export type CalendarInvites = "on" | "off" | null;
+
+export async function calendarInvitesIn(
+  ctx: QueryCtx,
+  group: Doc<"groups">,
+  account: Doc<"users">,
+): Promise<CalendarInvites> {
+  if ((await calendarInviteeIn(ctx, group, account)) !== null) return "on";
+  const withSessionEmailsOn = { ...account, sessionEmailsEnabled: true };
+  return (await calendarInviteeIn(ctx, group, withSessionEmailsOn)) === null ? null : "off";
+}
+
+async function calendarInviteeIn(
+  ctx: QueryCtx,
+  group: Doc<"groups">,
+  account: Doc<"users"> | null,
+): Promise<MailableAccount | null> {
+  if (!calendarMailConfigured() || !receivesSessionMail(account)) return null;
+  return (await isCalendarRecipient(ctx, group, account._id)) ? account : null;
 }
 
 function nightMessageFor(

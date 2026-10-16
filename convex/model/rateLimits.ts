@@ -16,6 +16,7 @@ const limits = {
   confirmTips: { kind: "token bucket", rate: 30, period: MINUTE, capacity: 60 },
   reminderLink: { kind: "token bucket", rate: 10, period: MINUTE, capacity: 10 },
   calendarFeed: { kind: "fixed window", rate: 10, period: HOUR },
+  sessionEmailsCatchUp: { kind: "fixed window", rate: 2, period: 24 * HOUR },
 } as const;
 
 export const rateLimiter = new RateLimiter(components.rateLimiter, limits);
@@ -29,4 +30,8 @@ export async function enforceRateLimit(
 ) {
   const status = await rateLimiter.limit(ctx, name, { key });
   if (!status.ok) fail({ code: "RATE_LIMITED", retryAfter: status.retryAfter });
+}
+
+export async function withinRateLimit(ctx: MutationCtx, name: KeyedRateLimit, key: string) {
+  return (await rateLimiter.limit(ctx, name, { key })).ok;
 }

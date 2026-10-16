@@ -7,7 +7,7 @@ test("an Account can save its session email preference on My groups", async ({ p
   const account = await signUpAccount();
   await openAsGm(page, account, "/me");
   const preference = page.getByRole("switch", {
-    name: "Email me when a session is set or cancelled",
+    name: "Email me a calendar invite when a session is set, changed or cancelled",
   });
   await expect(preference).toBeChecked();
   await preference.click();

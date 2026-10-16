@@ -21,7 +21,7 @@ export function EmailSettings({
   return (
     <section aria-label="Emails" className="flex flex-col gap-2 border-t border-line pt-5">
       <EmailSwitch
-        label="Email me when a session is set or cancelled"
+        label="Email me a calendar invite when a session is set, changed or cancelled"
         checked={settings?.sessionEmails}
         onSave={saveSessionEmails}
       />

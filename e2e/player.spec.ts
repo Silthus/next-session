@@ -185,7 +185,16 @@ test.describe("the player surface", () => {
         })
         .click();
     }
-    await expect(page.getByText(`All set for ${monthName(month)} ✓`)).toBeVisible();
+    const keepSessions = page.getByRole("status", {
+      name: "Keep your sessions and get a calendar invite",
+    });
+    const confirmation = keepSessions.getByText(
+      `All set for ${monthName(month)}. Your GM sees it.`,
+    );
+    if (remaining > 0) await expect(confirmation).toBeFocused();
+    else await expect(confirmation).toBeVisible();
+    await expect(keepSessions.getByText("Every session lands in your calendar.")).toBeVisible();
+    await expect(page.getByRole("region", { name: "Keep this group" })).toBeHidden();
     await expect(page.getByText("All nights set")).toBeVisible();
 
     await expect
@@ -194,14 +203,23 @@ test.describe("the player surface", () => {
         Object.fromEntries(bookableDays.map((date) => [date, date === today ? "maybe" : "busy"])),
       );
 
-    await page.getByRole("button", { name: `Fill ${monthName(addMonths(month, 1))} →` }).click();
+    await keepSessions
+      .getByRole("button", { name: `Not now, fill ${monthName(addMonths(month, 1))} →` })
+      .click();
     await expect(page).toHaveURL(new RegExp(`month=${addMonths(month, 1)}`));
     await expect(
       page.getByRole("heading", {
         level: 2,
         name: new RegExp(`^${monthName(addMonths(month, 1))}`),
       }),
-    ).toBeVisible();
+    ).toBeFocused();
+    await expect(page.getByRole("main").getByText("to get calendar invites.")).toHaveText(
+      "Keep this group to get calendar invites.",
+    );
+
+    await page.getByRole("button", { name: "Previous month" }).click();
+    await expect(page.getByText(`All set for ${monthName(month)} ✓`)).toBeVisible();
+    await expect(keepSessions).toBeHidden();
     expect(pageErrors).toEqual([]);
   });
 
@@ -219,7 +237,7 @@ test.describe("the player surface", () => {
     if (bookableDays.length > 1) {
       await page.getByRole("button", { name: /^Mark the other/ }).click();
     }
-    await expect(page.getByText(`All set for ${monthName(month)} ✓`)).toBeVisible();
+    await expect(page.getByText(`All set for ${monthName(month)}. Your GM sees it.`)).toBeVisible();
     await expect.poll(() => mutations.heldCount()).toBe(bookableDays.length > 1 ? 2 : 1);
     expect(await savedAnswers(group, "Ana", month)).toEqual({});
 
@@ -562,7 +580,7 @@ test.describe("player surface screenshots", () => {
     await answerAs(page, group, "Ben");
 
     await captureEveryVariant(page, group.link, async (shot) => {
-      await expect(page.getByText("Your GM sees it already.")).toBeVisible();
+      await expect(page.getByText("Every session lands in your calendar.")).toBeVisible();
       await shot("done");
     });
   });
