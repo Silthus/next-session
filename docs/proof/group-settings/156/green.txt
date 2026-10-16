@@ -58,3 +58,13 @@
 # running app: capture.spec.ts.txt on the local backend, Geoapify stubbed with page.route (no request left the machine)
 #  with a fake key: 4 passed (390/1280 x light/dark): one request per pause (text=Hauptstr, limit=5, lang=de, no filter), Keep first, ArrowDown+Enter picks street and town, no-match copy, Enter keeps Max’s place, 429 -> plain field, no further request, Save stores the typed text
 #  without a key: 4 passed: no combobox, no listbox, zero requests to geoapify, Save works
+
+# landed tree: 136fb3a (merged origin/spec/group-settings with #160)
+# gate: bun run check, exit 0
+ Test Files  91 passed (91)
+      Tests  1442 passed (1442)
+✓ built in 733ms
+--dry-run: exiting now.
+# e2e: bun run e2e, exit 0
+  35 skipped
+  91 passed (4.4m)
