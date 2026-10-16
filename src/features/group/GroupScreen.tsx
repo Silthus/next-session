@@ -264,21 +264,32 @@ function GroupSurface({
       onOpenTimeAndPlace={openTimeAndPlace}
     />
   );
-  if (loaded === undefined) return <GroupLoading heading={heading} actions={headerActions} />;
-  const { month, schedule } = loaded;
-  if (schedule === null) {
-    return saving ? <GroupLoading heading={heading} /> : <FirstGroupFallback />;
-  }
-  const { timeAndPlace } = schedule;
-
-  const summary = summarizeMonth({ month, today, ...schedule });
-  const day = summary.days.find((candidate) => candidate.date === selectedDay) ?? null;
   const shareUrl = shareLinkUrl({
     origin: window.location.origin,
     shareToken: group.shareToken,
     month: requestedMonth,
     today,
   });
+  const frame = (body: ReactNode) => (
+    <GroupFrame
+      heading={heading}
+      actions={
+        <>
+          {!wide && <HeaderShareLink url={shareUrl} onRotate={rotate} showToast={showToast} />}
+          {headerActions}
+        </>
+      }
+    >
+      {body}
+    </GroupFrame>
+  );
+  if (loaded === undefined) return frame(<GroupLoadingBody />);
+  const { month, schedule } = loaded;
+  if (schedule === null) return saving ? frame(<GroupLoadingBody />) : <FirstGroupFallback />;
+  const { timeAndPlace } = schedule;
+
+  const summary = summarizeMonth({ month, today, ...schedule });
+  const day = summary.days.find((candidate) => candidate.date === selectedDay) ?? null;
   const dayPanel = (presentation: DayPanelPresentation) =>
     day && (
       <DayPanel
@@ -303,16 +314,8 @@ function GroupSurface({
     now: openedAt,
   });
 
-  return (
-    <GroupFrame
-      heading={heading}
-      actions={
-        <>
-          {!wide && <HeaderShareLink url={shareUrl} onRotate={rotate} showToast={showToast} />}
-          {headerActions}
-        </>
-      }
-    >
+  return frame(
+    <>
       {nudging && (
         <Nudge
           names={schedule.players.map((player) => player.name)}
@@ -377,7 +380,7 @@ function GroupSurface({
           }}
         />
       </div>
-    </GroupFrame>
+    </>,
   );
 }
 
@@ -422,19 +425,25 @@ function insideDialog(target: EventTarget | null) {
   return target instanceof Element && target.closest("dialog") !== null;
 }
 
-function GroupLoading({ heading, actions }: { heading?: ReactNode; actions?: ReactNode }) {
+function GroupLoading() {
   return (
-    <GroupFrame heading={heading ?? <Skeleton className="h-7 w-40" />} actions={actions}>
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]" role="status" aria-busy="true">
-        <span className="sr-only">Loading your group</span>
-        <Skeleton className="aspect-[7/6] w-full rounded-xl" />
-        <div className="flex flex-col gap-4">
-          <Skeleton className="h-28 rounded-xl" />
-          <Skeleton className="h-40 rounded-xl" />
-          <Skeleton className="h-48 rounded-xl" />
-        </div>
-      </div>
+    <GroupFrame heading={<Skeleton className="h-7 w-40" />}>
+      <GroupLoadingBody />
     </GroupFrame>
+  );
+}
+
+function GroupLoadingBody() {
+  return (
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]" role="status" aria-busy="true">
+      <span className="sr-only">Loading your group</span>
+      <Skeleton className="aspect-[7/6] w-full rounded-xl" />
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-40 rounded-xl" />
+        <Skeleton className="h-48 rounded-xl" />
+      </div>
+    </div>
   );
 }
 
