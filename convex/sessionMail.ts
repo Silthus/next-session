@@ -25,6 +25,7 @@ import {
   type MailableAccount,
 } from "./model/recipients";
 import { sessionMailCopy, type MailCopy, type SessionChange } from "./model/sessionMailCopy";
+import { withinRateLimit } from "./model/rateLimits";
 import { shareLinkOf, siteLink } from "./model/siteLinks";
 import { groupTimeOf } from "./model/timeAndPlace";
 import { upcomingSessions } from "./model/upcomingSessions";
@@ -160,6 +161,7 @@ export const inviteToNights = internalMutation({
 
 export async function sessionEmailsTurnedOn(ctx: MutationCtx, userId: Id<"users">) {
   if (!calendarMailConfigured()) return;
+  if (!(await withinRateLimit(ctx, "sessionEmailsCatchUp", userId))) return;
   for (const groupId of await calendarGroupIdsOf(ctx, userId))
     await ctx.scheduler.runAfter(0, internal.sessionMail.setNightsAgain, { groupId, userId });
 }

@@ -1006,6 +1006,19 @@ describe("the calendar follows the Roster", () => {
     expect(resendMails().every(({ attachments }) => attachments.length === 1)).toBe(true);
   });
 
+  it("puts the nights in the calendar again at most twice a day for an Account that keeps toggling Session mail", async () => {
+    const { robin } = await crewWithNights();
+
+    for (let toggle = 0; toggle < 3; toggle++) {
+      await robin.as.mutation(api.me.setSessionEmails, { enabled: false });
+      await robin.as.mutation(api.me.setSessionEmails, { enabled: true });
+    }
+    await finish();
+
+    expect(firstLinesTo(ROBIN)).toHaveLength(2 * 2);
+    expect((await robin.as.query(api.me.notificationSettings, {}))?.sessionEmails).toBe(true);
+  });
+
   it("sends nothing when an Account with Session mail on turns it on again", async () => {
     const { robin } = await crewWithNights();
 
