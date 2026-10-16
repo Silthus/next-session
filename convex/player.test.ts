@@ -146,7 +146,7 @@ function datesFrom(first: number, last: number, month = "2026-10") {
 const USUAL = { startTime: "19:00", lengthMinutes: 240 };
 
 describe("player.group", () => {
-  it("shows the Group's name, its Roster, and every Session with its time", async () => {
+  it("shows the Group's name, its Roster, and every Session with its state and time", async () => {
     const { groupId, shareToken } = await sharedGroup();
     const bo = await seedPlayer(groupId, "Bo");
     const ada = await seedPlayer(groupId, "Ada");
@@ -162,7 +162,7 @@ describe("player.group", () => {
         { _id: bo, name: "Bo" },
       ],
       sessions: ["2026-10-02", TODAY, "2026-10-17", LAST_BOOKABLE_DATE, "2027-01-01"].map(
-        (date) => ({ date, ...USUAL }),
+        (date) => ({ date, state: "scheduled", ...USUAL }),
       ),
       timeZone: "Europe/Berlin",
       claimedPlayerId: null,
@@ -171,13 +171,14 @@ describe("player.group", () => {
     });
   });
 
-  it("leaves Cancelled Sessions out", async () => {
+  it("shows a Cancelled Session as cancelled", async () => {
     const { groupId, shareToken } = await sharedGroup();
     await seedSession(t, groupId, "2026-10-10", CANCELLED);
     await seedSession(t, groupId, "2026-10-17", { state: "scheduled" });
 
     expect((await t.query(api.player.group, { shareToken }))?.sessions).toEqual([
-      { date: "2026-10-17", ...USUAL },
+      { date: "2026-10-10", state: "cancelled", ...USUAL },
+      { date: "2026-10-17", state: "scheduled", ...USUAL },
     ]);
   });
 
@@ -192,7 +193,7 @@ describe("player.group", () => {
     await seedSession(t, groupId, "2026-10-17");
 
     expect(await t.query(api.player.group, { shareToken })).toMatchObject({
-      sessions: [{ date: "2026-10-17", ...saved }],
+      sessions: [{ date: "2026-10-17", state: "scheduled", ...saved }],
       timeZone: "America/New_York",
     });
   });
@@ -247,6 +248,7 @@ describe("player.group", () => {
     const other = await sharedGroup();
     await seedPlayer(other.groupId, "Stranger");
     await seedSession(t, other.groupId, "2026-10-17");
+    await seedSession(t, other.groupId, "2026-10-24", CANCELLED);
 
     expect(await t.query(api.player.group, { shareToken: mine.shareToken })).toMatchObject({
       groupId: mine.groupId,

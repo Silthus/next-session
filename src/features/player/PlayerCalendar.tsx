@@ -21,7 +21,14 @@ import { focusRing, pressable } from "../../ui/interactive";
 import { Skeleton } from "../../ui/Skeleton";
 import { useFocusOnMount } from "../../ui/useFocusOnMount";
 import { Progress } from "./Progress";
-import { dayLabel, monthName, playerMonth, type PlayerDay, type PlayerMonth } from "./playerMonth";
+import {
+  dayLabel,
+  monthName,
+  playerMonth,
+  type PlayerDay,
+  type PlayerMonth,
+  type PlayerSession,
+} from "./playerMonth";
 
 const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 const FILL_STAGGER_MS = 26;
@@ -52,7 +59,7 @@ export function PlayerCalendar({
   month,
   today,
   answers,
-  sessionDates,
+  sessions,
   hintVisible,
   onAnswer,
   onFillRest,
@@ -68,7 +75,7 @@ export function PlayerCalendar({
   month: IsoMonth;
   today: IsoDate;
   answers: Record<IsoDate, Answer> | undefined;
-  sessionDates: IsoDate[];
+  sessions: PlayerSession[];
   hintVisible: boolean;
   onAnswer: (date: IsoDate, answer: Answer | null) => Promise<unknown>;
   onFillRest: (month: IsoMonth) => Promise<unknown>;
@@ -78,7 +85,7 @@ export function PlayerCalendar({
   keepGroup?: ReactNode;
   accountControl?: ReactNode;
 }) {
-  const view = playerMonth({ month, today, answers: answers ?? {}, sessionDates });
+  const view = playerMonth({ month, today, answers: answers ?? {}, sessions });
   const [taps, setTaps] = useState(0);
   const [stagger, setStagger] = useState<ReadonlyMap<IsoDate, number>>(new Map());
   const loaded = answers !== undefined;
@@ -440,6 +447,11 @@ function DayTile({
           ★
         </span>
       )}
+      {day.cancelled && (
+        <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full border border-line-strong bg-surface-2 px-1 text-[8px] leading-3.5 font-semibold text-ink-2 sm:text-[9px]">
+          Cancelled
+        </span>
+      )}
     </button>
   );
 }
@@ -543,7 +555,12 @@ function Legend() {
 
 function tileLabel(day: PlayerDay): string {
   const answer = day.answer ? answerLabels[day.answer] : "Not set";
-  return `${dayLabel(day.date)}: ${answer}${day.session ? ", Session" : ""}`;
+  return `${dayLabel(day.date)}: ${answer}${sessionNote(day)}`;
+}
+
+function sessionNote(day: PlayerDay): string {
+  if (day.session) return ", Session";
+  return day.cancelled ? ", Session cancelled" : "";
 }
 
 function focusFellOffThePage() {

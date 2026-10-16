@@ -24,10 +24,10 @@ beforeEach(() => {
 
 const today = "2026-10-06";
 
-function atSeven(...dates: string[]) {
-  return dates.map((date) => ({ date, startTime: "19:00", lengthMinutes: 240 }) as const);
-}
+const USUAL = { startTime: "19:00", lengthMinutes: 240 } as const;
 
+const scheduled = (...dates: string[]) =>
+  dates.map((date) => ({ date, state: "scheduled" as const, ...USUAL }));
 const thursday: PlayingGroup = {
   groupId: "group-thursday" as Id<"groups">,
   name: "Thursday Crew",
@@ -35,7 +35,7 @@ const thursday: PlayingGroup = {
   playerId: "player-robin" as Id<"players">,
   playerName: "Robin",
   timeZone: "Europe/Berlin",
-  upcomingSessions: atSeven("2026-10-08", "2026-10-22"),
+  upcomingSessions: scheduled("2026-10-08", "2026-10-22"),
   openDates: 12,
 };
 
@@ -54,7 +54,7 @@ const ownTable = {
   groupId: "group-own" as Id<"groups">,
   name: "Dragon Heist",
   timeZone: "Europe/Berlin",
-  upcomingSessions: atSeven("2026-10-10"),
+  upcomingSessions: scheduled("2026-10-10"),
 };
 
 const everything: MyGroupsData = { running: [ownTable], playing: [thursday, sunday] };
@@ -101,6 +101,31 @@ describe("MyGroups", () => {
       "/g/group-own",
       "/s/thursdayTk",
     ]);
+  });
+
+  it("marks a Cancelled Session in Next sessions and on its Group's card", async () => {
+    const cancelledThursday = {
+      ...thursday,
+      upcomingSessions: [
+        { date: "2026-10-08", state: "cancelled" as const, ...USUAL },
+        ...scheduled("2026-10-22"),
+      ],
+    };
+    renderMyGroups({ groups: { running: [], playing: [cancelledThursday] } });
+
+    await screen.findByRole("heading", { level: 1, name: "My groups" });
+    const sessions = within(section("Next sessions")).getAllByRole("link");
+    expect(sessions.map((link) => link.textContent)).toEqual([
+      "Thursday, October 8Cancelled · in 2 daysThursday Crew",
+      "Thursday, October 22in 16 daysThursday Crew",
+    ]);
+    expect(sessions.map((link) => link.getAttribute("href"))).toEqual([
+      "/s/thursdayTk",
+      "/s/thursdayTk",
+    ]);
+    expect(within(section("You play in")).getByRole("link").textContent).toBe(
+      "Thursday Crewas RobinNext session Thu, Oct 8 · Cancelled12 days to answer",
+    );
   });
 
   it("says when no Session is scheduled yet", async () => {

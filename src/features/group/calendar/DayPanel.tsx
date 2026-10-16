@@ -63,15 +63,22 @@ export function DayPanel({
         </button>
         <span className="text-xs text-ink-3">{relativeDay(day.date, today)}</span>
       </div>
-      <h3
-        ref={heading}
-        id={headingId}
-        tabIndex={-1}
-        data-day-heading
-        className="mt-2 font-display text-2xl font-semibold outline-none"
-      >
-        {longDayLabel(day.date)}
-      </h3>
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <h3
+          ref={heading}
+          id={headingId}
+          tabIndex={-1}
+          data-day-heading
+          className="font-display text-2xl font-semibold outline-none"
+        >
+          {longDayLabel(day.date)}
+        </h3>
+        {day.cancelled && (
+          <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs font-semibold text-ink-2">
+            Cancelled
+          </span>
+        )}
+      </div>
       {playerCount === 0 ? (
         <p className="mt-1 text-sm text-ink-3">
           No players yet. They show up here once they open your link.
@@ -142,8 +149,8 @@ function SessionAction({
   onCancel: (session: CalendarSession) => void;
 }) {
   const session = day.session;
-  if (session && !day.bookable) {
-    return <p className="text-sm text-ink-3">You played this night. Past dates are read-only.</p>;
+  if (!day.bookable && (session || day.cancelled)) {
+    return <p className="text-sm text-ink-3">{readOnlyLine(day)}</p>;
   }
   const act = () => {
     if (pending) return;
@@ -160,17 +167,22 @@ function SessionAction({
       aria-busy={pending || undefined}
       onClick={act}
     >
-      {pending ? "Saving…" : <ActionLabel scheduled={session !== null} />}
+      {pending ? "Saving…" : <ActionLabel day={day} />}
     </Button>
   );
 }
 
-function ActionLabel({ scheduled }: { scheduled: boolean }) {
-  if (scheduled) return "Unschedule this session";
+function readOnlyLine(day: CalendarDay) {
+  if (day.cancelled) return "This night was cancelled. Past dates are read-only.";
+  return "You played this night. Past dates are read-only.";
+}
+
+function ActionLabel({ day }: { day: CalendarDay }) {
+  if (day.session) return "Cancel session";
   return (
     <>
       <IconStar />
-      Schedule session
+      {day.cancelled ? "Schedule again" : "Schedule session"}
     </>
   );
 }

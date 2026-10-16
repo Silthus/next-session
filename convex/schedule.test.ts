@@ -71,22 +71,30 @@ describe("schedule.month", () => {
         { playerId: ada, date: "2026-10-31", answer: "maybe" },
       ],
       sessions: [
-        { _id: september, date: "2026-09-12", ...USUAL },
-        { _id: october, date: "2026-10-17", ...USUAL },
-        { _id: december, date: "2026-12-05", ...USUAL },
+        { _id: september, date: "2026-09-12", state: "scheduled", published: false, ...USUAL },
+        { _id: october, date: "2026-10-17", state: "scheduled", published: false, ...USUAL },
+        { _id: december, date: "2026-12-05", state: "scheduled", published: false, ...USUAL },
       ],
       timeAndPlace: USUAL_IN_BERLIN,
     });
   });
 
-  it("leaves Cancelled Sessions out", async () => {
+  it("returns Cancelled Sessions too, and whether players have heard of each", async () => {
     const { as, groupId } = await signedInGmWithGroup(t);
-    await seedSession(t, groupId, "2026-10-10", CANCELLED);
-    const scheduled = await seedSession(t, groupId, "2026-10-17", { state: "scheduled" });
+    const cancelled = await seedSession(t, groupId, "2026-10-10", CANCELLED);
+    const announced = await seedSession(t, groupId, "2026-10-17", {
+      state: "scheduled",
+      published: { state: "scheduled", revision: 1 },
+    });
+    const fresh = await seedSession(t, groupId, "2026-10-24", { state: "scheduled" });
 
     const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
 
-    expect(schedule?.sessions).toEqual([{ _id: scheduled, date: "2026-10-17", ...USUAL }]);
+    expect(schedule?.sessions).toEqual([
+      { _id: cancelled, date: "2026-10-10", state: "cancelled", published: true, ...USUAL },
+      { _id: announced, date: "2026-10-17", state: "scheduled", published: true, ...USUAL },
+      { _id: fresh, date: "2026-10-24", state: "scheduled", published: false, ...USUAL },
+    ]);
   });
 
   it("gives every Session the Group's saved time and place", async () => {
@@ -101,7 +109,9 @@ describe("schedule.month", () => {
 
     const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
 
-    expect(schedule?.sessions).toEqual([{ _id: sessionId, date: "2026-10-17", ...saved }]);
+    expect(schedule?.sessions).toEqual([
+      { _id: sessionId, date: "2026-10-17", state: "scheduled", published: false, ...saved },
+    ]);
     expect(schedule?.timeAndPlace).toEqual({ ...saved, timeZone: "America/New_York" });
   });
 

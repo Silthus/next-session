@@ -79,27 +79,65 @@ describe("useSessionActions", () => {
     expect(calls["sessions:cancel"]![0]!.args).toEqual({ sessionId: "s5" });
   });
 
+  it("says a Session is cancelled and brings its date back on Undo", async () => {
+    const { result } = renderHook(() => useSessionActions(groupId, show));
+    act(() => void result.current.cancel({ _id: "s5" as Id<"sessions">, date: "2026-11-05" }));
+    expect(calls["sessions:cancel"]![0]!.args).toEqual({ sessionId: "s5" });
+    await settle("sessions:cancel", 0, "null");
+    expect(lastToast().message).toBe("Session on Thu, Nov 5 cancelled.");
+
+    act(() => lastToast().undo?.());
+    expect(calls["sessions:schedule"]![0]!.args).toEqual({ groupId, date: "2026-11-05" });
+  });
+
   it("shows a scheduled night in every cached month of the Group at once", () => {
     renderHook(() => useSessionActions(groupId, show));
     const store = fakeStore({
-      "g1|2026-10": [{ _id: "s1", date: "2026-10-09" }],
-      "g1|2026-11": [{ _id: "s1", date: "2026-10-09" }],
+      "g1|2026-10": [session("s1", "2026-10-09")],
+      "g1|2026-11": [session("s1", "2026-10-09")],
       "g2|2026-11": [],
     });
 
     optimisticUpdates["sessions:schedule"]!(store, { groupId, date: "2026-11-05" });
-    expect(store.sessionDates()).toEqual({
-      "g1|2026-10": ["2026-10-09", "2026-11-05"],
-      "g1|2026-11": ["2026-10-09", "2026-11-05"],
+    expect(store.sessionsShown()).toEqual({
+      "g1|2026-10": ["2026-10-09 scheduled", "2026-11-05 scheduled"],
+      "g1|2026-11": ["2026-10-09 scheduled", "2026-11-05 scheduled"],
       "g2|2026-11": [],
+    });
+  });
+
+  it("drops a cancelled Session players never heard of, so Undo right after a schedule leaves no mark", () => {
+    renderHook(() => useSessionActions(groupId, show));
+    const store = fakeStore({ "g1|2026-11": [session("s1", "2026-11-05", { published: false })] });
+
+    optimisticUpdates["sessions:cancel"]!(store, { sessionId: "s1" });
+    expect(store.sessionsShown()).toEqual({ "g1|2026-11": [] });
+  });
+
+  it("marks a cancelled Session players have heard of as Cancelled, in every cached month", () => {
+    renderHook(() => useSessionActions(groupId, show));
+    const store = fakeStore({
+      "g1|2026-10": [session("s1", "2026-11-05"), session("s2", "2026-11-12")],
+      "g1|2026-11": [session("s1", "2026-11-05"), session("s2", "2026-11-12")],
     });
 
     optimisticUpdates["sessions:cancel"]!(store, { sessionId: "s1" });
-    expect(store.sessionDates()).toEqual({
-      "g1|2026-10": ["2026-11-05"],
-      "g1|2026-11": ["2026-11-05"],
-      "g2|2026-11": [],
+    expect(store.sessionsShown()).toEqual({
+      "g1|2026-10": ["2026-11-05 cancelled", "2026-11-12 scheduled"],
+      "g1|2026-11": ["2026-11-05 cancelled", "2026-11-12 scheduled"],
     });
+  });
+
+  it("schedules a Cancelled night again in place", () => {
+    renderHook(() => useSessionActions(groupId, show));
+    const store = fakeStore({
+      "g1|2026-11": [session("s1", "2026-11-05", { state: "cancelled" })],
+    });
+
+    optimisticUpdates["sessions:schedule"]!(store, { groupId, date: "2026-11-05" });
+    expect(store.sessions("g1|2026-11")).toEqual([
+      session("s1", "2026-11-05", { state: "scheduled" }),
+    ]);
   });
 
   it("shows a scheduled night at the Group's time and place before the server answers", () => {
@@ -108,9 +146,11 @@ describe("useSessionActions", () => {
 
     optimisticUpdates["sessions:schedule"]!(store, { groupId, date: "2026-11-05" });
 
-    expect(store.sessionsIn("g1|2026-11")).toEqual([
+    expect(store.sessions("g1|2026-11")).toEqual([
       expect.objectContaining({
         date: "2026-11-05",
+        state: "scheduled",
+        published: false,
         startTime: "18:30",
         lengthMinutes: 180,
         location: "Max's place",
@@ -126,7 +166,11 @@ async function settle(name: string, index: number, value: string) {
   });
 }
 
-type Session = { _id: string; date: string };
+type Session = { _id: string; date: string; state: "scheduled" | "cancelled"; published: boolean };
+
+function session(_id: string, date: string, fields: Partial<Session> = {}): Session {
+  return { _id, date, state: "scheduled", published: true, ...fields };
+}
 
 const TUESDAYS_AT_MAX = {
   startTime: "18:30",
@@ -153,12 +197,15 @@ function fakeStore(cached: Record<string, Session[]>) {
       const key = `${args.groupId}|${args.month}`;
       entries.set(key, { ...entries.get(key)!, value: { ...entries.get(key)!.value, ...value } });
     },
-    sessionDates: () =>
+    sessions: (key: string) => entries.get(key)!.value.sessions,
+    sessionsShown: () =>
       Object.fromEntries(
-        [...entries].map(([key, entry]) => [key, entry.value.sessions.map((s) => s.date)]),
+        [...entries].map(([key, entry]) => [
+          key,
+          entry.value.sessions.map((s) => `${s.date} ${s.state}`),
+        ]),
       ),
-    sessionsIn: (key: string) => entries.get(key)!.value.sessions,
   };
   return store as unknown as OptimisticLocalStore &
-    Pick<typeof store, "sessionDates" | "sessionsIn">;
+    Pick<typeof store, "sessions" | "sessionsShown">;
 }

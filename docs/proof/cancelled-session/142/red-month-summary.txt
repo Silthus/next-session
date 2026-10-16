@@ -1,0 +1,105 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-9ffb835b
+
+ ❯ |shared| shared/monthSummary.test.ts (19 tests | 3 failed) 35ms
+   ❯ summarizeMonth days (5)
+     × attaches the Session on its date 7ms
+     × keeps a Cancelled Session apart, so its date is open again 3ms
+   ❯ summarizeMonth Best Nights (7)
+     × ranks a Cancelled date on its Answers like any open date 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/monthSummary.test.ts > summarizeMonth days > attaches the Session on its date
+AssertionError: expected { date: '2026-10-30', …(9) } to match object { session: { _id: 's-1', …(2) }, …(1) }
+(9 matching properties omitted from actual)
+
+- Expected
++ Received
+
+@@ -1,7 +1,6 @@
+  {
+-   "cancelled": null,
+    "session": {
+      "_id": "s-1",
+      "date": "2026-10-30",
+      "state": "scheduled",
+    },
+
+ ❯ shared/monthSummary.test.ts:53:37
+     51|       sessions: [{ _id: "s-0", date: "2026-11-02", state: "scheduled" …
+     52|     });
+     53|     expect(day(days, "2026-10-30")).toMatchObject({ session, cancelled…
+       |                                     ^
+     54|     expect(day(days, "2026-10-29")).toMatchObject({ session: null, can…
+     55|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |shared| shared/monthSummary.test.ts > summarizeMonth days > keeps a Cancelled Session apart, so its date is open again
+AssertionError: expected { date: '2026-10-30', …(9) } to match object { session: null, …(2) }
+(8 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "cancelled": {
++   "perfect": true,
++   "session": {
+      "_id": "s-1",
+      "date": "2026-10-30",
+      "state": "cancelled",
+    },
+-   "perfect": true,
+-   "session": null,
+  }
+
+ ❯ shared/monthSummary.test.ts:64:37
+     62|       sessions: [cancelled],
+     63|     });
+     64|     expect(day(days, "2026-10-30")).toMatchObject({ session: null, can…
+       |                                     ^
+     65|   });
+     66| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |shared| shared/monthSummary.test.ts > summarizeMonth Best Nights > ranks a Cancelled date on its Answers like any open date
+AssertionError: expected [ [ '2026-10-25', …(1) ], …(1) ] to deeply equal [ [ '2026-10-25', null ], …(1) ]
+
+- Expected
++ Received
+
+@@ -1,9 +1,13 @@
+  [
+    [
+      "2026-10-25",
+-     null,
++     {
++       "_id": "s-1",
++       "date": "2026-10-25",
++       "state": "cancelled",
++     },
+    ],
+    [
+      "2026-10-21",
+      null,
+    ],
+
+ ❯ shared/monthSummary.test.ts:199:68
+    197|       sessions: [{ _id: "s-1", date: "2026-10-25", state: "cancelled" …
+    198|     });
+    199|     expect(bestNights.map((night) => [night.date, night.session])).toE…
+       |                                                                    ^
+    200|       ["2026-10-25", null],
+    201|       ["2026-10-21", null],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 16 passed (19)
+   Start at  09:16:27
+   Duration  231ms (transform 52%, tests 32%, import 12%, worker 3%)
+

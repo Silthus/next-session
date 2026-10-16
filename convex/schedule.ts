@@ -3,7 +3,7 @@ import { addMonths, isValidMonth, type IsoMonth } from "../shared/dates";
 import type { Doc, Id } from "./_generated/dataModel";
 import { query, type QueryCtx } from "./_generated/server";
 import { findOwnedGroup } from "./model/access";
-import { isScheduled } from "./sessionLifecycle";
+import { stateOf } from "./sessionLifecycle";
 import { profileImageUrl } from "./model/profileImages";
 import {
   sessionTimeAndPlace,
@@ -11,7 +11,7 @@ import {
   timeAndPlaceOf,
   timeAndPlaceView,
 } from "./model/timeAndPlace";
-import { answerValue } from "./schema";
+import { answerValue, sessionState } from "./schema";
 
 const monthSchedule = v.object({
   players: v.array(
@@ -19,7 +19,13 @@ const monthSchedule = v.object({
   ),
   answers: v.array(v.object({ playerId: v.id("players"), date: v.string(), answer: answerValue })),
   sessions: v.array(
-    v.object({ _id: v.id("sessions"), date: v.string(), ...sessionTimeAndPlaceFields }),
+    v.object({
+      _id: v.id("sessions"),
+      date: v.string(),
+      state: sessionState,
+      published: v.boolean(),
+      ...sessionTimeAndPlaceFields,
+    }),
   ),
   timeAndPlace: timeAndPlaceView,
 });
@@ -71,7 +77,13 @@ async function sessionsOf(ctx: QueryCtx, group: Doc<"groups">) {
     .withIndex("by_groupId_and_date", (q) => q.eq("groupId", group._id))
     .collect();
   const timeAndPlace = sessionTimeAndPlace(group);
-  return sessions.filter(isScheduled).map(({ _id, date }) => ({ _id, date, ...timeAndPlace }));
+  return sessions.map((session) => ({
+    _id: session._id,
+    date: session.date,
+    state: stateOf(session),
+    published: session.published !== undefined,
+    ...timeAndPlace,
+  }));
 }
 
 function firstDayOf(month: IsoMonth) {

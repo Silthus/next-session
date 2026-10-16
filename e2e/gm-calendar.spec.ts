@@ -229,8 +229,8 @@ test("the GM schedules a Session, cancels it, and undoes that", async ({ page })
   await panel.getByRole("button", { name: "Schedule session" }).click();
   await expect.poll(() => sessionDates(gm)).toEqual([night(5)]);
 
-  await panel.getByRole("button", { name: "Unschedule this session" }).click();
-  await expect(toast).toContainText("removed");
+  await panel.getByRole("button", { name: "Cancel session" }).click();
+  await expect(toast).toContainText("cancelled.");
   await expect(dayCell(page, /, \w+ 5: everyone free$/)).toBeVisible();
   await expect.poll(() => sessionDates(gm)).toEqual([]);
 
@@ -239,7 +239,9 @@ test("the GM schedules a Session, cancels it, and undoes that", async ({ page })
   await expect.poll(() => sessionDates(gm)).toEqual([night(5)]);
 });
 
-test("Undo of a cancel after the Undo window restores the same Session", async ({ page }) => {
+test("after the Undo window a cancelled Session stays Cancelled until the GM schedules it again", async ({
+  page,
+}) => {
   test.setTimeout(90_000);
   const gm = await signInAnonymousGm();
   await seedThreePlayers(gm);
@@ -247,19 +249,39 @@ test("Undo of a cancel after the Undo window restores the same Session", async (
   const panel = page.getByRole("region", { name: /, \w+ 5$/ });
   const toast = toastRegion(page);
   await panel.getByRole("button", { name: "Schedule session" }).click();
-  await expect.poll(() => sessionIds(gm)).toHaveLength(1);
-  const [sessionId] = await sessionIds(gm);
+  await expect.poll(() => sessionStates(gm)).toHaveLength(1);
+  const [scheduled] = await sessionStates(gm);
+  const sessionId = scheduled?._id;
   await page.waitForTimeout(UNDO_WINDOW_MS + 1_000);
 
-  await panel.getByRole("button", { name: "Unschedule this session" }).click();
-  await expect(toast).toContainText("removed");
-  await expect.poll(() => sessionIds(gm)).toEqual([]);
+  await panel.getByRole("button", { name: "Cancel session" }).click();
+  await expect(toast).toContainText(/^Session on \w+, \w+ 5 cancelled\./);
+  await expect(dayCell(page, /, \w+ 5: everyone free, Session cancelled$/)).toBeVisible();
+  await expect(panel.getByText("Cancelled", { exact: true })).toBeVisible();
+  await expect.poll(() => sessionStates(gm)).toEqual([{ _id: sessionId, state: "cancelled" }]);
   await screenshot(page, "cancelled-with-undo.png");
-  await toast.getByRole("button", { name: "Undo" }).click();
 
+  await toast.getByRole("button", { name: "Undo" }).click();
   await expect(dayCell(page, /, \w+ 5: everyone free, Session scheduled$/)).toBeVisible();
-  await expect.poll(() => sessionIds(gm)).toEqual([sessionId]);
-  await screenshot(page, "restored-after-undo.png");
+  await expect.poll(() => sessionStates(gm)).toEqual([{ _id: sessionId, state: "scheduled" }]);
+
+  await panel.getByRole("button", { name: "Cancel session" }).click();
+  await expect(dayCell(page, /, \w+ 5: everyone free, Session cancelled$/)).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Best nights" }).getByRole("button", {
+      name: /^Schedule again /,
+    }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await screenshot(page, "cancelled.png");
+  await dayCell(page, /, \w+ 5: /).click();
+
+  await panel.getByRole("button", { name: "Schedule again" }).click();
+  await expect(toast).toContainText("Players see it on the link.");
+  await expect(dayCell(page, /, \w+ 5: everyone free, Session scheduled$/)).toBeVisible();
+  await expect(panel.getByText("Cancelled", { exact: true })).toBeHidden();
+  await expect.poll(() => sessionStates(gm)).toEqual([{ _id: sessionId, state: "scheduled" }]);
+  await screenshot(page, "scheduled-again.png");
 });
 
 const UNDO_WINDOW_MS = 30_000;
@@ -268,12 +290,12 @@ async function screenshot(page: Page, name: string) {
   if (screenshotDir) await page.screenshot({ path: `${screenshotDir}/${name}` });
 }
 
-async function sessionIds(gm: Gm) {
+async function sessionStates(gm: Gm) {
   const schedule = await gm.client.query(api.schedule.month, {
     groupId: gm.groupId,
     month: nextMonth,
   });
-  return schedule?.sessions.map((session) => session._id) ?? [];
+  return schedule?.sessions.map(({ _id, state }) => ({ _id, state })) ?? [];
 }
 
 async function sessionDates(gm: Gm) {

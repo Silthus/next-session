@@ -16,16 +16,13 @@ export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
   const [pendingDates, setPendingDates] = useState<ReadonlySet<IsoDate>>(new Set());
   const scheduleSession = useMutation(api.sessions.schedule).withOptimisticUpdate(
     (store, { date }) =>
-      editCachedSessions(store, groupId, ({ sessions, timeAndPlace }) => [
-        ...sessions,
-        optimisticSession(date, timeAndPlace),
-      ]),
+      editCachedSessions(store, groupId, ({ sessions, timeAndPlace }) =>
+        scheduled(sessions, date, timeAndPlace),
+      ),
   );
   const cancelSession = useMutation(api.sessions.cancel).withOptimisticUpdate(
     (store, { sessionId }) =>
-      editCachedSessions(store, groupId, ({ sessions }) =>
-        sessions.filter((session) => session._id !== sessionId),
-      ),
+      editCachedSessions(store, groupId, ({ sessions }) => cancelled(sessions, sessionId)),
   );
 
   async function settle(date: IsoDate, change: () => Promise<void>) {
@@ -52,10 +49,10 @@ export function useSessionActions(groupId: Id<"groups">, show: ShowToast) {
     });
   }
 
-  function cancel(session: CalendarSession) {
+  function cancel(session: Pick<CalendarSession, "_id" | "date">) {
     return settle(session.date, async () => {
       await cancelSession({ sessionId: session._id });
-      show(`Session on ${dayLabel(session.date)} removed.`, () => {
+      show(`Session on ${dayLabel(session.date)} cancelled.`, () => {
         void schedule(session.date);
         focusDay(session.date);
       });
@@ -74,8 +71,16 @@ type MonthSchedule = NonNullable<FunctionReturnType<typeof api.schedule.month>>;
 function optimisticSession(
   date: IsoDate,
   { startTime, lengthMinutes, location }: MonthSchedule["timeAndPlace"],
-): MonthSchedule["sessions"][number] {
-  return { _id: `optimistic-${date}` as Id<"sessions">, date, startTime, lengthMinutes, location };
+): CalendarSession {
+  return {
+    _id: `optimistic-${date}` as Id<"sessions">,
+    date,
+    state: "scheduled",
+    published: false,
+    startTime,
+    lengthMinutes,
+    location,
+  };
 }
 
 function editCachedSessions(
@@ -87,4 +92,24 @@ function editCachedSessions(
     if (args.groupId !== groupId || !value) continue;
     store.setQuery(api.schedule.month, args, { ...value, sessions: edit(value) });
   }
+}
+
+function scheduled(
+  sessions: CalendarSession[],
+  date: IsoDate,
+  timeAndPlace: MonthSchedule["timeAndPlace"],
+): CalendarSession[] {
+  if (!sessions.some((session) => session.date === date)) {
+    return [...sessions, optimisticSession(date, timeAndPlace)];
+  }
+  return sessions.map((session) =>
+    session.date === date ? { ...session, state: "scheduled" } : session,
+  );
+}
+
+function cancelled(sessions: CalendarSession[], sessionId: Id<"sessions">): CalendarSession[] {
+  return sessions.flatMap((session) => {
+    if (session._id !== sessionId) return [session];
+    return session.published ? [{ ...session, state: "cancelled" }] : [];
+  });
 }

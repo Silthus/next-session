@@ -10,7 +10,14 @@ export type RunningGroup = MyGroups["running"][number];
 export type GroupPage =
   { kind: "gm"; groupId: Id<"groups"> } | { kind: "player"; shareToken: string };
 
-export type UpcomingSession = { date: IsoDate; groupName: string; to: GroupPage };
+export type GroupSession = RunningGroup["upcomingSessions"][number];
+
+export type UpcomingSession = {
+  date: IsoDate;
+  cancelled: boolean;
+  groupName: string;
+  to: GroupPage;
+};
 
 const NEXT_SESSIONS_SHOWN = 5;
 
@@ -30,11 +37,20 @@ export function daysToAnswer(openDates: number): string | null {
   return `${String(openDates)} ${openDates === 1 ? "day" : "days"} to answer`;
 }
 
+export function isCancelled(session: GroupSession) {
+  return session.state === "cancelled";
+}
+
 function sessionsOf(
-  group: { name: string; upcomingSessions: { date: IsoDate }[] },
+  group: { name: string; upcomingSessions: GroupSession[] },
   to: GroupPage,
 ): UpcomingSession[] {
-  return group.upcomingSessions.map(({ date }) => ({ date, groupName: group.name, to }));
+  return group.upcomingSessions.map((session) => ({
+    date: session.date,
+    cancelled: isCancelled(session),
+    groupName: group.name,
+    to,
+  }));
 }
 
 function byDateThenGroupName(a: UpcomingSession, b: UpcomingSession) {

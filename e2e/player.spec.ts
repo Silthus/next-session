@@ -7,6 +7,7 @@ import { addMonths, monthDays, monthOf, todayUtc, type IsoDate } from "../shared
 import { convexUrl, toastRegion } from "./helpers";
 
 const screenshotDir = `${process.env.E2E_OUTPUT_DIR ?? "test-results"}/player-screenshots`;
+const UNDO_WINDOW_MS = 30_000;
 
 type SeededGroup = Awaited<ReturnType<typeof seedGroup>>;
 
@@ -380,6 +381,39 @@ test.describe("the player surface", () => {
     await expect(tile(page, today)).toBeDisabled();
     await expect(page.getByRole("progressbar")).toHaveCount(0);
     await expect(page.getByRole("button", { name: /^Mark the other/ })).toHaveCount(0);
+  });
+
+  test("a Cancelled Session stays marked and answerable until the GM schedules it again", async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    const { today, month } = currentDates();
+    const group = await seedGroup();
+    const sessionId = await group.gm.mutation(api.sessions.schedule, {
+      groupId: group.groupId,
+      date: today,
+    });
+    await answerAs(page, group, "Ana");
+    await page.goto(group.link);
+    await expect(tile(page, today)).toHaveAccessibleName(`${dayLabel(today)}: Not set, Session`);
+    await page.waitForTimeout(UNDO_WINDOW_MS + 1_000);
+
+    await group.gm.mutation(api.sessions.cancel, { sessionId });
+
+    await expect(tile(page, today)).toHaveAccessibleName(
+      `${dayLabel(today)}: Not set, Session cancelled`,
+    );
+    await expect(tile(page, today)).toContainText("Cancelled");
+    await tile(page, today).click();
+    await expect(tile(page, today)).toHaveAccessibleName(
+      `${dayLabel(today)}: Free, Session cancelled`,
+    );
+    await expect.poll(async () => (await playerAnswersInMonth(group, "Ana", month)).length).toBe(1);
+
+    await group.gm.mutation(api.sessions.schedule, { groupId: group.groupId, date: today });
+
+    await expect(tile(page, today)).toHaveAccessibleName(`${dayLabel(today)}: Free, Session`);
+    await expect(tile(page, today)).not.toContainText("Cancelled");
   });
 
   test("an unknown link says it no longer works", async ({ page }) => {

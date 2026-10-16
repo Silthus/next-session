@@ -80,7 +80,7 @@ function isPublishedAs(published: PublishedSession, snapshot: SessionSnapshot) {
   return SNAPSHOT_FIELDS.every((field) => published[field] === snapshot[field]);
 }
 
-function stateOf(session: Doc<"sessions">): SessionState {
+export function stateOf(session: Doc<"sessions">): SessionState {
   return session.state ?? "scheduled";
 }
 

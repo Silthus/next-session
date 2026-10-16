@@ -3,7 +3,8 @@ import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react"
 import type { IsoDate } from "../../../shared/dates";
 import { track } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
-import { IconMore, IconStar } from "../../ui/icons";
+import { cn } from "../../ui/cn";
+import { IconMore, IconStar, IconStarCancelled } from "../../ui/icons";
 import { focusRing, hoverRow, mutedStepsUp, pressable } from "../../ui/interactive";
 import { PageShell } from "../../ui/PageShell";
 import { ProfileImage } from "../../ui/ProfileImage";
@@ -12,11 +13,14 @@ import { dayLabel, longDayLabel, relativeDay } from "../group/calendar/calendarD
 import { MenuButton, Popover } from "../group/rail/Popover";
 import {
   daysToAnswer,
+  isCancelled,
   nextSessions,
   type GroupPage,
+  type GroupSession,
   type MyGroups as MyGroupsData,
   type PlayingGroup,
   type RunningGroup,
+  type UpcomingSession,
 } from "./myGroups";
 
 type MyGroupsProps = {
@@ -125,14 +129,17 @@ function NextSessions({ groups, today }: { groups: MyGroupsData; today: IsoDate 
             <li key={`${session.date}-${pageKey(session.to)}`}>
               <GroupPageLink
                 to={session.to}
-                className={`flex items-center gap-3 rounded-md border border-accent/40 bg-accent-soft/50 px-3 py-2.5 hover:border-accent hover:bg-accent-soft ${pressable}`}
+                className={cn(
+                  "flex items-center gap-3 rounded-md border px-3 py-2.5",
+                  session.cancelled
+                    ? `border-line bg-surface ${hoverRow}`
+                    : `border-accent/40 bg-accent-soft/50 hover:border-accent hover:bg-accent-soft ${pressable}`,
+                )}
               >
-                <IconStar className="size-5 shrink-0 text-accent-strong" />
+                <SessionStar cancelled={session.cancelled} className="size-5 shrink-0" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold">{longDayLabel(session.date)}</span>
-                  <span className="block text-xs text-ink-3">
-                    {relativeDay(session.date, today)}
-                  </span>
+                  <span className="block text-xs text-ink-3">{whenOf(session, today)}</span>
                 </span>
                 <span className="max-w-[45%] truncate text-sm font-medium text-ink-2">
                   {session.groupName}
@@ -275,13 +282,29 @@ function GroupName({ name }: { name: string }) {
   return <span className="font-display text-lg font-semibold break-words">{name}</span>;
 }
 
-function NextSession({ sessions }: { sessions: { date: IsoDate }[] }) {
+function SessionStar({ cancelled, className }: { cancelled: boolean; className: string }) {
+  if (cancelled) return <IconStarCancelled className={cn(className, "text-ink-3")} />;
+  return <IconStar className={cn(className, "text-accent-strong")} />;
+}
+
+function whenOf(session: UpcomingSession, today: IsoDate) {
+  const when = relativeDay(session.date, today);
+  return session.cancelled ? `Cancelled · ${when}` : when;
+}
+
+function NextSession({ sessions }: { sessions: GroupSession[] }) {
   const [next] = sessions;
   if (next === undefined) return <span className="text-sm text-ink-3">No session yet</span>;
+  const cancelled = isCancelled(next);
   return (
-    <span className="flex items-center gap-1.5 text-sm font-medium text-accent-strong">
-      <IconStar className="size-3.5 shrink-0" />
-      {`Next session ${dayLabel(next.date)}`}
+    <span
+      className={cn(
+        "flex items-center gap-1.5 text-sm font-medium",
+        cancelled ? "text-ink-2" : "text-accent-strong",
+      )}
+    >
+      <SessionStar cancelled={cancelled} className="size-3.5 shrink-0" />
+      {`Next session ${dayLabel(next.date)}${cancelled ? " · Cancelled" : ""}`}
     </span>
   );
 }

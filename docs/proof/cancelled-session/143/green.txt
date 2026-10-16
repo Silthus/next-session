@@ -1,0 +1,12 @@
+Green: the same tests after the change.
+Command: bunx vitest run convex/player.test.ts convex/me.test.ts src/features/player/playerMonth.test.ts src/features/player/PlayerCalendar.test.tsx src/features/me/myGroups.test.ts src/features/me/MyGroups.test.tsx --reporter=verbose
+
+ ✓ |ui| src/features/me/myGroups.test.ts > nextSessions > marks a Cancelled Session and keeps its link to the Group page 0ms
+ ✓ |ui| src/features/player/playerMonth.test.ts > playerMonth > marks a Cancelled Session as cancelled rather than as a Session 1ms
+ ✓ |convex| convex/me.test.ts > me.groups > counts a Cancelled Session toward the next five, marked cancelled 4ms
+ ✓ |convex| convex/me.test.ts > me.groups > keeps a Cancelled Session on its date and drops it once the date has passed 28ms
+ ✓ |convex| convex/player.test.ts > player.group > shows a Cancelled Session as cancelled 3ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > marks a Cancelled Session in Next sessions and on its Group's card 26ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > marks a Cancelled Session as Cancelled and keeps it answerable 50ms
+ Test Files  6 passed (6)
+      Tests  183 passed (183)

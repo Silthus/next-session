@@ -18,8 +18,7 @@ const TOMORROW = "2026-10-04";
 const BOOKABLE_DAYS_FROM_TODAY = 29 + 30 + 31;
 const BERLIN = "Europe/Berlin";
 
-const atTheUsualTime = (...dates: string[]) =>
-  dates.map((date) => ({ date, startTime: "19:00", lengthMinutes: 240 }));
+const USUAL = { startTime: "19:00", lengthMinutes: 240 };
 
 let t: TestBackend;
 
@@ -59,6 +58,10 @@ async function seedAnswers(groupId: Id<"groups">, playerId: Id<"players">, dates
 
 const myGroups = (as: GmClient | TestBackend, today = TODAY) => as.query(api.me.groups, { today });
 
+const scheduled = (...dates: string[]) =>
+  dates.map((date) => ({ date, state: "scheduled", ...USUAL }));
+const cancelled = (date: string) => ({ date, state: "cancelled", ...USUAL });
+
 describe("me.groups", () => {
   it("is null for a visitor and an Anonymous GM", async () => {
     const anonymousGm = await signInAnonymousGm(t);
@@ -88,7 +91,7 @@ describe("me.groups", () => {
           groupId,
           name: "Dragon table",
           timeZone: BERLIN,
-          upcomingSessions: atTheUsualTime(
+          upcomingSessions: scheduled(
             TODAY,
             "2026-10-09",
             "2026-10-16",
@@ -101,17 +104,18 @@ describe("me.groups", () => {
     });
   });
 
-  it("leaves Cancelled Sessions out of the next five", async () => {
+  it("counts a Cancelled Session toward the next five, marked cancelled", async () => {
     const { as, groupId } = await groupWithGm();
     for (const date of [TODAY, "2026-10-09", "2026-10-16"]) await seedSession(t, groupId, date);
     for (const date of ["2026-10-10", "2026-10-11"]) await seedSession(t, groupId, date, CANCELLED);
-    for (const date of ["2026-10-23", "2026-10-30", "2026-11-06"]) {
-      await seedSession(t, groupId, date);
-    }
+    await seedSession(t, groupId, "2026-10-23");
 
-    expect((await myGroups(as))?.running[0]?.upcomingSessions).toEqual(
-      atTheUsualTime(TODAY, "2026-10-09", "2026-10-16", "2026-10-23", "2026-10-30"),
-    );
+    expect((await myGroups(as))?.running[0]?.upcomingSessions).toEqual([
+      ...scheduled(TODAY, "2026-10-09"),
+      cancelled("2026-10-10"),
+      cancelled("2026-10-11"),
+      ...scheduled("2026-10-16"),
+    ]);
   });
 
   it("shows when and where each upcoming Session is, in the Group's time zone", async () => {
@@ -127,11 +131,23 @@ describe("me.groups", () => {
     await joinAs(player.as, shareToken);
     const expected = {
       timeZone: "America/New_York",
-      upcomingSessions: [{ date: "2026-10-17", ...saved }],
+      upcomingSessions: [{ date: "2026-10-17", state: "scheduled", ...saved }],
     };
 
     expect((await myGroups(as))?.running).toMatchObject([expected]);
     expect((await myGroups(player.as))?.playing).toMatchObject([expected]);
+  });
+
+  it("keeps a Cancelled Session on its date and drops it once the date has passed", async () => {
+    const { groupId, shareToken } = await groupWithGm();
+    await seedSession(t, groupId, TODAY, CANCELLED);
+    const player = await signInAccount(t);
+    await joinAs(player.as, shareToken);
+    expect((await myGroups(player.as))?.playing[0]?.upcomingSessions).toEqual([cancelled(TODAY)]);
+
+    vi.setSystemTime(NOW + 60 * 60_000);
+
+    expect((await myGroups(player.as, TOMORROW))?.playing[0]?.upcomingSessions).toEqual([]);
   });
 
   it("lists the Groups the Account plays in with its Player and the days left to answer", async () => {
@@ -157,7 +173,7 @@ describe("me.groups", () => {
           playerId: ada,
           playerName: "Ada",
           timeZone: BERLIN,
-          upcomingSessions: atTheUsualTime("2026-10-17"),
+          upcomingSessions: scheduled("2026-10-17"),
           openDates: BOOKABLE_DAYS_FROM_TODAY - 3,
         },
       ],
@@ -223,16 +239,13 @@ describe("me.groups", () => {
     const player = await signInAccount(t);
     await joinAs(player.as, shareToken);
     expect((await myGroups(player.as))?.playing).toMatchObject([
-      {
-        upcomingSessions: atTheUsualTime(TODAY, "2026-10-17"),
-        openDates: BOOKABLE_DAYS_FROM_TODAY,
-      },
+      { upcomingSessions: scheduled(TODAY, "2026-10-17"), openDates: BOOKABLE_DAYS_FROM_TODAY },
     ]);
 
     vi.setSystemTime(NOW + 60 * 60_000);
 
     expect((await myGroups(player.as, TOMORROW))?.playing).toMatchObject([
-      { upcomingSessions: atTheUsualTime("2026-10-17"), openDates: BOOKABLE_DAYS_FROM_TODAY - 1 },
+      { upcomingSessions: scheduled("2026-10-17"), openDates: BOOKABLE_DAYS_FROM_TODAY - 1 },
     ]);
   });
 
@@ -245,9 +258,9 @@ describe("me.groups", () => {
       (await myGroups(player.as, today))?.playing[0]?.upcomingSessions;
 
     expect(await upcomingAsOf(TOMORROW)).toEqual([]);
-    expect(await upcomingAsOf("2026-10-02")).toEqual(atTheUsualTime(TODAY));
+    expect(await upcomingAsOf("2026-10-02")).toEqual(scheduled(TODAY));
     for (const wrongClock of ["2026-10-05", "2026-09-01", "2026-13-01", "today"]) {
-      expect(await upcomingAsOf(wrongClock)).toEqual(atTheUsualTime(TODAY));
+      expect(await upcomingAsOf(wrongClock)).toEqual(scheduled(TODAY));
     }
   });
 });
