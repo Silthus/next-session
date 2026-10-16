@@ -108,6 +108,7 @@ erDiagram
   users ||--o{ players : "claims (userId)"
   groups ||--o{ players : roster
   groups ||--o{ sessions : "one per date"
+  groups ||--o| calendarCancellations : "snapshot on delete"
 
   users {
     bool sessionEmailsEnabled "existing, now also stops invites"
@@ -122,38 +123,50 @@ erDiagram
     string location "NEW free text, optional"
   }
   sessions {
-    string date "existing YYYY-MM-DD, now read in the Group zone"
+    string date "existing YYYY-MM-DD, read in the Group zone"
     string state "NEW scheduled|cancelled, missing = scheduled"
     string startTime "NEW HH:MM override, missing = Group's"
-    number changedAt "NEW, the last GM change"
-    string settledState "NEW, what everyone was told, missing = never settled"
+    number changedAt "NEW, the last change"
+    object published "NEW, written only by settle, missing = never published"
     number sequence "NEW, last SEQUENCE sent, missing = 0"
-    string calendarFingerprint "NEW, last entry sent to calendars"
+  }
+  calendarCancellations {
+    string groupId "NEW, the deleted Group"
+    array recipients "NEW, Account ids at deletion"
+    array entries "NEW, published entries with sequence"
+    number cursor "NEW, batch position"
   }
   mailVolume {
     string provider "NEW resend|workflows"
   }
 ```
 
-Removed: the `sessionMailStates` table. The Session row now keeps its own latest change, because cancelling no longer deletes it.
+`published` is `{state, start, end, summary, location?, revision}`: the snapshot of the Session that calendars, Session mail and Reminders know. Only the settle job writes it. Removed: the `sessionMailStates` table. The Session row now holds its own latest change, because cancelling no longer deletes it.
 
 ❓ **Q2.1 Where do the start time, length and time zone live, and what about existing Groups?**
-➡️ 🤖 **Four optional fields on `groups`, read through one pure `groupTime(group)` that fills the defaults: 19:00, 4 hours, `Europe/Berlin`.** Existing rows need no migration write: a missing value is the default, as #124 did for the Session state. New Groups capture the creator's browser zone (`Intl.DateTimeFormat().resolvedOptions().timeZone`), passed to `groups.create` and to the anonymous sign-in that creates the first Group, and validated on the server. A GM whose existing Group isn't in Berlin changes it once on the settings page. The 4 hours match the live test. 19:00 is the usual game night start and is easy to change.
+➡️ 🤖 **Four optional fields on `groups`, read through one pure `groupTime(group)` that fills the defaults: 19:00, 4 hours, `Europe/Berlin`.**
+- Existing rows need no migration write: a missing value is the default, as #124 did for the Session state.
+- New Groups capture the creator's browser zone (`Intl.DateTimeFormat().resolvedOptions().timeZone`), passed to `groups.create` and to the anonymous sign-in that creates the first Group. The server validates it.
+- A GM whose existing Group isn't in Berlin changes it once on the settings page.
+- The 4 hours match the live test. 19:00 is the usual game night start and is easy to change.
 
 ❓ **Q2.2 What can a Session override?**
-➡️ 🤖 **Its start time only (`sessions.startTime`), with "follow the Group" as the missing value.** The length and location stay the Group's. Michael asked for the time, and one override keeps the day panel to one field. A restored Session keeps its override, because it is the same row. Without an override it follows the Group's current usual time (#124 follow-up).
+➡️ 🤖 **Its start time only (`sessions.startTime`), with "follow the Group" as the missing value.** The length, zone and location stay the Group's. Michael asked for the time, and one override keeps the day panel to one field. A restored Session keeps its override, because it is the same row. Without an override it follows the Group's current usual time (#124 follow-up).
 
 ❓ **Q2.3 How does the Cancelled Session sit in the schema?**
-➡️ 🤖 **`state` on the row, missing = scheduled, plus `changedAt` and `settledState`.**
-- **Cancel** inside the Undo window of a Session that never settled deletes the row, so it leaves no trace (#124). A cancel inside the window of a **Schedule again** reverts to `cancelled` silently. Any other cancel sets `state: "cancelled"`.
-- **Undo of a cancel** and **Schedule again** are the same call, `sessions.schedule({groupId, date})`. It restores the cancelled row by id, or inserts a new one when the row was deleted. A deleted row was never sent anywhere, so a new id loses no calendar identity (#124 follow-up "Undo on a restored id").
-- **Migration:** one internal mutation sets `settledState: "scheduled"` on every existing row (a few hundred at most, in one pass of pages). That is the only backfill. It runs before the code that reads `settledState` deploys, in the same PR, through `convex deploy` plus a one-off `convex run`.
+➡️ 🤖 **`state` on the row, where missing means scheduled, plus `changedAt` and `published`.**
+- **Cancel** deletes a row that was never published, which is only possible inside its first Undo window. It leaves no trace (#124). Any other cancel sets `state: "cancelled"`. Whether anyone hears of it is the settle job's call (Q3.1), not cancel's. So cancel → **Schedule again** → cancel inside one window, from a published scheduled Session, still announces the cancel, while cancel → Undo announces nothing.
+- **Undo of a cancel** and **Schedule again** are the same call, `sessions.schedule({groupId, date})`. It restores the cancelled row by id, or inserts a new one when the row was deleted. A deleted row was never published, so a new id loses no calendar identity (#124 follow-up "Undo on a restored id").
+- **Migration:** one internal mutation backfills `published` on every existing row from its current values with `revision: 0` (a few hundred rows, in pages). It runs in the same PR, before the code that reads `published`. S4's switch-on then sends the first invites for upcoming Sessions (spec split).
 
 ❓ **Q2.4 The Group location.**
 ➡️ 🔒 (#123, map notes) **One optional free-text `groups.location`, at most 200 characters, trimmed.** No coordinates and no provider id. It goes into `LOCATION` and the Reminder.
 
 ❓ **Q2.5 Feed and Reminder-link tokens.**
-➡️ 🤖 **Two random 128-bit tokens on `users`, each with its own index, minted lazily.** They are credentials in the sense of ADR-0004: whoever holds one gets exactly one thing, the feed or the Reminders switch. They are separate, so a leaked feed URL can't turn off Reminders and the other way round. **Reset feed link** on My groups mints a new feed token at once, with no Undo: a leaked feed wants a hard stop. A stored token, not an HMAC: one lookup, testable without a secret, revocable per Account.
+➡️ 🤖 **Two random 128-bit tokens on `users`, each with its own index, minted lazily.**
+- They are credentials in the sense of ADR-0004: whoever holds one gets exactly one thing, the feed or the Reminders switch. They are separate, so a leaked feed URL can't turn off Reminders, and the other way round.
+- **The Account feed carries no Share Token.** Its entries link to `next-session.link/g/<groupId>` for a Group the Account runs and to `next-session.link/me` for one it plays in, and both need sign-in. So **Reset feed link** on My groups revokes everything the leaked URL gave. It mints a new token at once, with no Undo, because a leaked feed wants a hard stop.
+- A stored token, not an HMAC: one lookup, testable without a secret, revocable per Account.
 
 ---
 
@@ -172,25 +185,26 @@ flowchart TB
 
   subgraph convex[convex/]
     sessions[sessions.ts<br/>schedule, cancel, setStartTime]:::changed
-    groups[groups.ts<br/>settings, updateSettings]:::changed
+    groups[groups.ts<br/>settings, updateSettings, remove]:::changed
     playerMod[player.ts / roster.ts<br/>claim, release, removePlayer]:::changed
-    lifecycle[model/sessionLifecycle.ts<br/>Undo window, settle, fingerprint]:::new
+    lifecycle[model/sessionLifecycle.ts<br/>Undo window, settle, published snapshot]:::new
     recipients[model/recipients.ts<br/>calendarAccounts, reminderAccounts]:::new
-    sessionMail[sessionMail.ts<br/>Session mail with invite]:::new
+    sessionMail[sessionMail.ts<br/>broadcast, invite, withdraw, cancellations]:::new
     reminders[reminders.ts<br/>schedule and fire Reminders]:::new
     calendarHttp[calendarFeed.ts + http.ts<br/>/cal/a, /cal/s]:::new
     mailTransport[mail.ts<br/>Workflows webhook + Resend adapter, retrier, volume]:::changed
     me[me.ts<br/>remindersEnabled, feed link]:::changed
-    links[reminderLinks.ts<br/>turnOffByLink]:::new
+    links[reminderLinks.ts<br/>turnOff, turnOn]:::new
   end
 
   worker[worker/index.ts<br/>/cal/* proxy]:::changed
 
   sessions --> lifecycle
   groups --> lifecycle
-  playerMod -- "claim / release" --> sessionMail
-  lifecycle -- "settled change" --> sessionMail
-  lifecycle -- "settled change" --> reminders
+  groups -- "remove" --> sessionMail
+  playerMod -- "recipient set changed" --> sessionMail
+  lifecycle -- "published" --> sessionMail
+  lifecycle -- "published" --> reminders
   lifecycle --> sessionTime
   sessionMail --> recipients
   reminders --> recipients
@@ -198,49 +212,70 @@ flowchart TB
   sessionMail --> mailTransport
   reminders --> sessionTime
   reminders --> mailTransport
-  calendarHttp --> icalendar
-  calendarHttp --> sessionTime
+  calendarHttp -- "reads published only" --> icalendar
   worker --> calendarHttp
   me --> links
 ```
 
-The deep module is **`model/sessionLifecycle.ts`**. Every change to what a Session means to the outside goes through it: schedule, cancel, restore, a time override, a Group settings edit. It owns the Undo window and the settled state. Callers say what changed. The lifecycle decides whether anyone hears about it, and when. Session mail and Reminders are the two channels it hands a settled change to. Each derives what to send from the row, not from the event, so a late, repeated or stale job sends nothing wrong.
+The deep module is **`model/sessionLifecycle.ts`**. Every change to what a Session means to the outside goes through it: schedule, cancel, restore, a time override, a Group settings edit, a rename. It owns the Undo window and the **published snapshot**. Callers say what changed, and the lifecycle decides whether anyone hears about it, and when.
+
+Everything outside the GM's and players' own screens reads `published`, never the live row: Session mail, Reminders, the feed, the download and every retry. That is how the Undo window holds for every channel, the pull ones included.
 
 ❓ **Q3.1 Edge-triggered or level-triggered delivery?** Today `queueSessionMail` records an event (scheduled / cancelled) keyed by Group and date and checks after the window that it still holds.
-➡️ 🤖 **Level-triggered.** The settle job runs `UNDO_WINDOW_MS` after the latest `changedAt` (latest wins, so edits coalesce). It compares the row with what was last sent (`settledState`, `calendarFingerprint`) and sends only the difference. That makes "a change inside the Undo window reaches nobody" fall out of the comparison instead of being a special case, and it handles a time edit, a Group settings edit, a rename and a Share Token rotation the same way. The settle job runs whether or not mail is configured, so `settledState` means "past the Undo window" in every deployment, dev and CI included.
+➡️ 🤖 **Level-triggered, through the published snapshot.**
+- The settle job runs `UNDO_WINDOW_MS` after the latest `changedAt`. Latest wins, so edits coalesce.
+- It builds the snapshot the row means now (state, start, end, Group name, location). If that equals `published`, it does nothing. That is the whole Undo rule.
+- Otherwise it writes `published` with `revision + 1` and hands the old and new snapshot to Session mail and Reminders.
 
-❓ **Q3.2 Which fields make the calendar fingerprint?**
-➡️ 🤖 **State, start and end instant, time zone, location, the Group name (`SUMMARY`) and the link (`URL`).** Any difference sends a `REQUEST` (or `CANCEL`) with a higher `SEQUENCE`. A Share Token rotation therefore updates every upcoming entry with the new link, which is what a rotation is for. A Group's settings edit fans out to each upcoming Session that follows the Group's time, and each Session settles on its own.
+A time edit, a Group settings edit and a rename take the same path. The settle job runs whether or not mail is configured, so `published` means "past the Undo window" in every deployment, dev and CI included.
 
-❓ **Q3.3 UID and SEQUENCE.**
-➡️ 🤖 **`UID` = `<sessionId>@next-session.link`, fixed for the row's life. `SEQUENCE` = `sessions.sequence`, incremented once per send round for that Session: one broadcast after a settle, or one per-recipient send.** Restoring the same row keeps the same entry (#124). A per-recipient send (a new claim, a release) also bumps it. The others then hold a lower number, which is harmless: a sequence only has to grow per recipient. The feed and the download report the current `sequence`, so a client that holds both never sees the feed go backwards. `DTSTAMP` is the send time. A Convex id reveals nothing, and `ownedSession` already refuses foreign ids.
+❓ **Q3.2 What is in the snapshot, and which Sessions does a Group edit touch?**
+➡️ 🤖 **State, start and end instant, Group name (`SUMMARY`) and location.** No link: invites and the feed carry token-free links (Q2.5). So a Share Token rotation sends nothing, and the new Share Link reaches players through the mail body the next time something changes.
+
+A Group settings edit or rename queues a settle for **every** upcoming Session. A Session with its own start time still inherits the length, zone and location. Each settle's comparison decides whether that Session changed.
+
+❓ **Q3.3 UID, SEQUENCE and stale sends.**
+➡️ 🤖 **`UID` is `<sessionId>@next-session.link`, fixed for the row's life. `SEQUENCE` is `sessions.sequence`, incremented once per send round:** one broadcast after a publish, or one per-recipient invite or withdrawal.
+- **Staleness is judged by `published.revision`, never by `sequence`.** Each send job carries the revision it delivers and builds its calendar part from `published` at send time. A broadcast or invite job drops itself when `published.revision` has moved on, because the newer broadcast covers its recipient. A per-recipient send that bumped `sequence` therefore never cancels anyone else's pending retry.
+- The feed and the download report the current `sequence`, so they never go backwards against an invite.
+- `DTSTAMP` is the send time.
+- A Convex id reveals nothing, and `ownedSession` already refuses foreign ids.
 
 ❓ **Q3.4 Who follows Roster changes?**
-➡️ 🤖 **Session mail does.**
-- A new claim sends that Account a `REQUEST` for each upcoming scheduled Session of the Group.
-- A release, **Remove from my groups**, or the GM removing a Claimed Player sends a `CANCEL` for each upcoming announced Session.
-- Deleting a Group (by hand or by Expiry) snapshots its recipients and upcoming announced Sessions before the rows go, and sends `CANCEL`s.
+➡️ 🤖 **Session mail does, by comparing the calendar recipient set before and after.** The set is the GM's Account plus the Accounts behind Claimed Players, deduplicated.
+- A claim that adds an Account to the set queues an **invite** (`REQUEST`) for each upcoming published scheduled Session. At send time it needs the Account to be in the set.
+- A release, **Remove from my groups** or the GM removing a Player, when it takes an Account out of the set, queues a **withdrawal** for each upcoming published Session. A withdrawal is a `CANCEL` to that `ATTENDEE` with no `STATUS`, as RFC 5546 §3.2.5 wants for an uninvited attendee. At send time it needs the Account to still be out of the set. So the release itself doesn't suppress it, and a GM who releases their own Player keeps their entry.
+- **Deleting a Group** (by hand or by Expiry) writes one `calendarCancellations` row with the recipients and the upcoming published entries, before the children go. A self-rescheduling internal mutation then queues at most 200 `CANCEL`s with `STATUS:CANCELLED` per run, as `cleanup.sweepExpiredGroups` pages today. That stays far below Convex's 1,000 scheduled functions per mutation, and the row is deleted when the cursor reaches the end.
 
-Without this, a player who keeps the Group after the night is set never gets it, and a removed player keeps a ghost entry. Reminders need nothing extra: they resolve recipients when they fire (#125 decision 9).
+Without these, a player who keeps the Group after the night is set never gets the entry, and a removed player keeps a ghost entry. Reminders need nothing extra, because they resolve recipients when they fire (#125 decision 9).
 
 ❓ **Q3.5 How are Reminders scheduled?**
-➡️ 🤖 **Two scheduled functions per settled scheduled Session (`day`, `hours`), each carrying its due time.** When one fires, it recomputes the due time from the current row and Group. If the Session is cancelled or gone, or the due time differs (it was moved), it does nothing. If the time passed more than 10 minutes ago, it skips (#125 decision 3). So a move, cancel or Schedule again never has to find and cancel old jobs: settle simply schedules the new pair, and the stale pair no-ops. Recipients are resolved at fire time: Accounts behind Claimed Players with `remindersEnabled !== false`. A due time that has already passed when the Session settles is never scheduled. No cron.
+➡️ 🤖 **Two scheduled functions (`day`, `hours`) per published revision whose state is scheduled, each carrying `{sessionId, lead, revision}`.**
+- A job sends only when `published.revision` still equals its revision and `published.state` is scheduled.
+- Any move, cancel, Schedule again or Group edit that reaches people publishes a new revision, so the old pair drops itself and the new pair takes over. Nothing has to find or cancel old jobs.
+- An Undo that reaches nobody publishes nothing, so the existing pair stays and no duplicate appears. A restore that is undone inside its window leaves `published` cancelled, so the old pair stays silent.
+- A due time that has already passed at publish is never scheduled (#125 decision 3).
+- A job that runs late because of scheduler lag still sends within 5 minutes of its due time, and skips after that. 🤖 This reads "never sent once its time has passed" as excluding seconds of lag. Say so if you want it strict.
+- Recipients are resolved when the job fires: Accounts behind Claimed Players with `remindersEnabled !== false`.
+- No cron.
 
 ❓ **Q3.6 Where do the feed and the download come from?**
-➡️ 🤖 **Convex HTTP actions behind the Worker, on `next-session.link/cal/…`:**
-- `GET /cal/a/<feedToken>.ics` is the Account feed: every Session of the Groups the Account runs or plays in, from 31 days back to the end of the Booking Window, cancelled ones as `STATUS:CANCELLED`.
-- `GET /cal/s/<shareToken>.ics` is the Group download for visitors: the same window for one Group.
+➡️ 🤖 **Convex HTTP actions behind the Worker, on `next-session.link/cal/…`, reading `published` only.**
+- `GET /cal/a/<feedToken>.ics` is the Account feed: every published Session of the Groups the Account runs or plays in, from 31 days back to the end of the Booking Window. Cancelled ones carry `STATUS:CANCELLED`, and links are token-free (Q2.5).
+- `GET /cal/s/<shareToken>.ics` is the Group download for visitors: the same window for one Group, linking to the Share Link its holder already has.
 
-Both use `icalendar.feed` and the same `UID`s and `SEQUENCE`s as the invites. Neither has an `ATTENDEE`, a `METHOD` or a `VALARM`. The Share-Token URL also works as a `webcal://` subscription, and rotating the Share Token stops it, as ADR-0004 wants. The Worker proxies `/cal/` the way it proxies `/ingest/`, so the URL stays on our domain and Convex's host can change. The responses send `Cache-Control: private, max-age=900`. Unknown tokens get a plain 404.
+Both use `icalendar.feed` and the same `UID`s as the invites, with no `ATTENDEE`, no `METHOD` and no `VALARM`. A Session inside its first Undo window isn't published yet, so it never appears in a feed.
+
+The Share-Token URL also works as a `webcal://` subscription, and rotating the Share Token stops it, as ADR-0004 wants. The Worker proxies `/cal/` the way it proxies `/ingest/`, so the URL stays on our domain. Responses send `Cache-Control: private, max-age=900`, and unknown tokens get a plain 404.
 
 ❓ **Q3.7 Where does the Reminders footer link go?**
-➡️ 🤖 **`next-session.link/reminders/off?t=<reminderLinkToken>`, a page with one button, "Turn off Reminders".** The button calls `reminderLinks.turnOff({token})`. Opening the link alone changes nothing, so mail scanners can't turn Reminders off (the reason Tips confirm on a button, ADR-0011). The page then offers "Turn them back on" (Undo) and links to My groups. The Session mail footer keeps linking to the authenticated My groups switch (#102).
+➡️ 🤖 **`next-session.link/reminders/off?t=<reminderLinkToken>`, a page with one button, "Turn off Reminders".** The button calls `reminderLinks.turnOff({token})`. Opening the link alone changes nothing, so mail scanners can't turn Reminders off (the reason Tips confirm on a button, ADR-0011). The page then offers "Turn them back on" and links to My groups. The Session mail footer keeps linking to the authenticated My groups switch (#102).
 
 ---
 
 ## Round 4: Call paths
 
-### Main write: the GM schedules a night, and it settles
+### Main write: the GM schedules a night, and it is published
 
 ```mermaid
 sequenceDiagram
@@ -256,35 +291,35 @@ sequenceDiagram
   participant RS as Resend
 
   GM->>S: schedule({groupId, date})
-  S->>L: scheduleSession(gm, group, date)
+  S->>L: scheduleSession(group, date)
   L->>DB: insert or restore row, state=scheduled, changedAt=now
   L->>Sch: runAfter(30s+1, settle, {sessionId, changedAt})
   S-->>GM: sessionId (Undo toast)
-  Note over GM,Sch: Undo inside 30s calls cancel: an unsettled row is deleted, and settle finds nothing
+  Note over GM,Sch: Undo inside 30s calls cancel. A never-published row is deleted, and settle finds nothing
   Sch->>L: settle({sessionId, changedAt})
-  L->>DB: read row and Group, check changedAt still latest
-  L->>L: diff row against settledState and calendarFingerprint
-  L->>DB: patch settledState
-  L->>SM: settled({session, group, previousState})
-  SM->>DB: recipients = GM Account + Claimed Accounts (emails on)
-  SM->>DB: sequence += 1, calendarFingerprint = current
+  L->>DB: read row and Group, check changedAt is still the latest
+  L->>L: build snapshot, compare with published
+  L->>DB: published = snapshot, revision + 1
+  L->>SM: published({previous, current})
+  SM->>DB: recipients = GM Account + Claimed Accounts, emails on
+  SM->>DB: sequence + 1
   loop each recipient
-    SM->>M: requestCalendarMail({sessionId, userId, sequence})
+    SM->>M: requestCalendarMail({sessionId, userId, revision, sequence, kind: broadcast})
   end
-  L->>R: settled(session)
-  R->>Sch: runAt(dueDay, fire, {sessionId, lead: day, dueAt})
-  R->>Sch: runAt(dueHours, fire, {sessionId, lead: hours, dueAt})
-  M->>DB: read recipient, Group and Session again (internal query)
+  L->>R: published(current)
+  R->>Sch: runAt(dueDay, fire, {sessionId, lead: day, revision})
+  R->>Sch: runAt(dueHours, fire, {sessionId, lead: hours, revision})
+  M->>DB: read recipient, Group and published again (internal query)
   M->>RS: POST /emails, text + html + invite.ics (method=REQUEST)
 ```
 
 Each participant knows only its own part:
 - `sessions.schedule` knows authorization and the Booking Window.
-- The lifecycle knows the window and the diff.
+- The lifecycle knows the window and the snapshot.
 - Session mail knows recipients and `SEQUENCE`.
 - `mail.ts` knows transports, retries and volume.
 
-The action reads the recipient again at send time, as `sendSession` does today, so a release or opt-out after the fan-out still stops the mail.
+The action reads the recipient and `published` again at send time, as `sendSession` does today, so a release, an opt-out or a newer revision after the fan-out still stops the mail.
 
 ### Main read: a calendar app polls the Account feed
 
@@ -301,16 +336,16 @@ sequenceDiagram
   W->>H: proxy (no cookies, no client headers)
   H->>Q: runQuery({feedToken, today})
   Q->>Q: user by_calendarFeedToken, else null
-  Q->>Q: Groups run (≤50) + played (≤50), Sessions in window per Group
-  Q-->>H: CalendarEntry[] (uid, sequence, start, end, zone, status, …)
-  H->>I: feed(entries, "Next Session")
+  Q->>Q: Groups run (≤50) + played (≤50), published Sessions in window per Group
+  Q-->>H: CalendarEntry[] (uid, sequence, start, end, status, token-free url)
+  H->>I: feed("Next Session", entries)
   H-->>App: 200 text/calendar, Cache-Control private, max-age=900
-  Note over H,App: unknown or reset token: 404, no body
+  Note over H,App: unknown or reset token gets 404 with no body
 ```
 
-Bounded: 100 Groups × at most about 120 dates in the window. Real Groups hold a handful of Sessions. The query reads the Sessions through an index range on `by_groupId_and_date`.
+Bounded: 100 Groups × at most about 120 dates in the window. Real Groups hold a handful of Sessions. The query reads them through an index range on `by_groupId_and_date`.
 
-### Failure: Resend is down, and the night moves while mail is retrying
+### Failure: Resend is down, a player claims, and the night moves while mail is retrying
 
 ```mermaid
 sequenceDiagram
@@ -321,34 +356,36 @@ sequenceDiagram
   participant RS as Resend
   participant R as reminders.fire
 
-  L->>SM: settled (sequence 3, 19:00)
-  SM->>M: requestCalendarMail(seq 3)
+  L->>SM: published revision 2 (19:00)
+  SM->>M: broadcast to Alice, revision 2, SEQUENCE 3
   M->>RS: POST
   RS-->>M: 503
-  M-->>M: retry in 5s, 20s, 80s (max 4 attempts)
+  Note over SM: Bob claims a Player
+  SM->>M: invite to Bob, revision 2, SEQUENCE 4
+  M-->>M: Alice's retry: revision still 2, so it sends with SEQUENCE 3
   Note over L: GM moves the night to 20:00 and it settles
-  L->>SM: settled (sequence 4, 20:00)
-  SM->>M: requestCalendarMail(seq 4)
-  M->>M: retry of seq 3 reads row: sequence is now 4, so drop the stale send
-  M->>RS: POST seq 4 (20:00)
+  L->>SM: published revision 3 (20:00)
+  SM->>M: broadcast to Alice and Bob, revision 3, SEQUENCE 5
+  M->>M: any retry still on revision 2 drops itself
+  M->>RS: POST revision 3 (20:00)
   RS-->>M: 200
-  R->>R: old 19:00 Reminder jobs fire: dueAt differs, so no-op
-  Note over M,RS: 429 and 5xx retry. Other 4xx are logged, not retried. After 4 failed attempts the entry is missing until the next change, and the feed still shows it
+  R->>R: revision 2 Reminder jobs fire and drop, revision 3 jobs wait
+  Note over M,RS: 429 and 5xx retry. Other 4xx are logged, not retried. After 4 failed attempts the entry is missing until the next change, and the feed still has it
 ```
 
-The send action carries the `sequence` it was asked to send and drops itself when the row has moved on, so an old retry can never overwrite a newer entry. A mail Resend accepted but timed out on can still arrive twice. The same `UID` and `SEQUENCE` make the second one a no-op in calendars.
+A per-recipient send bumps `sequence` but never makes another recipient's retry look stale. Only a newer published revision does. A mail Resend accepted but timed out on can still arrive twice. The same `UID` and `SEQUENCE` make the second one a no-op in calendars.
 
 ❓ **Q4.1 What if the settle job itself fails?**
-➡️ 🤖 **It is a mutation, so Convex retries it on conflicts, and it has no external calls.** Sending happens in actions behind the retrier. If a settle never runs (a deploy bug), the row stays unsettled: the UI is right, and nobody is told. The next change settles it.
+➡️ 🤖 **It is a mutation, so Convex retries it on conflicts, and it makes no external calls.** Sending happens in actions behind the retrier. If a settle never runs (a deploy bug), the row stays unpublished or on its old snapshot: the screens are right, and nobody is told. The next change settles it.
 
 ❓ **Q4.2 Unverified Password emails (map fog).**
-➡️ 🤖 **No verification gate.** Session mail already goes to unverified Password Accounts since #102. A typo address could learn the Group's location, but the Share Link in the same mail already opens the whole Group, so the gate would protect little and add a flow. This is worth a line in the spec's risk callout.
+➡️ 🤖 **No verification gate.** Session mail already goes to unverified Password Accounts since #102. A typo address could learn the Group's location, but the Share Link in the same mail already opens the whole Group. The gate would protect little and add a flow. Worth a line in the spec's risk callout.
 
 ❓ **Q4.3 Time zones in the invite.**
-➡️ 🤖 **`DTSTART;TZID=<Group zone>` with a minimal `VTIMEZONE` that holds the one offset in effect at the start, computed with `Intl`.** #129 proved `TZID` + `VTIMEZONE` across a DST change in Outlook. Each message is regenerated after a move, so a single observance is always correct, and no time zone database ships in the bundle. Fallback if a client balks: UTC `DTSTART…Z`, a one-line change in `icalendar.ts`.
+➡️ 🤖 **`DTSTART` and `DTEND` in UTC (`…Z`), computed in Convex from the Group's zone. No `VTIMEZONE`.** A single Session is one fixed instant, so UTC is exact, also for a night that spans a DST change. Every client shows it in the viewer's own zone. #129 proved `TZID` with a full `VTIMEZONE`, not UTC, so S4's first live send checks UTC in Outlook and Gmail. The fallback is a full transition-aware `VTIMEZONE` generated from `Intl` for the years spanned, contained in `icalendar.ts`.
 
 ❓ **Q4.4 What is a Session's date, now that it has a zone?**
-➡️ 🤖 **`date` stays the plain calendar date the GM picked, read in the Group's zone.** The Booking Window and "played" stay UTC dates (invariant 8). The only edge is a Session on today's date after midnight UTC but before midnight in the Group zone, which is read-only one evening early for zones west of UTC. Accepted, and noted in the spec.
+➡️ 🤖 **`date` stays the plain calendar date the GM picked, read in the Group's zone.** The Booking Window and "played" stay UTC dates (invariant 8). The one edge is a Session on today's date after midnight UTC but before midnight in the Group zone, which goes read-only one evening early for zones west of UTC. Accepted, and noted in the spec.
 
 ---
 
@@ -368,12 +405,7 @@ export const DEFAULT_GROUP_TIME: GroupTime = {
 
 export function groupTime(group: Partial<GroupTime>): GroupTime;
 
-export type SessionWindow = {
-  start: number; // epoch ms
-  end: number;
-  timeZone: string;
-  offsetMinutes: number; // offset in effect at start, for the VTIMEZONE
-};
+export type SessionWindow = { start: number; end: number }; // epoch ms
 
 export function sessionWindow(date: IsoDate, time: GroupTime, override?: ClockTime): SessionWindow;
 
@@ -384,7 +416,13 @@ export function isClockTime(value: string): value is ClockTime;
 export function isTimeZone(value: string): boolean; // Intl accepts it
 ```
 
-Invariants: a local time that doesn't exist (the spring-forward gap) moves forward to the next valid minute. An ambiguous one (fall-back) takes the first occurrence. `lengthMinutes` is 30 to 720 in steps of 15. "1 day before" is 24 hours, not the same wall clock, so a Session the night after a DST change reminds at 18:00 or 20:00 local. 🤖 Accepted, because it is simpler and rare. The spec can switch to wall-clock if Michael prefers. Performance: pure, `Intl.DateTimeFormat` only.
+Invariants:
+- A local time that doesn't exist (the spring-forward gap) moves forward to the next valid minute. An ambiguous one (fall-back) takes the first occurrence.
+- `end` is `start + lengthMinutes` in real time, so a night across a DST change keeps its length.
+- `lengthMinutes` is 30 to 720, in steps of 15.
+- "1 day before" is 24 hours, not the same wall clock, so a Session the night after a DST change reminds at 18:00 or 20:00 local. 🤖 Accepted, because it is simpler and rare. The spec can switch to wall-clock time if Michael prefers.
+
+Performance: pure, `Intl.DateTimeFormat` only.
 
 ### `shared/icalendar.ts` (pure)
 
@@ -393,16 +431,21 @@ export type CalendarEntry = {
   uid: string; // `${sessionId}@next-session.link`
   sequence: number;
   stamp: number;
-  window: SessionWindow;
+  window: SessionWindow; // written as UTC DTSTART/DTEND
   status: "CONFIRMED" | "CANCELLED";
   summary: string; // Group name
   location?: string;
-  description: string; // one line plus the URL
-  url: string;
+  description: string;
+  url: string; // token-free for Accounts, the Share Link only in the visitor download
 };
 
+export type InviteKind =
+  | "request" //  METHOD:REQUEST, STATUS:CONFIRMED
+  | "cancel" //   METHOD:CANCEL, STATUS:CANCELLED: the Session is off for everyone
+  | "withdraw"; // METHOD:CANCEL, no STATUS: only this attendee is uninvited (RFC 5546 §3.2.5)
+
 export function invite(message: {
-  method: "REQUEST" | "CANCEL";
+  kind: InviteKind;
   organizer: string; // calendar@next-session.link
   attendee: string; // the recipient; PARTSTAT=ACCEPTED;RSVP=FALSE
   entry: CalendarEntry;
@@ -410,70 +453,115 @@ export function invite(message: {
 
 export function feed(calendarName: string, entries: CalendarEntry[]): string;
 
-export const CALENDAR_CONTENT_TYPE: (method: "REQUEST" | "CANCEL") => string;
+export function calendarContentType(kind: InviteKind): string; // text/calendar; charset=utf-8; method=…
 ```
 
-Invariants: CRLF line ends, lines folded at 75 octets, text escaped per RFC 5545, no `VALARM` ever, `CANCEL` carries `STATUS:CANCELLED`, `feed` carries no `METHOD` and no `ATTENDEE`. Output is deterministic for equal input, which makes golden tests possible. Error modes: none. Inputs are already validated by the backend.
+Invariants:
+- CRLF line ends, lines folded at 75 octets, text escaped per RFC 5545.
+- Times are always UTC. There is never a `VALARM`.
+- `feed` carries no `METHOD` and no `ATTENDEE`.
+- Output is deterministic for equal input, which allows golden tests.
+
+Error modes: none. The backend validates its inputs first.
 
 ### `convex/model/sessionLifecycle.ts`
 
 ```ts
 export const UNDO_WINDOW_MS = 30_000;
 
+export type PublishedSession = {
+  state: "scheduled" | "cancelled";
+  start: number;
+  end: number;
+  summary: string;
+  location?: string;
+  revision: number;
+};
+
 /** Insert, or restore a cancelled row in place. SESSION_EXISTS when already scheduled. */
 export async function scheduleSession(ctx: MutationCtx, group: Doc<"groups">, date: IsoDate): Promise<Id<"sessions">>;
 
-/** Delete an unsettled row inside its window, revert a restore inside its window, else mark cancelled. */
+/** Delete a never-published row, else mark it cancelled. Never decides who hears of it. */
 export async function cancelSession(ctx: MutationCtx, session: Doc<"sessions">): Promise<void>;
 
 export async function setSessionStart(ctx: MutationCtx, session: Doc<"sessions">, startTime: ClockTime | null): Promise<void>;
 
-/** After groups.updateSettings, a rename or a rotation: bump changedAt and queue a settle for every upcoming Session. */
+/** After groups.updateSettings or a rename: bump changedAt and queue a settle for every upcoming Session. */
 export async function groupChanged(ctx: MutationCtx, group: Doc<"groups">): Promise<void>;
 
+/** Publish the row's snapshot if it differs from `published`, then hand old and new to the channels. */
 export const settle: RegisteredMutation<"internal", { sessionId: Id<"sessions">; changedAt: number }, null>;
 ```
 
 Invariants:
-1. Nothing outside the lifecycle writes `state`, `changedAt`, `settledState`, `sequence` or `calendarFingerprint`.
-2. No channel is called before `changedAt + UNDO_WINDOW_MS`.
-3. A settle whose `changedAt` is no longer the row's latest does nothing.
-4. A row deleted inside its window was never sent anywhere.
-5. One Session per Group and date, cancelled included (invariant 3).
+1. Only `settle` writes `published`. Only the lifecycle writes `state` and `changedAt`.
+2. Nothing outside the GM's and players' screens reads the live row. Mail, Reminders, feeds, downloads and retries read `published`.
+3. `published` changes no sooner than `UNDO_WINDOW_MS` after the change that caused it.
+4. A settle whose `changedAt` is no longer the row's latest does nothing.
+5. A deleted row was never published.
+6. `published.revision` grows by one per publish.
+7. One Session per Group and date, cancelled included (invariant 3).
 
-Error modes: the callers' existing `NOT_FOUND`, `OUT_OF_WINDOW`, `SESSION_EXISTS`, `RATE_LIMITED`. Performance: a GM call costs one row write and one scheduled function. `groupChanged` touches at most the upcoming Sessions in the Booking Window (≤ about 92). Each settle is its own mutation, so nothing grows past one Session per transaction.
+Error modes: the callers' existing `NOT_FOUND`, `OUT_OF_WINDOW`, `SESSION_EXISTS` and `RATE_LIMITED`.
+
+Performance:
+- A GM call costs one row write and one scheduled function.
+- `groupChanged` touches at most the upcoming Sessions in the Booking Window, about 92.
+- Each settle is its own mutation and schedules at most 101 sends plus 2 Reminder jobs, below the 1,000 limit.
 
 ### `convex/sessionMail.ts` and `convex/mail.ts`
 
 ```ts
 // sessionMail.ts: what goes to whom
-export async function sessionSettled(ctx: MutationCtx, change: SettledChange): Promise<void>;
-export async function claimChanged(ctx: MutationCtx, args: { userId: Id<"users">; groupId: Id<"groups">; claimed: boolean }): Promise<void>;
-export async function groupDeleting(ctx: MutationCtx, group: Doc<"groups">): Promise<void>;
+export async function sessionPublished(ctx: MutationCtx, previous: PublishedSession | undefined, session: Doc<"sessions">): Promise<void>;
+export async function recipientSetChanged(ctx: MutationCtx, args: { groupId: Id<"groups">; userId: Id<"users">; before: boolean; after: boolean }): Promise<void>;
+export async function groupDeleting(ctx: MutationCtx, group: Doc<"groups">): Promise<void>; // writes calendarCancellations
+export const drainCancellations: RegisteredMutation<"internal", { cancellationId: Id<"calendarCancellations"> }, null>; // ≤ 200 per run
 
 // mail.ts: transports, unchanged shape for Welcome and Tips
-export async function requestCalendarMail(ctx: MutationCtx, args: { sessionId: Id<"sessions">; userId: Id<"users">; sequence: number; method: "REQUEST" | "CANCEL" }): Promise<void>;
-export async function requestReminder(ctx: MutationCtx, args: { sessionId: Id<"sessions">; userId: Id<"users">; lead: ReminderLead; dueAt: number }): Promise<void>;
+type CalendarSend = {
+  sessionId: Id<"sessions">;
+  userId: Id<"users">;
+  revision: number;
+  sequence: number;
+  kind: "broadcast" | "invite" | "withdraw";
+};
+export async function requestCalendarMail(ctx: MutationCtx, send: CalendarSend): Promise<void>;
+export async function requestReminder(ctx: MutationCtx, args: { sessionId: Id<"sessions">; userId: Id<"users">; lead: ReminderLead; revision: number }): Promise<void>;
 export function calendarMailConfigured(): boolean; // RESEND_API_KEY set
-export function remindersConfigured(): boolean;   // POSTHOG_REMINDER_WEBHOOK_URL + secret set
+export function remindersConfigured(): boolean; // POSTHOG_REMINDER_WEBHOOK_URL + secret set
 ```
 
-Invariants:
-- Recipients are read twice, at fan-out and at send. A send drops itself when the row's `sequence` is newer than its own, when the Account no longer qualifies, or when the Group is gone (except for `groupDeleting`, which carries a snapshot).
-- The actor gets the invite. The body copy names "you" instead of the GM.
+Send-time rules, checked in the action's internal query on every attempt:
+
+| Kind | Sends only when | Calendar part |
+| --- | --- | --- |
+| `broadcast` | `published.revision` equals the job's, and the Account is in the calendar recipient set with Session mail on | `request` for scheduled, `cancel` for cancelled |
+| `invite` | the same, and `published.state` is scheduled | `request` |
+| `withdraw` | the Account is **not** in the set (a re-claim makes it moot), whatever the revision | `withdraw` |
+| deletion `cancel` | always, from the snapshot row, because the Group is gone | `cancel` |
+
+Other invariants:
+- The actor gets the invite, and the body copy names "you" instead of the GM.
 - `.test` addresses and Anonymous GMs never get mail.
 - Volume is counted per provider (`mailVolume.provider`), warning at 80 and over 100 a day each: Session mail = 1, Reminder = 1 per send, Welcome = 1, Tips = 2.
 
-Error modes: network errors, 5xx and Resend's 429 retry (4 attempts, backoff 5 s × 4ⁿ). Other 4xx are logged and dropped. With neither env set, nothing is scheduled and the lifecycle still settles. Personal data stays out of telemetry events, as in §12.6.
+Error modes: network errors, 5xx and Resend's 429 retry (4 attempts, backoff 5 s × 4ⁿ). Other 4xx are logged and dropped. With neither env set, nothing is scheduled, and the lifecycle still publishes. Personal data stays out of telemetry events, as in §12.6.
 
 ### `convex/reminders.ts`
 
 ```ts
-export async function sessionSettled(ctx: MutationCtx, session: Doc<"sessions">, group: Doc<"groups">): Promise<void>; // schedules day + hours if still ahead
-export const fire: RegisteredMutation<"internal", { sessionId: Id<"sessions">; lead: ReminderLead; dueAt: number }, null>;
+export async function sessionPublished(ctx: MutationCtx, session: Doc<"sessions">): Promise<void>; // schedules day + hours if still ahead and scheduled
+export const fire: RegisteredMutation<"internal", { sessionId: Id<"sessions">; lead: ReminderLead; revision: number }, null>;
 ```
 
-Webhook body to Workflows: `{distinct_id, product, email, group_name, date_label, start_label, location?, lead, player_url, reminders_off_url}`. Invariants: never sent for a cancelled, moved or deleted Session, or more than 10 minutes late. Only Accounts behind Claimed Players with `remindersEnabled !== false`.
+Webhook body to Workflows: `{distinct_id, product, email, group_name, date_label, start_label, location?, lead, player_url, reminders_off_url}`.
+
+Invariants:
+- A Reminder is sent only while `published.revision` equals the job's revision and `published.state` is scheduled.
+- It is never sent more than 5 minutes after its due time.
+- It goes only to Accounts behind Claimed Players with `remindersEnabled !== false`.
+- One job is one Reminder occurrence: the revision gate leaves at most one live pair per Session.
 
 ### HTTP and public functions
 
@@ -496,7 +584,9 @@ Webhook body to Workflows: `{distinct_id, product, email, group_name, date_label
 
 Reads gain the state and the start: `schedule.month`, `player.group` and `me.groups` return `{date, state, start}` per Session instead of a bare date. `me.groups.upcomingSessions` keeps cancelled ones, marked, until their date passes (#124).
 
-Backend.spec.md gains the new entrances, plus one invariant to witness: **feed scoping**. A feed token or Share Token reaches only its own Account's or Group's Sessions, and a reset or rotated token reaches nothing.
+Backend.spec.md gains the new entrances, plus two invariants to witness:
+- **Feed scoping.** A feed token or Share Token reaches only its own Account's or Group's published Sessions. A reset or rotated token reaches nothing, and the Account feed never reveals a Share Token.
+- **Published only.** Mail, Reminders, feeds and downloads never show a change before its Undo window ends.
 
 ---
 
@@ -528,12 +618,12 @@ No new signing secret: both link tokens are stored.
 
 | Seam | Tested through |
 | --- | --- |
-| `shared/sessionTime.ts` | Vitest on plain data: defaults, override, a Berlin Session on each side of both DST changes, the spring-forward gap, reminder due times |
-| `shared/icalendar.ts` | Vitest golden files: `REQUEST`, `CANCEL`, a feed with a cancelled entry, folding of a long location with umlauts, escaping, no `VALARM` anywhere, `PARTSTAT=ACCEPTED;RSVP=FALSE` |
-| `sessions.*`, `groups.updateSettings` through the lifecycle | `convex-test` through `api.*` with fake timers: the #124 table (cancel inside and after the window, Undo by id, Schedule again restores, cancel inside a restore's window reverts silently), one settle per burst of edits, a settings edit moves only Sessions without an override |
-| Session mail | `convex-test` with a fake `fetch` that records Resend payloads and decodes `invite.ics`: one mail per recipient with the GM included, `UID` stable across restore, `SEQUENCE` strictly rising, nothing inside the window, `CANCEL` on release and Player removal, a stale retry drops itself, a 503 then 200 sends once |
-| Reminders | `convex-test` with fake timers: both fire at their times, a move fires only the new pair, cancel and opt-out and release send none, a late settle skips the passed Reminder, the payload holds no Share Token outside `player_url` |
-| HTTP routes | `convex-test` `t.fetch("/cal/…")`: 200 with a parseable calendar for a valid token, 404 after a reset or rotation, another Account's Sessions never appear (feed scoping) |
+| `shared/sessionTime.ts` | Vitest on plain data: defaults, override, a Berlin Session on each side of both DST changes and one spanning the October change (4 real hours), the spring-forward gap, reminder due times |
+| `shared/icalendar.ts` | Vitest golden files: `request`, `cancel` with `STATUS:CANCELLED`, `withdraw` without `STATUS`, a feed with a cancelled entry, UTC times, folding of a long location with umlauts, escaping, no `VALARM` anywhere, `PARTSTAT=ACCEPTED;RSVP=FALSE` |
+| `sessions.*`, `groups.updateSettings` through the lifecycle | `convex-test` through `api.*` with fake timers: the #124 table (cancel inside and after the first window, Undo by id, Schedule again restores, cancel → Schedule again → cancel inside one window still publishes the cancel, cancel → Undo publishes nothing), one publish per burst of edits, a location edit republishes a Session with its own start time, a start-time edit leaves it alone |
+| Session mail | `convex-test` with a fake `fetch` that records Resend payloads and decodes `invite.ics`: one mail per recipient with the GM included, `UID` stable across restore, `SEQUENCE` strictly rising per recipient, nothing before publish, a claim's invite doesn't drop another recipient's pending retry, a release's withdrawal still sends after the claim is gone, a GM releasing their own Player gets no withdrawal, a retry on an old revision drops itself, a 503 then 200 sends once, deleting a Group with 100 Accounts × 20 Sessions drains in batches |
+| Reminders | `convex-test` with fake timers: both fire at their times, a move fires only the new pair, cancel → Schedule again at the same time sends one pair (not two), a restore undone inside its window sends none, opt-out and release send none, a late publish skips the passed Reminder, the payload holds no Share Token outside `player_url` |
+| HTTP routes | `convex-test` `t.fetch("/cal/…")`: 200 with a parseable calendar for a valid token, 404 after a reset or rotation, another Account's Sessions never appear (feed scoping), the Account feed holds no Share Token, a Session inside its first Undo window is absent |
 | `worker/index.ts` | Vitest: `calendarTarget(url)` maps `/cal/*` to the Convex site and strips cookies, like `ingestTarget` |
 | Settings page, day panel time, Cancelled marks, My groups switches, the Reminders-off page | Testing Library: props in, callbacks out. The off page calls nothing on load and `turnOff` only on the press |
 | Whole flow | Playwright on the local backend: set the Group time and location, schedule, cancel after the window, Schedule again, download the Group ICS and parse it. The live proof per ship ticket sends to Michael's inboxes |
@@ -561,7 +651,7 @@ flowchart LR
   S3 --> S6
 ```
 
-1. **S1 Cancelled Session.** Builds `model/sessionLifecycle.ts` and the `state`, `changedAt` and `settledState` fields, with the backfill. `sessions.cancel` replaces `unschedule` and `session_cancelled` replaces `session_unscheduled`. The existing Workflows Session update is driven by settle, and `sessionMailStates` is dropped. Cancelled marks show on the GM, player and My groups surfaces, and **Schedule again** is added.
+1. **S1 Cancelled Session.** Builds `model/sessionLifecycle.ts` and the `state`, `changedAt` and `published` fields, with the backfill. `sessions.cancel` replaces `unschedule` and `session_cancelled` replaces `session_unscheduled`. The existing Workflows Session update is driven by publish, and `sessionMailStates` is dropped. Cancelled marks show on the GM, player and My groups surfaces, and **Schedule again** is added.
    - S1a: backend lifecycle and migration.
    - S1b: UI marks and Schedule again.
 2. **S2 Group settings and start times.** `shared/sessionTime.ts`, the `groups` fields, `updateSettings`, `setStartTime`, the time zone captured at create, the settings page with Geoapify and its attribution, the time shown on Sessions, and the Privacy row for Geoapify. Uses the #128 prototype.
@@ -571,7 +661,7 @@ flowchart LR
 3. **S3 Calendar files.** `shared/icalendar.ts`, the HTTP routes, the Worker proxy, the feed token and **Reset feed link**, the Group download on the player page and **Subscribe in your calendar app** on My groups, and the feed Privacy row. This already gives every player a working path, Gmail included, before any invite goes out.
    - S3a: builder, routes and Worker.
    - S3b: UI, placed per #127.
-4. **S4 Session mail with invites.** The Resend adapter, `sequence` and `calendarFingerprint`, recipients with the GM included, claim, release and Group-deletion follow-ups, `calendar@` with Email Routing, the provider split in `mailVolume`, the Resend Privacy row, a new ADR, and the glossary updates (**Session updates** carry the invite and include the GM).
+4. **S4 Session mail with invites.** The Resend adapter, `sequence`, recipients with the GM included, invites and withdrawals on recipient-set changes, the batched `calendarCancellations` on Group deletion, `calendar@` with Email Routing, the provider split in `mailVolume`, the Resend Privacy row, a new ADR, and the glossary updates (**Session updates** carry the invite and include the GM).
    - S4a: built disabled.
    - S4b: switch-on. Env, DNS, a one-time invite for already-scheduled upcoming Sessions (paced against the 100 a day), live proof in Michael's inboxes, then removing the Workflows Session update path.
 5. **S5 Reminders.** `reminders.ts`, `remindersEnabled`, `reminderLinkToken`, the Reminders-off page, the My groups switch, the Workflows workflow and template, and the Reminders Privacy row.
@@ -602,6 +692,16 @@ Open for the specs, not for this architecture:
 
 Session mail (set, cancelled, moved) goes from Convex through Resend, with the Session update as the body and an iMIP invite (`METHOD:REQUEST` / `CANCEL`) as its calendar part. Reminders, the Welcome Mail and Tips stay in PostHog Workflows. PostHog Workflows can't attach a calendar part (#122), and two mails per change would be noise. Splitting by job also splits the two 100-a-day quotas, which keeps the largest volume (Reminders) away from the invites. Considered: keeping the Workflows update and sending a second mail with the invite (no change to #102's live path, double mail), and moving all mail to Resend (one provider, but Tips' double opt-in and templates move too). Consequences: Session mail copy lives in code, not in the Workflows editor. `calendar@next-session.link` is the sender and the organizer, with an Email Routing rule that drops replies. The GM's Account now gets Session mail too.
 
-### Draft ADR-0013: Sessions settle after the Undo window, and channels send the difference
+### Draft ADR-0013: Sessions publish a snapshot after the Undo window, and every outside channel reads only the snapshot
 
-A Session row carries its state, the state everyone was last told, the last calendar fingerprint and a `SEQUENCE`. Every change goes through one lifecycle module, which settles the row 30 seconds after its latest change and hands the settled row to Session mail and Reminders. Each channel derives what to send by comparing the row with what was sent, so Undo, coalesced edits, stale retries and late jobs need no special cases. The calendar `UID` is `<sessionId>@next-session.link` for the row's whole life. Cancel keeps the row, except inside the window of a Session that never settled. Considered: the current edge-triggered latest-change table keyed by Group and date (`sessionMailStates`). It can't hold a sequence for a deleted row and can't express time or settings edits. Also considered: a separate per-recipient delivery table (more exact, more rows, more code). Consequences: `sessionMailStates` goes away, and the Session row grows five optional fields.
+A Session row carries its live state plus a `published` snapshot (state, start, end, Group name, location, revision) and a `SEQUENCE` counter. Every change goes through one lifecycle module. It settles the row 30 seconds after its latest change and publishes a new revision only when the snapshot differs. Session mail, Reminders, the Account feed, the visitor download and every retry read only `published`, so the Undo window holds for push and pull alike. Stale work is judged by revision: an old send or Reminder job drops itself when a newer revision exists. Undo, coalesced edits, late jobs and per-recipient sends therefore need no special cases. The calendar `UID` is `<sessionId>@next-session.link` for the row's whole life. Cancel keeps the row, unless it was never published.
+
+Considered:
+- The current edge-triggered latest-change table keyed by Group and date (`sessionMailStates`). It can't hold a sequence for a deleted row, can't express time or settings edits, and gives pull channels no Undo.
+- Judging staleness by `SEQUENCE`. A per-recipient invite would then silence other recipients' retries.
+- A per-recipient delivery table. More exact, but more rows and more code.
+
+Consequences:
+- `sessionMailStates` goes away.
+- The Session row grows `state`, `startTime`, `changedAt`, `published` and `sequence`.
+- Existing rows are backfilled as published at revision 0.
