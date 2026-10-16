@@ -272,7 +272,7 @@ describe("DayPanel when and where of a Session", () => {
     renderPanel({ session: "scheduled", timeAndPlace: USUAL_AT_MAX });
 
     await userEvent.click(screen.getByRole("button", { name: "Edit when and where" }));
-    expect(document.activeElement).toBe(startTimeField());
+    expect(document.activeElement).toBe(screen.getByRole("form", { name: "When and where" }));
 
     fireEvent.change(startTimeField(), { target: { value: "20:30" } });
     await userEvent.click(screen.getByRole("button", { name: "Save" }));

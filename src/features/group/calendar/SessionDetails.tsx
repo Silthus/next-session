@@ -8,6 +8,7 @@ import { cn } from "../../../ui/cn";
 import { IconClock } from "../../../ui/icons";
 import { focusRing } from "../../../ui/interactive";
 import { useFocusOnClose } from "../../../ui/useFocusOnClose";
+import { useFocusOnMount } from "../../../ui/useFocusOnMount";
 import { LocationField } from "../settings/LocationField";
 import { LengthChips, StartTimeField } from "../settings/TimeFields";
 import type { CalendarSession } from "./DayCell";
@@ -110,6 +111,7 @@ function DetailsEditor({
   const [initial] = useState(() => draftOf(session));
   const [draft, setDraft] = useState(initial);
   const [busy, setBusy] = useState(false);
+  const editor = useFocusOnMount<HTMLFormElement>();
   const [failure, setFailure] = useState<string | null>(null);
   const ids = {
     start: useId(),
@@ -157,14 +159,16 @@ function DetailsEditor({
 
   return (
     <form
+      ref={editor}
+      tabIndex={-1}
+      aria-label="When and where"
       onSubmit={(event) => void submit(event)}
       noValidate
-      className="flex flex-col gap-3 rounded-md bg-surface-2 p-3"
+      className={cn("flex flex-col gap-3 rounded-md bg-surface-2 p-3", focusRing)}
     >
       <DetailRow label="Starts at" labelId={ids.startLabel} htmlFor={ids.start}>
         <StartTimeField
           id={ids.start}
-          autoFocus
           value={draft.values.startTime}
           onChange={(startTime) => change({ startTime })}
         />

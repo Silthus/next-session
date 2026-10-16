@@ -162,6 +162,15 @@ describe("TimeAndPlacePage", () => {
     expect(screen.getByText("No zone matches")).toBeTruthy();
   });
 
+  it("keeps the zone on Enter before anything is typed", async () => {
+    const { onSave } = renderPage();
+    await userEvent.click(screen.getByRole("button", { name: "Change time zone" }));
+    await userEvent.type(screen.getByRole("searchbox", { name: "Find a time zone" }), "{Enter}");
+
+    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.getByRole("searchbox", { name: "Find a time zone" })).toBeTruthy();
+  });
+
   it("waits for an Enter that ends a composition before picking a zone", async () => {
     const { onSave } = renderPage();
     await userEvent.click(screen.getByRole("button", { name: "Change time zone" }));

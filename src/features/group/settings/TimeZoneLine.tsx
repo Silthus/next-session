@@ -65,7 +65,7 @@ function TimeZoneSearch({
   const listId = useId();
   const pickTopMatch = () => {
     const top = matches[0];
-    if (top) onPick(top);
+    if (query.trim() !== "" && top) onPick(top);
   };
   return (
     <div className="flex flex-col gap-1.5">
