@@ -1,0 +1,18 @@
+$ bunx vitest run src/routes/routes.test.tsx shared/legal.test.ts   # after the policy change
+ ✓ |shared| shared/legal.test.ts > LEGAL_VERSIONS > matches the version the terms text shows 1ms
+ ✓ |shared| shared/legal.test.ts > LEGAL_VERSIONS > matches the version the privacy text shows 0ms
+ ✓ |shared| shared/legal.test.ts > privacy text > has no placeholder left to fill in 0ms
+ ✓ |shared| shared/legal.test.ts > privacy text > names both labels of the measurement switch on /privacy 0ms
+ ✓ |ui| src/routes/routes.test.tsx > legal routes > /terms renders the document from docs/legal with every placeholder filled 174ms
+ ✓ |ui| src/routes/routes.test.tsx > legal routes > /privacy renders the document from docs/legal with every placeholder filled 61ms
+ ✓ |ui| src/routes/routes.test.tsx > legal routes > /imprint renders the document from docs/legal with every placeholder filled 27ms
+ ✓ |ui| src/routes/routes.test.tsx > document titles > names the landing page after the product 9ms
+ ✓ |ui| src/routes/routes.test.tsx > /privacy > renders the effective date, the processor table, the storage list and the authority link 109ms
+ ✓ |ui| src/routes/routes.test.tsx > unknown paths > show the not-found page with a link home 19ms
+ ✓ |ui| src/routes/routes.test.tsx > /s/$shareToken > keeps only a well-formed month from "?month=2026-11" 1ms
+ ✓ |ui| src/routes/routes.test.tsx > /s/$shareToken > keeps only a well-formed month from "" 1ms
+ ✓ |ui| src/routes/routes.test.tsx > /s/$shareToken > keeps only a well-formed month from "?month=soon" 1ms
+ ✓ |ui| src/routes/routes.test.tsx > /s/$shareToken > keeps only a well-formed month from "?month=2026-13" 1ms
+ ✓ |ui| src/routes/routes.test.tsx > /s/$shareToken > keeps only a well-formed month from "?month=2026-1" 0ms
+ Test Files  2 passed (2)
+      Tests  15 passed (15)

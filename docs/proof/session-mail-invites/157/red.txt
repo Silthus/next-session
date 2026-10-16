@@ -1,0 +1,22 @@
+$ bunx vitest run src/routes/routes.test.tsx shared/legal.test.ts   # tree before the policy change
+     × renders the effective date, the processor table, the storage list and the authority link 1007ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  |ui| src/routes/routes.test.tsx > /privacy > renders the effective date, the processor table, the storage list and the authority link
+TestingLibraryElementError: Unable to find an element with the text: Updated Oct 16, 2026. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+ ❯ src/routes/routes.test.tsx:72:25
+     72|     expect(await screen.findByText("Updated Oct 16, 2026")).toBeTruthy…
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 14 passed (15)
+
+$ bunx vitest run src/routes/routes.test.tsx shared/legal.test.ts   # old policy text, LEGAL_VERSIONS already at 1.8
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  |shared| shared/legal.test.ts > LEGAL_VERSIONS > matches the version the privacy text shows
+AssertionError: expected '1.7' to be '1.8' // Object.is equality
+Expected: "1.8"
+Received: "1.7"
+ ❯ shared/legal.test.ts:14:45
+ FAIL  |ui| src/routes/routes.test.tsx > /privacy > renders the effective date, the processor table, the storage list and the authority link
+TestingLibraryElementError: Unable to find an accessible element with the role "cell" and name "Plus Five Five, Inc. (Resend)"
+ ❯ src/routes/routes.test.tsx:74:19
+ Test Files  2 failed (2)
+      Tests  2 failed | 13 passed (15)
