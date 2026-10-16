@@ -1,7 +1,7 @@
 import { useId, useState } from "react";
 import type { IsoDate } from "../../../../shared/dates";
 import { endClockTime, type ClockTime } from "../../../../shared/sessionTime";
-import { timeRange, type WallClockTime } from "../../../lib/timeAndPlace";
+import { timeRange, zoneSuffix, type WallClockTime } from "../../../lib/timeAndPlace";
 import { Button } from "../../../ui/Button";
 import { cn } from "../../../ui/cn";
 import { IconChevron, IconClock, IconStar } from "../../../ui/icons";
@@ -84,7 +84,7 @@ function TimeAndPlacePrompt({
     <div className="mt-3 rounded-md border border-dashed border-line-strong px-3 py-2.5">
       <p className="text-sm font-semibold">When and where do you play?</p>
       <p className="mt-0.5 text-xs text-ink-3">
-        {`Calendars show ${timeAndPlace.startTime} to ${end} until you change it.`}
+        {`Calendars show ${timeAndPlace.startTime} to ${end}${zoneSuffix(timeAndPlace.timeZone)} until you change it.`}
       </p>
       <Button size="sm" variant="soft" className="mt-2" onClick={onSet}>
         Set time and place

@@ -110,6 +110,7 @@ describe("TimeAndPlacePage", () => {
       screen.getByText(/^New York time\. Players abroad see it in their own time\./),
     ).toBeTruthy();
     expect(preview.textContent).toContain("19:00–23:00 New York time");
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Change time zone" }));
   });
 
   it("lists the cities that start with what the GM typed first", async () => {
@@ -128,6 +129,48 @@ describe("TimeAndPlacePage", () => {
     );
     expect(screen.queryByRole("searchbox")).toBeNull();
     expect(screen.getByText(/^Berlin time\./)).toBeTruthy();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Change time zone" }));
+  });
+
+  it("picks the top zone on Enter without saving, then saves it", async () => {
+    const { onSave } = renderPage();
+    await userEvent.click(screen.getByRole("button", { name: "Change time zone" }));
+    await userEvent.type(
+      screen.getByRole("searchbox", { name: "Find a time zone" }),
+      "new york{Enter}",
+    );
+
+    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.queryByRole("searchbox")).toBeNull();
+    expect(screen.getByText(/^New York time\./)).toBeTruthy();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Change time zone" }));
+
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(onSave).toHaveBeenCalledWith({ ...usualNight, timeZone: "America/New_York" });
+  });
+
+  it("does nothing on Enter when no zone matches", async () => {
+    const { onSave } = renderPage();
+    await userEvent.click(screen.getByRole("button", { name: "Change time zone" }));
+    await userEvent.type(
+      screen.getByRole("searchbox", { name: "Find a time zone" }),
+      "atlantis{Enter}",
+    );
+
+    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.getByRole("searchbox", { name: "Find a time zone" })).toBeTruthy();
+    expect(screen.getByText("No zone matches")).toBeTruthy();
+  });
+
+  it("waits for an Enter that ends a composition before picking a zone", async () => {
+    const { onSave } = renderPage();
+    await userEvent.click(screen.getByRole("button", { name: "Change time zone" }));
+    const search = screen.getByRole("searchbox", { name: "Find a time zone" });
+    await userEvent.type(search, "tokyo");
+    fireEvent.keyDown(search, { key: "Enter", isComposing: true });
+
+    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.getByRole("searchbox", { name: "Find a time zone" })).toBeTruthy();
   });
 
   it("says that saving moves upcoming Sessions", () => {

@@ -1,5 +1,5 @@
 import type { FunctionArgs } from "convex/server";
-import { useId, useState, type FormEvent, type ReactNode } from "react";
+import { useId, useState, type FormEvent, type ReactNode, type Ref } from "react";
 import type { api } from "../../../../convex/_generated/api";
 import { errorMessage } from "../../../lib/errors";
 import { timeRange, type WallClockTime } from "../../../lib/timeAndPlace";
@@ -7,6 +7,7 @@ import { Button } from "../../../ui/Button";
 import { cn } from "../../../ui/cn";
 import { IconClock } from "../../../ui/icons";
 import { focusRing } from "../../../ui/interactive";
+import { useFocusOnClose } from "../../../ui/useFocusOnClose";
 import { LocationField } from "../settings/LocationField";
 import { LengthChips, StartTimeField } from "../settings/TimeFields";
 import type { CalendarSession } from "./DayCell";
@@ -41,20 +42,23 @@ export function SessionDetails({
   onDone: () => void;
   onSave: (changes: SessionDetailChanges) => Promise<void>;
 }) {
+  const edit = useFocusOnClose<HTMLButtonElement>(editing);
   if (editing) {
     return <DetailsEditor session={session} usual={usual} onDone={onDone} onSave={onSave} />;
   }
-  return <DetailsLine session={session} timeZone={usual.timeZone} onEdit={onEdit} />;
+  return <DetailsLine session={session} timeZone={usual.timeZone} onEdit={onEdit} editRef={edit} />;
 }
 
 function DetailsLine({
   session,
   timeZone,
   onEdit,
+  editRef,
 }: {
   session: CalendarSession;
   timeZone: string;
   onEdit?: () => void;
+  editRef: Ref<HTMLButtonElement>;
 }) {
   const labelId = useId();
   const range = timeRange({ ...session, timeZone });
@@ -69,11 +73,14 @@ function DetailsLine({
         <p id={labelId} className="font-semibold text-ink">
           When and where
         </p>
-        <p>{session.location ? `${range} · ${session.location}` : range}</p>
+        <p className="[overflow-wrap:anywhere]">
+          {session.location ? `${range} · ${session.location}` : range}
+        </p>
         {session.overrides.length > 0 && <OnlyThisNight className="mt-1" />}
       </div>
       {onEdit && (
         <button
+          ref={editRef}
           type="button"
           aria-label="Edit when and where"
           onClick={onEdit}
@@ -157,6 +164,7 @@ function DetailsEditor({
       <DetailRow label="Starts at" labelId={ids.startLabel} htmlFor={ids.start}>
         <StartTimeField
           id={ids.start}
+          autoFocus
           value={draft.values.startTime}
           onChange={(startTime) => change({ startTime })}
         />

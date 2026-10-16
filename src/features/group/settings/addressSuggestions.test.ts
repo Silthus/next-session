@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { geoapifySearch } from "./addressSuggestions";
+import { geoapifySearch, suggestUntilFailure } from "./addressSuggestions";
 
 function fetchAnswering(response: Response) {
   return vi.fn<typeof fetch>().mockResolvedValue(response);
@@ -7,6 +7,26 @@ function fetchAnswering(response: Response) {
 
 function geoapifyAnswer(results: { address_line1: string; address_line2: string }[]) {
   return new Response(JSON.stringify({ results }), { status: 200 });
+}
+
+function fetchStallingInTheBody() {
+  return vi.fn<typeof fetch>((_url, init) => {
+    const body = new ReadableStream({
+      start(stream) {
+        init?.signal?.addEventListener("abort", () => stream.error(init.signal?.reason));
+      },
+    });
+    return Promise.resolve(new Response(body, { status: 200 }));
+  });
+}
+
+function settling(promise: Promise<unknown>) {
+  const outcome = { state: "waiting" };
+  promise.then(
+    () => (outcome.state = "answered"),
+    () => (outcome.state = "gave up"),
+  );
+  return outcome;
 }
 
 const neverCancelled = () => new AbortController().signal;
@@ -62,5 +82,32 @@ describe("geoapifySearch", () => {
     const slow = expect(search("Hauptstr", neverCancelled())).rejects.toThrow();
     await vi.advanceTimersByTimeAsync(5000);
     await slow;
+  });
+
+  it("gives up and stops suggesting when the answer stalls after the headers", async () => {
+    const suggestions = suggestUntilFailure(
+      geoapifySearch({ apiKey: "geo_test", language: "en", fetch: fetchStallingInTheBody() }),
+    );
+
+    const search = settling(suggestions.search("Hauptstr", neverCancelled()));
+    await vi.advanceTimersByTimeAsync(5000);
+
+    expect(search.state).toBe("gave up");
+    expect(suggestions.isStopped()).toBe(true);
+  });
+
+  it("stops reading the answer when the caller cancels after the headers", async () => {
+    const suggestions = suggestUntilFailure(
+      geoapifySearch({ apiKey: "geo_test", language: "en", fetch: fetchStallingInTheBody() }),
+    );
+    const cancel = new AbortController();
+
+    const search = settling(suggestions.search("Hauptstr", cancel.signal));
+    await vi.advanceTimersByTimeAsync(0);
+    cancel.abort();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(search.state).toBe("gave up");
+    expect(suggestions.isStopped()).toBe(false);
   });
 });

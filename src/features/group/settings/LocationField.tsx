@@ -1,5 +1,6 @@
 import { useEffect, useId, useState, type KeyboardEvent, type ReactNode } from "react";
 import { LOCATION_MAX_LENGTH } from "../../../../shared/limits";
+import { isImeComposing } from "../../../lib/keyboard";
 import { cn } from "../../../ui/cn";
 import { focusRing } from "../../../ui/interactive";
 import { useAddressSuggestions, type Address, type AddressSuggestions } from "./addressSuggestions";
@@ -39,7 +40,7 @@ export function LocationField({
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (!open) return;
+    if (!open || isImeComposing(event.nativeEvent)) return;
     const moves: Record<string, () => void> = {
       ArrowDown: () => lookup.highlight(Math.min(lookup.highlighted + 1, rowCount - 1)),
       ArrowUp: () => lookup.highlight(Math.max(lookup.highlighted - 1, noRowChosen)),
@@ -221,9 +222,14 @@ function askAfterPause(
 ) {
   const cancel = new AbortController();
   const timer = setTimeout(() => {
-    suggestions.search(query, cancel.signal).then(onAnswer, () => {
-      if (!cancel.signal.aborted) onFailure();
-    });
+    suggestions.search(query, cancel.signal).then(
+      (addresses) => {
+        if (!cancel.signal.aborted) onAnswer(addresses);
+      },
+      () => {
+        if (!cancel.signal.aborted) onFailure();
+      },
+    );
   }, pauseBeforeAskingMs);
   return () => {
     clearTimeout(timer);

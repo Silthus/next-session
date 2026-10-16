@@ -56,9 +56,11 @@ export function geoapifySearch({
       format: "json",
       apiKey,
     }).toString();
-    const response = await withPatience(signal, (patient) => fetch(url, { signal: patient }));
-    if (!response.ok) throw new Error(`Geoapify answered ${String(response.status)}`);
-    const answer = (await response.json()) as GeoapifyAnswer;
+    const answer = await withPatience(signal, async (patient) => {
+      const response = await fetch(url, { signal: patient });
+      if (!response.ok) throw new Error(`Geoapify answered ${String(response.status)}`);
+      return (await response.json()) as GeoapifyAnswer;
+    });
     return answer.results.map((result) => ({
       street: result.address_line1,
       town: result.address_line2 ?? "",

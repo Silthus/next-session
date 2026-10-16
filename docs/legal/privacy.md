@@ -70,7 +70,7 @@ Transfers to the USA rely on the EU–US Data Privacy Framework and the EU Stand
 
 When the location field suggests addresses, your browser sends what you type there and your IP address to Geoapify, whose operator is registered in Cyprus (EU) and which answers from data centers in the EU, with Cloudflare and Bunny CDN in the path.
 
-Everyone who has a group's share link can see that group's name, its player names, its scheduled dates, and its answers. That is how the Service works; see the Terms.
+Everyone who has a group's share link can see that group's name, its player names, its scheduled dates with their time and place, and its answers. That is how the Service works; see the Terms.
 
 Your Google profile picture is shown only to you and to the GM of each group where your account has a player. People with a share link do not see it.
 

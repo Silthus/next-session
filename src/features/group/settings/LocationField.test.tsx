@@ -1,4 +1,4 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -124,6 +124,20 @@ describe("LocationField with address suggestions", () => {
     expect(combobox()).toBeTruthy();
   });
 
+  it("drops an answer that arrives after the GM left the field", async () => {
+    let answer: (addresses: Address[]) => void = () => undefined;
+    const search = vi.fn<AddressSearch>(() => new Promise((resolve) => (answer = resolve)));
+    renderField({ suggestions: suggestUntilFailure(search) });
+
+    await user().type(combobox(), "Haupt");
+    await pause();
+    act(() => combobox().blur());
+    await act(() => Promise.resolve(answer([hauptstrasse])));
+
+    expect(screen.queryByRole("listbox")).toBeNull();
+    expect(combobox().getAttribute("aria-expanded")).toBe("false");
+  });
+
   it("keeps the typed text on Enter when no row is chosen, without submitting the form", async () => {
     const search = searchAnswering([]);
     const { onSubmit } = renderField({ suggestions: suggestUntilFailure(search) });
@@ -158,6 +172,18 @@ describe("LocationField with address suggestions", () => {
     expect(combobox().value).toBe("Hauptstraße 5, 10115 Berlin, Germany");
     expect(screen.queryByRole("listbox")).toBeNull();
     expect(search).toHaveBeenCalledOnce();
+  });
+
+  it("leaves the keys to a composition still in progress", async () => {
+    renderField({ suggestions: suggestUntilFailure(searchAnswering([hauptstrasse])) });
+
+    await user().type(combobox(), "Haupt");
+    await pause();
+    await user().keyboard("{ArrowDown}{ArrowDown}");
+    fireEvent.keyDown(combobox(), { key: "Enter", isComposing: true });
+
+    expect(combobox().value).toBe("Haupt");
+    expect(options()[1]?.getAttribute("aria-selected")).toBe("true");
   });
 
   it("replaces the text with a clicked row", async () => {

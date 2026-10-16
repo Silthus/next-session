@@ -1,7 +1,9 @@
 import { useId, useMemo, useState } from "react";
+import { isImeComposing } from "../../../lib/keyboard";
 import { zoneName } from "../../../lib/timeAndPlace";
 import { cn } from "../../../ui/cn";
 import { focusRing, hoverRow } from "../../../ui/interactive";
+import { useFocusOnClose } from "../../../ui/useFocusOnClose";
 
 const MATCHES_SHOWN = 8;
 
@@ -13,6 +15,7 @@ export function TimeZoneLine({
   onChange: (timeZone: string) => void;
 }) {
   const [choosing, setChoosing] = useState(false);
+  const change = useFocusOnClose<HTMLButtonElement>(choosing);
   if (choosing) {
     return (
       <TimeZoneSearch
@@ -29,6 +32,7 @@ export function TimeZoneLine({
     <p className="text-xs text-ink-3">
       {`${zoneName(value)}. Players abroad see it in their own time. `}
       <button
+        ref={change}
         type="button"
         aria-label="Change time zone"
         onClick={() => setChoosing(true)}
@@ -59,6 +63,10 @@ function TimeZoneSearch({
     .sort((a, b) => closeness(a, query) - closeness(b, query))
     .slice(0, MATCHES_SHOWN);
   const listId = useId();
+  const pickTopMatch = () => {
+    const top = matches[0];
+    if (top) onPick(top);
+  };
   return (
     <div className="flex flex-col gap-1.5">
       <input
@@ -70,10 +78,16 @@ function TimeZoneSearch({
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         onKeyDown={(event) => {
-          if (event.key !== "Escape") return;
+          if (isImeComposing(event.nativeEvent)) return;
+          const answers: Record<string, () => void> = {
+            Enter: () => pickTopMatch(),
+            Escape: onCancel,
+          };
+          const answer = answers[event.key];
+          if (!answer) return;
           event.preventDefault();
           event.stopPropagation();
-          onCancel();
+          answer();
         }}
         className={cn(
           "h-9 w-full max-w-72 rounded-md border border-line-strong bg-surface px-2 text-sm text-ink",

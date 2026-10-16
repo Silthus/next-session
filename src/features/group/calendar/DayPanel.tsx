@@ -135,7 +135,7 @@ function CalendarLine({
   return (
     <div className="flex items-center gap-2 rounded-md bg-surface-2 px-3 py-2 text-xs text-ink-2">
       <IconClock className="shrink-0 text-ink-3" />
-      <p className="min-w-0 flex-1">{`Players' calendars will show ${shown}`}</p>
+      <p className="min-w-0 flex-1 [overflow-wrap:anywhere]">{`Players' calendars will show ${shown}`}</p>
       <button
         type="button"
         aria-label="Change time and place"

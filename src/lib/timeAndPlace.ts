@@ -5,7 +5,11 @@ export type WallClockTime = Pick<GroupTime, "lengthMinutes" | "timeZone"> & { st
 
 export function timeRange(time: WallClockTime, viewerTimeZone = browserTimeZone()): string {
   const range = `${time.startTime}–${endClockTime(time.startTime as ClockTime, time.lengthMinutes)}`;
-  return sameZone(time.timeZone, viewerTimeZone) ? range : `${range} ${zoneName(time.timeZone)}`;
+  return `${range}${zoneSuffix(time.timeZone, viewerTimeZone)}`;
+}
+
+export function zoneSuffix(timeZone: string, viewerTimeZone = browserTimeZone()): string {
+  return sameZone(timeZone, viewerTimeZone) ? "" : ` ${zoneName(timeZone)}`;
 }
 
 export function zoneName(timeZone: string): string {

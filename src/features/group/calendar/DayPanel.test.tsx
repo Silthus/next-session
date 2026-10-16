@@ -268,6 +268,30 @@ describe("DayPanel when and where of a Session", () => {
     expect(screen.queryByRole("button", { name: "Save" })).toBeNull();
   });
 
+  it("moves focus into the editor on Edit and back to Edit once saved", async () => {
+    renderPanel({ session: "scheduled", timeAndPlace: USUAL_AT_MAX });
+
+    await userEvent.click(screen.getByRole("button", { name: "Edit when and where" }));
+    expect(document.activeElement).toBe(startTimeField());
+
+    fireEvent.change(startTimeField(), { target: { value: "20:30" } });
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: "Edit when and where" }),
+    );
+  });
+
+  it("returns focus to Edit when the GM cancels the editor", async () => {
+    renderPanel({ session: "scheduled", timeAndPlace: USUAL_AT_MAX });
+
+    await userEvent.click(screen.getByRole("button", { name: "Edit when and where" }));
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: "Edit when and where" }),
+    );
+  });
+
   it("marks each of the Session's own values as only this night in the editor", async () => {
     renderPanel({ session: "scheduled", timeAndPlace: USUAL_AT_MAX, sessionTime: OWN_NIGHT });
 

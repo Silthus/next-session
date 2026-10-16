@@ -7,10 +7,12 @@ const LENGTH_CHOICES_IN_HOURS = [2, 3, 4, 5, 6];
 export function StartTimeField({
   id,
   value,
+  autoFocus = false,
   onChange,
 }: {
   id: string;
   value: string;
+  autoFocus?: boolean;
   onChange: (startTime: string) => void;
 }) {
   return (
@@ -18,6 +20,7 @@ export function StartTimeField({
       id={id}
       type="time"
       required
+      autoFocus={autoFocus}
       value={value}
       onChange={(event) => {
         if (isClockTime(event.target.value)) onChange(event.target.value);
