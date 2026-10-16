@@ -408,6 +408,7 @@ function PlayerAnswers({
       today={today}
       answers={answers}
       sessions={group.sessions}
+      timeZone={group.timeZone}
       hintVisible={hintVisible}
       onHintToggle={() => (hintVisible ? dismissHint() : setHintVisible(true))}
       onAnswer={(date, answer) => {

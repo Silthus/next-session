@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { convexUrl, legalContact, MissingEnvError, postHogEnv } from "./env";
+import { convexUrl, geoapifyKey, legalContact, MissingEnvError, postHogEnv } from "./env";
 
 describe("convexUrl", () => {
   it("returns the Convex URL when it is set", () => {
@@ -43,5 +43,16 @@ describe("postHogEnv", () => {
       token: "phc_test",
       release: "abc123",
     });
+  });
+});
+
+describe("geoapifyKey", () => {
+  it("is absent without a key, so the location field stays plain", () => {
+    expect(geoapifyKey({})).toBeNull();
+    expect(geoapifyKey({ VITE_GEOAPIFY_KEY: "" })).toBeNull();
+  });
+
+  it("carries the key the build was given", () => {
+    expect(geoapifyKey({ VITE_GEOAPIFY_KEY: "geo_test" })).toBe("geo_test");
   });
 });

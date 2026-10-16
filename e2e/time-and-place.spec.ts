@@ -10,7 +10,10 @@ const sessionsCard = (page: Page) => page.getByRole("region", { name: "Sessions"
 const groupMenu = (page: Page) =>
   page.getByRole("heading", { level: 1 }).getByRole("button", { name: "Thursday Crew" });
 
-test("the GM sets the Group's time and place and schedules a night with it", async ({ page }) => {
+test("the GM sets the Group's time and place, schedules a night, and the player sees both", async ({
+  page,
+  browser,
+}) => {
   const gm = await signInAnonymousGm();
   await gm.client.mutation(api.groups.rename, { groupId: gm.groupId, name: "Thursday Crew" });
   await seedPlayer(gm, "Ana");
@@ -65,6 +68,18 @@ test("the GM sets the Group's time and place and schedules a night with it", asy
   await expect(
     sessionsCard(page).getByRole("button", { name: new RegExp(`, \\w+ 12`) }),
   ).toContainText("18:30–21:30");
+
+  const playerContext = await browser.newContext({ timezoneId: "Europe/Berlin" });
+  const player = await playerContext.newPage();
+  await player.goto(`/s/${gm.shareToken}`);
+  await player.getByRole("button", { name: "Ana", exact: true }).click();
+  const nextSession = player
+    .getByRole("region", { name: "Next sessions" })
+    .getByRole("listitem")
+    .filter({ hasText: new RegExp(`\\w+ 12`) });
+  await expect(nextSession).toContainText("18:30–21:30");
+  await expect(nextSession).toContainText("Max's place");
+  await playerContext.close();
 });
 
 test("a Group the GM does not own shows the not-found screen", async ({ page }) => {

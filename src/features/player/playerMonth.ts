@@ -21,13 +21,19 @@ export type PlayerDay = {
   cancelled: boolean;
 };
 
-export type PlayerSession = { date: IsoDate; state: SessionState };
+type DatedSession = { date: IsoDate; state: SessionState };
+
+export type PlayerSession = DatedSession & {
+  startTime: string;
+  lengthMinutes: number;
+  location?: string;
+};
 
 export type PlayerMonthInput = {
   month: IsoMonth;
   today: IsoDate;
   answers: Record<IsoDate, Answer>;
-  sessions: PlayerSession[];
+  sessions: DatedSession[];
 };
 
 export function visibleMonth(requested: string | undefined, today: IsoDate): IsoMonth {
