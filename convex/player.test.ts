@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ConvexError } from "convex/values";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import type { AppErrorData } from "./model/errors";
 import {
@@ -11,6 +11,7 @@ import {
   newBackend,
   seedSession,
   signedInGmWithGroup,
+  signIn,
   signInAccount,
   signInAnonymousGm,
   type TestBackend,
@@ -168,6 +169,7 @@ describe("player.group", () => {
       claimedPlayerId: null,
       removedFromMyGroups: false,
       opensAsGm: false,
+      calendarInvites: null,
     });
   });
 
@@ -274,6 +276,146 @@ describe("player.group", () => {
     expect(
       await t.query(api.player.group, { shareToken: await shareTokenOf(groupId) }),
     ).toMatchObject({ groupId });
+  });
+});
+
+describe("player.group calendar invites", () => {
+  beforeEach(() => {
+    vi.stubEnv("RESEND_API_KEY", "re_test_key");
+    vi.stubEnv("SITE_URL", "https://next-session.link");
+  });
+
+  afterEach(() => vi.unstubAllEnvs());
+
+  async function keptAccount(signInPlayer = signInAccount) {
+    const group = await sharedGroup();
+    const ada = await seedPlayer(group.groupId, "Ada");
+    const player = await signInPlayer(t);
+    await player.as.mutation(api.player.claim, { shareToken: group.shareToken, playerId: ada });
+    return { ...group, player };
+  }
+
+  async function calendarInvitesFor(as: GmClient, shareToken: string) {
+    return (await as.query(api.player.group, { shareToken }))?.calendarInvites;
+  }
+
+  async function nightMailFor(groupId: Id<"groups">, userId: Id<"users">) {
+    const sessionId = await seedSession(t, groupId, "2026-10-17", {
+      state: "scheduled",
+      published: {
+        state: "scheduled",
+        start: NOW + DAY,
+        end: NOW + DAY + HOUR,
+        summary: "My group",
+        revision: 1,
+      },
+    });
+    const send = {
+      kind: "invite" as const,
+      sessionId,
+      userId,
+      revision: 1,
+      sequence: 1,
+      stamp: NOW,
+    };
+    return await t.query(internal.sessionMail.calendarMail, { send });
+  }
+
+  it("is on for an Account that keeps the Group", async () => {
+    const { shareToken, player } = await keptAccount();
+
+    expect(await calendarInvitesFor(player.as, shareToken)).toBe("on");
+  });
+
+  it("is on for the GM's own Account playing in its Group", async () => {
+    const { as: gm, shareToken } = await sharedGroup();
+    await gm.mutation(api.player.join, { shareToken, name: "Gus" });
+
+    expect(await calendarInvitesFor(gm, shareToken)).toBe("on");
+  });
+
+  it("is off for an Account that keeps the Group with Session emails off", async () => {
+    const { shareToken, player } = await keptAccount();
+    await player.as.mutation(api.me.setSessionEmails, { enabled: false });
+
+    expect(await calendarInvitesFor(player.as, shareToken)).toBe("off");
+  });
+
+  it("is null for every caller while the deployment sends no calendar mail", async () => {
+    vi.stubEnv("RESEND_API_KEY", "");
+    const { as: gm, shareToken, player } = await keptAccount();
+    await player.as.mutation(api.me.setSessionEmails, { enabled: false });
+
+    expect(await calendarInvitesFor(player.as, shareToken)).toBeNull();
+    expect(await calendarInvitesFor(gm, shareToken)).toBeNull();
+  });
+
+  it("is null for a visitor and for an Account outside the Group", async () => {
+    const { shareToken } = await keptAccount();
+    const stranger = await signInAccount(t);
+
+    expect(await calendarInvitesFor(t, shareToken)).toBeNull();
+    expect(await calendarInvitesFor(stranger.as, shareToken)).toBeNull();
+  });
+
+  it("is null for an Account that removed the Group from My groups", async () => {
+    const { groupId, shareToken, player } = await keptAccount();
+    await player.as.mutation(api.player.removeFromMyGroups, { groupId });
+
+    expect(await calendarInvitesFor(player.as, shareToken)).toBeNull();
+  });
+
+  it("is null for an Account with a .test address, Session emails on or off", async () => {
+    const { shareToken, player } = await keptAccount((backend) =>
+      signIn(backend, { email: "ada@preview.test" }),
+    );
+
+    expect(await calendarInvitesFor(player.as, shareToken)).toBeNull();
+    await player.as.mutation(api.me.setSessionEmails, { enabled: false });
+    expect(await calendarInvitesFor(player.as, shareToken)).toBeNull();
+  });
+
+  it("is null for an Anonymous GM on its own Share Link", async () => {
+    const { as: anonymousGm, shareToken } = await sharedGroup(signInAnonymousGm);
+    await anonymousGm.mutation(api.player.join, { shareToken, name: "Gus" });
+
+    expect(await calendarInvitesFor(anonymousGm, shareToken)).toBeNull();
+  });
+
+  it("says on exactly when the send path would mail the Account a calendar invite", async () => {
+    const kept = await keptAccount();
+    const sessionEmailsOff = await keptAccount();
+    await sessionEmailsOff.player.as.mutation(api.me.setSessionEmails, { enabled: false });
+    const removed = await keptAccount();
+    await removed.player.as.mutation(api.player.removeFromMyGroups, { groupId: removed.groupId });
+    const testAddress = await keptAccount((backend) =>
+      signIn(backend, { email: "kim@preview.test" }),
+    );
+    const anonymousGm = await sharedGroup(signInAnonymousGm);
+
+    const callers = [
+      { ...kept, ...kept.player },
+      kept,
+      { ...sessionEmailsOff, ...sessionEmailsOff.player },
+      { ...removed, ...removed.player },
+      { ...testAddress, ...testAddress.player },
+      anonymousGm,
+    ];
+    const agreements = [];
+    for (const { as, userId, groupId, shareToken } of callers) {
+      const invitesOn = (await calendarInvitesFor(as, shareToken)) === "on";
+      const mailed = (await nightMailFor(groupId, userId)) !== null;
+      agreements.push({ invitesOn, mailed });
+    }
+
+    expect(agreements).toEqual([
+      { invitesOn: true, mailed: true },
+      { invitesOn: true, mailed: true },
+      { invitesOn: false, mailed: false },
+      { invitesOn: false, mailed: false },
+      { invitesOn: false, mailed: false },
+      { invitesOn: false, mailed: false },
+    ]);
   });
 });
 

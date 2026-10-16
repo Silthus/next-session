@@ -1,0 +1,25 @@
+# green: the same tests on the ticket tree
+ ✓ |convex| convex/player.test.ts > player.group calendar invites > is on for an Account that keeps the Group
+ ✓ |convex| convex/player.test.ts > player.group calendar invites > is on for the GM's own Account playing in its Group
+ ✓ |convex| convex/player.test.ts > player.group calendar invites > is off for an Account that keeps the Group with Session emails off
+ ✓ |convex| convex/player.test.ts > player.group calendar invites > is null for every caller while the deployment sends no calendar mail
+ ✓ |convex| convex/player.test.ts > player.group calendar invites > is null for a visitor and for an Account outside the Group
+ ✓ |convex| convex/player.test.ts > player.group calendar invites > is null for an Account that removed the Group from My groups
+ ✓ |convex| convex/player.test.ts > player.group calendar invites > is null for an Account with a .test address, Session emails on or off
+ ✓ |convex| convex/player.test.ts > player.group calendar invites > is null for an Anonymous GM on its own Share Link
+ ✓ |convex| convex/player.test.ts > player.group calendar invites > says on exactly when the send path would mail the Account a calendar invite
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > shows the Session updates switch alone while Reminders aren't configured
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > shows the Reminders switch under Session updates once Reminders are configured
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > turns Reminders off without touching Session updates
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > turns Session updates off without touching Reminders
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > holds the Reminders switch while it saves, and keeps Session updates usable
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > says a Reminders change failed and offers another try
+ ✓ |ui| src/features/me/EmailSettings.test.tsx > EmailSettings > disables the Session updates switch while the settings load
+ ✓ |ui| src/features/player/KeepGroup.test.tsx > KeepGroup as a quiet line > offers Keep this group to get calendar invites
+ ✓ |ui| src/features/player/KeepGroup.test.tsx > KeepGroup once kept > names the inbox calendar invites go to under the kept line
+ ✓ |ui| src/features/player/KeepGroup.test.tsx > KeepGroup once kept > says calendar invites are off and where to turn them on
+ ✓ |ui| src/features/player/KeepGroup.test.tsx > KeepGroup once kept > says nothing about calendar invites when the Account gets none for this Group
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar next sessions > says the invite is sent in place of the download once the Account gets calendar invites
+ ✓ |ui| src/features/player/PlayerScreen.test.tsx > PlayerScreen > shows Invite sent and where invites go only when player.group says the Account gets them
+ ✓ |ui| src/features/player/PlayerScreen.test.tsx > PlayerScreen > keeps the download for an Account with Session emails off, and says invites are off
+      Tests  23 passed | 173 skipped (196)

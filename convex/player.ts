@@ -34,6 +34,7 @@ import {
 } from "./model/players";
 import { enforceRateLimit } from "./model/rateLimits";
 import { datedSessionOf } from "./sessionLifecycle";
+import { calendarInvitesIn } from "./sessionMail";
 import { track } from "./model/telemetry";
 import { groupTimeOf, sessionTimeAndPlace, sessionTimeAndPlaceFields } from "./model/timeAndPlace";
 import { answerValue, datedSession } from "./schema";
@@ -49,6 +50,7 @@ const playerGroupView = v.object({
   claimedPlayerId: v.union(v.id("players"), v.null()),
   removedFromMyGroups: v.boolean(),
   opensAsGm: v.boolean(),
+  calendarInvites: v.union(v.literal("on"), v.literal("off"), v.null()),
 });
 
 export const group = query({
@@ -192,15 +194,22 @@ export const fillRest = mutation({
 async function callerIn(ctx: QueryCtx, group: Doc<"groups">) {
   const account = await currentAccount(ctx);
   if (account === null)
-    return { claimedPlayerId: null, removedFromMyGroups: false, opensAsGm: false };
-  const [claimed, removedFromMyGroups] = await Promise.all([
+    return {
+      claimedPlayerId: null,
+      removedFromMyGroups: false,
+      opensAsGm: false,
+      calendarInvites: null,
+    };
+  const [claimed, removedFromMyGroups, calendarInvites] = await Promise.all([
     claimedPlayerIn(ctx, account._id, group._id),
     hasRemovedGroup(ctx, account._id, group._id),
+    calendarInvitesIn(ctx, group, account),
   ]);
   return {
     claimedPlayerId: claimed?._id ?? null,
     removedFromMyGroups,
     opensAsGm: group.ownerId === account._id && claimed === null,
+    calendarInvites,
   };
 }
 

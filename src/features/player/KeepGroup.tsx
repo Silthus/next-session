@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState, type RefObject } from "react";
 import type { IsoMonth } from "../../../shared/dates";
 import { track, type KeepSurface } from "../../lib/telemetry";
@@ -8,6 +9,8 @@ import { GoogleLogo, LegalLinks } from "../account/AccountSheet";
 import { monthName } from "./playerMonth";
 
 export type KeepState = "offer" | "keeping" | "kept";
+
+export type CalendarInvites = "on" | "off" | null;
 
 export type KeepSessionsOffer = {
   refusal: string | null;
@@ -38,6 +41,8 @@ export function KeepGroup({
   state,
   invite,
   refusal,
+  calendarInvites,
+  email,
   onKeep,
   onContinueWithGoogle,
   onDismissNudge,
@@ -47,6 +52,8 @@ export function KeepGroup({
   state: KeepState;
   invite: "nudge" | "line";
   refusal: string | null;
+  calendarInvites: CalendarInvites;
+  email?: string;
   onKeep: () => void;
   onContinueWithGoogle?: () => void;
   onDismissNudge?: () => void;
@@ -70,7 +77,10 @@ export function KeepGroup({
   return (
     <div className="flex flex-col items-center gap-1 text-center text-sm">
       {state === "kept" ? (
-        <KeptLine focusOnMount={keepTapped} onRemove={onRemove} />
+        <>
+          <KeptLine focusOnMount={keepTapped} onRemove={onRemove} />
+          <CalendarInvitesLine calendarInvites={calendarInvites} email={email} />
+        </>
       ) : invite === "nudge" ? (
         <KeepNudge
           onCreateAccount={keep}
@@ -172,6 +182,30 @@ function KeptLine({ focusOnMount, onRemove }: { focusOnMount: boolean; onRemove?
           </button>
         </>
       )}
+    </p>
+  );
+}
+
+function CalendarInvitesLine({
+  calendarInvites,
+  email,
+}: {
+  calendarInvites: CalendarInvites;
+  email: string | undefined;
+}) {
+  if (calendarInvites === "on" && email !== undefined)
+    return <p className="text-ink-3">{`Calendar invites go to ${email}.`}</p>;
+  if (calendarInvites !== "off") return null;
+  return (
+    <p className="text-ink-3">
+      Calendar invites are off. Turn them on in{" "}
+      <Link
+        to="/me"
+        className={`-my-3.5 rounded-sm py-3.5 underline underline-offset-2 hover:text-ink ${focusRing}`}
+      >
+        My groups
+      </Link>
+      .
     </p>
   );
 }

@@ -13,6 +13,7 @@ export function NextSessions({
   groupId,
   shareToken,
   keptInMyGroups,
+  inviteSent,
   sessions,
   timeZone,
   today,
@@ -20,6 +21,7 @@ export function NextSessions({
   groupId: string;
   shareToken: string;
   keptInMyGroups: boolean;
+  inviteSent: boolean;
   sessions: readonly PlayerSession[];
   timeZone: string;
   today: IsoDate;
@@ -62,8 +64,29 @@ export function NextSessions({
           </li>
         ))}
       </ul>
-      <CalendarDownload groupId={groupId} shareToken={shareToken} keptInMyGroups={keptInMyGroups} />
+      {inviteSent ? (
+        <InviteSent />
+      ) : (
+        <CalendarDownload
+          groupId={groupId}
+          shareToken={shareToken}
+          keptInMyGroups={keptInMyGroups}
+        />
+      )}
     </section>
+  );
+}
+
+function InviteSent() {
+  return (
+    <p className="mt-3 flex">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-free-soft px-3 py-1.5 text-xs font-semibold text-ink-2">
+        <span aria-hidden="true" className="text-free">
+          ✓
+        </span>
+        Invite sent
+      </span>
+    </p>
   );
 }
 

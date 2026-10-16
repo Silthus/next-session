@@ -68,6 +68,7 @@ function calendarProps(props: Partial<Props> = {}): Props {
     groupName: "Thursday Crew",
     shareToken: "test-share-token",
     keptInMyGroups: false,
+    inviteSent: false,
     playerName: "Ana",
     month: "2026-10",
     today,
@@ -662,6 +663,15 @@ describe("PlayerCalendar next sessions", () => {
       "A one-time copy. Subscribe on My groups to follow moves and cancellations.",
     );
     expect(card.queryByText(/Keep this group/)).toBeNull();
+  });
+
+  it("says the invite is sent in place of the download once the Account gets calendar invites", async () => {
+    renderCalendar({ sessions: [sessionOn("2026-10-16")], keptInMyGroups: true, inviteSent: true });
+
+    const card = within(await nextSessions());
+    expect(card.getByText("Invite sent")).toBeTruthy();
+    expect(card.queryByRole("link", { name: "Add to calendar" })).toBeNull();
+    expect(card.queryByText(/A one-time copy/)).toBeNull();
   });
 
   it("shows no Next sessions while nothing is scheduled ahead", async () => {

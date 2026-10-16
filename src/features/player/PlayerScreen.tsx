@@ -224,6 +224,8 @@ function PlayerGroup({
                 state={state}
                 invite={asksToKeep ? "nudge" : "line"}
                 refusal={keeper.refusal}
+                calendarInvites={group.calendarInvites}
+                email={account.email}
                 {...keepActions}
                 onDismissNudge={dismissKeepInvite}
                 onRemove={
@@ -412,6 +414,7 @@ function PlayerAnswers({
       groupName={group.name}
       shareToken={shareToken}
       keptInMyGroups={group.claimedPlayerId === player.playerId}
+      inviteSent={group.calendarInvites === "on"}
       playerName={player.name}
       month={month}
       today={today}

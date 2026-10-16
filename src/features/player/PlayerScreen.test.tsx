@@ -4,7 +4,7 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { act, render, screen, within } from "@testing-library/react";
+import { act, cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { getFunctionName, type FunctionReference } from "convex/server";
 import { useState, useSyncExternalStore } from "react";
@@ -29,6 +29,7 @@ const roster = {
   claimedPlayerId: null,
   removedFromMyGroups: false,
   opensAsGm: false,
+  calendarInvites: null,
 };
 const queries: Record<string, unknown> = {};
 const nightOn = (date: string) => ({
@@ -123,6 +124,7 @@ beforeEach(() => {
   queries["player:answers2026-11"] = {};
   rememberPlayer(groupId, { playerId, name: "Ana" });
   account.status = "signedOut";
+  account.email = undefined;
   google.mockReset();
   answer.mockReset().mockResolvedValue({ keptNow: false });
   release.mockReset().mockResolvedValue(null);
@@ -248,6 +250,52 @@ describe("PlayerScreen", () => {
 
     const nextSessions = await screen.findByRole("region", { name: "Next sessions" });
     expect(within(nextSessions).getByRole("link", { name: "Subscribe on My groups" })).toBeTruthy();
+  });
+
+  it("shows Invite sent and where invites go only when player.group says the Account gets them", async () => {
+    account.status = "account";
+    account.email = "ana@example.com";
+    const shown = [];
+    for (const calendarInvites of ["on", "off", null] as const) {
+      queries["player:group"] = {
+        ...roster,
+        claimedPlayerId: playerId,
+        sessions: [nightOn("2026-10-16")],
+        calendarInvites,
+      };
+      renderPage();
+      const nextSessions = await screen.findByRole("region", { name: "Next sessions" });
+      shown.push({
+        calendarInvites,
+        inviteSent: within(nextSessions).queryByText("Invite sent") !== null,
+        download: within(nextSessions).queryByRole("link", { name: "Add to calendar" }) !== null,
+        invitesGoTo: screen.queryByText("Calendar invites go to ana@example.com.") !== null,
+      });
+      cleanup();
+    }
+
+    expect(shown).toEqual([
+      { calendarInvites: "on", inviteSent: true, download: false, invitesGoTo: true },
+      { calendarInvites: "off", inviteSent: false, download: true, invitesGoTo: false },
+      { calendarInvites: null, inviteSent: false, download: true, invitesGoTo: false },
+    ]);
+  });
+
+  it("keeps the download for an Account with Session emails off, and says invites are off", async () => {
+    account.status = "account";
+    account.email = "ana@example.com";
+    queries["player:group"] = {
+      ...roster,
+      claimedPlayerId: playerId,
+      sessions: [nightOn("2026-10-16")],
+      calendarInvites: "off",
+    };
+    renderPage();
+
+    const nextSessions = await screen.findByRole("region", { name: "Next sessions" });
+    expect(within(nextSessions).getByRole("link", { name: "Add to calendar" })).toBeTruthy();
+    expect(within(nextSessions).getByRole("link", { name: "Subscribe on My groups" })).toBeTruthy();
+    expect(screen.getByText(/^Calendar invites are off\./)).toBeTruthy();
   });
 
   it("opens the keep sheet from the done card of a visitor who finished the month", async () => {

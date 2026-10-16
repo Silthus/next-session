@@ -59,6 +59,7 @@ export function PlayerCalendar({
   groupName,
   shareToken,
   keptInMyGroups,
+  inviteSent,
   playerName,
   month,
   today,
@@ -79,6 +80,7 @@ export function PlayerCalendar({
   groupName: string;
   shareToken: string;
   keptInMyGroups: boolean;
+  inviteSent: boolean;
   playerName: string;
   month: IsoMonth;
   today: IsoDate;
@@ -243,6 +245,7 @@ export function PlayerCalendar({
           groupId={groupId}
           shareToken={shareToken}
           keptInMyGroups={keptInMyGroups}
+          inviteSent={inviteSent}
           sessions={sessions}
           timeZone={timeZone}
           today={today}

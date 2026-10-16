@@ -166,9 +166,9 @@ export const inviteToNights = internalMutation({
   returns: v.null(),
   handler: async (ctx, { groupId, userId }) => {
     const group = await ctx.db.get("groups", groupId);
-    if (!calendarMailConfigured() || group === null) return null;
-    if (!(await isCalendarRecipient(ctx, group, userId))) return null;
-    if (!receivesSessionMail(await ctx.db.get("users", userId))) return null;
+    if (group === null) return null;
+    if ((await calendarInviteeIn(ctx, group, await ctx.db.get("users", userId))) === null)
+      return null;
     const nights = await upcomingPublishedNights(ctx, groupId);
     const stamp = Date.now();
     const sends: NightSend[] = [];
@@ -325,10 +325,31 @@ async function nightTarget(ctx: QueryCtx, send: NightSend): Promise<NightTarget 
   const entry = entryOf(published);
   if (entry === null) return null;
   const group = await ctx.db.get("groups", session.groupId);
-  if (!group || !(await isCalendarRecipient(ctx, group, send.userId))) return null;
-  const account = await ctx.db.get("users", send.userId);
-  if (!receivesSessionMail(account)) return null;
+  if (!group) return null;
+  const account = await calendarInviteeIn(ctx, group, await ctx.db.get("users", send.userId));
+  if (account === null) return null;
   return { session, group, account, entry };
+}
+
+export type CalendarInvites = "on" | "off" | null;
+
+export async function calendarInvitesIn(
+  ctx: QueryCtx,
+  group: Doc<"groups">,
+  account: Doc<"users">,
+): Promise<CalendarInvites> {
+  if ((await calendarInviteeIn(ctx, group, account)) !== null) return "on";
+  const withSessionEmailsOn = { ...account, sessionEmailsEnabled: true };
+  return (await calendarInviteeIn(ctx, group, withSessionEmailsOn)) === null ? null : "off";
+}
+
+async function calendarInviteeIn(
+  ctx: QueryCtx,
+  group: Doc<"groups">,
+  account: Doc<"users"> | null,
+): Promise<MailableAccount | null> {
+  if (!calendarMailConfigured() || !receivesSessionMail(account)) return null;
+  return (await isCalendarRecipient(ctx, group, account._id)) ? account : null;
 }
 
 function nightMessageFor(
