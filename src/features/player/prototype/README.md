@@ -44,11 +44,11 @@ The #96 Keep card now leads with **"Get a calendar invite for every session."** 
 
 Michael's line verbatim: **"Keep your sessions and get a calendar invite"**. Under it, the mechanism in player words: "Every session lands in your calendar and moves when your GM moves it." That sentence is the reason to make an Account now and not later, and it is what `METHOD:REQUEST` with `SEQUENCE` updates delivers. The green confirmation shrinks to one line above the title, so the player still knows the answers landed. "Not now, fill November →" is the one way out, and it keeps the momentum the old card had. On the last bookable month it reads "Not now".
 
-### `visitor-done-later`: visitor, after Not now
+### `visitor-not-now`: visitor, after Not now
 
-![](screenshots/A-visitor-done-later-mobile-light.png)
+![](screenshots/A-visitor-not-now-mobile-light.png)
 
-The old green "All set for October ✓" card comes back, so declining costs nothing. Under the legend there is one quiet line: **"Keep this group to get calendar invites."** The offer stays reachable without repeating the card.
+"Not now, fill November →" lands on November in one tap, the same as the old "Fill November →" button. Declining costs nothing and adds no extra step. Under the legend there is one quiet line: **"Keep this group to get calendar invites."** The offer stays reachable without repeating the card. If the player goes back to October, the old green "All set for October ✓" card is there.
 
 ### `visitor-nothing-scheduled`: visitor, month done, no Session yet
 
@@ -73,7 +73,7 @@ The same quiet line as after Not now: "Keep this group to get calendar invites."
 ## Calls made 🤖 (Michael was AFK)
 
 1. Variant **A** for the done moment, as Michael described it. B makes two cards compete for one moment. C is the boldest and puts the pitch beside the date, but it pitches before the player has finished answering.
-2. "Not now" on the done card also moves to the next month, so there is one way out, not two competing buttons.
+2. "Not now" on the done card goes straight to the next month, so there is one way out, not two competing buttons. Michael confirmed it with no hop in between.
 3. The ICS download lives in a new **Next session strip** at the top, shown only when an upcoming Session exists.
 4. The ICS holds **every upcoming scheduled Session** of the Group, not only the next one. Cancelled Sessions are left out.
 5. The visitor download says plainly that it is a one-time copy, and that line is the pitch.

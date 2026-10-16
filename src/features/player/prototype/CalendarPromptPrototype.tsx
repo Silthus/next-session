@@ -32,7 +32,7 @@ export type Variant = keyof typeof VARIANTS;
 export const STATES = {
   "visitor-answering": "Visitor, still answering",
   "visitor-done": "Visitor, whole month answered",
-  "visitor-done-later": "Visitor, after Not now",
+  "visitor-not-now": "Visitor, after Not now (lands on November)",
   "visitor-nothing-scheduled": "Visitor, month done, no Session yet",
   "account-answering": "Account keeps the Group, still answering",
   "account-done": "Account keeps the Group, month done",
@@ -44,11 +44,17 @@ type Who = "visitor" | "account" | "accountNotKept";
 
 const setup: Record<
   PrototypeState,
-  { who: Who; full: boolean; sessions: boolean; dismissed: boolean }
+  { who: Who; full: boolean; sessions: boolean; dismissed: boolean; month?: IsoMonth }
 > = {
   "visitor-answering": { who: "visitor", full: false, sessions: true, dismissed: false },
   "visitor-done": { who: "visitor", full: true, sessions: true, dismissed: false },
-  "visitor-done-later": { who: "visitor", full: true, sessions: true, dismissed: true },
+  "visitor-not-now": {
+    who: "visitor",
+    full: true,
+    sessions: true,
+    dismissed: true,
+    month: "2026-11",
+  },
   "visitor-nothing-scheduled": { who: "visitor", full: true, sessions: false, dismissed: false },
   "account-answering": { who: "account", full: false, sessions: true, dismissed: false },
   "account-done": { who: "account", full: true, sessions: true, dismissed: false },
@@ -76,11 +82,17 @@ export function CalendarPromptPrototype({
   state: PrototypeState;
   variant: Variant;
 }) {
-  const { who, full, sessions: hasSessions, dismissed: startsDismissed } = setup[state];
+  const {
+    who,
+    full,
+    sessions: hasSessions,
+    dismissed: startsDismissed,
+    month: startMonth = MONTH,
+  } = setup[state];
   const [answers, setAnswers] = useState<Record<IsoDate, Answer>>(() =>
     full ? fullMonth() : PARTIAL,
   );
-  const [month, setMonth] = useState<IsoMonth>(MONTH);
+  const [month, setMonth] = useState<IsoMonth>(startMonth);
   const [dismissed, setDismissed] = useState(startsDismissed);
   const sessions = hasSessions ? SESSIONS : [];
   const visitor = who === "visitor";
@@ -88,8 +100,8 @@ export function CalendarPromptPrototype({
   useEffect(() => {
     setAnswers(full ? fullMonth() : PARTIAL);
     setDismissed(startsDismissed);
-    setMonth(MONTH);
-  }, [state, full, startsDismissed]);
+    setMonth(startMonth);
+  }, [state, full, startsDismissed, startMonth]);
 
   const pitchInStrip = visitor && variant === "C" && !dismissed;
 

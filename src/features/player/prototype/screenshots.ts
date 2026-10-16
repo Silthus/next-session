@@ -9,7 +9,7 @@ const out = "src/features/player/prototype/screenshots";
 const allStates = [
   "visitor-answering",
   "visitor-done",
-  "visitor-done-later",
+  "visitor-not-now",
   "visitor-nothing-scheduled",
   "account-answering",
   "account-done",
