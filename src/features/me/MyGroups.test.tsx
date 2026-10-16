@@ -11,7 +11,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { track } from "../../lib/telemetry";
 import { MyGroups } from "./MyGroups";
-import type { MyGroups as MyGroupsData, PlayingGroup } from "./myGroups";
+import type { MyGroups as MyGroupsData, PlayingGroup, RunningGroup } from "./myGroups";
 
 const viewer = vi.hoisted(() => ({ timeZone: "Europe/Berlin" }));
 
@@ -57,13 +57,11 @@ const sunday: PlayingGroup = {
   openDates: 0,
 };
 
-const ownTable = {
+const ownTable: RunningGroup = {
   groupId: "group-own" as Id<"groups">,
   name: "Dragon Heist",
   timeZone: "Europe/Berlin",
-  upcomingSessions: [
-    { date: "2026-10-10", state: "scheduled" as const, ...USUAL, startTime: "18:30" },
-  ],
+  upcomingSessions: [{ date: "2026-10-10", state: "scheduled", ...USUAL, startTime: "18:30" }],
 };
 
 const everything: MyGroupsData = { running: [ownTable], playing: [thursday, sunday] };
