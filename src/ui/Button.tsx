@@ -32,7 +32,7 @@ export function buttonClassName(
   className?: string,
 ) {
   return cn(
-    "inline-flex shrink-0 items-center justify-center rounded-md font-medium disabled:pointer-events-none disabled:opacity-40",
+    "inline-flex shrink-0 items-center justify-center rounded-md font-medium disabled:pointer-events-none disabled:opacity-40 aria-busy:cursor-default aria-busy:opacity-40",
     pressable,
     variants[variant],
     sizes[size],
@@ -46,15 +46,17 @@ export function Button({
   busy = false,
   className,
   children,
-  disabled,
+  onClick,
   ...props
 }: ButtonProps) {
+  const inFlight = busy !== false;
   return (
     <button
       type="button"
-      disabled={disabled || busy !== false}
-      aria-busy={busy !== false || undefined}
+      aria-disabled={inFlight || undefined}
+      aria-busy={inFlight || undefined}
       className={buttonClassName(variant, size, className)}
+      onClick={(event) => (inFlight ? event.preventDefault() : onClick?.(event))}
       {...props}
     >
       {busy === false ? children : busy}

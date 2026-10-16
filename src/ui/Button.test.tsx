@@ -20,8 +20,25 @@ describe("Button", () => {
       </Button>,
     );
     const button = screen.getByRole("button", { name: "Making your link…" });
-    expect(button).toHaveProperty("disabled", true);
+    expect(button.getAttribute("aria-disabled")).toBe("true");
     await userEvent.click(button);
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("keeps its form from submitting again while in flight", async () => {
+    const onSubmit = vi.fn((event: { preventDefault: () => void }) => event.preventDefault());
+    render(
+      <form onSubmit={onSubmit}>
+        <input aria-label="Where" />
+        <Button type="submit" busy="Saving…">
+          Save
+        </Button>
+      </form>,
+    );
+
+    await userEvent.type(screen.getByRole("textbox", { name: "Where" }), "Max's place{Enter}");
+    await userEvent.click(screen.getByRole("button", { name: "Saving…" }));
+
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 });

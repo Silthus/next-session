@@ -74,10 +74,8 @@ describe("LandingView", () => {
 
   it("holds the button while the link is being made", async () => {
     renderLanding({ state: { phase: "creating" } });
-    expect(await screen.findByRole("button", { name: "Making your link…" })).toHaveProperty(
-      "disabled",
-      true,
-    );
+    const button = await screen.findByRole("button", { name: "Making your link…" });
+    expect(button.getAttribute("aria-disabled")).toBe("true");
   });
 
   it.each([

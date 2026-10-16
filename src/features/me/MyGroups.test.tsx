@@ -218,10 +218,8 @@ describe("MyGroups", () => {
   it("holds Create your link while the link is being made", async () => {
     renderMyGroups({ groups: { running: [], playing: [] }, creating: true });
 
-    expect(await screen.findByRole("button", { name: "Making your link…" })).toHaveProperty(
-      "disabled",
-      true,
-    );
+    const button = await screen.findByRole("button", { name: "Making your link…" });
+    expect(button.getAttribute("aria-disabled")).toBe("true");
   });
 
   it("names the Account and lets it log out", async () => {

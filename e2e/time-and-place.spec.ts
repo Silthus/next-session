@@ -1,7 +1,15 @@
 import { expect, test, type Page } from "@playwright/test";
 import { api } from "../convex/_generated/api";
 import { addMonths, monthOf, todayUtc } from "../shared/dates";
-import { openAsGm, seedPlayer, signInAnonymousGm, toastRegion } from "./helpers";
+import {
+  failMutation,
+  interceptSync,
+  openAsGm,
+  seedPlayer,
+  serverError,
+  signInAnonymousGm,
+  toastRegion,
+} from "./helpers";
 
 test.use({ timezoneId: "Europe/Berlin" });
 
@@ -89,4 +97,24 @@ test("a Group the GM does not own shows the not-found screen", async ({ page }) 
   await expect(page.getByRole("heading", { name: "Nothing here" })).toBeVisible();
   await page.goto("/g/not-a-group/settings");
   await expect(page.getByRole("heading", { name: "Nothing here" })).toBeVisible();
+});
+
+test("a Save that fails leaves the GM on the Save button", async ({ page }) => {
+  const gm = await signInAnonymousGm();
+  let fail = () => {};
+  await interceptSync(page, (text, { client }) => {
+    if (!text.includes('"udfPath":"groups:updateSettings"')) return false;
+    fail = () => failMutation(client, text, serverError);
+    return true;
+  });
+  await openAsGm(page, gm, `/g/${gm.groupId}/settings`);
+  await page.getByLabel("Where").fill("Max's place");
+  const save = page.getByRole("button", { name: "Save" });
+
+  await save.click();
+  await expect(page.getByRole("button", { name: "Saving…" })).toBeVisible();
+  fail();
+
+  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(save).toBeFocused();
 });

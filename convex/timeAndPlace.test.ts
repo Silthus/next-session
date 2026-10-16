@@ -5,6 +5,7 @@ import {
   CANCELLED,
   expectErrorCode,
   expiryOf,
+  type GmClient,
   newBackend,
   seedSession,
   signedInGmWithGroup,
@@ -295,6 +296,29 @@ describe("a saved Time and place", () => {
     await wait(UNDO_WINDOW_MS + 1);
 
     expect(await publishedOf(sessionId)).toEqual(published);
+  });
+
+  it.each([
+    [
+      "a saved Time and place",
+      (as: GmClient, groupId: Id<"groups">) =>
+        as.mutation(api.groups.updateSettings, { groupId, ...TUESDAYS_AT_MAX }),
+    ],
+    [
+      "a rename",
+      (as: GmClient, groupId: Id<"groups">) =>
+        as.mutation(api.groups.rename, { groupId, name: "Thursday crew" }),
+    ],
+  ])("publishes a Session cancelled before %s at its published time and place", async (_, edit) => {
+    const { as, groupId, sessionId } = await groupWithPublishedSession("2026-10-17");
+    const before = await publishedOf(sessionId);
+    await as.mutation(api.sessions.cancel, { sessionId });
+    await wait(10_000);
+
+    await edit(as, groupId);
+    await wait(UNDO_WINDOW_MS + 1);
+
+    expect(await publishedOf(sessionId)).toEqual({ ...before, state: "cancelled", revision: 2 });
   });
 
   it("publishes a Cancelled Session at the new time once it is scheduled again", async () => {

@@ -1,12 +1,13 @@
+import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
 import {
-  expect,
-  test,
-  type Browser,
-  type Locator,
-  type Page,
-  type WebSocketRoute,
-} from "@playwright/test";
-import { reserveAccountSignUp, password, signUpAccount, toastRegion } from "./helpers";
+  failMutation,
+  interceptSync,
+  password,
+  reserveAccountSignUp,
+  serverError,
+  signUpAccount,
+  toastRegion,
+} from "./helpers";
 
 const shareLinkPattern = /^127\.0\.0\.1:\d+\/s\/[A-Za-z0-9_-]{10}$/;
 
@@ -49,36 +50,10 @@ async function seedAccount(browser: Browser) {
   return { email, groupPath };
 }
 
-type Sync = { client: WebSocketRoute; server: WebSocketRoute };
-
-async function interceptSync(page: Page, onClientMessage: (text: string, sync: Sync) => boolean) {
-  await page.routeWebSocket(/\/api\/.*\/sync/, (client) => {
-    const server = client.connectToServer();
-    client.onMessage((message) => {
-      if (!onClientMessage(String(message), { client, server })) server.send(message);
-    });
-    server.onMessage((message) => client.send(message));
-  });
-}
-
 function isFinishSave(text: string) {
   return text.includes('"udfPath":"account:finishSave"');
 }
 
-function failMutation(client: WebSocketRoute, text: string, failure: object) {
-  const { requestId } = JSON.parse(text) as { requestId: number };
-  client.send(
-    JSON.stringify({
-      type: "MutationResponse",
-      requestId,
-      success: false,
-      logLines: [],
-      ...failure,
-    }),
-  );
-}
-
-const serverError = { result: "Server Error" };
 const claimInvalid = { result: "", errorData: { code: "CLAIM_INVALID" } };
 
 async function failThenHoldFinishSave(page: Page) {

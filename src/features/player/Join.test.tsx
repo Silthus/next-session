@@ -92,7 +92,9 @@ describe("Join", () => {
       "Dev{Enter}",
     );
 
-    expect(screen.getByRole("button", { name: "Joining…" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("button", { name: "Joining…" }).getAttribute("aria-disabled")).toBe(
+      "true",
+    );
     expect(screen.getByRole("button", { name: "Ben" })).toHaveProperty("disabled", true);
     await userEvent.click(screen.getByRole("button", { name: "Ben" }));
     expect(onPick).not.toHaveBeenCalled();
