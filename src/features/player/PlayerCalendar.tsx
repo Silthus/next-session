@@ -56,6 +56,8 @@ const answerTiles: Record<Answer | "none", string> = {
 export function PlayerCalendar({
   groupId,
   groupName,
+  shareToken,
+  keptInMyGroups,
   playerName,
   month,
   today,
@@ -73,6 +75,8 @@ export function PlayerCalendar({
 }: {
   groupId: string;
   groupName: string;
+  shareToken: string;
+  keptInMyGroups: boolean;
   playerName: string;
   month: IsoMonth;
   today: IsoDate;
@@ -206,7 +210,14 @@ export function PlayerCalendar({
       </header>
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 sm:px-5">
-        <NextSessions sessions={sessions} timeZone={timeZone} today={today} />
+        <NextSessions
+          groupId={groupId}
+          shareToken={shareToken}
+          keptInMyGroups={keptInMyGroups}
+          sessions={sessions}
+          timeZone={timeZone}
+          today={today}
+        />
         {!view.readOnly &&
           (loaded ? (
             <div className="rounded-xl border border-line bg-surface p-3.5 shadow-card">

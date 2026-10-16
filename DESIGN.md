@@ -127,7 +127,7 @@ All presentational; data arrives through props. Prototype equivalents in [`proto
 | `Sessions` | status line "Next in 14 days"; upcoming as accent cards with relative date; history collapsed as "n played"; scheduled Sessions only, so a Cancelled one is neither upcoming nor played | none scheduled |
 | `Nudge` | orange banner after the first player joins: Save group / Later | dismissed (per browser) |
 | `SaveSheet` | bottom sheet (mobile) / centered dialog (desktop): Google, email code, merge reassurance | — |
-| `PlayerCalendar` | Next sessions (when and where each upcoming scheduled Session is), tap-cycle grid of big tiles with glyphs, month nav, progress bar, fill-rest button, done card, legend, cycling tip | read-only past month, done, scheduled tile (accent ring + ★ badge), cancelled tile (neutral "Cancelled" pill on its top edge, no ring or ★, still tappable) |
+| `PlayerCalendar` | Next sessions (when and where each upcoming scheduled Session is, with Add to calendar), tap-cycle grid of big tiles with glyphs, month nav, progress bar, fill-rest button, done card, legend, cycling tip | read-only past month, done, scheduled tile (accent ring + ★ badge), cancelled tile (neutral "Cancelled" pill on its top edge, no ring or ★, still tappable) |
 | `Progress` | "16 of 30 nights set · 53 %" bar, turns green at 100 % | done |
 | `Join` | invited-to header, name chips, type-a-name + Join | no roster yet (field only) |
 | `Toast` | ink pill at the bottom with optional action (Undo) | — |
@@ -199,7 +199,7 @@ States: **no roster yet** (field only, placeholder "Your name"), **returning pla
 
 ### 4.6 Player calendar `/s/:token?as=`
 
-Header: mark, group name, "Answering as Ana · Not you?", a `?` for the non-modal tutorial. Then **Next sessions** while a scheduled Session lies ahead: one accent row per Session, soonest first, with the date, "in 12 days · 18:30–21:30" in the Group's wall clock (the zone named only when the browser's differs) and the place on its own line when there is one. Then the progress card, the month card (large tiles with glyphs, nav), the fill-rest button, the legend, a cycling tip, "Plan your own game →", legal.
+Header: mark, group name, "Answering as Ana · Not you?", a `?` for the non-modal tutorial. Then **Next sessions** while a scheduled Session lies ahead: one accent row per Session, soonest first, with the date, "in 12 days · 18:30–21:30" in the Group's wall clock (the zone named only when the browser's differs) and the place on its own line when there is one. Under the rows, a secondary **Add to calendar** and the line "A one-time copy. Keep this group to get moves and cancellations too.", or "A one-time copy. Subscribe on My groups to follow moves and cancellations." for an Account that keeps the Group. Then the progress card, the month card (large tiles with glyphs, nav), the fill-rest button, the legend, a cycling tip, "Plan your own game →", legal.
 
 Tap cycle: unanswered → free → maybe → busy → unanswered, optimistic, `pop` + haptic + particles; a failure reverts with a toast. Swipe left/right changes month. `Mark the other N nights busy` writes `no` to every remaining future day.
 

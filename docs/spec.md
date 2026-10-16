@@ -552,6 +552,7 @@ Unchanged: `roster.removePlayer` deletes the Player with its Answers, so the cla
   - A visitor signs in through the nudge, then the existing keep path claims at once.
   - An Anonymous GM keeps the quiet line and Save-first sheet (§5.3), then claims.
   - The client writes `next-session.pendingKeep` (`{shareToken, playerId}`) to `sessionStorage` before signing in and clears it after the claim. It also clears it on `PLAYER_CLAIMED`, `NOT_FOUND`, `TOO_MANY_GROUPS`, a sign-in the server refused, and **Not you?**. App start retries a leftover keep once an Account is signed in, which covers a dropped connection and Google's OAuth redirect (#58) alike.
+- **Next sessions.** While a scheduled Session lies ahead, the page opens with one row per upcoming scheduled Session and, under them, **Add to calendar**: a plain link to the Calendar download `/cal/s/<Share Token>.ics` (§14.1), so phones open their calendar import. The line beside it reads "A one-time copy. Keep this group to get moves and cancellations too." An Account that keeps the Group reads "A one-time copy. Subscribe on My groups to follow moves and cancellations." instead, with the link to `/me`. The rows read the live Sessions and the file reads `published`, so a night scheduled within the last 30 seconds shows in the rows before it is in the file.
 - **Join while signed in** claims the new name and confirms with a toast: "Kept in My groups".
 - **Not you?** on a Claimed Player calls `player.release`, then shows Join.
 - **`PLAYER_CLAIMED`** reads "Another account keeps this name. Add yours with a last initial, or ask your GM."
@@ -689,7 +690,8 @@ export type BrowserEvent =
   | { name: "keep_group_started"; group_id: string } // the tap on Keep this group
   | { name: "remove_group_started"; group_id: string } // Remove from my groups on /me
   | { name: "remove_group_undone"; group_id: string } // its Undo
-  | { name: "create_link_started"; surface: "me" }; // Create your link on /me
+  | { name: "create_link_started"; surface: "me" } // Create your link on /me
+  | { name: "calendar_downloaded"; group_id: string }; // the press on Add to calendar
 
 export function initTelemetry(source?: EnvSource): Promise<void>; // no-op without VITE_POSTHOG_TOKEN
 export function track(event: BrowserEvent): void; // sends `next_session:<name>`
@@ -704,6 +706,7 @@ The committed facts behind these steps (a link or Group created, a Player claime
 | --- | --- |
 | `share_link_copied`, `share_link_shared` | `ShareLinkCard` (`surface` is a prop: `landing` from the landing, else `compact` or `rail`). One event per Copy press with the final method; a native share counts once it resolves |
 | `answers_started`, `fill_rest_used`, `keep_group_started` | `PlayerCalendar`, which takes `groupId` |
+| `calendar_downloaded` | `NextSessions` on the player page, one per press on **Add to calendar** |
 | `save_started` | `saveGroups` and `saveThroughGoogle` in `save.ts` |
 | `sign_in_failed` | The Account sheet's email form |
 | `remove_group_started`, `remove_group_undone` | `useRemoval` on `/me` |
@@ -956,7 +959,8 @@ Calendar files carry a Group's published Sessions into players' own calendars. T
 - It holds the published **scheduled** Sessions dated from today (UTC) to the end of the Booking Window, read through the `by_groupId_and_date` index range. Cancelled and past Sessions are left out: a one-time import has nothing to cancel. A Session inside its first Undo window isn't published yet, so it is absent, and a move inside a later window shows the old time until the window ends. A published row that still lacks `start`, `end` or `summary` (possible only before the S2 backfill runs) is left out instead of failing the file.
 - Each entry: `UID` `<sessionId>@next-session.link`, `SEQUENCE` 0 until the invites add a sequence, `DTSTAMP` the serve time, `DTSTART` and `DTEND` in UTC, `SUMMARY` the published Group name, `LOCATION` the published location, `STATUS:CONFIRMED`, and the Share Link (built from `SITE_URL`) as `URL` and in `DESCRIPTION`. The calendar is named after the Group.
 - `200` with `Content-Type: text/calendar; charset=utf-8`, `Cache-Control: private, max-age=900` and `Content-Disposition: attachment; filename="next-session.ics"`. A Group with nothing upcoming gets an empty calendar. An unknown or rotated-away token, or a path outside the Share Token alphabet, gets `404` with no body.
-- No rate limit, no Expiry touch and no server event: reads are cheap and cached for 15 minutes, and a download is not activity on the Group.
+- No rate limit, no Expiry touch and no server event: reads are cheap and cached for 15 minutes, and a download is not activity on the Group. The browser sends `calendar_downloaded` on the press instead (§13.4).
+- **Add to calendar** in the player page's Next sessions card links here (§12.4).
 - A rename settles the scheduled upcoming Sessions through `groupChanged` (§12.6), so the download shows the new name once the Undo window ends. A Cancelled Session keeps its old name until **Schedule again**. The rename sends no Session update, because the state didn't change.
 
 ### 14.2 Worker
