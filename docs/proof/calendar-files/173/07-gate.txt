@@ -1,0 +1,9 @@
+bun run check on 02659ec (merged with origin/spec/calendar-files 3c6a222)
+$ tsc -p tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p convex/tsconfig.json && eslint . && prettier --check . && vitest run && vite build && wrangler deploy --dry-run
+All matched files use Prettier code style!
+ Test Files  91 passed (91)
+      Tests  1505 passed (1505)
+✓ built in 679ms
+Total Upload: 4.29 KiB / gzip: 1.43 KiB
+--dry-run: exiting now.
+exit 0
