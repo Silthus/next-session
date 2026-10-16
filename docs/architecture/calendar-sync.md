@@ -245,7 +245,8 @@ A Group settings edit or rename queues a settle for **every** upcoming Session. 
 ➡️ 🤖 **Session mail does, by comparing the calendar recipient set before and after.** The set is the GM's Account plus the Accounts behind Claimed Players, deduplicated.
 - A claim that adds an Account to the set queues an **invite** (`REQUEST`) for each upcoming published scheduled Session. At send time it needs the Account to be in the set.
 - A release, **Remove from my groups** or the GM removing a Player, when it takes an Account out of the set, queues a **withdrawal** for each upcoming published Session. A withdrawal is a `CANCEL` to that `ATTENDEE` with no `STATUS`, as RFC 5546 §3.2.5 wants for an uninvited attendee. At send time it needs the Account to still be out of the set. So the release itself doesn't suppress it, and a GM who releases their own Player keeps their entry.
-- **Deleting a Group** (by hand or by Expiry) writes one `calendarCancellations` row with the recipients and the upcoming published entries, before the children go. A self-rescheduling internal mutation then queues at most 200 `CANCEL`s with `STATUS:CANCELLED` per run, as `cleanup.sweepExpiredGroups` pages today. That stays far below Convex's 1,000 scheduled functions per mutation, and the row is deleted when the cursor reaches the end.
+- **Deleting a Group** (by hand or by Expiry) writes one `calendarCancellations` row with the recipients and the upcoming published entries, before the children go. A self-rescheduling internal mutation then queues at most 200 `CANCEL`s with `STATUS:CANCELLED` per run, as `cleanup.sweepExpiredGroups` pages today. That stays far below Convex's 1,000 scheduled functions per mutation.
+- **Withdrawals and deletion cancels are self-contained.** When one is queued, it reserves `sequence + 1` and freezes a minimal payload into the job's arguments: `UID`, the reserved `SEQUENCE`, start, end and Group name. Retries reuse that payload. So a withdrawal still lands after its Group is deleted, it never shows a later change the removed player shouldn't see, a deletion cancel always carries a higher `SEQUENCE` than the entry it removes, and the `calendarCancellations` row can go as soon as its last batch is queued.
 
 Without these, a player who keeps the Group after the night is set never gets the entry, and a removed player keeps a ghost entry. Reminders need nothing extra, because they resolve recipients when they fire (#125 decision 9).
 
@@ -498,7 +499,7 @@ Invariants:
 2. Nothing outside the GM's and players' screens reads the live row. Mail, Reminders, feeds, downloads and retries read `published`.
 3. `published` changes no sooner than `UNDO_WINDOW_MS` after the change that caused it.
 4. A settle whose `changedAt` is no longer the row's latest does nothing.
-5. A deleted row was never published.
+5. A row that `cancelSession` deletes was never published. Only Group deletion removes published rows, and it cancels them first.
 6. `published.revision` grows by one per publish.
 7. One Session per Group and date, cancelled included (invariant 3).
 
@@ -519,13 +520,11 @@ export async function groupDeleting(ctx: MutationCtx, group: Doc<"groups">): Pro
 export const drainCancellations: RegisteredMutation<"internal", { cancellationId: Id<"calendarCancellations"> }, null>; // ≤ 200 per run
 
 // mail.ts: transports, unchanged shape for Welcome and Tips
-type CalendarSend = {
-  sessionId: Id<"sessions">;
-  userId: Id<"users">;
-  revision: number;
-  sequence: number;
-  kind: "broadcast" | "invite" | "withdraw";
-};
+type FrozenEntry = { uid: string; sequence: number; start: number; end: number; summary: string }; // SEQUENCE reserved at queue time
+type CalendarSend =
+  | { kind: "broadcast" | "invite"; sessionId: Id<"sessions">; userId: Id<"users">; revision: number; sequence: number }
+  | { kind: "withdraw"; groupId: Id<"groups">; userId: Id<"users">; entry: FrozenEntry }
+  | { kind: "deletionCancel"; userId: Id<"users">; entry: FrozenEntry };
 export async function requestCalendarMail(ctx: MutationCtx, send: CalendarSend): Promise<void>;
 export async function requestReminder(ctx: MutationCtx, args: { sessionId: Id<"sessions">; userId: Id<"users">; lead: ReminderLead; revision: number }): Promise<void>;
 export function calendarMailConfigured(): boolean; // RESEND_API_KEY set
@@ -538,8 +537,8 @@ Send-time rules, checked in the action's internal query on every attempt:
 | --- | --- | --- |
 | `broadcast` | `published.revision` equals the job's, and the Account is in the calendar recipient set with Session mail on | `request` for scheduled, `cancel` for cancelled |
 | `invite` | the same, and `published.state` is scheduled | `request` |
-| `withdraw` | the Account is **not** in the set (a re-claim makes it moot), whatever the revision | `withdraw` |
-| deletion `cancel` | always, from the snapshot row, because the Group is gone | `cancel` |
+| `withdraw` | the Account is **not** in the Group's set (a re-claim makes it moot, and a deleted Group counts as out), whatever the revision. Built from the frozen entry | `withdraw` |
+| `deletionCancel` | always, built from the frozen entry, because the Group is gone | `cancel` |
 
 Other invariants:
 - The actor gets the invite, and the body copy names "you" instead of the GM.
@@ -621,7 +620,7 @@ No new signing secret: both link tokens are stored.
 | `shared/sessionTime.ts` | Vitest on plain data: defaults, override, a Berlin Session on each side of both DST changes and one spanning the October change (4 real hours), the spring-forward gap, reminder due times |
 | `shared/icalendar.ts` | Vitest golden files: `request`, `cancel` with `STATUS:CANCELLED`, `withdraw` without `STATUS`, a feed with a cancelled entry, UTC times, folding of a long location with umlauts, escaping, no `VALARM` anywhere, `PARTSTAT=ACCEPTED;RSVP=FALSE` |
 | `sessions.*`, `groups.updateSettings` through the lifecycle | `convex-test` through `api.*` with fake timers: the #124 table (cancel inside and after the first window, Undo by id, Schedule again restores, cancel → Schedule again → cancel inside one window still publishes the cancel, cancel → Undo publishes nothing), one publish per burst of edits, a location edit republishes a Session with its own start time, a start-time edit leaves it alone |
-| Session mail | `convex-test` with a fake `fetch` that records Resend payloads and decodes `invite.ics`: one mail per recipient with the GM included, `UID` stable across restore, `SEQUENCE` strictly rising per recipient, nothing before publish, a claim's invite doesn't drop another recipient's pending retry, a release's withdrawal still sends after the claim is gone, a GM releasing their own Player gets no withdrawal, a retry on an old revision drops itself, a 503 then 200 sends once, deleting a Group with 100 Accounts × 20 Sessions drains in batches |
+| Session mail | `convex-test` with a fake `fetch` that records Resend payloads and decodes `invite.ics`: one mail per recipient with the GM included, `UID` stable across restore, `SEQUENCE` strictly rising per recipient, nothing before publish, a claim's invite doesn't drop another recipient's pending retry, a release's withdrawal still sends after the claim is gone and after the Group is deleted, without any change published after the release, a GM releasing their own Player gets no withdrawal, a deletion cancel carries a higher `SEQUENCE` than the last invite, a retry on an old revision drops itself, a 503 then 200 sends once, deleting a Group with 100 Accounts × 20 Sessions drains in batches |
 | Reminders | `convex-test` with fake timers: both fire at their times, a move fires only the new pair, cancel → Schedule again at the same time sends one pair (not two), a restore undone inside its window sends none, opt-out and release send none, a late publish skips the passed Reminder, the payload holds no Share Token outside `player_url` |
 | HTTP routes | `convex-test` `t.fetch("/cal/…")`: 200 with a parseable calendar for a valid token, 404 after a reset or rotation, another Account's Sessions never appear (feed scoping), the Account feed holds no Share Token, a Session inside its first Undo window is absent |
 | `worker/index.ts` | Vitest: `calendarTarget(url)` maps `/cal/*` to the Convex site and strips cookies, like `ingestTarget` |
