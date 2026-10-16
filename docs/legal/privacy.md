@@ -88,7 +88,7 @@ Your Google profile picture is shown only to you and to the GM of each group whe
 | Server logs at our hosting providers | According to the providers' log retention, typically up to 30 days |
 | Usage events and error reports in PostHog | 1 year |
 | Technical logs in PostHog | 14 days |
-| Session emails with their calendar invites, and their delivery logs, at Resend | 30 days |
+| Session emails with their calendar invites, and their delivery logs, at Resend | 30 days; removed from Resend's backups within 7 days after that |
 | Your Google profile picture | Replaced or deleted at your next Google sign-in after you change or remove it at Google; deleted with your account |
 | Your calendar feed link | Until you reset it on My groups or your account is deleted |
 | Your reminder setting and reminder link | Until your account is deleted |

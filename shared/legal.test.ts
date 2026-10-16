@@ -48,7 +48,7 @@ describe("privacy text", () => {
 
   it("says how long Resend keeps session emails and their delivery logs", () => {
     expect(sectionOf(privacy, "5. How long we keep data")).toContain(
-      "| Session emails with their calendar invites, and their delivery logs, at Resend | 30 days |",
+      "| Session emails with their calendar invites, and their delivery logs, at Resend | 30 days; removed from Resend's backups within 7 days after that |",
     );
   });
 
