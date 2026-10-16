@@ -4,6 +4,7 @@ import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import type { AppErrorData } from "./model/errors";
 import {
+  CANCELLED,
   expectErrorCode,
   expiryOf,
   type GmClient,
@@ -163,6 +164,14 @@ describe("player.group", () => {
       removedFromMyGroups: false,
       opensAsGm: false,
     });
+  });
+
+  it("leaves Cancelled Sessions out", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    await seedSession(t, groupId, "2026-10-10", CANCELLED);
+    await seedSession(t, groupId, "2026-10-17", { state: "scheduled" });
+
+    expect((await t.query(api.player.group, { shareToken }))?.sessionDates).toEqual(["2026-10-17"]);
   });
 
   it("opens the GM view for the GM's Account, and for no one else", async () => {

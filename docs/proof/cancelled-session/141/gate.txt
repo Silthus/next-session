@@ -1,0 +1,10 @@
+# Full local gate on the landed tree: bun run check
+
+$ tsc -p tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p convex/tsconfig.json && eslint . && prettier --check . && vitest run && vite build && wrangler deploy --dry-run
+ Test Files  85 passed (85)
+      Tests  1286 passed (1286)
+✓ built in 465ms
+--dry-run: exiting now.
+EXIT 0
+
+An earlier run of the same tree failed on one unhandled error: a fillRest setTimeout in src/features/player/PlayerCalendar.tsx fired after jsdom teardown (untouched by this change). The rerun above is green.

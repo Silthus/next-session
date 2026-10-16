@@ -3,6 +3,7 @@ import { summarizeMonth } from "../shared/monthSummary";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import {
+  CANCELLED,
   newBackend,
   seedSession,
   signedInGmWithGroup,
@@ -73,6 +74,16 @@ describe("schedule.month", () => {
         { _id: december, date: "2026-12-05" },
       ],
     });
+  });
+
+  it("leaves Cancelled Sessions out", async () => {
+    const { as, groupId } = await signedInGmWithGroup(t);
+    await seedSession(t, groupId, "2026-10-10", CANCELLED);
+    const scheduled = await seedSession(t, groupId, "2026-10-17", { state: "scheduled" });
+
+    const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
+
+    expect(schedule?.sessions).toEqual([{ _id: scheduled, date: "2026-10-17" }]);
   });
 
   it("leaves out the Players, Answers, and Sessions of other Groups", async () => {

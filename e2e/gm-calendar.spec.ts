@@ -208,7 +208,7 @@ async function isInside(inner: Locator, outer: Locator) {
   );
 }
 
-test("the GM schedules a Session, unschedules it, and undoes that", async ({ page }) => {
+test("the GM schedules a Session, cancels it, and undoes that", async ({ page }) => {
   const gm = await signInAnonymousGm();
   await seedThreePlayers(gm);
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
@@ -238,6 +238,43 @@ test("the GM schedules a Session, unschedules it, and undoes that", async ({ pag
   await expect(dayCell(page, /, \w+ 5: everyone free, Session scheduled$/)).toBeVisible();
   await expect.poll(() => sessionDates(gm)).toEqual([night(5)]);
 });
+
+test("Undo of a cancel after the Undo window restores the same Session", async ({ page }) => {
+  test.setTimeout(90_000);
+  const gm = await signInAnonymousGm();
+  await seedThreePlayers(gm);
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
+  const panel = page.getByRole("region", { name: /, \w+ 5$/ });
+  const toast = toastRegion(page);
+  await panel.getByRole("button", { name: "Schedule session" }).click();
+  await expect.poll(() => sessionIds(gm)).toHaveLength(1);
+  const [sessionId] = await sessionIds(gm);
+  await page.waitForTimeout(UNDO_WINDOW_MS + 1_000);
+
+  await panel.getByRole("button", { name: "Unschedule this session" }).click();
+  await expect(toast).toContainText("removed");
+  await expect.poll(() => sessionIds(gm)).toEqual([]);
+  await screenshot(page, "cancelled-with-undo.png");
+  await toast.getByRole("button", { name: "Undo" }).click();
+
+  await expect(dayCell(page, /, \w+ 5: everyone free, Session scheduled$/)).toBeVisible();
+  await expect.poll(() => sessionIds(gm)).toEqual([sessionId]);
+  await screenshot(page, "restored-after-undo.png");
+});
+
+const UNDO_WINDOW_MS = 30_000;
+
+async function screenshot(page: Page, name: string) {
+  if (screenshotDir) await page.screenshot({ path: `${screenshotDir}/${name}` });
+}
+
+async function sessionIds(gm: Gm) {
+  const schedule = await gm.client.query(api.schedule.month, {
+    groupId: gm.groupId,
+    month: nextMonth,
+  });
+  return schedule?.sessions.map((session) => session._id) ?? [];
+}
 
 async function sessionDates(gm: Gm) {
   const schedule = await gm.client.query(api.schedule.month, {

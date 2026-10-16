@@ -3,6 +3,7 @@ import { addMonths, isValidMonth, type IsoMonth } from "../shared/dates";
 import type { Id } from "./_generated/dataModel";
 import { query, type QueryCtx } from "./_generated/server";
 import { findOwnedGroup } from "./model/access";
+import { isScheduled } from "./sessionLifecycle";
 import { profileImageUrl } from "./model/profileImages";
 import { answerValue } from "./schema";
 
@@ -60,7 +61,7 @@ async function sessionsOf(ctx: QueryCtx, groupId: Id<"groups">) {
     .query("sessions")
     .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId))
     .collect();
-  return sessions.map(({ _id, date }) => ({ _id, date }));
+  return sessions.filter(isScheduled).map(({ _id, date }) => ({ _id, date }));
 }
 
 function firstDayOf(month: IsoMonth) {
