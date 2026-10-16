@@ -4,7 +4,7 @@ import type { IsoDate } from "../../../shared/dates";
 import { track } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
-import { IconMore, IconStar } from "../../ui/icons";
+import { IconMore, IconStar, IconStarCancelled } from "../../ui/icons";
 import { focusRing, hoverRow, mutedStepsUp, pressable } from "../../ui/interactive";
 import { PageShell } from "../../ui/PageShell";
 import { ProfileImage } from "../../ui/ProfileImage";
@@ -136,12 +136,7 @@ function NextSessions({ groups, today }: { groups: MyGroupsData; today: IsoDate 
                     : `border-accent/40 bg-accent-soft/50 hover:border-accent hover:bg-accent-soft ${pressable}`,
                 )}
               >
-                <IconStar
-                  className={cn(
-                    "size-5 shrink-0",
-                    session.cancelled ? "text-ink-3" : "text-accent-strong",
-                  )}
-                />
+                <SessionStar cancelled={session.cancelled} className="size-5 shrink-0" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold">{longDayLabel(session.date)}</span>
                   <span className="block text-xs text-ink-3">{whenOf(session, today)}</span>
@@ -287,6 +282,11 @@ function GroupName({ name }: { name: string }) {
   return <span className="font-display text-lg font-semibold break-words">{name}</span>;
 }
 
+function SessionStar({ cancelled, className }: { cancelled: boolean; className: string }) {
+  if (cancelled) return <IconStarCancelled className={cn(className, "text-ink-3")} />;
+  return <IconStar className={cn(className, "text-accent-strong")} />;
+}
+
 function whenOf(session: UpcomingSession, today: IsoDate) {
   const when = relativeDay(session.date, today);
   return session.cancelled ? `Cancelled · ${when}` : when;
@@ -303,7 +303,7 @@ function NextSession({ sessions }: { sessions: GroupSession[] }) {
         cancelled ? "text-ink-2" : "text-accent-strong",
       )}
     >
-      <IconStar className="size-3.5 shrink-0" />
+      <SessionStar cancelled={cancelled} className="size-3.5 shrink-0" />
       {`Next session ${dayLabel(next.date)}${cancelled ? " · Cancelled" : ""}`}
     </span>
   );
