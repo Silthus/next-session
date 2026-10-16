@@ -121,6 +121,41 @@ describe("TimeAndPlacePage", () => {
     expect(preview.textContent).toContain("19:00–23:00");
   });
 
+  it("saves the time from before the GM started typing when the typed one is no time", async () => {
+    const { onSave, preview } = renderPage();
+    await userEvent.clear(startTime());
+    await userEvent.type(startTime(), "2400{Tab}");
+    expect(startTime().value).toBe("19:00");
+    expect(preview.textContent).toContain("19:00–23:00");
+
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ startTime: "19:00" }));
+  });
+
+  it("does not save on Enter while the start time is half-typed, and puts the time back", async () => {
+    const { onSave } = renderPage();
+    await userEvent.clear(startTime());
+    await userEvent.type(startTime(), "201{Backspace}{Enter}");
+    expect(onSave).not.toHaveBeenCalled();
+    expect(startTime().value).toBe("19:00");
+  });
+
+  it("saves on Enter the start time just typed", async () => {
+    const { onSave } = renderPage();
+    await userEvent.clear(startTime());
+    await userEvent.type(startTime(), "730{Enter}");
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ startTime: "07:30" }));
+  });
+
+  it("takes a pasted start time with spaces around it", async () => {
+    const { preview } = renderPage();
+    await userEvent.clear(startTime());
+    await userEvent.paste(" 20:30 ");
+    await userEvent.tab();
+    expect(startTime().value).toBe("20:30");
+    expect(preview.textContent).toContain("20:30–00:30");
+  });
+
   it("shows the place in the preview as it is typed", async () => {
     const { preview } = renderPage();
     await userEvent.type(screen.getByLabelText("Where"), "Max's place");

@@ -14,7 +14,8 @@ export function StartTimeField({
   value: string;
   onChange: (startTime: string) => void;
 }) {
-  const [typed, setTyped] = useState<string | null>(null);
+  const [draft, setDraft] = useState<{ typed: string; before: string } | null>(null);
+  const settle = () => setDraft(null);
   return (
     <input
       id={id}
@@ -22,15 +23,19 @@ export function StartTimeField({
       inputMode="numeric"
       autoComplete="off"
       placeholder="19:00"
-      maxLength={5}
       required
-      value={typed ?? value}
+      value={draft?.typed ?? value}
       onChange={(event) => {
-        setTyped(event.target.value);
-        const startTime = readClockTime(event.target.value);
-        if (startTime) onChange(startTime);
+        const before = draft?.before ?? value;
+        setDraft({ typed: event.target.value, before });
+        onChange(readClockTime(event.target.value) ?? before);
       }}
-      onBlur={() => setTyped(null)}
+      onKeyDown={(event) => {
+        if (event.key !== "Enter" || draft === null) return;
+        if (!readClockTime(draft.typed)) event.preventDefault();
+        settle();
+      }}
+      onBlur={settle}
       className={cn(
         "h-11 w-36 rounded-md border border-line-strong bg-surface px-3 font-mono text-base text-ink tabular-nums",
         focusRing,

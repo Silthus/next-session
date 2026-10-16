@@ -1,0 +1,13 @@
+     × saves the time from before the GM started typing when the typed one is no time 72ms
+     × does not save on Enter while the start time is half-typed, and puts the time back 63ms
+     × takes a pasted start time with spaces around it 47ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected '02:40' to be '19:00' // Object.is equality
+Expected: "19:00"
+Received: "02:40"
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+Received:
+AssertionError: expected '19:00' to be '20:30' // Object.is equality
+Expected: "20:30"
+Received: "19:00"
+      Tests  3 failed | 23 passed (26)
