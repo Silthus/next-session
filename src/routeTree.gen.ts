@@ -17,6 +17,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TipsRouteImport } from './routes/tips'
 import { Route as GGroupIdRouteImport } from './routes/g.$groupId'
 import { Route as SShareTokenRouteImport } from './routes/s.$shareToken'
+import { Route as GGroupIdSettingsRouteImport } from './routes/g.$groupId_.settings'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,11 @@ const SShareTokenRoute = SShareTokenRouteImport.update({
   path: '/s/$shareToken',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GGroupIdSettingsRoute = GGroupIdSettingsRouteImport.update({
+  id: '/g/$groupId_/settings',
+  path: '/g/$groupId/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/tips': typeof TipsRoute
   '/g/$groupId': typeof GGroupIdRoute
   '/s/$shareToken': typeof SShareTokenRoute
+  '/g/$groupId/settings': typeof GGroupIdSettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/tips': typeof TipsRoute
   '/g/$groupId': typeof GGroupIdRoute
   '/s/$shareToken': typeof SShareTokenRoute
+  '/g/$groupId/settings': typeof GGroupIdSettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/tips': typeof TipsRoute
   '/g/$groupId': typeof GGroupIdRoute
   '/s/$shareToken': typeof SShareTokenRoute
+  '/g/$groupId_/settings': typeof GGroupIdSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/tips'
     | '/g/$groupId'
     | '/s/$shareToken'
+    | '/g/$groupId/settings'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/tips'
     | '/g/$groupId'
     | '/s/$shareToken'
+    | '/g/$groupId/settings'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/tips'
     | '/g/$groupId'
     | '/s/$shareToken'
+    | '/g/$groupId_/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   TipsRoute: typeof TipsRoute
   GGroupIdRoute: typeof GGroupIdRoute
   SShareTokenRoute: typeof SShareTokenRoute
+  GGroupIdSettingsRoute: typeof GGroupIdSettingsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SShareTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/g/$groupId_/settings': {
+      id: '/g/$groupId_/settings'
+      path: '/g/$groupId/settings'
+      fullPath: '/g/$groupId/settings'
+      preLoaderRoute: typeof GGroupIdSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   TipsRoute: TipsRoute,
   GGroupIdRoute: GGroupIdRoute,
   SShareTokenRoute: SShareTokenRoute,
+  GGroupIdSettingsRoute: GGroupIdSettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

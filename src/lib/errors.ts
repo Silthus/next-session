@@ -37,6 +37,10 @@ const byTopic = {
     TOO_MANY_GROUPS: `You have ${String(MAX_GROUPS_PER_GM)} groups. Delete one to make room.`,
     NOT_FOUND: "That group is gone already.",
   },
+  timeAndPlace: {
+    INVALID_SETTINGS: "Check the start time and the place, then save again.",
+    NOT_FOUND: "That group is gone already.",
+  },
   shareLink: {
     UNDO_EXPIRED: "Too late to undo. Share the new link.",
     NOT_FOUND: "That group is gone already.",
