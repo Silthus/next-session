@@ -10,7 +10,7 @@ export type RunningGroup = MyGroups["running"][number];
 export type GroupPage =
   { kind: "gm"; groupId: Id<"groups"> } | { kind: "player"; shareToken: string };
 
-type GroupSession = MyGroups["running"][number]["upcomingSessions"][number];
+export type GroupSession = RunningGroup["upcomingSessions"][number];
 
 export type UpcomingSession = {
   date: IsoDate;

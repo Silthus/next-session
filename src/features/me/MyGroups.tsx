@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { cn } from "../../ui/cn";
 import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react";
 import type { IsoDate } from "../../../shared/dates";
 import { track } from "../../lib/telemetry";
 import { Button } from "../../ui/Button";
+import { cn } from "../../ui/cn";
 import { IconMore, IconStar } from "../../ui/icons";
 import { focusRing, hoverRow, mutedStepsUp, pressable } from "../../ui/interactive";
 import { PageShell } from "../../ui/PageShell";
@@ -16,6 +16,7 @@ import {
   isCancelled,
   nextSessions,
   type GroupPage,
+  type GroupSession,
   type MyGroups as MyGroupsData,
   type PlayingGroup,
   type RunningGroup,
@@ -291,7 +292,7 @@ function whenOf(session: UpcomingSession, today: IsoDate) {
   return session.cancelled ? `Cancelled · ${when}` : when;
 }
 
-function NextSession({ sessions }: { sessions: RunningGroup["upcomingSessions"] }) {
+function NextSession({ sessions }: { sessions: GroupSession[] }) {
   const [next] = sessions;
   if (next === undefined) return <span className="text-sm text-ink-3">No session yet</span>;
   const cancelled = isCancelled(next);
