@@ -1,0 +1,22 @@
+     × opens on 19:00 for 4 hours in Berlin time for a Group never saved 167ms
+     × opens with what the GM saved 40ms
+     × moves the end time and the preview as soon as the start or the length changes 40ms
+     × never lets the start time go empty 42ms
+     × takes the start time as typed in 24-hour time 31ms
+     × reads 2015 as 20:15 and shows it that way on leaving the field 29ms
+     × reads 7:30 as 07:30 and shows it that way on leaving the field 33ms
+     × reads 18.45 as 18:45 and shows it that way on leaving the field 34ms
+     × puts the last whole time back when the GM leaves the field on a half-typed one 34ms
+     × saves exactly the page's values once 28ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+TestingLibraryElementError: Unable to find an accessible element with the role "textbox" and name "Starts at"
+TestingLibraryElementError: Unable to find an accessible element with the role "textbox" and name "Starts at"
+TestingLibraryElementError: Unable to find an accessible element with the role "textbox" and name "Starts at"
+TestingLibraryElementError: Unable to find an accessible element with the role "textbox" and name "Starts at"
+TestingLibraryElementError: Unable to find an accessible element with the role "textbox" and name "Starts at"
+TestingLibraryElementError: Unable to find an accessible element with the role "textbox" and name "Starts at"
+TestingLibraryElementError: Unable to find an accessible element with the role "textbox" and name "Starts at"
+TestingLibraryElementError: Unable to find an accessible element with the role "textbox" and name "Starts at"
+TestingLibraryElementError: Unable to find an accessible element with the role "textbox" and name "Starts at"
+TestingLibraryElementError: Unable to find an accessible element with the role "textbox" and name "Starts at"
+      Tests  10 failed | 12 passed (22)

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { endClockTime, isClockTime, type ClockTime } from "../../../../shared/sessionTime";
 import { cn } from "../../../ui/cn";
 import { focusRing, pressable } from "../../../ui/interactive";
@@ -13,21 +14,38 @@ export function StartTimeField({
   value: string;
   onChange: (startTime: string) => void;
 }) {
+  const [typed, setTyped] = useState<string | null>(null);
   return (
     <input
       id={id}
-      type="time"
+      type="text"
+      inputMode="numeric"
+      autoComplete="off"
+      placeholder="19:00"
+      maxLength={5}
       required
-      value={value}
+      value={typed ?? value}
       onChange={(event) => {
-        if (isClockTime(event.target.value)) onChange(event.target.value);
+        setTyped(event.target.value);
+        const startTime = readClockTime(event.target.value);
+        if (startTime) onChange(startTime);
       }}
+      onBlur={() => setTyped(null)}
       className={cn(
         "h-11 w-36 rounded-md border border-line-strong bg-surface px-3 font-mono text-base text-ink tabular-nums",
         focusRing,
       )}
     />
   );
+}
+
+const TYPED_CLOCK_TIME = /^(\d{1,2})[:.]?(\d{2})$/;
+
+function readClockTime(typed: string): ClockTime | null {
+  const [, hours, minutes] = TYPED_CLOCK_TIME.exec(typed.trim()) ?? [];
+  if (hours === undefined || minutes === undefined) return null;
+  const startTime = `${hours.padStart(2, "0")}:${minutes}`;
+  return isClockTime(startTime) ? startTime : null;
 }
 
 export function LengthChips({

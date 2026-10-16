@@ -41,7 +41,7 @@ function renderPage({
   return { onSave, preview: screen.getByRole("region", { name: "In players' calendars" }) };
 }
 
-const startTime = () => screen.getByLabelText<HTMLInputElement>("Starts at");
+const startTime = () => screen.getByRole<HTMLInputElement>("textbox", { name: "Starts at" });
 const length = (hours: number) => screen.getByRole("radio", { name: `${String(hours)} h` });
 
 describe("TimeAndPlacePage", () => {
@@ -90,7 +90,35 @@ describe("TimeAndPlacePage", () => {
   it("never lets the start time go empty", () => {
     renderPage();
     fireEvent.change(startTime(), { target: { value: "" } });
+    fireEvent.blur(startTime());
     expect(startTime().value).toBe("19:00");
+  });
+
+  it("takes the start time as typed in 24-hour time", async () => {
+    const { preview } = renderPage();
+    await userEvent.clear(startTime());
+    await userEvent.type(startTime(), "20:30");
+    expect(preview.textContent).toContain("20:30–00:30");
+  });
+
+  it.each([
+    ["2015", "20:15"],
+    ["7:30", "07:30"],
+    ["18.45", "18:45"],
+  ])("reads %s as %s and shows it that way on leaving the field", async (typed, shown) => {
+    const { preview } = renderPage();
+    await userEvent.clear(startTime());
+    await userEvent.type(startTime(), `${typed}{Tab}`);
+    expect(startTime().value).toBe(shown);
+    expect(preview.textContent).toContain(`${shown}–`);
+  });
+
+  it("puts the last whole time back when the GM leaves the field on a half-typed one", async () => {
+    const { preview } = renderPage();
+    await userEvent.clear(startTime());
+    await userEvent.type(startTime(), "21:{Tab}");
+    expect(startTime().value).toBe("19:00");
+    expect(preview.textContent).toContain("19:00–23:00");
   });
 
   it("shows the place in the preview as it is typed", async () => {

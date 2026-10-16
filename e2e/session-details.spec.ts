@@ -27,7 +27,6 @@ async function gmWithScheduledNight() {
 
 async function openNight(page: Page, gm: Gm) {
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth()}&day=${night()}`);
-  await page.waitForLoadState("networkidle");
 }
 
 async function sessionOf(gm: Gm) {
