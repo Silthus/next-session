@@ -4,10 +4,9 @@ import { api } from "../convex/_generated/api";
 import type { Id } from "../convex/_generated/dataModel";
 import { ANSWERS } from "../shared/answers";
 import { addMonths, monthDays, monthOf, todayUtc, type IsoDate } from "../shared/dates";
-import { convexUrl, toastRegion } from "./helpers";
+import { convexUrl, toastRegion, waitUntilPublished } from "./helpers";
 
 const screenshotDir = `${process.env.E2E_OUTPUT_DIR ?? "test-results"}/player-screenshots`;
-const UNDO_WINDOW_MS = 30_000;
 
 type SeededGroup = Awaited<ReturnType<typeof seedGroup>>;
 
@@ -396,7 +395,7 @@ test.describe("the player surface", () => {
     await answerAs(page, group, "Ana");
     await page.goto(group.link);
     await expect(tile(page, today)).toHaveAccessibleName(`${dayLabel(today)}: Not set, Session`);
-    await page.waitForTimeout(UNDO_WINDOW_MS + 1_000);
+    await waitUntilPublished(group.gm, group.groupId, today);
 
     await group.gm.mutation(api.sessions.cancel, { sessionId });
 

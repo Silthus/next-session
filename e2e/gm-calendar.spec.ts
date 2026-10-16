@@ -1,7 +1,14 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { api } from "../convex/_generated/api";
 import { addMonths, monthOf, todayUtc } from "../shared/dates";
-import { openAsGm, seedPlayer, signInAnonymousGm, toastRegion, type Gm } from "./helpers";
+import {
+  openAsGm,
+  seedPlayer,
+  signInAnonymousGm,
+  toastRegion,
+  waitUntilPublished,
+  type Gm,
+} from "./helpers";
 
 let today = todayUtc(Date.now());
 let nextMonth = addMonths(monthOf(today), 1);
@@ -252,7 +259,7 @@ test("after the Undo window a cancelled Session stays Cancelled until the GM sch
   await expect.poll(() => sessionStates(gm)).toHaveLength(1);
   const [scheduled] = await sessionStates(gm);
   const sessionId = scheduled?._id;
-  await page.waitForTimeout(UNDO_WINDOW_MS + 1_000);
+  await waitUntilPublished(gm.client, gm.groupId, night(5));
 
   await panel.getByRole("button", { name: "Cancel session" }).click();
   await expect(toast).toContainText(/^Session on \w+, \w+ 5 cancelled\./);
@@ -283,8 +290,6 @@ test("after the Undo window a cancelled Session stays Cancelled until the GM sch
   await expect.poll(() => sessionStates(gm)).toEqual([{ _id: sessionId, state: "scheduled" }]);
   await screenshot(page, "scheduled-again.png");
 });
-
-const UNDO_WINDOW_MS = 30_000;
 
 async function screenshot(page: Page, name: string) {
   if (screenshotDir) await page.screenshot({ path: `${screenshotDir}/${name}` });
