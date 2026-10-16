@@ -11,6 +11,7 @@ import { useTodayUtc } from "../player/useTodayUtc";
 import { EmailSettings } from "./EmailSettings";
 import { MyGroups } from "./MyGroups";
 import { useRemoval } from "./useRemoval";
+import type { CalendarFeedActions } from "./YourCalendar";
 
 const TOAST_SCOPE = "me";
 
@@ -23,6 +24,7 @@ export function MyGroupsScreen() {
   const heading = useRef<HTMLHeadingElement>(null);
   const { remove } = useRemoval(today, toasts.show, () => heading.current?.focus());
   const { creating, create } = useCreateLink(toasts.show);
+  const calendarFeed = useCalendarFeed(toasts.show);
 
   if (gm.status === "loading") return <div className="min-h-dvh" />;
   if (!account || groups === null) return <Navigate to="/" replace />;
@@ -31,6 +33,7 @@ export function MyGroupsScreen() {
     <>
       <MyGroups
         settings={<NotificationSettings />}
+        calendarFeed={calendarFeed}
         email={gm.email}
         image={gm.image}
         groups={groups}
@@ -76,6 +79,19 @@ function useCreateLink(show: (message: string) => void) {
   }
 
   return { creating, create };
+}
+
+function useCalendarFeed(show: (message: string) => void): CalendarFeedActions {
+  const calendarFeed = useMutation(api.me.calendarFeed);
+  const resetCalendarFeed = useMutation(api.me.resetCalendarFeed);
+  return {
+    subscribe: async () => (await calendarFeed({})).url,
+    reset: async () => {
+      const { url } = await resetCalendarFeed({});
+      show("New link ready. Calendars on the old link stop updating.");
+      return url;
+    },
+  };
 }
 
 function ToastRegion({

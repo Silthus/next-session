@@ -1,0 +1,46 @@
+ ✓ |shared| shared/legal.test.ts > LEGAL_VERSIONS > matches the version the terms text shows 2ms
+ ✓ |shared| shared/legal.test.ts > LEGAL_VERSIONS > matches the version the privacy text shows 0ms
+ ✓ |shared| shared/legal.test.ts > privacy text > has no placeholder left to fill in 0ms
+ ✓ |shared| shared/legal.test.ts > privacy text > names both labels of the measurement switch on /privacy 0ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > lists when and where the next Sessions are across Groups, each with its Group 374ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > names a Group's zone when the browser is elsewhere 50ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > marks a Cancelled Session in Next sessions and on its Group's card 63ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > says when no Session is scheduled yet 32ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > shows a card per Claimed Player that opens the player page 74ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > removes a Group from My groups through the card's menu 104ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > shows a card per Group the Account runs that opens the GM page 48ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > offers a Player who runs nothing to create their own link 57ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > points an Account without Groups to its GM's link and to its own 34ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > holds Create your link while the link is being made 17ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > names the Account and lets it log out 33ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > shows the Account's picture next to its email 22ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > puts focus on its heading when it opens, so a redirect lands somewhere 28ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > shows a skeleton while the Groups load 10ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > Your calendar on My groups > subscribes on the press only, then offers the link to copy and to open in a calendar app 72ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > Your calendar on My groups > resets the link at once and shows the new one 82ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > Your calendar on My groups > copies the link and counts the copy 90ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > Your calendar on My groups > says to slow down when the Account churned its link too often 47ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > Your calendar on My groups > is not offered to an Account with no Groups 7ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups telemetry > tracks Create your link on /me for a Player who runs nothing 29ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups telemetry > tracks Create your link on /me empty 17ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > shows the link without its scheme and copies the full URL 2033ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > forgets Copied when the link changes, keeping focus on Rotate 143ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > copies the selected link when the clipboard API refuses, keeping focus on the button 96ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > copies the selected link when the browser has no clipboard API at all 63ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > falls back to a long-press hint when the browser refuses every way to copy 93ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > prefills the share message for WhatsApp, Telegram and Mail 91ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > offers the native share sheet only where the browser has one 53ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > draws Share via WhatsApp as an icon, not a stand-in letter 61ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > draws Share via Telegram as an icon, not a stand-in letter 65ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > draws Share via Mail as an icon, not a stand-in letter 55ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > draws Share as an icon, not a stand-in letter 53ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > keeps the share targets but drops the hint when compact, and offers Rotate when asked 105ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks a copy through the clipboard once, with its surface 75ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks and logs a copy through the selection when the clipboard refuses 55ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks and logs a copy the browser refused every way 35ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks Share via WhatsApp by its channel 39ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks Share via Telegram by its channel 30ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks Share via Mail by its channel 44ms
+ ✓ |ui| src/ui/ShareLinkCard.test.tsx > ShareLinkCard > telemetry > tracks the native share sheet only once it shared 92ms
+ Test Files  3 passed (3)
+      Tests  44 passed (44)

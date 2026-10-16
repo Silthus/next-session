@@ -1,0 +1,112 @@
+Mutant no-backslash: >   return value.replace(/[;,]/g, "\\$&").replace(/\r\n|\r|\n/g, "\\n");
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-7ec46f65
+
+ ❯ |shared| shared/icalendar.test.ts (7 tests | 1 failed) 13ms
+   ❯ calendar text (3)
+     × escapes commas, semicolons, backslashes and line breaks in text 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > calendar text > escapes commas, semicolons, backslashes and line breaks in text
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to contain '\r\nSUMMARY:D&D\, Dienstag\; Runde 3\…'
+
+- Expected
++ Received
+
+- 
+- SUMMARY:D&D\, Dienstag\; Runde 3\\4
++ BEGIN:VCALENDAR
++ VERSION:2.0
++ PRODID:-//Next Session//next-session.link//EN
++ CALSCALE:GREGORIAN
++ X-WR-CALNAME:Kampagne\, Dienstag
++ REFRESH-INTERVAL;VALUE=DURATION:PT1H
++ X-PUBLISHED-TTL:PT1H
++ BEGIN:VEVENT
++ UID:j57c9w2qx8@next-session.link
++ SEQUENCE:2
++ DTSTAMP:20261016T092800Z
++ DTSTART:20261031T180000Z
++ DTEND:20261031T220000Z
++ SUMMARY:D&D\, Dienstag\; Runde 3\4
++ LOCATION:Bei Anna
++ DESCRIPTION:Zeile eins\nZeile zwei\nZeile drei
++ URL:https://next-session.link/me
++ STATUS:CONFIRMED
++ END:VEVENT
++ END:VCALENDAR
+
+
+ ❯ shared/icalendar.test.ts:74:18
+     72|     const text = feed("Kampagne, Dienstag", [awkward]);
+     73|     expect(text).toContain("\r\nX-WR-CALNAME:Kampagne\\, Dienstag\r\n"…
+     74|     expect(text).toContain("\r\nSUMMARY:D&D\\, Dienstag\\; Runde 3\\\\…
+       |                  ^
+     75|     expect(text).toContain("\r\nDESCRIPTION:Zeile eins\\nZeile zwei\\n…
+     76|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  08:56:45
+   Duration  138ms (transform 53%, tests 24%, import 18%, worker 5%)
+
+Mutant lf-only: >   return value.replace(/[\\;,]/g, "\\$&").replace(/\n/g, "\\n");
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-7ec46f65
+
+ ❯ |shared| shared/icalendar.test.ts (7 tests | 1 failed) 13ms
+   ❯ calendar text (3)
+     × escapes commas, semicolons, backslashes and line breaks in text 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > calendar text > escapes commas, semicolons, backslashes and line breaks in text
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to contain '\r\nDESCRIPTION:Zeile eins\nZeile zwe…'
+
+- Expected
++ Received
+
+- 
++ BEGIN:VCALENDAR
++ VERSION:2.0
++ PRODID:-//Next Session//next-session.link//EN
++ CALSCALE:GREGORIAN
++ X-WR-CALNAME:Kampagne\, Dienstag
++ REFRESH-INTERVAL;VALUE=DURATION:PT1H
++ X-PUBLISHED-TTL:PT1H
++ BEGIN:VEVENT
++ UID:j57c9w2qx8@next-session.link
++ SEQUENCE:2
++ DTSTAMP:20261016T092800Z
++ DTSTART:20261031T180000Z
++ DTEND:20261031T220000Z
++ SUMMARY:D&D\, Dienstag\; Runde 3\\4
++ LOCATION:Bei Anna
+- DESCRIPTION:Zeile eins\nZeile zwei\nZeile drei
++ DESCRIPTION:Zeile eins\nZeile zwei\nZeile drei
++ URL:https://next-session.link/me
++ STATUS:CONFIRMED
++ END:VEVENT
++ END:VCALENDAR
+
+
+ ❯ shared/icalendar.test.ts:75:18
+     73|     expect(text).toContain("\r\nX-WR-CALNAME:Kampagne\\, Dienstag\r\n"…
+     74|     expect(text).toContain("\r\nSUMMARY:D&D\\, Dienstag\\; Runde 3\\\\…
+     75|     expect(text).toContain("\r\nDESCRIPTION:Zeile eins\\nZeile zwei\\n…
+       |                  ^
+     76|   });
+     77|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  08:56:45
+   Duration  142ms (transform 52%, tests 24%, import 18%, worker 5%)
+

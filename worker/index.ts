@@ -1,5 +1,6 @@
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
+  CONVEX_SITE_URL: string;
 }
 
 const lonirOrigin = "https://little-spaniel-709.convex.site";
@@ -18,6 +19,10 @@ const forwardedRequestHeaders = [
   "accept",
   "accept-encoding",
 ];
+
+const calendarPrefix = /^\/cal\//;
+const calendarFile = /^\/cal\/[as]\/[A-Za-z0-9_-]+\.ics$/;
+const keptCalendarHeaders = ["content-type", "cache-control", "content-disposition"];
 
 function legacyRedirect(url: URL): string | null {
   const isLegacy = legacyShareLink.test(url.pathname) || legacyGroupsPage.test(url.pathname);
@@ -76,10 +81,37 @@ function handleIngest(request: Request, url: URL): Promise<Response> {
     : Promise.resolve(new Response(null, { status: 204 }));
 }
 
+function isCalendar(url: URL): boolean {
+  return calendarPrefix.test(url.pathname);
+}
+
+export function calendarTarget(url: URL, convexSiteUrl: string): string | null {
+  return calendarFile.test(url.pathname) ? new URL(url.pathname, convexSiteUrl).href : null;
+}
+
+async function proxyToConvex(target: string): Promise<Response> {
+  const upstream = await fetch(new Request(target, { method: "GET" }));
+  const headers = new Headers();
+  keptCalendarHeaders.forEach((name) => {
+    const value = upstream.headers.get(name);
+    if (value !== null) headers.set(name, value);
+  });
+  return new Response(upstream.body, { status: upstream.status, headers });
+}
+
+function handleCalendar(request: Request, url: URL, env: Env): Promise<Response> {
+  if (request.method !== "GET") {
+    return Promise.resolve(new Response(null, { status: 405, headers: { allow: "GET" } }));
+  }
+  const target = calendarTarget(url, env.CONVEX_SITE_URL);
+  return target ? proxyToConvex(target) : Promise.resolve(new Response(null, { status: 404 }));
+}
+
 export default {
   fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (isIngest(url)) return handleIngest(request, url);
+    if (isCalendar(url)) return handleCalendar(request, url, env);
     const lonirUrl = legacyRedirect(url);
     return lonirUrl ? Promise.resolve(Response.redirect(lonirUrl, 302)) : env.ASSETS.fetch(request);
   },

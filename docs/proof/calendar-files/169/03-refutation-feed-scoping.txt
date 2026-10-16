@@ -1,0 +1,64 @@
+# feed scoping refutation: the witness with the break staged (groupDownload reads every Group's Sessions in the window instead of its own index range)
+
+diff --git a/convex/calendarFiles.ts b/convex/calendarFiles.ts
+index c286b3a..1c5bb18 100644
+--- a/convex/calendarFiles.ts
++++ b/convex/calendarFiles.ts
+@@ -39,9 +39,7 @@ export const groupDownload = internalQuery({
+     const { first, last } = bookingWindow(todayUtc(servedAt));
+     const upcoming = await ctx.db
+       .query("sessions")
+-      .withIndex("by_groupId_and_date", (q) =>
+-        q.eq("groupId", group._id).gte("date", first).lte("date", last),
+-      )
++      .filter((q) => q.and(q.gte(q.field("date"), first), q.lte(q.field("date"), last)))
+       .collect();
+     const shareLink = shareLinkOf(group);
+     const entries = upcoming
+
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-57fbe946
+
+ ❯ |convex| convex/calendarFiles.test.ts (12 tests | 1 failed | 11 skipped) 132ms
+   ❯ feed scoping (1)
+     × every calendar file holds only the published Sessions of its own token's Group 131ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > feed scoping > every calendar file holds only the published Sessions of its own token's Group
+AssertionError: expected [ [ …(2) ], [ …(2) ], [ …(2) ] ] to deeply equal [ [ …(2) ] ]
+
+- Expected
++ Received
+
+  [
+    [
+      "000000000000000000010006sessions@next-session.link",
+      "Thursday Crew",
+    ],
++   [
++     "000000000000000000010008sessions@next-session.link",
++     "Sunday Table",
++   ],
++   [
++     "000000000000000000010010sessions@next-session.link",
++     "Sunday Table",
++   ],
+  ]
+
+ ❯ convex/calendarFiles.test.ts:278:66
+    276|     const rotatedAwayResponse = await download(rotatedAway);
+    277|
+    278|     expect(ourEvents.map((event) => [event.UID, event.SUMMARY])).toEqu…
+       |                                                                  ^
+    279|       [uidOf(ourSession), "Thursday Crew"],
+    280|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 skipped (12)
+   Start at  10:35:34
+   Duration  588ms (transform 39%, tests 26%, import 26%, environment 8%, worker 1%)
+

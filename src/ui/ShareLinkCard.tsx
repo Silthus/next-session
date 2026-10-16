@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { log, track, type BrowserEvent } from "../lib/telemetry";
+import { log, track, type BrowserEvent, type CopyMethod } from "../lib/telemetry";
 import { Button } from "./Button";
 import { cn } from "./cn";
 import { Eyebrow } from "./Eyebrow";
@@ -18,7 +18,6 @@ type CopyState = "idle" | "copied" | "blocked";
 type CopySurface = Extract<BrowserEvent, { name: "share_link_copied" }>["surface"];
 type ShareSurface = Extract<BrowserEvent, { name: "share_link_shared" }>["surface"];
 type ShareChannel = Extract<BrowserEvent, { name: "share_link_shared" }>["channel"];
-type CopyMethod = Extract<BrowserEvent, { name: "share_link_copied" }>["method"];
 
 export function ShareLinkCard({
   url,
@@ -89,6 +88,14 @@ export function ShareLinkCard({
 }
 
 export function useCopyLink(url: string, surface: CopySurface) {
+  return useCopy(url, surface, (method) => ({ name: "share_link_copied", surface, method }));
+}
+
+export function useCopy(
+  url: string,
+  surface: string,
+  copiedEvent: (method: CopyMethod) => BrowserEvent,
+) {
   const [copied, setCopied] = useState<{ url: string; state: CopyState }>({ url, state: "idle" });
   const copyState = copied.url === url ? copied.state : "idle";
   useEffect(() => {
@@ -99,7 +106,7 @@ export function useCopyLink(url: string, surface: CopySurface) {
 
   const copy = () =>
     copyText(url, surface).then((method) => {
-      track({ name: "share_link_copied", surface, method });
+      track(copiedEvent(method));
       const state: CopyState = method === "failed" ? "blocked" : "copied";
       setCopied({ url, state });
       return state;
@@ -108,7 +115,7 @@ export function useCopyLink(url: string, surface: CopySurface) {
   return { copyState, copy };
 }
 
-function copyText(text: string, surface: CopySurface): Promise<CopyMethod> {
+function copyText(text: string, surface: string): Promise<CopyMethod> {
   return writeToClipboard(text).then(
     () => "clipboard",
     (refusal: unknown) => {

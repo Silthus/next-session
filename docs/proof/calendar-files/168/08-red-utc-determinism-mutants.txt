@@ -1,0 +1,429 @@
+Mutant local-time: >   return new Date(epochMs).toISOString().replace(/\.\d{3}/, "").replace(/[-:]/g, "").replace("Z", "");
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-7ec46f65
+
+ ❯ |shared| shared/icalendar.test.ts (10 tests | 5 failed) 23ms
+   ❯ invite (3)
+     × asks the attendee's calendar to add the Session as confirmed and already accepted 7ms
+     × tells every attendee's calendar that the Session is off 1ms
+     × uninvites only this attendee, leaving the Session's status unsaid 1ms
+   ❯ feed (1)
+     × lists scheduled and cancelled Sessions for a subscribed calendar, without invite headers 2ms
+   ❯ every calendar (2)
+     × writes every time in UTC and carries no time zone and no alarm 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > invite > asks the attendee's calendar to add the Session as confirmed and already accepted
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to be 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' // Object.is equality
+
+- Expected
++ Received
+
+@@ -4,13 +4,13 @@
+  CALSCALE:GREGORIAN
+  METHOD:REQUEST
+  BEGIN:VEVENT
+  UID:j57c9w2qx8@next-session.link
+  SEQUENCE:2
+- DTSTAMP:20261016T092800Z
++ DTSTAMP:20261016T092800
+- DTSTART:20261031T180000Z
++ DTSTART:20261031T180000
+- DTEND:20261031T220000Z
++ DTEND:20261031T220000
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
+  URL:https://next-session.link/me
+  STATUS:CONFIRMED
+
+ ❯ shared/icalendar.test.ts:35:73
+     33| describe("invite", () => {
+     34|   it("asks the attendee's calendar to add the Session as confirmed and…
+     35|     expect(invite({ kind: "request", ...addresses, entry: halloween })…
+       |                                                                         ^
+     36|   });
+     37|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > invite > tells every attendee's calendar that the Session is off
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to be 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' // Object.is equality
+
+- Expected
++ Received
+
+@@ -4,13 +4,13 @@
+  CALSCALE:GREGORIAN
+  METHOD:CANCEL
+  BEGIN:VEVENT
+  UID:j57c9w2qx8@next-session.link
+  SEQUENCE:2
+- DTSTAMP:20261016T092800Z
++ DTSTAMP:20261016T092800
+- DTSTART:20261031T180000Z
++ DTSTART:20261031T180000
+- DTEND:20261031T220000Z
++ DTEND:20261031T220000
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
+  URL:https://next-session.link/me
+  STATUS:CANCELLED
+
+ ❯ shared/icalendar.test.ts:39:72
+     37|
+     38|   it("tells every attendee's calendar that the Session is off", () => {
+     39|     expect(invite({ kind: "cancel", ...addresses, entry: halloween }))…
+       |                                                                        ^
+     40|   });
+     41|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > invite > uninvites only this attendee, leaving the Session's status unsaid
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to be 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' // Object.is equality
+
+- Expected
++ Received
+
+@@ -4,13 +4,13 @@
+  CALSCALE:GREGORIAN
+  METHOD:CANCEL
+  BEGIN:VEVENT
+  UID:j57c9w2qx8@next-session.link
+  SEQUENCE:2
+- DTSTAMP:20261016T092800Z
++ DTSTAMP:20261016T092800
+- DTSTART:20261031T180000Z
++ DTSTART:20261031T180000
+- DTEND:20261031T220000Z
++ DTEND:20261031T220000
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
+  URL:https://next-session.link/me
+  ORGANIZER;CN=Next Session:mailto:calendar@next-session.link
+
+ ❯ shared/icalendar.test.ts:43:74
+     41|
+     42|   it("uninvites only this attendee, leaving the Session's status unsai…
+     43|     expect(invite({ kind: "withdraw", ...addresses, entry: halloween }…
+       |                                                                          ^
+     44|   });
+     45| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > feed > lists scheduled and cancelled Sessions for a subscribed calendar, without invite headers
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to be 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' // Object.is equality
+
+- Expected
++ Received
+
+@@ -6,25 +6,25 @@
+  REFRESH-INTERVAL;VALUE=DURATION:PT1H
+  X-PUBLISHED-TTL:PT1H
+  BEGIN:VEVENT
+  UID:j57c9w2qx8@next-session.link
+  SEQUENCE:2
+- DTSTAMP:20261016T092805Z
++ DTSTAMP:20261016T092805
+- DTSTART:20261031T180000Z
++ DTSTART:20261031T180000
+- DTEND:20261031T220000Z
++ DTEND:20261031T220000
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
+  URL:https://next-session.link/me
+  STATUS:CONFIRMED
+  END:VEVENT
+  BEGIN:VEVENT
+  UID:j57d4r8kz1@next-session.link
+  SEQUENCE:0
+- DTSTAMP:20261016T092805Z
++ DTSTAMP:20261016T092805
+- DTSTART:20261107T183000Z
++ DTSTART:20261107T183000
+- DTEND:20261107T223000Z
++ DTEND:20261107T223000
+  SUMMARY:Spieleabend C
+  DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
+  URL:https://next-session.link/me
+  STATUS:CANCELLED
+  END:VEVENT
+
+ ❯ shared/icalendar.test.ts:50:43
+     48|   it("lists scheduled and cancelled Sessions for a subscribed calendar…
+     49|     const entries = [halloween, cancelledNovember].map((entry) => ({ .…
+     50|     expect(feed("Next Session", entries)).toBe(feedGolden);
+       |                                           ^
+     51|   });
+     52| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > every calendar > writes every time in UTC and carries no time zone and no alarm
+AssertionError: expected 'DTSTAMP:20261016T092800' to match /^(DTSTAMP|DTSTART|DTEND):\d{8}T\d{6}Z$/
+
+- Expected:
+/^(DTSTAMP|DTSTART|DTEND):\d{8}T\d{6}Z$/
+
++ Received:
+"DTSTAMP:20261016T092800"
+
+ ❯ shared/icalendar.test.ts:101:46
+     99|       const times = text.match(/^(DTSTAMP|DTSTART|DTEND)[:;].*$/gm) ??…
+    100|       expect(times).toHaveLength(3 * text.split("BEGIN:VEVENT").slice(…
+    101|       for (const time of times) expect(time).toMatch(/^(DTSTAMP|DTSTAR…
+       |                                              ^
+    102|       expect(text).not.toMatch(/VTIMEZONE|TZID|VALARM/);
+    103|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 5 passed (10)
+   Start at  08:57:20
+   Duration  170ms (transform 45%, tests 35%, import 15%, worker 4%)
+
+Mutant clock-stamp: >     `DTSTAMP:${utc(Date.now())}`,
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-7ec46f65
+
+ ❯ |shared| shared/icalendar.test.ts (10 tests | 5 failed) 24ms
+   ❯ invite (3)
+     × asks the attendee's calendar to add the Session as confirmed and already accepted 7ms
+     × tells every attendee's calendar that the Session is off 1ms
+     × uninvites only this attendee, leaving the Session's status unsaid 1ms
+   ❯ feed (1)
+     × lists scheduled and cancelled Sessions for a subscribed calendar, without invite headers 2ms
+   ❯ every calendar (2)
+     × is the same text for the same entries, whatever the clock says 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > invite > asks the attendee's calendar to add the Session as confirmed and already accepted
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to be 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' // Object.is equality
+
+- Expected
++ Received
+
+@@ -4,11 +4,11 @@
+  CALSCALE:GREGORIAN
+  METHOD:REQUEST
+  BEGIN:VEVENT
+  UID:j57c9w2qx8@next-session.link
+  SEQUENCE:2
+- DTSTAMP:20261016T092800Z
++ DTSTAMP:20261016T085720Z
+  DTSTART:20261031T180000Z
+  DTEND:20261031T220000Z
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
+
+ ❯ shared/icalendar.test.ts:35:73
+     33| describe("invite", () => {
+     34|   it("asks the attendee's calendar to add the Session as confirmed and…
+     35|     expect(invite({ kind: "request", ...addresses, entry: halloween })…
+       |                                                                         ^
+     36|   });
+     37|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > invite > tells every attendee's calendar that the Session is off
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to be 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' // Object.is equality
+
+- Expected
++ Received
+
+@@ -4,11 +4,11 @@
+  CALSCALE:GREGORIAN
+  METHOD:CANCEL
+  BEGIN:VEVENT
+  UID:j57c9w2qx8@next-session.link
+  SEQUENCE:2
+- DTSTAMP:20261016T092800Z
++ DTSTAMP:20261016T085720Z
+  DTSTART:20261031T180000Z
+  DTEND:20261031T220000Z
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
+
+ ❯ shared/icalendar.test.ts:39:72
+     37|
+     38|   it("tells every attendee's calendar that the Session is off", () => {
+     39|     expect(invite({ kind: "cancel", ...addresses, entry: halloween }))…
+       |                                                                        ^
+     40|   });
+     41|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > invite > uninvites only this attendee, leaving the Session's status unsaid
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to be 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' // Object.is equality
+
+- Expected
++ Received
+
+@@ -4,11 +4,11 @@
+  CALSCALE:GREGORIAN
+  METHOD:CANCEL
+  BEGIN:VEVENT
+  UID:j57c9w2qx8@next-session.link
+  SEQUENCE:2
+- DTSTAMP:20261016T092800Z
++ DTSTAMP:20261016T085720Z
+  DTSTART:20261031T180000Z
+  DTEND:20261031T220000Z
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
+
+ ❯ shared/icalendar.test.ts:43:74
+     41|
+     42|   it("uninvites only this attendee, leaving the Session's status unsai…
+     43|     expect(invite({ kind: "withdraw", ...addresses, entry: halloween }…
+       |                                                                          ^
+     44|   });
+     45| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > feed > lists scheduled and cancelled Sessions for a subscribed calendar, without invite headers
+AssertionError: expected 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' to be 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRO…' // Object.is equality
+
+- Expected
++ Received
+
+@@ -6,11 +6,11 @@
+  REFRESH-INTERVAL;VALUE=DURATION:PT1H
+  X-PUBLISHED-TTL:PT1H
+  BEGIN:VEVENT
+  UID:j57c9w2qx8@next-session.link
+  SEQUENCE:2
+- DTSTAMP:20261016T092805Z
++ DTSTAMP:20261016T085720Z
+  DTSTART:20261031T180000Z
+  DTEND:20261031T220000Z
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
+@@ -18,11 +18,11 @@
+  STATUS:CONFIRMED
+  END:VEVENT
+  BEGIN:VEVENT
+  UID:j57d4r8kz1@next-session.link
+  SEQUENCE:0
+- DTSTAMP:20261016T092805Z
++ DTSTAMP:20261016T085720Z
+  DTSTART:20261107T183000Z
+  DTEND:20261107T223000Z
+  SUMMARY:Spieleabend C
+  DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
+  URL:https://next-session.link/me
+
+ ❯ shared/icalendar.test.ts:50:43
+     48|   it("lists scheduled and cancelled Sessions for a subscribed calendar…
+     49|     const entries = [halloween, cancelledNovember].map((entry) => ({ .…
+     50|     expect(feed("Next Session", entries)).toBe(feedGolden);
+       |                                           ^
+     51|   });
+     52| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > every calendar > is the same text for the same entries, whatever the clock says
+AssertionError: expected [ …(4) ] to deeply equal [ …(4) ]
+
+- Expected
++ Received
+
+@@ -5,11 +5,11 @@
+  CALSCALE:GREGORIAN
+  METHOD:REQUEST
+  BEGIN:VEVENT
+  UID:j57c9w2qx8@next-session.link
+  SEQUENCE:2
+- DTSTAMP:20260101T000000Z
++ DTSTAMP:20270701T123456Z
+  DTSTART:20261031T180000Z
+  DTEND:20261031T220000Z
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\\nhttps://next-session.link/me
+@@ -27,11 +27,11 @@
+  CALSCALE:GREGORIAN
+  METHOD:CANCEL
+  BEGIN:VEVENT
+  UID:j57c9w2qx8@next-session.link
+  SEQUENCE:2
+- DTSTAMP:20260101T000000Z
++ DTSTAMP:20270701T123456Z
+  DTSTART:20261031T180000Z
+  DTEND:20261031T220000Z
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\\nhttps://next-session.link/me
+@@ -49,11 +49,11 @@
+  CALSCALE:GREGORIAN
+  METHOD:CANCEL
+  BEGIN:VEVENT
+  UID:j57c9w2qx8@next-session.link
+  SEQUENCE:2
+- DTSTAMP:20260101T000000Z
++ DTSTAMP:20270701T123456Z
+  DTSTART:20261031T180000Z
+  DTEND:20261031T220000Z
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\\nhttps://next-session.link/me
+@@ -72,11 +72,11 @@
+  REFRESH-INTERVAL;VALUE=DURATION:PT1H
+  X-PUBLISHED-TTL:PT1H
+  BEGIN:VEVENT
+  UID:j57c9w2qx8@next-session.link
+  SEQUENCE:2
+- DTSTAMP:20260101T000000Z
++ DTSTAMP:20270701T123456Z
+  DTSTART:20261031T180000Z
+  DTEND:20261031T220000Z
+  SUMMARY:Spieleabend C
+  LOCATION:Bei Anna
+  DESCRIPTION:Next session of Spieleabend C.\\nhttps://next-session.link/me
+@@ -84,11 +84,11 @@
+  STATUS:CONFIRMED
+  END:VEVENT
+  BEGIN:VEVENT
+  UID:j57d4r8kz1@next-session.link
+  SEQUENCE:0
+- DTSTAMP:20260101T000000Z
++ DTSTAMP:20270701T123456Z
+  DTSTART:20261107T183000Z
+  DTEND:20261107T223000Z
+  SUMMARY:Spieleabend C
+  DESCRIPTION:Next session of Spieleabend C.\\nhttps://next-session.link/me
+  URL:https://next-session.link/me
+
+ ❯ shared/icalendar.test.ts:110:29
+    108|     const january = everyCalendar();
+    109|     vi.setSystemTime(Date.UTC(2027, 6, 1, 12, 34, 56));
+    110|     expect(everyCalendar()).toEqual(january);
+       |                             ^
+    111|   });
+    112| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 5 passed (10)
+   Start at  08:57:20
+   Duration  170ms (transform 45%, tests 36%, import 15%, worker 4%)
+

@@ -15,11 +15,13 @@ import {
   type KeyValueStorage,
 } from "./storage";
 
+export type CopyMethod = "clipboard" | "fallback" | "failed";
+
 export type BrowserEvent =
   | {
       name: "share_link_copied";
       surface: "landing" | "rail" | "compact" | "header";
-      method: "clipboard" | "fallback" | "failed";
+      method: CopyMethod;
     }
   | {
       name: "share_link_shared";
@@ -33,7 +35,9 @@ export type BrowserEvent =
   | { name: "keep_group_started"; group_id: string }
   | { name: "remove_group_started"; group_id: string }
   | { name: "remove_group_undone"; group_id: string }
-  | { name: "create_link_started"; surface: "me" };
+  | { name: "create_link_started"; surface: "me" }
+  | { name: "calendar_downloaded"; group_id: string }
+  | { name: "calendar_feed_copied"; method: CopyMethod };
 
 export type ErrorContext = {
   surface: string;

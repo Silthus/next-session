@@ -1,0 +1,8 @@
+bun run check on the base tree 8dd3522 (origin/spec/calendar-files before this ticket), run in a detached worktree:
+$ tsc -p tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p convex/tsconfig.json && eslint . && prettier --check . && vitest run && vite build && wrangler deploy --dry-run
+All matched files use Prettier code style!
+ Test Files  91 passed (91)
+      Tests  1468 passed (1468)
+✓ built in 662ms
+Total Upload: 4.29 KiB / gzip: 1.43 KiB
+exit=0

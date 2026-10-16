@@ -1,0 +1,104 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-6dab991f
+
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerScreen.test.tsx > PlayerScreen > opens the GM view when the GM's Account opens its own Share Link 77ms
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > says who is answering and lets them switch 208ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > moves focus to the Group name so screen readers start there 30ms
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerScreen.test.tsx > PlayerScreen > stays on the player view when the Group becomes the Account's own while open 177ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerScreen.test.tsx > PlayerScreen > waits for the first answer to save before showing the visitor nudge 108ms
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > cycles a tile from not set to free, maybe, busy and back 203ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > shows each Answer with a glyph as well as a color 62ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerScreen.test.tsx > PlayerScreen > keeps Not you selected when the first answer claims after the click 122ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > locks the days before today 48ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > marks a Session with a star and keeps it tappable 41ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerScreen.test.tsx > PlayerScreen > keeps the newly picked name when the rejected Player's claim arrives late 141ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > marks a Cancelled Session as Cancelled and keeps it answerable 52ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > shows progress over the nights left and fills the rest busy 58ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerScreen.test.tsx > PlayerScreen > offers keeping when the visitor reaches a month with saved answers 67ms
+ ✓ |ui| src/features/player/PlayerScreen.test.tsx > PlayerScreen > gives a visitor the Group's calendar file behind its Share Link 26ms
+ ✓ |ui| src/features/player/PlayerScreen.test.tsx > PlayerScreen > points an Account that keeps the Group to My groups for moves and cancellations 24ms
+ ✓ |ui| src/features/player/PlayerScreen.test.tsx > PlayerScreen > shows an error if the visitor's direct Google sign-in cannot start 67ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > celebrates a done month and offers the next one 56ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > says all set for now at the end of the Booking Window 45ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > shows a past month read-only without progress or Fill Rest 56ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > goes back a month 47ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > points at the first open night on a first visit and reopens on ? 44ms
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > keeps the tiles out of reach until the month's Answers load 15ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > hands focus to the done card after Fill Rest and to the month after Fill next 100ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > gives focus back to Fill Rest when the backend refuses it 91ms
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > leaves focus alone when a tap reopens a month that Fill Rest saved 109ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > keeps focus on the night the player moved to while a refused Fill Rest rolls back 108ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > ignores a refusal for a month the player swiped away from 97ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > explains that past nights lock under a read-only month 16ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > ties the first-visit hint to the tile it points at 39ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > offers no How it works on a read-only month 35ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > changes the month on a left swipe 17ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > changes the month on a right swipe 17ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > keeps the month on a mostly vertical drag 16ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar > keeps the month on a left swipe past the Booking Window 17ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar next sessions > shows when and where each upcoming Session is, soonest first 23ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar next sessions > leaves out played and Cancelled Sessions 20ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar next sessions > names the Group's zone when the player's browser is elsewhere 19ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar next sessions > offers the upcoming Sessions as a one-time copy for the player's calendar 22ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar next sessions > points an Account that keeps the Group to My groups to follow moves 24ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar next sessions > shows no Next sessions while nothing is scheduled ahead 18ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar header and keep slot > shows the account control in the header 18ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar header and keep slot > shows the keep slot under the calendar 17ms
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar telemetry > tracks calendar_downloaded when the player presses Add to calendar 28ms
+Not implemented: Window's scrollTo() method
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar telemetry > tracks answers_started at the first saved tap, once per page load 178ms
+Not implemented: Window's scrollTo() method
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar telemetry > does not track answers_started again when the calendar mounts again 103ms
+ ✓ |ui| src/features/player/PlayerCalendar.test.tsx > PlayerCalendar telemetry > tracks fill_rest_used once the nights are saved, and not when refused 96ms
+
+ Test Files  2 passed (2)
+      Tests  47 passed (47)
+   Start at  11:06:34
+   Duration  3.11s (tests 64%, environment 19%, transform 9%, import 5%, setup 3%)
+

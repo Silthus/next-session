@@ -2,7 +2,7 @@
 
 > **Draft, pending review by a qualified German lawyer before publication.** Source text for the `/privacy` page. `{{…}}` placeholders are filled at build time (see `docs/spec.md` §7).
 
-**Version 1.8. Effective: {{EFFECTIVE_DATE}}**
+**Version 1.9. Effective: {{EFFECTIVE_DATE}}**
 
 This policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.
 
@@ -29,6 +29,7 @@ We have not appointed a data protection officer because we are not required to.
 | Pseudonymous usage events (pages viewed, steps such as creating a link, joining, scheduling), with the random ID of your user, player, or group | Learn which parts of the Service are used, fix problems | Legitimate interest, 6(1)(f) |
 | Error reports and technical logs (error message, browser, page) | Keep the Service working | Legitimate interest, 6(1)(f) |
 | For an account: your email address | Send you one welcome mail | Contract, 6(1)(b) |
+| For an account that subscribes to its calendar feed: a secret feed link. The calendar app that fetches the link receives the group name, date, start and end time, and place of the sessions of your groups | Let your calendar app follow the sessions of your groups | Contract, 6(1)(b) |
 | For a player with an account, when session emails are enabled: your email address, group name, session date, share link and email preference | Tell you when a session is set or cancelled | Contract, 6(1)(b) |
 | If you ask for tips: your email address and your confirmation | Send the two tip mails | Consent, 6(1)(a) |
 
@@ -85,6 +86,7 @@ Your Google profile picture is shown only to you and to the GM of each group whe
 | Usage events and error reports in PostHog | 1 year |
 | Technical logs in PostHog | 14 days |
 | Your Google profile picture | Replaced or deleted at your next Google sign-in after you change or remove it at Google; deleted with your account |
+| Your calendar feed link | Until you reset it on My groups or your account is deleted |
 | Your account's pseudonymous profile in PostHog, and your email address for the welcome mail, tips, and session updates | Until your account is deleted |
 
 When you save a group to an account, the group moves to the account and the temporary user ID is deleted.

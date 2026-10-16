@@ -1,0 +1,4 @@
+ × |ui| src/features/me/MyGroups.test.tsx > Your calendar on My groups > resets the link at once and shows the new one 35ms
+   → Unable to find an element with the text: Stops the old link at once.. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 19 passed (20)

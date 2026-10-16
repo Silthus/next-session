@@ -66,6 +66,8 @@ function calendarProps(props: Partial<Props> = {}): Props {
   return {
     groupId: "group-thursday",
     groupName: "Thursday Crew",
+    shareToken: "test-share-token",
+    keptInMyGroups: false,
     playerName: "Ana",
     month: "2026-10",
     today,
@@ -481,6 +483,32 @@ describe("PlayerCalendar next sessions", () => {
     );
   });
 
+  it("offers the upcoming Sessions as a one-time copy for the player's calendar", async () => {
+    renderCalendar({ sessions: [sessionOn("2026-10-16")] });
+
+    const card = within(await nextSessions());
+    expect(card.getByRole("link", { name: "Add to calendar" }).getAttribute("href")).toBe(
+      "/cal/s/test-share-token.ics",
+    );
+    expect(
+      card.getByText("A one-time copy. Keep this group to get moves and cancellations too."),
+    ).toBeTruthy();
+  });
+
+  it("points an Account that keeps the Group to My groups to follow moves", async () => {
+    renderCalendar({ sessions: [sessionOn("2026-10-16")], keptInMyGroups: true });
+
+    const card = within(await nextSessions());
+    expect(card.getByRole("link", { name: "Add to calendar" })).toBeTruthy();
+    expect(card.getByRole("link", { name: "Subscribe on My groups" }).getAttribute("href")).toBe(
+      "/me",
+    );
+    expect(card.getByText(/^A one-time copy\./).textContent).toBe(
+      "A one-time copy. Subscribe on My groups to follow moves and cancellations.",
+    );
+    expect(card.queryByText(/Keep this group/)).toBeNull();
+  });
+
   it("shows no Next sessions while nothing is scheduled ahead", async () => {
     renderCalendar({ sessions: [sessionOn("2026-10-02"), sessionOn("2026-10-20", "cancelled")] });
 
@@ -516,6 +544,19 @@ describe("PlayerCalendar telemetry", () => {
     });
     return { promise, ...settle };
   }
+
+  it("tracks calendar_downloaded when the player presses Add to calendar", async () => {
+    renderCalendar({ groupId: "group-download", sessions: [sessionOn("2026-10-16")] });
+    const download = await screen.findByRole("link", { name: "Add to calendar" });
+    download.addEventListener("click", (event) => event.preventDefault());
+
+    await userEvent.click(download);
+
+    expect(track).toHaveBeenCalledExactlyOnceWith({
+      name: "calendar_downloaded",
+      group_id: "group-download",
+    });
+  });
 
   it("tracks answers_started at the first saved tap, once per page load", async () => {
     const saves = [deferred(), deferred(), deferred()];

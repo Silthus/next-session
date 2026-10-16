@@ -5,10 +5,11 @@
   "workers_dev": true,
   "preview_urls": false,
   "routes": [{ "pattern": "next-session.link", "custom_domain": true }],
+  "vars": { "CONVEX_SITE_URL": "https://pleasant-sockeye-672.convex.site" },
   "assets": {
     "directory": "dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/s/*", "/groups*", "/ingest/*"],
+    "run_worker_first": ["/s/*", "/groups*", "/ingest/*", "/cal/*"],
   },
 }

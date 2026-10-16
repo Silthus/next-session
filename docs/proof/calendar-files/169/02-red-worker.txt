@@ -1,0 +1,176 @@
+# red: the Worker /cal proxy tests on the base tree bbe8f34 (no calendarTarget, no /cal proxy)
+
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-57fbe946
+
+ ❯ |shared| worker/index.test.ts (61 tests | 23 failed) 43ms
+   ❯ calendarTarget (13)
+     × sends /cal/s/AbC9_-xZ12.ics to https://calendar-test-123.convex.site/cal/s/AbC9_-xZ12.ics 2ms
+     × sends /cal/a/Feed_token-22chars0000.ics to https://calendar-test-123.convex.site/cal/a/Feed_token-22chars0000.ics 0ms
+     × sends /cal/s/AbC9_-xZ12.ics?utm_source=mail to https://calendar-test-123.convex.site/cal/s/AbC9_-xZ12.ics 0ms
+     × has no Convex target for /cal/ 0ms
+     × has no Convex target for /cal/s/ 0ms
+     × has no Convex target for /cal/s/.ics 0ms
+     × has no Convex target for /cal/s/AbC9_-xZ12 0ms
+     × has no Convex target for /cal/s/AbC9.xZ12.ics 0ms
+     × has no Convex target for /cal/s/AbC9%2FxZ12.ics 0ms
+     × has no Convex target for /cal/s/AbC9_-xZ12.ics/extra 0ms
+     × has no Convex target for /cal/x/AbC9_-xZ12.ics 0ms
+     × has no Convex target for /cal/api/auth/signin 0ms
+     × has no Convex target for /api/auth/signin 0ms
+   ❯ the /cal proxy (10)
+     × fetches the calendar file from Convex without cookies or client headers 2ms
+     × keeps the calendar headers and status and drops every other response header 2ms
+     × passes on a 404 for an unknown token with no body 1ms
+     × answers /cal/ with 404 and forwards nothing 0ms
+     × answers /cal/s/AbC9_-xZ12 with 404 and forwards nothing 0ms
+     × answers /cal/api/auth/signin with 404 and forwards nothing 0ms
+     × answers POST with 405 and forwards nothing 0ms
+     × answers PUT with 405 and forwards nothing 0ms
+     × answers DELETE with 405 and forwards nothing 0ms
+     × answers HEAD with 405 and forwards nothing 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 23 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| worker/index.test.ts > calendarTarget > sends /cal/s/AbC9_-xZ12.ics to https://calendar-test-123.convex.site/cal/s/AbC9_-xZ12.ics
+ FAIL  |shared| worker/index.test.ts > calendarTarget > sends /cal/a/Feed_token-22chars0000.ics to https://calendar-test-123.convex.site/cal/a/Feed_token-22chars0000.ics
+ FAIL  |shared| worker/index.test.ts > calendarTarget > sends /cal/s/AbC9_-xZ12.ics?utm_source=mail to https://calendar-test-123.convex.site/cal/s/AbC9_-xZ12.ics
+TypeError: calendarTarget is not a function
+ ❯ worker/index.test.ts:189:12
+    187|     ["/cal/s/AbC9_-xZ12.ics?utm_source=mail", `${convexSite}/cal/s/AbC…
+    188|   ])("sends %s to %s", (path, target) => {
+    189|     expect(calendarTarget(new URL(`${app}${path}`), convexSite)).toBe(…
+       |            ^
+    190|   });
+    191|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/23]⎯
+
+ FAIL  |shared| worker/index.test.ts > calendarTarget > has no Convex target for /cal/
+ FAIL  |shared| worker/index.test.ts > calendarTarget > has no Convex target for /cal/s/
+ FAIL  |shared| worker/index.test.ts > calendarTarget > has no Convex target for /cal/s/.ics
+ FAIL  |shared| worker/index.test.ts > calendarTarget > has no Convex target for /cal/s/AbC9_-xZ12
+ FAIL  |shared| worker/index.test.ts > calendarTarget > has no Convex target for /cal/s/AbC9.xZ12.ics
+ FAIL  |shared| worker/index.test.ts > calendarTarget > has no Convex target for /cal/s/AbC9%2FxZ12.ics
+ FAIL  |shared| worker/index.test.ts > calendarTarget > has no Convex target for /cal/s/AbC9_-xZ12.ics/extra
+ FAIL  |shared| worker/index.test.ts > calendarTarget > has no Convex target for /cal/x/AbC9_-xZ12.ics
+ FAIL  |shared| worker/index.test.ts > calendarTarget > has no Convex target for /cal/api/auth/signin
+ FAIL  |shared| worker/index.test.ts > calendarTarget > has no Convex target for /api/auth/signin
+TypeError: calendarTarget is not a function
+ ❯ worker/index.test.ts:204:12
+    202|     "/api/auth/signin",
+    203|   ])("has no Convex target for %s", (path) => {
+    204|     expect(calendarTarget(new URL(`${app}${path}`), convexSite)).toBeN…
+       |            ^
+    205|   });
+    206| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/23]⎯
+
+ FAIL  |shared| worker/index.test.ts > the /cal proxy > fetches the calendar file from Convex without cookies or client headers
+AssertionError: expected '<!doctype html>' to be 'BEGIN:VCALENDAR' // Object.is equality
+
+Expected: "BEGIN:VCALENDAR"
+Received: "<!doctype html>"
+
+ ❯ worker/index.test.ts:224:35
+    222|
+    223|     expect(response.status).toBe(200);
+    224|     expect(await response.text()).toBe("BEGIN:VCALENDAR");
+       |                                   ^
+    225|     expect(requested).toEqual([]);
+    226|     expect(forwarded).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/23]⎯
+
+ FAIL  |shared| worker/index.test.ts > the /cal proxy > keeps the calendar headers and status and drops every other response header
+AssertionError: expected { Object (content-type) } to deeply equal { …(3) }
+
+- Expected
++ Received
+
+  {
+-   "cache-control": "private, max-age=900",
+-   "content-disposition": "attachment; filename=\"next-session.ics\"",
+-   "content-type": "text/calendar; charset=utf-8",
++   "content-type": "text/plain;charset=UTF-8",
+  }
+
+ ❯ worker/index.test.ts:249:50
+    247|     const { response } = await visit("/cal/s/AbC9_-xZ12.ics");
+    248|
+    249|     expect(Object.fromEntries(response.headers)).toEqual({
+       |                                                  ^
+    250|       "content-type": "text/calendar; charset=utf-8",
+    251|       "cache-control": "private, max-age=900",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/23]⎯
+
+ FAIL  |shared| worker/index.test.ts > the /cal proxy > passes on a 404 for an unknown token with no body
+AssertionError: expected 200 to be 404 // Object.is equality
+
+- Expected
++ Received
+
+- 404
++ 200
+
+ ❯ worker/index.test.ts:261:29
+    259|     const { response } = await visit("/cal/a/UnknownFeedToken000000.ic…
+    260|
+    261|     expect(response.status).toBe(404);
+       |                             ^
+    262|     expect(await response.text()).toBe("");
+    263|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/23]⎯
+
+ FAIL  |shared| worker/index.test.ts > the /cal proxy > answers /cal/ with 404 and forwards nothing
+ FAIL  |shared| worker/index.test.ts > the /cal proxy > answers /cal/s/AbC9_-xZ12 with 404 and forwards nothing
+ FAIL  |shared| worker/index.test.ts > the /cal proxy > answers /cal/api/auth/signin with 404 and forwards nothing
+AssertionError: expected 200 to be 404 // Object.is equality
+
+- Expected
++ Received
+
+- 404
++ 200
+
+ ❯ worker/index.test.ts:272:31
+    270|       const { response, requested } = await visit(path);
+    271|
+    272|       expect(response.status).toBe(404);
+       |                               ^
+    273|       expect(await response.text()).toBe("");
+    274|       expect(forwarded).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/23]⎯
+
+ FAIL  |shared| worker/index.test.ts > the /cal proxy > answers POST with 405 and forwards nothing
+ FAIL  |shared| worker/index.test.ts > the /cal proxy > answers PUT with 405 and forwards nothing
+ FAIL  |shared| worker/index.test.ts > the /cal proxy > answers DELETE with 405 and forwards nothing
+ FAIL  |shared| worker/index.test.ts > the /cal proxy > answers HEAD with 405 and forwards nothing
+AssertionError: expected 200 to be 405 // Object.is equality
+
+- Expected
++ Received
+
+- 405
++ 200
+
+ ❯ worker/index.test.ts:286:31
+    284|       const { response, requested } = await visit("/cal/s/AbC9_-xZ12.i…
+    285|
+    286|       expect(response.status).toBe(405);
+       |                               ^
+    287|       expect(response.headers.get("allow")).toBe("GET");
+    288|       expect(forwarded).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/23]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  23 failed | 38 passed (61)
+   Start at  10:29:44
+   Duration  233ms (tests 52%, transform 32%, import 12%, worker 3%)
+

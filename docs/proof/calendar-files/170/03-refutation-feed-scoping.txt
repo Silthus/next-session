@@ -1,0 +1,48 @@
+# feed scoping refutation (feed token): the witness with the break staged (accountFeed reads every Group as run instead of only the Account's own by_ownerId range)
+
+--- a/convex/calendarFiles.ts
++++ b/convex/calendarFiles.ts
+@@ -101,10 +101,7 @@
+ }
+ 
+ async function feedGroupsOf(ctx: QueryCtx, account: Doc<"users">) {
+-  const run = await ctx.db
+-    .query("groups")
+-    .withIndex("by_ownerId", (q) => q.eq("ownerId", account._id))
+-    .take(MAX_GROUPS_PER_GM);
++  const run = await ctx.db.query("groups").take(MAX_GROUPS_PER_GM);
+   const played = await groupsPlayedBy(ctx, account, new Set(run.map((group) => group._id)));
+   return [
+     ...run.map((group) => ({ group, url: siteLink(`/g/${group._id}`) })),
+
+  the detector went red: 1 of 2 tests under "every calendar file holds only the published Sessions its own token reaches" failed: feed scoping every calendar file holds only the published Sessions its own token reaches through a feed token
+  recorded in .coherence/runs/379651fc-0d46-4b8b-8665-baa8f82dd77a.jsonl at 2026-10-16T10:54:43.041Z
+now restore the code and run: run — the refutation counts as witnessed once a later run finds the same totality oracle passing
+
+ FAIL  |convex| convex/calendarFiles.test.ts > feed scoping > every calendar file holds only the published Sessions its own token reaches > through a feed token
+AssertionError: expected [ [ …(2) ], [ …(2) ], [ …(2) ] ] to deeply equal [ [ …(2) ], [ …(2) ] ]
+
+- Expected
++ Received
+
+@@ -5,6 +5,10 @@
+    ],
+    [
+      "000000000000000000010013sessions@next-session.link",
+      "Sunday Table",
+    ],
++   [
++     "000000000000000000010015sessions@next-session.link",
++     "Monday Night",
++   ],
+  ]
+
+ ❯ convex/calendarFiles.test.ts:491:80
+    489|       const theirEvents = await feedEvents(theirFeed);
+    490|
+    491|       expect(eventsIn(ourCalendar).map((event) => [event.UID, event.SU…
+       |                                                                                ^
+    492|         [uidOf(ourSession), "Thursday Crew"],
+    493|         [uidOf(playedSession), "Sunday Table"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
