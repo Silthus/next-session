@@ -14,8 +14,8 @@ const modules = import.meta.glob("../**/*.*s");
 
 export type TestBackend = ReturnType<typeof newBackend>;
 
-export function newBackend() {
-  const t = convexTest(schema, modules);
+export function newBackend({ transactionLimits = false } = {}) {
+  const t = convexTest({ schema, modules, transactionLimits });
   rateLimiterTest.register(t);
   actionRetrierTest.register(t);
   return t;

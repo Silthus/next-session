@@ -1,0 +1,8 @@
+bun run check on 5e24e95 (the landed code), through fleet heavy: exit 0
+ Test Files  91 passed (91)
+      Tests  1464 passed (1464)
+tsc x3, eslint, prettier --check, vite build, wrangler deploy --dry-run: all passed
+
+bun run e2e: not run, the ticket touches no UI and no e2e
+
+coherence spec --check: 7 invariants, 0 problems; run --invariant 'calendar recipients' --each: pass batched and alone, refutation witnessed

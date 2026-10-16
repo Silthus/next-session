@@ -1,0 +1,2 @@
+      Tests  1754 passed (1754)
+bun run check exit 0 on the fix commit's tree (tsc x3, eslint, prettier, vitest, vite build, wrangler dry run)

@@ -1,0 +1,114 @@
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > announces a set Session with when, where, the invite hint, the group link and why it came 20ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > leaves the Where line out when the Session has no location 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > says what a changed Session is now 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail a Player gets > tells a cancel without when or where, and that the calendar removes it 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > says you for a set Session 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > says you for a changed Session 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > says you for a cancelled Session 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the Session mail the GM gets > links the GM surface and says the GM runs the group 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the HTML part > says the same words with one button to the group 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the HTML part > escapes what the GM typed 2ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > writes the times in the Group's zone with its city 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the mail for entering or leaving the calendar recipient set > invites a player who entered with the night and the invite hint 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the mail for entering or leaving the calendar recipient set > invites a gm who entered with the night and the invite hint 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the mail for entering or leaving the calendar recipient set > withdraws the night from a Player who left, with no button to the group 0ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the mail for a deleted Group's night > tells a player the night is off, with no button to the gone group 1ms
+ ✓ |convex| convex/model/sessionMailCopy.test.ts > the mail for a deleted Group's night > tells a gm the night is off, with no button to the gone group 0ms
+ ✓ |convex| convex/reminders.test.ts > reminds each Claimed Account once, 1 day and again 2 hours before the start 309ms
+ ✓ |convex| convex/reminders.test.ts > names the Group, the date, the start and the location in the Group's time zone, and links only the current Share Link 21ms
+ ✓ |convex| convex/reminders.test.ts > writes the date and start in a Group time zone far from UTC and leaves out a missing location 24ms
+ ✓ |convex| convex/reminders.test.ts > reminds each Account once however many Players it claims, the GM only through a Player of their own, and never an Account that can't get mail 21ms
+ ✓ |convex| convex/reminders.test.ts > a Reminder > never announces a change before its Undo window ends 11ms
+ ✓ |convex| convex/reminders.test.ts > a Reminder > names the published time while a new time zone waits out its Undo window 13ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails every calendar recipient once after the Undo window, the GM included, and nobody before 400ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails only the Group's calendar recipient set, rechecked on every attempt 83ms
+ ✓ |convex| convex/sessionCancellations.test.ts > deleting a Group > cancels every upcoming published Session in each calendar it reached before the Group goes 352ms
+ ✓ |convex| convex/sessionCancellations.test.ts > deleting a Group > cancels a night whose cancel was published but had not reached the calendars yet 49ms
+ ✓ |convex| convex/sessionCancellations.test.ts > deleting a Group > cancels nothing that is past or was never published 7ms
+ ✓ |convex| convex/sessionCancellations.test.ts > deleting a Group > cancels an expired Unsaved Group's nights for its Players and leaves its Anonymous GM out 37ms
+ ✓ |convex| convex/reminders.test.ts > a Reminder > keeps the published time zone across a retry 14ms
+ ✓ |convex| convex/reminders.test.ts > moves the pair with a saved Time and place and shows the new location 17ms
+ ✓ |convex| convex/reminders.test.ts > fires the moved pair at the new times 19ms
+ ✓ |convex| convex/reminders.test.ts > Cancel, Undo and Schedule again > reminds nobody of a Session cancelled after its window 10ms
+ ✓ |convex| convex/reminders.test.ts > Cancel, Undo and Schedule again > sends one pair, not two, for Cancel then Schedule again inside the cancel's window 17ms
+ ✓ |convex| convex/reminders.test.ts > Cancel, Undo and Schedule again > sends one pair, not two, for Cancel then Schedule again after the cancel settled 27ms
+ ✓ |convex| convex/sessionInvites.test.ts > puts the night into each calendar as an accepted invite without an alarm and with a token-free link 22ms
+ ✓ |convex| convex/sessionInvites.test.ts > takes a cancelled night out of every calendar 37ms
+ ✓ |convex| convex/sessionInvites.test.ts > raises SEQUENCE for every recipient across set, change, cancel and Schedule again under one UID 53ms
+ ✓ |convex| convex/reminders.test.ts > Cancel, Undo and Schedule again > reminds nobody when a Schedule again is undone inside its window 13ms
+ ✓ |convex| convex/reminders.test.ts > Cancel, Undo and Schedule again > reminds nobody of a new Session undone inside its first window 6ms
+ ✓ |convex| convex/reminders.test.ts > recipients resolved when the Reminder fires > reminds nobody who turns Reminders off in My groups before the due time 23ms
+ ✓ |convex| convex/reminders.test.ts > recipients resolved when the Reminder fires > reminds nobody who releases the Group before the due time 16ms
+ ✓ |convex| convex/reminders.test.ts > recipients resolved when the Reminder fires > reminds nobody who is removed by the GM before the due time 24ms
+ ✓ |convex| convex/reminders.test.ts > recipients resolved when the Reminder fires > reminds nobody who loses the Group to deletion before the due time 12ms
+ ✓ |convex| convex/sessionInvites.test.ts > gives the Calendar download and feed the SEQUENCE of the night's last invite 102ms
+ ✓ |convex| convex/reminders.test.ts > recipients resolved when the Reminder fires > sends no 2-hour Reminder after the day Reminder's link turned Reminders off 24ms
+ ✓ |convex| convex/reminders.test.ts > recipients resolved when the Reminder fires > reminds an Account that claims a Player after the Session was published 22ms
+ ✓ |convex| convex/reminders.test.ts > recipients resolved when the Reminder fires > keeps the Account's Reminder link the same across Reminders 12ms
+ ✓ |convex| convex/reminders.test.ts > due times > schedules only the 2-hour Reminder for a Session published an hour after the day Reminder was due 8ms
+ ✓ |convex| convex/reminders.test.ts > due times > schedules only the 2-hour Reminder for a Session published 2 minutes after the day Reminder was due 11ms
+ ✓ |convex| convex/reminders.test.ts > due times > schedules no Reminder for a Session published less than 2 hours ahead 4ms
+ ✓ |convex| convex/reminders.test.ts > due times > a day Reminder run 4 minutes late sends ["day","hours"] 16ms
+ ✓ |convex| convex/reminders.test.ts > due times > a day Reminder run 6 minutes late sends ["hours"] 10ms
+ ✓ |convex| convex/reminders.test.ts > built disabled > schedules nothing and calls no webhook without POSTHOG_REMINDER_WEBHOOK_URL, and still publishes 4ms
+ ✓ |convex| convex/reminders.test.ts > built disabled > schedules nothing and calls no webhook without POSTHOG_MAIL_WEBHOOK_SECRET, and still publishes 6ms
+ ✓ |convex| convex/sessionInvites.test.ts > spaces the sends of one fan-out at least 500 ms apart 24ms
+ ✓ |convex| convex/sessionInvites.test.ts > links the footer's My groups to the deployment's own site 13ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > drops a retry whose revision is no longer the published one 42ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > sends a 503 then 200 once, the same request under one Idempotency-Key 14ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > still delivers a retry after the Share Token rotates, under a key that matches its new body 19ms
+ ✓ |convex| convex/reminders.test.ts > built disabled > drops a scheduled Reminder when Reminders are switched off before it fires 7ms
+ ✓ |convex| convex/reminders.test.ts > the switch-on backfill > schedules one pair for each upcoming scheduled Session published before switch-on, even when run twice 24ms
+ ✓ |convex| convex/reminders.test.ts > the switch-on backfill > waits out a Time and place change still inside its Undo window 20ms
+ ✓ |convex| convex/reminders.test.ts > the switch-on backfill > waits for a settle that runs late 5ms
+ ✓ |convex| convex/reminders.test.ts > the switch-on backfill > schedules a Session whose pending change was taken back once its Undo window ends 19ms
+ ✓ |convex| convex/reminders.test.ts > the switch-on backfill > leaves a Session published after switch-on with its one pair 11ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > names the night's time in the zone it was published in when the zone changes before a retry 40ms
+ ✓ |convex| convex/sessionInvites.test.ts > delivery > logs a 422 without the recipient and does not retry it 13ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Account with Session mail off 13ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Account with a .test address 7ms
+ ✓ |convex| convex/sessionInvites.test.ts > mails nothing to an Anonymous GM 8ms
+ ✓ |convex| convex/sessionInvites.test.ts > the provider switch > leaves Session updates on Workflows and Resend untouched without RESEND_API_KEY 6ms
+ ✓ |convex| convex/sessionInvites.test.ts > the provider switch > requests no Workflows Session update while RESEND_API_KEY is set 12ms
+ ✓ |convex| convex/reminders.test.ts > the switch-on backfill > pages through more upcoming Sessions than one page holds 26ms
+ ✓ |convex| convex/reminders.test.ts > the switch-on backfill > skips a Session whose Reminders are already behind it 4ms
+ ✓ |convex| convex/reminders.test.ts > delivery > sends once after a 503 then a 200 10ms
+ ✓ |convex| convex/reminders.test.ts > delivery > drops a Reminder the webhook refuses with HTTP 400 6ms
+ ✓ |convex| convex/reminders.test.ts > delivery > drops a Reminder the webhook refuses with HTTP 404 6ms
+ ✓ |convex| convex/reminders.test.ts > delivery > drops a Reminder the webhook refuses with HTTP 429 10ms
+ ✓ |convex| convex/reminders.test.ts > delivery > rechecks the switch before retrying a failed send 11ms
+ ✓ |convex| convex/reminders.test.ts > delivery > rechecks the release before retrying a failed send 10ms
+ ✓ |convex| convex/reminders.test.ts > delivery > counts one delivery per Reminder in the day's mail volume 12ms
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > counts and warns Resend sends apart from Workflows sends 327ms
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > reads a day counted before providers as Workflows 4ms
+ ✓ |convex| convex/sessionInvites.test.ts > mail volume > keeps emails, Group names and Share Tokens out of usage events and logs 17ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites a Player who keeps the Group through Join while signed in to each upcoming published scheduled Session 48ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites a Player who keeps the Group through Keep this group to each upcoming published scheduled Session 46ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites a Player who keeps the Group through the auto-keep on answer to each upcoming published scheduled Session 55ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > withdraws each upcoming published Session from a Player who leaves through Not you? 52ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > withdraws each upcoming published Session from a Player who leaves through Remove from my groups 47ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > withdraws each upcoming published Session from a Player who leaves through the GM removing the Player 44ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > still withdraws the night as it was at the release after a change and the Group's deletion 88ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > drops a withdrawal when the Player keeps the Group again before it sends 47ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > drops an invite when the Player leaves before it sends 38ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > lets a claim's invite leave another recipient's pending broadcast retry alone 17ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > sends nothing when a Player switches to another name in the same Group 37ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > sends nothing when the GM releases their own Player 29ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > invites the Account that Saves the Group to each upcoming published scheduled Session 47ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > lets an Account Save 26 Groups with 20 published nights each, and invites it to every night 1638ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > neither invites nor withdraws an Account with Session mail off 40ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > neither invites nor withdraws an Account with a .test address 38ms
+ ✓ |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > drops a pending withdrawal once the Account turns Session mail off 34ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > invites the whole recipient set to every upcoming Session that fits the day's share, soonest first 31ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > queues only what fits a day near its share, then finishes after the next UTC midnight 28ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > skips a Session that had a Resend send, a cancelled Session and a past Session 23ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > still invites the GM and every Player to a night a newcomer was invited to first 33ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > pages through Sessions whose recipients all turned Session mail off within Convex's limits 139ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > queues nothing on a second start after it finished 11ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > queues nothing without RESEND_API_KEY and leaves every Session for the start after the switch-on 10ms
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > sends a Session larger than the day's share alone, on a day with no Resend sends yet 179ms
+ ✓ |convex| convex/sessionCancellations.test.ts > deleting a Group > drains 100 Accounts × 20 Sessions in runs Convex accepts, spaced under Resend's rate, and forgets them 4581ms
+ ✓ |convex| convex/sessionCancellations.test.ts > deleting a Group > drops a deletion cancel once the Account turns Session mail off before it sends 38ms
+ ✓ |convex| convex/sessionCancellations.test.ts > deleting a Group > deletes as before without RESEND_API_KEY: nothing kept for later, nothing sent 20ms
+ Test Files  4 passed (4)
+      Tests  112 passed (112)

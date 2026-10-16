@@ -2,6 +2,7 @@ import { MAX_CLAIMED_PLAYERS_PER_ACCOUNT, MAX_PLAYERS_PER_GROUP } from "../../sh
 import { normalizeName, type NormalizedName } from "../../shared/names";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
+import { changeRecipientSet } from "../sessionMail";
 import { fail } from "./errors";
 
 export function validName(raw: string): NormalizedName {
@@ -46,10 +47,12 @@ export async function claimedPlayerIn(
 export async function claimPlayer(ctx: MutationCtx, account: Doc<"users">, player: Doc<"players">) {
   if (player.userId === account._id) return;
   if (player.userId !== undefined) fail({ code: "PLAYER_CLAIMED" });
-  const earlier = await claimedPlayerIn(ctx, account._id, player.groupId);
-  if (earlier === null) await ensureRoomForAnotherClaim(ctx, account._id);
-  else await unclaim(ctx, earlier);
-  await ctx.db.patch("players", player._id, { userId: account._id });
+  await changeRecipientSet(ctx, { groupId: player.groupId, userId: account._id }, async () => {
+    const earlier = await claimedPlayerIn(ctx, account._id, player.groupId);
+    if (earlier === null) await ensureRoomForAnotherClaim(ctx, account._id);
+    else await unclaim(ctx, earlier);
+    await ctx.db.patch("players", player._id, { userId: account._id });
+  });
   await forgetRemovalFromMyGroups(ctx, account._id, player.groupId);
 }
 
@@ -66,7 +69,9 @@ export async function keepOnAnswer(
 
 export async function releaseClaim(ctx: MutationCtx, account: Doc<"users">, groupId: Id<"groups">) {
   const claimed = await claimedPlayerIn(ctx, account._id, groupId);
-  if (claimed !== null) await unclaim(ctx, claimed);
+  if (claimed !== null) {
+    await changeRecipientSet(ctx, { groupId, userId: account._id }, () => unclaim(ctx, claimed));
+  }
   return claimed;
 }
 

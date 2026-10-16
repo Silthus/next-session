@@ -1,0 +1,38 @@
+# Red by staged break: each break is applied alone to convex/sessionMail.ts, the file is restored byte for byte after each
+
+## Break 1: groupDeleting keeps Sessions published as Cancelled (the scheduled filter removed)
+     × cancels nothing that is not an upcoming published scheduled Session 107ms
+      Tests  1 failed | 5 passed (6)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ { …(6) }, { …(6) } ] to deeply equal []
+
+## Break 2: groupDeleting ignores RESEND_API_KEY (its calendarMailConfigured guard removed)
+     × deletes as before without RESEND_API_KEY: nothing kept for later, nothing sent 33ms
+      Tests  1 failed | 5 passed (6)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ { …(7) } ] to deeply equal []
+
+## Break 3: one drain run queues every cancel (CANCELLATION_BATCH_SIZE 200 -> 2_000)
+     × drains 100 Accounts × 20 Sessions in runs Convex accepts, spaced under Resend's rate, and forgets them 401ms
+      Tests  1 failed | 5 passed (6)
+Error when running scheduled function sessionMail:drainCancellations Error: Scheduled too many functions in a single function execution (limit: 1000). This is a Convex limit: https://docs.convex.dev/production/state/limits
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [] to have a length of 2000 but got +0
+
+## Break 4: the next drain run starts at once instead of when its sends are due (runAfter(span -> runAfter(0)
+     × drains 100 Accounts × 20 Sessions in runs Convex accepts, spaced under Resend's rate, and forgets them 8307ms
+      Tests  1 failed | 5 passed (6)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected 1 to be greater than or equal to 500
+
+## Break 5: the last drain run keeps the calendarCancellations row (delete -> patch)
+     × drains 100 Accounts × 20 Sessions in runs Convex accepts, spaced under Resend's rate, and forgets them 4809ms
+      Tests  1 failed | 5 passed (6)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ { …(7) } ] to deeply equal []
+
+## Break 6: a deletion cancel stops rechecking the Session mail switch at send time
+     × drops a deletion cancel once the Account turns Session mail off before it sends 254ms
+      Tests  1 failed | 5 passed (6)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ { …(6) }, { …(6) } ] to deeply equal []

@@ -1,0 +1,10 @@
+# Green: the #159 tests after the change, every assertion intact, none skipped
+# bunx vitest run convex/sessionInvites.test.ts --reporter=verbose
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > invites the whole recipient set to every upcoming Session that fits the day's share, soonest first
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > queues only what fits a day near its share, then finishes after the next UTC midnight
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > skips a Session that had a Resend send, a cancelled Session and a past Session
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > queues nothing on a second start after it finished
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > queues nothing without RESEND_API_KEY and leaves every Session for the start after the switch-on
+ ✓ |convex| convex/sessionInvites.test.ts > the one-time invites > sends a Session larger than the day's share alone, on a day with no Resend sends yet
+ Test Files  1 passed (1)
+      Tests  39 passed (39)

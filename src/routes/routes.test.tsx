@@ -71,6 +71,7 @@ describe("/privacy", () => {
     renderAt("/privacy");
     expect(await screen.findByText("Updated Oct 16, 2026")).toBeTruthy();
     expect(screen.getByRole("cell", { name: "Convex, Inc." })).toBeTruthy();
+    expect(screen.getByRole("cell", { name: "Plus Five Five, Inc. (Resend)" })).toBeTruthy();
     expect(screen.getAllByRole("listitem").length).toBeGreaterThanOrEqual(3);
     expect(screen.getByRole("link", { name: "https://www.lda.bayern.de" })).toHaveProperty(
       "href",

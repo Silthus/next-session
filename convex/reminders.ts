@@ -1,6 +1,5 @@
 import { v } from "convex/values";
 import { todayUtc } from "../shared/dates";
-import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
 import { UNDO_WINDOW_MS } from "../shared/sessions";
 import { reminderDueAt, type ReminderLead } from "../shared/sessionTime";
 import { internal } from "./_generated/api";
@@ -15,7 +14,8 @@ import { reminderLead, reminderSend, remindersConfigured, requestReminder } from
 import { remindersOffLinkOf, shareLinkOf } from "./model/siteLinks";
 import { claimedPlayerIn } from "./model/players";
 import { reminderLinkTokenFor, remindersOn } from "./model/reminderLinks";
-import { accountDistinctId, isTestAddress, PRODUCT, serverLog } from "./model/telemetry";
+import { claimedAccountIds, isMailable, type MailableAccount } from "./model/recipients";
+import { accountDistinctId, PRODUCT, serverLog } from "./model/telemetry";
 import { groupTimeOf } from "./model/timeAndPlace";
 import { isSettling } from "./sessionLifecycle";
 
@@ -184,19 +184,14 @@ function isLate(published: ScheduledSnapshot, lead: ReminderLead) {
 }
 
 async function remindableAccounts(ctx: QueryCtx, groupId: Id<"groups">) {
-  const players = await ctx.db
-    .query("players")
-    .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", groupId))
-    .take(MAX_PLAYERS_PER_GROUP);
-  const userIds = new Set(players.flatMap((player) => (player.userId ? [player.userId] : [])));
-  const accounts = await Promise.all([...userIds].map((userId) => ctx.db.get("users", userId)));
+  const accounts = await Promise.all(
+    (await claimedAccountIds(ctx, groupId)).map((userId) => ctx.db.get("users", userId)),
+  );
   return accounts.filter((account) => account !== null && isRemindable(account));
 }
 
-function isRemindable(account: Doc<"users">): account is Doc<"users"> & { email: string } {
-  return (
-    remindersOn(account) && !account.isAnonymous && !!account.email && !isTestAddress(account.email)
-  );
+function isRemindable(account: Doc<"users">): account is MailableAccount {
+  return remindersOn(account) && isMailable(account);
 }
 
 function dateLabel(instant: number, timeZone: string) {

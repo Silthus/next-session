@@ -21,6 +21,10 @@ export type InviteMessage = {
   entry: CalendarEntry;
 };
 
+export function sessionUid(sessionId: string): string {
+  return `${sessionId}@next-session.link`;
+}
+
 export function invite({ kind, organizer, attendee, entry }: InviteMessage): string {
   return calendar([
     `METHOD:${METHODS[kind]}`,

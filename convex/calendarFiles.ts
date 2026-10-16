@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { bookingWindow, todayUtc, type IsoDate } from "../shared/dates";
-import { feed, type CalendarEntry } from "../shared/icalendar";
+import { feed, sessionUid, type CalendarEntry } from "../shared/icalendar";
 import { MAX_CLAIMED_PLAYERS_PER_ACCOUNT, MAX_GROUPS_PER_GM } from "../shared/limits";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -12,7 +12,6 @@ const DOWNLOAD_PATH = /^\/cal\/s\/([A-Za-z0-9_-]+)\.ics$/;
 const FEED_PATH = /^\/cal\/a\/([A-Za-z0-9_-]+)\.ics$/;
 const FEED_CALENDAR_NAME = "Next Session";
 const FEED_DAYS_BACK = 31;
-const UNSENT_SEQUENCE = 0;
 const DAY = 86_400_000;
 
 const CALENDAR_HEADERS = {
@@ -156,8 +155,8 @@ function publishedEntryOf(
   if (published?.start === undefined || published.end === undefined) return null;
   if (published.summary === undefined) return null;
   return {
-    uid: `${session._id}@next-session.link`,
-    sequence: UNSENT_SEQUENCE,
+    uid: sessionUid(session._id),
+    sequence: session.sequence ?? 0,
     stamp,
     window: { start: published.start, end: published.end },
     status: published.state === "cancelled" ? "CANCELLED" : "CONFIRMED",

@@ -133,6 +133,9 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - expiry sweep: the daily cron deletes Unsaved Groups past their Expiry
   handler: sweepExpiredGroups in cleanup.ts
   trust: operator
+- one-time invites: the operator starts it once at the Resend switch-on; it invites the calendar recipient set to every upcoming Session that never had a round to its whole calendar recipient set, paced to half the daily quota
+  handler: inviteScheduledSessions in oneTimeInvites.ts
+  trust: operator
 - reminder job: the scheduler fires a Reminder 1 day or 2 hours before a published Session starts, and it emails the Accounts behind the Group's Claimed Players
   handler: fire in reminders.ts
   trust: operator
@@ -220,11 +223,36 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   refuted: the Calendar feed took each Session's live state instead of its published state -> the oracle failed by name (2026-10-16)
   kinds: output
   checklist: commit-ordered-effects declared as published only
-  checklist: revalidated-permission dismissed: every send attempt rechecks the published snapshot (its state for a Session update, its revision for a Reminder), the Group, the Claim and the Session email or Reminders switch in its own query
-  checklist: destination-confinement dismissed: Session updates and Reminders post only to their configured Workflows webhooks, never to a caller-supplied address
-  checklist: redaction dismissed: each body is the Workflows trigger data the recipient's own mail needs, it carries a Share Token only in player_url, and it never reaches telemetry
-  checklist: circuit-breaker-policy dismissed: a failing webhook gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks a GM's change
-  checklist: declared-target-coverage dismissed: there are two webhook targets, the Workflows Session update and Reminder webhooks, and the oracle's title names a test for each
+  checklist: revalidated-permission dismissed: every send attempt rechecks the published snapshot (its state for a Workflows Session update, its revision for a Resend Session mail or a Reminder), the Group, the Claim or the calendar recipient set, and the Session email or Reminders switch in its own query
+  checklist: destination-confinement dismissed: Session mail and Reminders post only to their configured Workflows webhooks or the fixed Resend API address, never to a caller-supplied address
+  checklist: redaction dismissed: each body is what the recipient's own mail needs, built at send time; it carries a Share Token only in the Share Link a Player's mail links to, and it never reaches telemetry
+  checklist: circuit-breaker-policy dismissed: a failing webhook or Resend gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks a GM's change
+  checklist: declared-target-coverage dismissed: Session mail has one provider at a time, Resend while RESEND_API_KEY is set and the Workflows Session update otherwise, and Reminders have their own webhook; the oracle's title names a test for each webhook, and the Resend sends wait for the same settle
+- calendar recipients: Session mail reaches only the calendar recipient set of its Group: the GM's Account and the Accounts behind its Claimed Players, and a withdrawal only an Account that left it.
+  over: every Resend send of a broadcast round for a Group with its GM, two Claimed Players, an unclaimed Player and an Account that claims only in another Group, with one Claimed Player releasing between attempts, and of the withdrawals queued by that release and by a release a re-claim undoes before it sends
+  via: mails only the Group's calendar recipient set, rechecked on every attempt
+  because: a Session mail carries the Group's name, the night, its location and a Share Link; sent beyond the GM and the Accounts that keep the Group it would hand a table's plans and its Player credential to strangers, and a release that still got the next retry would mail someone who just left; a withdrawal that reached an Account back in the set would take a night it keeps out of its calendar
+  crossing: store -> egress
+  refuted: isCalendarRecipient answered true for every Account, so a send no longer rechecked the Claim -> the oracle failed by name (2026-10-16)
+  refuted: withdrawalMail stopped rechecking the calendar recipient set at send time, so a withdrawal a re-claim undid still sent -> the oracle failed by name (2026-10-16)
+  kinds: output
+  checklist: destination-confinement dismissed: the Resend adapter posts only to the fixed Resend API address, and the recipient is the Account's own stored email, never a caller-supplied address
+  checklist: redaction declared as no personal data to posthog
+  checklist: commit-ordered-effects declared as published only
+  checklist: circuit-breaker-policy dismissed: a failing Resend gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks a GM's change
+  checklist: declared-target-coverage dismissed: the fan-out reads the whole set through calendarRecipients, bounded by the 100-Player cap, and drops only Accounts the send-time rules exclude
+- deletion cancels first: Only deleting a Group removes a published Session, and before it goes it cancels each upcoming published Session in every calendar it reached: the GM's and the Accounts behind its Claimed Players.
+  over: groups.remove for a Group with its GM, a Claimed Player and two upcoming published scheduled Sessions, after each received the invites
+  via: cancels every upcoming published Session in each calendar it reached before the Group goes
+  because: an invite puts the night into a calendar that outlives the Group (architecture invariant 5); a deletion that dropped the published rows without a cancel would leave every GM and Player with nights that will never happen, and nothing could take them out later, because the Group and its Sessions are gone
+  crossing: store -> egress
+  refuted: groupDeleting returned before writing the calendarCancellations row, so deleting a Group dropped its published Sessions without a cancel -> the oracle failed by name (2026-10-16)
+  kinds: output
+  checklist: destination-confinement dismissed: the Resend adapter posts only to the fixed Resend API address, and the recipient is the Account's own stored email, never a caller-supplied address
+  checklist: redaction declared as no personal data to posthog
+  checklist: commit-ordered-effects dismissed: groupDeleting writes the calendarCancellations row and schedules its drain inside the deleting mutation, so a deletion that rolls back queues no cancel, and one that commits always has its row
+  checklist: circuit-breaker-policy dismissed: a failing Resend gets four attempts with backoff through the action retrier and is then dropped; an outage never blocks the deletion
+  checklist: declared-target-coverage dismissed: the row freezes the whole calendar recipient set through calendarRecipients, bounded by the 100-Player cap, and every upcoming published Session; the drain queues each pair once, 200 per run, and drops only Accounts the send-time rules exclude
 - feed scoping: A calendar file reached through a Share Token holds only the published Sessions of the Group behind that token's current value, and one reached through a feed token only those of the Groups its Account runs or plays in; a rotated-away, reset or unknown token reaches nothing, and the Calendar feed never shows a Share Token.
   over: the Calendar download fetched for two Groups with Sessions on the same date, through each Group's current Share Token and through a rotated-away one; and the Calendar feed fetched for two Accounts that run their own Groups and play in one shared Group, through each current feed token and through a reset one
   via: every calendar file holds only the published Sessions its own token reaches

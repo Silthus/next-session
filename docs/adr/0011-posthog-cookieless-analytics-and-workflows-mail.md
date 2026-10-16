@@ -30,6 +30,8 @@ Everything ships disabled and turns on only where the production deploy provides
 
 ## Amendment, 2026-10-07: Session updates use Workflows
 
+Superseded by [ADR-0012](0012-session-mail-goes-through-resend-and-carries-the-calendar-invite.md): Session mail goes through Resend and carries the calendar invite.
+
 Michael chose PostHog Workflows for Session updates, superseding the Session-notification Resend plan above. Resend from Convex remains the considered alternative. Convex fans out through the existing secret-guarded webhook pattern, with the current Claimed Accounts, an Account preference and a hosted "Session updates" unsubscribe category. Group names, emails and Share Links are workflow trigger data only, never capture events or person properties.
 
 Implementation #97 ships disabled. #102 owns sender verification, category creation, live mail environment, inbox proof and the visitor notification promise. Neither implementation nor this amendment enables production mail. The current design is in `docs/spec.md` §12.6 and §13.7.

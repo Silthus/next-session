@@ -1,0 +1,47 @@
+
+ RUN  v5.0.3 ~/.t3/worktrees/next-session/t3-690833ec
+
+stdout | convex/sessionInvites.test.ts > gives the Calendar download and feed the SEQUENCE of the night's last invite
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > gives the Calendar download and feed the SEQUENCE of the night's last invite
+Run 0000000000000000000000010003runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > gives the Calendar download and feed the SEQUENCE of the night's last invite
+Run 0000000000000000000000010006runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > gives the Calendar download and feed the SEQUENCE of the night's last invite
+Run 0000000000000000000000010009runs succeeded.
+
+ ❯ |convex| convex/sessionInvites.test.ts (40 tests | 1 failed | 39 skipped) 220ms
+   × gives the Calendar download and feed the SEQUENCE of the night's last invite 219ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/sessionInvites.test.ts > gives the Calendar download and feed the SEQUENCE of the night's last invite
+AssertionError: expected [ +0 ] to deeply equal [ 2 ]
+
+- Expected
++ Received
+
+  [
+-   2,
++   0,
+  ]
+
+ ❯ convex/sessionInvites.test.ts:351:46
+    349|   const feed = await t.fetch(new URL(feedUrl).pathname);
+    350|
+    351|   expect(sequencesIn(await download.text())).toEqual([2]);
+       |                                              ^
+    352|   expect(sequencesIn(await feed.text())).toEqual([2]);
+    353| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 39 skipped (40)
+   Start at  16:29:55
+   Duration  686ms (tests 37%, transform 32%, import 23%, environment 7%, worker 1%)
+

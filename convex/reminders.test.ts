@@ -156,7 +156,7 @@ async function mailVolumeOn(day: string) {
       (
         await ctx.db
           .query("mailVolume")
-          .withIndex("by_day", (q) => q.eq("day", day))
+          .withIndex("by_provider_and_day", (q) => q.eq("provider", "workflows").eq("day", day))
           .unique()
       )?.count,
   );

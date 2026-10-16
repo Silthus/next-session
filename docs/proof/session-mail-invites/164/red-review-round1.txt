@@ -1,0 +1,259 @@
+
+ RUN  v5.0.3 ~/.t3/worktrees/next-session/t3-690833ec
+
+stdout | convex/sessionCancellations.test.ts > deleting a Group > cancels a night whose cancel was published but had not reached the calendars yet
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/sessionCancellations.test.ts > deleting a Group > cancels a night whose cancel was published but had not reached the calendars yet
+Run 0000000000000000000000010003runs succeeded.
+
+stdout | convex/sessionCancellations.test.ts > deleting a Group > cancels a night whose cancel was published but had not reached the calendars yet
+Run 0000000000000000000000010006runs succeeded.
+
+stdout | convex/sessionCancellations.test.ts > deleting a Group > cancels a night whose cancel was published but had not reached the calendars yet
+Run 0000000000000000000000010009runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > links the footer's My groups to the deployment's own site
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > links the footer's My groups to the deployment's own site
+Run 0000000000000000000000010003runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > delivery > still delivers a retry after the Share Token rotates, under a key that matches its new body
+Run 0000000000000000000000010000runs succeeded.
+
+stderr | convex/sessionInvites.test.ts > delivery > still delivers a retry after the Share Token rotates, under a key that matches its new body
+Error executing 0000000000000000000000010003runs: Resend answered HTTP 503
+
+stderr | convex/sessionInvites.test.ts > delivery > still delivers a retry after the Share Token rotates, under a key that matches its new body
+Run 0000000000000000000000010003runs failed, retrying in 12130.50 ms: Resend answered HTTP 503
+
+stderr | convex/sessionInvites.test.ts > delivery > still delivers a retry after the Share Token rotates, under a key that matches its new body
+Resend refused a calendar mail: HTTP 409, dropped
+
+stdout | convex/sessionInvites.test.ts > delivery > still delivers a retry after the Share Token rotates, under a key that matches its new body
+Run 0000000000000000000000010003runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > delivery > names the night's time in the zone it was published in when the zone changes before a retry
+Run 0000000000000000000000010000runs succeeded.
+
+stderr | convex/sessionInvites.test.ts > delivery > names the night's time in the zone it was published in when the zone changes before a retry
+Error executing 0000000000000000000000010003runs: Resend answered HTTP 503
+
+stderr | convex/sessionInvites.test.ts > delivery > names the night's time in the zone it was published in when the zone changes before a retry
+Run 0000000000000000000000010003runs failed, retrying in 26483.62 ms: Resend answered HTTP 503
+
+stderr | convex/sessionInvites.test.ts > delivery > names the night's time in the zone it was published in when the zone changes before a retry
+Resend refused a calendar mail: HTTP 409, dropped
+
+stdout | convex/sessionInvites.test.ts > delivery > names the night's time in the zone it was published in when the zone changes before a retry
+Run 0000000000000000000000010003runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > delivery > names the night's time in the zone it was published in when the zone changes before a retry
+Run 0000000000000000000000010008runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > delivery > names the night's time in the zone it was published in when the zone changes before a retry
+Run 0000000000000000000000010011runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > the one-time invites > invites the whole recipient set to every upcoming Session that fits the day's share, soonest first
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > the one-time invites > invites the whole recipient set to every upcoming Session that fits the day's share, soonest first
+Run 0000000000000000000000010003runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > the one-time invites > invites the whole recipient set to every upcoming Session that fits the day's share, soonest first
+Run 0000000000000000000000010006runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > the one-time invites > invites the whole recipient set to every upcoming Session that fits the day's share, soonest first
+Run 0000000000000000000000010009runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > the one-time invites > invites the whole recipient set to every upcoming Session that fits the day's share, soonest first
+Run 0000000000000000000000010012runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > the one-time invites > invites the whole recipient set to every upcoming Session that fits the day's share, soonest first
+Run 0000000000000000000000010015runs succeeded.
+
+stdout | convex/sessionInvites.test.ts > the one-time invites > still invites the GM and every Player to a night a newcomer was invited to first
+Run 0000000000000000000000010000runs succeeded.
+
+ ❯ |convex| convex/sessionInvites.test.ts (46 tests | 7 failed) 3063ms
+   × links the footer's My groups to the deployment's own site 16ms
+   ❯ delivery (5)
+     × still delivers a retry after the Share Token rotates, under a key that matches its new body 14ms
+     × names the night's time in the zone it was published in when the zone changes before a retry 19ms
+   ❯ the calendar follows the Roster (17)
+     × lets an Account Save 26 Groups with 20 published nights each, and invites it to every night 182ms
+   ❯ the one-time invites (8)
+     × invites the whole recipient set to every upcoming Session that fits the day's share, soonest first 23ms
+     × still invites the GM and every Player to a night a newcomer was invited to first 8ms
+     × pages through Sessions whose recipients all turned Session mail off within Convex's limits 1441ms
+ ❯ |convex| convex/sessionCancellations.test.ts (7 tests | 1 failed) 3569ms
+   ❯ deleting a Group (7)
+     × cancels a night whose cancel was published but had not reached the calendars yet 27ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/sessionCancellations.test.ts > deleting a Group > cancels a night whose cancel was published but had not reached the calendars yet
+AssertionError: expected [] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+- [
+-   "Thursday Crew was deleted, so its session on Saturday, October 17, 2026 is off.",
+- ]
++ []
+
+ ❯ convex/sessionCancellations.test.ts:188:67
+    186|     await finish();
+    187|
+    188|     expect(mailsTo(ROBIN).map(({ text }) => text.split("\n")[0])).toEq…
+       |                                                                   ^
+    189|       "Thursday Crew was deleted, so its session on Saturday, October …
+    190|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  |convex| convex/sessionInvites.test.ts > links the footer's My groups to the deployment's own site
+AssertionError: expected 'The next session for Thursday Crew is…' to contain 'Turn session emails off in My groups:…'
+
+- Expected
++ Received
+
+- Turn session emails off in My groups: https://preview.next-session.test/me.
++ The next session for Thursday Crew is set: Saturday, October 17, 2026, 19:00–23:00, Berlin time.
++ Where: Max's place
++
++ It's in the calendar invite in this mail. Not in your calendar yet? Tap Add to calendar once.
++
++ Open your group: https://preview.next-session.test/s/crew-token
++
++ You get this because you keep this group.
++ Turn session emails off in My groups: https://next-session.link/me. Replies to this address aren't read.
++
+
+ ❯ convex/sessionInvites.test.ts:385:16
+    383|
+    384|   const { text, html } = mailTo("robin@example.com");
+    385|   expect(text).toContain(
+       |                ^
+    386|     "Turn session emails off in My groups: https://preview.next-sessio…
+    387|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  |convex| convex/sessionInvites.test.ts > delivery > still delivers a retry after the Share Token rotates, under a key that matches its new body
+TypeError: Cannot read properties of undefined (reading 'text')
+ ❯ convex/sessionInvites.test.ts:478:18
+    476|     const [mail, ...more] = acceptedTo(ROBIN);
+    477|     expect(more).toEqual([]);
+    478|     expect(mail!.text).not.toContain("crew-token");
+       |                  ^
+    479|   });
+    480|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  |convex| convex/sessionInvites.test.ts > delivery > names the night's time in the zone it was published in when the zone changes before a retry
+AssertionError: expected 'The session for Thursday Crew on Satu…' to be 'The next session for Thursday Crew is…' // Object.is equality
+
+Expected: "The next session for Thursday Crew is set: Saturday, October 17, 2026, 19:00–23:00, Berlin time."
+Received: "The session for Thursday Crew on Saturday, October 17, 2026 changed. It's now Saturday, October 17, 2026, 19:00–23:00, Auckland time."
+
+ ❯ convex/sessionInvites.test.ts:493:55
+    491|     await finish();
+    492|
+    493|     expect(acceptedTo(ROBIN)[0]!.text.split("\n")[0]).toBe(
+       |                                                       ^
+    494|       "The next session for Thursday Crew is set: Saturday, October 17…
+    495|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  |convex| convex/sessionInvites.test.ts > the calendar follows the Roster > lets an Account Save 26 Groups with 20 published nights each, and invites it to every night
+Error: Scheduled too many functions in a single function execution (limit: 1000). This is a Convex limit: https://docs.convex.dev/production/state/limits
+ ❯ performAsyncSyscall node_modules/convex/src/server/impl/syscall.ts:52:11
+ ❯ runUdf node_modules/convex/src/server/impl/registration_impl.ts:770:18
+ ❯ ActionRetrier.run node_modules/@convex-dev/action-retrier/src/client/index.ts:139:19
+ ❯ requestCalendarMails convex/mail.ts:239:5
+    237|   await recordMailVolume(ctx, "resend", sends.length);
+    238|   for (const [index, send] of sends.entries()) {
+    239|     await retrier.runAfter(ctx, index * CALENDAR_SEND_SPACING_MS, inte…
+       |     ^
+    240|       send,
+    241|     });
+ ❯ recipientSetChanged convex/sessionMail.ts:155:3
+ ❯ changeRecipientSet convex/sessionMail.ts:133:3
+ ❯ moveGroups convex/account.ts:104:5
+ ❯ handler convex/account.ts:63:22
+ ❯ invokeFunction node_modules/convex/src/server/impl/registration_impl.ts:90:14
+ ❯ invokeMutation node_modules/convex/src/server/impl/registration_impl.ts:70:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  |convex| convex/sessionInvites.test.ts > the one-time invites > invites the whole recipient set to every upcoming Session that fits the day's share, soonest first
+AssertionError: expected 'You keep Thursday Crew now, so its se…' to be 'The next session for Thursday Crew is…' // Object.is equality
+
+Expected: "The next session for Thursday Crew is set: Saturday, October 17, 2026, 19:00–23:00, Berlin time."
+Received: "You keep Thursday Crew now, so its session is in your calendar: Saturday, October 17, 2026, 19:00–23:00, Berlin time."
+
+ ❯ convex/sessionInvites.test.ts:1014:52
+    1012|     for (const address of [gmEmail, ROBIN])
+    1013|       expect(subjectsTo(address)).toEqual([NEXT("17"), NEXT("24"), NEX…
+    1014|     expect(mailsTo(ROBIN)[0]!.text.split("\n")[0]).toBe(
+       |                                                    ^
+    1015|       "The next session for Thursday Crew is set: Saturday, October 17…
+    1016|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  |convex| convex/sessionInvites.test.ts > the one-time invites > still invites the GM and every Player to a night a newcomer was invited to first
+AssertionError: expected [] to deeply equal ArrayContaining{…}
+
+- Expected
++ Received
+
+- ArrayContaining [
+-   "gm-39@example.com",
+-   "robin@example.com",
+-   "kim@example.com",
+- ]
++ []
+
+ ❯ convex/sessionInvites.test.ts:1069:51
+    1067|     await startInvites();
+    1068|
+    1069|     expect(resendMails().flatMap(({ to }) => to)).toEqual(
+       |                                                   ^
+    1070|       expect.arrayContaining([gmEmail, ROBIN, "kim@example.com"]),
+    1071|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  |convex| convex/sessionInvites.test.ts > the one-time invites > pages through Sessions whose recipients all turned Session mail off within Convex's limits
+Error: Too many index ranges read in a single function execution (limit: 4096). This is a Convex limit: https://docs.convex.dev/production/state/limits
+ ❯ performAsyncSyscall node_modules/convex/src/server/impl/syscall.ts:52:11
+ ❯ get node_modules/convex/src/server/impl/database_impl.ts:41:23
+ ❯ Object.get node_modules/convex/src/server/impl/database_impl.ts:54:13
+ ❯ nightTarget convex/sessionMail.ts:295:19
+    293|   const group = await ctx.db.get("groups", session.groupId);
+    294|   if (!group || !(await isCalendarRecipient(ctx, group, send.userId)))…
+    295|   const account = await ctx.db.get("users", send.userId);
+       |                   ^
+    296|   if (!receivesSessionMail(account)) return null;
+    297|   return { session, group, account, entry };
+ ❯ roundOf convex/sessionMail.ts:104:9
+ ❯ inviteRoundOf convex/sessionMail.ts:87:10
+ ❯ handler convex/oneTimeInvites.ts:38:21
+ ❯ invokeFunction node_modules/convex/src/server/impl/registration_impl.ts:90:14
+ ❯ invokeMutation node_modules/convex/src/server/impl/registration_impl.ts:70:18
+ ❯ runMutationWithHandler node_modules/convex-test/dist/index.js:1975:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  8 failed | 45 passed (53)
+   Start at  16:44:57
+   Duration  4.01s (tests 91%, transform 4%, import 4%, environment 1%)
+

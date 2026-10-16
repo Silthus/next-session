@@ -1,9 +1,10 @@
 import { v } from "convex/values";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, type MutationCtx } from "./_generated/server";
 import { ownedGroup, ownedPlayer, touchGroup } from "./model/access";
 import { ensureNameIsFree, ensureRosterHasRoom, validName } from "./model/players";
 import { enforceRateLimit } from "./model/rateLimits";
+import { changeRecipientSet } from "./sessionMail";
 
 export const addPlayer = mutation({
   args: { groupId: v.id("groups"), name: v.string() },
@@ -40,12 +41,21 @@ export const removePlayer = mutation({
   handler: async (ctx, { playerId }) => {
     const { gm, group, player } = await ownedPlayer(ctx, playerId);
     await enforceRateLimit(ctx, "gmEdit", gm._id);
-    await deleteAnswersOf(ctx, player._id);
-    await ctx.db.delete("players", player._id);
+    const { userId } = player;
+    if (userId === undefined) await deletePlayer(ctx, player);
+    else
+      await changeRecipientSet(ctx, { groupId: group._id, userId }, () =>
+        deletePlayer(ctx, player),
+      );
     await touchGroup(ctx, group);
     return null;
   },
 });
+
+async function deletePlayer(ctx: MutationCtx, player: Doc<"players">) {
+  await deleteAnswersOf(ctx, player._id);
+  await ctx.db.delete("players", player._id);
+}
 
 async function deleteAnswersOf(ctx: MutationCtx, playerId: Id<"players">) {
   const answers = await ctx.db

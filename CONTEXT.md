@@ -119,8 +119,8 @@ The one email every new Account gets right after it is created, confirming the A
 _Avoid_: onboarding email, confirmation email
 
 **Session updates**:
-Emails to the Accounts behind a Group's Claimed Players when a Session is set or cancelled, excluding the actor. The Account preference on My groups and the hosted unsubscribe both stop them. Implementation ships disabled until live activation.
-_Avoid_: alerts, reminders (a Reminder is its own email)
+Emails to the GM's Account and the Accounts behind a Group's Claimed Players when a Session is set, changed or cancelled, each carrying a calendar invite. The GM who made the change gets one too, written as "you". The Session emails switch on My groups stops them. They go through Resend once its key is set; until then they go without the invite, through Workflows, to the Claimed Players only.
+_Avoid_: alerts, reminders (a Reminder is its own email), invite email
 
 **Reminder**:
 An email to the Account behind a Claimed Player, 1 day and again 2 hours before a scheduled Session starts. Reminders are on by default. The link in every Reminder and the Reminders switch on My groups stop them, and neither touches Session updates. A Cancelled Session reminds nobody, and a Reminder is never sent once its time has passed. Calendar entries from Next Session carry no reminder of their own, though the player's calendar app may add one.

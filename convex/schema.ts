@@ -7,6 +7,8 @@ export const answerValue = v.union(v.literal("free"), v.literal("maybe"), v.lite
 
 export const sessionState = v.union(...SESSION_STATES.map((state) => v.literal(state)));
 
+export const mailProvider = v.union(v.literal("resend"), v.literal("workflows"));
+
 export const datedSession = v.object({ date: v.string(), state: sessionState });
 
 export const publishedSession = v.object({
@@ -15,8 +17,19 @@ export const publishedSession = v.object({
   end: v.optional(v.number()),
   location: v.optional(v.string()),
   summary: v.optional(v.string()),
+  timeZone: v.optional(v.string()),
   revision: v.number(),
 });
+
+export const frozenEntry = v.object({
+  uid: v.string(),
+  sequence: v.number(),
+  start: v.number(),
+  end: v.number(),
+  summary: v.string(),
+});
+
+export const frozenNight = v.object({ date: v.string(), entry: frozenEntry });
 
 export default defineSchema({
   ...authTables,
@@ -100,11 +113,25 @@ export default defineSchema({
     lengthMinutes: v.optional(v.number()),
     location: v.optional(v.string()),
     remindersRevision: v.optional(v.number()),
+    sequence: v.optional(v.number()),
+    wholeRoundSent: v.optional(v.boolean()),
   })
     .index("by_groupId_and_date", ["groupId", "date"])
     .index("by_date", ["date"]),
 
-  mailVolume: defineTable({ day: v.string(), count: v.number() }).index("by_day", ["day"]),
+  calendarCancellations: defineTable({
+    groupId: v.id("groups"),
+    ownerId: v.id("users"),
+    recipients: v.array(v.id("users")),
+    nights: v.array(frozenNight),
+    cursor: v.number(),
+  }),
+
+  mailVolume: defineTable({
+    day: v.string(),
+    count: v.number(),
+    provider: v.optional(mailProvider),
+  }).index("by_provider_and_day", ["provider", "day"]),
 
   saveClaims: defineTable({
     anonymousUserId: v.id("users"),

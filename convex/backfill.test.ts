@@ -188,6 +188,7 @@ describe("backfill.widenPublishedSnapshots", () => {
       end: Date.UTC(2026, 9, 17, 19, 30),
       location: "Max's place",
       summary: "My group",
+      timeZone: "Europe/Berlin",
       revision: 2,
     });
     expect(fetchMock).not.toHaveBeenCalled();

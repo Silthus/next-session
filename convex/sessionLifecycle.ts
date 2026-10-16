@@ -1,5 +1,5 @@
 import { v, type Infer } from "convex/values";
-import { bookingWindow, todayUtc, type IsoDate } from "../shared/dates";
+import type { IsoDate } from "../shared/dates";
 import { DEFAULT_GROUP_TIME, sessionWindow } from "../shared/sessionTime";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -15,6 +15,7 @@ import {
   sessionOverridesOf,
   type SessionDetailChanges,
 } from "./model/timeAndPlace";
+import { upcomingSessions } from "./model/upcomingSessions";
 
 const SETTLE_DEADLINE_MS = 2 * UNDO_WINDOW_MS;
 const SNAPSHOT_FIELDS = ["state", "start", "end", "location", "summary"] as const;
@@ -41,13 +42,7 @@ export async function cancelSession(ctx: MutationCtx, session: Doc<"sessions">) 
 }
 
 export async function groupChanged(ctx: MutationCtx, group: Doc<"groups">) {
-  const { first, last } = bookingWindow(todayUtc(Date.now()));
-  const upcoming = await ctx.db
-    .query("sessions")
-    .withIndex("by_groupId_and_date", (q) =>
-      q.eq("groupId", group._id).gte("date", first).lte("date", last),
-    )
-    .collect();
+  const upcoming = await upcomingSessions(ctx, group._id);
   for (const session of upcoming.filter(isScheduled)) await recordChange(ctx, session._id);
 }
 
@@ -69,6 +64,7 @@ function snapshotOf(
     ...sessionWindow(session.date, groupTimeOf(group), sessionOverridesOf(session)),
     ...sessionLocationOf(group, session),
     summary: group.name,
+    timeZone: groupTimeOf(group).timeZone,
   };
 }
 

@@ -66,6 +66,7 @@ export const publishedSession = v.object({
   end: v.optional(v.number()),
   location: v.optional(v.string()),
   summary: v.optional(v.string()), // the Group name at publish time
+  timeZone: v.optional(v.string()), // the Group's zone at publish time; missing before Session mail, read as the Group's zone (§15.8)
   revision: v.number(),
 }); // start, end and summary are missing only on rows published before the Time and place deploy
 
@@ -135,7 +136,25 @@ export default defineSchema({
     state: v.optional(sessionState), // missing means scheduled
     changedAt: v.optional(v.number()), // the latest change, which the settle job compares
     published: v.optional(publishedSession), // what the outside world knows; missing means never published
-  }).index("by_groupId_and_date", ["groupId", "date"]),
+    sequence: v.optional(v.number()), // the last calendar SEQUENCE sent; missing means 0 (§15)
+    wholeRoundSent: v.optional(v.boolean()), // a round went to the whole calendar recipient set (§15.3, §15.10)
+  })
+    .index("by_groupId_and_date", ["groupId", "date"])
+    .index("by_date", ["date"]), // the one-time invites read every Group's upcoming Sessions (§15.10)
+
+  calendarCancellations: defineTable({ // a deleted Group's calendar entries still to cancel (§15.5)
+    groupId: v.id("groups"),
+    ownerId: v.id("users"),
+    recipients: v.array(v.id("users")), // the eligible calendar recipients at deletion
+    nights: v.array(frozenNight), // {date, entry: {uid, sequence, start, end, summary}}
+    cursor: v.number(), // recipient × night pairs queued so far
+  }),
+
+  mailVolume: defineTable({
+    day: v.string(), // UTC day
+    count: v.number(),
+    provider: v.optional(mailProvider), // "resend" | "workflows"; missing reads as workflows
+  }).index("by_provider_and_day", ["provider", "day"]),
 
   saveClaims: defineTable({
     anonymousUserId: v.id("users"),
@@ -219,7 +238,7 @@ The name and Roster checks that `roster` and `player` share (`validName`, `ensur
 | | `finishSave` | mutation | `{code}` → `{groupIds}` | Account only. See §5.3 |
 | `auth` | `signIn`, `signOut`, `store` | Convex Auth | | |
 
-Internal: `groups.deleteChildren`, `cleanup.sweepExpiredGroups` (cron), `sessionLifecycle.settle` (§12.6), `backfill.publishLegacySessions` and `backfill.emptyRetiredMailStates` (run once after the Cancelled Session deploys), `backfill.widenPublishedSnapshots` (run once after the Time and place deploy: fills `start`, `end` and `summary` into every `published` at the same revision, with what the code before Time and place published: the usual 19:00 for 4 hours in Europe/Berlin and no place), `calendarFiles.groupDownload` and `calendarFiles.accountFeed` (§14), `auth.keepFirstGroupTimeZone` (§5.2), `rateLimits` component setup in `convex/convex.config.ts` and limit definitions in `convex/model/rateLimits.ts`.
+Internal: `groups.deleteChildren`, `cleanup.sweepExpiredGroups` (cron), `sessionLifecycle.settle` (§12.6), `backfill.publishLegacySessions` and `backfill.emptyRetiredMailStates` (run once after the Cancelled Session deploys), `backfill.widenPublishedSnapshots` (run once after the Time and place deploy: fills `start`, `end` and `summary` into every `published` at the same revision, with what the code before Time and place published: the usual 19:00 for 4 hours in Europe/Berlin and no place), `calendarFiles.groupDownload` and `calendarFiles.accountFeed` (§14), `oneTimeInvites.inviteScheduledSessions` (run once at the Resend switch-on, §15.10), `sessionMail.drainCancellations` (§15.5), `auth.keepFirstGroupTimeZone` (§5.2), `rateLimits` component setup in `convex/convex.config.ts` and limit definitions in `convex/model/rateLimits.ts`.
 
 Dropped from Lonir: workspace functions, `gmGetGroupRail` and `gmGetDateAvailability` (the client derives the rail counts and the day panel from `groups.mine` and `schedule.month`), `listSessions`, `getAvailability`, `claimMembership` (a client-only check against `player.group`), early access, consent, client errors, hand-off, activation telemetry.
 
@@ -576,6 +595,8 @@ The no-account path keeps its steps and its fields: Join shows no new prompt, an
 
 ### 12.6 Session emails through PostHog Workflows
 
+> Superseded by §15 once `RESEND_API_KEY` is set. Until then this path runs unchanged.
+
 Michael chose Workflows on 2026-10-07; Resend from Convex was the alternative. Implementation (#97) shipped disabled. #102 owns sender verification, the transactional "Session updates" category, activation, mail environment and inbox proof. The visitor nudge promises notifications only after #102.
 
 - Session updates follow the published snapshot ([ADR-0013](adr/0013-sessions-publish-a-snapshot-after-the-undo-window.md)). `sessions.schedule` and `sessions.cancel` change the Session through `convex/sessionLifecycle.ts`, which sets `changedAt` and schedules `internal.sessionLifecycle.settle` 30 seconds and 1 ms later. The GM never waits for a webhook.
@@ -906,6 +927,8 @@ In Michael's voice, plain text first (every template carries a real `text` part)
 
 ### 13.7 Session updates share the Workflows mail path
 
+> Superseded by §15 ([ADR-0012](adr/0012-session-mail-goes-through-resend-and-carries-the-calendar-invite.md)) once `RESEND_API_KEY` is set.
+
 Session updates use the §12.6 Convex fan-out and `POSTHOG_SESSION_WEBHOOK_URL`, reusing `POSTHOG_MAIL_WEBHOOK_SECRET`, the sender and the action retrier. Michael chose this over Resend on 2026-10-07. Definitions in `docs/posthog/workflows/session-updates.json` and `templates/session-update.json` are draft-only: secret, sender, template and category placeholders must be resolved by #102.
 
 Each mail names the Group and the night, states "set" or "cancelled", and has one button to the current Share Link. It reads as system mail: the sender is "Next Session" and no person signs it, since the GM who scheduled the night is rarely the person who built Next Session. The template includes real plain text and editable design blocks, with tracking off and a link to the authenticated My groups email preference. Michael confirmed on 2026-10-07 that "Session updates" is `transactional`. Its category bypasses hosted marketing opt-outs; the `/me` switch controls Session emails without changing Tips consent. No notification promise or production mail environment ships in #97.
@@ -969,11 +992,11 @@ Calendar files carry a Group's published Sessions into players' own calendars. T
 
 - A Convex HTTP action (`downloadGroupCalendar` in `convex/calendarFiles.ts`, routed in `convex/http.ts`) reads through the internal query `calendarFiles.groupDownload` with the token and the serve time. The query finds the Group by its **current** Share Token only, so a rotated-away token opens nothing, even inside the rotation's Undo.
 - It holds the published **scheduled** Sessions dated from today (UTC) to the end of the Booking Window, read through the `by_groupId_and_date` index range. Cancelled and past Sessions are left out: a one-time import has nothing to cancel. A Session inside its first Undo window isn't published yet, so it is absent, and a move inside a later window shows the old time until the window ends. A published row that still lacks `start`, `end` or `summary` (possible only before the S2 backfill runs) is left out instead of failing the file.
-- Each entry: `UID` `<sessionId>@next-session.link`, `SEQUENCE` 0 until the invites add a sequence, `DTSTAMP` the serve time, `DTSTART` and `DTEND` in UTC, `SUMMARY` the published Group name, `LOCATION` the published location, `STATUS:CONFIRMED`, and the Share Link (built from `SITE_URL`) as `URL` and in `DESCRIPTION`. The calendar is named after the Group.
+- Each entry: `UID` `<sessionId>@next-session.link`, `SEQUENCE` the Session's `sequence` (0 before any invite, §15.3), `DTSTAMP` the serve time, `DTSTART` and `DTEND` in UTC, `SUMMARY` the published Group name, `LOCATION` the published location, `STATUS:CONFIRMED`, and the Share Link (built from `SITE_URL`) as `URL` and in `DESCRIPTION`. The calendar is named after the Group.
 - `200` with `Content-Type: text/calendar; charset=utf-8`, `Cache-Control: private, max-age=900` and `Content-Disposition: attachment; filename="next-session.ics"`. A Group with nothing upcoming gets an empty calendar. An unknown or rotated-away token, or a path outside the Share Token alphabet, gets `404` with no body.
 - No rate limit, no Expiry touch and no server event: reads are cheap and cached for 15 minutes, and a download is not activity on the Group. The browser sends `calendar_downloaded` on the press instead (§13.4).
 - **Add to calendar** in the player page's Next sessions card links here (§12.4).
-- A rename settles the scheduled upcoming Sessions through `groupChanged` (§12.6), so the download shows the new name once the Undo window ends. A Cancelled Session keeps its old name until **Schedule again**. The rename sends no Session update, because the state didn't change.
+- A rename settles the scheduled upcoming Sessions through `groupChanged` (§12.6), so the download shows the new name once the Undo window ends. A Cancelled Session keeps its old name until **Schedule again**. Without `RESEND_API_KEY` the rename sends no Session update, because the state didn't change; with it, Session mail (§15) sends a "changed" mail with the new name.
 
 ### 14.2 Calendar feed
 
@@ -998,3 +1021,96 @@ The Worker proxies `/cal/` the way it proxies `/ingest/`, so the URL stays on `n
 - The Convex site origin is the `CONVEX_SITE_URL` var in `wrangler.jsonc` (`https://pleasant-sockeye-672.convex.site`).
 - The upstream request carries no cookies and no client headers. The response keeps the status, `content-type`, `cache-control` and `content-disposition`, and drops every other header, `set-cookie` included.
 - The Vite dev server proxies `/cal/` to `VITE_CONVEX_SITE_URL`, which `convex dev` writes to `.env.local` and the e2e server sets to the local site port. So the relative link `/cal/s/<token>.ics` works locally, in e2e and in production.
+
+## 15. Session mail
+
+Every Session update is one mail through Resend that carries a calendar invite ([ADR-0012](adr/0012-session-mail-goes-through-resend-and-carries-the-calendar-invite.md)). It supersedes §12.6 and §13.7 once `RESEND_API_KEY` is set. S4 of the calendar sync map (#146) specifies it; this section holds what has shipped.
+
+### 15.1 The provider switch
+
+- `calendarMailConfigured()` in `convex/mail.ts` is true when `RESEND_API_KEY` is set. CI and dev never set it.
+- `settle` (§12.6) calls `sessionPublished` in `convex/sessionMail.ts` on every publish. With the key, it starts a broadcast round and requests no Workflows Session update. Without it, the §12.6 Workflows path runs exactly as before, and nothing reaches Resend or is counted for it. So a change never mails twice.
+
+### 15.2 Who gets it
+
+- The **calendar recipient set** of a Group is the GM's Account plus the Accounts behind its Claimed Players, deduplicated (`convex/model/recipients.ts`). The GM who made the change is included.
+- Every send also needs, at queue time and again on every attempt, an Account that is not anonymous, has an email, isn't a `.test` address, and hasn't turned Session emails off on My groups.
+
+### 15.3 A broadcast round
+
+- Every publish is a round, because the invite carries the start, end, location and Group name: `set` for a first publish or **Schedule again**, `changed` for a new start, length, location or Group name, `cancelled` for a cancel. A publish that keeps a Cancelled Session cancelled sends nothing: those calendars already hold the cancel.
+- A round raises `sessions.sequence` by one (missing is 0), sets `sessions.wholeRoundSent`, and queues one send per eligible recipient, each carrying `{kind: "broadcast", change, sessionId, userId, revision, sequence}`. The published snapshot carries the Group's zone, so a mail names the time in the zone its night was published in, even while a zone change waits out its Undo window.
+- Sends are scheduled 600 ms apart within a round, under Resend's 2 requests a second. Two rounds that overlap rely on the retries.
+- Each attempt rechecks, in `sessionMail.calendarMail`, that `published.revision` still equals the send's revision and that the Account is still in the set and eligible. A send whose revision moved on drops itself, so a slow mail never overwrites a newer change. Staleness is judged by revision, never by `sequence`.
+
+### 15.4 Entering or leaving the set
+
+- Every mutation that can move an Account into or out of a Group's set runs its change through `changeRecipientSet` in `convex/sessionMail.ts`, which compares membership before and after in the same transaction: a claim (**Join** while signed in, **Keep this group**, the auto-keep on answer) and a release (**Not you?**, **Remove from my groups**) in `convex/model/players.ts`, the GM removing a Player, and **Save**, which makes the Account the GM of the moved Groups.
+- A set that ends where it began sends nothing: a switch to another name in the same Group, or a GM releasing their own Player.
+- Entering schedules `sessionMail.inviteToNights` for that Group and Account, so a Save that moves many Groups stays under Convex's 1,000 scheduled functions per mutation. It rechecks that the Account is still in the set and eligible, then queues an `invite` for each upcoming Session (from today, UTC, to the end of the Booking Window) whose published state is scheduled: a `request` to that Account alone, `{kind: "invite", sessionId, userId, revision, sequence}`.
+- Leaving queues a `withdraw` for each upcoming published Session, Cancelled ones included, so an entry whose cancel the release dropped still leaves: `{kind: "withdraw", groupId, userId, date, entry}`, with `entry` frozen as `{uid, sequence, start, end, summary}`.
+- Each raises that Session's `sequence` by one. Staleness stays with the revision, so an invite never drops another recipient's pending broadcast.
+- An invite sends only while its revision is still published, the Session is still scheduled and the Account is still in the set. A withdrawal sends only while the Account is still out of the set, whatever the revision; a deleted Group counts as out. It is built from its frozen entry, so it lands after the Group is deleted and never shows a change made after the release. A re-claim before it sends makes it drop itself.
+- Both need an eligible Account (§15.2) when queued and on every attempt, so the Session emails switch stops them too.
+
+### 15.5 Deleting a Group
+
+- `deleteGroup` in `convex/model/groups.ts` is the one deletion path, for `groups.remove` and the Expiry sweep. Before the Group and its children go, it calls `groupDeleting` in `convex/sessionMail.ts`.
+- `groupDeleting` writes one `calendarCancellations` row: the GM's Account, the eligible Accounts of the calendar recipient set at deletion (§15.2), and each upcoming published Session, frozen as `{date, entry}` with `entry` `{uid, sequence, start, end, summary}` and `sequence` reserved as the Session's `sequence + 1`. A Session already published as Cancelled is cancelled again, because its cancel may still be waiting for a retry that the Group's deletion would drop. Never-published and past Sessions are left out. With nothing to cancel, or no eligible Account, no row is written. Without `RESEND_API_KEY` nothing is written, so deletion runs exactly as before.
+- `sessionMail.drainCancellations` queues at most 200 `deletionCancel`s per run, `{kind: "deletionCancel", userId, reader, date, entry}`, moves the row's `cursor`, and runs again once its sends are due, 600 ms apart, so a large Group stays under Resend's rate and far below Convex's 1,000 scheduled functions per mutation. The run that queues the last batch deletes the row.
+- A deletion cancel is a `cancel` with `STATUS:CANCELLED`, built from its frozen entry, because the Group is gone. Its `SEQUENCE` is above every invite the Session sent. It sends whenever the Account is still eligible (§15.2), so an Anonymous GM, whose Account ends with its last Group, gets nothing.
+
+### 15.6 The Resend adapter
+
+- `POST https://api.resend.com/emails` with `from: "Next Session <calendar@next-session.link>"`, one recipient, `text` and `html`, and one attachment `invite.ics`, base64, with `content_type` from `calendarContentType` (`text/calendar; charset=utf-8; method=REQUEST|CANCEL`). No `reply_to`.
+- `Idempotency-Key: calendar/<uid>/<sequence>/<userId>/<fingerprint>`, where the fingerprint is a hash of the request body, so a retry of a request Resend accepted is not sent twice within its 24 hours, and a retry whose body changed (a rotated Share Link) is a new request instead of one Resend refuses.
+- Network errors, 5xx and 429 retry through the action retrier: 4 attempts, backoff 5 s × 4ⁿ. Other 4xx are logged with the status only and dropped.
+
+### 15.7 The invite
+
+- Built by `invite` in `shared/icalendar.ts` from the published snapshot: `request` for a scheduled Session, `cancel` (with `STATUS:CANCELLED`) for a cancelled one. A withdrawal is a `withdraw` (`METHOD:CANCEL` with no `STATUS`) built from its frozen entry, with the Player link. A deletion cancel is a `cancel` built from its frozen entry, with the Player link for GM and Player alike, since the Group's page is gone.
+- `UID` `<sessionId>@next-session.link` for the row's whole life, `SEQUENCE` and `DTSTAMP` the round's, so a retry repeats its request byte for byte under the same Idempotency-Key, `DTSTART` and `DTEND` in UTC, `SUMMARY` the published Group name, `LOCATION` the published location.
+- `URL` is token-free and built from `SITE_URL` (`convex/model/siteLinks.ts`): `/g/<groupId>` for the GM, `/me` for a Player. `DESCRIPTION` is "Open your group: <that link>".
+- `ORGANIZER` is `calendar@next-session.link`; the `ATTENDEE` is the recipient with `PARTSTAT=ACCEPTED;RSVP=FALSE`. No `VALARM`.
+
+### 15.8 Copy
+
+`sessionMailCopy` in `convex/model/sessionMailCopy.ts` is pure: plain text first, then the same words in HTML (the Workflows template's cream background, mono "NEXT SESSION" header and one button, no images, no tracking). System mail: nobody signs.
+
+`{when}` is "Saturday, October 31, 2026, 19:00–23:00, Berlin time", in the published zone with its city (the Group's zone for a snapshot published before Session mail). `{where}` is the line "Where: <location>" when there is one. The button "Open your group" goes to the Share Link for a Player and to `/g/<groupId>` for the GM.
+
+| Change | Subject | Player | GM |
+| --- | --- | --- | --- |
+| Set | `{group}: next session {date}` | The next session for {group} is set: {when}. {where} | You set the next session for {group}: {when}. {where} |
+| Changed | `{group}: session on {date} changed` | The session for {group} on {date} changed. It's now {when}. {where} | You changed the session for {group} on {date}. It's now {when}. {where} |
+| Cancelled | `{group}: session on {date} cancelled` | The session for {group} on {date} is cancelled. | You cancelled the session for {group} on {date}. |
+| Invite (entered the set) | `{group}: next session {date}` | You keep {group} now, so its session is in your calendar: {when}. {where} | {group} is yours now, so its session is in your calendar: {when}. {where} |
+| Withdrawal | `{group}: session on {date} removed from your calendar` | You don't keep {group} any more, so its session on {date} leaves your calendar. | — (a GM never leaves the set) |
+| Deletion cancel | `{group}: session on {date} cancelled` | {group} was deleted, so its session on {date} is off. | You deleted {group}, so its session on {date} is off. |
+
+Then, for set, changed and invite: "It's in the calendar invite in this mail. Not in your calendar yet? Tap **Add to calendar** once." For cancelled, withdrawal and deletion cancel: "Your calendar removes it by itself. If it doesn't, delete it there." Then the button, except in a withdrawal or a deletion cancel. Footer: "You get this because you run this group.", "…because you keep this group." or, in a withdrawal or a Player's deletion cancel, "…because you kept this group.", and in the GM's deletion cancel "…because you ran this group.", then "Turn session emails off in My groups: <SITE_URL>/me. Replies to this address aren't read."
+
+### 15.9 Volume
+
+`mailVolume` counts per provider and UTC day: Resend for Session mail (1 per send), Workflows for Welcome (1), Tips (2) and the Workflows Session update (1). A row without a provider is a Workflows count from before the split. Each provider warns once through `serverLog` ("Daily mail volume warning", with `provider`) when its day reaches 80 and once when it passes 100. Suppressed recipients aren't counted and a retry isn't counted twice. No email, Group name or Share Token reaches a usage event or log.
+
+### 15.10 One-time invites
+
+The Sessions published before the switch-on never had a Resend send. `oneTimeInvites.inviteScheduledSessions`, started once with `convex run` after `RESEND_API_KEY` is set, gives them their invites:
+
+- It reads the upcoming Sessions (today, UTC, to the end of the Booking Window) through the `by_date` index, soonest first, 20 a page so a page of full Rosters stays within Convex's reads per transaction, and takes those whose published state is scheduled and that never had a whole round (`wholeRoundSent` unset). A newcomer's invite or a withdrawal raises `sequence` but is not a whole round, so it doesn't make the run skip the GM and the other Players.
+- Each gets one round to its whole calendar recipient set with the "Set" copy (§15.8), because the GM and the Players have had the night for a while: `sequence` rises by one, `wholeRoundSent` is set, and one `broadcast` send with `change: "set"` goes to each eligible recipient. A Session with no eligible recipient is passed over and stays unsent.
+- Pacing: a run tops the day's Resend count up to 50 of the 100, leaving half for live Session mail, and stops before the first Session whose round wouldn't fit. It then runs again at the next UTC midnight. A round larger than 50 on its own goes alone as the first send of a day, so a big Group never stalls the rest.
+- A Session published again before its turn gets a broadcast, which is a whole round, and the run skips it. A second start after it finished queues nothing.
+- Without `RESEND_API_KEY` it does nothing and leaves every Session for the start after the switch-on.
+- It ends with one `serverLog` line, "One-time invites finished", with `sessions_invited` and `invites_queued` only.
+
+### 15.11 Test seams
+
+| Seam | Tested through |
+| --- | --- |
+| Session mail and the Resend adapter | `convex-test` through `api.sessions.*`, `api.groups.*`, `api.player.*`, `api.roster.removePlayer` and `api.account.finishSave` with fake timers and a fake `fetch` that records Resend payloads and decodes `invite.ics` (`convex/sessionInvites.test.ts`) |
+| The provider switch and the Workflows path | the same file and `convex/sessionMail.test.ts` |
+| Deleting a Group | `convex-test` through `api.groups.remove` and `internal.cleanup.sweepExpiredGroups` with the same fake `fetch`, the 100 Accounts × 20 Sessions drain under Convex's transaction limits (`convex/sessionCancellations.test.ts`) |
+| Copy | `sessionMailCopy` on plain data with Vitest (`convex/model/sessionMailCopy.test.ts`) |
+| One-time invites | `convex-test` through `internal.oneTimeInvites.inviteScheduledSessions` with the same fake `fetch` and fake timers, the day's Resend count seeded in `mailVolume` (`convex/sessionInvites.test.ts`) |

@@ -1,0 +1,47 @@
+   × mails every calendar recipient once after the Undo window, the GM included, and nobody before 113ms
+   × puts the night into each calendar as an accepted invite without an alarm and with a token-free link 11ms
+   × takes a cancelled night out of every calendar 12ms
+   × raises SEQUENCE for every recipient across set, change, cancel and Schedule again under one UID 17ms
+   × spaces the sends of one fan-out at least 500 ms apart 11ms
+     × drops a retry whose revision is no longer the published one 5ms
+     × sends a 503 then 200 once, under one Idempotency-Key 3ms
+     × logs a 422 without the recipient and does not retry it 6ms
+   × mails nothing to an Account with Session mail off 9ms
+   × mails nothing to an Account with a .test address 4ms
+   × mails nothing to an Anonymous GM 7ms
+     × leaves Session updates on Workflows and Resend untouched without RESEND_API_KEY 5ms
+     × requests no Workflows Session update while RESEND_API_KEY is set 5ms
+     × counts and warns Resend sends apart from Workflows sends 173ms
+     × keeps emails, Group names and Share Tokens out of usage events and logs 11ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  |convex| convex/sessionInvites.test.ts > mails every calendar recipient once after the Undo window, the GM included, and nobody before
+AssertionError: expected [] to deeply equal ArrayContaining{…}
+ FAIL  |convex| convex/sessionInvites.test.ts > puts the night into each calendar as an accepted invite without an alarm and with a token-free link
+AssertionError: expected [] to have a length of 1 but got +0
+ FAIL  |convex| convex/sessionInvites.test.ts > takes a cancelled night out of every calendar
+AssertionError: expected [] to have a length of 1 but got +0
+ FAIL  |convex| convex/sessionInvites.test.ts > raises SEQUENCE for every recipient across set, change, cancel and Schedule again under one UID
+AssertionError: expected [] to deeply equal [ 1, 2, 3, 4 ]
+ FAIL  |convex| convex/sessionInvites.test.ts > spaces the sends of one fan-out at least 500 ms apart
+AssertionError: expected [] to have a length of 4 but got +0
+ FAIL  |convex| convex/sessionInvites.test.ts > delivery > drops a retry whose revision is no longer the published one
+AssertionError: expected [] to deeply equal [ '2026', 'cancelled', …(2) ]
+ FAIL  |convex| convex/sessionInvites.test.ts > delivery > sends a 503 then 200 once, under one Idempotency-Key
+AssertionError: expected [] to deeply equal [ …(2) ]
+ FAIL  |convex| convex/sessionInvites.test.ts > delivery > logs a 422 without the recipient and does not retry it
+AssertionError: expected [] to have a length of 2 but got +0
+ FAIL  |convex| convex/sessionInvites.test.ts > mails nothing to an Account with Session mail off
+AssertionError: expected [] to deeply equal [ 'gm-9@example.com' ]
+ FAIL  |convex| convex/sessionInvites.test.ts > mails nothing to an Account with a .test address
+AssertionError: expected [] to deeply equal [ 'gm-10@example.com' ]
+ FAIL  |convex| convex/sessionInvites.test.ts > mails nothing to an Anonymous GM
+AssertionError: expected [] to deeply equal [ 'robin@example.com' ]
+ FAIL  |convex| convex/sessionInvites.test.ts > the provider switch > leaves Session updates on Workflows and Resend untouched without RESEND_API_KEY
+AssertionError: expected null to be undefined // Object.is equality
+ FAIL  |convex| convex/sessionInvites.test.ts > the provider switch > requests no Workflows Session update while RESEND_API_KEY is set
+AssertionError: expected [ 'https://example.test/session' ] to deeply equal [ …(2) ]
+ FAIL  |convex| convex/sessionInvites.test.ts > mail volume > counts and warns Resend sends apart from Workflows sends
+AssertionError: expected [] to have a length of 80 but got +0
+ FAIL  |convex| convex/sessionInvites.test.ts > mail volume > keeps emails, Group names and Share Tokens out of usage events and logs
+AssertionError: expected '{"change":"scheduled","date_label":"S…' not to contain 'robin@example.com'
+      Tests  15 failed (15)
