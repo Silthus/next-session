@@ -4,7 +4,7 @@ import {
   createRouter,
   RouterProvider,
 } from "@tanstack/react-router";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import type { ComponentProps } from "react";
@@ -279,6 +279,17 @@ describe("Your calendar on My groups", () => {
     expect(
       within(block).getByRole("link", { name: "Open in calendar app" }).getAttribute("href"),
     ).toBe("webcal://next-session.link/cal/a/feedTokenFeedTokenAb.ics");
+  });
+
+  it("moves focus to the new link after a keyboard press, so the next step is copying it", async () => {
+    renderMyGroups();
+    const block = await screen.findByRole("region", { name: "Your calendar" });
+    within(block).getByRole("button", { name: "Subscribe in your calendar app" }).focus();
+
+    await userEvent.keyboard("{Enter}");
+
+    const link = await within(block).findByRole("textbox", { name: "Calendar feed link" });
+    await waitFor(() => expect(document.activeElement).toBe(link));
   });
 
   it("resets the link at once and shows the new one", async () => {

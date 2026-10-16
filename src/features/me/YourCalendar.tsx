@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { errorMessage } from "../../lib/errors";
 import { Button, buttonClassName } from "../../ui/Button";
 import { IconCheck, IconCopy } from "../../ui/icons";
@@ -68,6 +68,8 @@ export function YourCalendar({ calendarFeed }: { calendarFeed: CalendarFeedActio
 }
 
 function FeedLink({ url }: { url: string }) {
+  const field = useRef<HTMLInputElement>(null);
+  useEffect(() => field.current?.focus(), []);
   const { copyState, copy } = useCopy(url, "me", (method) => ({
     name: "calendar_feed_copied",
     method,
@@ -76,6 +78,7 @@ function FeedLink({ url }: { url: string }) {
     <>
       <div className="flex items-center gap-2">
         <input
+          ref={field}
           readOnly
           value={url}
           aria-label="Calendar feed link"
