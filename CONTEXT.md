@@ -75,8 +75,16 @@ The dates that can be answered or scheduled: from today to the end of the month 
 _Avoid_: range, horizon
 
 **Session**:
-A date the GM picked for the Group to play. A Group has at most one Session per date.
+A date the GM picked for the Group to play. It is scheduled or cancelled, and a Group has at most one Session per date, cancelled ones included. A scheduled Session whose date has passed was played.
 _Avoid_: event, appointment, game, scheduled session
+
+**Cancel** / **Cancelled Session**:
+The GM calling off a Session after the Undo window, and the Session that results. It stays on its date marked Cancelled, so players and their calendars learn the night is off, and it never counts as played. **Schedule again** restores the same Session until the date passes. A Session cancelled inside its Undo window leaves no trace.
+_Avoid_: unschedule, delete, remove (a Session)
+
+**Undo window**:
+The 30 seconds after the GM schedules or cancels a Session, in which Undo reverts the change and nobody is told about it.
+_Avoid_: grace period, delay
 
 **Best Nights**:
 The top three dates of the visible month that no Player answered busy, ranked by how many are free, with maybe counting half.
@@ -122,4 +130,6 @@ _Avoid_: app tag, source
 
 - Lonir called a roster entry a "Membership" and stored answers as `yes / maybe / no` while the UI said Free / Maybe / Busy. Next Session uses **Player** and **free / maybe / busy** everywhere, in code and in copy.
 - Lonir split "Scheduled Session" (a date) from "Session" (prep content). Next Session has no prep content, so **Session** is the picked date.
+- Lonir stored `scheduled | played | cancelled`. Next Session stores only scheduled or cancelled; played follows from the date.
+- Code still says `sessions.unschedule` and `session_unscheduled`, which deletes the Session. These mean **Cancel** and become `sessions.cancel` and `session_cancelled` when the Cancelled Session ships.
 - "Claim" means two things in code. The Save **claim code** (`saveClaims`) moves an Anonymous GM's Groups; a **Claim** links a Player to an Account. In copy, the first is "Save" and the second is "Keep this group".
