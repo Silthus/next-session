@@ -1,0 +1,27 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-7ec46f65
+
+ ❯ |shared| shared/icalendar.test.ts (4 tests | 1 failed) 7ms
+   ❯ feed (1)
+     × lists scheduled and cancelled Sessions for a subscribed calendar, without invite headers 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/icalendar.test.ts > feed > lists scheduled and cancelled Sessions for a subscribed calendar, without invite headers
+TypeError: feed is not a function
+ ❯ shared/icalendar.test.ts:50:12
+     48|   it("lists scheduled and cancelled Sessions for a subscribed calendar…
+     49|     const entries = [halloween, cancelledNovember].map((entry) => ({ .…
+     50|     expect(feed("Next Session", entries)).toBe(feedGolden);
+       |            ^
+     51|   });
+     52| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  08:55:11
+   Duration  134ms (transform 59%, import 21%, tests 13%, worker 6%)
+

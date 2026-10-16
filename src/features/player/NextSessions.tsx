@@ -1,15 +1,25 @@
+import { Link } from "@tanstack/react-router";
 import { useId } from "react";
 import type { IsoDate } from "../../../shared/dates";
+import { track } from "../../lib/telemetry";
 import { timeRange } from "../../lib/timeAndPlace";
+import { buttonClassName } from "../../ui/Button";
 import { IconStar } from "../../ui/icons";
+import { focusRing } from "../../ui/interactive";
 import { longDayLabel, relativeDay } from "../group/calendar/calendarDates";
 import type { PlayerSession } from "./playerMonth";
 
 export function NextSessions({
+  groupId,
+  shareToken,
+  keptInMyGroups,
   sessions,
   timeZone,
   today,
 }: {
+  groupId: string;
+  shareToken: string;
+  keptInMyGroups: boolean;
   sessions: readonly PlayerSession[];
   timeZone: string;
   today: IsoDate;
@@ -52,6 +62,45 @@ export function NextSessions({
           </li>
         ))}
       </ul>
+      <CalendarDownload groupId={groupId} shareToken={shareToken} keptInMyGroups={keptInMyGroups} />
     </section>
+  );
+}
+
+function CalendarDownload({
+  groupId,
+  shareToken,
+  keptInMyGroups,
+}: {
+  groupId: string;
+  shareToken: string;
+  keptInMyGroups: boolean;
+}) {
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+      <a
+        href={`/cal/s/${shareToken}.ics`}
+        onClick={() => track({ name: "calendar_downloaded", group_id: groupId })}
+        className={buttonClassName("secondary", "md")}
+      >
+        Add to calendar
+      </a>
+      <p className="min-w-0 flex-1 basis-48 text-xs text-ink-3">
+        A one-time copy.{" "}
+        {keptInMyGroups ? (
+          <>
+            <Link
+              to="/me"
+              className={`-my-3.5 rounded-sm py-3.5 font-semibold text-accent-strong underline underline-offset-2 hover:text-ink ${focusRing}`}
+            >
+              Subscribe on My groups
+            </Link>{" "}
+            to follow moves and cancellations.
+          </>
+        ) : (
+          "Keep this group to get moves and cancellations too."
+        )}
+      </p>
+    </div>
   );
 }

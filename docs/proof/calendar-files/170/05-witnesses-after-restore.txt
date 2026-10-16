@@ -1,0 +1,10 @@
+    1 test under "never announces a change before its Undo window ends" passed in one invocation of bunx vitest run -t <2 names> --reporter=json --outputFile=<report>
+convex/feed scoping
+  totality oracle: pass (5.1 s, one invocation for every test the bullets name); refutation witnessed
+    2 tests under "every calendar file holds only the published Sessions its own token reaches" passed in one invocation of bunx vitest run -t <2 names> --reporter=json --outputFile=<report>
+run recorded in .coherence/runs/ef697ca8-bf77-43cb-acce-aca1ddf6aa85.jsonl: 2 enforcements, 2 pass, 0 fail, 0 not run; instrument typescript (none); 5.2 s
+each alone, in its own invocation:
+  convex/published only: pass (5.6 s)
+  convex/feed scoping: pass (5.6 s)
+per-test run recorded in .coherence/runs/ef697ca8-bf77-43cb-acce-aca1ddf6aa85.jsonl: 2 alone, 2 pass; 11.2 s
+every totality oracle that passed batched passes alone

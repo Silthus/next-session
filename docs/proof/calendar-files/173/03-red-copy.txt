@@ -1,0 +1,4 @@
+ × |ui| src/features/me/MyGroups.test.tsx > Your calendar on My groups > copies the link and counts the copy 51ms
+   → expected "vi.fn()" to be called once with arguments: [ Array(1) ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 18 passed (19)

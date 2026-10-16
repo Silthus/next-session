@@ -1,0 +1,22 @@
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > lists when and where the next Sessions are across Groups, each with its Group 1125ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > names a Group's zone when the browser is elsewhere 42ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > marks a Cancelled Session in Next sessions and on its Group's card 65ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > says when no Session is scheduled yet 38ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > shows a card per Claimed Player that opens the player page 57ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > removes a Group from My groups through the card's menu 162ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > shows a card per Group the Account runs that opens the GM page 82ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > offers a Player who runs nothing to create their own link 292ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > points an Account without Groups to its GM's link and to its own 261ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > holds Create your link while the link is being made 14ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > names the Account and lets it log out 72ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > shows the Account's picture next to its email 144ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > puts focus on its heading when it opens, so a redirect lands somewhere 71ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups > shows a skeleton while the Groups load 18ms
+ × |ui| src/features/me/MyGroups.test.tsx > Your calendar on My groups > subscribes on the press only, then offers the link to copy and to open in a calendar app 1025ms
+   → Unable to find role="region" and name "Your calendar"
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups telemetry > tracks Create your link on /me for a Player who runs nothing 56ms
+ ✓ |ui| src/features/me/MyGroups.test.tsx > MyGroups telemetry > tracks Create your link on /me empty 43ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  |ui| src/features/me/MyGroups.test.tsx > Your calendar on My groups > subscribes on the press only, then offers the link to copy and to open in a calendar app
+TestingLibraryElementError: Unable to find role="region" and name "Your calendar"
+      Tests  1 failed | 16 passed (17)

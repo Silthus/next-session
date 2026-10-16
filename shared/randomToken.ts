@@ -4,10 +4,10 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
 
 export type RandomBytes = (length: number) => Uint8Array;
 
-export function newShareToken(randomBytes: RandomBytes = cryptoRandomBytes): string {
-  return Array.from(randomBytes(SHARE_TOKEN_LENGTH), (byte) =>
-    ALPHABET.charAt(byte % ALPHABET.length),
-  ).join("");
+export function randomToken(length: number, randomBytes: RandomBytes = cryptoRandomBytes): string {
+  return Array.from(randomBytes(length), (byte) => ALPHABET.charAt(byte % ALPHABET.length)).join(
+    "",
+  );
 }
 
 function cryptoRandomBytes(length: number): Uint8Array {

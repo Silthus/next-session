@@ -74,7 +74,7 @@ test("an Account sees every Group it plays in and the Sessions across them on /m
       date: sessionDate,
     });
     await page.getByRole("button", { name: "Your account" }).click();
-    await page.getByRole("link", { name: "My groups" }).click();
+    await page.getByRole("link", { name: "My groups", exact: true }).click();
     await expect(page).toHaveURL("/me");
 
     await expect(section(page, "Next sessions").getByRole("link")).toHaveText([

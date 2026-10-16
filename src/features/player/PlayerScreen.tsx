@@ -403,6 +403,8 @@ function PlayerAnswers({
     <PlayerCalendar
       groupId={group.groupId}
       groupName={group.name}
+      shareToken={shareToken}
+      keptInMyGroups={group.claimedPlayerId === player.playerId}
       playerName={player.name}
       month={month}
       today={today}

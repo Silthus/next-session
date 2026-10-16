@@ -1,0 +1,283 @@
+# red: the S3b route, rename and feed scoping tests on the base tree bbe8f34 (no /cal/s route, rename outside groupChanged)
+
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-57fbe946
+
+stdout | convex/calendarFiles.test.ts > a rename > leaves a Cancelled Session's published name alone and sends no Session update
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/calendarFiles.test.ts > a rename > leaves a Cancelled Session's published name alone and sends no Session update
+Run 0000000000000000000000010003runs succeeded.
+
+stdout | convex/calendarFiles.test.ts > a rename > leaves a Cancelled Session's published name alone and sends no Session update
+Run 0000000000000000000000010006runs succeeded.
+
+ ❯ |convex| convex/calendarFiles.test.ts (12 tests | 12 failed) 197ms
+   ❯ the calendar download (9)
+     × answers with every upcoming scheduled Session of the Group as a calendar file 105ms
+     × holds an empty calendar for a Group with nothing upcoming 5ms
+     × leaves out a Session inside its first Undo window 5ms
+     × shows the old time of a move until its Undo window ends 7ms
+     × leaves out Cancelled and past Sessions 9ms
+     × keeps a Session dated today 4ms
+     × answers 404 with no body for an unknown token 3ms
+     × answers 404 with no body for a token outside the Share Token alphabet 3ms
+     × answers 404 with no body for a rotated-away token, even inside the rotation's Undo 6ms
+   ❯ feed scoping (1)
+     × every calendar file holds only the published Sessions of its own token's Group 10ms
+   ❯ a rename (2)
+     × reaches the download once its Undo window ends 6ms
+     × leaves a Cancelled Session's published name alone and sends no Session update 33ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar download > answers with every upcoming scheduled Session of the Group as a calendar file
+AssertionError: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ convex/calendarFiles.test.ts:135:29
+    133|     const response = await download(shareToken);
+    134|
+    135|     expect(response.status).toBe(200);
+       |                             ^
+    136|     expect(response.headers.get("Content-Type")).toBe("text/calendar; …
+    137|     expect(response.headers.get("Cache-Control")).toBe("private, max-a…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/12]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar download > holds an empty calendar for a Group with nothing upcoming
+AssertionError: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ convex/calendarFiles.test.ts:170:29
+    168|     const response = await download(shareToken);
+    169|
+    170|     expect(response.status).toBe(200);
+       |                             ^
+    171|     const calendar = await response.text();
+    172|     expect(unfolded(calendar)).toContain("X-WR-CALNAME:Thursday Crew");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/12]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar download > leaves out a Session inside its first Undo window
+AssertionError: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ downloadedEvents convex/calendarFiles.test.ts:92:27
+     90| async function downloadedEvents(shareToken: string) {
+     91|   const response = await download(shareToken);
+     92|   expect(response.status).toBe(200);
+       |                           ^
+     93|   return eventsIn(await response.text());
+     94| }
+ ❯ convex/calendarFiles.test.ts:182:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/12]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar download > shows the old time of a move until its Undo window ends
+AssertionError: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ downloadedEvents convex/calendarFiles.test.ts:92:27
+     90| async function downloadedEvents(shareToken: string) {
+     91|   const response = await download(shareToken);
+     92|   expect(response.status).toBe(200);
+       |                           ^
+     93|   return eventsIn(await response.text());
+     94| }
+ ❯ convex/calendarFiles.test.ts:202:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/12]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar download > leaves out Cancelled and past Sessions
+AssertionError: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ downloadedEvents convex/calendarFiles.test.ts:92:27
+     90| async function downloadedEvents(shareToken: string) {
+     91|   const response = await download(shareToken);
+     92|   expect(response.status).toBe(200);
+       |                           ^
+     93|   return eventsIn(await response.text());
+     94| }
+ ❯ convex/calendarFiles.test.ts:220:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/12]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar download > keeps a Session dated today
+AssertionError: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ downloadedEvents convex/calendarFiles.test.ts:92:27
+     90| async function downloadedEvents(shareToken: string) {
+     91|   const response = await download(shareToken);
+     92|   expect(response.status).toBe(200);
+       |                           ^
+     93|   return eventsIn(await response.text());
+     94| }
+ ❯ convex/calendarFiles.test.ts:231:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/12]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar download > answers 404 with no body for an unknown token
+AssertionError: expected 'No HttpAction routed for /cal/s/Unkno…' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ No HttpAction routed for /cal/s/UnknownTok.ics
+
+ ❯ convex/calendarFiles.test.ts:243:35
+    241|
+    242|     expect(response.status).toBe(404);
+    243|     expect(await response.text()).toBe("");
+       |                                   ^
+    244|   });
+    245|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/12]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar download > answers 404 with no body for a token outside the Share Token alphabet
+AssertionError: expected 'No HttpAction routed for /cal/s/not.a…' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ No HttpAction routed for /cal/s/not.a.token.ics
+
+ ❯ convex/calendarFiles.test.ts:243:35
+    241|
+    242|     expect(response.status).toBe(404);
+    243|     expect(await response.text()).toBe("");
+       |                                   ^
+    244|   });
+    245|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/12]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > the calendar download > answers 404 with no body for a rotated-away token, even inside the rotation's Undo
+AssertionError: expected 'No HttpAction routed for /cal/s/TX9m0…' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ No HttpAction routed for /cal/s/TX9m0pJfXn.ics
+
+ ❯ convex/calendarFiles.test.ts:256:35
+    254|     const response = await download(rotatedAway);
+    255|     expect(response.status).toBe(404);
+    256|     expect(await response.text()).toBe("");
+       |                                   ^
+    257|     expect(startsOf(await downloadedEvents(await shareTokenOf(group)))…
+    258|       "20261017T170000Z",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/12]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > feed scoping > every calendar file holds only the published Sessions of its own token's Group
+AssertionError: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ downloadedEvents convex/calendarFiles.test.ts:92:27
+     90| async function downloadedEvents(shareToken: string) {
+     91|   const response = await download(shareToken);
+     92|   expect(response.status).toBe(200);
+       |                           ^
+     93|   return eventsIn(await response.text());
+     94| }
+ ❯ convex/calendarFiles.test.ts:274:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/12]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > a rename > reaches the download once its Undo window ends
+AssertionError: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ downloadedEvents convex/calendarFiles.test.ts:92:27
+     90| async function downloadedEvents(shareToken: string) {
+     91|   const response = await download(shareToken);
+     92|   expect(response.status).toBe(200);
+       |                           ^
+     93|   return eventsIn(await response.text());
+     94| }
+ ❯ convex/calendarFiles.test.ts:299:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/12]⎯
+
+ FAIL  |convex| convex/calendarFiles.test.ts > a rename > leaves a Cancelled Session's published name alone and sends no Session update
+AssertionError: expected [ { end: 1792270800000, …(5) }, …(1) ] to deeply equal [ ObjectContaining{…}, …(1) ]
+
+- Expected
++ Received
+
+@@ -1,9 +1,13 @@
+  [
+    {
++     "end": 1792270800000,
++     "location": "Max's place",
++     "revision": 1,
++     "start": 1792256400000,
+      "state": "scheduled",
+-     "summary": "Friday Crew",
++     "summary": "Thursday Crew",
+    },
+    {
+      "end": 1792875600000,
+      "location": "Max's place",
+      "revision": 2,
+
+ ❯ convex/calendarFiles.test.ts:325:23
+    323|       (await ctx.db.query("sessions").collect()).map((session) => sess…
+    324|     );
+    325|     expect(published).toEqual([
+       |                       ^
+    326|       expect.objectContaining({ state: "scheduled", summary: "Friday C…
+    327|       expect.objectContaining({ state: "cancelled", summary: "Thursday…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/12]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  12 failed (12)
+   Start at  10:28:13
+   Duration  629ms (tests 37%, transform 32%, import 23%, environment 7%, worker 1%)
+

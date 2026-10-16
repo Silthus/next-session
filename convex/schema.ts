@@ -39,10 +39,12 @@ export default defineSchema({
     tipsConfirmedAt: v.optional(v.number()),
     profileImageId: v.optional(v.id("_storage")),
     profileImageFrom: v.optional(v.string()),
+    calendarFeedToken: v.optional(v.string()),
   })
     .index("email", ["email"])
     .index("phone", ["phone"])
-    .index("by_tipsCodeHash", ["tipsCodeHash"]),
+    .index("by_tipsCodeHash", ["tipsCodeHash"])
+    .index("by_calendarFeedToken", ["calendarFeedToken"]),
 
   groups: defineTable({
     ownerId: v.id("users"),

@@ -1,0 +1,24 @@
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-7ec46f65
+
+ ❯ |shared| shared/icalendar.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |shared| shared/icalendar.test.ts [ shared/icalendar.test.ts ]
+Error: Cannot find module './icalendar' imported from /home/coder/.t3/worktrees/next-session/t3-7ec46f65/shared/icalendar.test.ts
+ ❯ shared/icalendar.test.ts:2:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { type CalendarEntry, invite } from "./icalendar";
+       | ^
+      3| import requestGolden from "./icalendar.golden/request.ics?raw";
+      4|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  08:54:15
+   Duration  109ms (worker 96%, environment 4%)
+

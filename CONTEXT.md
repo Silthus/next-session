@@ -98,6 +98,14 @@ _Avoid_: top days, recommendations
 A Player's action that answers busy for every unanswered date left in the month.
 _Avoid_: mark all, bulk no
 
+**Calendar download**:
+The one-time `.ics` copy of a Group's upcoming scheduled Sessions that **Add to calendar** on the player page gives anyone holding the Share Link. It shows each Session as it stood after its last Undo window and doesn't follow later changes. Rotating the Share Token stops its link.
+_Avoid_: export, ICS link (in copy)
+
+**Calendar feed**:
+The secret link `next-session.link/cal/a/<feed token>.ics` that an Account subscribes to in its calendar app. It follows every Session of the Groups the Account runs or plays in, from the past month to the end of the Booking Window, and shows a Cancelled Session as cancelled. It carries no Share Token. **Reset feed link** gives a new link and stops the old one at once, with no Undo.
+_Avoid_: webcal, iCal link, sync, subscription link (in copy)
+
 ### Legal
 
 **Legal Acceptance**:

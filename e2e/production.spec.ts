@@ -223,7 +223,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
     await shoot(player, testInfo, "7-player-kept");
 
     await player.getByRole("button", { name: "Your account" }).click();
-    await player.getByRole("link", { name: "My groups" }).click();
+    await player.getByRole("link", { name: "My groups", exact: true }).click();
     await expect(player).toHaveURL(new URL("/me", appOrigin).href);
     await expect(myGroupsSection(player, "Next sessions").getByRole("link")).toHaveText([
       new RegExp(`^${dayLabel(dateOf(5))}.*${groupName}$`),

@@ -1,0 +1,5 @@
+Mutant: the Your calendar block rendered outside the has-Groups branch
+ × |ui| src/features/me/MyGroups.test.tsx > Your calendar on My groups > is not offered to an Account with no Groups 18ms
+   → expected <section …(2)>…(1)</section> to be null
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 17 passed (18)

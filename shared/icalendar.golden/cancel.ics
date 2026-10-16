@@ -1,0 +1,21 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Next Session//next-session.link//EN
+CALSCALE:GREGORIAN
+METHOD:CANCEL
+BEGIN:VEVENT
+UID:j57c9w2qx8@next-session.link
+SEQUENCE:2
+DTSTAMP:20261016T092800Z
+DTSTART:20261031T180000Z
+DTEND:20261031T220000Z
+SUMMARY:Spieleabend C
+LOCATION:Bei Anna
+DESCRIPTION:Next session of Spieleabend C.\nhttps://next-session.link/me
+URL:https://next-session.link/me
+STATUS:CANCELLED
+ORGANIZER;CN=Next Session:mailto:calendar@next-session.link
+ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=FALSE:mailto:player@ex
+ ample.com
+END:VEVENT
+END:VCALENDAR

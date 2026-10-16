@@ -1,7 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { newBackend, signedInGmWithGroup, signIn, type TestBackend } from "./model/test.setup";
+import {
+  newBackend,
+  signedInGmWithGroup,
+  signIn,
+  type GmClient,
+  type TestBackend,
+} from "./model/test.setup";
 import { UNDO_WINDOW_MS } from "./sessionLifecycle";
 
 let t: TestBackend;
@@ -13,6 +19,7 @@ beforeEach(() => {
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
   vi.stubEnv("POSTHOG_SESSION_WEBHOOK_URL", "https://example.test/session");
   vi.stubEnv("POSTHOG_MAIL_WEBHOOK_SECRET", "secret");
+  vi.stubEnv("SITE_URL", "http://localhost:5173");
   fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(new Response(null, { status: 200 })));
   vi.stubGlobal("fetch", fetchMock);
   t = newBackend();
@@ -75,6 +82,22 @@ function changes() {
   return bodies().map(({ change }) => change);
 }
 
+async function downloadedCalendar() {
+  const response = await t.fetch("/cal/s/old-token.ics");
+  expect(response.status).toBe(200);
+  return await response.text();
+}
+
+async function feedStatusOf(as: GmClient, sessionId: Id<"sessions">) {
+  const { url } = await as.mutation(api.me.calendarFeed, {});
+  const response = await t.fetch(new URL(url).pathname);
+  expect(response.status).toBe(200);
+  const entry = (await response.text())
+    .split("BEGIN:VEVENT")
+    .find((event) => event.includes(`UID:${sessionId}@next-session.link`));
+  return /STATUS:(\w+)/.exec(entry ?? "")?.[1];
+}
+
 async function sessionRow(sessionId: Id<"sessions">) {
   return await t.run(async (ctx) => await ctx.db.get("sessions", sessionId));
 }
@@ -113,15 +136,19 @@ it("returns to the GM before mail, then sends once to each current claimed Accou
 });
 
 it("never announces a change before its Undo window ends", async () => {
-  const { as, sessionId } = await publishedSession();
+  const { as, account, sessionId } = await publishedSession();
 
   await as.mutation(api.sessions.cancel, { sessionId });
   await wait(UNDO_WINDOW_MS);
   expect(fetchMock).not.toHaveBeenCalled();
+  expect(await downloadedCalendar()).toContain(`UID:${sessionId}@next-session.link`);
+  expect(await feedStatusOf(account.as, sessionId)).toBe("CONFIRMED");
 
   await wait(1);
   await deliver();
   expect(changes()).toEqual(["cancelled"]);
+  expect(await downloadedCalendar()).not.toContain(`UID:${sessionId}@next-session.link`);
+  expect(await feedStatusOf(account.as, sessionId)).toBe("CANCELLED");
 });
 
 describe("the Undo window", () => {

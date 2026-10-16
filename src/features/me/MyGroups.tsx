@@ -23,9 +23,11 @@ import {
   type RunningGroup,
   type UpcomingSession,
 } from "./myGroups";
+import { YourCalendar, type CalendarFeedActions } from "./YourCalendar";
 
 type MyGroupsProps = {
   settings?: ReactNode;
+  calendarFeed: CalendarFeedActions;
   email: string | undefined;
   image?: string;
   groups: MyGroupsData | undefined;
@@ -41,6 +43,7 @@ const cardClassName = `rounded-xl border border-line bg-surface shadow-card tran
 
 export function MyGroups({
   settings,
+  calendarFeed,
   email,
   image,
   groups,
@@ -74,6 +77,9 @@ export function MyGroups({
             <PlayingGroups groups={groups.playing} onRemove={onRemove} />
           )}
           <RunningGroups groups={groups.running} creating={creating} onCreate={onCreate} />
+          <Section title="Your calendar">
+            <YourCalendar calendarFeed={calendarFeed} />
+          </Section>
         </>
       )}
       {settings}

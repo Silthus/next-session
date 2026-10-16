@@ -124,9 +124,21 @@ jobs:
             echo "::error::$path answered '$actual', expected '$expected'"
             return 1
           }
+          expect_empty_not_found() {
+            local path="$1" actual=""
+            for attempt in 1 2 3 4 5 6; do
+              actual="$(curl --silent --max-time 10 --output /dev/null --write-out '%{http_code} %{size_download}' "$APP_URL$path" || true)"
+              [ "$actual" = "404 0" ] && return 0
+              sleep 5
+            done
+            echo "::error::$path answered '$actual', expected an empty 404 from the calendar route"
+            return 1
+          }
           expect_response / "200 "
           expect_response "/g/smoke-deep-link?month=2026-01" "200 "
           expect_response /s/AAAAAAAAAA "200 "
           expect_response /s/AAAAAAAA "302 $LONIR_URL/s/AAAAAAAA"
           expect_response "/groups/smoke?month=2026-01" "302 $LONIR_URL/groups/smoke?month=2026-01"
           expect_response /ingest/ "204 "
+          expect_empty_not_found /cal/s/AAAAAAAAAA.ics
+          expect_empty_not_found /cal/a/AAAAAAAAAAAAAAAAAAAAAA.ics
