@@ -327,24 +327,35 @@ describe("the Calendar feed link", () => {
     }
   });
 
-  it("is refused once the Account spent its calls for the hour, and only for that Account", async () => {
+  it("is shown again however often the Account asks for the link it already has", async () => {
+    const { as } = await signInAccount(t);
+    const first = await calendarFeed(as);
+
+    for (let call = 0; call < CALENDAR_FEED_CALLS_PER_HOUR * 2; call++) {
+      expect(await calendarFeed(as)).toEqual(first);
+    }
+  });
+
+  it("is not replaced once the Account spent its new links for the hour, and only for that Account", async () => {
     const spent = await signInAccount(t);
     const other = await signInAccount(t);
-    for (let call = 0; call < CALENDAR_FEED_CALLS_PER_HOUR; call++) {
-      await calendarFeed(spent.as);
+    let current = await calendarFeed(spent.as);
+    for (let call = 1; call < CALENDAR_FEED_CALLS_PER_HOUR; call++) {
+      current = await resetCalendarFeed(spent.as);
     }
 
-    await expectErrorCode(calendarFeed(spent.as), "RATE_LIMITED");
     await expectErrorCode(resetCalendarFeed(spent.as), "RATE_LIMITED");
+    expect(await calendarFeed(spent.as)).toEqual(current);
     expect((await resetCalendarFeed(other.as)).url).toMatch(FEED_URL);
   });
 
-  it("is served again an hour later", async () => {
+  it("is replaced again an hour later", async () => {
     const { as } = await signInAccount(t);
-    for (let call = 0; call < CALENDAR_FEED_CALLS_PER_HOUR; call++) await calendarFeed(as);
+    for (let call = 0; call < CALENDAR_FEED_CALLS_PER_HOUR; call++) await resetCalendarFeed(as);
+    await expectErrorCode(resetCalendarFeed(as), "RATE_LIMITED");
 
     vi.setSystemTime(NOW + 60 * 60_000);
 
-    expect((await calendarFeed(as)).url).toMatch(FEED_URL);
+    expect((await resetCalendarFeed(as)).url).toMatch(FEED_URL);
   });
 });

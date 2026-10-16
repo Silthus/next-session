@@ -212,7 +212,7 @@ The name and Roster checks that `roster` and `player` share (`validName`, `ensur
 | | `answer` | mutation | `{shareToken, playerId, date, answer: Answer \| null}` → `null` | Upsert, or delete on `null`. Rate limit `answer`. Touches the Group |
 | | `fillRest` | mutation | `{shareToken, playerId, month}` → `null` | Writes `busy` to every unanswered bookable date of the month in one mutation |
 | `me` | `groups` | query | `{today}` → `MyGroups \| null` | Account only, `null` otherwise. The Groups the caller runs and the Groups where it has a Claimed Player, with the next five Sessions as of `today`, Cancelled ones included, as `{date, state}` with each one's effective `startTime`, `lengthMinutes` and `location`, and each Group's `timeZone` (§12) |
-| | `calendarFeed` | mutation | `{}` → `{url}` | Account only. Mints the Calendar feed token on the first call and returns the same URL after (§14.2). Rate limit `calendarFeed` |
+| | `calendarFeed` | mutation | `{}` → `{url}` | Account only. Mints the Calendar feed token on the first call and returns the same URL after (§14.2). Rate limit `calendarFeed` on the mint only |
 | | `resetCalendarFeed` | mutation | `{}` → `{url}` | Account only. **Reset feed link**: replaces the token at once, with no Undo (§14.2). Rate limit `calendarFeed` |
 | `account` | `me` | query | `{}` → `{isAnonymous, email} \| null` | |
 | | `startSave` | mutation | `{}` → `{code}` | Anonymous GM only. 32 random bytes, stored hashed, 10-minute TTL. Rate limit `startSave` |
@@ -284,7 +284,7 @@ Convex functions do not see the client IP, so limits key on what the server can 
 | `startSave` | GM id | fixed window, 10 per hour |
 | `gmEdit` | GM id | token bucket, 120 per minute, capacity 60 |
 | `claimPlayer` | Account id | token bucket, 30 per minute, capacity 10 (`player.claim` and `player.release`) |
-| `calendarFeed` | Account id | fixed window, 10 per hour (`me.calendarFeed` and `me.resetCalendarFeed`) |
+| `calendarFeed` | Account id | fixed window, 10 per hour, spent by each new feed token (`me.calendarFeed`'s first call and `me.resetCalendarFeed`) |
 
 `gmEdit` covers every GM mutation without a limit of its own: `groups.rename`, `remove`, `rotateShareToken` and `undoRotateShareToken`, all of `roster` and `sessions`, and `account.finishSave`. It is sized so that no real GM reaches it.
 
@@ -980,7 +980,7 @@ Calendar files carry a Group's published Sessions into players' own calendars. T
 `GET next-session.link/cal/a/<feed token>.ics` is the **Calendar feed**: every Session of every Group an Account runs or plays in, for whoever holds the feed link. The Account subscribes to it once in its calendar app.
 
 - The feed token is `users.calendarFeedToken`, 22 characters from the Share Token alphabet (132 bits), drawn by the same `randomToken` helper in `shared/randomToken.ts`. It is a stored bearer credential in the sense of [ADR-0004](adr/0004-share-token-is-the-player-credential.md), not an HMAC, so **Reset feed link** revokes it.
-- `me.calendarFeed({}) → {url}` mints the token on the first call and returns the same URL after. `me.resetCalendarFeed({}) → {url}` replaces it at once, with no Undo: a leaked feed wants a hard stop. Both need an Account (`UNAUTHENTICATED` for an Anonymous GM or a visitor) and spend the `calendarFeed` rate limit of the Account (§5.4). `url` is `<SITE_URL>/cal/a/<token>.ics`; the web app derives the `webcal://` form from it.
+- `me.calendarFeed({}) → {url}` mints the token on the first call and returns the same URL after. `me.resetCalendarFeed({}) → {url}` replaces it at once, with no Undo: a leaked feed wants a hard stop. Both need an Account (`UNAUTHENTICATED` for an Anonymous GM or a visitor) and each new token spends the `calendarFeed` rate limit of the Account (§5.4). Showing the link the Account already has spends nothing, so opening My groups again never locks an Account out of its own link. `url` is `<SITE_URL>/cal/a/<token>.ics`; the web app derives the `webcal://` form from it.
 - The first mint tracks `calendar_feed_created` and a reset tracks `calendar_feed_reset`, both with only the actor. No token reaches an event or a log, and feed polls are not tracked.
 - A Convex HTTP action (`serveAccountFeed` in `convex/calendarFiles.ts`, routed in `convex/http.ts`) reads through the internal query `calendarFiles.accountFeed` with the token and the serve time. The query finds the Account by its **current** token only, so a reset token opens nothing.
 - It holds the published Sessions dated from 31 days back (UTC) to the end of the Booking Window, of the Groups the Account runs (at most 50) and the Groups where it has a Claimed Player (at most 50), each Group once. Each Group's Sessions come from one `by_groupId_and_date` index range capped at the days in the window. A Cancelled Session carries `STATUS:CANCELLED`, so a subscribed calendar shows it as off until it drops out of the window. The past month stays because many calendar apps delete what drops out of a feed. A Group the Account released, removed from My groups or deleted is gone from the next fetch, even while a deleted Group's Players are still being removed.

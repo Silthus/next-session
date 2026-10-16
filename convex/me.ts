@@ -170,7 +170,6 @@ export const calendarFeed = mutation({
   returns: calendarFeedLink,
   handler: async (ctx) => {
     const account = await requireAccount(ctx);
-    await enforceRateLimit(ctx, "calendarFeed", account._id);
     if (account.calendarFeedToken !== undefined) {
       return calendarFeedLinkOf(account.calendarFeedToken);
     }
@@ -185,7 +184,6 @@ export const resetCalendarFeed = mutation({
   returns: calendarFeedLink,
   handler: async (ctx) => {
     const account = await requireAccount(ctx);
-    await enforceRateLimit(ctx, "calendarFeed", account._id);
     const feedToken = await mintCalendarFeedToken(ctx, account);
     await track(ctx, { name: "calendar_feed_reset", actor: account });
     return calendarFeedLinkOf(feedToken);
@@ -193,6 +191,7 @@ export const resetCalendarFeed = mutation({
 });
 
 async function mintCalendarFeedToken(ctx: MutationCtx, account: Doc<"users">) {
+  await enforceRateLimit(ctx, "calendarFeed", account._id);
   const calendarFeedToken = randomToken(CALENDAR_FEED_TOKEN_LENGTH);
   await ctx.db.patch("users", account._id, { calendarFeedToken });
   return calendarFeedToken;
