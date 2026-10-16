@@ -60,10 +60,19 @@ describe("privacy text", () => {
       );
     });
 
+    it("names the stored reminder setting and secret reminder link, and keeps them until the account goes", () => {
+      expect(sectionOf(privacy, "2. What we process")).toMatch(
+        /\| For an account:[^\n|]*whether you want reminders[^\n|]*secret reminder link[^\n|]*turns reminders off or on without signing in[^\n]*\| Contract, 6\(1\)\(b\) \|/,
+      );
+      expect(sectionOf(privacy, "5. How long we keep data")).toMatch(
+        /\| Your reminder setting and reminder link \| Until your account is deleted/,
+      );
+    });
+
     it("says how to stop them, and that stopping them leaves session updates alone", () => {
       const reminderStop = sectionOf(privacy, "6. Your rights")
         .split("\n\n")
-        .find((paragraph) => paragraph.startsWith("When reminders are on"));
+        .find((paragraph) => paragraph.includes("1 day and 2 hours before a session"));
       expect(reminderStop).toContain(
         'the "Email me 1 day and 2 hours before a session" switch on My groups',
       );

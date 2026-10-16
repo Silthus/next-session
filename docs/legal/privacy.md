@@ -32,6 +32,7 @@ We have not appointed a data protection officer because we are not required to.
 | For an account that subscribes to its calendar feed: a secret feed link. The calendar app that fetches the link receives the group name, date, start and end time, and place of the sessions of your groups | Let your calendar app follow the sessions of your groups | Contract, 6(1)(b) |
 | For a player with an account, when session emails are enabled: your email address, group name, session date, share link and email preference | Tell you when a session is set or cancelled | Contract, 6(1)(b) |
 | For a player with an account, when reminders are on: your email address, group name, session date, start time, location and share link | Remind you 1 day and 2 hours before a session | Contract, 6(1)(b) |
+| For an account: whether you want reminders, and a secret reminder link that turns reminders off or on without signing in | Let you stop reminders from any reminder | Contract, 6(1)(b) |
 | If you ask for tips: your email address and your confirmation | Send the two tip mails | Consent, 6(1)(a) |
 
 Player names are whatever the GM or the player types in. A first name or nickname is enough. We do not need, and ask you not to enter, anything else about a person.
@@ -40,7 +41,7 @@ A group's location is whatever the GM types in: an address, a note, or a link. A
 
 We measure use without cookies and without storing anything on your device. We show no ads and do no cross-site tracking, we do not combine your usage events with data from our other products, and we do not sell data or use it for automated decisions.
 
-To count visitors, PostHog forms a hash of your IP address and browser with a secret that changes every day. It does not store your IP address. Share links and sign-in codes are removed from page addresses before they are sent, so a group's share link never reaches usage measurement. When session emails or reminders are on, PostHog receives the share link as mail content through a separate, secret-guarded workflow, not as a usage event or person property.
+To count visitors, PostHog forms a hash of your IP address and browser with a secret that changes every day. It does not store your IP address. Share links and sign-in codes are removed from page addresses before they are sent, so a group's share link never reaches usage measurement. When session emails or reminders are on, PostHog receives the share link, and for reminders your reminder link, as mail content through a separate, secret-guarded workflow, not as a usage event or person property.
 
 ## 3. Storage on your device (§ 25 TDDDG)
 
@@ -88,6 +89,7 @@ Your Google profile picture is shown only to you and to the GM of each group whe
 | Technical logs in PostHog | 14 days |
 | Your Google profile picture | Replaced or deleted at your next Google sign-in after you change or remove it at Google; deleted with your account |
 | Your calendar feed link | Until you reset it on My groups or your account is deleted |
+| Your reminder setting and reminder link | Until your account is deleted |
 | Your account's pseudonymous profile in PostHog, and your email address for the welcome mail, tips, session updates, and reminders | Until your account is deleted |
 
 When you save a group to an account, the group moves to the account and the temporary user ID is deleted.
