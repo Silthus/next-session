@@ -2,7 +2,7 @@
 
 > **Draft, pending review by a qualified German lawyer before publication.** Source text for the `/privacy` page. `{{…}}` placeholders are filled at build time (see `docs/spec.md` §7).
 
-**Version 1.9. Effective: {{EFFECTIVE_DATE}}**
+**Version 1.10. Effective: {{EFFECTIVE_DATE}}**
 
 This policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.
 
@@ -31,6 +31,7 @@ We have not appointed a data protection officer because we are not required to.
 | For an account: your email address | Send you one welcome mail | Contract, 6(1)(b) |
 | For an account that subscribes to its calendar feed: a secret feed link. The calendar app that fetches the link receives the group name, date, start and end time, and place of the sessions of your groups | Let your calendar app follow the sessions of your groups | Contract, 6(1)(b) |
 | For a player with an account, when session emails are enabled: your email address, group name, session date, share link and email preference | Tell you when a session is set or cancelled | Contract, 6(1)(b) |
+| For a player with an account, when reminders are on: your email address, group name, session date, start time, location and share link | Remind you 1 day and 2 hours before a session | Contract, 6(1)(b) |
 | If you ask for tips: your email address and your confirmation | Send the two tip mails | Consent, 6(1)(a) |
 
 Player names are whatever the GM or the player types in. A first name or nickname is enough. We do not need, and ask you not to enter, anything else about a person.
@@ -39,7 +40,7 @@ A group's location is whatever the GM types in: an address, a note, or a link. A
 
 We measure use without cookies and without storing anything on your device. We show no ads and do no cross-site tracking, we do not combine your usage events with data from our other products, and we do not sell data or use it for automated decisions.
 
-To count visitors, PostHog forms a hash of your IP address and browser with a secret that changes every day. It does not store your IP address. Share links and sign-in codes are removed from page addresses before they are sent, so a group's share link never reaches usage measurement. When session emails are enabled, PostHog receives the share link as mail content through a separate, secret-guarded workflow, not as a usage event or person property.
+To count visitors, PostHog forms a hash of your IP address and browser with a secret that changes every day. It does not store your IP address. Share links and sign-in codes are removed from page addresses before they are sent, so a group's share link never reaches usage measurement. When session emails or reminders are on, PostHog receives the share link as mail content through a separate, secret-guarded workflow, not as a usage event or person property.
 
 ## 3. Storage on your device (§ 25 TDDDG)
 
@@ -65,7 +66,7 @@ We use these processors under data processing agreements (Art. 28 GDPR):
 | --- | --- | --- |
 | Convex, Inc. | Database, application backend, sign-in | USA |
 | Cloudflare, Inc. | Delivering the website, protection against attacks | Global network, USA |
-| PostHog Inc. | Usage measurement, error reports, technical logs, and sending the welcome mail, tips, and session updates when enabled | EU (Frankfurt) hosting, US company |
+| PostHog Inc. | Usage measurement, error reports, technical logs, and sending the welcome mail, tips, session updates, and reminders when enabled | EU (Frankfurt) hosting, US company |
 
 Transfers to the USA rely on the EU–US Data Privacy Framework and the EU Standard Contractual Clauses.
 
@@ -87,7 +88,7 @@ Your Google profile picture is shown only to you and to the GM of each group whe
 | Technical logs in PostHog | 14 days |
 | Your Google profile picture | Replaced or deleted at your next Google sign-in after you change or remove it at Google; deleted with your account |
 | Your calendar feed link | Until you reset it on My groups or your account is deleted |
-| Your account's pseudonymous profile in PostHog, and your email address for the welcome mail, tips, and session updates | Until your account is deleted |
+| Your account's pseudonymous profile in PostHog, and your email address for the welcome mail, tips, session updates, and reminders | Until your account is deleted |
 
 When you save a group to an account, the group moves to the account and the temporary user ID is deleted.
 
@@ -98,6 +99,8 @@ You have the right of access (Art. 15), rectification (Art. 16), erasure (Art. 1
 **You may object to usage measurement at any time.** While the Service measures use, this page ends with a **Turn off usage measurement in this browser** button. Press it, and the Service sends no usage events, error reports, or technical logs from that browser. At your request, the Service remembers the choice in your browser's local storage, and the button becomes **Turn it back on**. If your browser does not let the Service remember the choice, it lasts until you reload the page or leave the site. Steps such as creating a link, joining, or scheduling are recorded on our servers, so the button does not cover them. To object to those, write to {{CONTACT_EMAIL}}; for an account, we then stop them for good.
 
 When session emails are enabled, you can stop them with the "Email me when a session is set or cancelled" switch on My groups, linked from each update. Sign in to change this account-wide preference. Session updates are transactional service messages; the tips unsubscribe does not control them. Session updates carry no open or click tracking.
+
+When reminders are on, you can stop them with the "Email me 1 day and 2 hours before a session" switch on My groups, or with the link in every reminder, which works without signing in. Neither touches session updates. Reminders are transactional service messages and carry no open or click tracking.
 
 You may withdraw your consent to the tips at any time, with the unsubscribe link in every tip or by replying to it. Mails sent before you withdraw stay lawful.
 
