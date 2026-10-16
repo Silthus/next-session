@@ -3,15 +3,18 @@ import { addMonths, isValidMonth, type IsoMonth } from "../shared/dates";
 import type { Id } from "./_generated/dataModel";
 import { query, type QueryCtx } from "./_generated/server";
 import { findOwnedGroup } from "./model/access";
+import { datedSessionOf } from "./sessionLifecycle";
 import { profileImageUrl } from "./model/profileImages";
-import { answerValue } from "./schema";
+import { answerValue, datedSession } from "./schema";
 
 const monthSchedule = v.object({
   players: v.array(
     v.object({ _id: v.id("players"), name: v.string(), image: v.optional(v.string()) }),
   ),
   answers: v.array(v.object({ playerId: v.id("players"), date: v.string(), answer: answerValue })),
-  sessions: v.array(v.object({ _id: v.id("sessions"), date: v.string() })),
+  sessions: v.array(
+    v.object({ _id: v.id("sessions"), ...datedSession.fields, published: v.boolean() }),
+  ),
 });
 
 export const month = query({
@@ -60,7 +63,11 @@ async function sessionsOf(ctx: QueryCtx, groupId: Id<"groups">) {
     .query("sessions")
     .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId))
     .collect();
-  return sessions.map(({ _id, date }) => ({ _id, date }));
+  return sessions.map((session) => ({
+    _id: session._id,
+    ...datedSessionOf(session),
+    published: session.published !== undefined,
+  }));
 }
 
 function firstDayOf(month: IsoMonth) {

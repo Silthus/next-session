@@ -1,10 +1,10 @@
 import { ActionRetrier } from "@convex-dev/action-retrier";
 import { v, type Infer } from "convex/values";
 import { components, internal } from "./_generated/api";
-import type { SessionChange } from "./notifications";
-import type { Doc, Id } from "./_generated/dataModel";
+import type { Doc } from "./_generated/dataModel";
 import { internalAction, internalMutation, type MutationCtx } from "./_generated/server";
 import { accountDistinctId, isTestAddress, PRODUCT, serverLog } from "./model/telemetry";
+import { sessionState } from "./schema";
 
 declare const process: { env: Record<string, string | undefined> };
 
@@ -25,9 +25,16 @@ export const sessionMailBody = v.object({
   email: v.string(),
   group_name: v.string(),
   date_label: v.string(),
-  change: v.union(v.literal("scheduled"), v.literal("cancelled")),
+  change: sessionState,
   player_url: v.string(),
 });
+
+export const sessionSend = {
+  sessionId: v.id("sessions"),
+  userId: v.id("users"),
+  revision: v.number(),
+};
+export type SessionSend = Infer<ReturnType<typeof v.object<typeof sessionSend>>>;
 
 const mailKind = v.union(v.literal("welcome"), v.literal("tips"));
 type MailKind = Infer<typeof mailKind>;
@@ -96,31 +103,19 @@ function isRetryable(status: number) {
   return status === TOO_MANY_REQUESTS || status >= FIRST_SERVER_ERROR;
 }
 
-export async function requestSessionMail(
-  ctx: MutationCtx,
-  args: SessionChange & { userId: Id<"users"> },
-) {
+export async function requestSessionMail(ctx: MutationCtx, send: SessionSend) {
   if (!webhookFor("session")) return;
   await recordMailVolume(ctx, 1);
-  await retrier.run(ctx, internal.mail.sendSession, args);
+  await retrier.run(ctx, internal.mail.sendSession, send);
 }
 
 export const sendSession = internalAction({
-  args: {
-    groupId: v.id("groups"),
-    sessionId: v.id("sessions"),
-    actorId: v.id("users"),
-    date: v.string(),
-    change: v.union(v.literal("scheduled"), v.literal("cancelled")),
-    createdAt: v.number(),
-    changedAt: v.number(),
-    userId: v.id("users"),
-  },
+  args: sessionSend,
   returns: v.null(),
-  handler: async (ctx, args) => {
+  handler: async (ctx, send) => {
     const webhook = webhookFor("session");
     if (!webhook) return null;
-    const body = await ctx.runQuery(internal.notifications.recipient, args);
+    const body = await ctx.runQuery(internal.sessionMail.recipient, send);
     if (!body) return null;
     const { status } = await post(webhook, body);
     if (status >= FIRST_SERVER_ERROR)

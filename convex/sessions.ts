@@ -1,12 +1,12 @@
 import { v } from "convex/values";
 import { isBookable, todayUtc } from "../shared/dates";
 import { MAX_PLAYERS_PER_GROUP } from "../shared/limits";
-import { queueSessionMail } from "./notifications";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, type QueryCtx } from "./_generated/server";
 import { ownedGroup, ownedSession, touchGroup } from "./model/access";
 import { fail } from "./model/errors";
 import { enforceRateLimit } from "./model/rateLimits";
+import { cancelSession, isScheduled, scheduleSession } from "./sessionLifecycle";
 import { track, type ServerEvent } from "./model/telemetry";
 
 export const schedule = mutation({
@@ -15,41 +15,26 @@ export const schedule = mutation({
   handler: async (ctx, { groupId, date }) => {
     const { gm, group } = await ownedGroup(ctx, groupId);
     ensureBookable(date);
-    if ((await sessionOn(ctx, group._id, date)) !== null) fail({ code: "SESSION_EXISTS" });
     await enforceRateLimit(ctx, "gmEdit", gm._id);
-    const sessionId = await ctx.db.insert("sessions", { groupId: group._id, date });
-    await queueSessionMail(ctx, {
-      groupId,
-      sessionId,
-      actorId: gm._id,
-      date,
-      change: "scheduled",
-      createdAt: Date.now(),
-    });
+    const isFirstForGroup = !(await hasSessions(ctx, group._id));
+    const sessionId = await scheduleSession(ctx, group, date);
     await touchGroup(ctx, group);
-    await track(ctx, () => sessionScheduled(ctx, gm, group._id));
+    await track(ctx, () => sessionScheduled(ctx, gm, group._id, isFirstForGroup));
     return sessionId;
   },
 });
 
-export const unschedule = mutation({
+export const cancel = mutation({
   args: { sessionId: v.id("sessions") },
   returns: v.null(),
   handler: async (ctx, { sessionId }) => {
     const { gm, group, session } = await ownedSession(ctx, sessionId);
     ensureBookable(session.date);
+    if (!isScheduled(session)) return null;
     await enforceRateLimit(ctx, "gmEdit", gm._id);
-    await ctx.db.delete("sessions", session._id);
-    await queueSessionMail(ctx, {
-      groupId: group._id,
-      sessionId,
-      actorId: gm._id,
-      date: session.date,
-      change: "cancelled",
-      createdAt: session._creationTime,
-    });
+    await cancelSession(ctx, session);
     await touchGroup(ctx, group);
-    await track(ctx, { name: "session_unscheduled", actor: gm, group_id: group._id });
+    await track(ctx, { name: "session_cancelled", actor: gm, group_id: group._id });
     return null;
   },
 });
@@ -58,33 +43,29 @@ function ensureBookable(date: string) {
   if (!isBookable(date, todayUtc(Date.now()))) fail({ code: "OUT_OF_WINDOW" });
 }
 
-async function sessionOn(ctx: QueryCtx, groupId: Id<"groups">, date: string) {
-  return await ctx.db
+async function hasSessions(ctx: QueryCtx, groupId: Id<"groups">) {
+  const session = await ctx.db
     .query("sessions")
-    .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId).eq("date", date))
+    .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId))
     .first();
+  return session !== null;
 }
 
 async function sessionScheduled(
   ctx: QueryCtx,
   gm: Doc<"users">,
   groupId: Id<"groups">,
+  isFirstForGroup: boolean,
 ): Promise<ServerEvent> {
-  const [players, sessions] = await Promise.all([
-    ctx.db
-      .query("players")
-      .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", groupId))
-      .take(MAX_PLAYERS_PER_GROUP),
-    ctx.db
-      .query("sessions")
-      .withIndex("by_groupId_and_date", (q) => q.eq("groupId", groupId))
-      .take(2),
-  ]);
+  const players = await ctx.db
+    .query("players")
+    .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", groupId))
+    .take(MAX_PLAYERS_PER_GROUP);
   return {
     name: "session_scheduled",
     actor: gm,
     group_id: groupId,
     player_count: players.length,
-    is_first_for_group: sessions.length === 1,
+    is_first_for_group: isFirstForGroup,
   };
 }

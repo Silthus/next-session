@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import type { Answer } from "../../../../shared/answers";
 import { summarizeMonth } from "../../../../shared/monthSummary";
+import type { CalendarSession } from "./DayCell";
 import { DayPanel } from "./DayPanel";
 
 const today = "2026-10-02";
@@ -12,7 +13,7 @@ const players = ["Ana", "Ben", "Chiara", "Dev", "Eli"].map((name) => ({ _id: nam
 type PanelSetup = {
   date?: string;
   answers?: Record<string, Answer>;
-  scheduled?: boolean;
+  session?: CalendarSession["state"];
   pending?: boolean;
   roster?: typeof players;
 };
@@ -20,7 +21,7 @@ type PanelSetup = {
 function renderPanel({
   date = "2026-10-16",
   answers = {},
-  scheduled = false,
+  session,
   pending = false,
   roster = players,
 }: PanelSetup = {}) {
@@ -29,10 +30,12 @@ function renderPanel({
     today,
     players: roster,
     answers: Object.entries(answers).map(([playerId, answer]) => ({ playerId, date, answer })),
-    sessions: scheduled ? [{ _id: "s1" as Id<"sessions">, date }] : [],
+    sessions: session
+      ? [{ _id: "s1" as Id<"sessions">, date, state: session, published: true }]
+      : [],
   });
   const day = summary.days.find((d) => d.date === date)!;
-  const handlers = { onClose: vi.fn(), onSchedule: vi.fn(), onUnschedule: vi.fn() };
+  const handlers = { onClose: vi.fn(), onSchedule: vi.fn(), onCancel: vi.fn() };
   render(
     <DayPanel
       day={day}
@@ -69,20 +72,36 @@ describe("DayPanel", () => {
     expect(onSchedule).toHaveBeenCalledOnce();
   });
 
-  it("unschedules a Session that has not passed", async () => {
-    const { onUnschedule } = renderPanel({ scheduled: true });
-    await userEvent.click(screen.getByRole("button", { name: "Unschedule this session" }));
-    expect(onUnschedule).toHaveBeenCalledWith(expect.objectContaining({ _id: "s1" }));
+  it("cancels a Session that has not passed", async () => {
+    const { onCancel } = renderPanel({ session: "scheduled" });
+    expect(screen.queryByText("Cancelled")).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Cancel session" }));
+    expect(onCancel).toHaveBeenCalledWith(expect.objectContaining({ _id: "s1" }));
   });
 
-  it("still unschedules a Session today", async () => {
-    const { onUnschedule } = renderPanel({ date: today, scheduled: true });
-    await userEvent.click(screen.getByRole("button", { name: "Unschedule this session" }));
-    expect(onUnschedule).toHaveBeenCalledWith(expect.objectContaining({ _id: "s1", date: today }));
+  it("still cancels a Session today", async () => {
+    const { onCancel } = renderPanel({ date: today, session: "scheduled" });
+    await userEvent.click(screen.getByRole("button", { name: "Cancel session" }));
+    expect(onCancel).toHaveBeenCalledWith(expect.objectContaining({ _id: "s1", date: today }));
   });
 
-  it("offers no Unschedule on a past Session", () => {
-    renderPanel({ date: "2026-10-01", scheduled: true });
+  it("marks a Cancelled Session and schedules it again", async () => {
+    const { onSchedule, onCancel } = renderPanel({ session: "cancelled" });
+    expect(screen.getByText("Cancelled")).toBeTruthy();
+    await userEvent.click(screen.getByRole("button", { name: "Schedule again" }));
+    expect(onSchedule).toHaveBeenCalledOnce();
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("keeps a past Cancelled Session marked and read-only", () => {
+    renderPanel({ date: "2026-10-01", session: "cancelled" });
+    expect(screen.getByText("Cancelled")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /schedule|cancel/i })).toBeNull();
+    expect(screen.getByText("This night was cancelled. Past dates are read-only.")).toBeTruthy();
+  });
+
+  it("offers no cancel on a past Session", () => {
+    renderPanel({ date: "2026-10-01", session: "scheduled" });
     expect(screen.queryByRole("button", { name: /schedule/i })).toBeNull();
     expect(screen.getByText("You played this night. Past dates are read-only.")).toBeTruthy();
   });

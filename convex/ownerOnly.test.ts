@@ -65,8 +65,8 @@ const foreignCalls: Record<string, ForeignCall> = {
   "sessions.schedule": refusedAsMissing((as, { groupId }) =>
     as.mutation(api.sessions.schedule, { groupId, date: "2026-10-24" }),
   ),
-  "sessions.unschedule": refusedAsMissing((as, { sessionId }) =>
-    as.mutation(api.sessions.unschedule, { sessionId }),
+  "sessions.cancel": refusedAsMissing((as, { sessionId }) =>
+    as.mutation(api.sessions.cancel, { sessionId }),
   ),
 };
 

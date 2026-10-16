@@ -1,0 +1,729 @@
+# Red: new and changed tests on the integration tip ee0fe41, before the change
+
+$ bunx vitest run <the changed test files>
+
+ RUN  v5.0.3 /home/coder/.t3/worktrees/next-session/t3-0d92197f
+
+ ❯ |convex| convex/backfill.test.ts (0 test)
+ ❯ |convex| convex/ownerOnly.test.ts (2 tests | 2 failed) 122ms
+   ❯ owner-only Groups (2)
+     × covers every public function of the GM modules 11ms
+     × every GM-facing function treats another GM's Group, Player and Session as missing and changes nothing 109ms
+ ❯ |convex| convex/schedule.test.ts (12 tests | 1 failed) 119ms
+   ❯ schedule.month (12)
+     × leaves Cancelled Sessions out 24ms
+ ❯ |convex| convex/sessions.test.ts (25 tests | 12 failed) 159ms
+   ❯ sessions.schedule (15)
+     × restores a Cancelled Session in place, keeping its id 22ms
+     × schedules a new Session on a date whose Session was removed 3ms
+   ❯ sessions.cancel (9)
+     × removes a Session that was never published 6ms
+     × keeps a published Session on its date as Cancelled 3ms
+     × cancels a Session today 4ms
+     × succeeds and changes nothing for a Session already Cancelled 5ms
+     × keeps a past Session, because past dates are read-only 3ms
+     × pushes out the Expiry of an Unsaved Group 2ms
+     × treats a Session of a foreign Group as missing 2ms
+     × treats a removed Session as missing 2ms
+     × rejects a signed-out caller 2ms
+   ❯ the GM edit limit (1)
+     × refuses scheduling and cancelling once the GM's edits are spent, and changes nothing 14ms
+ ❯ |convex| convex/me.test.ts (12 tests | 1 failed) 174ms
+   ❯ me.groups (12)
+     × leaves Cancelled Sessions out of the next five 22ms
+stdout | convex/sessionMail.test.ts > never announces a change before its Undo window ends
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/sessionMail.test.ts > the Undo window > keeps a Session cancelled after its window as Cancelled and sends one cancelled update
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/sessionMail.test.ts > the Undo window > keeps the id on Undo of a cancel and mails nobody
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/sessionMail.test.ts > the Undo window > restores the same id on Schedule again and sends one scheduled update
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/sessionMail.test.ts > the Undo window > sends exactly one cancelled update for cancel, Schedule again and cancel inside one window
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/sessionMail.test.ts > the Undo window > publishes a burst of changes once, a window after the last
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/sessionMail.test.ts > the Undo window > sends nothing for a cancel undone after 1000 ms
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/sessionMail.test.ts > the Undo window > sends nothing for a cancel undone after 30000 ms
+Run 0000000000000000000000010000runs succeeded.
+
+ ❯ |ui| src/features/group/calendar/useSessionActions.test.tsx (4 tests | 3 failed) 50ms
+   ❯ useSessionActions (4)
+     × ignores a second change to a night while the first is on its way 5ms
+     × undoes a new Session with the id the server returned 12ms
+     × shows a scheduled night in every cached month of the Group at once 4ms
+stdout | convex/sessionMail.test.ts > the Undo window > does not move a pending settle when a Cancelled Session is cancelled again
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/sessionMail.test.ts > cancels with the current Group name and Share Link
+Run 0000000000000000000000010000runs succeeded.
+
+stdout | convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one
+Run 0000000000000000000000010000runs succeeded.
+
+ ❯ |ui| src/features/group/calendar/DayPanel.test.tsx (9 tests | 2 failed) 300ms
+   ❯ DayPanel (9)
+     × cancels a Session that has not passed 28ms
+     × still cancels a Session today 19ms
+ ❯ |convex| convex/sessionMail.test.ts (32 tests | 16 failed) 703ms
+   × never announces a change before its Undo window ends 22ms
+   ❯ the Undo window (12)
+     × removes a Session cancelled inside its first window and mails nobody 10ms
+     × keeps a Session cancelled after its window as Cancelled and sends one cancelled update 8ms
+     × keeps the id on Undo of a cancel and mails nobody 8ms
+     × restores the same id on Schedule again and sends one scheduled update 12ms
+     × sends exactly one cancelled update for cancel, Schedule again and cancel inside one window 8ms
+     × publishes a burst of changes once, a window after the last 6ms
+     × announces the final Session after a new one is undone and scheduled again 5ms
+     × sends nothing for a new Session undone after 0 ms 3ms
+     × sends nothing for a new Session undone after 30000 ms 3ms
+     × sends nothing for a cancel undone after 1000 ms 7ms
+     × sends nothing for a cancel undone after 30000 ms 8ms
+     × does not move a pending settle when a Cancelled Session is cancelled again 6ms
+   × cancels with the current Group name and Share Link 6ms
+   × publishes without mail configured and queues no send 7ms
+   × drops a retry whose revision is no longer the published one 8ms
+ ❯ |convex| convex/player.test.ts (100 tests | 1 failed) 1039ms
+   ❯ player.group (11)
+     × leaves Cancelled Sessions out 25ms
+ ❯ |convex| convex/telemetry.callSites.test.ts (30 tests | 2 failed) 1377ms
+   ❯ GM mutations (6)
+     × tracks session_cancelled 14ms
+     × tracks Schedule again as session_scheduled that is not the Group's first 8ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/backfill.test.ts [ convex/backfill.test.ts ]
+Error: Cannot find module './backfill' imported from /home/coder/.t3/worktrees/next-session/t3-0d92197f/convex/backfill.test.ts
+ ❯ convex/backfill.test.ts:6:1
+      4| import type { Id } from "./_generated/dataModel";
+      5| import type { MutationCtx } from "./_generated/server";
+      6| import { LEGACY_PAGE_SIZE } from "./backfill";
+       | ^
+      7| import {
+      8|   newBackend,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/41]⎯
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 40 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |convex| convex/me.test.ts > me.groups > leaves Cancelled Sessions out of the next five
+ FAIL  |convex| convex/player.test.ts > player.group > leaves Cancelled Sessions out
+ FAIL  |convex| convex/schedule.test.ts > schedule.month > leaves Cancelled Sessions out
+Error: Validator error: Unexpected field `published` in object
+ ❯ performAsyncSyscall node_modules/convex/src/server/impl/syscall.ts:52:11
+ ❯ insert node_modules/convex/src/server/impl/database_impl.ts:102:23
+ ❯ Object.insert node_modules/convex/src/server/impl/database_impl.ts:147:14
+ ❯ convex/model/test.setup.ts:61:37
+     59|   fields: SessionFields = {},
+     60| ) {
+     61|   return await t.run(async (ctx) => await ctx.db.insert("sessions", { …
+       |                                     ^
+     62| }
+     63|
+ ❯ invokeFunction node_modules/convex/src/server/impl/registration_impl.ts:90:14
+ ❯ invokeMutation node_modules/convex/src/server/impl/registration_impl.ts:70:18
+ ❯ runMutationWithHandler node_modules/convex-test/dist/index.js:1975:31
+ ❯ handler node_modules/convex-test/dist/index.js:2181:24
+ ❯ invokeFunction node_modules/convex/src/server/impl/registration_impl.ts:90:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/41]⎯
+
+ FAIL  |convex| convex/ownerOnly.test.ts > owner-only Groups > covers every public function of the GM modules
+AssertionError: expected [ Array(13) ] to deeply equal [ Array(13) ]
+
+- Expected
++ Received
+
+@@ -8,8 +8,8 @@
+    "groups.undoRotateShareToken",
+    "roster.addPlayer",
+    "roster.removePlayer",
+    "roster.renamePlayer",
+    "schedule.month",
++   "sessions.cancel",
+    "sessions.schedule",
+-   "sessions.unschedule",
+  ]
+
+ ❯ convex/ownerOnly.test.ts:106:46
+    104| describe("owner-only Groups", () => {
+    105|   it("covers every public function of the GM modules", () => {
+    106|     expect(Object.keys(foreignCalls).sort()).toEqual(publicFunctionsOf…
+       |                                              ^
+    107|   });
+    108|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/41]⎯
+
+ FAIL  |convex| convex/ownerOnly.test.ts > owner-only Groups > every GM-facing function treats another GM's Group, Player and Session as missing and changes nothing
+AssertionError: expected Error: Expected a Convex function exporte… to be an instance of ConvexError
+ ❯ expectErrorCode convex/model/test.setup.ts:92:17
+     90|     (reason: unknown) => reason,
+     91|   );
+     92|   expect(error).toBeInstanceOf(ConvexError);
+       |                 ^
+     93|   const { data } = error as ConvexError<AppErrorData & { code: Code }>;
+     94|   expect(data.code).toBe(code);
+ ❯ convex/ownerOnly.test.ts:28:5
+ ❯ convex/ownerOnly.test.ts:114:53
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > never announces a change before its Undo window ends
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:114:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > the Undo window > removes a Session cancelled inside its first window and mails nobody
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:128:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > the Undo window > keeps a Session cancelled after its window as Cancelled and sends one cancelled update
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:138:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > the Undo window > keeps the id on Undo of a cancel and mails nobody
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:147:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > the Undo window > restores the same id on Schedule again and sends one scheduled update
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:158:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > the Undo window > sends exactly one cancelled update for cancel, Schedule again and cancel inside one window
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:172:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > the Undo window > publishes a burst of changes once, a window after the last
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:183:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > the Undo window > announces the final Session after a new one is undone and scheduled again
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:199:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > the Undo window > sends nothing for a new Session undone after 0 ms
+ FAIL  |convex| convex/sessionMail.test.ts > the Undo window > sends nothing for a new Session undone after 30000 ms
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:211:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > the Undo window > sends nothing for a cancel undone after 1000 ms
+ FAIL  |convex| convex/sessionMail.test.ts > the Undo window > sends nothing for a cancel undone after 30000 ms
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:219:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > the Undo window > does not move a pending settle when a Cancelled Session is cancelled again
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:230:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > cancels with the current Group name and Share Link
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:246:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > publishes without mail configured and queues no send
+AssertionError: expected { …(4) } to match object { published: { …(2) } }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "published": {
+-     "revision": 1,
+-     "state": "scheduled",
+-   },
++   "_creationTime": 1791374400000.0059,
++   "_id": "000000000000000000010006sessions",
++   "date": "2026-10-17",
++   "groupId": "00000000000000000000010002groups",
+  }
+
+ ❯ convex/sessionMail.test.ts:290:39
+    288|   await finish();
+    289|
+    290|   expect(await sessionRow(sessionId)).toMatchObject({
+       |                                       ^
+    291|     published: { state: "scheduled", revision: 1 },
+    292|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/41]⎯
+
+ FAIL  |convex| convex/sessionMail.test.ts > drops a retry whose revision is no longer the published one
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessionMail.test.ts:345:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/41]⎯
+
+ FAIL  |convex| convex/sessions.test.ts > sessions.schedule > restores a Cancelled Session in place, keeping its id
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessions.test.ts:87:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/41]⎯
+
+ FAIL  |convex| convex/sessions.test.ts > sessions.schedule > schedules a new Session on a date whose Session was removed
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessions.test.ts:99:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/41]⎯
+
+ FAIL  |convex| convex/sessions.test.ts > sessions.cancel > removes a Session that was never published
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessions.test.ts:164:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/41]⎯
+
+ FAIL  |convex| convex/sessions.test.ts > sessions.cancel > keeps a published Session on its date as Cancelled
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessions.test.ts:174:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/41]⎯
+
+ FAIL  |convex| convex/sessions.test.ts > sessions.cancel > cancels a Session today
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessions.test.ts:184:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/41]⎯
+
+ FAIL  |convex| convex/sessions.test.ts > sessions.cancel > succeeds and changes nothing for a Session already Cancelled
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessions.test.ts:193:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/41]⎯
+
+ FAIL  |convex| convex/sessions.test.ts > sessions.cancel > keeps a past Session, because past dates are read-only
+AssertionError: expected Error: Expected a Convex function exporte… to be an instance of ConvexError
+ ❯ expectErrorCode convex/model/test.setup.ts:92:17
+     90|     (reason: unknown) => reason,
+     91|   );
+     92|   expect(error).toBeInstanceOf(ConvexError);
+       |                 ^
+     93|   const { data } = error as ConvexError<AppErrorData & { code: Code }>;
+     94|   expect(data.code).toBe(code);
+ ❯ convex/sessions.test.ts:206:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/41]⎯
+
+ FAIL  |convex| convex/sessions.test.ts > sessions.cancel > pushes out the Expiry of an Unsaved Group
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessions.test.ts:215:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/41]⎯
+
+ FAIL  |convex| convex/sessions.test.ts > sessions.cancel > treats a Session of a foreign Group as missing
+AssertionError: expected Error: Expected a Convex function exporte… to be an instance of ConvexError
+ ❯ expectErrorCode convex/model/test.setup.ts:92:17
+     90|     (reason: unknown) => reason,
+     91|   );
+     92|   expect(error).toBeInstanceOf(ConvexError);
+       |                 ^
+     93|   const { data } = error as ConvexError<AppErrorData & { code: Code }>;
+     94|   expect(data.code).toBe(code);
+ ❯ convex/sessions.test.ts:228:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/41]⎯
+
+ FAIL  |convex| convex/sessions.test.ts > sessions.cancel > treats a removed Session as missing
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/sessions.test.ts:235:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/41]⎯
+
+ FAIL  |convex| convex/sessions.test.ts > sessions.cancel > rejects a signed-out caller
+AssertionError: expected Error: Expected a Convex function exporte… to be an instance of ConvexError
+ ❯ expectErrorCode convex/model/test.setup.ts:92:17
+     90|     (reason: unknown) => reason,
+     91|   );
+     92|   expect(error).toBeInstanceOf(ConvexError);
+       |                 ^
+     93|   const { data } = error as ConvexError<AppErrorData & { code: Code }>;
+     94|   expect(data.code).toBe(code);
+ ❯ convex/sessions.test.ts:244:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/41]⎯
+
+ FAIL  |convex| convex/sessions.test.ts > the GM edit limit > refuses scheduling and cancelling once the GM's edits are spent, and changes nothing
+AssertionError: expected Error: Expected a Convex function exporte… to be an instance of ConvexError
+ ❯ expectErrorCode convex/model/test.setup.ts:92:17
+     90|     (reason: unknown) => reason,
+     91|   );
+     92|   expect(error).toBeInstanceOf(ConvexError);
+       |                 ^
+     93|   const { data } = error as ConvexError<AppErrorData & { code: Code }>;
+     94|   expect(data.code).toBe(code);
+ ❯ convex/sessions.test.ts:258:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/41]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks session_cancelled
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ sendsDuring convex/telemetry.callSites.test.ts:59:3
+ ❯ eventsDuring convex/telemetry.callSites.test.ts:64:17
+ ❯ convex/telemetry.callSites.test.ts:288:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/41]⎯
+
+ FAIL  |convex| convex/telemetry.callSites.test.ts > GM mutations > tracks Schedule again as session_scheduled that is not the Group's first
+Error: Expected a Convex function exported from module "sessions" as `cancel`, but there is no such export.
+ ❯ resolveFunction node_modules/convex-test/dist/index.js:2405:15
+    2403|     const func = module[exportName];
+    2404|     if (func === undefined) {
+    2405|         throw new Error(`Expected a Convex function exported from modu…
+       |               ^
+    2406|     }
+    2407|     const handler = getHandler(func);
+ ❯ Object.mutationFromPath node_modules/convex-test/dist/index.js:2117:34
+ ❯ mutation node_modules/convex-test/dist/index.js:2167:20
+ ❯ convex/telemetry.callSites.test.ts:303:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/41]⎯
+
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > cancels a Session that has not passed
+AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining {"_id": "s1"} ]
+
+Number of calls: 0
+
+ ❯ src/features/group/calendar/DayPanel.test.tsx:75:22
+     73|     const { onCancel } = renderPanel({ scheduled: true });
+     74|     await userEvent.click(screen.getByRole("button", { name: "Unschedu…
+     75|     expect(onCancel).toHaveBeenCalledWith(expect.objectContaining({ _i…
+       |                      ^
+     76|   });
+     77|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/41]⎯
+
+ FAIL  |ui| src/features/group/calendar/DayPanel.test.tsx > DayPanel > still cancels a Session today
+AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…} ]
+
+Number of calls: 0
+
+ ❯ src/features/group/calendar/DayPanel.test.tsx:81:22
+     79|     const { onCancel } = renderPanel({ date: today, scheduled: true });
+     80|     await userEvent.click(screen.getByRole("button", { name: "Unschedu…
+     81|     expect(onCancel).toHaveBeenCalledWith(expect.objectContaining({ _i…
+       |                      ^
+     82|   });
+     83|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/41]⎯
+
+ FAIL  |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > ignores a second change to a night while the first is on its way
+TypeError: result.current.cancel is not a function
+ ❯ src/features/group/calendar/useSessionActions.test.tsx:64:35
+     62|     const undoSchedule = lastToast().undo;
+     63|
+     64|     act(() => void result.current.cancel({ _id: "s5" as Id<"sessions">…
+       |                                   ^
+     65|     act(() => undoSchedule?.());
+     66|     expect(calls["sessions:cancel"]).toHaveLength(1);
+ ❯ node_modules/@testing-library/react/dist/act-compat.js:47:24
+ ❯ process.env.NODE_ENV.exports.act node_modules/react/cjs/react.development.js:890:22
+ ❯ Proxy.<anonymous> node_modules/@testing-library/react/dist/act-compat.js:46:25
+ ❯ src/features/group/calendar/useSessionActions.test.tsx:64:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/41]⎯
+
+ FAIL  |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > undoes a new Session with the id the server returned
+TypeError: Cannot read properties of undefined (reading '0')
+ ❯ src/features/group/calendar/useSessionActions.test.tsx:79:36
+     77|
+     78|     act(() => lastToast().undo?.());
+     79|     expect(calls["sessions:cancel"]![0]!.args).toEqual({ sessionId: "s…
+       |                                    ^
+     80|   });
+     81|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[36/41]⎯
+
+ FAIL  |ui| src/features/group/calendar/useSessionActions.test.tsx > useSessionActions > shows a scheduled night in every cached month of the Group at once
+TypeError: optimisticUpdates.sessions:cancel is not a function
+ ❯ src/features/group/calendar/useSessionActions.test.tsx:97:41
+     95|     });
+     96|
+     97|     optimisticUpdates["sessions:cancel"]!(store, { sessionId: "s1" });
+       |                                         ^
+     98|     expect(store.sessionDates()).toEqual({
+     99|       "g1|2026-10": ["2026-11-05"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[37/41]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 2 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+TypeError: onUnschedule is not a function
+ ❯ act src/features/group/calendar/DayPanel.tsx:155:18
+ ❯ executeDispatch node_modules/react-dom/cjs/react-dom-client.development.js:20804:9
+ ❯ runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:1048:13
+ ❯ processDispatchQueue node_modules/react-dom/cjs/react-dom-client.development.js:20854:19
+ ❯ node_modules/react-dom/cjs/react-dom-client.development.js:21423:9
+ ❯ batchedUpdates$1 node_modules/react-dom/cjs/react-dom-client.development.js:3437:40
+ ❯ dispatchEventForPluginEventSystem node_modules/react-dom/cjs/react-dom-client.development.js:21008:7
+ ❯ dispatchEvent node_modules/react-dom/cjs/react-dom-client.development.js:26142:11
+ ❯ dispatchDiscreteEvent node_modules/react-dom/cjs/react-dom-client.development.js:26110:11
+ ❯ HTMLDivElement.callTheUserObjectsOperation node_modules/jsdom/lib/generated/idl/EventListener.js:26:30
+
+This error originated in "src/features/group/calendar/DayPanel.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The last test to run before this error was "cancels a Session that has not passed". This means either:
+- the error was thrown while Vitest was running this test, or
+- the error was thrown after the test completed, and this was the most recent test at that point.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+TypeError: onUnschedule is not a function
+ ❯ act src/features/group/calendar/DayPanel.tsx:155:18
+ ❯ executeDispatch node_modules/react-dom/cjs/react-dom-client.development.js:20804:9
+ ❯ runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:1048:13
+ ❯ processDispatchQueue node_modules/react-dom/cjs/react-dom-client.development.js:20854:19
+ ❯ node_modules/react-dom/cjs/react-dom-client.development.js:21423:9
+ ❯ batchedUpdates$1 node_modules/react-dom/cjs/react-dom-client.development.js:3437:40
+ ❯ dispatchEventForPluginEventSystem node_modules/react-dom/cjs/react-dom-client.development.js:21008:7
+ ❯ dispatchEvent node_modules/react-dom/cjs/react-dom-client.development.js:26142:11
+ ❯ dispatchDiscreteEvent node_modules/react-dom/cjs/react-dom-client.development.js:26110:11
+ ❯ HTMLDivElement.callTheUserObjectsOperation node_modules/jsdom/lib/generated/idl/EventListener.js:26:30
+
+This error originated in "src/features/group/calendar/DayPanel.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The last test to run before this error was "still cancels a Session today". This means either:
+- the error was thrown while Vitest was running this test, or
+- the error was thrown after the test completed, and this was the most recent test at that point.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  10 failed | 1 passed (11)
+      Tests  40 failed | 209 passed (249)
+     Errors  2 errors
+   Start at  08:52:19
+   Duration  2.02s (tests 43%, transform 24%, environment 17%, import 14%, setup 1%, worker 1%)
+

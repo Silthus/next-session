@@ -1,6 +1,7 @@
 import type { Id } from "../../../../convex/_generated/dataModel";
 import type { Answer } from "../../../../shared/answers";
 import { summarizeMonth } from "../../../../shared/monthSummary";
+import type { CalendarSession } from "../calendar/DayCell";
 
 export const today = "2026-10-02";
 
@@ -13,11 +14,13 @@ export function monthWith({
   players = rosterOf("Ana", "Ben", "Chiara", "Dev", "Eli"),
   answers = {},
   sessions = [],
+  cancelled = [],
 }: {
   month?: string;
   players?: { _id: string; name: string }[];
   answers?: Record<string, Record<string, Answer>>;
   sessions?: string[];
+  cancelled?: string[];
 }) {
   return summarizeMonth({
     month,
@@ -26,6 +29,13 @@ export function monthWith({
     answers: Object.entries(answers).flatMap(([date, byPlayer]) =>
       Object.entries(byPlayer).map(([playerId, answer]) => ({ playerId, date, answer })),
     ),
-    sessions: sessions.map((date) => ({ _id: `s-${date}` as Id<"sessions">, date })),
+    sessions: [
+      ...sessions.map((date) => sessionOn(date, "scheduled")),
+      ...cancelled.map((date) => sessionOn(date, "cancelled")),
+    ],
   });
+}
+
+export function sessionOn(date: string, state: CalendarSession["state"]): CalendarSession {
+  return { _id: `s-${date}` as Id<"sessions">, date, state, published: true };
 }

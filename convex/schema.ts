@@ -1,8 +1,15 @@
 import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { SESSION_STATES } from "../shared/sessions";
 
 export const answerValue = v.union(v.literal("free"), v.literal("maybe"), v.literal("busy"));
+
+export const sessionState = v.union(...SESSION_STATES.map((state) => v.literal(state)));
+
+export const datedSession = v.object({ date: v.string(), state: sessionState });
+
+export const publishedSession = v.object({ state: sessionState, revision: v.number() });
 
 export default defineSchema({
   ...authTables,
@@ -70,19 +77,12 @@ export default defineSchema({
   sessions: defineTable({
     groupId: v.id("groups"),
     date: v.string(),
+    state: v.optional(sessionState),
+    changedAt: v.optional(v.number()),
+    published: v.optional(publishedSession),
   }).index("by_groupId_and_date", ["groupId", "date"]),
 
   mailVolume: defineTable({ day: v.string(), count: v.number() }).index("by_day", ["day"]),
-
-  sessionMailStates: defineTable({
-    groupId: v.id("groups"),
-    date: v.string(),
-    sessionId: v.id("sessions"),
-    change: v.union(v.literal("scheduled"), v.literal("cancelled")),
-    changedAt: v.number(),
-    notify: v.optional(v.boolean()),
-    settled: v.optional(v.boolean()),
-  }).index("by_groupId_and_date", ["groupId", "date"]),
 
   saveClaims: defineTable({
     anonymousUserId: v.id("users"),
