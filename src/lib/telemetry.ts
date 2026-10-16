@@ -35,6 +35,7 @@ export type BrowserEvent =
   | { name: "remove_group_started"; group_id: string }
   | { name: "remove_group_undone"; group_id: string }
   | { name: "create_link_started"; surface: "me" }
+  | { name: "calendar_downloaded"; group_id: string }
   | { name: "calendar_feed_copied"; method: CopyMethod };
 
 export type ErrorContext = {
