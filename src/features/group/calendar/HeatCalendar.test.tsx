@@ -1,5 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import type { Answer } from "../../../../shared/answers";
@@ -23,6 +24,7 @@ type CalendarSetup = {
   answers?: { playerId: string; date: string; answer: Answer }[];
   sessions?: CalendarSession[];
   selectedDay?: string | null;
+  dayPopover?: ReactNode;
 };
 
 function renderCalendar({
@@ -32,6 +34,7 @@ function renderCalendar({
   answers = [],
   sessions = [],
   selectedDay = null,
+  dayPopover,
 }: CalendarSetup = {}) {
   const onSelectDay = vi.fn();
   const onMonthChange = vi.fn();
@@ -43,6 +46,7 @@ function renderCalendar({
       players={players}
       days={summary.days}
       selectedDay={selectedDay}
+      dayPopover={dayPopover}
       onSelectDay={onSelectDay}
       onMonthChange={onMonthChange}
     />,
@@ -123,6 +127,12 @@ describe("HeatCalendar", () => {
       });
       const past = screen.getByRole("button", { name: /^Thursday, October 1:/ });
       expect(past.getAttribute("aria-describedby")).toBeNull();
+    });
+
+    it("leaves the names to the open night's popover", () => {
+      renderCalendar({ players: crew, selectedDay: "2026-10-16", dayPopover: <p>Day detail</p> });
+      const night = screen.getByRole("button", { name: /^Friday, October 16/ });
+      expect(night.getAttribute("aria-describedby")).toBeNull();
     });
 
     it("says nothing beside a night while the Roster is empty", () => {
@@ -355,5 +365,41 @@ describe("HeatCalendar", () => {
     const day = screen.getByRole("button", { name: "Friday, October 16" });
     expect(day.querySelectorAll("[data-bar]")).toHaveLength(0);
     expect(day.textContent).toBe("16");
+  });
+
+  describe("the selected night's popover", () => {
+    const popover = <button type="button">Schedule session</button>;
+
+    it("opens beside the selected night, next in the tab order", async () => {
+      renderCalendar({ selectedDay: "2026-10-16", dayPopover: popover });
+      screen.getByRole("button", { name: /^Friday, October 16/ }).focus();
+      await userEvent.tab();
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "Schedule session" }));
+    });
+
+    it("closes on a click outside the calendar's nights", async () => {
+      const { onSelectDay } = renderCalendar({ selectedDay: "2026-10-16", dayPopover: popover });
+      await userEvent.click(screen.getByRole("heading", { name: "October 2026" }));
+      expect(onSelectDay).toHaveBeenCalledExactlyOnceWith(null);
+    });
+
+    it("stays open on a click inside it, and moves to another night on that night's click", async () => {
+      const { onSelectDay } = renderCalendar({ selectedDay: "2026-10-16", dayPopover: popover });
+      await userEvent.click(screen.getByRole("button", { name: "Schedule session" }));
+      expect(onSelectDay).not.toHaveBeenCalled();
+      await userEvent.click(screen.getByRole("button", { name: /^Saturday, October 17/ }));
+      expect(onSelectDay).toHaveBeenCalledExactlyOnceWith("2026-10-17");
+    });
+
+    it("stays open while the GM answers a toast", async () => {
+      const { onSelectDay } = renderCalendar({ selectedDay: "2026-10-16", dayPopover: popover });
+      render(
+        <div role="status">
+          <button type="button">Undo</button>
+        </div>,
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Undo" }));
+      expect(onSelectDay).not.toHaveBeenCalled();
+    });
   });
 });

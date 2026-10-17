@@ -20,19 +20,21 @@ export function DayCell({
   players,
   today,
   selected,
+  detailOpen = false,
   onToggle,
 }: {
   day: CalendarDay;
   players: readonly PlayerRow[];
   today: string;
   selected: boolean;
+  detailOpen?: boolean;
   onToggle: () => void;
 }) {
   const perfect = day.perfect && day.session === null;
   const isToday = day.date === today;
   const whoId = useId();
   const [whoDismissed, setWhoDismissed] = useState(false);
-  const who = players.length > 0 && !day.past && !whoDismissed;
+  const who = players.length > 0 && !day.past && !whoDismissed && !detailOpen;
   const dismissWho = (event: KeyboardEvent) => {
     if (event.key !== "Escape" || !who) return;
     event.stopPropagation();

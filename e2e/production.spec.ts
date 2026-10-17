@@ -35,7 +35,7 @@ const night = (page: Page, date: IsoDate) =>
   page.getByRole("button", { name: new RegExp(`^${dayLabel(date)}: `) });
 const switcher = (page: Page) =>
   page.getByRole("heading", { level: 1 }).getByRole("button", { name: groupName });
-const rail = (page: Page) => page.getByRole("complementary", { name: "Group overview" });
+const topBar = (page: Page) => page.getByRole("banner");
 const myGroupsSection = (page: Page, name: string) => page.getByRole("region", { name });
 const playingCard = (page: Page) =>
   myGroupsSection(page, "You play in").getByRole("listitem").filter({ hasText: groupName });
@@ -48,7 +48,7 @@ test.afterEach(async () => {
 
 async function deleteGroup(gm: Page, groupPath: string) {
   await gm.goto(groupPath);
-  await expect(rail(gm).getByRole("button", { name: "Copy" })).toBeVisible();
+  await expect(topBar(gm).getByRole("button", { name: "Copy player link" })).toBeVisible();
   await gm.getByRole("heading", { level: 1 }).getByRole("button").click();
   await gm.getByRole("button", { name: "Delete group" }).click();
   await gm
@@ -136,7 +136,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
   await test.step("2. The GM opens the Group and renames it", async () => {
     await gm.getByRole("link", { name: "Open your group →" }).click();
     await expect(gm).toHaveURL(groupPath);
-    await expect(rail(gm).locator("code")).toHaveText(shareLinkShown);
+    await expect(topBar(gm).locator("code")).toHaveText(shareLinkShown);
     await gm.getByRole("heading", { level: 1 }).getByRole("button", { name: "My group" }).click();
     await gm.getByRole("button", { name: "Rename group" }).click();
     await gm.getByRole("textbox", { name: "Group name" }).fill(groupName);
@@ -203,7 +203,7 @@ test("a GM and a Player schedule a Session on the deployed app", async ({
     await submitCredentials(elsewhere, "Log in", "Log in");
     await expect(elsewhere).toHaveURL(groupPath);
     await expect(switcher(elsewhere)).toBeVisible();
-    await expect(rail(elsewhere).locator("code")).toHaveText(shareLinkShown);
+    await expect(topBar(elsewhere).locator("code")).toHaveText(shareLinkShown);
     await shoot(elsewhere, testInfo, "5-logged-in-elsewhere");
     await elsewhereContext.close();
   });

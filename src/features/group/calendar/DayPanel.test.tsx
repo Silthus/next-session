@@ -35,7 +35,8 @@ function renderPanel({
   timeAndPlace = { startTime: "19:00", lengthMinutes: 240, timeZone: "Europe/Berlin" },
   sessionTime,
   onSaveDetails = () => Promise.resolve(),
-}: PanelSetup = {}) {
+  floating = false,
+}: PanelSetup & { floating?: boolean } = {}) {
   const summary = summarizeMonth({
     month: date.slice(0, 7),
     today,
@@ -71,7 +72,7 @@ function renderPanel({
       today={today}
       pending={pending}
       timeAndPlace={timeAndPlace}
-      closeLabel="Overview"
+      {...(floating ? {} : { closeLabel: "Overview" })}
       {...handlers}
     />,
   );
@@ -195,6 +196,13 @@ describe("DayPanel", () => {
   it("goes back to the overview", async () => {
     const { onClose } = renderPanel();
     await userEvent.click(screen.getByRole("button", { name: "Overview" }));
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("closes with a Close button when it floats beside its night", async () => {
+    const { onClose } = renderPanel({ floating: true });
+    expect(screen.queryByRole("button", { name: /Overview/ })).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(onClose).toHaveBeenCalledOnce();
   });
 

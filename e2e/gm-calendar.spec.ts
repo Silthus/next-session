@@ -42,7 +42,7 @@ test("the GM reads the heat-map and sees who is free on a night", async ({ page 
   await expect(panel.getByText("1 free")).toBeVisible();
   await expect(panel.getByRole("listitem")).toHaveText([/Ana.*Free/, /Ben.*Maybe/, /Chiara.*Busy/]);
 
-  await panel.getByRole("button", { name: "Overview" }).click();
+  await panel.getByRole("button", { name: "Close" }).click();
   await expect(panel).toBeHidden();
   await expect(page).not.toHaveURL(/day=/);
   await expect(dayCell(page, /, \w+ 6: /)).toBeFocused();
