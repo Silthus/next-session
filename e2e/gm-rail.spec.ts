@@ -64,7 +64,7 @@ test("the GM copies, rotates, and undoes the Share Link from the top bar", async
   const copyButton = topBar.getByRole("button", { name: "Copy player link" });
   await expect(topBar.getByText(`/s/${gm.shareToken}`)).toBeVisible();
   await copyButton.click();
-  await expect(copyButton).toHaveText("Copied");
+  await expect(topBar.getByRole("button", { name: "Copied player link" })).toHaveText("Copied");
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
     `/s/${gm.shareToken}`,
   );
@@ -99,7 +99,7 @@ test("the GM shares the month they are looking at, and players open on it", asyn
 
   const topBar = page.getByRole("banner");
   await topBar.getByRole("button", { name: "Copy player link" }).click();
-  await expect(topBar.getByRole("button", { name: "Copy player link" })).toHaveText("Copied");
+  await expect(topBar.getByRole("button", { name: "Copied player link" })).toHaveText("Copied");
   const copied = await page.evaluate(() => navigator.clipboard.readText());
   expect(copied).toBe(`${new URL(page.url()).origin}/s/${gm.shareToken}?month=${nextMonth}`);
   await topBar.getByRole("button", { name: "Share player link" }).click();
@@ -143,15 +143,26 @@ test("the open night floats beside its cell and closes on a click elsewhere", as
   await seedCrew(gm);
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
 
-  const cell = page.getByRole("button", { name: /, \w+ 6: / });
-  await cell.click();
-  const dayPanel = page.getByRole("region", { name: /, \w+ 6$/ });
-  const [cellBox, panelBox] = await Promise.all([cell.boundingBox(), dayPanel.boundingBox()]);
-  const besideCell =
-    panelBox!.x >= cellBox!.x + cellBox!.width || panelBox!.x + panelBox!.width <= cellBox!.x;
-  expect(besideCell).toBe(true);
-  await expect(page.getByRole("region", { name: "Sessions" })).toBeVisible();
+  for (const day of [3, 6, 24, 27]) {
+    const cell = page.getByRole("button", { name: new RegExp(`, \\w+ ${String(day)}: `) });
+    await cell.click();
+    const dayPanel = page.getByRole("region", { name: new RegExp(`, \\w+ ${String(day)}$`) });
+    await expect(dayPanel).toBeVisible();
+    await dayPanel.evaluate((panel) =>
+      Promise.all(panel.parentElement!.getAnimations().map((animation) => animation.finished)),
+    );
+    const [cellBox, panelBox] = await Promise.all([cell.boundingBox(), dayPanel.boundingBox()]);
+    const gapRight = panelBox!.x - (cellBox!.x + cellBox!.width);
+    const gapLeft = cellBox!.x - (panelBox!.x + panelBox!.width);
+    expect(Math.min(Math.abs(gapRight - 12), Math.abs(gapLeft - 12))).toBeLessThanOrEqual(1);
+    expect(Math.abs(panelBox!.y - cellBox!.y)).toBeLessThanOrEqual(1);
+    await page.keyboard.press("Escape");
+    await expect(dayPanel).toBeHidden();
+  }
 
+  await page.getByRole("button", { name: /, \w+ 6: / }).click();
+  const dayPanel = page.getByRole("region", { name: /, \w+ 6$/ });
+  await expect(page.getByRole("region", { name: "Sessions" })).toBeVisible();
   await page.keyboard.press("Tab");
   await expect(dayPanel.getByRole("button", { name: "Close" })).toBeFocused();
 

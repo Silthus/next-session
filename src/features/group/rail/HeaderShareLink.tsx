@@ -48,7 +48,7 @@ export function HeaderShareLink({
           <Button
             size="sm"
             variant={copied ? "free" : "primary"}
-            aria-label="Copy player link"
+            aria-label={copied ? "Copied player link" : "Copy player link"}
             onClick={copyAndConfirm}
             className="ml-1 h-7 rounded-full"
           >

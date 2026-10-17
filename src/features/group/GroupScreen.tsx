@@ -341,7 +341,7 @@ function GroupSurface({
                 players={schedule.players}
                 days={summary.days}
                 selectedDay={selectedDay}
-                dayPopover={wide && dayPanel({ className: "shadow-xl" })}
+                dayPopover={wide && dayPanel({})}
                 onSelectDay={selectDay}
                 onMonthChange={showMonth}
               />

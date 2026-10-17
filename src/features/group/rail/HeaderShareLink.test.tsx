@@ -80,5 +80,6 @@ describe("HeaderShareLink", () => {
     await userEvent.click(copyButton);
 
     expect(copyButton.textContent).toBe("Copied");
+    expect(screen.getByRole("button", { name: "Copied player link" })).toBe(copyButton);
   });
 });

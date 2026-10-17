@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { monthOf, type IsoDate } from "../../../../shared/dates";
 import { cn } from "../../../ui/cn";
 import { leadingBlanks, weekdayColumn } from "./calendarDates";
@@ -34,11 +34,10 @@ export function DayPopover({
   return (
     <div
       ref={popover}
-      style={{ gridColumn: column + 1, gridRow: row + 2 } satisfies CSSProperties}
+      style={{ gridColumn: `${column + 1} / span 1`, gridRow: `${row + 2} / span 1` }}
       className={cn(
-        "absolute z-30 w-[22rem] animate-rise",
+        "absolute top-0 z-30 max-h-[calc(100dvh-6rem)] w-[22rem] scroll-mt-20 scroll-mb-4 overflow-y-auto rounded-xl shadow-xl animate-rise",
         column < 4 ? "left-full ml-3" : "right-full mr-3",
-        row < 3 ? "top-0" : "bottom-0",
       )}
     >
       {children}
