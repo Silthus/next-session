@@ -1,0 +1,16 @@
+Red first, one seam at a time (vitest, before each implementation):
+
+HeatCalendar.test.tsx  the selected night's popover
+  x opens beside the selected night, next in the tab order
+  x closes on a click outside the calendar's nights
+  x stays open on a click inside it, and moves to another night on that night's click
+  (stays open while the GM answers a toast: passed before any outside-click handler existed; kept as a guard)
+HeatCalendar.test.tsx  x leaves the names to the open night's popover
+GroupRail.test.tsx     x flanks the calendar with Players and Best Nights on the left and Sessions on the right on wide screens
+                       x shows one panel at a time behind a segmented control on phones (calendar now rendered by GroupRail)
+HeaderShareLink.test.tsx  x shows the link itself beside Copy on wide screens
+DayPanel.test.tsx      x closes with a Close button when it floats beside its night
+
+e2e (Chromium, local backend): the open-day e2e checks that clicked "Save your group" and a Players
+menu while a day was open went red once a click outside closed the popover; they now reach those
+controls by keyboard, keeping their Escape checks.

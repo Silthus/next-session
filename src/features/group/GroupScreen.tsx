@@ -9,7 +9,6 @@ import { isImeComposing } from "../../lib/keyboard";
 import { dismissNudge, nudgeDismissedAt, rememberLastGroup } from "../../lib/storage";
 import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
-import { ShareLinkCard } from "../../ui/ShareLinkCard";
 import { Skeleton } from "../../ui/Skeleton";
 import { Toast, type ToastMessage } from "../../ui/Toast";
 import { cn } from "../../ui/cn";
@@ -25,7 +24,7 @@ import { useSessionActions } from "./calendar/useSessionActions";
 import { useMonthSchedule } from "./calendar/useMonthSchedule";
 import { useToday } from "./calendar/useToday";
 import { BestNights } from "./rail/BestNights";
-import { GroupRail } from "./rail/GroupRail";
+import { GroupRail, wideColumns } from "./rail/GroupRail";
 import { GroupSwitcherContainer } from "./rail/GroupSwitcherContainer";
 import { HeaderAccount } from "./rail/HeaderAccount";
 import { HeaderShareLink } from "./rail/HeaderShareLink";
@@ -275,7 +274,7 @@ function GroupSurface({
       heading={heading}
       actions={
         <>
-          {!wide && <HeaderShareLink url={shareUrl} onRotate={rotate} showToast={showToast} />}
+          <HeaderShareLink url={shareUrl} wide={wide} onRotate={rotate} showToast={showToast} />
           {headerActions}
         </>
       }
@@ -323,63 +322,62 @@ function GroupSurface({
           onLater={laterNudge}
         />
       )}
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-        {day && !wide ? (
-          dayPanel({
-            closeLabel: <BackTo month={month} />,
-            className: "animate-slide-forward",
-            focusHeading: slide === "forward",
-          })
-        ) : (
-          <div className={cn(slide === "back" && "animate-slide-back")}>
-            <HeatCalendar
-              month={requestedMonth}
-              today={today}
-              players={schedule.players}
-              days={summary.days}
-              selectedDay={selectedDay}
-              onSelectDay={selectDay}
-              onMonthChange={showMonth}
-            />
-          </div>
-        )}
-        <GroupRail
-          wide={wide}
-          rosterEmpty={schedule.players.length === 0}
-          onAddPlayer={() => setAddPlayerRequests((requests) => requests + 1)}
-          shareLink={<ShareLinkCard url={shareUrl} onRotate={rotate} />}
-          dayPanel={dayPanel({ closeLabel: "Overview", className: "animate-rise" })}
-          panels={{
-            bestNights: (
-              <BestNights
-                nights={summary.bestNights}
-                playerCount={schedule.players.length}
-                monthOver={month < monthOf(today)}
-                onSelectDay={openDay}
-                onSchedule={wide ? sessions.schedule : undefined}
-              />
-            ),
-            sessions: (
-              <Sessions
-                sessions={schedule.sessions}
+      <GroupRail
+        wide={wide}
+        rosterEmpty={schedule.players.length === 0}
+        onAddPlayer={() => setAddPlayerRequests((requests) => requests + 1)}
+        calendar={
+          day && !wide ? (
+            dayPanel({
+              closeLabel: <BackTo month={month} />,
+              className: "animate-slide-forward",
+              focusHeading: slide === "forward",
+            })
+          ) : (
+            <div className={cn(slide === "back" && "animate-slide-back")}>
+              <HeatCalendar
+                month={requestedMonth}
                 today={today}
-                timeAndPlace={timeAndPlace}
-                onSelectDay={openDay}
-                onOpenTimeAndPlace={openTimeAndPlace}
+                players={schedule.players}
+                days={summary.days}
+                selectedDay={selectedDay}
+                dayPopover={wide && dayPanel({ className: "shadow-xl" })}
+                onSelectDay={selectDay}
+                onMonthChange={showMonth}
               />
-            ),
-            players: (
-              <Players
-                progress={summary.progress}
-                addRequest={addPlayerRequests}
-                onAdd={rail.addPlayer}
-                onRename={rail.renamePlayer}
-                onRemove={rail.removePlayer}
-              />
-            ),
-          }}
-        />
-      </div>
+            </div>
+          )
+        }
+        panels={{
+          bestNights: (
+            <BestNights
+              nights={summary.bestNights}
+              playerCount={schedule.players.length}
+              monthOver={month < monthOf(today)}
+              onSelectDay={openDay}
+              onSchedule={wide ? sessions.schedule : undefined}
+            />
+          ),
+          sessions: (
+            <Sessions
+              sessions={schedule.sessions}
+              today={today}
+              timeAndPlace={timeAndPlace}
+              onSelectDay={openDay}
+              onOpenTimeAndPlace={openTimeAndPlace}
+            />
+          ),
+          players: (
+            <Players
+              progress={summary.progress}
+              addRequest={addPlayerRequests}
+              onAdd={rail.addPlayer}
+              onRename={rail.renamePlayer}
+              onRemove={rail.removePlayer}
+            />
+          ),
+        }}
+      />
     </>,
   );
 }
@@ -434,15 +432,26 @@ function GroupLoading() {
 }
 
 function GroupLoadingBody() {
+  const wide = useWideLayout();
+  const calendar = <Skeleton className="aspect-[7/6] w-full rounded-xl" />;
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]" role="status" aria-busy="true">
+    <div className={wide ? wideColumns : "flex flex-col gap-4"} role="status" aria-busy="true">
       <span className="sr-only">Loading your group</span>
-      <Skeleton className="aspect-[7/6] w-full rounded-xl" />
-      <div className="flex flex-col gap-4">
-        <Skeleton className="h-28 rounded-xl" />
-        <Skeleton className="h-40 rounded-xl" />
-        <Skeleton className="h-48 rounded-xl" />
-      </div>
+      {wide ? (
+        <>
+          <div className="flex flex-col gap-4">
+            <Skeleton className="h-48 rounded-xl" />
+            <Skeleton className="h-40 rounded-xl" />
+          </div>
+          {calendar}
+          <Skeleton className="h-40 rounded-xl" />
+        </>
+      ) : (
+        <>
+          {calendar}
+          <Skeleton className="h-40 rounded-xl" />
+        </>
+      )}
     </div>
   );
 }

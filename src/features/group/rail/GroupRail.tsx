@@ -17,36 +17,41 @@ export function GroupRail({
   wide,
   rosterEmpty,
   onAddPlayer,
-  shareLink,
-  dayPanel,
+  calendar,
   panels,
 }: {
   wide: boolean;
   rosterEmpty: boolean;
   onAddPlayer: () => void;
-  shareLink: ReactNode;
-  dayPanel: ReactNode;
+  calendar: ReactNode;
   panels: RailPanels;
 }) {
   if (!wide) {
     return (
-      <PhoneRail
-        panels={panels}
-        firstTab={rosterEmpty ? "players" : "bestNights"}
-        onAddPlayer={onAddPlayer}
-      />
+      <div className="flex flex-col gap-4">
+        {calendar}
+        <PhoneRail
+          panels={panels}
+          firstTab={rosterEmpty ? "players" : "bestNights"}
+          onAddPlayer={onAddPlayer}
+        />
+      </div>
     );
   }
   return (
-    <aside aria-label="Group overview" className="flex flex-col gap-4">
-      {shareLink}
-      {dayPanel}
-      {panels.bestNights}
-      {panels.sessions}
-      {panels.players}
-    </aside>
+    <div className={wideColumns}>
+      <aside aria-label="Group overview" className="flex flex-col gap-4">
+        {panels.players}
+        {panels.bestNights}
+      </aside>
+      {calendar}
+      <div className="flex flex-col gap-4">{panels.sessions}</div>
+    </div>
   );
 }
+
+export const wideColumns =
+  "grid items-start gap-4 grid-cols-[15rem_minmax(0,1fr)_17rem] xl:grid-cols-[18rem_minmax(0,1fr)_20rem]";
 
 function PhoneRail({
   panels,

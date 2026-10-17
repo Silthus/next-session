@@ -52,7 +52,7 @@ const playersCard = (page: Page) => page.getByRole("region", { name: /^Players/ 
 const switcher = (page: Page, name: string) =>
   page.getByRole("heading", { level: 1 }).getByRole("button", { name });
 
-test("the GM copies, rotates, and undoes the Share Link from the rail", async ({
+test("the GM copies, rotates, and undoes the Share Link from the top bar", async ({
   page,
   context,
 }) => {
@@ -60,30 +60,30 @@ test("the GM copies, rotates, and undoes the Share Link from the rail", async ({
   const gm = await signInAnonymousGm();
   await openAsGm(page, gm, `/g/${gm.groupId}`);
 
-  const rail = page.getByRole("complementary", { name: "Group overview" });
-  await expect(rail.getByText(`/s/${gm.shareToken}`)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Copy player link" })).toBeHidden();
-  await rail.getByRole("button", { name: "Copy" }).click();
-  await expect(rail.getByRole("button", { name: "Copied" })).toBeVisible();
+  const topBar = page.getByRole("banner");
+  const copyButton = topBar.getByRole("button", { name: "Copy player link" });
+  await expect(topBar.getByText(`/s/${gm.shareToken}`)).toBeVisible();
+  await copyButton.click();
+  await expect(copyButton).toHaveText("Copied");
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
     `/s/${gm.shareToken}`,
   );
 
-  await rail.getByRole("button", { name: "Rotate" }).focus();
+  await topBar.getByRole("button", { name: "Share player link" }).click();
+  await topBar.getByRole("button", { name: "Rotate" }).focus();
   await page.keyboard.press("Enter");
   const toast = toastRegion(page);
   await expect(toast).toContainText("Link rotated. Old links stopped working.");
   await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).not.toBe(gm.shareToken);
   const rotated = await shareTokenOf(gm.client, gm.groupId);
-  await expect(rail.getByText(`/s/${rotated}`)).toBeVisible();
-  await expect(rail.getByRole("button", { name: "Copy" })).toBeVisible();
-  await expect(rail.getByRole("button", { name: "Rotate" })).toBeFocused();
+  await expect(topBar.getByText(`/s/${rotated}`).first()).toBeVisible();
+  await expect(topBar.getByRole("button", { name: "Rotate" })).toBeFocused();
 
   await toast.getByRole("button", { name: "Undo" }).focus();
   await page.keyboard.press("Enter");
   await expect(toast).toContainText("The old link works again.");
   await expect(page.locator("[data-month-heading]")).toBeFocused();
-  await expect(rail.getByText(`/s/${gm.shareToken}`)).toBeVisible();
+  await expect(topBar.getByText(`/s/${gm.shareToken}`)).toBeVisible();
   await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).toBe(gm.shareToken);
 });
 
@@ -97,12 +97,13 @@ test("the GM shares the month they are looking at, and players open on it", asyn
   await seedPlayer(gm, "Ana");
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
 
-  const rail = page.getByRole("complementary", { name: "Group overview" });
-  await rail.getByRole("button", { name: "Copy" }).click();
-  await expect(rail.getByRole("button", { name: "Copied" })).toBeVisible();
+  const topBar = page.getByRole("banner");
+  await topBar.getByRole("button", { name: "Copy player link" }).click();
+  await expect(topBar.getByRole("button", { name: "Copy player link" })).toHaveText("Copied");
   const copied = await page.evaluate(() => navigator.clipboard.readText());
   expect(copied).toBe(`${new URL(page.url()).origin}/s/${gm.shareToken}?month=${nextMonth}`);
-  await expect(rail.getByRole("link", { name: "Share via WhatsApp" })).toHaveAttribute(
+  await topBar.getByRole("button", { name: "Share player link" }).click();
+  await expect(topBar.getByRole("link", { name: "Share via WhatsApp" })).toHaveAttribute(
     "href",
     `https://wa.me/?text=${encodeURIComponent(`Help me find our next game night. Tap the days you can play, it takes 30 seconds: ${copied}`)}`,
   );
@@ -120,20 +121,43 @@ test("the GM shares the month they are looking at, and players open on it", asyn
 test("the newest action owns the only toast", async ({ page }) => {
   const gm = await signInAnonymousGm();
   await seedCrew(gm);
-  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
-  const rail = page.getByRole("complementary", { name: "Group overview" });
-
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
   const toast = toastRegion(page);
 
-  await rail.getByRole("button", { name: "Rotate" }).click();
+  await page.getByRole("button", { name: "Share player link" }).click();
+  await page.getByRole("button", { name: "Rotate" }).click();
   await expect(toast).toContainText("Link rotated.");
-  await rail.getByRole("button", { name: "Schedule session" }).click();
+  await page.getByRole("button", { name: /, \w+ 5: / }).click();
+  const dayPanel = page.getByRole("region", { name: /, \w+ 5$/ });
+  await dayPanel.getByRole("button", { name: "Schedule session" }).click();
   await expect(toast).toContainText("Players see it on the link.");
   await expect(toast).not.toContainText("Link rotated.");
 
   await toast.getByRole("button", { name: "Undo" }).click();
-  await expect(rail.getByRole("button", { name: "Schedule session" })).toBeVisible();
+  await expect(dayPanel.getByRole("button", { name: "Schedule session" })).toBeVisible();
   await expect.poll(() => shareTokenOf(gm.client, gm.groupId)).not.toBe(gm.shareToken);
+});
+
+test("the open night floats beside its cell and closes on a click elsewhere", async ({ page }) => {
+  const gm = await signInAnonymousGm();
+  await seedCrew(gm);
+  await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
+
+  const cell = page.getByRole("button", { name: /, \w+ 6: / });
+  await cell.click();
+  const dayPanel = page.getByRole("region", { name: /, \w+ 6$/ });
+  const [cellBox, panelBox] = await Promise.all([cell.boundingBox(), dayPanel.boundingBox()]);
+  const besideCell =
+    panelBox!.x >= cellBox!.x + cellBox!.width || panelBox!.x + panelBox!.width <= cellBox!.x;
+  expect(besideCell).toBe(true);
+  await expect(page.getByRole("region", { name: "Sessions" })).toBeVisible();
+
+  await page.keyboard.press("Tab");
+  await expect(dayPanel.getByRole("button", { name: "Close" })).toBeFocused();
+
+  await page.locator("[data-month-heading]").click();
+  await expect(dayPanel).toBeHidden();
+  await expect(page).not.toHaveURL(/day=/);
 });
 
 test("the GM adds, renames, and removes Players", async ({ page }) => {
@@ -155,8 +179,8 @@ test("the GM adds, renames, and removes Players", async ({ page }) => {
   await expect(players.getByRole("listitem")).toHaveText([/Ana/, /Ben/]);
 
   await page.goto(`/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
-  await players.getByRole("button", { name: "More for Ben" }).click();
-  await players.getByRole("button", { name: "Rename" }).click();
+  await players.getByRole("button", { name: "More for Ben" }).press("Enter");
+  await players.getByRole("button", { name: "Rename" }).press("Enter");
   for (const composition of [{ isComposing: true }, { keyCode: 229 }]) {
     await players
       .getByRole("textbox", { name: "New name for Ben" })
@@ -192,7 +216,7 @@ test("Best Nights and Sessions open their day", async ({ page }) => {
 
   const sessions = page.getByRole("region", { name: "Sessions" });
   await expect(sessions.getByRole("button", { name: /5/ })).toBeVisible();
-  await dayPanel.getByRole("button", { name: "Overview" }).click();
+  await dayPanel.getByRole("button", { name: "Close" }).click();
   await expect.poll(() => sessionDates(gm)).toEqual([night(5)]);
   await page.goto(`/g/${gm.groupId}`);
   await sessions.getByRole("button", { name: /5/ }).click();
@@ -449,14 +473,14 @@ test("an Anonymous GM saves into an Account from the header, stays on the Group,
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}&day=${night(5)}`);
   const dayPanel = page.getByRole("region", { name: /, \w+ 5$/ });
 
-  await page.getByRole("button", { name: "Save your group" }).click();
+  await page.getByRole("button", { name: "Save your group" }).press("Enter");
   const sheet = page.getByRole("dialog", { name: "Keep My group" });
   await expect(sheet).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(sheet).toBeHidden();
   await expect(dayPanel).toBeVisible();
 
-  await page.getByRole("button", { name: "Save your group" }).click();
+  await page.getByRole("button", { name: "Save your group" }).press("Enter");
   await sheet.getByText("I already have one").click();
   await sheet.getByLabel("Email", { exact: true }).fill(account.email);
   await sheet.getByLabel("Password").fill(password);
@@ -499,7 +523,7 @@ const screenshotDir = process.env.E2E_SCREENSHOTS;
 test.describe("screenshots", () => {
   test.skip(!screenshotDir, "Set E2E_SCREENSHOTS to a directory to capture them");
 
-  for (const width of [390, 1440]) {
+  for (const width of [390, 1280, 1600]) {
     for (const colorScheme of ["light", "dark"] as const) {
       test(`${String(width)}px ${colorScheme}`, async ({ browser }) => {
         const gm = await signInAnonymousGm();
@@ -534,8 +558,15 @@ test.describe("screenshots", () => {
         }
         await shot("rail");
 
-        if (width < 640) await page.getByRole("button", { name: "Share player link" }).click();
-        await page.getByRole("button", { name: "Rotate" }).first().click();
+        if (width >= 1024) {
+          await page.getByRole("button", { name: /, \w+ 6: / }).click();
+          await expect(page.getByRole("region", { name: /, \w+ 6$/ })).toBeVisible();
+          await shot("day-popover", false);
+          await page.keyboard.press("Escape");
+        }
+
+        await page.getByRole("button", { name: "Share player link" }).click();
+        await page.getByRole("button", { name: "Rotate" }).click();
         await expect(toastRegion(page)).toContainText("Link rotated.");
         await shot("rotate-undo", false);
 

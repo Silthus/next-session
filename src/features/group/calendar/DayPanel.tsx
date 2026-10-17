@@ -9,7 +9,7 @@ import { cn } from "../../../ui/cn";
 import { Dot } from "../../../ui/Dot";
 import { longDayLabel, relativeDay } from "./calendarDates";
 import type { CalendarDay, CalendarSession } from "./DayCell";
-import { IconChevron, IconClock, IconStar } from "../../../ui/icons";
+import { IconChevron, IconClock, IconClose, IconStar } from "../../../ui/icons";
 import { focusRing, hoverRow } from "../../../ui/interactive";
 import { timeRange } from "../../../lib/timeAndPlace";
 import { SessionDetails, type SessionDetailChanges, type TimeAndPlace } from "./SessionDetails";
@@ -41,7 +41,7 @@ export function DayPanel({
   today: IsoDate;
   pending: boolean;
   timeAndPlace: TimeAndPlace;
-  closeLabel: ReactNode;
+  closeLabel?: ReactNode;
   focusHeading?: boolean;
   onClose: () => void;
   onSchedule: () => void;
@@ -61,20 +61,7 @@ export function DayPanel({
   }, [focusHeading]);
   return (
     <Card accent aria-labelledby={headingId} className={className}>
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={onClose}
-          className={cn(
-            "-ml-2 flex items-center gap-1 rounded-md px-2 py-1.5 text-sm font-medium text-ink-2 hover:text-ink",
-            hoverRow,
-          )}
-        >
-          <IconChevron direction="left" className="size-4" />
-          {closeLabel}
-        </button>
-        <span className="text-xs text-ink-3">{relativeDay(day.date, today)}</span>
-      </div>
+      <PanelTop closeLabel={closeLabel} relative={relativeDay(day.date, today)} onClose={onClose} />
       <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
         <h3
           ref={heading}
@@ -120,6 +107,49 @@ export function DayPanel({
         )}
       </div>
     </Card>
+  );
+}
+
+function PanelTop({
+  closeLabel,
+  relative,
+  onClose,
+}: {
+  closeLabel: ReactNode;
+  relative: string;
+  onClose: () => void;
+}) {
+  const when = <span className="text-xs text-ink-3">{relative}</span>;
+  if (closeLabel === undefined) {
+    return (
+      <div className="flex items-center justify-between">
+        {when}
+        <button
+          type="button"
+          aria-label="Close"
+          onClick={onClose}
+          className={cn("-mr-2 rounded-md p-1.5 text-ink-2 hover:text-ink", hoverRow)}
+        >
+          <IconClose />
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center justify-between">
+      <button
+        type="button"
+        onClick={onClose}
+        className={cn(
+          "-ml-2 flex items-center gap-1 rounded-md px-2 py-1.5 text-sm font-medium text-ink-2 hover:text-ink",
+          hoverRow,
+        )}
+      >
+        <IconChevron direction="left" className="size-4" />
+        {closeLabel}
+      </button>
+      {when}
+    </div>
   );
 }
 

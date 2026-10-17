@@ -1,9 +1,11 @@
+import { Fragment, type ReactNode } from "react";
 import { addMonths, monthOf, type IsoDate, type IsoMonth } from "../../../../shared/dates";
 import type { PlayerRow } from "../../../../shared/monthSummary";
 import { Button } from "../../../ui/Button";
 import { Card } from "../../../ui/Card";
 import { cn } from "../../../ui/cn";
 import { lastVisibleMonth, leadingBlanks, monthLabel, WEEKDAYS } from "./calendarDates";
+import { DayPopover } from "./DayPopover";
 import { DayCell, MAX_PLAYERS_WITH_BARS, unansweredBarTone, type CalendarDay } from "./DayCell";
 import { IconChevron, IconStar, IconStarCancelled } from "../../../ui/icons";
 
@@ -13,6 +15,7 @@ export function HeatCalendar({
   players,
   days,
   selectedDay,
+  dayPopover,
   onSelectDay,
   onMonthChange,
 }: {
@@ -21,6 +24,7 @@ export function HeatCalendar({
   players: readonly PlayerRow[];
   days: readonly CalendarDay[];
   selectedDay: IsoDate | null;
+  dayPopover?: ReactNode;
   onSelectDay: (day: IsoDate | null) => void;
   onMonthChange: (month: IsoMonth) => void;
 }) {
@@ -33,7 +37,7 @@ export function HeatCalendar({
         aria-busy={loading || undefined}
         inert={loading}
         className={cn(
-          "grid grid-cols-7 gap-0.5 transition-opacity duration-150 sm:gap-1.5",
+          "relative grid grid-cols-7 gap-0.5 transition-opacity duration-150 sm:gap-1.5",
           loading && "opacity-50",
         )}
       >
@@ -49,16 +53,27 @@ export function HeatCalendar({
         {Array.from({ length: leadingBlanks(gridMonth) }, (_, i) => (
           <span key={`blank-${String(i)}`} />
         ))}
-        {days.map((day) => (
-          <DayCell
-            key={day.date}
-            day={day}
-            players={players}
-            today={today}
-            selected={day.date === selectedDay}
-            onToggle={() => onSelectDay(day.date === selectedDay ? null : day.date)}
-          />
-        ))}
+        {days.map((day) => {
+          const selected = day.date === selectedDay;
+          const popover = selected && dayPopover;
+          return (
+            <Fragment key={day.date}>
+              <DayCell
+                day={day}
+                players={players}
+                today={today}
+                selected={selected}
+                detailOpen={Boolean(popover)}
+                onToggle={() => onSelectDay(selected ? null : day.date)}
+              />
+              {popover && (
+                <DayPopover date={day.date} onDismiss={() => onSelectDay(null)}>
+                  {popover}
+                </DayPopover>
+              )}
+            </Fragment>
+          );
+        })}
       </div>
       <Legend dense={players.length > MAX_PLAYERS_WITH_BARS} />
     </Card>

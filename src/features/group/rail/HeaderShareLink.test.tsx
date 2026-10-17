@@ -69,4 +69,16 @@ describe("HeaderShareLink", () => {
     await userEvent.click(screen.getByRole("button", { name: "Rotate" }));
     expect(onRotate).toHaveBeenCalledOnce();
   });
+
+  it("shows the link itself beside Copy on wide screens", async () => {
+    stubClipboard(() => Promise.resolve());
+    render(<HeaderShareLink url={url} wide onRotate={vi.fn()} showToast={vi.fn()} />);
+    expect(screen.getByText("next-session.link/s/k3Qx9Lm2aB")).toBeTruthy();
+    const copyButton = screen.getByRole("button", { name: "Copy player link" });
+    expect(copyButton.textContent).toBe("Copy");
+
+    await userEvent.click(copyButton);
+
+    expect(copyButton.textContent).toBe("Copied");
+  });
 });

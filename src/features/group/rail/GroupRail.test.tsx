@@ -1,26 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { GroupRail } from "./GroupRail";
 
-function renderRail({
-  wide,
-  dayPanel = null,
-  rosterEmpty = false,
-}: {
-  wide: boolean;
-  dayPanel?: ReactNode;
-  rosterEmpty?: boolean;
-}) {
+function renderRail({ wide, rosterEmpty = false }: { wide: boolean; rosterEmpty?: boolean }) {
   const onAddPlayer = vi.fn();
   render(
     <GroupRail
       wide={wide}
       rosterEmpty={rosterEmpty}
       onAddPlayer={onAddPlayer}
-      shareLink={<p>Share link</p>}
-      dayPanel={dayPanel}
+      calendar={<p>Calendar</p>}
       panels={{
         bestNights: <p>Best nights panel</p>,
         players: <p>Players panel</p>,
@@ -31,20 +21,20 @@ function renderRail({
   return { onAddPlayer };
 }
 
-const visibleText = () =>
-  screen.getAllByText(/panel$|^Share link$|^Day$/).map((p) => p.textContent);
+const visibleText = () => screen.getAllByText(/panel$|^Calendar$/).map((p) => p.textContent);
 
 describe("GroupRail", () => {
-  it("stacks the Share Link, the day, Best Nights, Sessions and Players on wide screens", () => {
-    renderRail({ wide: true, dayPanel: <p>Day</p> });
+  it("flanks the calendar with Players and Best Nights on the left and Sessions on the right on wide screens", () => {
+    renderRail({ wide: true });
     expect(screen.queryByRole("tablist")).toBeNull();
     expect(visibleText()).toEqual([
-      "Share link",
-      "Day",
-      "Best nights panel",
-      "Sessions panel",
       "Players panel",
+      "Best nights panel",
+      "Calendar",
+      "Sessions panel",
     ]);
+    const overview = screen.getByRole("complementary", { name: "Group overview" });
+    expect(overview.textContent).toBe("Players panelBest nights panel");
   });
 
   it("shows one panel at a time behind a segmented control on phones", async () => {
@@ -53,7 +43,7 @@ describe("GroupRail", () => {
     expect(tabs.map((tab) => tab.textContent)).toEqual(["Best nights", "Players", "Sessions"]);
     expect(screen.getByRole("tab", { selected: true }).textContent).toBe("Best nights");
     expect(screen.getByRole("tabpanel").textContent).toBe("Best nights panel");
-    expect(screen.queryByText("Share link")).toBeNull();
+    expect(visibleText().slice(0, 1)).toEqual(["Calendar"]);
 
     await userEvent.click(screen.getByRole("tab", { name: "Sessions" }));
     expect(screen.getByRole("tabpanel").textContent).toBe("Sessions panel");
