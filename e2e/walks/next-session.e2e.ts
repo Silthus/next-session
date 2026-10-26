@@ -54,6 +54,7 @@ test("a GM shares one link, a player marks their nights, and the GM picks the ne
   await agent.act("schedule {night} as the next session", {
     params: { night: spokenDay(firstNight) },
   });
+  await browser.reload();
   await expect(scheduledSession(screen, firstNight)).toBeVisible();
   await app.screenshot("the GM picked the next session");
 });
