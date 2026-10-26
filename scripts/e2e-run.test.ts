@@ -12,17 +12,20 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, it } from "vitest";
-import { createE2eRun } from "./e2e-run";
+import { createE2eRun, runCommand } from "./e2e-run";
 
 it("gives concurrent runs fresh projects and ports without changing the developer environment", async () => {
   const source = mkdtempSync(join(tmpdir(), "next-session-source-"));
   writeFileSync(join(source, "package.json"), "{}");
   writeFileSync(join(source, ".env.local"), "developer-only");
+  mkdirSync(join(source, ".e2e"));
+  writeFileSync(join(source, ".e2e", "report.json"), "{}");
   const runs = await Promise.all([createE2eRun(source), createE2eRun(source)]);
   try {
     expect(new Set(runs.flatMap((run) => Object.values(run.ports))).size).toBe(6);
     expect(runs[0].directory).not.toBe(runs[1].directory);
     expect(() => readFileSync(join(runs[0].directory, ".env.local"))).toThrow();
+    expect(existsSync(join(runs[0].directory, ".e2e"))).toBe(false);
     writeFileSync(join(runs[0].directory, ".env.local"), "run-only");
     await runs[0].dispose();
     expect(readFileSync(join(source, ".env.local"), "utf8")).toBe("developer-only");
@@ -79,6 +82,37 @@ it("a disposed run never deletes a later owner's port lease", async () => {
     expect(readFileSync(owner, "utf8")).toBe("later run");
   } finally {
     rmSync(lease, { recursive: true, force: true });
+    rmSync(source, { recursive: true, force: true });
+  }
+});
+
+it("runs the Playwright suite in the run with its arguments", async () => {
+  const source = mkdtempSync(join(tmpdir(), "e2e-command-"));
+  writeFileSync(join(source, "package.json"), "{}");
+  const run = await createE2eRun(source);
+  try {
+    const { command, args, env } = runCommand(["--grep", "player"], run);
+    expect([command, ...args]).toEqual(["bunx", "playwright", "test", "--grep", "player"]);
+    expect(env.E2E_BASE_URL).toBe(`http://127.0.0.1:${run.ports.web}`);
+    expect(env.E2E_CONVEX_URL).toBe(`http://127.0.0.1:${run.ports.cloud}`);
+  } finally {
+    await run.dispose();
+    rmSync(source, { recursive: true, force: true });
+  }
+});
+
+it("serves the app in the run on the port another runner chose", async () => {
+  const source = mkdtempSync(join(tmpdir(), "e2e-command-"));
+  writeFileSync(join(source, "package.json"), "{}");
+  const run = await createE2eRun(source);
+  try {
+    const { command, args, env } = runCommand(["--serve", "4321"], run);
+    expect([command, ...args]).toEqual(["bun", "scripts/e2e-server.ts"]);
+    expect(env.E2E_BASE_URL).toBe("http://127.0.0.1:4321");
+    expect(env.E2E_SITE_PORT).toBe(String(run.ports.site));
+    expect(env.VITE_POSTHOG_TOKEN).toBe("");
+  } finally {
+    await run.dispose();
     rmSync(source, { recursive: true, force: true });
   }
 });
