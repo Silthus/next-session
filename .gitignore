@@ -10,3 +10,4 @@ test-results/
 .tanstack/
 .wrangler/
 *.tsbuildinfo
+.e2e/

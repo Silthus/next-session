@@ -42,6 +42,7 @@ export async function createE2eRun(source = process.cwd()) {
       ".git",
       ".coherence",
       ".convex",
+      ".e2e",
       ".tanstack",
       ".wrangler",
       ".vite",
@@ -73,8 +74,42 @@ export async function createE2eRun(source = process.cwd()) {
   }
 }
 
-async function main() {
-  let run: Awaited<ReturnType<typeof createE2eRun>> | undefined;
+type E2eRun = Awaited<ReturnType<typeof createE2eRun>>;
+
+export function runCommand(argv: string[], run: E2eRun) {
+  const [flag, servePort] = argv;
+  const isolated = (webPort: number) => ({
+    ...process.env,
+    VITE_POSTHOG_TOKEN: "",
+    VITE_GEOAPIFY_KEY: "",
+    POSTHOG_PERSONAL_API_KEY: "",
+    POSTHOG_PROJECT_ID: "",
+    E2E_BASE_URL: `http://127.0.0.1:${webPort}`,
+    E2E_CONVEX_URL: `http://127.0.0.1:${run.ports.cloud}`,
+    E2E_SITE_PORT: String(run.ports.site),
+  });
+  if (flag === "--serve" && servePort) {
+    return { command: "bun", args: ["scripts/e2e-server.ts"], env: isolated(Number(servePort)) };
+  }
+  const name = basename(run.directory);
+  const outputDirectory = resolve("test-results", name);
+  return {
+    command: "bunx",
+    args: ["playwright", "test", ...argv],
+    outputDirectory,
+    env: {
+      ...isolated(run.ports.web),
+      E2E_OUTPUT_DIR: outputDirectory,
+      E2E_REPORT_DIR: resolve("playwright-report", name),
+      ...(process.env.E2E_SCREENSHOTS
+        ? { E2E_SCREENSHOTS: resolve(process.env.E2E_SCREENSHOTS, name) }
+        : {}),
+    },
+  };
+}
+
+async function main(argv = process.argv.slice(2)) {
+  let run: E2eRun | undefined;
   let child: ChildProcess | undefined;
   let outputDirectory: string | undefined;
   let interrupted = false;
@@ -91,25 +126,12 @@ async function main() {
       process.exitCode = 130;
       return;
     }
-    outputDirectory = resolve("test-results", basename(run.directory));
-    child = spawn("bunx", ["playwright", "test", ...process.argv.slice(2)], {
+    const command = runCommand(argv, run);
+    outputDirectory = "outputDirectory" in command ? command.outputDirectory : undefined;
+    child = spawn(command.command, command.args, {
       cwd: run.directory,
       stdio: "inherit",
-      env: {
-        ...process.env,
-        VITE_POSTHOG_TOKEN: "",
-        VITE_GEOAPIFY_KEY: "",
-        POSTHOG_PERSONAL_API_KEY: "",
-        POSTHOG_PROJECT_ID: "",
-        E2E_BASE_URL: `http://127.0.0.1:${run.ports.web}`,
-        E2E_CONVEX_URL: `http://127.0.0.1:${run.ports.cloud}`,
-        E2E_SITE_PORT: String(run.ports.site),
-        E2E_OUTPUT_DIR: outputDirectory,
-        E2E_REPORT_DIR: resolve("playwright-report", basename(run.directory)),
-        ...(process.env.E2E_SCREENSHOTS
-          ? { E2E_SCREENSHOTS: resolve(process.env.E2E_SCREENSHOTS, basename(run.directory)) }
-          : {}),
-      },
+      env: command.env,
     });
     process.exitCode = await new Promise<number>((resolve, reject) => {
       child!.once("error", reject);

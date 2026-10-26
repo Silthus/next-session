@@ -13,6 +13,7 @@ export default defineConfig(
     "src/routeTree.gen.ts",
     "playwright-report/",
     "test-results/",
+    ".e2e/",
     ".wrangler/",
   ]),
   js.configs.recommended,
