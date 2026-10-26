@@ -9,6 +9,9 @@ Developer and CI scripts: local auth keys, the end-to-end runner and its local b
 - e2e run: a developer or CI runs the Playwright suite against a local backend
   handler: e2e-run.ts
   trust: operator
+- e2e serve: the e2e runner serves the app from an isolated project on the port it chose
+  handler: e2e-run.ts
+  trust: operator
 - e2e server: the end-to-end runner starts the local Convex backend and the web app
   handler: e2e-server.ts
   trust: operator
