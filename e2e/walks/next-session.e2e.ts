@@ -24,9 +24,11 @@ test("a GM shares one link, a player marks their nights, and the GM picks the ne
   await app.open("/");
   await agent.act("create a link for a new group");
   await expect(shareLinkIsReady(screen)).toBeVisible();
+  await app.screenshot("the GM has a Share Link to send");
 
   await agent.act("open the group");
   await expect(calendarOf(screen, thisMonth)).toBeVisible();
+  await app.screenshot("the GM sees their group");
 
   const shareLink = await screen.getByText(/\/s\//).textContent();
 
@@ -34,22 +36,26 @@ test("a GM shares one link, a player marks their nights, and the GM picks the ne
     await app.open(shareLink!.slice(shareLink!.indexOf("/s/")));
     await agent.act("join the group as {name}", { params: { name: player } });
     await expect(answeringAs(screen, player)).toBeVisible();
+    await app.screenshot("the player joined the group");
 
     await agent.act("mark {first} and {second} as free", {
       params: { first: spokenDay(firstNight), second: spokenDay(secondNight) },
     });
     await expect(nightMarkedFree(screen, firstNight)).toBeVisible();
     await expect(nightMarkedFree(screen, secondNight)).toBeVisible();
+    await app.screenshot("the player marked their free nights");
   });
 
   await agent.act("show {month}", { params: { month: spokenMonth(nextMonth) } });
   await expect(bestNight(screen, firstNight)).toBeVisible();
   await expect(bestNight(screen, secondNight)).toBeVisible();
+  await app.screenshot("the GM sees the best nights");
 
   await agent.act("schedule {night} as the next session", {
     params: { night: spokenDay(firstNight) },
   });
   await expect(scheduledSession(screen, firstNight)).toBeVisible();
+  await app.screenshot("the GM picked the next session");
 });
 
 function shareLinkIsReady(screen: Screen) {
