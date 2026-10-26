@@ -43,6 +43,7 @@ Browser ──HTTPS──▶ Cloudflare Worker "next-session" (next-session.link
 | Fonts | Self-hosted through Fontsource (`@fontsource-variable/bricolage-grotesque`, `@fontsource-variable/inter`, `@fontsource/jetbrains-mono`), not the Google Fonts CDN. Loading Google's CDN sends visitor IPs to Google, which German courts have ruled needs consent. This deviates from DESIGN.md D6 on purpose. |
 | Unit and integration tests | Vitest with three projects: `shared` (node), `convex` (`edge-runtime`, `convex-test`), `ui` (jsdom, Testing Library) |
 | End-to-end tests | Playwright (chromium) against `vite dev` and a local Convex backend |
+| Walks | TesterArmy `e2e` on Michael's ChatGPT login, local only: `bun run walk` after `bunx e2e login openai --device` |
 | Lint and format | ESLint (typescript-eslint, react-hooks, `@convex-dev/eslint-plugin`) and Prettier |
 | Gate | `bun run check` = `tsc` (app, node, and convex projects) + `eslint .` + `prettier --check .` + `vitest run` + `vite build` + `wrangler deploy --dry-run` |
 | Hosting | `wrangler` 4.x deploys `dist/` and `worker/index.ts` |
@@ -374,7 +375,7 @@ shared/                 dates.ts, answers.ts, monthSummary.ts, names.ts, randomT
 convex/                 schema.ts, model/, groups.ts, schedule.ts, roster.ts, sessions.ts, player.ts, me.ts,
                         account.ts, auth.ts, auth.config.ts, http.ts, crons.ts, cleanup.ts, convex.config.ts
 worker/index.ts         legacy-link redirect, then static assets
-e2e/                    Playwright specs and helpers
+e2e/                    Playwright specs and helpers; walks/ holds the *.e2e.ts walks
 docs/legal/             terms.md, privacy.md, imprint.md
 ```
 
@@ -411,6 +412,7 @@ Storage keys: `next-session.players` (Player identity), `next-session.lastGroup`
 | `src/ui/*` and feature views | Props in, callbacks out | Testing Library (render, user events, accessible names) |
 | `worker/index.ts` | `legacyRedirect(url) → string \| null` | Vitest |
 | The whole product | URLs and clicks | Playwright against `vite dev` + a local Convex backend; the production spec against the deployed URL |
+| A main flow | `agent.act` goals in product words, then locator `expect`s on saved data | An `e2e/walks/*.e2e.ts` walk, run with `bun run walk`, as the `ui-walk` proof. Playwright stays the CI gate and covers the edge cases ([#196](https://github.com/Silthus/next-session/pull/196)) |
 
 Containers (`GroupScreen`, `PlayerScreen`) are thin glue between Convex hooks and views; Playwright covers them instead of mocking Convex in jsdom.
 

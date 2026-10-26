@@ -22,5 +22,6 @@ export default {
     },
   ],
   timeout: 300_000,
+  retries: 1,
   trace: "on",
 } satisfies E2EConfig;
