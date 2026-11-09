@@ -62,6 +62,15 @@ describe("Continue with Google", () => {
     expect(user?.acceptedLegalAt).toBeGreaterThanOrEqual(before);
   });
 
+  it("keeps only the given name Google sends, for the Welcome Mail's greeting", async () => {
+    const { userId } = await signInWithGoogle(t, {
+      ...newGoogleIdentity(),
+      given_name: " Ada ",
+    });
+
+    expect((await userOf(userId))?.name).toBe("Ada");
+  });
+
   it("signs in to the same Account the next time", async () => {
     const identity = newGoogleIdentity();
     const first = await signInWithGoogle(t, identity);

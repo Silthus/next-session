@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": { "types": ["node"] },
-  "include": ["worker", "e2e", "scripts", "*.ts"],
+  "include": ["worker", "e2e", "scripts", "emails", "*.ts"],
   "exclude": ["env.d.ts"]
 }

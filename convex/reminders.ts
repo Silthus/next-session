@@ -15,7 +15,7 @@ import { remindersOffLinkOf, shareLinkOf } from "./model/siteLinks";
 import { claimedPlayerIn } from "./model/players";
 import { reminderLinkTokenFor, remindersOn } from "./model/reminderLinks";
 import { claimedAccountIds, isMailable, type MailableAccount } from "./model/recipients";
-import { accountDistinctId, PRODUCT, serverLog } from "./model/telemetry";
+import { accountDistinctId, serverLog } from "./model/telemetry";
 import { groupTimeOf } from "./model/timeAndPlace";
 import { isSettling } from "./sessionLifecycle";
 
@@ -32,17 +32,17 @@ const reminderJob = {
   timeZone: v.string(),
 };
 
-const reminderBody = v.object({
-  distinct_id: v.string(),
-  product: v.string(),
+const reminderRecipient = v.object({
   email: v.string(),
-  group_name: v.string(),
-  date_label: v.string(),
-  start_label: v.string(),
-  location: v.optional(v.string()),
+  distinctId: v.string(),
+  playerName: v.string(),
   lead: reminderLead,
-  player_url: v.string(),
-  reminders_off_url: v.string(),
+  groupName: v.string(),
+  dateLabel: v.string(),
+  startLabel: v.string(),
+  location: v.optional(v.string()),
+  playerUrl: v.string(),
+  remindersOffUrl: v.string(),
 });
 
 type ScheduledSnapshot = NonNullable<Doc<"sessions">["published"]> & { start: number };
@@ -116,7 +116,7 @@ export const fire = internalMutation({
 
 export const recipient = internalQuery({
   args: reminderSend,
-  returns: v.union(reminderBody, v.null()),
+  returns: v.union(reminderRecipient, v.null()),
   handler: async (ctx, send) => {
     const session = await ctx.db.get("sessions", send.sessionId);
     const published = session && liveSnapshotOf(session, send.revision);
@@ -127,16 +127,16 @@ export const recipient = internalQuery({
     if (!group || !account || !isRemindable(account) || !account.reminderLinkToken) return null;
     const { timeZone } = send;
     return {
-      distinct_id: accountDistinctId(account),
-      product: PRODUCT,
       email: account.email,
-      group_name: group.name,
-      date_label: dateLabel(published.start, timeZone),
-      start_label: startLabel(published.start, timeZone),
-      ...(published.location === undefined ? {} : { location: published.location }),
+      distinctId: accountDistinctId(account),
+      playerName: claim.name,
       lead: send.lead,
-      player_url: shareLinkOf(group),
-      reminders_off_url: remindersOffLinkOf(account.reminderLinkToken),
+      groupName: group.name,
+      dateLabel: dateLabel(published.start, timeZone),
+      startLabel: startLabel(published.start, timeZone),
+      ...(published.location === undefined ? {} : { location: published.location }),
+      playerUrl: shareLinkOf(group),
+      remindersOffUrl: remindersOffLinkOf(account.reminderLinkToken),
     };
   },
 });

@@ -88,8 +88,14 @@ const AccountGoogle = Google({
     id: google.sub,
     email: normalizeEmail(google.email),
     image: typeof google.picture === "string" ? google.picture : null,
+    // Only the given name, which the Welcome Mail greets by; Google's full name stays at Google.
+    name: givenNameOf(google.given_name),
   }),
 });
+
+function givenNameOf(givenName: unknown) {
+  return typeof givenName === "string" && givenName.trim() !== "" ? givenName.trim() : undefined;
+}
 
 function requireStrongPassword(password: unknown) {
   if (typeof password !== "string" || password.length < MIN_PASSWORD_LENGTH) {
