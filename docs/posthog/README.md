@@ -4,23 +4,26 @@ What Next Session has in PostHog, and how to rebuild it. The design is `docs/spe
 
 ## Mail activation
 
-Welcome Mail and Tips are active in EU project `13216` since 2026-10-07, and Reminders since 2026-10-16 (below), using verified sender `88088`. Their production webhook environment is configured privately. #79 proved Welcome receipt and Tips confirmation; Tips retains its two-day maximum wait and can exit early after a Session is scheduled. Session updates go through Resend with a calendar invite (`docs/spec.md` §15), and their old workflow is archived (#162).
+Welcome Mail and Tips are active in EU project `13216` since 2026-10-07, and Reminders since 2026-10-16 (below), using verified sender `88088`. The Welcome Mail and Reminders move from their workflows to code sends with [ADR-0014](../adr/0014-welcome-mail-and-reminders-are-posthog-code-sends.md) (below); Tips keep their workflow. The production mail environment is configured privately. #79 proved Welcome receipt and Tips confirmation; Tips retains its two-day maximum wait and can exit early after a Session is scheduled. Session updates go through Resend with a calendar invite (`docs/spec.md` §15), and their old workflow is archived (#162).
 
-In PostHog EU project `13216`, open **Workflows → Channels → hello@next-session.link** and press **Verify** or **Verify DNS records**. Confirm the channel shows verified before setting `POSTHOG_MAIL_WEBHOOK_SECRET`, `POSTHOG_WELCOME_WEBHOOK_URL` and `POSTHOG_TIPS_WEBHOOK_URL` in Convex production. The corresponding workflow must also be active. A webhook can return 201 before its email step runs, so acceptance alone does not prove delivery.
+In PostHog EU project `13216`, open **Workflows → Channels → hello@next-session.link** and press **Verify** or **Verify DNS records**. Confirm the channel shows verified before setting any mail variable in Convex production: code sends use the same sender. For Tips, `POSTHOG_MAIL_WEBHOOK_SECRET` and `POSTHOG_TIPS_WEBHOOK_URL` need the Tips workflow active. A webhook can return 201 before its email step runs, so acceptance alone does not prove delivery.
 
 ## Code sends (Welcome Mail and Reminders)
 
-[ADR-0014](../adr/0014-welcome-mail-and-reminders-are-posthog-code-sends.md) moves the Welcome Mail and Reminders from their workflow webhooks to `posthog.emails.send()`. It ships off: Convex uses the code send only when `POSTHOG_PROJECT_TOKEN`, `POSTHOG_SECRET_KEY` and `MAIL_REPLY_TO` are all set, and otherwise posts to the webhooks as before. Tips keep their webhook.
+[ADR-0014](../adr/0014-welcome-mail-and-reminders-are-posthog-code-sends.md) sends the Welcome Mail and Reminders with `posthog.emails.send()` from `convex/codeMail.ts`. Their copy is React Email components in [`emails/`](../../emails): `bun run mail:preview` shows them at `http://localhost:3030` with sample data. Convex sends them only when `POSTHOG_PROJECT_TOKEN`, `POSTHOG_SECRET_KEY` and `MAIL_REPLY_TO` are all set. Without them, no Welcome Mail goes out, no Reminder is scheduled, and My groups hides the Reminders switch. There is no webhook fallback.
 
 Switch on in this order:
 
-1. PostHog sends a code send untracked when asked (today it adds its open pixel and rewrites links, which §13 call 15 rules out).
-2. In EU project `13216`, create a project secret API key with **Transactional email: Write**. Set it as `POSTHOG_SECRET_KEY` in Convex prod, and the contact address (the `LEGAL_CONTACT_EMAIL` variable) as `MAIL_REPLY_TO`. Never echo either into a log or comment.
-3. Sign up with an owned address, with and without Tips. Check the Welcome Mail's copy, both links and the reply-to, and its send under **Workflows → Transactional emails**, named `next-session-welcome`.
-4. Schedule a disposable Session that starts a few minutes more than 2 hours from now, so its 2-hour Reminder is still ahead once the Undo window closes. Check that Reminder (`next-session-reminder`) and its footer link, as #149 did.
-5. Once real Welcome Mails and Reminders have gone out as code sends for a week, archive their two workflows and remove `POSTHOG_WELCOME_WEBHOOK_URL` and `POSTHOG_REMINDER_WEBHOOK_URL` from Convex prod. `POSTHOG_MAIL_WEBHOOK_SECRET` stays for Tips.
+1. PostHog can send a code send without its open pixel and rewritten links, and `posthog-node` exposes it; `convex/codeMail.ts` turns it off. Today every code send is tracked, which §13 call 15 rules out.
+2. In EU project `13216`, create a project secret API key with **Transactional email: Write**. Set it as `POSTHOG_SECRET_KEY` in Convex prod, and the contact address (the `LEGAL_CONTACT_EMAIL` variable) as `MAIL_REPLY_TO`. `main` before ADR-0014 ignores both, so set them before the merge. Never echo either into a log or comment.
+3. Merge and deploy. Run the Reminder backfill once, `bunx convex run --prod reminders:scheduleUpcoming '{}'`, so Sessions published while the webhook was gone get their pair.
+4. Sign up with an owned address, with and without Tips, once with Google so the greeting has a first name. Check the copy, both links and the reply-to, and the send under **Workflows → Transactional emails**, named `next-session-welcome`.
+5. Schedule a disposable Session that starts a few minutes more than 2 hours from now, so its 2-hour Reminder is still ahead once the Undo window closes. Check that Reminder (`next-session-reminder`), its greeting by Player name, and its footer link, as #149 did.
+6. Archive the "Next Session: Welcome Mail" and "Next Session: Reminders" workflows, and remove `POSTHOG_WELCOME_WEBHOOK_URL` and `POSTHOG_REMINDER_WEBHOOK_URL` from Convex prod. `POSTHOG_MAIL_WEBHOOK_SECRET` stays for Tips.
 
-To switch back before step 5, remove `POSTHOG_SECRET_KEY`: the next mail queued goes to its still-active workflow. After step 5, first reactivate both workflows and set their webhook URLs again, then remove the key. Without either, these mails are dropped.
+To stop both mails, remove `POSTHOG_SECRET_KEY`. Going back to the workflows means reverting ADR-0014's code.
+
+`docs/spec.md` §13.9: create the project in EU Cloud, re-create the sender, templates and workflows from these files, and change `VITE_POSTHOG_TOKEN`, `POSTHOG_PROJECT_ID`, the Convex env and the webhook URLs.
 
 ## Where things live
 
@@ -29,17 +32,17 @@ To switch back before step 5, remove `POSTHOG_SECRET_KEY`: the next mail queued 
 | Project | Lonir's shared project on EU Cloud (`eu.posthog.com`), project ID `13216`. Free plan: events kept 1 year, logs 14 days |
 | Sender | Workflows → Channels: `Michael from Next Session <hello@next-session.link>`. Its SES records (three `*._domainkey` CNAMEs, `feedback` MX and SPF, `_amazonses` TXT, the root SPF, `_dmarc`) are in the `next-session.link` zone, next to Resend's `send`, `rsend` and `resend._domainkey`. Channel ID `88088`. Someone must press **Verify** on the channel once: PostHog sends nothing from an unverified sender, and its verify endpoint refuses personal API keys |
 | Email templates | Workflows → Library. Definitions in [`templates/`](templates) |
-| Workflows | "Next Session: Welcome Mail", "Next Session: Tips" and "Next Session: Reminders". Rebuild definitions in [`workflows/`](workflows) remain draft with placeholders |
+| Workflows | "Next Session: Tips". "Next Session: Welcome Mail" and "Next Session: Reminders" are archived once code sends are on. Rebuild definitions in [`workflows/`](workflows) remain draft with placeholders |
 | Browser token | Repo variable `VITE_POSTHOG_TOKEN`, read by the deploy job's build |
 | Source maps | Repo variable `POSTHOG_PROJECT_ID` and repo secret `POSTHOG_PERSONAL_API_KEY`. The deploy job installs `posthog-cli` pinned by its release checksum |
-| Server token and mail | Convex prod env: `POSTHOG_PROJECT_TOKEN` is set. `POSTHOG_MAIL_WEBHOOK_SECRET`, `POSTHOG_WELCOME_WEBHOOK_URL`, `POSTHOG_TIPS_WEBHOOK_URL` and `POSTHOG_REMINDER_WEBHOOK_URL` are configured privately |
+| Server token and mail | Convex prod env: `POSTHOG_PROJECT_TOKEN` is set. `POSTHOG_SECRET_KEY`, `MAIL_REPLY_TO`, `POSTHOG_MAIL_WEBHOOK_SECRET` and `POSTHOG_TIPS_WEBHOOK_URL` are configured privately |
 | Local copies | `~/.config/next-session/posthog.env` (token, personal API key) and `posthog-mail.env` (webhook secret) on devbox-michaelr-1. Never commit them |
 
 ## Templates
 
 Each file in [`templates/`](templates) is the body of a `POST /api/environments/<project>/messaging_templates/`. PostHog renders the HTML from the `design`, so the templates open as editable blocks. The copy is §13.6's, in the app's gold-on-paper palette. `text` is the full plain-text version.
 
-The Welcome Mail shows the Tips confirmation only when the trigger event has `tips_confirm_url` (`{% if event.properties.tips_confirm_url %}`). Tips link to `{{ unsubscribe_url }}`.
+Only the Tips are templates here. Tips link to `{{ unsubscribe_url }}`. The Welcome Mail and Reminders are components in [`emails/`](../../emails).
 
 A workflow's email step copies the template when the step is saved. Editing a library template later changes no workflow. Edit the step, or save the step again with the template's ID.
 
@@ -50,16 +53,15 @@ Each file in [`workflows/`](workflows) is the body of a `POST /api/environments/
 | Placeholder | Value |
 | --- | --- |
 | `<POSTHOG_MAIL_WEBHOOK_SECRET>` | The secret in Convex's `POSTHOG_MAIL_WEBHOOK_SECRET`. The trigger refuses any request whose `Authorization` header is not `Bearer <secret>` |
-| `<TEMPLATE:welcome>`, `<TEMPLATE:tip-1>`, `<TEMPLATE:tip-2>` | The library template IDs |
+| `<TEMPLATE:tip-1>`, `<TEMPLATE:tip-2>` | The library template IDs |
 | `<SENDER_INTEGRATION_ID>` | The sender's channel ID, a number (`GET /api/environments/<project>/integrations/`, kind `email`) |
 | `<REPLY_TO>` | The contact address, the repo variable `LEGAL_CONTACT_EMAIL`. `hello@next-session.link` has no inbox |
 
-- **Welcome Mail:** webhook trigger, event `next_session:welcome_requested`, then one transactional email. Convex posts `{distinct_id, product, email, tips_confirm_url?}`.
 - **Tips:** webhook trigger, event `next_session:tips_requested`, then wait up to 2 days for a `next_session:session_scheduled` with `product = next-session`, Tip 1, and wait up to 5 days for one more. A scheduled Session ends the run at either wait, so no Tip goes out after it; each timeout sends the next Tip. A wait only sees events that arrive while the run waits there, so a Session scheduled before the GM confirmed still gets both Tips.
 - Every email step has `tracking_enabled: false`: no open pixel, no rewritten links.
-- Welcome and Reminders are `transactional`, so provider marketing opt-outs do not affect them. Reminders use the transactional category named "Session updates" and have their own opt-out link. Tips remain `marketing`; their existing unsubscribe applies to all marketing in this shared project. Do not change that consent or category as part of Reminder setup. Personal API keys currently cannot manage the real categories; use the project UI.
+- Tips remain `marketing`; their existing unsubscribe applies to all marketing in this shared project. Do not change that consent or category as part of Reminder setup. Personal API keys currently cannot manage the real categories; use the project UI.
 - Webhook payloads are workflow trigger data, not application usage events or person properties. Provider operational delivery events separately contain recipient email and subject metadata. Actual sends report `$email_tracking_enabled=false`; inspected application events and person updates contain no email, Group name or Share Token. The optional `capture_workflows_engagement_events` setting could not be read because the key lacks `project:read`; actual delivery events are evidence, not a source-default assumption. No shared-project setting was changed.
-- The webhook URL is `https://webhooks.eu.posthog.com/public/webhooks/<workflow id>`. It answers only while the workflow is active. Set the Convex mail env only after both workflows are active and the sender is verified. A 404 is not retried; a 201 from an unverified sender still does not deliver mail. Either can lose a Welcome Mail.
+- The webhook URL is `https://webhooks.eu.posthog.com/public/webhooks/<workflow id>`. It answers only while the workflow is active. Set the Tips webhook env only after the workflow is active and the sender is verified. A 404 is not retried; a 201 from an unverified sender still does not deliver mail. Either can lose a Welcome Mail.
 
 Test a workflow with `POST .../hog_flows/<id>/invocations/` (`configuration`, `globals`, `mock_async_functions: true`, `current_action_id`), one step at a time. The key needs `group:read` for that.
 
@@ -79,42 +81,25 @@ Convex marks events from a `.test` Account with `is_test_account: true`. The ano
 
 ## Reminders
 
-As of 2026-10-16, Reminders are on in production (#149). The [Reminders workflow](https://eu.posthog.com/project/13216/workflows/01a1451e-8468-0000-412a-96da466da377/workflow?node=email_reminder) is active and uses template `01a1451e-7c94-0000-d5b4-8e922ecd4738`, sender `88088` and the Session updates category. Convex prod has `POSTHOG_REMINDER_WEBHOOK_URL`, set after Privacy Policy 1.10 went live. Without it, or without `POSTHOG_MAIL_WEBHOOK_SECRET`, Convex schedules no Reminder and calls no webhook. `workflows/reminders.json` and `templates/reminder.json` are the rebuild definitions.
+Reminders have been on in production since 2026-10-16 (#149), first through the "Next Session: Reminders" workflow and, with ADR-0014, as code sends. Without the code-send env above, Convex schedules no Reminder.
 
-The switch-on proof is on #149. Four mocked runs covered both leads, with and without a location. The workflow refused a missing or wrong Bearer with 401. The backfill ran once and left no Session with two pairs. In production, a disposable Group scheduled for the same evening got only its 2-hour Reminder, because its 1-day time had already passed. PostHog sent it with tracking off, the provider reported it delivered, and Michael confirmed it in his inbox with the right Group, time, place, button and footer link. A second disposable Session, cancelled before its 2-hour job, sent nothing. The footer link, opened signed out, changed nothing until **Turn off Reminders**; My groups then showed the switch off, and turning it back on held through a reload. Both Groups were deleted, and the proof Account's preferences were restored.
+The switch-on proof is on #149. Four mocked runs covered both leads, with and without a location. The backfill ran once and left no Session with two pairs. In production, a disposable Group scheduled for the same evening got only its 2-hour Reminder, because its 1-day time had already passed. PostHog sent it with tracking off, the provider reported it delivered, and Michael confirmed it in his inbox with the right Group, time, place, button and footer link. A second disposable Session, cancelled before its 2-hour job, sent nothing. The footer link, opened signed out, changed nothing until **Turn off Reminders**; My groups then showed the switch off, and turning it back on held through a reload.
 
-Convex posts one Reminder per Account, 24 hours (`lead: "day"`) and 2 hours (`lead: "hours"`) before the Session starts, with event `next_session:reminder_requested`:
+Convex sends one Reminder per Account, 24 hours (`day`) and 2 hours (`hours`) before the Session starts, with event `next_session:reminder_requested`. `emails/ReminderMail.tsx` writes it from what `reminders.recipient` reads when the job fires:
 
-| Field | Value |
+| Value | What it is |
 | --- | --- |
-| `distinct_id`, `product`, `email` | As the Welcome Mail sends them |
-| `group_name` | The Group's name at send time |
-| `date_label` | The start's date in the Group's time zone at publish, "Saturday, October 17, 2026" |
-| `start_label` | The start in the Group's time zone at publish, 24-hour "19:00" |
+| `playerName` | The name the Group knows the Account's Claimed Player by, for the greeting |
+| `groupName` | The Group's name at send time |
+| `dateLabel` | The start's date in the Group's time zone at publish, "Saturday, October 17, 2026" |
+| `startLabel` | The start in the Group's time zone at publish, 24-hour "19:00" |
 | `location` | The published location. Left out when the Session has none |
-| `lead` | `day` or `hours` |
-| `player_url` | The current Share Link, read at send time. No other field carries a Share Token |
-| `reminders_off_url` | `https://next-session.link/reminders/off?t=<token>`, the Account's own Reminder link |
+| `playerUrl` | The current Share Link, read at send time. Nothing else carries a Share Token |
+| `remindersOffUrl` | `https://next-session.link/reminders/off?t=<token>`, the Account's own Reminder link |
 
-Placeholders, beside the shared ones above:
+The subject is "Tomorrow: …" or "In 2 hours: … at 19:00", and the body says the Group "plays tomorrow" or "plays in 2 hours", so a Session just after midnight never reads "today" the evening before. It has no hosted unsubscribe link: the footer links to the Account's Reminders-off page, which asks before it changes anything.
 
-| Placeholder | Value |
-| --- | --- |
-| `<TEMPLATE:reminder>` | The library template ID of `templates/reminder.json` |
-| `<CATEGORY:session-updates>` | The existing transactional Session updates category, `01a115ad-3d17-0000-c6cc-ec3e891a4e82`. Reminders reuse it, because categories need the UI and a transactional category changes no delivery. A dedicated "Reminders" category is a later rename in the UI |
-
-The email step is `transactional` with `tracking_enabled: false`. It has no hosted unsubscribe link: the footer links to the Account's Reminders-off page, which asks before it changes anything. The subject is "Tomorrow: …" or "In 2 hours: … at 19:00", and the body says the Group "plays tomorrow" or "plays in 2 hours", so a Session just after midnight never reads "today" the evening before. Subject and plain text use `raw`, because PostHog escapes Liquid only in HTML.
-
-Switch on in this order:
-
-1. The Privacy Policy with the Reminders row is live.
-2. Create the template and the workflow from the rebuild files, inactive. A step created through the API keeps its own copy of the template, so read the saved template back (PostHog renders its `html` from the `design`) and copy its `subject`, `text`, `html` and `design` into the step's `inputs.email.value`. Exercise both leads, with and without a location, through `mock_async_functions=true`: each reaches one mocked sender, the Group name is escaped once in HTML, and the footer link is the body's `reminders_off_url`. Give the mock recipient a domain with mail servers, or PostHog skips the step before it reaches the mock.
-3. Activate the workflow and check that a missing or wrong Bearer gets 401.
-4. Set `POSTHOG_REMINDER_WEBHOOK_URL` in Convex prod. It reuses `POSTHOG_MAIL_WEBHOOK_SECRET`.
-5. Run the backfill once: `bunx convex run --prod reminders:scheduleUpcoming '{}'`. It schedules the pair for every upcoming scheduled Session that has none for its current revision, so running it twice schedules nothing new. A Session changed in the last minute waits, because its change may not have settled yet: the backfill runs itself again 90 seconds later, after that change has published or been taken back. It logs "Reminder backfill finished" with the number of Reminders it scheduled. That log, like "Daily mail volume warning", goes to PostHog logs, not the Convex console: query `logs` by `body` in project `13216`.
-6. Take the live proof: a real Reminder in an owned inbox, its footer link turning Reminders off, and the My groups switch showing it off.
-
-Each Reminder counts 1 in the daily mail estimate when its job fires, never per retry. A job that runs more than 5 minutes after its due time sends nothing. A due time already past at publish is never scheduled. Network errors and 5xx get four attempts in all, with backoff; every attempt rechecks the published revision, the Claim, the Reminders switch and the current Share Link. Other 4xx, 429 included, are logged and dropped.
+Each Reminder counts 1 in the daily mail estimate when its job fires, never per retry. A job that runs more than 5 minutes after its due time sends nothing. A due time already past at publish is never scheduled. Network errors, a send still in flight, rate limits and 5xx get four attempts in all, with backoff and the same idempotency key; every attempt rechecks the published revision, the Claim, the Reminders switch and the current Share Link. Other refusals, `quota_limited` included, are logged and dropped.
 
 ## Delivery limits
 

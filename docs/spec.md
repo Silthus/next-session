@@ -855,7 +855,7 @@ A forged `session_scheduled` for someone's distinct id could only skip their sec
 
 `convex/mail.ts` holds `requestMail(ctx, {kind: "welcome" | "tips", user, tipsConfirmUrl?})`. It returns at once when `POSTHOG_MAIL_WEBHOOK_SECRET` is unset or the address is under `.test`, and otherwise starts an internal action through `@convex-dev/action-retrier` (at most 4 attempts, exponential backoff, retrying network errors and 5xx) that posts `{distinct_id, product, email, tips_confirm_url}` to the workflow's webhook URL (`POSTHOG_WELCOME_WEBHOOK_URL`, `POSTHOG_TIPS_WEBHOOK_URL`). A timeout after PostHog accepted a request can send a mail twice; that is the accepted cost of not losing one.
 
-Amended by [ADR-0014](adr/0014-welcome-mail-and-reminders-are-posthog-code-sends.md): with `POSTHOG_SECRET_KEY` and `MAIL_REPLY_TO` set, the Welcome Mail and Reminders go out as PostHog code sends from `convex/codeMail.ts`, with their copy in `convex/model/accountMailCopy.ts` and an idempotency key per mail. Tips keep their webhook.
+Amended by [ADR-0014](adr/0014-welcome-mail-and-reminders-are-posthog-code-sends.md): the Welcome Mail and Reminders go out only as PostHog code sends from `convex/codeMail.ts`, with their copy as React Email components in `emails/` and an idempotency key per mail. They need `POSTHOG_SECRET_KEY` and `MAIL_REPLY_TO`; there is no webhook fallback. Only the Tips keep a webhook (`POSTHOG_TIPS_WEBHOOK_URL`).
 
 Double opt-in, end to end:
 

@@ -21,7 +21,7 @@ withGoogleCredentials();
 const NOW = Date.UTC(2026, 9, 6, 15, 0);
 const MINUTE = 60_000;
 const DAY = 86_400_000;
-const WELCOME_URL = "https://webhooks.example.test/welcome";
+const WELCOME_URL = "https://eu.posthog.com/api/projects/@current/messaging/send/email/";
 const TIPS_URL = "https://webhooks.example.test/tips";
 const SITE_URL = "http://localhost:5173";
 
@@ -32,9 +32,17 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date", "setTimeout"] });
   vi.setSystemTime(NOW);
   vi.stubEnv("POSTHOG_MAIL_WEBHOOK_SECRET", "mail-webhook-secret");
-  vi.stubEnv("POSTHOG_WELCOME_WEBHOOK_URL", WELCOME_URL);
   vi.stubEnv("POSTHOG_TIPS_WEBHOOK_URL", TIPS_URL);
-  fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(new Response(null, { status: 200 })));
+  vi.stubEnv("POSTHOG_PROJECT_TOKEN", "phc_project");
+  vi.stubEnv("POSTHOG_SECRET_KEY", "phs_secret");
+  vi.stubEnv("MAIL_REPLY_TO", "contact@example.com");
+  fetchMock = vi.fn<typeof fetch>((url) =>
+    Promise.resolve(
+      url === WELCOME_URL
+        ? Response.json({ message_id: "message-1" }, { status: 202 })
+        : new Response(null, { status: 200 }),
+    ),
+  );
   vi.stubGlobal("fetch", fetchMock);
   t = newBackend();
 });
@@ -44,16 +52,28 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-type WebhookBody = { distinct_id: string; email: string; tips_confirm_url?: string };
+type MailBody = { distinct_id: string; email: string; tips_confirm_url?: string };
 
 async function mailRequestsDuring(action: () => Promise<unknown>) {
   fetchMock.mockClear();
   await action();
   await t.finishAllScheduledFunctions(() => vi.runAllTimers());
-  return fetchMock.mock.calls.map(([url, init]) => ({
-    url,
-    body: JSON.parse(init?.body as string) as WebhookBody,
-  }));
+  return fetchMock.mock.calls
+    .filter(([url]) => url === WELCOME_URL || url === TIPS_URL)
+    .map(([url, init]) => {
+      const body = JSON.parse(init?.body as string) as Record<string, string>;
+      return { url, body: url === WELCOME_URL ? welcomeFields(body) : (body as MailBody) };
+    });
+}
+
+// The Welcome Mail's recipient and the Tips confirmation link it carries, read from its code send.
+function welcomeFields({ distinct_id, to, text }: Record<string, string>): MailBody {
+  const tipsConfirmUrl = /Yes, send me the tips (\S+)/.exec(text!)?.[1];
+  return {
+    distinct_id: distinct_id!,
+    email: to!,
+    ...(tipsConfirmUrl === undefined ? {} : { tips_confirm_url: tipsConfirmUrl }),
+  };
 }
 
 const signUpWithTips = (tips: unknown, credentials = newCredentials()) =>
@@ -90,7 +110,6 @@ describe("the Welcome Mail", () => {
         url: WELCOME_URL,
         body: {
           distinct_id: `next-session:${userId}`,
-          product: "next-session",
           email: credentials.email,
         },
       },

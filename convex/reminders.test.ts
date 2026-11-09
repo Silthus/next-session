@@ -12,7 +12,8 @@ import {
 import { UNDO_WINDOW_MS } from "../shared/sessions";
 
 const HOUR = 3_600_000;
-const REMINDER_WEBHOOK = "https://example.test/reminder";
+const SEND_URL = "https://eu.posthog.com/api/projects/@current/messaging/send/email/";
+const SECRET_KEY = "phs_secret";
 const date = "2026-10-17";
 const start = Date.UTC(2026, 9, 17, 17);
 const dayDue = start - 24 * HOUR;
@@ -24,10 +25,13 @@ let fetchMock: ReturnType<typeof vi.fn<typeof fetch>>;
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
-  vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", REMINDER_WEBHOOK);
-  vi.stubEnv("POSTHOG_MAIL_WEBHOOK_SECRET", "secret");
+  vi.stubEnv("POSTHOG_PROJECT_TOKEN", "phc_project");
+  vi.stubEnv("POSTHOG_SECRET_KEY", SECRET_KEY);
+  vi.stubEnv("MAIL_REPLY_TO", "contact@example.com");
   vi.stubEnv("SITE_URL", "https://next-session.link");
-  fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(new Response(null, { status: 200 })));
+  fetchMock = vi.fn<typeof fetch>(() =>
+    Promise.resolve(Response.json({ message_id: "message-1" }, { status: 202 })),
+  );
   vi.stubGlobal("fetch", fetchMock);
   t = newBackend();
 });
@@ -87,9 +91,47 @@ async function nextJobDueBy(instant: number) {
 }
 
 function reminders() {
+  return codeSends().map(({ headers, body }) => sentReminder(headers, body));
+}
+
+// Answers the next code send with this response, and every other request, such as telemetry, as usual.
+function answerNextSend(answer: () => Response | Promise<Response>) {
+  const usual = fetchMock.getMockImplementation()!;
+  let answered = false;
+  fetchMock.mockImplementation((url, init) => {
+    if (url !== SEND_URL || answered) return usual(url, init);
+    answered = true;
+    return Promise.resolve(answer());
+  });
+}
+
+function codeSends() {
   return fetchMock.mock.calls
-    .filter(([url]) => url === REMINDER_WEBHOOK)
-    .map(([, init]) => JSON.parse(init!.body as string) as Record<string, unknown>);
+    .filter(([url]) => url === SEND_URL)
+    .map(([, init]) => ({
+      headers: new Headers(init!.headers),
+      body: JSON.parse(init!.body as string) as Record<string, string>,
+    }));
+}
+
+// Reads back what a Reminder told its recipient, from its subject, text and idempotency key.
+function sentReminder(headers: Headers, mail: Record<string, string>) {
+  const [, , group_name, start_label] = /^(Tomorrow|In 2 hours): (.+) at (\d\d:\d\d)$/.exec(
+    mail.subject!,
+  )!;
+  const text = mail.text!;
+  const location = /^Where: (.+)$/m.exec(text)?.[1];
+  return {
+    lead: headers.get("Idempotency-Key")!.split(":")[4],
+    distinct_id: mail.distinct_id,
+    email: mail.to,
+    group_name,
+    date_label: /plays (?:tomorrow|in 2 hours), (.+), at \d\d:\d\d\./.exec(text)![1],
+    start_label,
+    ...(location === undefined ? {} : { location }),
+    player_url: /Open your group (\S+)/.exec(text)![1],
+    reminders_off_url: /Turn off reminders (\S+)/.exec(text)![1],
+  };
 }
 
 function leads() {
@@ -208,7 +250,6 @@ it("names the Group, the date, the start and the location in the Group's time zo
   expect(reminders()).toEqual([
     {
       distinct_id: `next-session:${robin.userId}`,
-      product: "next-session",
       email: "robin@example.com",
       group_name: "Renamed Crew",
       date_label: "Saturday, October 17, 2026",
@@ -224,9 +265,7 @@ it("names the Group, the date, the start and the location in the Group's time zo
     .filter(([, value]) => /new-token|share-token/.test(String(value)))
     .map(([field]) => field);
   expect(fieldsWithShareToken).toEqual(["player_url"]);
-  expect(new Headers(fetchMock.mock.calls[0]![1]!.headers).get("Authorization")).toBe(
-    "Bearer secret",
-  );
+  expect(codeSends()[0]!.headers.get("Authorization")).toBe(`Bearer ${SECRET_KEY}`);
 });
 
 it("writes the date and start in a Group time zone far from UTC and leaves out a missing location", async () => {
@@ -305,7 +344,7 @@ describe("a Reminder", () => {
     const { as, groupId } = await crew();
     await as.mutation(api.sessions.schedule, { groupId, date });
     await settle();
-    fetchMock.mockResolvedValueOnce(new Response(null, { status: 503 }));
+    answerNextSend(() => new Response(null, { status: 503 }));
 
     await at(dayDue);
     await saveTimeAndPlace(as, groupId, { timeZone: "America/New_York" });
@@ -519,9 +558,12 @@ describe("due times", () => {
 });
 
 describe("built disabled", () => {
-  it.each(["POSTHOG_REMINDER_WEBHOOK_URL", "POSTHOG_MAIL_WEBHOOK_SECRET"])(
-    "schedules nothing and calls no webhook without %s, and still publishes",
-    async (variable) => {
+  it.each([
+    ["POSTHOG_SECRET_KEY", SECRET_KEY],
+    ["MAIL_REPLY_TO", "contact@example.com"],
+  ])(
+    "schedules nothing and sends nothing without %s, and still publishes",
+    async (variable, value) => {
       vi.stubEnv(variable, "");
       const { as, groupId } = await crew();
       const sessionId = await as.mutation(api.sessions.schedule, { groupId, date });
@@ -529,12 +571,9 @@ describe("built disabled", () => {
 
       expect(await scheduledReminders()).toEqual([]);
       expect(await sessionRow(sessionId)).toMatchObject({ published: { state: "scheduled" } });
-      vi.stubEnv(
-        variable,
-        variable === "POSTHOG_MAIL_WEBHOOK_SECRET" ? "secret" : REMINDER_WEBHOOK,
-      );
+      vi.stubEnv(variable, value);
       await at(start + HOUR);
-      expect(fetchMock).not.toHaveBeenCalled();
+      expect(codeSends()).toEqual([]);
     },
   );
 
@@ -543,15 +582,15 @@ describe("built disabled", () => {
     await as.mutation(api.sessions.schedule, { groupId, date });
     await settle();
 
-    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "");
+    vi.stubEnv("POSTHOG_SECRET_KEY", "");
     await at(start + HOUR);
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(codeSends()).toEqual([]);
   });
 });
 
 describe("the switch-on backfill", () => {
   it("schedules one pair for each upcoming scheduled Session published before switch-on, even when run twice", async () => {
-    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "");
+    vi.stubEnv("POSTHOG_SECRET_KEY", "");
     const { as, groupId } = await crew();
     await as.mutation(api.sessions.schedule, { groupId, date });
     const cancelledId = await as.mutation(api.sessions.schedule, { groupId, date: "2026-10-18" });
@@ -559,7 +598,7 @@ describe("the switch-on backfill", () => {
     await as.mutation(api.sessions.cancel, { sessionId: cancelledId });
     await settle();
 
-    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", REMINDER_WEBHOOK);
+    vi.stubEnv("POSTHOG_SECRET_KEY", SECRET_KEY);
     await t.mutation(internal.reminders.scheduleUpcoming, {});
     await deliver();
     await t.mutation(internal.reminders.scheduleUpcoming, {});
@@ -573,14 +612,14 @@ describe("the switch-on backfill", () => {
   });
 
   it("waits out a Time and place change still inside its Undo window", async () => {
-    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "");
+    vi.stubEnv("POSTHOG_SECRET_KEY", "");
     const { as, groupId } = await crew();
     await as.mutation(api.sessions.schedule, { groupId, date });
     await settle();
     await vi.advanceTimersByTimeAsync(dayDue - UNDO_WINDOW_MS / 2 - Date.now());
     await saveTimeAndPlace(as, groupId, { timeZone: "America/New_York" });
 
-    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", REMINDER_WEBHOOK);
+    vi.stubEnv("POSTHOG_SECRET_KEY", SECRET_KEY);
     await t.mutation(internal.reminders.scheduleUpcoming, {});
     await at(start + 12 * HOUR);
 
@@ -591,7 +630,7 @@ describe("the switch-on backfill", () => {
   });
 
   it("waits for a settle that runs late", async () => {
-    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "");
+    vi.stubEnv("POSTHOG_SECRET_KEY", "");
     const { as, groupId } = await crew();
     await as.mutation(api.sessions.schedule, { groupId, date });
     await settle();
@@ -599,14 +638,14 @@ describe("the switch-on backfill", () => {
     await saveTimeAndPlace(as, groupId, { timeZone: "America/New_York" });
     vi.setSystemTime(Date.now() + UNDO_WINDOW_MS + 5_000);
 
-    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", REMINDER_WEBHOOK);
+    vi.stubEnv("POSTHOG_SECRET_KEY", SECRET_KEY);
     await t.mutation(internal.reminders.scheduleUpcoming, {});
 
     expect((await scheduledReminders()).filter(({ name }) => name.includes("fire"))).toEqual([]);
   });
 
   it("schedules a Session whose pending change was taken back once its Undo window ends", async () => {
-    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "");
+    vi.stubEnv("POSTHOG_SECRET_KEY", "");
     const { as, groupId } = await crew();
     await as.mutation(api.sessions.schedule, { groupId, date });
     await settle();
@@ -614,7 +653,7 @@ describe("the switch-on backfill", () => {
     await saveTimeAndPlace(as, groupId, { timeZone: "America/New_York" });
     await saveTimeAndPlace(as, groupId, { timeZone: "Europe/Berlin" });
 
-    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", REMINDER_WEBHOOK);
+    vi.stubEnv("POSTHOG_SECRET_KEY", SECRET_KEY);
     await t.mutation(internal.reminders.scheduleUpcoming, {});
     await at(start);
 
@@ -653,13 +692,13 @@ describe("the switch-on backfill", () => {
   });
 
   it("skips a Session whose Reminders are already behind it", async () => {
-    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "");
+    vi.stubEnv("POSTHOG_SECRET_KEY", "");
     const { as, groupId } = await crew();
     await as.mutation(api.sessions.schedule, { groupId, date });
     await settle();
     vi.setSystemTime(hoursDue + 60_000);
 
-    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", REMINDER_WEBHOOK);
+    vi.stubEnv("POSTHOG_SECRET_KEY", SECRET_KEY);
     await t.mutation(internal.reminders.scheduleUpcoming, {});
     await deliver();
 
@@ -670,7 +709,7 @@ describe("the switch-on backfill", () => {
 describe("delivery", () => {
   it("sends once after a 503 then a 200", async () => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
-    fetchMock.mockResolvedValueOnce(new Response(null, { status: 503 }));
+    answerNextSend(() => new Response(null, { status: 503 }));
     const { as, groupId } = await crew();
     await as.mutation(api.sessions.schedule, { groupId, date });
     await settle();
@@ -678,20 +717,24 @@ describe("delivery", () => {
     await at(dayDue);
     await at(dayDue + 60_000);
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(codeSends()).toHaveLength(2);
     expect(reminders()[0]).toEqual(reminders()[1]);
   });
 
-  it.each([400, 404, 429])("drops a Reminder the webhook refuses with HTTP %i", async (status) => {
+  it.each([
+    [400, "invalid_input"],
+    [404, "not_found"],
+    [429, "quota_limited"],
+  ])("drops a Reminder PostHog refuses with HTTP %i %s", async (status, code) => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
-    fetchMock.mockResolvedValueOnce(new Response(null, { status }));
+    answerNextSend(() => Response.json({ code, detail: code }, { status }));
     const { as, groupId } = await crew();
     await as.mutation(api.sessions.schedule, { groupId, date });
     await settle();
 
     await at(dayDue + 3 * 60_000);
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(codeSends()).toHaveLength(1);
   });
 
   it.each(["switch", "release"])(
@@ -699,7 +742,7 @@ describe("delivery", () => {
     async (change) => {
       vi.spyOn(Math, "random").mockReturnValue(0.5);
       const { as, groupId, robin } = await crew();
-      fetchMock.mockImplementationOnce(async () => {
+      answerNextSend(async () => {
         if (change === "switch") await robin.as.mutation(api.me.setReminders, { enabled: false });
         if (change === "release") await robin.as.mutation(api.player.release, { groupId });
         return new Response(null, { status: 503 });
@@ -709,7 +752,7 @@ describe("delivery", () => {
 
       await at(dayDue + 3 * 60_000);
 
-      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(codeSends()).toHaveLength(1);
     },
   );
 
@@ -725,33 +768,8 @@ describe("delivery", () => {
   });
 });
 
-describe("Reminders as PostHog code sends", () => {
-  const SEND_URL = "https://eu.posthog.com/api/projects/@current/messaging/send/email/";
-
-  beforeEach(() => {
-    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "");
-    vi.stubEnv("POSTHOG_PROJECT_TOKEN", "phc_project");
-    vi.stubEnv("POSTHOG_SECRET_KEY", "phs_secret");
-    vi.stubEnv("MAIL_REPLY_TO", "contact@example.com");
-    fetchMock.mockImplementation((url) =>
-      Promise.resolve(
-        url === SEND_URL
-          ? Response.json({ message_id: "message-1" }, { status: 202 })
-          : new Response(null, { status: 200 }),
-      ),
-    );
-  });
-
-  function codeSends() {
-    return fetchMock.mock.calls
-      .filter(([url]) => url === SEND_URL)
-      .map(([, init]) => ({
-        headers: new Headers(init!.headers),
-        body: JSON.parse(init!.body as string) as Record<string, string>,
-      }));
-  }
-
-  it("sends each lead from code, without a webhook, keyed to the Session's revision", async () => {
+describe("a Reminder's code send", () => {
+  it("greets the Player by name and is keyed to the Session's revision", async () => {
     const { as, groupId, robin } = await crew();
     await saveTimeAndPlace(as, groupId, { location: "Max's place" });
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date });
@@ -763,7 +781,6 @@ describe("Reminders as PostHog code sends", () => {
     const revision = (await sessionRow(sessionId))!.published!.revision;
     const [day, hours, ...more] = codeSends();
     expect(more).toEqual([]);
-    expect(reminders()).toEqual([]);
     expect(day!.headers.get("Idempotency-Key")).toBe(
       `next-session:reminder:${sessionId}:${revision}:day:${robin.userId}`,
     );
@@ -777,27 +794,9 @@ describe("Reminders as PostHog code sends", () => {
       capture_engagement: false,
     });
     expect(day!.body.text).toContain(
-      "Thursday Crew plays tomorrow, Saturday, October 17, 2026, at 19:00.\nWhere: Max's place",
+      "Hi Robin,\n\nThursday Crew plays tomorrow, Saturday, October 17, 2026, at 19:00.\nWhere: Max's place",
     );
-    expect(day!.body.text).toContain("Open your group: https://next-session.link/s/share-token");
     expect(day!.body.html).toContain(`href="https://next-session.link/reminders/off?t=${token}"`);
     expect(hours!.body.subject).toBe("In 2 hours: Thursday Crew at 19:00");
-  });
-
-  it("checks the Account again before it retries a Reminder PostHog didn't take", async () => {
-    const { as, groupId, robin } = await crew();
-    await as.mutation(api.sessions.schedule, { groupId, date });
-    await settle();
-    fetchMock.mockImplementationOnce(() =>
-      Promise.resolve(
-        Response.json({ code: "service_unavailable", detail: "busy" }, { status: 503 }),
-      ),
-    );
-    await at(dayDue);
-
-    await robin.as.mutation(api.me.setReminders, { enabled: false });
-    await at(start + HOUR);
-
-    expect(codeSends()).toHaveLength(1);
   });
 });

@@ -100,29 +100,30 @@ export const reminderSend = {
 };
 type ReminderSend = Infer<ReturnType<typeof v.object<typeof reminderSend>>>;
 
-const mailKind = v.union(v.literal("welcome"), v.literal("tips"));
-type MailKind = Infer<typeof mailKind>;
+// Only the Tips keep a workflow webhook: their drip waits days between steps and stops once a
+// Session is scheduled, which only a workflow does.
+const webhookKind = v.literal("tips");
+type WebhookKind = Infer<typeof webhookKind>;
 
 const webhookBody = v.object({
   distinct_id: v.string(),
   product: v.string(),
   email: v.string(),
-  tips_confirm_url: v.optional(v.string()),
 });
 type WebhookBody = Infer<typeof webhookBody>;
 
-export type MailRequest = { kind: MailKind; user: Doc<"users">; tipsConfirmUrl?: string };
-
-const WEBHOOK_URL_VARIABLES: Record<MailKind | "reminder", string> = {
-  welcome: "POSTHOG_WELCOME_WEBHOOK_URL",
-  tips: "POSTHOG_TIPS_WEBHOOK_URL",
-  reminder: "POSTHOG_REMINDER_WEBHOOK_URL",
+export type MailRequest = {
+  kind: "welcome" | WebhookKind;
+  user: Doc<"users">;
+  tipsConfirmUrl?: string;
 };
+
+const WEBHOOK_URL_VARIABLES: Record<WebhookKind, string> = { tips: "POSTHOG_TIPS_WEBHOOK_URL" };
 
 export type CodeMailConfig = { projectToken: string; secretKey: string; replyTo: string };
 
-// Welcome Mail and Reminders go out as PostHog code sends once the deployment has a project
-// secret key and a reply-to address. Until then they go through their workflow webhooks.
+// The Welcome Mail and Reminders go out as PostHog code sends. A deployment without a project
+// secret key and a reply-to address sends neither.
 export function codeMailConfig(): CodeMailConfig | null {
   const projectToken = postHogProjectToken();
   const secretKey = process.env.POSTHOG_SECRET_KEY;
@@ -133,29 +134,31 @@ export function codeMailConfig(): CodeMailConfig | null {
 export async function requestMail(ctx: MutationCtx, { kind, user, tipsConfirmUrl }: MailRequest) {
   const { email } = user;
   if (email === undefined || isTestAddress(email)) return;
-  if (kind === "welcome" && codeMailConfig() !== null) {
+  if (kind === "welcome") {
+    if (codeMailConfig() === null) return;
+    const firstName = firstNameOf(user);
     await recordMailVolume(ctx, "workflows", 1);
     await retrier.run(ctx, internal.codeMail.sendWelcome, {
       userId: user._id,
       to: email,
       distinctId: accountDistinctId(user),
+      ...(firstName === undefined ? {} : { firstName }),
       ...(tipsConfirmUrl === undefined ? {} : { tipsConfirmUrl }),
     });
     return;
   }
   if (webhookFor(kind) === null) return;
-  const body: WebhookBody = {
-    distinct_id: accountDistinctId(user),
-    product: PRODUCT,
-    email,
-    ...(tipsConfirmUrl === undefined ? {} : { tips_confirm_url: tipsConfirmUrl }),
-  };
-  await recordMailVolume(ctx, "workflows", kind === "tips" ? 2 : 1);
+  const body: WebhookBody = { distinct_id: accountDistinctId(user), product: PRODUCT, email };
+  await recordMailVolume(ctx, "workflows", 2);
   await retrier.run(ctx, internal.mail.send, { kind, body });
 }
 
+function firstNameOf({ name }: Doc<"users">) {
+  return name?.trim().split(/\s+/)[0] || undefined;
+}
+
 export const send = internalAction({
-  args: { kind: mailKind, body: webhookBody },
+  args: { kind: webhookKind, body: webhookBody },
   returns: v.null(),
   handler: async (_ctx, { kind, body }) => {
     const webhook = webhookFor(kind);
@@ -192,29 +195,11 @@ function isRetryable(status: number) {
 export async function requestReminder(ctx: MutationCtx, send: ReminderSend) {
   if (!remindersConfigured()) return;
   await recordMailVolume(ctx, "workflows", 1);
-  const action =
-    codeMailConfig() === null ? internal.mail.sendReminder : internal.codeMail.sendReminder;
-  await retrier.run(ctx, action, send);
+  await retrier.run(ctx, internal.codeMail.sendReminder, send);
 }
 
-export const sendReminder = internalAction({
-  args: reminderSend,
-  returns: v.null(),
-  handler: async (ctx, send) => {
-    const webhook = webhookFor("reminder");
-    if (!webhook) return null;
-    const body = await ctx.runQuery(internal.reminders.recipient, send);
-    if (!body) return null;
-    const { status } = await post(webhook, body);
-    if (status >= FIRST_SERVER_ERROR)
-      throw new Error(`The Reminder webhook answered HTTP ${status}`);
-    if (status >= 400) console.error(`The Reminder webhook refused: HTTP ${status}, dropped`);
-    return null;
-  },
-});
-
 export function remindersConfigured() {
-  return codeMailConfig() !== null || webhookFor("reminder") !== null;
+  return codeMailConfig() !== null;
 }
 
 export function calendarMailConfigured() {

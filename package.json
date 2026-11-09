@@ -10,6 +10,7 @@
     "format": "prettier --write .",
     "test": "vitest",
     "e2e": "bun scripts/e2e-run.ts",
+    "mail:preview": "email dev --dir emails --port 3030",
     "e2e:prod": "playwright test --config playwright.prod.config.ts",
     "walk": "E2E_TELEMETRY_DISABLED=1 e2e run --no-cache"
   },
@@ -23,7 +24,8 @@
     "posthog-js": "1.438.1",
     "posthog-node": "5.63.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "react-email": "6.11.7"
   },
   "devDependencies": {
     "@ai-sdk/openai": "4.0.90",
@@ -37,6 +39,7 @@
     "@playwright/test": "1.63.0",
     "@posthog/coherence": "1.7.2",
     "@posthog/rollup-plugin": "1.6.1",
+    "@react-email/ui": "6.11.7",
     "@tailwindcss/vite": "4.3.3",
     "@tanstack/router-plugin": "1.168.42",
     "@testing-library/dom": "10.4.2",

@@ -270,8 +270,9 @@ const notificationSettings = (as: GmClient | TestBackend) =>
   as.query(api.me.notificationSettings, {});
 
 function configureReminders() {
-  vi.stubEnv("POSTHOG_MAIL_WEBHOOK_SECRET", "mail-webhook-secret");
-  vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "https://webhooks.example.test/reminders");
+  vi.stubEnv("POSTHOG_PROJECT_TOKEN", "phc_project");
+  vi.stubEnv("POSTHOG_SECRET_KEY", "phs_secret");
+  vi.stubEnv("MAIL_REPLY_TO", "contact@example.com");
 }
 
 describe("me.notificationSettings", () => {
@@ -295,7 +296,7 @@ describe("me.notificationSettings", () => {
     });
   });
 
-  it.each(["POSTHOG_REMINDER_WEBHOOK_URL", "POSTHOG_MAIL_WEBHOOK_SECRET"])(
+  it.each(["POSTHOG_PROJECT_TOKEN", "POSTHOG_SECRET_KEY", "MAIL_REPLY_TO"])(
     "hides Reminders without %s",
     async (variable) => {
       configureReminders();

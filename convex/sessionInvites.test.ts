@@ -559,7 +559,8 @@ describe("mail volume", () => {
   }
 
   it("counts and warns Resend sends apart from Workflows sends", async () => {
-    vi.stubEnv("POSTHOG_WELCOME_WEBHOOK_URL", "https://example.test/welcome");
+    vi.stubEnv("POSTHOG_SECRET_KEY", "phs_secret");
+    vi.stubEnv("MAIL_REPLY_TO", "contact@example.com");
     const { as, groupId } = await signedInGmWithGroup(t);
     await t.run(async (ctx) => {
       for (let index = 0; index < 79; index++) {
@@ -615,7 +616,8 @@ describe("mail volume", () => {
   });
 
   it("reads a day counted before providers as Workflows", async () => {
-    vi.stubEnv("POSTHOG_WELCOME_WEBHOOK_URL", "https://example.test/welcome");
+    vi.stubEnv("POSTHOG_SECRET_KEY", "phs_secret");
+    vi.stubEnv("MAIL_REPLY_TO", "contact@example.com");
     await t.run(async (ctx) => {
       await ctx.db.insert("mailVolume", { day: "2026-10-07", count: 79 });
       const userId = await ctx.db.insert("users", { email: "new@example.com" });

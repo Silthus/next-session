@@ -6,8 +6,9 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { internalAction } from "./_generated/server";
 import { codeMailConfig, reminderSend, type CodeMailConfig } from "./mail";
-import { reminderMailCopy, welcomeMailCopy } from "./model/accountMailCopy";
-import type { MailCopy } from "./model/mailHtml";
+import { reminderMail } from "../emails/ReminderMail";
+import type { RenderedMail } from "../emails/renderMail";
+import { welcomeMail } from "../emails/WelcomeMail";
 import { siteLink } from "./model/siteLinks";
 
 const POSTHOG_HOST = "https://eu.i.posthog.com";
@@ -19,12 +20,13 @@ export const sendWelcome = internalAction({
     userId: v.id("users"),
     to: v.string(),
     distinctId: v.string(),
+    firstName: v.optional(v.string()),
     tipsConfirmUrl: v.optional(v.string()),
   },
   returns: v.null(),
-  handler: async (_ctx, { userId, to, distinctId, tipsConfirmUrl }) => {
-    const copy = welcomeMailCopy({ myGroupsLink: siteLink("/me"), tipsConfirmUrl });
-    await send("Welcome Mail", copy, {
+  handler: async (_ctx, { userId, to, distinctId, firstName, tipsConfirmUrl }) => {
+    const mail = await welcomeMail({ firstName, myGroupsUrl: siteLink("/me"), tipsConfirmUrl });
+    await send("Welcome Mail", mail, {
       to,
       distinctId,
       from: WELCOME_SENDER,
@@ -39,21 +41,13 @@ export const sendReminder = internalAction({
   args: reminderSend,
   returns: v.null(),
   handler: async (ctx, reminder) => {
-    const body = await ctx.runQuery(internal.reminders.recipient, reminder);
-    if (body === null) return null;
-    const copy = reminderMailCopy({
-      lead: body.lead,
-      groupName: body.group_name,
-      dateLabel: body.date_label,
-      startLabel: body.start_label,
-      location: body.location,
-      playerUrl: body.player_url,
-      remindersOffUrl: body.reminders_off_url,
-    });
+    const recipient = await ctx.runQuery(internal.reminders.recipient, reminder);
+    if (recipient === null) return null;
+    const { email, distinctId, ...props } = recipient;
     const { sessionId, revision, lead, userId } = reminder;
-    await send("Reminder", copy, {
-      to: body.email,
-      distinctId: body.distinct_id,
+    await send("Reminder", await reminderMail(props), {
+      to: email,
+      distinctId,
       from: REMINDER_SENDER,
       templateKey: "next-session-reminder",
       idempotencyKey: `next-session:reminder:${sessionId}:${revision}:${lead}:${userId}`,
@@ -67,7 +61,7 @@ type Envelope = Pick<
   "to" | "distinctId" | "from" | "templateKey" | "idempotencyKey"
 >;
 
-async function send(name: string, copy: MailCopy, envelope: Envelope) {
+async function send(name: string, mail: RenderedMail, envelope: Envelope) {
   const config = codeMailConfig();
   if (config === null) {
     console.error(`Code mail is no longer configured, the ${name} was dropped`);
@@ -75,7 +69,7 @@ async function send(name: string, copy: MailCopy, envelope: Envelope) {
   }
   const { error } = await clientFor(config).emails.send({
     ...envelope,
-    ...copy,
+    ...mail,
     replyTo: config.replyTo,
     captureEngagement: false,
     // The retrier retries instead, so a Reminder's Account is checked again before each attempt.
