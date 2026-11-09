@@ -21,8 +21,8 @@ Tips stay on their workflow: the drip waits days between steps and stops when a 
 ## Consequences
 
 - The workflows "Next Session: Welcome Mail" and "Next Session: Reminders" are archived after the switch, and their rebuild files are gone from `docs/posthog/`.
-- `captureEngagement: false` keeps the sends off the person, but it doesn't change the email. PostHog's code sends still add its open pixel and rewrite links today, so the key stays unset until PostHog lets a code send go out untracked and `convex/codeMail.ts` asks for that (§13 call 15).
-- A retrier job keeps the function and arguments it was queued with, so `mail.send` still takes a queued `"welcome"` request and `mail.sendReminder` still exists; both forward to their code send. They go with the workflows in switch-on step 6.
+- The mails count opens and clicks: PostHog adds its open pixel and rewrites their links, by Michael's call on 2026-11-09 (§13 call 15). `captureEngagement: false` keeps the counts off the person; they show per send under **Workflows → Transactional emails**. Privacy Policy 1.14 names it.
+- A retrier job keeps the function and arguments it was queued with, so `mail.send` still takes a queued `"welcome"` request and `mail.sendReminder` still exists; both forward to their code send. They go with the workflows in switch-on step 5.
 - Merging this before the key is set stops both mails. The key is set first, then the merge, then the Reminder backfill once (`docs/posthog/README.md`).
 - `react-email` is a runtime dependency of the Convex Node bundle, and `@react-email/ui` a dev dependency for the preview.
 - The sends count toward the same PostHog sending allowance as before.

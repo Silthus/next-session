@@ -70,6 +70,14 @@ describe("privacy text", () => {
     );
   });
 
+  it("says the welcome mail and reminders count opens and clicks, and the tips don't", () => {
+    expect(sectionOf(privacy, "2. What we process")).toContain(
+      "| For the welcome mail and reminders: whether and when you opened the mail, and which of its links you clicked. The mail carries a small invisible image, and its links pass through PostHog on the way to the page | Learn whether our mails arrive and are read, and which links help | Legitimate interest, 6(1)(f) |",
+    );
+    expect(privacy).not.toContain("Reminders are transactional service messages and carry no");
+    expect(privacy).toContain("the tips carry no open or click tracking");
+  });
+
   describe("Reminders", () => {
     it("says what a Reminder carries, why, and on which legal basis", () => {
       expect(sectionOf(privacy, "2. What we process")).toContain(

@@ -160,7 +160,7 @@ function firstNameOf({ name }: Doc<"users">) {
 
 // Retrier jobs keep the function and arguments they were queued with, so a Welcome Mail or
 // Reminder queued before the code sends arrives here; both forward to their code send. Delete
-// them with the workflows (docs/posthog/README.md, switch-on step 6), once the queue has drained.
+// them with the workflows (docs/posthog/README.md, switch-on step 5), once the queue has drained.
 const queuedKind = v.union(v.literal("welcome"), webhookKind);
 const queuedBody = v.object({ ...webhookBody.fields, tips_confirm_url: v.optional(v.string()) });
 
