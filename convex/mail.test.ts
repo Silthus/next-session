@@ -237,21 +237,30 @@ describe("the Welcome Mail as a PostHog code send", () => {
     expect(sentRequests().map(({ url }) => url)).toEqual([WELCOME_URL]);
   });
 
-  it("retries a 503 with the same idempotency key until PostHog takes it", async () => {
+  it.each([
+    ["a network error", () => Promise.reject(new TypeError("fetch failed"))],
+    ["a send still in flight", () => Promise.resolve(refused(409, "idempotency_key_in_flight"))],
+    ["a rate limit", () => Promise.resolve(refused(429, "rate_limited"))],
+    ["an unavailable service", () => Promise.resolve(refused(503, "service_unavailable"))],
+  ])("retries %s with the same idempotency key until PostHog takes it", async (_, failure) => {
     const account = await newAccount();
-    fetchMock
-      .mockResolvedValueOnce(refused(503, "service_unavailable"))
-      .mockResolvedValueOnce(refused(503, "service_unavailable"))
-      .mockResolvedValueOnce(refused(503, "service_unavailable"))
-      .mockResolvedValueOnce(refused(503, "service_unavailable"));
+    fetchMock.mockImplementationOnce(failure).mockImplementationOnce(failure);
 
     await request({ kind: "welcome" }, account);
 
     const sends = codeSends();
-    expect(sends.length).toBe(5);
+    expect(sends.length).toBe(3);
     expect(new Set(sends.map(({ headers }) => headers.get("Idempotency-Key")))).toEqual(
       new Set([`next-session:welcome:${account._id}`]),
     );
+  });
+
+  it("gives up after 4 attempts", async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(refused(503, "service_unavailable")));
+
+    await request({ kind: "welcome" }, await newAccount());
+
+    expect(codeSends().length).toBe(4);
   });
 
   it("drops a send PostHog refuses, without retrying it", async () => {

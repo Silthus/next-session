@@ -783,4 +783,21 @@ describe("Reminders as PostHog code sends", () => {
     expect(day!.body.html).toContain(`href="https://next-session.link/reminders/off?t=${token}"`);
     expect(hours!.body.subject).toBe("In 2 hours: Thursday Crew at 19:00");
   });
+
+  it("checks the Account again before it retries a Reminder PostHog didn't take", async () => {
+    const { as, groupId, robin } = await crew();
+    await as.mutation(api.sessions.schedule, { groupId, date });
+    await settle();
+    fetchMock.mockImplementationOnce(() =>
+      Promise.resolve(
+        Response.json({ code: "service_unavailable", detail: "busy" }, { status: 503 }),
+      ),
+    );
+    await at(dayDue);
+
+    await robin.as.mutation(api.me.setReminders, { enabled: false });
+    await at(start + HOUR);
+
+    expect(codeSends()).toHaveLength(1);
+  });
 });

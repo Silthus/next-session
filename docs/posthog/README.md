@@ -17,10 +17,10 @@ Switch on in this order:
 1. PostHog sends a code send untracked when asked (today it adds its open pixel and rewrites links, which §13 call 15 rules out).
 2. In EU project `13216`, create a project secret API key with **Transactional email: Write**. Set it as `POSTHOG_SECRET_KEY` in Convex prod, and the contact address (the `LEGAL_CONTACT_EMAIL` variable) as `MAIL_REPLY_TO`. Never echo either into a log or comment.
 3. Sign up with an owned address, with and without Tips. Check the Welcome Mail's copy, both links and the reply-to, and its send under **Workflows → Transactional emails**, named `next-session-welcome`.
-4. Schedule a disposable Session within 2 hours and check its Reminder (`next-session-reminder`) and its footer link, as #149 did.
-5. Archive the Welcome Mail and Reminders workflows, and remove `POSTHOG_WELCOME_WEBHOOK_URL` and `POSTHOG_REMINDER_WEBHOOK_URL` from Convex prod. `POSTHOG_MAIL_WEBHOOK_SECRET` stays for Tips.
+4. Schedule a disposable Session that starts a few minutes more than 2 hours from now, so its 2-hour Reminder is still ahead once the Undo window closes. Check that Reminder (`next-session-reminder`) and its footer link, as #149 did.
+5. Once real Welcome Mails and Reminders have gone out as code sends for a week, archive their two workflows and remove `POSTHOG_WELCOME_WEBHOOK_URL` and `POSTHOG_REMINDER_WEBHOOK_URL` from Convex prod. `POSTHOG_MAIL_WEBHOOK_SECRET` stays for Tips.
 
-To switch back, remove `POSTHOG_SECRET_KEY`: the next mail queued goes to its webhook again, while the workflows are still active.
+To switch back before step 5, remove `POSTHOG_SECRET_KEY`: the next mail queued goes to its still-active workflow. After step 5, first reactivate both workflows and set their webhook URLs again, then remove the key. Without either, these mails are dropped.
 
 ## Where things live
 

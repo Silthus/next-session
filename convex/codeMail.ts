@@ -78,6 +78,8 @@ async function send(name: string, copy: MailCopy, envelope: Envelope) {
     ...copy,
     replyTo: config.replyTo,
     captureEngagement: false,
+    // The retrier retries instead, so a Reminder's Account is checked again before each attempt.
+    maxRetries: 0,
   });
   if (error === null) return;
   if (isRetryable(error)) throw new Error(`PostHog didn't take the ${name}: ${error.code}`);
@@ -93,7 +95,7 @@ function clientFor({ projectToken, secretKey }: CodeMailConfig) {
   });
 }
 
-// What posthog-node retries itself. Its retries share the idempotency key, and so do the retrier's.
+// What posthog-node would retry itself. Every retrier attempt sends the same idempotency key.
 function isRetryable({ statusCode, code }: EmailError) {
   if (statusCode === undefined) return code === "network_error";
   if (statusCode === 409) return code === "idempotency_key_in_flight";
