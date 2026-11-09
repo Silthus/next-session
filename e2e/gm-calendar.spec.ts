@@ -197,8 +197,8 @@ test("on a phone a focused night's outline stays clear of its neighbour", async 
   await seedSixPlayers(gm);
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
 
-  // A Sunday's next night wraps to the next row, so measure the night before it then.
-  const focused = weekdayColumn(night(6)) === SUNDAY_COLUMN ? 5 : 6;
+  const nightAfterSixthWrapsRow = weekdayColumn(night(6)) === SUNDAY_COLUMN;
+  const focused = nightAfterSixthWrapsRow ? 5 : 6;
   const day = dayCell(page, new RegExp(`, \\w+ ${String(focused)}: `));
   const neighbour = dayCell(page, new RegExp(`, \\w+ ${String(focused + 1)}: `));
   await day.focus();
