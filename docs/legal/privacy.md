@@ -2,7 +2,7 @@
 
 > **Draft, pending review by a qualified German lawyer before publication.** Source text for the `/privacy` page. `{{…}}` placeholders are filled at build time (see `docs/spec.md` §7).
 
-**Version 1.13. Effective: {{EFFECTIVE_DATE}}**
+**Version 1.14. Effective: {{EFFECTIVE_DATE}}**
 
 This policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.
 
@@ -28,10 +28,10 @@ We have not appointed a data protection officer because we are not required to.
 | Technical connection data (IP address, browser, time) in server logs of our hosting providers | Deliver the site and keep it secure | Legitimate interest, 6(1)(f) |
 | Pseudonymous usage events (pages viewed, steps such as creating a link, joining, scheduling), with the random ID of your user, player, or group | Learn which parts of the Service are used, fix problems | Legitimate interest, 6(1)(f) |
 | Error reports and technical logs (error message, browser, page) | Keep the Service working | Legitimate interest, 6(1)(f) |
-| For an account: your email address | Send you one welcome mail | Contract, 6(1)(b) |
+| For an account: your email address, and for an account with Google the given name Google sends us | Send you one welcome mail, greeting you by name | Contract, 6(1)(b) |
 | For an account that subscribes to its calendar feed: a secret feed link. The calendar app that fetches the link receives the group name, date, start and end time, and place of the sessions of your groups | Let your calendar app follow the sessions of your groups | Contract, 6(1)(b) |
 | For the account that runs a group, and for a player with an account, when session emails are enabled: your email address, group name, session date, start time and location, a link to the group (for a player, the share link), your email preference, and a calendar invite with the same details | Tell you when a session is set, changed, or cancelled, and keep the session in your calendar | Contract, 6(1)(b) |
-| For a player with an account, when reminders are on: your email address, group name, session date, start time, location and share link | Remind you 1 day and 2 hours before a session | Contract, 6(1)(b) |
+| For a player with an account, when reminders are on: your email address, your player name, group name, session date, start time, location and share link | Remind you 1 day and 2 hours before a session | Contract, 6(1)(b) |
 | For an account: whether you want reminders, and a secret reminder link that turns reminders off or on without signing in | Let you stop reminders from any reminder | Contract, 6(1)(b) |
 | If you ask for tips: your email address and your confirmation | Send the two tip mails | Consent, 6(1)(a) |
 
@@ -41,7 +41,7 @@ A group's location is whatever the GM types in: an address, a note, or a link. A
 
 We measure use without cookies and without storing anything on your device. We show no ads and do no cross-site tracking, we do not combine your usage events with data from our other products, and we do not sell data or use it for automated decisions.
 
-To count visitors, PostHog forms a hash of your IP address and browser with a secret that changes every day. It does not store your IP address. Share links and sign-in codes are removed from page addresses before they are sent, so a group's share link never reaches usage measurement. When reminders are on, PostHog receives the share link and your reminder link as mail content through a separate, secret-guarded workflow, not as a usage event or person property. When session emails are enabled, Resend receives the share link as mail content; the calendar invite itself carries no share link.
+To count visitors, PostHog forms a hash of your IP address and browser with a secret that changes every day. It does not store your IP address. Share links and sign-in codes are removed from page addresses before they are sent, so a group's share link never reaches usage measurement. When reminders are on, PostHog receives the share link and your reminder link as mail content, which our backend sends with a secret key, not as a usage event or person property. When session emails are enabled, Resend receives the share link as mail content; the calendar invite itself carries no share link.
 
 ## 3. Storage on your device (§ 25 TDDDG)
 

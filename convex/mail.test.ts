@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { internal } from "./_generated/api";
 import type { Doc } from "./_generated/dataModel";
 import { requestMail, type MailRequest } from "./mail";
 import { newBackend, type TestBackend } from "./model/test.setup";
@@ -210,11 +211,11 @@ describe("the Welcome Mail as a PostHog code send", () => {
     expect(codeSends()).toEqual([]);
   });
 
-  it("greets the Account by the first name its sign-in gave", async () => {
+  it("greets the Account by the given name its Google sign-in kept", async () => {
     const account = await t.run(async (ctx) => {
       const userId = await ctx.db.insert("users", {
         email: "ada@example.com",
-        name: "Ada Lovelace",
+        name: "Ada",
       });
       return (await ctx.db.get("users", userId))!;
     });
@@ -222,6 +223,31 @@ describe("the Welcome Mail as a PostHog code send", () => {
     await request({ kind: "welcome" }, account);
 
     expect(codeSends()[0]!.body.text).toContain("Hi Ada 👋,");
+  });
+
+  it("takes over a Welcome Mail the retrier queued for the workflow, as its code send", async () => {
+    const account = await newAccount();
+    const tipsConfirmUrl = "https://next-session.link/tips?confirm=abc";
+
+    await t.action(internal.mail.send, {
+      kind: "welcome",
+      body: {
+        distinct_id: `next-session:${account._id}`,
+        product: "next-session",
+        email: "gm@example.com",
+        tips_confirm_url: tipsConfirmUrl,
+      },
+    });
+
+    const [sent, ...more] = codeSends();
+    expect(more).toEqual([]);
+    expect(sentRequests().map(({ url }) => url)).toEqual([SEND_URL]);
+    expect(sent!.headers.get("Idempotency-Key")).toBe(`next-session:welcome:${account._id}`);
+    expect(sent!.body).toMatchObject({
+      to: "gm@example.com",
+      distinct_id: `next-session:${account._id}`,
+    });
+    expect(sent!.body.text).toContain(`Yes, send me the tips ${tipsConfirmUrl}`);
   });
 
   it.each(["POSTHOG_SECRET_KEY", "MAIL_REPLY_TO", "POSTHOG_PROJECT_TOKEN"])(

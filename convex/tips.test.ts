@@ -127,6 +127,28 @@ describe("the Welcome Mail", () => {
     expect(requests[0]!.body).not.toHaveProperty("tips_confirm_url");
   });
 
+  it("greets a new Google Account by the given name Google sends", async () => {
+    await mailRequestsDuring(() =>
+      signInWithGoogle(t, { sub: "google-sub-ada", email: "ada@example.com", given_name: "Ada" }),
+    );
+
+    const [, init] = fetchMock.mock.calls.find(([url]) => url === WELCOME_URL)!;
+    expect((JSON.parse(init?.body as string) as { text: string }).text).toContain("Hi Ada 👋,");
+  });
+
+  it("greets a Google Account without a given name, and a Password Account, as there", async () => {
+    await mailRequestsDuring(async () => {
+      await signInWithGoogle(t, { sub: "google-sub-nameless", email: "nameless@example.com" });
+      await signUpAccount(t, newCredentials());
+    });
+
+    const texts = fetchMock.mock.calls
+      .filter(([url]) => url === WELCOME_URL)
+      .map(([, init]) => (JSON.parse(init?.body as string) as { text: string }).text);
+    expect(texts).toHaveLength(2);
+    for (const text of texts) expect(text).toContain("Hi there 👋,");
+  });
+
   it("is requested once: a log in or a second Google sign-in requests nothing", async () => {
     const credentials = newCredentials();
     const identity = { sub: "google-sub-again", email: "bea@example.com" };

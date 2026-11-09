@@ -75,7 +75,7 @@ export function withGoogleCredentials() {
   });
 }
 
-export type GoogleIdentity = { sub: string; email: string; picture?: string };
+export type GoogleIdentity = { sub: string; email: string; picture?: string; given_name?: string };
 
 export const GOOGLE_PICTURES = "https://lh3.googleusercontent.com/a/";
 export const FOREIGN_PICTURE = "https://pictures.example.com/photo.png";
@@ -97,7 +97,7 @@ function base64urlJson(value: object) {
   return btoa(JSON.stringify(value)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function googleIdToken({ sub, email, picture }: GoogleIdentity) {
+function googleIdToken({ sub, email, picture, given_name }: GoogleIdentity) {
   const now = Math.floor(Date.now() / 1000);
   const claims = {
     iss: GOOGLE_ISSUER,
@@ -106,6 +106,7 @@ function googleIdToken({ sub, email, picture }: GoogleIdentity) {
     email,
     email_verified: true,
     picture,
+    given_name,
     iat: now,
     exp: now + 3600,
   };

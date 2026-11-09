@@ -59,15 +59,21 @@ describe("privacy text", () => {
     )?.[0];
     const shareLinkReach = sectionOf(privacy, "2. What we process")
       .split("\n\n")
-      .find((paragraph) => paragraph.includes("secret-guarded workflow"));
+      .find((paragraph) => paragraph.includes("as mail content, which our backend sends"));
     for (const text of [postHogRow, postHogProfile, shareLinkReach])
       expect(text).not.toMatch(/session (updates|emails or)/i);
+  });
+
+  it("names the given name a Google sign-in gives, for the welcome mail's greeting", () => {
+    expect(sectionOf(privacy, "2. What we process")).toContain(
+      "| For an account: your email address, and for an account with Google the given name Google sends us | Send you one welcome mail, greeting you by name | Contract, 6(1)(b) |",
+    );
   });
 
   describe("Reminders", () => {
     it("says what a Reminder carries, why, and on which legal basis", () => {
       expect(sectionOf(privacy, "2. What we process")).toContain(
-        "| For a player with an account, when reminders are on: your email address, group name, session date, start time, location and share link | Remind you 1 day and 2 hours before a session | Contract, 6(1)(b) |",
+        "| For a player with an account, when reminders are on: your email address, your player name, group name, session date, start time, location and share link | Remind you 1 day and 2 hours before a session | Contract, 6(1)(b) |",
       );
     });
 
