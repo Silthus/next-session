@@ -11,7 +11,13 @@ import {
 import { todayUtc } from "../shared/dates";
 import { calendarContentType } from "../shared/icalendar";
 import { SESSION_CHANGES } from "./model/sessionMailCopy";
-import { accountDistinctId, isTestAddress, PRODUCT, serverLog } from "./model/telemetry";
+import {
+  accountDistinctId,
+  isTestAddress,
+  postHogProjectToken,
+  PRODUCT,
+  serverLog,
+} from "./model/telemetry";
 import { frozenEntry, mailProvider } from "./schema";
 
 declare const process: { env: Record<string, string | undefined> };
@@ -113,9 +119,31 @@ const WEBHOOK_URL_VARIABLES: Record<MailKind | "reminder", string> = {
   reminder: "POSTHOG_REMINDER_WEBHOOK_URL",
 };
 
+export type CodeMailConfig = { projectToken: string; secretKey: string; replyTo: string };
+
+// Welcome Mail and Reminders go out as PostHog code sends once the deployment has a project
+// secret key and a reply-to address. Until then they go through their workflow webhooks.
+export function codeMailConfig(): CodeMailConfig | null {
+  const projectToken = postHogProjectToken();
+  const secretKey = process.env.POSTHOG_SECRET_KEY;
+  const replyTo = process.env.MAIL_REPLY_TO;
+  return projectToken && secretKey && replyTo ? { projectToken, secretKey, replyTo } : null;
+}
+
 export async function requestMail(ctx: MutationCtx, { kind, user, tipsConfirmUrl }: MailRequest) {
   const { email } = user;
-  if (webhookFor(kind) === null || email === undefined || isTestAddress(email)) return;
+  if (email === undefined || isTestAddress(email)) return;
+  if (kind === "welcome" && codeMailConfig() !== null) {
+    await recordMailVolume(ctx, "workflows", 1);
+    await retrier.run(ctx, internal.codeMail.sendWelcome, {
+      userId: user._id,
+      to: email,
+      distinctId: accountDistinctId(user),
+      ...(tipsConfirmUrl === undefined ? {} : { tipsConfirmUrl }),
+    });
+    return;
+  }
+  if (webhookFor(kind) === null) return;
   const body: WebhookBody = {
     distinct_id: accountDistinctId(user),
     product: PRODUCT,
@@ -162,9 +190,11 @@ function isRetryable(status: number) {
 }
 
 export async function requestReminder(ctx: MutationCtx, send: ReminderSend) {
-  if (!webhookFor("reminder")) return;
+  if (!remindersConfigured()) return;
   await recordMailVolume(ctx, "workflows", 1);
-  await retrier.run(ctx, internal.mail.sendReminder, send);
+  const action =
+    codeMailConfig() === null ? internal.mail.sendReminder : internal.codeMail.sendReminder;
+  await retrier.run(ctx, action, send);
 }
 
 export const sendReminder = internalAction({
@@ -184,7 +214,7 @@ export const sendReminder = internalAction({
 });
 
 export function remindersConfigured() {
-  return webhookFor("reminder") !== null;
+  return codeMailConfig() !== null || webhookFor("reminder") !== null;
 }
 
 export function calendarMailConfigured() {

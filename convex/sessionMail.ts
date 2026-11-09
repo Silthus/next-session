@@ -27,7 +27,8 @@ import {
   receivesSessionMail,
   type MailableAccount,
 } from "./model/recipients";
-import { sessionMailCopy, type MailCopy, type SessionChange } from "./model/sessionMailCopy";
+import type { MailCopy } from "./model/mailHtml";
+import { sessionMailCopy, type SessionChange } from "./model/sessionMailCopy";
 import { withinRateLimit } from "./model/rateLimits";
 import { shareLinkOf, siteLink } from "./model/siteLinks";
 import { groupTimeOf } from "./model/timeAndPlace";

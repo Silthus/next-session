@@ -1,5 +1,6 @@
 import type { IsoDate } from "../../shared/dates";
 import type { SessionWindow } from "../../shared/sessionTime";
+import { button, escaped, footnote, link, mailPage, paragraph, type MailCopy } from "./mailHtml";
 
 export const SESSION_CHANGES = ["set", "changed", "cancelled"] as const;
 export type SessionChange = (typeof SESSION_CHANGES)[number];
@@ -32,8 +33,6 @@ export type DeletionCancelCopyInput = {
 };
 
 export type SessionMailCopyInput = NightCopyInput | WithdrawalCopyInput | DeletionCancelCopyInput;
-
-export type MailCopy = { subject: string; text: string; html: string };
 
 type CalendarHint = { lead: string; tap?: { button: string; tail: string } };
 
@@ -155,30 +154,20 @@ function textOf({ news, where, calendarHint, groupLink, why }: Paragraphs, myGro
   );
 }
 
-const INK = "#1a1511";
-const LINK = "#835200";
-
 function htmlOf({ news, where, calendarHint, groupLink, why }: Paragraphs, myGroupsLink: string) {
   const { lead, tap } = calendarHint;
   const calendarLine =
     escaped(lead) +
     (tap === undefined ? "" : `<strong>${escaped(tap.button)}</strong>${escaped(tap.tail)}`);
   const newsLine = escaped(news) + (where === undefined ? "" : `<br>${escaped(where)}`);
-  return `<!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body style="margin:0;padding:24px 0;background:#f2e7ce;font-family:'Trebuchet MS',Tahoma,Verdana,sans-serif;color:${INK};">
-<div style="max-width:560px;margin:0 auto;background:#fbf5e5;padding:28px 32px;">
-<p style="margin:0 0 18px;font-family:'Courier New',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:${LINK};font-weight:bold;">Next Session</p>
-<p style="margin:0 0 14px;font-size:16px;line-height:160%;">${newsLine}</p>
-<p style="margin:0 0 14px;font-size:16px;line-height:160%;">${calendarLine}</p>
-${groupLink === undefined ? "" : buttonTo(groupLink)}<p style="margin:0;font-size:13px;line-height:160%;">${escaped(why)} Turn session emails off in <a href="${escaped(myGroupsLink)}" style="color:${LINK};">My groups</a>. Replies to this address aren't read.</p>
-</div>
-</body></html>
-`;
-}
-
-function buttonTo(groupLink: string) {
-  return `<p style="margin:22px 0;"><a href="${escaped(groupLink)}" style="display:inline-block;padding:14px 24px;border-radius:10px;background:#c5953b;color:#221811;font-size:16px;text-decoration:none;">Open your group</a></p>
-`;
+  return mailPage([
+    paragraph(newsLine),
+    paragraph(calendarLine),
+    ...(groupLink === undefined ? [] : [button(groupLink, "Open your group")]),
+    footnote(
+      `${escaped(why)} Turn session emails off in ${link(myGroupsLink, "My groups")}. Replies to this address aren't read.`,
+    ),
+  ]);
 }
 
 function dateLabel(date: IsoDate) {
@@ -203,16 +192,4 @@ function clockRange({ window, timeZone }: NightCopyInput) {
 
 function cityOf(timeZone: string) {
   return (timeZone.split("/").at(-1) ?? timeZone).replaceAll("_", " ");
-}
-
-const HTML_ENTITIES: Record<string, string> = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#39;",
-};
-
-function escaped(value: string) {
-  return value.replace(/[&<>"']/g, (character) => HTML_ENTITIES[character]!);
 }

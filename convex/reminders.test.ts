@@ -724,3 +724,63 @@ describe("delivery", () => {
     expect(await mailVolumeOn("2026-10-16")).toBe(2);
   });
 });
+
+describe("Reminders as PostHog code sends", () => {
+  const SEND_URL = "https://eu.posthog.com/api/projects/@current/messaging/send/email/";
+
+  beforeEach(() => {
+    vi.stubEnv("POSTHOG_REMINDER_WEBHOOK_URL", "");
+    vi.stubEnv("POSTHOG_PROJECT_TOKEN", "phc_project");
+    vi.stubEnv("POSTHOG_SECRET_KEY", "phs_secret");
+    vi.stubEnv("MAIL_REPLY_TO", "contact@example.com");
+    fetchMock.mockImplementation((url) =>
+      Promise.resolve(
+        url === SEND_URL
+          ? Response.json({ message_id: "message-1" }, { status: 202 })
+          : new Response(null, { status: 200 }),
+      ),
+    );
+  });
+
+  function codeSends() {
+    return fetchMock.mock.calls
+      .filter(([url]) => url === SEND_URL)
+      .map(([, init]) => ({
+        headers: new Headers(init!.headers),
+        body: JSON.parse(init!.body as string) as Record<string, string>,
+      }));
+  }
+
+  it("sends each lead from code, without a webhook, keyed to the Session's revision", async () => {
+    const { as, groupId, robin } = await crew();
+    await saveTimeAndPlace(as, groupId, { location: "Max's place" });
+    const sessionId = await as.mutation(api.sessions.schedule, { groupId, date });
+    await settle();
+
+    await at(hoursDue);
+
+    const token = await reminderLinkTokenOf(robin.userId);
+    const revision = (await sessionRow(sessionId))!.published!.revision;
+    const [day, hours, ...more] = codeSends();
+    expect(more).toEqual([]);
+    expect(reminders()).toEqual([]);
+    expect(day!.headers.get("Idempotency-Key")).toBe(
+      `next-session:reminder:${sessionId}:${revision}:day:${robin.userId}`,
+    );
+    expect(day!.body).toMatchObject({
+      to: "robin@example.com",
+      distinct_id: `next-session:${robin.userId}`,
+      template_key: "next-session-reminder",
+      from: "Next Session <hello@next-session.link>",
+      reply_to: ["contact@example.com"],
+      subject: "Tomorrow: Thursday Crew at 19:00",
+      capture_engagement: false,
+    });
+    expect(day!.body.text).toContain(
+      "Thursday Crew plays tomorrow, Saturday, October 17, 2026, at 19:00.\nWhere: Max's place",
+    );
+    expect(day!.body.text).toContain("Open your group: https://next-session.link/s/share-token");
+    expect(day!.body.html).toContain(`href="https://next-session.link/reminders/off?t=${token}"`);
+    expect(hours!.body.subject).toBe("In 2 hours: Thursday Crew at 19:00");
+  });
+});
