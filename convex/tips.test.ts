@@ -129,11 +129,17 @@ describe("the Welcome Mail", () => {
 
   it("greets a new Google Account by the given name Google sends", async () => {
     await mailRequestsDuring(() =>
-      signInWithGoogle(t, { sub: "google-sub-ada", email: "ada@example.com", given_name: "Ada" }),
+      signInWithGoogle(t, {
+        sub: "google-sub-mary-jane",
+        email: "mary.jane@example.com",
+        given_name: "Mary Jane",
+      }),
     );
 
     const [, init] = fetchMock.mock.calls.find(([url]) => url === WELCOME_URL)!;
-    expect((JSON.parse(init?.body as string) as { text: string }).text).toContain("Hi Ada 👋,");
+    expect((JSON.parse(init?.body as string) as { text: string }).text).toContain(
+      "Hi Mary Jane 👋,",
+    );
   });
 
   it("greets a Google Account without a given name, and a Password Account, as there", async () => {
