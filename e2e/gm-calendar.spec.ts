@@ -1,6 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { api } from "../convex/_generated/api";
 import { addMonths, monthOf, todayUtc } from "../shared/dates";
+import { weekdayColumn } from "../src/features/group/calendar/calendarDates";
 import {
   openAsGm,
   seedPlayer,
@@ -18,6 +19,7 @@ test.beforeEach(() => {
   nextMonth = addMonths(monthOf(today), 1);
 });
 
+const SUNDAY_COLUMN = 6;
 const night = (day: number) => `${nextMonth}-${String(day).padStart(2, "0")}`;
 const dayCell = (page: Page, name: RegExp) => page.getByRole("button", { name });
 
@@ -195,8 +197,10 @@ test("on a phone a focused night's outline stays clear of its neighbour", async 
   await seedSixPlayers(gm);
   await openAsGm(page, gm, `/g/${gm.groupId}?month=${nextMonth}`);
 
-  const day = dayCell(page, /, \w+ 6: /);
-  const neighbour = dayCell(page, /, \w+ 7: /);
+  const nightAfterSixthWrapsRow = weekdayColumn(night(6)) === SUNDAY_COLUMN;
+  const focused = nightAfterSixthWrapsRow ? 5 : 6;
+  const day = dayCell(page, new RegExp(`, \\w+ ${String(focused)}: `));
+  const neighbour = dayCell(page, new RegExp(`, \\w+ ${String(focused + 1)}: `));
   await day.focus();
   expect(await day.evaluate((cell) => cell.matches(":focus-visible"))).toBe(true);
   const outlineReach = await day.evaluate((cell) => {
@@ -204,6 +208,7 @@ test("on a phone a focused night's outline stays clear of its neighbour", async 
     return parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth);
   });
   const [box, next] = await Promise.all([day.boundingBox(), neighbour.boundingBox()]);
+  expect(next!.y).toBe(box!.y);
   expect(box!.x + box!.width + outlineReach).toBeLessThanOrEqual(next!.x);
 });
 
