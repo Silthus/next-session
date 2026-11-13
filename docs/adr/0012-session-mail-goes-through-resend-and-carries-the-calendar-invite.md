@@ -1,5 +1,7 @@
 # Session mail goes through Resend and carries the calendar invite
 
+Superseded by [ADR-0015](0015-session-mail-goes-through-posthog-code-sends.md) on the provider: Session mail goes through PostHog code sends. The mail, its invite, its sender and its recipients stay as below.
+
 Session mail (a Session set, changed or cancelled) goes from Convex through Resend, from `Next Session <calendar@next-session.link>`. The Session update is the body and an iMIP invite (`METHOD:REQUEST` or `CANCEL`, built by `shared/icalendar`) is its calendar part, so one mail per change puts the night into the reader's calendar, moves it and takes it out. It goes to the GM's Account and to every Account behind a Claimed Player. Reminders, the Welcome Mail and Tips stay in PostHog Workflows (ADR-0011).
 
 PostHog Workflows can't attach a calendar part (#122), and a Session update plus a second mail with the invite would double every change. Splitting by job also splits the two 100-a-day quotas, which keeps the largest volume (Reminders) away from the invites. #129 proved the passthrough live: Outlook adds, moves and removes the entry with no tap, Gmail needs one tap on **Add to calendar**.
