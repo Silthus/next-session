@@ -11,19 +11,26 @@ import {
   type TestBackend,
 } from "./model/test.setup";
 import { UNDO_WINDOW_MS } from "../shared/sessions";
+import {
+  accepted,
+  POSTHOG_SEND_URL as SEND_URL,
+  postHogEmailFake,
+  urlOf,
+  type SentAttachment,
+  type SentEmail,
+} from "../posthogEmailFake";
 
-const RESEND_URL = "https://api.resend.com/emails";
+const CALENDAR_KEY = "next-session-session-update";
+const TELEMETRY_HOST = "https://eu.i.posthog.com/";
 const POSTHOG_LOGS = "/i/v1/logs";
+const SECRET_KEY = "phs_test_key";
 const date = "2026-10-17";
 
-type ResendMail = {
+type CalendarMail = SentEmail & {
   from: string;
-  to: string[];
-  subject: string;
   text: string;
   html: string;
-  reply_to?: string;
-  attachments: { filename: string; content: string; content_type: string }[];
+  attachments: SentAttachment[];
 };
 
 type SentRequest = { url: string; at: number; headers: Headers; body: string };
@@ -31,16 +38,18 @@ type SentRequest = { url: string; at: number; headers: Headers; body: string };
 let t: TestBackend;
 let fetchMock: ReturnType<typeof vi.fn<typeof fetch>>;
 let sent: SentRequest[];
+let email: ReturnType<typeof postHogEmailFake>;
 
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
-  vi.stubEnv("RESEND_API_KEY", "re_test_key");
+  vi.stubEnv("POSTHOG_PROJECT_TOKEN", "phc_test_project");
+  vi.stubEnv("POSTHOG_SECRET_KEY", SECRET_KEY);
   vi.stubEnv("SITE_URL", "https://next-session.link");
   vi.stubEnv("POSTHOG_MAIL_WEBHOOK_SECRET", "secret");
   sent = [];
-  fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(new Response(null, { status: 200 })));
-  vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+  fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(accepted()));
+  email = postHogEmailFake((input, init) => {
     sent.push({
       url: urlOf(input),
       at: Date.now(),
@@ -49,6 +58,7 @@ beforeEach(() => {
     });
     return fetchMock(input, init);
   });
+  vi.stubGlobal("fetch", email.fetch);
   t = newBackend();
 });
 
@@ -58,10 +68,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
-
-function urlOf(input: RequestInfo | URL) {
-  return typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-}
 
 async function crew(signInGm?: Parameters<typeof signedInGmWithGroup>[1]) {
   const gm = await signedInGmWithGroup(t, signInGm);
@@ -106,16 +112,38 @@ async function wait(milliseconds: number) {
   await t.finishInProgressScheduledFunctions();
 }
 
-function resendRequests() {
-  return sent.filter(({ url }) => url === RESEND_URL);
+// The calendar mails PostHog was asked to send, told apart from other code sends by their key.
+function calendarRequests() {
+  return sent.filter(
+    ({ url, body }) =>
+      url === SEND_URL && (JSON.parse(body) as SentEmail).template_key === CALENDAR_KEY,
+  );
 }
 
-function resendMails() {
-  return resendRequests().map(({ body }) => JSON.parse(body) as ResendMail);
+function calendarMails() {
+  return calendarRequests().map(({ body }) => JSON.parse(body) as CalendarMail);
+}
+
+function isCalendarSend(input: RequestInfo | URL, init?: RequestInit) {
+  return (
+    urlOf(input) === SEND_URL &&
+    (JSON.parse(init!.body as string) as SentEmail).template_key === CALENDAR_KEY
+  );
+}
+
+// Answers the next calendar send with this response, and every other request as usual.
+function answerNextSend(answer: () => Response) {
+  const usual = fetchMock.getMockImplementation()!;
+  let answered = false;
+  fetchMock.mockImplementation((input, init) => {
+    if (answered || !isCalendarSend(input, init)) return usual(input, init);
+    answered = true;
+    return Promise.resolve(answer());
+  });
 }
 
 function mailsTo(address: string) {
-  return resendMails().filter(({ to }) => to.includes(address));
+  return calendarMails().filter(({ to }) => to === address);
 }
 
 function mailTo(address: string) {
@@ -124,10 +152,8 @@ function mailTo(address: string) {
   return mails[0]!;
 }
 
-function inviteOf(mail: ResendMail) {
-  const [attachment] = mail.attachments;
-  const bytes = Uint8Array.from(atob(attachment!.content), (character) => character.charCodeAt(0));
-  return new TextDecoder().decode(bytes);
+function inviteOf(mail: CalendarMail) {
+  return email.fileText(mail.attachments[0]!);
 }
 
 function unfolded(calendar: string) {
@@ -135,14 +161,14 @@ function unfolded(calendar: string) {
 }
 
 function sequencesTo(address: string) {
-  return resendMails()
-    .filter(({ to }) => to.includes(address))
+  return calendarMails()
+    .filter(({ to }) => to === address)
     .map((mail) => Number(/SEQUENCE:(\d+)/.exec(inviteOf(mail))![1]));
 }
 
 function uidsTo(address: string) {
-  return resendMails()
-    .filter(({ to }) => to.includes(address))
+  return calendarMails()
+    .filter(({ to }) => to === address)
     .map((mail) => /UID:(.+)\r\n/.exec(inviteOf(mail))![1]);
 }
 
@@ -185,13 +211,13 @@ it("mails every calendar recipient once after the Undo window, the GM included, 
 
   await as.mutation(api.sessions.schedule, { groupId, date });
   await wait(UNDO_WINDOW_MS);
-  expect(resendRequests()).toEqual([]);
+  expect(calendarRequests()).toEqual([]);
   await finish();
 
-  expect(resendMails().map(({ to }) => to)).toEqual(
-    expect.arrayContaining([[gmEmail], ["robin@example.com"]]),
+  expect(calendarMails().map(({ to }) => to)).toEqual(
+    expect.arrayContaining([gmEmail, "robin@example.com"]),
   );
-  expect(resendMails()).toHaveLength(2);
+  expect(calendarMails()).toHaveLength(2);
   expect(mailTo("robin@example.com")).toMatchObject({
     from: "Next Session <calendar@next-session.link>",
     subject: "Thursday Crew: next session Saturday, October 17, 2026",
@@ -200,8 +226,16 @@ it("mails every calendar recipient once after the Undo window, the GM included, 
     ],
   });
   expect(mailTo("robin@example.com")).not.toHaveProperty("reply_to");
+  expect(mailTo("robin@example.com")).toMatchObject({
+    distinct_id: `next-session:${robin.userId}`,
+    sensitive: true,
+    tracking: { opens: false, engagement: false },
+  });
+  expect(inviteOf(mailTo("robin@example.com"))).toContain("METHOD:REQUEST\r\n");
   expect(mailTo(gmEmail).text).toContain("You set the next session for Thursday Crew");
-  expect(resendRequests()[0]!.headers.get("Authorization")).toBe("Bearer re_test_key");
+  const [request] = calendarRequests();
+  expect(request!.headers.get("Authorization")).toBe(`Bearer ${SECRET_KEY}`);
+  expect(request!.headers.get("X-PostHog-Migrated-From")).toBe("resend");
 });
 
 it("mails only the Group's calendar recipient set, rechecked on every attempt", async () => {
@@ -219,16 +253,23 @@ it("mails only the Group's calendar recipient set, rechecked on every attempt", 
       userId: stranger.userId,
     });
   });
-  let kimLeft = false;
-  fetchMock.mockImplementation(async (_url, init) => {
-    if (kimLeft || !(init!.body as string).includes("kim@example.com"))
-      return new Response(null, { status: 200 });
-    kimLeft = true;
-    await kim.as.mutation(api.player.release, { groupId });
-    return new Response(null, { status: 503 });
+  let kimFailed = false;
+  fetchMock.mockImplementation((input, init) => {
+    if (
+      kimFailed ||
+      !isCalendarSend(input, init) ||
+      !(init!.body as string).includes("kim@example.com")
+    )
+      return Promise.resolve(accepted());
+    kimFailed = true;
+    return Promise.resolve(new Response(null, { status: 503 }));
   });
 
   await as.mutation(api.sessions.schedule, { groupId, date });
+  await wait(UNDO_WINDOW_MS + 1);
+  for (let hop = 0; hop < 8 && !kimFailed; hop++) await wait(600);
+  expect(kimFailed).toBe(true);
+  await kim.as.mutation(api.player.release, { groupId });
   await finish();
   const robinPlayer = await claimOf(robin.userId);
   await robin.as.mutation(api.player.release, { groupId });
@@ -237,7 +278,7 @@ it("mails only the Group's calendar recipient set, rechecked on every attempt", 
 
   const set = "Thursday Crew: next session Saturday, October 17, 2026";
   const removed = "Thursday Crew: session on Saturday, October 17, 2026 removed from your calendar";
-  expect(resendMails().map(({ to, subject }) => `${to[0]} ${subject}`)).toEqual(
+  expect(calendarMails().map(({ to, subject }) => `${to} ${subject}`)).toEqual(
     expect.arrayContaining([
       `${gmEmail} ${set}`,
       `kim@example.com ${set}`,
@@ -246,7 +287,7 @@ it("mails only the Group's calendar recipient set, rechecked on every attempt", 
     ]),
   );
   expect(mailsTo("robin@example.com").map(({ subject }) => subject)).toEqual([set, set]);
-  expect(resendMails()).toHaveLength(5);
+  expect(calendarMails()).toHaveLength(5);
 });
 
 it("puts the night into each calendar as an accepted invite without an alarm and with a token-free link", async () => {
@@ -317,7 +358,7 @@ it("raises SEQUENCE for every recipient across set, change, cancel and Schedule 
     expect(sequencesTo(address)).toEqual([1, 2, 3, 4]);
     expect(new Set(uidsTo(address))).toEqual(new Set([`${sessionId}@next-session.link`]));
   }
-  expect(resendMails().map(({ subject }) => subject.split(": ")[1])).toEqual([
+  expect(calendarMails().map(({ subject }) => subject.split(": ")[1])).toEqual([
     "next session Saturday, October 17, 2026",
     "next session Saturday, October 17, 2026",
     "session on Saturday, October 17, 2026 changed",
@@ -366,7 +407,7 @@ it("spaces the sends of one fan-out at least 500 ms apart", async () => {
   await as.mutation(api.sessions.schedule, { groupId, date });
   await finish();
 
-  const times = resendRequests().map(({ at }) => at);
+  const times = calendarRequests().map(({ at }) => at);
   expect(times).toHaveLength(4);
   for (let index = 1; index < times.length; index++)
     expect(times[index]! - times[index - 1]!).toBeGreaterThanOrEqual(500);
@@ -395,11 +436,11 @@ describe("delivery", () => {
     const { as, groupId } = await gmAlone();
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date });
     await finish();
-    fetchMock.mockImplementation((_url, init) =>
+    fetchMock.mockImplementation((input, init) =>
       Promise.resolve(
-        new Response(null, {
-          status: (init!.body as string).includes("cancelled") ? 503 : 200,
-        }),
+        isCalendarSend(input, init) && (init!.body as string).includes("cancelled")
+          ? new Response(null, { status: 503 })
+          : accepted(),
       ),
     );
 
@@ -409,7 +450,7 @@ describe("delivery", () => {
     await as.mutation(api.sessions.schedule, { groupId, date });
     await finish();
 
-    expect(resendMails().map(({ subject }) => subject.split(" ").at(-1))).toEqual([
+    expect(calendarMails().map(({ subject }) => subject.split(" ").at(-1))).toEqual([
       "2026",
       "cancelled",
       "cancelled",
@@ -419,26 +460,27 @@ describe("delivery", () => {
 
   it("sends a 503 then 200 once, the same request under one Idempotency-Key", async () => {
     const { as, groupId, userId } = await gmAlone();
-    fetchMock.mockResolvedValueOnce(new Response(null, { status: 503 }));
+    answerNextSend(() => new Response(null, { status: 503 }));
 
     const sessionId = await as.mutation(api.sessions.schedule, { groupId, date });
     await finish();
 
-    const [key, retryKey] = resendRequests().map(({ headers }) => headers.get("Idempotency-Key"));
+    const [key, retryKey] = calendarRequests().map(({ headers }) => headers.get("Idempotency-Key"));
     expect(key).toMatch(
       new RegExp(`^calendar/${sessionId}@next-session\\.link/1/${userId}/[0-9a-f]{16}$`),
     );
     expect(retryKey).toBe(key);
-    const [first, retry] = resendRequests();
+    const [first, retry] = calendarRequests();
     expect(retry!.at).toBeGreaterThan(first!.at);
     expect(retry!.body).toBe(first!.body);
   });
 
   function failingRobinOnce() {
-    const accepted: string[] = [];
+    const taken: string[] = [];
     const bodiesByKey = new Map<string, string>();
     let robinFailed = false;
-    fetchMock.mockImplementation((_url, init) => {
+    fetchMock.mockImplementation((input, init) => {
+      if (!isCalendarSend(input, init)) return Promise.resolve(accepted());
       const key = new Headers(init!.headers).get("Idempotency-Key")!;
       const body = init!.body as string;
       const first = bodiesByKey.get(key) ?? body;
@@ -448,21 +490,21 @@ describe("delivery", () => {
         robinFailed = true;
         return Promise.resolve(new Response(null, { status: 503 }));
       }
-      accepted.push(body);
-      return Promise.resolve(new Response(null, { status: 200 }));
+      taken.push(body);
+      return Promise.resolve(accepted());
     });
-    return () => accepted.map((body) => JSON.parse(body) as ResendMail);
+    return () => taken.map((body) => JSON.parse(body) as CalendarMail);
   }
 
   async function publishedWithRobinRetrying() {
     const gm = await crew();
-    const accepted = failingRobinOnce();
+    const taken = failingRobinOnce();
     await gm.as.mutation(api.sessions.schedule, { groupId: gm.groupId, date });
     await wait(UNDO_WINDOW_MS + 1);
     await wait(1_000);
     return {
       ...gm,
-      acceptedTo: (address: string) => accepted().filter(({ to }) => to.includes(address)),
+      acceptedTo: (address: string) => taken().filter(({ to }) => to === address),
     };
   }
 
@@ -497,12 +539,16 @@ describe("delivery", () => {
   it("logs a 422 without the recipient and does not retry it", async () => {
     const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const { as, groupId } = await crew();
-    fetchMock.mockResolvedValue(new Response(null, { status: 422 }));
+    fetchMock.mockImplementation((input, init) =>
+      Promise.resolve(
+        isCalendarSend(input, init) ? new Response(null, { status: 422 }) : accepted(),
+      ),
+    );
 
     await as.mutation(api.sessions.schedule, { groupId, date });
     await finish();
 
-    expect(resendRequests()).toHaveLength(2);
+    expect(calendarRequests()).toHaveLength(2);
     expect(error).toHaveBeenCalledWith(expect.stringContaining("422"));
     expect(JSON.stringify(error.mock.calls)).not.toMatch(/example\.com|Thursday Crew/);
   });
@@ -522,7 +568,7 @@ it.each(["Session mail off", "a .test address"])(
     await as.mutation(api.sessions.schedule, { groupId, date });
     await finish();
 
-    expect(resendMails().flatMap(({ to }) => to)).toEqual([gmEmail]);
+    expect(calendarMails().map(({ to }) => to)).toEqual([gmEmail]);
   },
 );
 
@@ -532,11 +578,11 @@ it("mails nothing to an Anonymous GM", async () => {
   await as.mutation(api.sessions.schedule, { groupId, date });
   await finish();
 
-  expect(resendMails().flatMap(({ to }) => to)).toEqual(["robin@example.com"]);
+  expect(calendarMails().map(({ to }) => to)).toEqual(["robin@example.com"]);
 });
 
-it("publishes without RESEND_API_KEY but mails nobody and counts nothing, whatever Workflows has set", async () => {
-  vi.stubEnv("RESEND_API_KEY", "");
+it("publishes without PostHog's secret key but mails nobody and counts nothing, whatever Workflows has set", async () => {
+  vi.stubEnv("POSTHOG_SECRET_KEY", "");
   for (const workflow of ["WELCOME", "TIPS", "REMINDER"])
     vi.stubEnv(`POSTHOG_${workflow}_WEBHOOK_URL`, `https://example.test/${workflow}`);
   const { as, groupId } = await crew();
@@ -547,7 +593,7 @@ it("publishes without RESEND_API_KEY but mails nobody and counts nothing, whatev
   expect(await t.run(async (ctx) => await ctx.db.get("sessions", sessionId))).toMatchObject({
     published: { state: "scheduled", revision: 1 },
   });
-  expect(sent).toEqual([]);
+  expect(sent.filter(({ url }) => !url.startsWith(TELEMETRY_HOST))).toEqual([]);
   expect(await t.run(async (ctx) => await ctx.db.query("mailVolume").first())).toBeNull();
 });
 
@@ -582,7 +628,7 @@ describe("mail volume", () => {
     });
     await finish();
 
-    expect(resendRequests()).toHaveLength(80);
+    expect(calendarRequests()).toHaveLength(80);
     expect(volumeWarnings()).toEqual([
       expect.objectContaining({ provider: "resend", estimated_deliveries: 80, daily_limit: 100 }),
     ]);
@@ -608,7 +654,7 @@ describe("mail volume", () => {
       await finish();
     }
 
-    expect(resendRequests()).toHaveLength(101);
+    expect(calendarRequests()).toHaveLength(101);
     expect(volumeWarnings()).toEqual([
       expect.objectContaining({ provider: "resend", estimated_deliveries: 80 }),
       expect.objectContaining({ provider: "resend", estimated_deliveries: 101, daily_limit: 100 }),
@@ -637,7 +683,7 @@ describe("mail volume", () => {
     await as.mutation(api.sessions.cancel, { sessionId });
     await finish();
 
-    const telemetry = sent.filter(({ url }) => url !== RESEND_URL);
+    const telemetry = sent.filter(({ url }) => url !== SEND_URL);
     expect(telemetry.length).toBeGreaterThan(0);
     for (const { body } of telemetry)
       for (const secret of [gmEmail, "robin@example.com", "Thursday Crew", "crew-token"])
@@ -674,8 +720,8 @@ describe("the calendar follows the Roster", () => {
   }
 
   function firstLinesTo(address: string) {
-    return resendMails()
-      .filter(({ to }) => to.includes(address))
+    return calendarMails()
+      .filter(({ to }) => to === address)
       .map(({ text }) => text.split("\n")[0]);
   }
 
@@ -723,7 +769,7 @@ describe("the calendar follows the Roster", () => {
         "The next session for Thursday Crew is set: Saturday, November 7, 2026, 19:00–23:00, Berlin time.",
       ]);
       expect(sequencesTo(KIM)).toEqual([2, 2, 1]);
-      const [invite] = resendMails().filter(({ to }) => to.includes(KIM));
+      const [invite] = calendarMails().filter(({ to }) => to === KIM);
       expect(invite).toMatchObject({
         subject: "Thursday Crew: next session Saturday, October 17, 2026",
         attachments: [{ content_type: "text/calendar; charset=utf-8; method=REQUEST" }],
@@ -753,10 +799,10 @@ describe("the calendar follows the Roster", () => {
       await LEAVES[leave]!(gm);
       await finish();
 
-      expect(resendMails().flatMap(({ to }) => to)).toEqual([ROBIN, ROBIN, ROBIN]);
+      expect(calendarMails().map(({ to }) => to)).toEqual([ROBIN, ROBIN, ROBIN]);
       expect(firstLinesTo(ROBIN)).toEqual([WITHDRAWN("17"), WITHDRAWN("24"), WITHDRAWN("31")]);
       expect(sequencesTo(ROBIN)).toEqual([2, 2, 3]);
-      for (const mail of resendMails()) {
+      for (const mail of calendarMails()) {
         expect(mail.subject).toMatch(/removed from your calendar$/);
         expect(mail.attachments[0]!.content_type).toBe(
           "text/calendar; charset=utf-8; method=CANCEL",
@@ -776,8 +822,12 @@ describe("the calendar follows the Roster", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.99);
     const { as, groupId, gmEmail, robin } = await crewWithNights();
     let groupDeleted = false;
-    fetchMock.mockImplementation(() =>
-      Promise.resolve(new Response(null, { status: groupDeleted ? 200 : 503 })),
+    fetchMock.mockImplementation((input, init) =>
+      Promise.resolve(
+        groupDeleted || !isCalendarSend(input, init)
+          ? accepted()
+          : new Response(null, { status: 503 }),
+      ),
     );
 
     await robin.as.mutation(api.player.release, { groupId });
@@ -797,13 +847,13 @@ describe("the calendar follows the Roster", () => {
     await finish();
 
     expect(
-      resendMails().some(
-        ({ to, subject }) => to[0] === gmEmail && subject.startsWith("Friday Crew"),
+      calendarMails().some(
+        ({ to, subject }) => to === gmEmail && subject.startsWith("Friday Crew"),
       ),
     ).toBe(true);
-    const afterDeletion = resendRequests()
+    const afterDeletion = calendarRequests()
       .filter(({ at, body }) => at >= deletedAt && body.includes(ROBIN))
-      .map(({ body }) => JSON.parse(body) as ResendMail);
+      .map(({ body }) => JSON.parse(body) as CalendarMail);
     expect(afterDeletion.map(({ subject }) => subject)).toEqual([
       "Thursday Crew: session on Saturday, October 17, 2026 removed from your calendar",
       "Thursday Crew: session on Saturday, October 24, 2026 removed from your calendar",
@@ -842,15 +892,22 @@ describe("the calendar follows the Roster", () => {
     const { as, groupId } = await crew();
     const kim = await signIn(t, { email: KIM });
     let robinFailedOnce = false;
-    fetchMock.mockImplementation(async (_url, init) => {
-      if (robinFailedOnce || !(init!.body as string).includes(ROBIN))
-        return new Response(null, { status: 200 });
+    fetchMock.mockImplementation((input, init) => {
+      if (
+        robinFailedOnce ||
+        !isCalendarSend(input, init) ||
+        !(init!.body as string).includes(ROBIN)
+      )
+        return Promise.resolve(accepted());
       robinFailedOnce = true;
-      await kim.as.mutation(api.player.join, { shareToken: SHARE_TOKEN, name: "Kim" });
-      return new Response(null, { status: 503 });
+      return Promise.resolve(new Response(null, { status: 503 }));
     });
 
     await as.mutation(api.sessions.schedule, { groupId, date });
+    await wait(UNDO_WINDOW_MS + 1);
+    for (let hop = 0; hop < 8 && !robinFailedOnce; hop++) await wait(600);
+    expect(robinFailedOnce).toBe(true);
+    await kim.as.mutation(api.player.join, { shareToken: SHARE_TOKEN, name: "Kim" });
     await finish();
 
     expect(robinFailedOnce).toBe(true);
@@ -872,7 +929,7 @@ describe("the calendar follows the Roster", () => {
     });
     await finish();
 
-    expect(resendRequests()).toEqual([]);
+    expect(calendarRequests()).toEqual([]);
   });
 
   it("sends nothing when the GM releases their own Player", async () => {
@@ -882,7 +939,7 @@ describe("the calendar follows the Roster", () => {
     await as.mutation(api.player.release, { groupId });
     await finish();
 
-    expect(resendRequests()).toEqual([]);
+    expect(calendarRequests()).toEqual([]);
   });
 
   it("invites the Account that Saves the Group to each upcoming published scheduled Session", async () => {
@@ -904,7 +961,7 @@ describe("the calendar follows the Roster", () => {
     await account.as.mutation(api.account.finishSave, { code });
     await finish();
 
-    expect(resendMails().flatMap(({ to }) => to)).toEqual([
+    expect(calendarMails().map(({ to }) => to)).toEqual([
       "saved-gm@example.com",
       "saved-gm@example.com",
     ]);
@@ -912,7 +969,7 @@ describe("the calendar follows the Roster", () => {
       "Thursday Crew is yours now, so its session is in your calendar: Saturday, October 17, 2026, 19:00–23:00, Berlin time.",
       "Thursday Crew is yours now, so its session is in your calendar: Saturday, October 24, 2026, 19:00–23:00, Berlin time.",
     ]);
-    expect(unfolded(inviteOf(resendMails()[0]!))).toContain(
+    expect(unfolded(inviteOf(calendarMails()[0]!))).toContain(
       `URL:https://next-session.link/g/${groupId}\r\n`,
     );
   });
@@ -965,7 +1022,7 @@ describe("the calendar follows the Roster", () => {
       await kim.as.mutation(api.player.release, { groupId });
       await finish();
 
-      expect(resendRequests()).toEqual([]);
+      expect(calendarRequests()).toEqual([]);
     },
   );
 
@@ -1005,7 +1062,7 @@ describe("the calendar follows the Roster", () => {
     ];
     for (const address of [ROBIN, gmEmail])
       expect(mailsTo(address).map(({ subject }) => subject)).toEqual(nextSessions);
-    expect(resendMails().every(({ attachments }) => attachments.length === 1)).toBe(true);
+    expect(calendarMails().every(({ attachments }) => attachments.length === 1)).toBe(true);
   });
 
   it("puts the nights in the calendar again at most twice a day for an Account that keeps toggling Session mail", async () => {
@@ -1046,7 +1103,7 @@ describe("the calendar follows the Roster", () => {
     await as.mutation(api.me.setSessionEmails, { enabled: true });
     await finish();
 
-    const times = resendRequests().map(({ at }) => at);
+    const times = calendarRequests().map(({ at }) => at);
     expect(mailsTo(gmEmail)).toHaveLength(4);
     expect(times.slice(1).map((at, index) => at - times[index]! >= 500)).toEqual(
       Array(3).fill(true),
@@ -1076,7 +1133,7 @@ describe("the calendar follows the Roster", () => {
     await robin.as.mutation(api.me.setSessionEmails, { enabled: true });
     await finish();
 
-    expect(resendRequests()).toEqual([]);
+    expect(calendarRequests()).toEqual([]);
   });
 
   it("drops a pending withdrawal once the Account turns Session mail off", async () => {
@@ -1086,7 +1143,7 @@ describe("the calendar follows the Roster", () => {
     await robin.as.mutation(api.me.setSessionEmails, { enabled: false });
     await finish();
 
-    expect(resendRequests()).toEqual([]);
+    expect(calendarRequests()).toEqual([]);
   });
 });
 
@@ -1169,7 +1226,7 @@ describe("the one-time invites", () => {
 
     expect(subjectsTo(ROBIN)).toEqual([NEXT("17"), NEXT("24"), NEXT("31")]);
     expect(
-      resendRequests()
+      calendarRequests()
         .slice(2)
         .map(({ at }) => at >= Date.UTC(2026, 9, 8)),
     ).toEqual(Array(4).fill(true));
@@ -1196,12 +1253,12 @@ describe("the one-time invites", () => {
     const kim = await signIn(t, { email: "kim@example.com" });
     await kim.as.mutation(api.player.join, { shareToken: "crew-token", name: "Kim" });
     await finish();
-    expect(resendMails().flatMap(({ to }) => to)).toEqual(["kim@example.com"]);
+    expect(calendarMails().map(({ to }) => to)).toEqual(["kim@example.com"]);
     sent = [];
 
     await startInvites();
 
-    expect(resendMails().flatMap(({ to }) => to)).toEqual([gmEmail, "kim@example.com", ROBIN]);
+    expect(calendarMails().map(({ to }) => to)).toEqual([gmEmail, "kim@example.com", ROBIN]);
   });
 
   it("pages through Sessions whose recipients all turned Session mail off within Convex's limits", async () => {
@@ -1229,7 +1286,7 @@ describe("the one-time invites", () => {
 
     await startInvites();
 
-    expect(resendRequests()).toEqual([]);
+    expect(calendarRequests()).toEqual([]);
     expect(logLines(FINISHED)).toEqual([{ sessions_invited: 0, invites_queued: 0 }]);
   });
 
@@ -1241,20 +1298,20 @@ describe("the one-time invites", () => {
 
     await startInvites();
 
-    expect(resendRequests()).toEqual([]);
+    expect(calendarRequests()).toEqual([]);
   });
 
-  it("queues nothing without RESEND_API_KEY and leaves every Session for the start after the switch-on", async () => {
-    vi.stubEnv("RESEND_API_KEY", "");
+  it("queues nothing without PostHog's secret key and leaves every Session for the start after the switch-on", async () => {
+    vi.stubEnv("POSTHOG_SECRET_KEY", "");
     const { groupId } = await crew();
     await nightOn(groupId, "2026-10-17");
 
     await startInvites();
     await untilNextUtcMidnight();
 
-    expect(resendRequests()).toEqual([]);
+    expect(calendarRequests()).toEqual([]);
 
-    vi.stubEnv("RESEND_API_KEY", "re_test_key");
+    vi.stubEnv("POSTHOG_SECRET_KEY", SECRET_KEY);
     await startInvites();
 
     expect(subjectsTo(ROBIN)).toEqual([NEXT("17")]);
@@ -1279,7 +1336,7 @@ describe("the one-time invites", () => {
 
     await startInvites();
 
-    expect(resendRequests()).toHaveLength(60);
+    expect(calendarRequests()).toHaveLength(60);
     expect(subjectsTo(ROBIN)).toEqual([]);
 
     await untilNextUtcMidnight();

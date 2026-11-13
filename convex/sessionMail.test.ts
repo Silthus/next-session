@@ -9,8 +9,13 @@ import {
   type TestBackend,
 } from "./model/test.setup";
 import { UNDO_WINDOW_MS } from "../shared/sessions";
-
-type ResendMail = { to: string[]; subject: string; text: string };
+import {
+  accepted,
+  POSTHOG_SEND_URL as SEND_URL,
+  postHogEmailFake,
+  urlOf,
+  type SentEmail,
+} from "../posthogEmailFake";
 
 const ROBIN = "robin@example.com";
 const SEND_SPACING_MS = 1_000;
@@ -27,10 +32,11 @@ const date = "2026-10-17";
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
-  vi.stubEnv("RESEND_API_KEY", "re_test_key");
+  vi.stubEnv("POSTHOG_PROJECT_TOKEN", "phc_test_project");
+  vi.stubEnv("POSTHOG_SECRET_KEY", "phs_test_key");
   vi.stubEnv("SITE_URL", "http://localhost:5173");
-  fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(new Response(null, { status: 200 })));
-  vi.stubGlobal("fetch", fetchMock);
+  fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(accepted()));
+  vi.stubGlobal("fetch", postHogEmailFake(fetchMock).fetch);
   t = newBackend();
 });
 
@@ -81,10 +87,14 @@ async function deliver() {
   for (let hop = 0; hop < 8; hop++) await wait(SEND_SPACING_MS);
 }
 
+function emailRequests() {
+  return fetchMock.mock.calls.filter(([input]) => urlOf(input) === SEND_URL);
+}
+
 function mailsToRobin() {
-  return fetchMock.mock.calls
-    .map(([, init]) => JSON.parse(init!.body as string) as ResendMail)
-    .filter(({ to }) => to.some(isRobin));
+  return emailRequests()
+    .map(([, init]) => JSON.parse(init!.body as string) as SentEmail)
+    .filter(({ to }) => isRobin(to));
 }
 
 function isRobin(address: string) {
@@ -125,7 +135,7 @@ it("never announces a change before its Undo window ends", async () => {
 
   await as.mutation(api.sessions.cancel, { sessionId });
   await wait(UNDO_WINDOW_MS);
-  expect(fetchMock).not.toHaveBeenCalled();
+  expect(emailRequests()).toEqual([]);
   expect(await downloadedCalendar()).toContain(`UID:${sessionId}@next-session.link`);
   expect(await feedStatusOf(account.as, sessionId)).toBe("CONFIRMED");
 
@@ -146,7 +156,7 @@ describe("the Undo window", () => {
     await finish();
 
     expect(await sessionRow(sessionId)).toBeNull();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(emailRequests()).toEqual([]);
   });
 
   it("keeps a Session cancelled after its window as Cancelled and sends one cancelled mail", async () => {
@@ -167,7 +177,7 @@ describe("the Undo window", () => {
     expect(await as.mutation(api.sessions.schedule, { groupId, date })).toBe(sessionId);
     await finish();
 
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(emailRequests()).toEqual([]);
   });
 
   it("restores the same id on Schedule again and sends one set mail", async () => {
@@ -204,7 +214,7 @@ describe("the Undo window", () => {
       await wait(20_000);
       await as.mutation(api.sessions.cancel, { sessionId });
     }
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(emailRequests()).toEqual([]);
     await finish();
 
     expect(changes()).toEqual(["cancelled"]);
@@ -230,7 +240,7 @@ describe("the Undo window", () => {
       await as.mutation(api.sessions.cancel, { sessionId });
       await finish();
 
-      expect(fetchMock).not.toHaveBeenCalled();
+      expect(emailRequests()).toEqual([]);
     },
   );
 
@@ -244,7 +254,7 @@ describe("the Undo window", () => {
       await as.mutation(api.sessions.schedule, { groupId, date });
       await finish();
 
-      expect(fetchMock).not.toHaveBeenCalled();
+      expect(emailRequests()).toEqual([]);
     },
   );
 
@@ -324,17 +334,20 @@ it.each(["release", "opt-out", "remove-group"])(
   async (change) => {
     const { as, groupId, account } = await crew();
     let robinFailed = false;
-    fetchMock.mockImplementation(async (_url, init) => {
-      if (robinFailed || !(init!.body as string).includes(ROBIN))
-        return new Response(null, { status: 200 });
+    fetchMock.mockImplementation((input, init) => {
+      if (urlOf(input) !== SEND_URL || robinFailed || !(init!.body as string).includes(ROBIN))
+        return Promise.resolve(accepted());
       robinFailed = true;
-      if (change === "release") await account.as.mutation(api.player.release, { groupId });
-      if (change === "opt-out")
-        await account.as.mutation(api.me.setSessionEmails, { enabled: false });
-      if (change === "remove-group") await as.mutation(api.groups.remove, { groupId });
-      return new Response(null, { status: 503 });
+      return Promise.resolve(new Response(null, { status: 503 }));
     });
     await as.mutation(api.sessions.schedule, { groupId, date });
+    await wait(UNDO_WINDOW_MS + 1);
+    await wait(SEND_SPACING_MS);
+    expect(robinFailed).toBe(true);
+    if (change === "release") await account.as.mutation(api.player.release, { groupId });
+    if (change === "opt-out")
+      await account.as.mutation(api.me.setSessionEmails, { enabled: false });
+    if (change === "remove-group") await as.mutation(api.groups.remove, { groupId });
     await finish();
     expect(changes().filter((sent) => sent === "set")).toHaveLength(1);
   },

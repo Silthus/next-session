@@ -16,6 +16,7 @@ import {
   signInAnonymousGm,
   type TestBackend,
 } from "./model/test.setup";
+import { accepted, postHogEmailFake } from "../posthogEmailFake";
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -281,11 +282,16 @@ describe("player.group", () => {
 
 describe("player.group calendar invites", () => {
   beforeEach(() => {
-    vi.stubEnv("RESEND_API_KEY", "re_test_key");
+    vi.stubEnv("POSTHOG_PROJECT_TOKEN", "phc_test_project");
+    vi.stubEnv("POSTHOG_SECRET_KEY", "phs_test_key");
     vi.stubEnv("SITE_URL", "https://next-session.link");
+    vi.stubGlobal("fetch", postHogEmailFake(() => Promise.resolve(accepted())).fetch);
   });
 
-  afterEach(() => vi.unstubAllEnvs());
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
 
   async function keptAccount(signInPlayer = signInAccount) {
     const group = await sharedGroup();
@@ -342,7 +348,7 @@ describe("player.group calendar invites", () => {
   });
 
   it("is null for every caller while the deployment sends no calendar mail", async () => {
-    vi.stubEnv("RESEND_API_KEY", "");
+    vi.stubEnv("POSTHOG_SECRET_KEY", "");
     const { as: gm, shareToken, player } = await keptAccount();
     await player.as.mutation(api.me.setSessionEmails, { enabled: false });
 

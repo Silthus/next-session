@@ -29,6 +29,7 @@ import {
 } from "./model/recipients";
 import { sessionMailCopy, type MailCopy, type SessionChange } from "./model/sessionMailCopy";
 import { withinRateLimit } from "./model/rateLimits";
+import { accountDistinctId } from "./model/telemetry";
 import { shareLinkOf, siteLink } from "./model/siteLinks";
 import { groupTimeOf } from "./model/timeAndPlace";
 import { upcomingSessions } from "./model/upcomingSessions";
@@ -430,6 +431,7 @@ function nightMessageFor(
   });
   return {
     to: account.email,
+    distinctId: accountDistinctId(account),
     ...copy,
     invite: { kind, calendar },
     idempotencyKey: idempotencyKey(uid, send.sequence, account),
@@ -499,6 +501,7 @@ function frozenEntryMessage({
   });
   return {
     to: account.email,
+    distinctId: accountDistinctId(account),
     ...copy,
     invite: { kind, calendar },
     idempotencyKey: idempotencyKey(entry.uid, entry.sequence, account),

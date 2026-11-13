@@ -9,6 +9,13 @@ import {
   type TestBackend,
 } from "./model/test.setup";
 import { UNDO_WINDOW_MS } from "../shared/sessions";
+import {
+  accepted,
+  POSTHOG_SEND_URL as SEND_URL,
+  postHogEmailFake,
+  urlOf,
+  type SentEmail,
+} from "../posthogEmailFake";
 
 const SITE_URL = "http://localhost:5173";
 const SERVED_AT = Date.UTC(2026, 9, 8, 9, 30);
@@ -20,8 +27,8 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
   vi.stubEnv("SITE_URL", SITE_URL);
-  fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(new Response(null, { status: 200 })));
-  vi.stubGlobal("fetch", fetchMock);
+  fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(accepted()));
+  vi.stubGlobal("fetch", postHogEmailFake(fetchMock).fetch);
   t = newBackend();
 });
 
@@ -78,9 +85,9 @@ async function wait(milliseconds: number) {
 }
 
 function mailedSubjects() {
-  return fetchMock.mock.calls.map(
-    ([, init]) => (JSON.parse(init!.body as string) as { subject: string }).subject,
-  );
+  return fetchMock.mock.calls
+    .filter(([input]) => urlOf(input) === SEND_URL)
+    .map(([, init]) => (JSON.parse(init!.body as string) as SentEmail).subject);
 }
 
 async function finish() {
@@ -528,7 +535,8 @@ describe("a rename", () => {
   });
 
   it("leaves a Cancelled Session's published name alone and mails nothing about it", async () => {
-    vi.stubEnv("RESEND_API_KEY", "re_test_key");
+    vi.stubEnv("POSTHOG_PROJECT_TOKEN", "phc_test_project");
+    vi.stubEnv("POSTHOG_SECRET_KEY", "phs_test_key");
     const group = await crew();
     await withClaimedAccount(group);
     const feedUrl = await feedUrlOf(group);

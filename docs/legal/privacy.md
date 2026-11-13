@@ -2,7 +2,7 @@
 
 > **Draft, pending review by a qualified German lawyer before publication.** Source text for the `/privacy` page. `{{…}}` placeholders are filled at build time (see `docs/spec.md` §7).
 
-**Version 1.14. Effective: {{EFFECTIVE_DATE}}**
+**Version 1.15. Effective: {{EFFECTIVE_DATE}}**
 
 This policy explains which personal data Next Session ("the Service") processes, why, and what rights you have under the GDPR.
 
@@ -42,7 +42,7 @@ A group's location is whatever the GM types in: an address, a note, or a link. A
 
 We measure use without cookies and without storing anything on your device. We show no ads and do no cross-site tracking, we do not combine your usage events with data from our other products, and we do not sell data or use it for automated decisions.
 
-To count visitors, PostHog forms a hash of your IP address and browser with a secret that changes every day. It does not store your IP address. Share links and sign-in codes are removed from page addresses before they are sent, so a group's share link never reaches usage measurement. When reminders are on, PostHog receives the share link and your reminder link as mail content, which our backend sends with a secret key, not as a usage event or person property. When session emails are enabled, Resend receives the share link as mail content; the calendar invite itself carries no share link.
+To count visitors, PostHog forms a hash of your IP address and browser with a secret that changes every day. It does not store your IP address. Share links and sign-in codes are removed from page addresses before they are sent, so a group's share link never reaches usage measurement. When reminders are on, PostHog receives the share link and your reminder link as mail content, which our backend sends with a secret key, not as a usage event or person property. When session emails are enabled, PostHog receives the share link as mail content in the same way; the calendar invite itself carries no share link.
 
 ## 3. Storage on your device (§ 25 TDDDG)
 
@@ -68,8 +68,7 @@ We use these processors under data processing agreements (Art. 28 GDPR):
 | --- | --- | --- |
 | Convex, Inc. | Database, application backend, sign-in | USA |
 | Cloudflare, Inc. | Delivering the website, protection against attacks | Global network, USA |
-| PostHog Inc. | Usage measurement, error reports, technical logs, sending the welcome mail, tips, and reminders when enabled, and counting opens and clicks of the welcome mail and reminders | EU (Frankfurt) hosting, US company |
-| Plus Five Five, Inc. (Resend) | Sending session emails with calendar invites, when enabled | US company, sends through Amazon Web Services in the EU (Ireland) |
+| PostHog Inc. | Usage measurement, error reports, technical logs, sending the welcome mail, tips, reminders, and session emails with calendar invites when enabled, and counting opens and clicks of the welcome mail and reminders | EU (Frankfurt) hosting, US company |
 
 Transfers to the USA rely on the EU–US Data Privacy Framework and the EU Standard Contractual Clauses.
 
@@ -89,7 +88,8 @@ Your Google profile picture is shown only to you and to the GM of each group whe
 | Server logs at our hosting providers | According to the providers' log retention, typically up to 30 days |
 | Usage events, opens and clicks of our mails, and error reports in PostHog | 1 year |
 | Technical logs in PostHog | 14 days |
-| Session emails with their calendar invites, and their delivery logs, at Resend | 30 days; removed from Resend's backups within 7 days after that |
+| The delivery log of a session email in PostHog: your email address and whether the mail arrived. PostHog keeps no copy of the mail's text | 30 days |
+| The calendar invite of a session email, as a file in PostHog | 37 days |
 | Your Google profile picture | Replaced or deleted at your next Google sign-in after you change or remove it at Google; deleted with your account |
 | Your calendar feed link | Until you reset it on My groups or your account is deleted |
 | Your reminder setting and reminder link | Until your account is deleted |
