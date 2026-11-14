@@ -799,29 +799,4 @@ describe("a Reminder's code send", () => {
     expect(day!.body.html).toContain(`href="https://next-session.link/reminders/off?t=${token}"`);
     expect(hours!.body.subject).toBe("In 2 hours: Thursday Crew at 19:00");
   });
-
-  it("takes over a Reminder the retrier queued for the workflow, as its code send", async () => {
-    const { as, groupId, robin } = await crew();
-    const sessionId = await as.mutation(api.sessions.schedule, { groupId, date });
-    await settle();
-    const [fire] = await scheduledReminders();
-    const { revision, timeZone } = fire!.args[0] as { revision: number; timeZone: string };
-    await at(dayDue);
-    fetchMock.mockClear();
-
-    await t.action(internal.mail.sendReminder, {
-      sessionId,
-      userId: robin.userId,
-      revision,
-      lead: "day",
-      timeZone,
-    });
-
-    const [sent, ...more] = codeSends();
-    expect(more).toEqual([]);
-    expect(sent!.headers.get("Idempotency-Key")).toBe(
-      `next-session:reminder:${sessionId}:${revision}:day:${robin.userId}`,
-    );
-    expect(sent!.body.subject).toBe("Tomorrow: Thursday Crew at 19:00");
-  });
 });

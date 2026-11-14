@@ -1,7 +1,7 @@
 import { ActionRetrier } from "@convex-dev/action-retrier";
 import { v, type Infer } from "convex/values";
 import { components, internal } from "./_generated/api";
-import type { Doc, Id } from "./_generated/dataModel";
+import type { Doc } from "./_generated/dataModel";
 import {
   internalAction,
   internalMutation,
@@ -158,25 +158,10 @@ function firstNameOf({ name }: Doc<"users">) {
   return name?.trim() || undefined;
 }
 
-// Retrier jobs keep the function and arguments they were queued with, so a Welcome Mail or
-// Reminder queued before the code sends arrives here; both forward to their code send. Delete
-// them with the workflows (docs/posthog/README.md, switch-on step 5), once the queue has drained.
-const queuedKind = v.union(v.literal("welcome"), webhookKind);
-const queuedBody = v.object({ ...webhookBody.fields, tips_confirm_url: v.optional(v.string()) });
-
 export const send = internalAction({
-  args: { kind: queuedKind, body: queuedBody },
+  args: { kind: webhookKind, body: webhookBody },
   returns: v.null(),
-  handler: async (ctx, { kind, body: { tips_confirm_url, ...body } }) => {
-    if (kind === "welcome") {
-      await ctx.runAction(internal.codeMail.sendWelcome, {
-        userId: body.distinct_id.slice(`${PRODUCT}:`.length) as Id<"users">,
-        to: body.email,
-        distinctId: body.distinct_id,
-        ...(tips_confirm_url === undefined ? {} : { tipsConfirmUrl: tips_confirm_url }),
-      });
-      return null;
-    }
+  handler: async (_ctx, { kind, body }) => {
     const webhook = webhookFor(kind);
     if (webhook === null) {
       console.error(`The ${kind} mail webhook is no longer configured, request dropped`);
@@ -213,16 +198,6 @@ export async function requestReminder(ctx: MutationCtx, send: ReminderSend) {
   await recordMailVolume(ctx, "workflows", 1);
   await retrier.run(ctx, internal.codeMail.sendReminder, send);
 }
-
-// A Reminder queued before the code sends; see `send`.
-export const sendReminder = internalAction({
-  args: reminderSend,
-  returns: v.null(),
-  handler: async (ctx, send) => {
-    await ctx.runAction(internal.codeMail.sendReminder, send);
-    return null;
-  },
-});
 
 export function remindersConfigured() {
   return codeMailConfig() !== null;

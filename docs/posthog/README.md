@@ -18,7 +18,7 @@ Switch on in this order:
 2. Merge and deploy. Run the Reminder backfill once, `bunx convex run --prod reminders:scheduleUpcoming '{}'`, so Sessions published while the webhook was gone get their pair.
 3. Sign up with an owned address, with and without Tips, once with Google so the greeting has a given name. Check the copy, both links and the reply-to, and the send under **Workflows → Transactional emails**, named `next-session-welcome`.
 4. Schedule a disposable Session that starts a few minutes more than 2 hours from now, so its 2-hour Reminder is still ahead once the Undo window closes. Check that Reminder (`next-session-reminder`), its greeting by Player name, and its footer link, as #149 did.
-5. Archive the "Next Session: Welcome Mail" and "Next Session: Reminders" workflows, and remove `POSTHOG_WELCOME_WEBHOOK_URL` and `POSTHOG_REMINDER_WEBHOOK_URL` from Convex prod. `POSTHOG_MAIL_WEBHOOK_SECRET` stays for Tips. Then delete the two forwarders in `convex/mail.ts` (`send`'s `"welcome"` kind and `sendReminder`): the retrier jobs queued for the workflows before the merge have run by then.
+5. Archive the "Next Session: Welcome Mail" and "Next Session: Reminders" workflows, and remove `POSTHOG_WELCOME_WEBHOOK_URL` and `POSTHOG_REMINDER_WEBHOOK_URL` from Convex prod. `POSTHOG_MAIL_WEBHOOK_SECRET` stays for Tips.
 
 To stop both mails, remove `POSTHOG_SECRET_KEY`. Going back to the workflows means reverting ADR-0014's code.
 
