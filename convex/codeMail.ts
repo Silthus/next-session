@@ -5,7 +5,15 @@ import { PostHog, type EmailError, type SendCodeEmailOptions } from "posthog-nod
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { internalAction } from "./_generated/server";
-import { codeMailConfig, reminderSend, type CodeMailConfig } from "./mail";
+import {
+  calendarEmailOf,
+  calendarMessage,
+  codeMailConfig,
+  postHogMailConfig,
+  reminderSend,
+  SEND_TIMEOUT_MS,
+  type PostHogMailConfig,
+} from "./mail";
 import { reminderMail } from "../emails/ReminderMail";
 import type { RenderedMail } from "../emails/renderMail";
 import { welcomeMail } from "../emails/WelcomeMail";
@@ -56,6 +64,36 @@ export const sendReminder = internalAction({
   },
 });
 
+// Session mail with its calendar invite, which Resend sent before.
+export const sendCalendar = internalAction({
+  args: { mail: calendarMessage },
+  returns: v.null(),
+  handler: async (_ctx, { mail }) => {
+    const config = postHogMailConfig();
+    if (config === null) {
+      console.error("Code mail is no longer configured, a calendar mail was dropped");
+      return null;
+    }
+    const { error } = await calendarClientFor(config).emails.send({
+      ...calendarEmailOf(mail),
+      sensitive: true,
+      tracking: { opens: false, engagement: false },
+      // The request keeps its own deadline and never retried; the retrier retries instead.
+      maxRetries: 0,
+    });
+    if (error === null) return null;
+    if (error.code === "recipient_suppressed") {
+      console.log("PostHog skipped a calendar mail to a suppressed address");
+      return null;
+    }
+    const answer = `${error.statusCode === undefined ? "" : `HTTP ${error.statusCode} `}${error.code}`;
+    if (isRetryableCalendar(error))
+      throw new Error(`PostHog didn't take a calendar mail: ${answer}`);
+    console.error(`PostHog refused a calendar mail: ${answer}, dropped`);
+    return null;
+  },
+});
+
 type Envelope = Pick<
   SendCodeEmailOptions,
   "to" | "distinctId" | "from" | "templateKey" | "idempotencyKey"
@@ -80,13 +118,34 @@ async function send(name: string, mail: RenderedMail, envelope: Envelope) {
   console.error(`PostHog refused the ${name}: ${error.code}, dropped`);
 }
 
-function clientFor({ projectToken, secretKey }: CodeMailConfig) {
+function clientFor({ projectToken, secretKey }: PostHogMailConfig) {
   return new PostHog(projectToken, {
     host: POSTHOG_HOST,
     secretKey,
     enableLocalEvaluation: false,
     fetch: (url, options) => fetch(url, options),
   });
+}
+
+// Session mail's own client: it names the provider the sends moved from, and keeps the deadline
+// its Resend request had, now for each request of the send.
+function calendarClientFor({ projectToken, secretKey }: PostHogMailConfig) {
+  return new PostHog(projectToken, {
+    host: POSTHOG_HOST,
+    secretKey,
+    enableLocalEvaluation: false,
+    migratedFrom: "resend",
+    emailRequestTimeoutMs: SEND_TIMEOUT_MS,
+    fetch: (url, options) => fetch(url, options),
+  });
+}
+
+// What the Resend request retried: a network failure or timeout, a rate limit, a server error.
+// A used-up quota is not retried, and every other refusal is dropped, as before.
+function isRetryableCalendar({ statusCode, code }: EmailError) {
+  if (statusCode === undefined) return code === "network_error";
+  if (statusCode === 429) return code !== "quota_limited" && code !== "upload_quota_exceeded";
+  return statusCode >= 500;
 }
 
 // What posthog-node would retry itself. Every retrier attempt sends the same idempotency key.

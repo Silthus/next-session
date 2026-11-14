@@ -523,7 +523,7 @@ Each call is a reversible default. Michael can redirect any of them in one line.
 | 12 | The landing sends an Account without Groups of its own to `/me`. A GM still lands on their last Group, with a **My groups** link in the header | Every Account lands on `/me` |
 | 13 | A Player's name stays per Group. There is no Account display name | An Account name prefilled into Join |
 | 14 | The Privacy Policy gains one row and becomes 1.2. No re-acceptance gate: the new processing happens only when someone keeps a Group, and creating the Account stamps 1.2 | Build the re-acceptance gate first |
-| 15 | Session emails use disabled PostHog Workflows; #102 owns activation. Superseded: Session mail goes through Resend (§15) | Build Resend sending now |
+| 15 | Session emails use disabled PostHog Workflows; #102 owns activation. Superseded: Session mail goes through Resend (§15), then PostHog code sends (ADR-0015) | Build Resend sending now |
 
 ### 12.2 Who sees what
 
@@ -927,7 +927,7 @@ In Michael's voice, plain text first (every template carries a real `text` part)
 
 ### 13.7 Session updates
 
-Session updates go through Resend with a calendar invite (§15), not through Workflows.
+Session updates go out as a code send with a calendar invite (§15), not through Workflows.
 
 ### 13.8 Credentials and switch-on
 
@@ -1020,11 +1020,11 @@ The Worker proxies `/cal/` the way it proxies `/ingest/`, so the URL stays on `n
 
 ## 15. Session mail
 
-Every Session update is one mail through Resend that carries a calendar invite ([ADR-0012](adr/0012-session-mail-goes-through-resend-and-carries-the-calendar-invite.md)). S4 of the calendar sync map (#146) specifies it; this section holds what has shipped.
+Every Session update is one mail that carries a calendar invite ([ADR-0012](adr/0012-session-mail-goes-through-resend-and-carries-the-calendar-invite.md)), sent as a PostHog code send ([ADR-0015](adr/0015-session-mail-goes-through-posthog-code-sends.md)). S4 of the calendar sync map (#146) specifies it; this section holds what has shipped.
 
-### 15.1 Switched on by `RESEND_API_KEY`
+### 15.1 Switched on by PostHog's key
 
-- `calendarMailConfigured()` in `convex/mail.ts` is true when `RESEND_API_KEY` is set. CI and dev never set it.
+- `calendarMailConfigured()` in `convex/mail.ts` is true when `POSTHOG_PROJECT_TOKEN` and `POSTHOG_SECRET_KEY` are set, the key the code sends of §13 use. CI and dev never set the secret key.
 - `settle` (§12.6) calls `sessionPublished` in `convex/sessionMail.ts` on every publish. With the key, it starts a broadcast round. Without it, nothing is sent or counted.
 
 ### 15.2 Who gets it
@@ -1036,7 +1036,7 @@ Every Session update is one mail through Resend that carries a calendar invite (
 
 - Every publish is a round, because the invite carries the start, end, location and Group name: `set` for a first publish or **Schedule again**, `changed` for a new start, length, location or Group name, `cancelled` for a cancel. A publish that keeps a Cancelled Session cancelled sends nothing: those calendars already hold the cancel.
 - A round raises `sessions.sequence` by one (missing is 0), sets `sessions.wholeRoundSent`, and queues one send per eligible recipient, each carrying `{kind: "broadcast", change, sessionId, userId, revision, sequence}`. The published snapshot carries the Group's zone, so a mail names the time in the zone its night was published in, even while a zone change waits out its Undo window.
-- Sends are scheduled 600 ms apart within a round, under Resend's 2 requests a second. Two rounds that overlap rely on the retries.
+- Sends are scheduled 600 ms apart within a round, the spacing Resend's 2 requests a second set, kept until it is sized to PostHog's sending allowance. Two rounds that overlap rely on the retries.
 - Each attempt rechecks, in `sessionMail.calendarMail`, that `published.revision` still equals the send's revision and that the Account is still in the set and eligible. A send whose revision moved on drops itself, so a slow mail never overwrites a newer change. Staleness is judged by revision, never by `sequence`.
 
 ### 15.4 Entering or leaving the set
@@ -1056,11 +1056,12 @@ Every Session update is one mail through Resend that carries a calendar invite (
 - `sessionMail.drainCancellations` queues at most 200 `deletionCancel`s per run, `{kind: "deletionCancel", userId, reader, date, entry}`, moves the row's `cursor`, and runs again once its sends are due, 600 ms apart, so a large Group stays under Resend's rate and far below Convex's 1,000 scheduled functions per mutation. The run that queues the last batch deletes the row.
 - A deletion cancel is a `cancel` with `STATUS:CANCELLED`, built from its frozen entry, because the Group is gone. Its `SEQUENCE` is above every invite the Session sent. It sends whenever the Account is still eligible (§15.2), so an Anonymous GM, whose Account ends with its last Group, gets nothing.
 
-### 15.6 The Resend adapter
+### 15.6 The send
 
-- `POST https://api.resend.com/emails` with `from: "Next Session <calendar@next-session.link>"`, one recipient, `text` and `html`, and one attachment `invite.ics`, base64, with `content_type` from `calendarContentType` (`text/calendar; charset=utf-8; method=REQUEST|CANCEL`). No `reply_to`.
-- `Idempotency-Key: calendar/<uid>/<sequence>/<userId>/<fingerprint>`, where the fingerprint is a hash of the request body, so a retry of a request Resend accepted is not sent twice within its 24 hours, and a retry whose body changed (a rotated Share Link) is a new request instead of one Resend refuses.
-- Network errors, 5xx and 429 retry through the action retrier: 4 attempts, backoff 5 s × 4ⁿ. Other 4xx are logged with the status only and dropped.
+- `mail.sendCalendar` keeps its checks, then hands the send to `codeMail.sendCalendar`, a `"use node"` action: posthog-node runs only in Convex's Node runtime.
+- `posthog.emails.send` with template key `next-session-session-update`, `from: "Next Session <calendar@next-session.link>"`, one recipient, `text` and `html`, the Account's distinct ID, `sensitive: true`, `tracking: { opens: false, engagement: false }`, and one attachment `invite.ics` with `content_type` from `calendarContentType` (`text/calendar; charset=utf-8; method=REQUEST|CANCEL`). No `replyTo`. The SDK uploads the file by its hash before the send.
+- `idempotencyKey: calendar/<uid>/<sequence>/<userId>/<fingerprint>`, where the fingerprint is a hash of the send's fields, so a retry of a send PostHog accepted is not sent twice within its 24 hours, and a retry whose fields changed (a rotated Share Link) is a new send instead of one PostHog refuses.
+- Each request has a 10 s deadline and no SDK retry (`maxRetries: 0`). A network error, a 5xx and a 429 other than a used-up quota retry through the action retrier: 4 attempts, backoff 5 s × 4ⁿ. A suppressed recipient is logged and skipped. Other refusals are logged with their status and code, and dropped.
 
 ### 15.7 The invite
 
@@ -1088,25 +1089,25 @@ Then, for set, changed and invite: "It's in the calendar invite in this mail. No
 
 ### 15.9 Volume
 
-`mailVolume` counts per provider and UTC day: Resend for Session mail (1 per send), Workflows for Welcome (1), Tips (2) and each Reminder (1). A row without a provider is a Workflows count from before the split. Each provider warns once through `serverLog` ("Daily mail volume warning", with `provider`) when its day reaches 80 and once when it passes 100. Suppressed recipients aren't counted and a retry isn't counted twice. No email, Group name or Share Token reaches a usage event or log.
+`mailVolume` counts per provider and UTC day: `resend` for Session mail (1 per send), a key it keeps after the move to PostHog, Workflows for Welcome (1), Tips (2) and each Reminder (1). A row without a provider is a Workflows count from before the split. Each provider warns once through `serverLog` ("Daily mail volume warning", with `provider`) when its day reaches 80 and once when it passes 100. Suppressed recipients aren't counted and a retry isn't counted twice. No email, Group name or Share Token reaches a usage event or log.
 
 ### 15.10 One-time invites
 
-The Sessions published before the switch-on never had a Resend send. `oneTimeInvites.inviteScheduledSessions`, started once with `convex run` after `RESEND_API_KEY` is set, gives them their invites:
+The Sessions published before the switch-on never had a Session mail. `oneTimeInvites.inviteScheduledSessions`, started once with `convex run` after Session mail is switched on (§15.1), gives them their invites:
 
 - It reads the upcoming Sessions (today, UTC, to the end of the Booking Window) through the `by_date` index, soonest first, 20 a page so a page of full Rosters stays within Convex's reads per transaction, and takes those whose published state is scheduled and that never had a whole round (`wholeRoundSent` unset). A newcomer's invite or a withdrawal raises `sequence` but is not a whole round, so it doesn't make the run skip the GM and the other Players.
 - Each gets one round to its whole calendar recipient set with the "Set" copy (§15.8), because the GM and the Players have had the night for a while: `sequence` rises by one, `wholeRoundSent` is set, and one `broadcast` send with `change: "set"` goes to each eligible recipient. A Session with no eligible recipient is passed over and stays unsent.
-- Pacing: a run tops the day's Resend count up to 50 of the 100, leaving half for live Session mail, and stops before the first Session whose round wouldn't fit. It then runs again at the next UTC midnight. A round larger than 50 on its own goes alone as the first send of a day, so a big Group never stalls the rest.
+- Pacing: a run tops the day's `resend` count up to 50 of the 100, leaving half for live Session mail, and stops before the first Session whose round wouldn't fit. It then runs again at the next UTC midnight. A round larger than 50 on its own goes alone as the first send of a day, so a big Group never stalls the rest.
 - A Session published again before its turn gets a broadcast, which is a whole round, and the run skips it. A second start after it finished queues nothing.
-- Without `RESEND_API_KEY` it does nothing and leaves every Session for the start after the switch-on.
+- Without PostHog's key it does nothing and leaves every Session for the start after the switch-on.
 - It ends with one `serverLog` line, "One-time invites finished", with `sessions_invited` and `invites_queued` only.
 
 ### 15.11 Test seams
 
 | Seam | Tested through |
 | --- | --- |
-| Session mail and the Resend adapter | `convex-test` through `api.sessions.*`, `api.groups.*`, `api.player.*`, `api.roster.removePlayer` and `api.account.finishSave` with fake timers and a fake `fetch` that records Resend payloads and decodes `invite.ics` (`convex/sessionInvites.test.ts`) |
-| The Undo window, the opt-out and the rechecks before each send | `convex/sessionMail.test.ts` with the same fake `fetch`, only `RESEND_API_KEY` set |
-| Deleting a Group | `convex-test` through `api.groups.remove` and `internal.cleanup.sweepExpiredGroups` with the same fake `fetch`, the 100 Accounts × 20 Sessions drain under Convex's transaction limits (`convex/sessionCancellations.test.ts`) |
+| Session mail and its send | `convex-test` through `api.sessions.*`, `api.groups.*`, `api.player.*`, `api.roster.removePlayer` and `api.account.finishSave` with fake timers, the real posthog-node and a fake of PostHog's email API (`posthogEmailFake.ts`) that records each send and decodes the uploaded `invite.ics` (`convex/sessionInvites.test.ts`). `vitest.convex-setup.ts` hashes files at once under the faked clock |
+| The Undo window, the opt-out and the rechecks before each send | `convex/sessionMail.test.ts` with the same fake, only PostHog's token and key set |
+| Deleting a Group | `convex-test` through `api.groups.remove` and `internal.cleanup.sweepExpiredGroups` with the same fake, the 100 Accounts × 20 Sessions drain under Convex's transaction limits (`convex/sessionCancellations.test.ts`) |
 | Copy | `sessionMailCopy` on plain data with Vitest (`convex/model/sessionMailCopy.test.ts`) |
-| One-time invites | `convex-test` through `internal.oneTimeInvites.inviteScheduledSessions` with the same fake `fetch` and fake timers, the day's Resend count seeded in `mailVolume` (`convex/sessionInvites.test.ts`) |
+| One-time invites | `convex-test` through `internal.oneTimeInvites.inviteScheduledSessions` with the same fake and fake timers, the day's `resend` count seeded in `mailVolume` (`convex/sessionInvites.test.ts`) |

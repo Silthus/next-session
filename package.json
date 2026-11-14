@@ -22,7 +22,7 @@
     "@tanstack/react-router": "1.170.41",
     "convex": "1.46.0",
     "posthog-js": "1.438.1",
-    "posthog-node": "5.63.1",
+    "posthog-node": "file:vendor/posthog-node-5.71.0-pr5514-f13c1e0.tgz",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-email": "6.11.7"
@@ -64,5 +64,9 @@
     "vitest": "5.0.3",
     "wrangler": "4.147.0",
     "zod": "4.6.1"
+  },
+  "overrides": {
+    "@posthog/core": "file:vendor/posthog-core-1.67.2-f13c1e0.tgz",
+    "@posthog/types": "file:vendor/posthog-types-1.424.1-f13c1e0.tgz"
   }
 }

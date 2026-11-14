@@ -23,10 +23,9 @@ import { frozenEntry, mailProvider } from "./schema";
 declare const process: { env: Record<string, string | undefined> };
 
 const MAX_ATTEMPTS = 4;
-const SEND_TIMEOUT_MS = 10_000;
+export const SEND_TIMEOUT_MS = 10_000;
 const TOO_MANY_REQUESTS = 429;
 const FIRST_SERVER_ERROR = 500;
-const RESEND_URL = "https://api.resend.com/emails";
 export const CALENDAR_ADDRESS = "calendar@next-session.link";
 const CALENDAR_SENDER = `Next Session <${CALENDAR_ADDRESS}>`;
 const CALENDAR_SEND_SPACING_MS = 600;
@@ -77,6 +76,7 @@ export type CalendarSend = Infer<typeof calendarSend>;
 
 export const calendarMessage = v.object({
   to: v.string(),
+  distinctId: v.string(),
   subject: v.string(),
   text: v.string(),
   html: v.string(),
@@ -120,15 +120,22 @@ export type MailRequest = {
 
 const WEBHOOK_URL_VARIABLES: Record<WebhookKind, string> = { tips: "POSTHOG_TIPS_WEBHOOK_URL" };
 
-export type CodeMailConfig = { projectToken: string; secretKey: string; replyTo: string };
+export type PostHogMailConfig = { projectToken: string; secretKey: string };
+export type CodeMailConfig = PostHogMailConfig & { replyTo: string };
+
+// What a PostHog code send needs. Session mail needs nothing more: it sets no reply-to address.
+export function postHogMailConfig(): PostHogMailConfig | null {
+  const projectToken = postHogProjectToken();
+  const secretKey = process.env.POSTHOG_SECRET_KEY;
+  return projectToken && secretKey ? { projectToken, secretKey } : null;
+}
 
 // The Welcome Mail and Reminders go out as PostHog code sends. A deployment without a project
 // secret key and a reply-to address sends neither.
 export function codeMailConfig(): CodeMailConfig | null {
-  const projectToken = postHogProjectToken();
-  const secretKey = process.env.POSTHOG_SECRET_KEY;
+  const config = postHogMailConfig();
   const replyTo = process.env.MAIL_REPLY_TO;
-  return projectToken && secretKey && replyTo ? { projectToken, secretKey, replyTo } : null;
+  return config && replyTo ? { ...config, replyTo } : null;
 }
 
 export async function requestMail(ctx: MutationCtx, { kind, user, tipsConfirmUrl }: MailRequest) {
@@ -229,7 +236,7 @@ export function remindersConfigured() {
 }
 
 export function calendarMailConfigured() {
-  return resendApiKey() !== undefined;
+  return postHogMailConfig() !== null;
 }
 
 export async function requestCalendarMails(ctx: MutationCtx, sends: CalendarSend[]) {
@@ -247,49 +254,39 @@ export const sendCalendar = internalAction({
   args: { send: calendarSend },
   returns: v.null(),
   handler: async (ctx, { send }) => {
-    const apiKey = resendApiKey();
-    if (apiKey === undefined) return null;
+    if (!calendarMailConfigured()) return null;
     const mail = await ctx.runQuery(internal.sessionMail.calendarMail, { send });
     if (mail === null) return null;
-    const { status } = await postToResend(apiKey, mail, resendRequestOf(mail));
-    if (isRetryable(status)) throw new Error(`Resend answered HTTP ${status}`);
-    if (status >= 400) console.error(`Resend refused a calendar mail: HTTP ${status}, dropped`);
+    await ctx.runAction(internal.codeMail.sendCalendar, { mail });
     return null;
   },
 });
 
-function resendApiKey() {
-  return process.env.RESEND_API_KEY || undefined;
-}
+const CALENDAR_TEMPLATE_KEY = "next-session-session-update";
 
-function resendRequestOf(mail: Infer<typeof calendarMessage>) {
-  return JSON.stringify({
+// The PostHog send of one calendar mail. The idempotency key ends in a hash of the email, so a
+// changed mail is never answered with an earlier one.
+export function calendarEmailOf(mail: Infer<typeof calendarMessage>) {
+  const email = {
+    templateKey: CALENDAR_TEMPLATE_KEY,
+    to: mail.to,
     from: CALENDAR_SENDER,
-    to: [mail.to],
     subject: mail.subject,
-    text: mail.text,
     html: mail.html,
+    text: mail.text,
     attachments: [
       {
         filename: "invite.ics",
         content: base64(mail.invite.calendar),
-        content_type: calendarContentType(mail.invite.kind),
+        contentType: calendarContentType(mail.invite.kind),
       },
     ],
-  });
-}
-
-async function postToResend(apiKey: string, mail: Infer<typeof calendarMessage>, body: string) {
-  return await fetch(RESEND_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-      "Idempotency-Key": `${mail.idempotencyKey}/${fingerprintOf(body)}`,
-    },
-    body,
-    signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
-  });
+  };
+  return {
+    ...email,
+    distinctId: mail.distinctId,
+    idempotencyKey: `${mail.idempotencyKey}/${fingerprintOf(JSON.stringify(email))}`,
+  };
 }
 
 function fingerprintOf(text: string) {

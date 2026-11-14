@@ -4,7 +4,7 @@ What Next Session has in PostHog, and how to rebuild it. The design is `docs/spe
 
 ## Mail activation
 
-Welcome Mail and Tips are active in EU project `13216` since 2026-10-07, and Reminders since 2026-10-16 (below), using verified sender `88088`. The Welcome Mail and Reminders move from their workflows to code sends with [ADR-0014](../adr/0014-welcome-mail-and-reminders-are-posthog-code-sends.md) (below); Tips keep their workflow. The production mail environment is configured privately. #79 proved Welcome receipt and Tips confirmation; Tips retains its two-day maximum wait and can exit early after a Session is scheduled. Session updates go through Resend with a calendar invite (`docs/spec.md` §15), and their old workflow is archived (#162).
+Welcome Mail and Tips are active in EU project `13216` since 2026-10-07, and Reminders since 2026-10-16 (below), using verified sender `88088`. The Welcome Mail and Reminders move from their workflows to code sends with [ADR-0014](../adr/0014-welcome-mail-and-reminders-are-posthog-code-sends.md) (below); Tips keep their workflow. The production mail environment is configured privately. #79 proved Welcome receipt and Tips confirmation; Tips retains its two-day maximum wait and can exit early after a Session is scheduled. Session updates go through Resend with a calendar invite (`docs/spec.md` §15) until they move to a code send with [ADR-0015](../adr/0015-session-mail-goes-through-posthog-code-sends.md) (below), and their old workflow is archived (#162).
 
 In PostHog EU project `13216`, open **Workflows → Channels → hello@next-session.link** and press **Verify** or **Verify DNS records**. Confirm the channel shows verified before setting any mail variable in Convex production: code sends use the same sender. For Tips, `POSTHOG_MAIL_WEBHOOK_SECRET` and `POSTHOG_TIPS_WEBHOOK_URL` need the Tips workflow active. A webhook can return 201 before its email step runs, so acceptance alone does not prove delivery.
 
@@ -21,6 +21,20 @@ Switch on in this order:
 5. Archive the "Next Session: Welcome Mail" and "Next Session: Reminders" workflows, and remove `POSTHOG_WELCOME_WEBHOOK_URL` and `POSTHOG_REMINDER_WEBHOOK_URL` from Convex prod. `POSTHOG_MAIL_WEBHOOK_SECRET` stays for Tips. Then delete the two forwarders in `convex/mail.ts` (`send`'s `"welcome"` kind and `sendReminder`): the retrier jobs queued for the workflows before the merge have run by then.
 
 To stop both mails, remove `POSTHOG_SECRET_KEY`. Going back to the workflows means reverting ADR-0014's code.
+
+## Code send (Session mail)
+
+[ADR-0015](../adr/0015-session-mail-goes-through-posthog-code-sends.md) sends Session mail, with its `invite.ics`, as a code send from `convex/codeMail.ts`, named `next-session-session-update`. It goes out when `POSTHOG_PROJECT_TOKEN` and `POSTHOG_SECRET_KEY` are set, the key the Welcome Mail and Reminders use, and no longer reads `RESEND_API_KEY`. It is sensitive and tracks no opens, clicks or engagement.
+
+Switch on in this order:
+
+1. Wait until PostHog takes a file's content type with parameters (`text/calendar; charset=utf-8; method=REQUEST`). Until then it refuses every Session mail with `not_mime_type`. From a local backend, send one Session mail to an owned Gmail and an owned Outlook inbox, and check that each shows an invitation card, not only a file, and that the send shows as delivered under **Workflows → Transactional emails**.
+2. Copy Resend's suppressions right before the merge, so none are missed. In Resend, open **Emails → Suppressions** and press **Download CSV**. Keep the file out of the repo. In EU project `13216`, add each address of the file to the suppression list under **Workflows**, by hand or with the [messaging suppressions API](https://posthog.com/docs/api/messaging-suppressions). Leave out Resend contacts that only unsubscribed: they are not suppressions. Delete the CSV after.
+3. Check that no Session mail retry is pending in the action retrier: a retry of a send Resend already took would mail twice.
+4. Merge and deploy. Change a disposable Session's date, and check the update and its invite in an owned inbox.
+5. Remove `RESEND_API_KEY` from Convex prod, and revoke the key in Resend. Resend's DNS records (`send`, `rsend`, `resend._domainkey`) can go once no mail has used them for 30 days.
+
+There is no switch for Session mail alone: removing `POSTHOG_SECRET_KEY` stops it, the Welcome Mail and Reminders. Going back to Resend means reverting ADR-0015's code.
 
 `docs/spec.md` §13.9: create the project in EU Cloud, re-create the sender, templates and workflows from these files, and change `VITE_POSTHOG_TOKEN`, `POSTHOG_PROJECT_ID`, the Convex env and the webhook URLs.
 

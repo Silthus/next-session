@@ -6,7 +6,7 @@ Their copy is React Email components in `emails/` (`WelcomeMail.tsx`, `ReminderM
 
 There is no fallback to the workflows. With `POSTHOG_PROJECT_TOKEN`, `POSTHOG_SECRET_KEY` and `MAIL_REPLY_TO` set, the mails go out as code sends; without them, a deployment sends neither, schedules no Reminder and hides the Reminders switch, as it did before without the webhook env. Two paths would keep two copies of each mail and two retry rules alive for a switch-over that happens once.
 
-Tips stay on their workflow: the drip waits days between steps and stops when a Session is scheduled, which only a workflow does. Session mail stays on Resend and its own HTML until PostHog delivers attachments with `text/calendar; method=…` (ADR-0012).
+Tips stay on their workflow: the drip waits days between steps and stops when a Session is scheduled, which only a workflow does. Session mail stays on Resend and its own HTML until PostHog delivers attachments with `text/calendar; method=…` (ADR-0012); [ADR-0015](0015-session-mail-goes-through-posthog-code-sends.md) moves it once PostHog does.
 
 `posthog-node` resolves to its Node entry under Convex's bundler, so the sends live in a `"use node"` file, `convex/codeMail.ts`. Once `posthog-node` exports a `convex` condition for its edge entry, they can move back to the default runtime. Its own retries are off (`maxRetries: 0`): the action retrier makes every retry, so a Reminder's Account is checked again before each attempt.
 

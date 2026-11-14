@@ -46,22 +46,35 @@ describe("privacy text", () => {
     );
   });
 
-  it("says how long Resend keeps session emails and their delivery logs", () => {
-    expect(sectionOf(privacy, "5. How long we keep data")).toContain(
-      "| Session emails with their calendar invites, and their delivery logs, at Resend | 30 days; removed from Resend's backups within 7 days after that |",
+  it("says how long PostHog keeps a session email's delivery log and its calendar invite", () => {
+    const retention = sectionOf(privacy, "5. How long we keep data");
+    expect(retention).toContain(
+      "| The delivery log of a session email in PostHog: your email address and whether the mail arrived. PostHog keeps no copy of the mail's text | 30 days |",
+    );
+    expect(retention).toContain(
+      "| The calendar invite of a session email, as a file in PostHog | 37 days |",
     );
   });
 
-  it("leaves session emails to Resend alone, so PostHog neither sends them nor keeps an address for them", () => {
-    const postHogRow = /\| PostHog Inc\. \|[^\n]*/.exec(sectionOf(privacy, "4. Recipients"))?.[0];
-    const postHogProfile = /\| Your account's pseudonymous profile in PostHog[^\n]*/.exec(
-      sectionOf(privacy, "5. How long we keep data"),
-    )?.[0];
-    const shareLinkReach = sectionOf(privacy, "2. What we process")
-      .split("\n\n")
-      .find((paragraph) => paragraph.includes("as mail content, which our backend sends"));
-    for (const text of [postHogRow, postHogProfile, shareLinkReach])
-      expect(text).not.toMatch(/session (updates|emails or)/i);
+  it("names PostHog as the sender of session emails, and Resend nowhere", () => {
+    expect(sectionOf(privacy, "4. Recipients")).toMatch(
+      /\| PostHog Inc\. \|[^\n]*session emails with calendar invites when enabled/,
+    );
+    expect(
+      sectionOf(privacy, "2. What we process")
+        .split("\n\n")
+        .find((paragraph) => paragraph.includes("as mail content, which our backend sends")),
+    ).toContain("When session emails are enabled, PostHog receives the share link as mail content");
+    expect(privacy).not.toMatch(/Resend|Plus Five Five/);
+  });
+
+  it("keeps no address on the PostHog profile for session emails, which count no opens or clicks", () => {
+    expect(
+      /\| Your account's pseudonymous profile in PostHog[^\n]*/.exec(
+        sectionOf(privacy, "5. How long we keep data"),
+      )?.[0],
+    ).not.toMatch(/session/i);
+    expect(privacy).toContain("Session updates carry no open or click tracking.");
   });
 
   it("names the given name a Google sign-in gives, for the welcome mail's greeting", () => {

@@ -11,6 +11,13 @@ import {
   signIn,
   type TestBackend,
 } from "./model/test.setup";
+import {
+  accepted,
+  POSTHOG_SEND_URL as SEND_URL,
+  postHogEmailFake,
+  urlOf,
+  type SentEmail,
+} from "../posthogEmailFake";
 
 const ROBIN = "robin@example.com";
 
@@ -20,10 +27,11 @@ let fetchMock: ReturnType<typeof vi.fn<typeof fetch>>;
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
-  vi.stubEnv("RESEND_API_KEY", "re_test_key");
+  vi.stubEnv("POSTHOG_PROJECT_TOKEN", "phc_test_project");
+  vi.stubEnv("POSTHOG_SECRET_KEY", "phs_test_key");
   vi.stubEnv("SITE_URL", "https://next-session.link");
-  fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(new Response(null, { status: 200 })));
-  vi.stubGlobal("fetch", fetchMock);
+  fetchMock = vi.fn<typeof fetch>(() => Promise.resolve(accepted()));
+  vi.stubGlobal("fetch", postHogEmailFake(fetchMock).fetch);
   t = newBackend();
 });
 
@@ -209,7 +217,7 @@ describe("backfill.widenPublishedSnapshots", () => {
     await t.mutation(internal.sessionLifecycle.settle, { sessionId, changedAt });
 
     expect(await publishedOf(sessionId)).toEqual({ state: "scheduled", revision: 3 });
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(emailRequests()).toEqual([]);
   });
 
   it("keeps a Cancelled Session cancelled", async () => {
@@ -272,7 +280,7 @@ describe("backfill.widenPublishedSnapshots", () => {
     await t.finishAllScheduledFunctions(() => vi.runAllTimers());
 
     expect(await publishedOf(sessionId)).toEqual(widened);
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(emailRequests()).toEqual([]);
   });
 });
 
@@ -290,9 +298,13 @@ async function crew() {
   return gm;
 }
 
+function emailRequests() {
+  return fetchMock.mock.calls.filter(([input]) => urlOf(input) === SEND_URL);
+}
+
 function subjectsToRobin() {
-  return fetchMock.mock.calls
-    .map(([, init]) => JSON.parse(init!.body as string) as { to: string[]; subject: string })
-    .filter(({ to }) => to.includes(ROBIN))
+  return emailRequests()
+    .map(([, init]) => JSON.parse(init!.body as string) as SentEmail)
+    .filter(({ to }) => to === ROBIN)
     .map(({ subject }) => subject);
 }

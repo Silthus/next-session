@@ -9,32 +9,41 @@ import {
   type TestBackend,
 } from "./model/test.setup";
 import { UNDO_WINDOW_MS } from "../shared/sessions";
+import {
+  accepted,
+  POSTHOG_SEND_URL as SEND_URL,
+  postHogEmailFake,
+  urlOf,
+  type SentEmail,
+} from "../posthogEmailFake";
 
-const RESEND_URL = "https://api.resend.com/emails";
 const ROBIN = "robin@example.com";
-
-type ResendMail = {
-  to: string[];
-  subject: string;
-  text: string;
-  attachments: { filename: string; content: string; content_type: string }[];
-};
 
 type SentRequest = { url: string; at: number; body: string };
 
 let t: TestBackend;
 let sent: SentRequest[];
+let email: ReturnType<typeof postHogEmailFake>;
+
+// Answers every request as given, after keeping it in `sent`.
+function answering(answer: (url: string, body: string) => Response) {
+  email = postHogEmailFake((input, init) => {
+    const url = urlOf(input);
+    const body = init?.body as string;
+    sent.push({ url, at: Date.now(), body });
+    return Promise.resolve(answer(url, body));
+  });
+  vi.stubGlobal("fetch", email.fetch);
+}
 
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(Date.UTC(2026, 9, 7, 12));
-  vi.stubEnv("RESEND_API_KEY", "re_test_key");
+  vi.stubEnv("POSTHOG_PROJECT_TOKEN", "phc_test_project");
+  vi.stubEnv("POSTHOG_SECRET_KEY", "phs_test_key");
   vi.stubEnv("SITE_URL", "https://next-session.link");
   sent = [];
-  vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
-    sent.push({ url: urlOf(input), at: Date.now(), body: init?.body as string });
-    return Promise.resolve(new Response(null, { status: 200 }));
-  });
+  answering(() => accepted());
   t = newBackend();
 });
 
@@ -44,10 +53,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
-
-function urlOf(input: RequestInfo | URL) {
-  return typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-}
 
 async function crew(signInGm?: Parameters<typeof signedInGmWithGroup>[1]) {
   const gm = await signedInGmWithGroup(t, signInGm);
@@ -90,30 +95,29 @@ async function cancellationsKept() {
   return await t.run(async (ctx) => await ctx.db.query("calendarCancellations").collect());
 }
 
-function resendMails() {
+function sentMails() {
   return sent
-    .filter(({ url }) => url === RESEND_URL)
-    .map(({ body }) => JSON.parse(body) as ResendMail);
+    .filter(({ url }) => url === SEND_URL)
+    .map(({ body }) => JSON.parse(body) as SentEmail);
 }
 
 function mailsTo(address: string) {
-  return resendMails().filter(({ to }) => to.includes(address));
+  return sentMails().filter(({ to }) => to === address);
 }
 
-function calendarOf(mail: ResendMail) {
-  const bytes = Uint8Array.from(atob(mail.attachments[0]!.content), (c) => c.charCodeAt(0));
-  return new TextDecoder().decode(bytes).replace(/\r\n /g, "");
+function calendarOf(mail: SentEmail) {
+  return email.fileText(mail.attachments![0]!).replace(/\r\n /g, "");
 }
 
-function sequenceOf(mail: ResendMail) {
+function sequenceOf(mail: SentEmail) {
   return Number(/SEQUENCE:(\d+)/.exec(calendarOf(mail))![1]);
 }
 
-function uidOf(mail: ResendMail) {
+function uidOf(mail: SentEmail) {
   return /UID:(.+)\r\n/.exec(calendarOf(mail))![1]!;
 }
 
-function lastSequenceByUid(mails: ResendMail[]) {
+function lastSequenceByUid(mails: SentEmail[]) {
   return new Map(mails.map((mail) => [uidOf(mail), sequenceOf(mail)]));
 }
 
@@ -132,7 +136,7 @@ describe("deleting a Group", () => {
     await as.mutation(api.groups.remove, { groupId });
     await finish();
 
-    expect(mailsTo(ROBIN).map(({ subject, text }) => [subject, text.split("\n")[0]])).toEqual([
+    expect(mailsTo(ROBIN).map(({ subject, text }) => [subject, text!.split("\n")[0]])).toEqual([
       [
         "Thursday Crew: session on Saturday, October 17, 2026 cancelled",
         "Thursday Crew was deleted, so its session on Saturday, October 17, 2026 is off.",
@@ -142,17 +146,17 @@ describe("deleting a Group", () => {
         "Thursday Crew was deleted, so its session on Saturday, October 24, 2026 is off.",
       ],
     ]);
-    expect(mailsTo(gmEmail).map(({ text }) => text.split("\n")[0])).toEqual([
+    expect(mailsTo(gmEmail).map(({ text }) => text!.split("\n")[0])).toEqual([
       "You deleted Thursday Crew, so its session on Saturday, October 17, 2026 is off.",
       "You deleted Thursday Crew, so its session on Saturday, October 24, 2026 is off.",
     ]);
-    expect(resendMails()).toHaveLength(4);
+    expect(sentMails()).toHaveLength(4);
     for (const [address, lastInvite] of [
       [ROBIN, invited.robin],
       [gmEmail, invited.gm],
     ] as const) {
       for (const mail of mailsTo(address)) {
-        expect(mail.attachments[0]!.content_type).toBe(
+        expect(mail.attachments![0]!.content_type).toBe(
           "text/calendar; charset=utf-8; method=CANCEL",
         );
         expect(calendarOf(mail)).toContain("METHOD:CANCEL\r\n");
@@ -166,26 +170,21 @@ describe("deleting a Group", () => {
     const gm = await crew();
     const { as, groupId } = gm;
     const [sessionId] = await scheduleNightIds(gm, ["2026-10-17"]);
-    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
-      const body = init?.body as string;
-      sent.push({ url: urlOf(input), at: Date.now(), body });
-      return Promise.resolve(
-        new Response(null, { status: body.includes("cancelled") ? 503 : 200 }),
-      );
-    });
+    answering((url, body) =>
+      url === SEND_URL && body.includes("cancelled")
+        ? new Response(null, { status: 503 })
+        : accepted(),
+    );
     await as.mutation(api.sessions.cancel, { sessionId: sessionId! });
     await vi.advanceTimersByTimeAsync(UNDO_WINDOW_MS + 1);
     await t.finishInProgressScheduledFunctions();
-    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
-      sent.push({ url: urlOf(input), at: Date.now(), body: init?.body as string });
-      return Promise.resolve(new Response(null, { status: 200 }));
-    });
+    answering(() => accepted());
     sent = [];
 
     await as.mutation(api.groups.remove, { groupId });
     await finish();
 
-    expect(mailsTo(ROBIN).map(({ text }) => text.split("\n")[0])).toEqual([
+    expect(mailsTo(ROBIN).map(({ text }) => text!.split("\n")[0])).toEqual([
       "Thursday Crew was deleted, so its session on Saturday, October 17, 2026 is off.",
     ]);
   });
@@ -207,7 +206,7 @@ describe("deleting a Group", () => {
     await as.mutation(api.groups.remove, { groupId });
     await finish();
 
-    expect(resendMails()).toEqual([]);
+    expect(sentMails()).toEqual([]);
   });
 
   it("cancels an expired Unsaved Group's nights for its Players and leaves its Anonymous GM out", async () => {
@@ -220,13 +219,13 @@ describe("deleting a Group", () => {
     await t.mutation(internal.cleanup.sweepExpiredGroups, {});
     await finish();
 
-    expect(resendMails().map(({ to, text }) => [to, text.split("\n")[0]])).toEqual([
-      [[ROBIN], "Thursday Crew was deleted, so its session on Saturday, October 17, 2026 is off."],
-      [[ROBIN], "Thursday Crew was deleted, so its session on Saturday, October 24, 2026 is off."],
+    expect(sentMails().map(({ to, text }) => [to, text!.split("\n")[0]])).toEqual([
+      [ROBIN, "Thursday Crew was deleted, so its session on Saturday, October 17, 2026 is off."],
+      [ROBIN, "Thursday Crew was deleted, so its session on Saturday, October 24, 2026 is off."],
     ]);
   });
 
-  it("drains 100 Accounts × 20 Sessions in runs Convex accepts, spaced under Resend's rate, and forgets them", async () => {
+  it("drains 100 Accounts × 20 Sessions in runs Convex accepts, spaced 500 ms apart, and forgets them", async () => {
     vi.spyOn(console, "info").mockImplementation(() => undefined);
     t = newBackend({ transactionLimits: true });
     const { as, groupId } = await signedInGmWithGroup(t);
@@ -265,11 +264,11 @@ describe("deleting a Group", () => {
       await t.finishInProgressScheduledFunctions();
     }
 
-    const mails = resendMails();
+    const mails = sentMails();
     expect(mails).toHaveLength(2_000);
-    expect(new Set(mails.map(({ to }) => to[0])).size).toBe(100);
-    expect(new Set(mails.map((mail) => `${mail.to[0]} ${uidOf(mail)}`)).size).toBe(2_000);
-    const times = sent.filter(({ url }) => url === RESEND_URL).map(({ at }) => at);
+    expect(new Set(mails.map(({ to }) => to)).size).toBe(100);
+    expect(new Set(mails.map((mail) => `${mail.to} ${uidOf(mail)}`)).size).toBe(2_000);
+    const times = sent.filter(({ url }) => url === SEND_URL).map(({ at }) => at);
     const gaps = times.slice(1).map((at, index) => at - times[index]!);
     expect(Math.min(...gaps)).toBeGreaterThanOrEqual(500);
     expect(await cancellationsKept()).toEqual([]);
@@ -288,10 +287,10 @@ describe("deleting a Group", () => {
     expect(mailsTo(gm.gmEmail!)).toHaveLength(2);
   });
 
-  it("deletes as before without RESEND_API_KEY: nothing kept for later, nothing sent", async () => {
+  it("deletes as before without PostHog's secret key: nothing kept for later, nothing sent", async () => {
     const gm = await crew();
     await scheduleNights(gm);
-    vi.stubEnv("RESEND_API_KEY", "");
+    vi.stubEnv("POSTHOG_SECRET_KEY", "");
     sent = [];
 
     await gm.as.mutation(api.groups.remove, { groupId: gm.groupId });
@@ -299,7 +298,7 @@ describe("deleting a Group", () => {
     await finish();
 
     expect(keptForLater).toEqual([]);
-    expect(resendMails()).toEqual([]);
+    expect(sentMails()).toEqual([]);
     expect(await gm.as.query(api.groups.get, { groupId: gm.groupId })).toBeNull();
   });
 });
