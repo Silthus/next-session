@@ -405,7 +405,13 @@ function PlayerAnswers({
       store.setQuery(api.player.answers, query, withRestBusy(current, args.month, today));
   });
   const [hintVisible, setHintVisible] = useState(() => !hasSeenHint(group.groupId));
-  const others = useOthersOverlay({ group, shareToken, playerId, month });
+  const others = useOthersOverlay({
+    group,
+    shareToken,
+    playerId,
+    month,
+    pastMonth: month < monthOf(today),
+  });
 
   function dismissHint() {
     markHintSeen(group.groupId);
@@ -466,18 +472,20 @@ function useOthersOverlay({
   shareToken,
   playerId,
   month,
+  pastMonth,
 }: {
   group: PlayerGroupView;
   shareToken: string;
   playerId: Id<"players">;
   month: IsoMonth;
+  pastMonth: boolean;
 }): OthersOverlay | undefined {
   const hasOthers = group.players.length > 1;
   const [shown, setShown] = useState(() => !othersHidden());
   const [introSeen, setIntroSeen] = useState(hasSeenOthersIntro);
   const answers = useQuery(
     api.player.othersAnswers,
-    hasOthers && shown ? { shareToken, playerId, month } : "skip",
+    hasOthers && shown && !pastMonth ? { shareToken, playerId, month } : "skip",
   );
 
   function dismissIntro() {

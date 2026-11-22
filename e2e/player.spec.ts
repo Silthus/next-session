@@ -77,6 +77,11 @@ function tile(page: Page, date: IsoDate) {
 }
 
 async function answerAs(page: Page, group: SeededGroup, name: string) {
+  await answerAsBeforeTheOthersIntro(page, group, name);
+  await page.addInitScript(() => localStorage.setItem("next-session.othersIntroSeen", "1"));
+}
+
+async function answerAsBeforeTheOthersIntro(page: Page, group: SeededGroup, name: string) {
   await rememberPlayerWithoutHint(page, group, name);
   await markHintSeen(page, group);
 }
@@ -334,7 +339,7 @@ test.describe("the player surface", () => {
     const night = currentDates().bookableDays.at(-1)!;
     await answerFor(group, "Ben", night, "free");
     await answerFor(group, "Chiara", night, "maybe");
-    await answerAs(page, group, "Ana");
+    await answerAsBeforeTheOthersIntro(page, group, "Ana");
 
     await page.goto(group.link);
     const intro = page.getByRole("dialog", { name: "New: see who else can play" });
@@ -616,7 +621,7 @@ test.describe("player surface screenshots", () => {
       if (index % 2 === 0) await answerFor(group, "Chiara", date, index % 4 ? "free" : "maybe");
       if (index % 5 === 0) await answerFor(group, "Dev", date, "maybe");
     }
-    await answerAs(page, group, "Ana");
+    await answerAsBeforeTheOthersIntro(page, group, "Ana");
 
     await captureEveryVariant(page, group.link, async (shot) => {
       await expect(page.getByRole("dialog", { name: "New: see who else can play" })).toBeVisible();

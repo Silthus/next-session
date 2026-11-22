@@ -390,7 +390,7 @@ Storage keys: `next-session.players` (Player identity), `next-session.lastGroup`
 | Prefilled share message | "Help me find our next game night. Tap the days you can play, it takes 30 seconds: {url}" | GM-editable text |
 | Email code sign-in in v1 | No. The sheet asks for email and password. Google appears when Michael provides an OAuth client | Ship Resend OTP first |
 | Player first-visit hint | Non-modal popover on the first tile, per Group, dismissed by the first tap; the cycling tip stays | Cycling tip alone |
-| Others on the player calendar | On by default for a Player with others on the Roster: a thin bar at the foot of each open night fills green for the share of other Players free and yellow for maybe. **Show others** under the grid turns it off, remembered per browser. A one-time popover on the switch introduces it, after the first-visit hint | Names per night, or off by default |
+| Others on the player calendar | On by default for a Player with others on the Roster: a thin bar at the foot of each open night fills green for the share of other Players free and orange for maybe. **Show others** under the grid turns it off, remembered per browser. A one-time callout under the switch introduces it, after the first-visit hint | Names per night, or off by default |
 | Rotate with Undo | Undo restores the previous token within 30 s (`undoRotateShareToken`); no confirm | Confirm dialog |
 | Best Nights across months | Per visible month | Across the Booking Window |
 | `?as=` on the player URL | Dropped; identity is local only | Keep it as a shareable "answer as" link |
