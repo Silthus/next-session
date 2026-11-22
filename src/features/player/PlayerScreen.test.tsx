@@ -12,6 +12,7 @@ import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { useGm } from "../account/useGm";
 import { markHintSeen, rememberPlayer } from "../../lib/storage";
+import { track } from "../../lib/telemetry";
 import { PlayerScreen } from "./PlayerScreen";
 
 const groupId = "group-one" as Id<"groups">;
@@ -459,6 +460,22 @@ describe("the others on the calendar", () => {
     expect(screen.getByRole("switch", { name: "Show others" }).getAttribute("aria-checked")).toBe(
       "false",
     );
+  });
+
+  it("reports each flip of the switch with where it ends up", async () => {
+    vi.mocked(track).mockClear();
+    renderPage();
+    const toggle = await screen.findByRole("switch", { name: "Show others" });
+
+    await userEvent.click(toggle);
+    await userEvent.click(toggle);
+
+    expect(
+      vi.mocked(track).mock.calls.filter(([event]) => event.name === "others_overlay_toggled"),
+    ).toEqual([
+      [{ name: "others_overlay_toggled", group_id: groupId, shown: false }],
+      [{ name: "others_overlay_toggled", group_id: groupId, shown: true }],
+    ]);
   });
 
   it("introduces the others once, after the first-visit hint", async () => {
