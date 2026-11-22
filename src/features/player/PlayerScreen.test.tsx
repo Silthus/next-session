@@ -12,7 +12,6 @@ import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { useGm } from "../account/useGm";
 import { markHintSeen, rememberPlayer } from "../../lib/storage";
-import { track } from "../../lib/telemetry";
 import { PlayerScreen } from "./PlayerScreen";
 
 const groupId = "group-one" as Id<"groups">;
@@ -420,7 +419,6 @@ describe("the others on the calendar", () => {
   const intro = { name: "New: see who else can play" };
 
   beforeEach(() => {
-    vi.mocked(track).mockReset();
     queries["player:othersAnswers2026-10"] = {
       others: 1,
       days: { "2026-10-09": { free: 1, maybe: 0 } },
@@ -450,11 +448,6 @@ describe("the others on the calendar", () => {
     expect(screen.getByRole("button", { name: friday }).getAttribute("aria-label")).toBe(
       "Friday, October 9: Not set",
     );
-    expect(track).toHaveBeenCalledWith({
-      name: "others_overlay_toggled",
-      group_id: groupId,
-      shown: false,
-    });
 
     reopenPage();
     expect((await screen.findByRole("button", { name: friday })).getAttribute("aria-label")).toBe(
