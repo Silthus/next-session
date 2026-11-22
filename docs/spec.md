@@ -226,6 +226,7 @@ The name and Roster checks that `roster` and `player` share (`validName`, `ensur
 | | `updateDetails` | mutation | `{sessionId, startTime?, lengthMinutes?, location?}` → `null` | Each field is a value (the Session's own), `null` (follow the Group again) or absent (left alone). `OUT_OF_WINDOW` for a past date, `SESSION_CANCELLED` for a Cancelled Session, `INVALID_SETTINGS` on the same rules as `updateSettings`. Trims the location; an empty one means no place this night. Changes the Session through `updateSessionDetails` (§12.6) and touches the Group. A call that changes nothing is a no-op success. Rate limit `gmEdit` |
 | `player` | `group` | query | `{shareToken}` → `PlayerGroupView \| null` | groupId, name, Players (id, name), every Session of the Group as `{date, state}` with its effective `startTime`, `lengthMinutes` and `location`, Cancelled ones included (the client filters them by the Booking Window), the Group's `timeZone`, `claimedPlayerId`: the caller's Claimed Player in this Group, or `null`, and `opensAsGm`: whether the caller's Account runs this Group without a Claimed Player in it, which sends the Share Link on to `/g/<groupId>`. `null` renders the not-found page |
 | | `answers` | query | `{shareToken, playerId, month}` → `Record<date, Answer> \| null` | `null` for an unknown token, a foreign or removed Player, or a malformed id or month |
+| | `othersAnswers` | query | `{shareToken, playerId, month}` → `{others, days: Record<date, {free, maybe}>} \| null` | For the others overlay: how many of the Group's other Players answered free and maybe on each date of the month, and `others`, how many other Players the Roster has. Dates where no other Player is free or maybe are absent. `null` as for `answers` |
 | | `join` | mutation | `{shareToken, name}` → `Id<"players">` | `NAME_TAKEN` carries the existing `playerId` so the UI can highlight the chip. Rate limit `joinGroup`. An Account caller claims the new Player (§12) |
 | | `claim` | mutation | `{shareToken, playerId}` → `null` | Account only. Moves the caller's claim in this Group to the Player. `PLAYER_CLAIMED` if another Account holds it. Rate limit `claimPlayer` |
 | | `release` | mutation | `{groupId}` → `null` | Account only. Clears the caller's claim in that Group, if any. Rate limit `claimPlayer` |
@@ -379,7 +380,7 @@ e2e/                    Playwright specs and helpers; walks/ holds the *.e2e.ts 
 docs/legal/             terms.md, privacy.md, imprint.md
 ```
 
-Storage keys: `next-session.players` (Player identity), `next-session.lastGroup`, `next-session.nudgeDismissedAt`, `next-session.playerHint.<groupId>`, `next-session.pendingSave` and `next-session.pendingKeep` (sessionStorage). Convex Auth keeps its own tokens.
+Storage keys: `next-session.players` (Player identity), `next-session.lastGroup`, `next-session.nudgeDismissedAt`, `next-session.playerHint.<groupId>`, `next-session.othersHidden` and `next-session.othersIntroSeen` (the others overlay), `next-session.pendingSave` and `next-session.pendingKeep` (sessionStorage). Convex Auth keeps its own tokens.
 
 ### 6.3 Decisions on DESIGN.md's open points
 
@@ -389,6 +390,7 @@ Storage keys: `next-session.players` (Player identity), `next-session.lastGroup`
 | Prefilled share message | "Help me find our next game night. Tap the days you can play, it takes 30 seconds: {url}" | GM-editable text |
 | Email code sign-in in v1 | No. The sheet asks for email and password. Google appears when Michael provides an OAuth client | Ship Resend OTP first |
 | Player first-visit hint | Non-modal popover on the first tile, per Group, dismissed by the first tap; the cycling tip stays | Cycling tip alone |
+| Others on the player calendar | On by default for a Player with others on the Roster: a thin bar at the foot of each open night fills green for the share of other Players free and orange for maybe. **Show others** under the grid turns it off, remembered per browser. A one-time callout under the switch introduces it, after the first-visit hint | Names per night, or off by default |
 | Rotate with Undo | Undo restores the previous token within 30 s (`undoRotateShareToken`); no confirm | Confirm dialog |
 | Best Nights across months | Per visible month | Across the Booking Window |
 | `?as=` on the player URL | Dropped; identity is local only | Keep it as a shareable "answer as" link |
@@ -711,6 +713,7 @@ export type BrowserEvent =
   | { name: "share_link_shared"; surface: "landing" | "rail" | "compact"; channel: "whatsapp" | "telegram" | "mail" | "native" }
   | { name: "fill_rest_used"; group_id: string } // once the nights are saved
   | { name: "answers_started"; group_id: string } // once per page load and Group, at the first saved tap or Fill the rest
+  | { name: "others_overlay_toggled"; group_id: string; shown: boolean } // the press on Show others, and where it leaves it
   | { name: "save_started" } // password or Google
   | { name: "sign_in_failed"; flow: "signUp" | "signIn"; code: string } // only the auth refusals: WEAK_PASSWORD, EMAIL_TAKEN, INVALID_CREDENTIALS, RATE_LIMITED
   | { name: "keep_group_started"; group_id: string; surface: "done_card" | "keep_card" | "keep_line" } // the tap on a keep button, and which one
@@ -733,6 +736,7 @@ The committed facts behind these steps (a link or Group created, a Player claime
 | --- | --- |
 | `share_link_copied`, `share_link_shared` | `ShareLinkCard` (`surface` is a prop: `landing` from the landing, else `compact` or `rail`). One event per Copy press with the final method; a native share counts once it resolves |
 | `answers_started`, `fill_rest_used` | `PlayerCalendar`, which takes `groupId` |
+| `others_overlay_toggled` | `useOthersOverlay` in `PlayerScreen` |
 | `keep_group_started` | `KeepGroup` (`keep_card` from the Keep card, `keep_line` from the quiet line) and the Keep your sessions card (`done_card`) |
 | `calendar_downloaded` | `NextSessions` on the player page, one per press on **Add to calendar** |
 | `save_started` | `saveGroups` and `saveThroughGoogle` in `save.ts` |

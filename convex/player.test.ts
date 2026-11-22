@@ -503,6 +503,47 @@ describe("player.answers", () => {
   });
 });
 
+describe("player.othersAnswers", () => {
+  it("counts the other Players free and maybe on each date of the month", async () => {
+    const { groupId, shareToken } = await sharedGroup();
+    const ada = await seedPlayer(groupId, "Ada");
+    const bo = await seedPlayer(groupId, "Bo");
+    const cy = await seedPlayer(groupId, "Cy");
+    await seedPlayer(groupId, "Di");
+    await seedAnswer(groupId, ada, "2026-10-09", "free");
+    await seedAnswer(groupId, bo, "2026-10-09", "free");
+    await seedAnswer(groupId, cy, "2026-10-09", "maybe");
+    await seedAnswer(groupId, bo, "2026-10-10", "maybe");
+    await seedAnswer(groupId, cy, "2026-10-11", "busy");
+    await seedAnswer(groupId, bo, "2026-11-01", "free");
+
+    expect(
+      await t.query(api.player.othersAnswers, { shareToken, playerId: ada, month: "2026-10" }),
+    ).toEqual({
+      others: 3,
+      days: {
+        "2026-10-09": { free: 1, maybe: 1 },
+        "2026-10-10": { free: 0, maybe: 1 },
+      },
+    });
+  });
+
+  it("returns null for a Player of another Group, an unknown token or a malformed month", async () => {
+    const mine = await sharedGroup();
+    const other = await sharedGroup();
+    const ada = await seedPlayer(mine.groupId, "Ada");
+    const stranger = await seedPlayer(other.groupId, "Stranger");
+
+    for (const args of [
+      { shareToken: mine.shareToken, playerId: stranger, month: "2026-10" },
+      { shareToken: "unknown123", playerId: ada, month: "2026-10" },
+      { shareToken: mine.shareToken, playerId: ada, month: "Oct" },
+    ]) {
+      expect(await t.query(api.player.othersAnswers, args)).toBeNull();
+    }
+  });
+});
+
 describe("player.join", () => {
   it("adds the Player to the Roster under the normalized name", async () => {
     const { groupId, shareToken } = await sharedGroup();

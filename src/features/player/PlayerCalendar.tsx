@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import type { FunctionReturnType } from "convex/server";
 import {
   useEffect,
   useId,
@@ -8,6 +9,7 @@ import {
   type RefObject,
   type TouchEvent,
 } from "react";
+import type { api } from "../../../convex/_generated/api";
 import { ANSWERS, nextAnswer, type Answer } from "../../../shared/answers";
 import type { IsoDate, IsoMonth } from "../../../shared/dates";
 import { pageTitle } from "../../lib/pageTitle";
@@ -45,6 +47,17 @@ function answerSaved(groupId: string) {
   track({ name: "answers_started", group_id: groupId });
 }
 
+type OthersAnswers = NonNullable<FunctionReturnType<typeof api.player.othersAnswers>>;
+type OthersOnADay = OthersAnswers["days"][IsoDate];
+
+export type OthersOverlay = {
+  shown: boolean;
+  answers: OthersAnswers | undefined;
+  introVisible: boolean;
+  onToggle: () => void;
+  onIntroDismiss: () => void;
+};
+
 const answerLabels: Record<Answer, string> = { free: "Free", maybe: "Maybe", busy: "Busy" };
 const answerGlyphs: Record<Answer, string> = { free: "✓", maybe: "?", busy: "✕" };
 const answerTiles: Record<Answer | "none", string> = {
@@ -75,6 +88,7 @@ export function PlayerCalendar({
   keepGroup,
   keepSessions,
   accountControl,
+  others,
 }: {
   groupId: string;
   groupName: string;
@@ -96,6 +110,7 @@ export function PlayerCalendar({
   keepGroup?: ReactNode;
   keepSessions?: KeepSessionsOffer;
   accountControl?: ReactNode;
+  others?: OthersOverlay;
 }) {
   const view = playerMonth({ month, today, answers: answers ?? {}, sessions });
   const [taps, setTaps] = useState(0);
@@ -265,6 +280,7 @@ export function PlayerCalendar({
           hintVisible={hintVisible && !view.readOnly}
           headingRef={monthHeading}
           stagger={stagger}
+          others={view.readOnly ? undefined : others}
           onAnswer={answer}
           onMonthChange={onMonthChange}
         />
@@ -321,6 +337,7 @@ function MonthCard({
   hintVisible,
   headingRef,
   stagger,
+  others,
   onAnswer,
   onMonthChange,
 }: {
@@ -329,12 +346,14 @@ function MonthCard({
   hintVisible: boolean;
   headingRef: RefObject<HTMLHeadingElement | null>;
   stagger: ReadonlyMap<IsoDate, number>;
+  others: OthersOverlay | undefined;
   onAnswer: (day: PlayerDay) => void;
   onMonthChange: (month: IsoMonth) => void;
 }) {
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
   const hintDate = view.days.find((day) => !day.locked)?.date;
   const hintId = useId();
+  const othersShown = others?.shown === true ? others.answers : undefined;
 
   function startSwipe(event: TouchEvent) {
     const touch = event.touches[0];
@@ -416,6 +435,7 @@ function MonthCard({
               <DayTile
                 day={day}
                 staggerIndex={stagger.get(day.date)}
+                others={othersShown && othersOn(othersShown, day)}
                 describedBy={hintVisible && day.date === hintDate ? hintId : undefined}
                 onAnswer={onAnswer}
               />
@@ -431,18 +451,108 @@ function MonthCard({
           ),
         )}
       </div>
+      {others && loaded && (
+        <OthersSwitch others={others} introVisible={others.introVisible && !hintVisible} />
+      )}
     </section>
   );
 }
 
+function othersOn(answers: OthersAnswers, day: PlayerDay) {
+  const counts = answers.days[day.date];
+  if (day.locked || counts === undefined) return undefined;
+  return { ...counts, of: answers.others };
+}
+
+function OthersSwitch({ others, introVisible }: { others: OthersOverlay; introVisible: boolean }) {
+  const introId = useId();
+  return (
+    <>
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <span
+          className={cn(
+            "flex items-center gap-1.5 text-xs text-ink-3",
+            !others.shown && "invisible",
+          )}
+          aria-hidden="true"
+        >
+          <span className="flex h-1 w-6 overflow-hidden rounded-full bg-surface-2">
+            <span className="w-1/2 bg-free" />
+            <span className="w-1/4 bg-maybe-bar" />
+          </span>
+          Others free · maybe
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={others.shown}
+          aria-describedby={introVisible ? introId : undefined}
+          onClick={others.onToggle}
+          className={cn(
+            "-my-2 inline-flex min-h-11 items-center gap-2 rounded-full px-1 text-xs font-semibold text-ink-2 hover:text-ink",
+            focusRing,
+          )}
+        >
+          Show others
+          <span
+            aria-hidden="true"
+            className={cn(
+              "flex h-5 w-9 items-center rounded-full p-0.5 transition-colors duration-150",
+              others.shown ? "bg-free" : "bg-surface-2",
+            )}
+          >
+            <span
+              className={cn(
+                "size-4 rounded-full bg-white shadow-card transition-transform duration-150 ease-(--ease-snap) dark:bg-paper",
+                others.shown && "translate-x-4",
+              )}
+            />
+          </span>
+        </button>
+      </div>
+      {introVisible && <OthersIntro id={introId} onDismiss={others.onIntroDismiss} />}
+    </>
+  );
+}
+
+function OthersIntro({ id, onDismiss }: { id: string; onDismiss: () => void }) {
+  return (
+    <div
+      role="dialog"
+      aria-label="New: see who else can play"
+      className="animate-rise relative mt-2 ml-auto max-w-72 rounded-md bg-ink px-3 py-2.5 text-xs leading-snug font-medium text-paper shadow-card"
+    >
+      <span aria-hidden="true" className="absolute -top-1 right-6 size-2.5 rotate-45 bg-ink" />
+      <p id={id}>
+        <span className="font-bold">New:</span> the bar on each night shows who else can play. Green
+        is free, orange is maybe. Switch it off here anytime.
+      </p>
+      <button
+        type="button"
+        onClick={onDismiss}
+        className={cn(
+          "-mx-1 mt-1 -mb-1 rounded-sm px-1 py-1 font-bold underline underline-offset-2",
+          focusRing,
+        )}
+      >
+        Got it
+      </button>
+    </div>
+  );
+}
+
+type OthersOnTile = OthersOnADay & { of: number };
+
 function DayTile({
   day,
   staggerIndex,
+  others,
   describedBy,
   onAnswer,
 }: {
   day: PlayerDay;
   staggerIndex: number | undefined;
+  others: OthersOnTile | undefined;
   describedBy: string | undefined;
   onAnswer: (day: PlayerDay) => void;
 }) {
@@ -452,7 +562,7 @@ function DayTile({
     <button
       type="button"
       disabled={day.locked}
-      aria-label={tileLabel(day)}
+      aria-label={tileLabel(day, others)}
       aria-describedby={describedBy}
       onClick={() => {
         setPopping(true);
@@ -482,7 +592,9 @@ function DayTile({
         {day.dayOfMonth}
       </span>
       {day.answer && (
-        <span className="self-end text-sm leading-none font-bold">{answerGlyphs[day.answer]}</span>
+        <span className={cn("self-end text-sm leading-none font-bold", others && "mb-1 sm:mb-0.5")}>
+          {answerGlyphs[day.answer]}
+        </span>
       )}
       {day.session && (
         <span className="absolute -top-1.5 -right-1.5 rounded-full bg-accent px-1 text-[9px] leading-4 font-bold text-accent-ink">
@@ -490,7 +602,27 @@ function DayTile({
         </span>
       )}
       {day.cancelled && <CancelledMark />}
+      {others && <OthersMeter others={others} onSolid={day.answer !== null} />}
     </button>
+  );
+}
+
+function OthersMeter({ others, onSolid }: { others: OthersOnTile; onSolid: boolean }) {
+  const share = (count: number) => `${String((count / Math.max(others.of, 1)) * 100)}%`;
+  return (
+    <span
+      aria-hidden="true"
+      data-others-meter=""
+      className={cn(
+        "absolute inset-x-1 bottom-0.5 flex h-1.5 rounded-full p-px sm:inset-x-2 sm:bottom-1",
+        onSolid ? "bg-white dark:bg-paper" : "bg-surface-2",
+      )}
+    >
+      <span className="flex size-full overflow-hidden rounded-full">
+        <span className="bg-free" style={{ width: share(others.free) }} />
+        <span className="bg-maybe-bar" style={{ width: share(others.maybe) }} />
+      </span>
+    </span>
   );
 }
 
@@ -608,9 +740,14 @@ function Legend({ showsCancelled }: { showsCancelled: boolean }) {
   );
 }
 
-function tileLabel(day: PlayerDay): string {
+function tileLabel(day: PlayerDay, others: OthersOnTile | undefined): string {
   const answer = day.answer ? answerLabels[day.answer] : "Not set";
-  return `${dayLabel(day.date)}: ${answer}${sessionNote(day)}`;
+  return `${dayLabel(day.date)}: ${answer}${sessionNote(day)}${othersNote(others)}`;
+}
+
+function othersNote(others: OthersOnTile | undefined): string {
+  if (!others) return "";
+  return `, others: ${String(others.free)} free, ${String(others.maybe)} maybe`;
 }
 
 function sessionNote(day: PlayerDay): string {

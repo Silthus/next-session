@@ -77,6 +77,11 @@ function tile(page: Page, date: IsoDate) {
 }
 
 async function answerAs(page: Page, group: SeededGroup, name: string) {
+  await answerAsBeforeTheOthersIntro(page, group, name);
+  await page.addInitScript(() => localStorage.setItem("next-session.othersIntroSeen", "1"));
+}
+
+async function answerAsBeforeTheOthersIntro(page: Page, group: SeededGroup, name: string) {
   await rememberPlayerWithoutHint(page, group, name);
   await markHintSeen(page, group);
 }
@@ -85,6 +90,20 @@ async function markHintSeen(page: Page, group: SeededGroup) {
   await page.addInitScript((groupId) => {
     localStorage.setItem(`next-session.playerHint.${groupId}`, "1");
   }, group.groupId);
+}
+
+async function answerFor(
+  group: SeededGroup,
+  name: string,
+  date: IsoDate,
+  answer: (typeof ANSWERS)[number],
+) {
+  await group.gm.mutation(api.player.answer, {
+    shareToken: group.shareToken,
+    playerId: group.playerIds[name]!,
+    date,
+    answer,
+  });
 }
 
 async function playerAnswersInMonth(group: SeededGroup, name: string, month: string) {
@@ -313,6 +332,30 @@ test.describe("the player surface", () => {
       page.getByRole("button", { name: `Mark the other ${nightsLeft.length} nights busy` }),
     ).toBeVisible();
     expect(await savedAnswers(group, "Ana", beyondWindow)).toEqual({});
+  });
+
+  test("a player sees on each night who else can play, and can switch it off", async ({ page }) => {
+    const group = await seedGroup();
+    const night = currentDates().bookableDays.at(-1)!;
+    await answerFor(group, "Ben", night, "free");
+    await answerFor(group, "Chiara", night, "maybe");
+    await answerAsBeforeTheOthersIntro(page, group, "Ana");
+
+    await page.goto(group.link);
+    const intro = page.getByRole("dialog", { name: "New: see who else can play" });
+    await expect(intro).toBeVisible();
+    await expect(tile(page, night)).toHaveAccessibleName(
+      `${dayLabel(night)}: Not set, others: 1 free, 1 maybe`,
+    );
+    await intro.getByRole("button", { name: "Got it" }).click();
+    await expect(intro).toBeHidden();
+
+    await page.getByRole("switch", { name: "Show others" }).click();
+    await expect(tile(page, night)).toHaveAccessibleName(`${dayLabel(night)}: Not set`);
+    await page.reload();
+    await expect(page.getByRole("switch", { name: "Show others" })).not.toBeChecked();
+    await expect(tile(page, night)).toHaveAccessibleName(`${dayLabel(night)}: Not set`);
+    await expect(intro).toBeHidden();
   });
 
   test("a listed player answers with one tap and can switch with Not you?", async ({ page }) => {
@@ -567,6 +610,22 @@ test.describe("player surface screenshots", () => {
     await captureEveryVariant(page, group.link, async (shot) => {
       await expect(page.getByRole("tooltip")).toBeVisible();
       await shot("hint");
+    });
+  });
+
+  test("the others on the calendar at 390 and 1440 px, light and dark", async ({ page }) => {
+    const group = await seedGroup(["Ana", "Ben", "Chiara", "Dev"]);
+    const days = await seedAnswers(group, "Ana");
+    for (const [index, date] of days.entries()) {
+      if (index % 3 !== 2) await answerFor(group, "Ben", date, "free");
+      if (index % 2 === 0) await answerFor(group, "Chiara", date, index % 4 ? "free" : "maybe");
+      if (index % 5 === 0) await answerFor(group, "Dev", date, "maybe");
+    }
+    await answerAsBeforeTheOthersIntro(page, group, "Ana");
+
+    await captureEveryVariant(page, group.link, async (shot) => {
+      await expect(page.getByRole("dialog", { name: "New: see who else can play" })).toBeVisible();
+      await shot("others");
     });
   });
 

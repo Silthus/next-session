@@ -9,6 +9,8 @@ const HINT_KEY_PREFIX = "next-session.playerHint.";
 const LAST_GROUP_KEY = "next-session.lastGroup";
 const NUDGE_DISMISSED_KEY = "next-session.nudgeDismissedAt";
 const MEASUREMENT_OFF_KEY = "next-session.measurementOff";
+const OTHERS_HIDDEN_KEY = "next-session.othersHidden";
+const OTHERS_INTRO_SEEN_KEY = "next-session.othersIntroSeen";
 
 const refusedStorage: KeyValueStorage = {
   getItem: () => null,
@@ -47,6 +49,23 @@ export function hasSeenHint(groupId: string, storage = browserStorage()): boolea
 
 export function markHintSeen(groupId: string, storage = browserStorage()) {
   write(storage, HINT_KEY_PREFIX + groupId, String(Date.now()));
+}
+
+export function othersHidden(storage = browserStorage()): boolean {
+  return read(storage, OTHERS_HIDDEN_KEY) !== null;
+}
+
+export function rememberOthersShown(shown: boolean, storage = browserStorage()) {
+  if (shown) attempt(() => storage.removeItem(OTHERS_HIDDEN_KEY), undefined);
+  else write(storage, OTHERS_HIDDEN_KEY, "1");
+}
+
+export function hasSeenOthersIntro(storage = browserStorage()): boolean {
+  return read(storage, OTHERS_INTRO_SEEN_KEY) !== null;
+}
+
+export function markOthersIntroSeen(storage = browserStorage()) {
+  write(storage, OTHERS_INTRO_SEEN_KEY, String(Date.now()));
 }
 
 export function rememberLastGroup(groupId: string, storage = browserStorage()) {
