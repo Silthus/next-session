@@ -86,6 +86,31 @@ export const answers = query({
   },
 });
 
+const othersOnADay = v.object({ free: v.number(), maybe: v.number() });
+
+export const othersAnswers = query({
+  args: { shareToken: v.string(), playerId: v.string(), month: v.string() },
+  returns: v.union(
+    v.object({ others: v.number(), days: v.record(v.string(), othersOnADay) }),
+    v.null(),
+  ),
+  handler: async (ctx, { shareToken, playerId, month }) => {
+    const player = await findPlayerOnShareLink(ctx, shareToken, playerId);
+    if (player === null || !isValidMonth(month)) return null;
+    const [roster, rows] = await Promise.all([
+      rosterOf(ctx, player.groupId),
+      answersOfGroupIn(ctx, player.groupId, month),
+    ]);
+    const days: Record<IsoDate, { free: number; maybe: number }> = {};
+    for (const row of rows) {
+      if (row.playerId === player._id || row.answer === "busy") continue;
+      const day = (days[row.date] ??= { free: 0, maybe: 0 });
+      day[row.answer] += 1;
+    }
+    return { others: roster.length - 1, days };
+  },
+});
+
 export const join = mutation({
   args: { shareToken: v.string(), name: v.string() },
   returns: v.id("players"),
@@ -262,6 +287,18 @@ async function answersOfPlayerIn(ctx: QueryCtx, playerId: Id<"players">, month: 
     .withIndex("by_playerId_and_date", (q) =>
       q
         .eq("playerId", playerId)
+        .gte("date", firstDayOf(month))
+        .lt("date", firstDayOf(addMonths(month, 1))),
+    )
+    .collect();
+}
+
+async function answersOfGroupIn(ctx: QueryCtx, groupId: Id<"groups">, month: IsoMonth) {
+  return await ctx.db
+    .query("answers")
+    .withIndex("by_groupId_and_date", (q) =>
+      q
+        .eq("groupId", groupId)
         .gte("date", firstDayOf(month))
         .lt("date", firstDayOf(addMonths(month, 1))),
     )

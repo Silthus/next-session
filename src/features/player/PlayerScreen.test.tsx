@@ -11,7 +11,8 @@ import { useState, useSyncExternalStore } from "react";
 import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { useGm } from "../account/useGm";
-import { rememberPlayer } from "../../lib/storage";
+import { markHintSeen, rememberPlayer } from "../../lib/storage";
+import { track } from "../../lib/telemetry";
 import { PlayerScreen } from "./PlayerScreen";
 
 const groupId = "group-one" as Id<"groups">;
@@ -411,5 +412,81 @@ describe("PlayerScreen", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Continue with Google" }));
 
     expect((await screen.findByRole("alert")).textContent).toBe("That didn't work. Try again.");
+  });
+});
+
+describe("the others on the calendar", () => {
+  const friday = /^Friday, October 9:/;
+  const intro = { name: "New: see who else can play" };
+
+  beforeEach(() => {
+    vi.mocked(track).mockReset();
+    queries["player:othersAnswers2026-10"] = {
+      others: 1,
+      days: { "2026-10-09": { free: 1, maybe: 0 } },
+    };
+  });
+
+  function reopenPage() {
+    cleanup();
+    renderPage();
+  }
+
+  it("shows on each night how many others are free or maybe, on by default", async () => {
+    renderPage();
+
+    expect((await screen.findByRole("button", { name: friday })).getAttribute("aria-label")).toBe(
+      "Friday, October 9: Not set, others: 1 free, 0 maybe",
+    );
+    expect(screen.getByRole("switch", { name: "Show others" }).getAttribute("aria-checked")).toBe(
+      "true",
+    );
+  });
+
+  it("hides the others when switched off, and still hides them on the next visit", async () => {
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("switch", { name: "Show others" }));
+    expect(screen.getByRole("button", { name: friday }).getAttribute("aria-label")).toBe(
+      "Friday, October 9: Not set",
+    );
+    expect(track).toHaveBeenCalledWith({
+      name: "others_overlay_toggled",
+      group_id: groupId,
+      shown: false,
+    });
+
+    reopenPage();
+    expect((await screen.findByRole("button", { name: friday })).getAttribute("aria-label")).toBe(
+      "Friday, October 9: Not set",
+    );
+    expect(screen.getByRole("switch", { name: "Show others" }).getAttribute("aria-checked")).toBe(
+      "false",
+    );
+  });
+
+  it("introduces the others once, after the first-visit hint", async () => {
+    renderPage();
+    await screen.findByRole("button", { name: friday });
+    expect(screen.queryByRole("dialog", intro)).toBeNull();
+
+    markHintSeen(groupId);
+    reopenPage();
+    await userEvent.click(
+      within(await screen.findByRole("dialog", intro)).getByRole("button", { name: "Got it" }),
+    );
+    expect(screen.queryByRole("dialog", intro)).toBeNull();
+
+    reopenPage();
+    await screen.findByRole("button", { name: friday });
+    expect(screen.queryByRole("dialog", intro)).toBeNull();
+  });
+
+  it("offers no switch to a Player alone on the Roster", async () => {
+    queries["player:group"] = { ...roster, players: [roster.players[0]] };
+    renderPage();
+
+    await screen.findByRole("button", { name: friday });
+    expect(screen.queryByRole("switch", { name: "Show others" })).toBeNull();
   });
 });

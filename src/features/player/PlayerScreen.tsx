@@ -9,11 +9,16 @@ import { errorMessage } from "../../lib/errors";
 import {
   forgetPlayer,
   hasSeenHint,
+  hasSeenOthersIntro,
   markHintSeen,
+  markOthersIntroSeen,
+  othersHidden,
   recallPlayer,
+  rememberOthersShown,
   rememberPlayer,
   type PlayerIdentity,
 } from "../../lib/storage";
+import { track } from "../../lib/telemetry";
 import { NotFoundScreen } from "../../ui/NotFoundScreen";
 import { Skeleton } from "../../ui/Skeleton";
 import { Button } from "../../ui/Button";
@@ -24,7 +29,7 @@ import { useGm } from "../account/useGm";
 import { HeaderAccount } from "../group/rail/HeaderAccount";
 import { Join } from "./Join";
 import { KeepGroup } from "./KeepGroup";
-import { PlayerCalendar } from "./PlayerCalendar";
+import { PlayerCalendar, type OthersOverlay } from "./PlayerCalendar";
 import { visibleMonth } from "./playerMonth";
 import { useTodayUtc } from "./useTodayUtc";
 
@@ -400,6 +405,7 @@ function PlayerAnswers({
       store.setQuery(api.player.answers, query, withRestBusy(current, args.month, today));
   });
   const [hintVisible, setHintVisible] = useState(() => !hasSeenHint(group.groupId));
+  const others = useOthersOverlay({ group, shareToken, playerId, month });
 
   function dismissHint() {
     markHintSeen(group.groupId);
@@ -450,8 +456,48 @@ function PlayerAnswers({
       keepGroup={keepGroup(answered === true)}
       keepSessions={keepSessions}
       accountControl={accountControl}
+      others={others}
     />
   );
+}
+
+function useOthersOverlay({
+  group,
+  shareToken,
+  playerId,
+  month,
+}: {
+  group: PlayerGroupView;
+  shareToken: string;
+  playerId: Id<"players">;
+  month: IsoMonth;
+}): OthersOverlay | undefined {
+  const hasOthers = group.players.length > 1;
+  const [shown, setShown] = useState(() => !othersHidden());
+  const [introSeen, setIntroSeen] = useState(hasSeenOthersIntro);
+  const answers = useQuery(
+    api.player.othersAnswers,
+    hasOthers && shown ? { shareToken, playerId, month } : "skip",
+  );
+
+  function dismissIntro() {
+    markOthersIntroSeen();
+    setIntroSeen(true);
+  }
+
+  if (!hasOthers) return undefined;
+  return {
+    shown,
+    answers: answers ?? undefined,
+    introVisible: !introSeen,
+    onToggle: () => {
+      dismissIntro();
+      rememberOthersShown(!shown);
+      setShown(!shown);
+      track({ name: "others_overlay_toggled", group_id: group.groupId, shown: !shown });
+    },
+    onIntroDismiss: dismissIntro,
+  };
 }
 
 function OpenOwnGroup({

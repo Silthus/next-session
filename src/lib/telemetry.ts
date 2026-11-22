@@ -31,6 +31,7 @@ export type BrowserEvent =
     }
   | { name: "fill_rest_used"; group_id: string }
   | { name: "answers_started"; group_id: string }
+  | { name: "others_overlay_toggled"; group_id: string; shown: boolean }
   | { name: "save_started" }
   | { name: "sign_in_failed"; flow: "signUp" | "signIn"; code: string }
   | { name: "keep_group_started"; group_id: string; surface: KeepSurface }

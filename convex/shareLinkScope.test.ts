@@ -61,6 +61,20 @@ const shareTokenCalls: Record<string, ForeignCall> = {
         month: BOOKABLE_MONTH,
       }),
   ),
+  "player.othersAnswers": readsAsMissing(
+    ({ shareToken, foreignPlayerId }) =>
+      t.query(api.player.othersAnswers, {
+        shareToken,
+        playerId: foreignPlayerId,
+        month: BOOKABLE_MONTH,
+      }),
+    ({ rotatedAwayShareToken, ownPlayerId }) =>
+      t.query(api.player.othersAnswers, {
+        shareToken: rotatedAwayShareToken,
+        playerId: ownPlayerId,
+        month: BOOKABLE_MONTH,
+      }),
+  ),
   "player.join": refusedAsMissing(({ rotatedAwayShareToken }) =>
     t.mutation(api.player.join, { shareToken: rotatedAwayShareToken, name: "Intruder" }),
   ),
