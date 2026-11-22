@@ -30,7 +30,7 @@ import { HeaderAccount } from "../group/rail/HeaderAccount";
 import { Join } from "./Join";
 import { KeepGroup } from "./KeepGroup";
 import { PlayerCalendar, type OthersOverlay } from "./PlayerCalendar";
-import { visibleMonth } from "./playerMonth";
+import { isPastMonth, visibleMonth } from "./playerMonth";
 import { useTodayUtc } from "./useTodayUtc";
 
 type PlayerGroupView = NonNullable<FunctionReturnType<typeof api.player.group>>;
@@ -410,7 +410,7 @@ function PlayerAnswers({
     shareToken,
     playerId,
     month,
-    pastMonth: month < monthOf(today),
+    pastMonth: isPastMonth(month, today),
   });
 
   function dismissHint() {

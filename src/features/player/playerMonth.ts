@@ -50,7 +50,7 @@ export function playerMonth({ month, today, answers, sessions }: PlayerMonthInpu
   return {
     month,
     label: monthLabel(month),
-    readOnly: month < monthOf(today),
+    readOnly: isPastMonth(month, today),
     leadingBlanks: mondayFirstWeekday(`${month}-01`),
     days: monthDays(month).map((date): PlayerDay => ({
       date,
@@ -70,6 +70,10 @@ export function playerMonth({ month, today, answers, sessions }: PlayerMonthInpu
 }
 
 export type PlayerMonth = ReturnType<typeof playerMonth>;
+
+export function isPastMonth(month: IsoMonth, today: IsoDate): boolean {
+  return month < monthOf(today);
+}
 
 export function monthName(month: IsoMonth): string {
   return formatUtc(`${month}-01`, { month: "long" });

@@ -39,6 +39,7 @@ const nightOn = (date: string) => ({
   lengthMinutes: 240,
 });
 const listeners = new Set<() => void>();
+const subscriptions: string[] = [];
 const answer = vi.fn();
 const release = vi.fn();
 const google = vi.fn();
@@ -61,8 +62,9 @@ vi.mock(import("../../lib/telemetry"), async (original) => ({
   track: vi.fn(),
 }));
 vi.mock("convex/react", () => ({
-  useQuery: (reference: FunctionReference<"query">, args: { month?: string }) => {
-    const key = getFunctionName(reference) + (args.month ?? "");
+  useQuery: (reference: FunctionReference<"query">, args: { month?: string } | "skip") => {
+    const key = getFunctionName(reference) + (args === "skip" ? "" : (args.month ?? ""));
+    if (args !== "skip") subscriptions.push(key);
     return useSyncExternalStore(
       (listener) => {
         listeners.add(listener);
@@ -138,6 +140,7 @@ beforeEach(() => {
   localStorage.clear();
   sessionStorage.clear();
   for (const key of Object.keys(queries)) delete queries[key];
+  subscriptions.length = 0;
   queries["player:group"] = roster;
   queries["player:answers2026-10"] = {};
   queries["player:answers2026-11"] = {};
@@ -473,6 +476,18 @@ describe("the others on the calendar", () => {
     reopenPage();
     await screen.findByRole("button", { name: friday });
     expect(screen.queryByRole("dialog", intro)).toBeNull();
+  });
+
+  it("asks the backend for no others on a past month, where the calendar shows none", async () => {
+    queries["player:answers2026-09"] = {};
+    renderPage();
+    await screen.findByRole("button", { name: friday });
+
+    await userEvent.click(screen.getByRole("button", { name: "Previous month" }));
+
+    await screen.findByRole("heading", { name: "September 2026" });
+    expect(subscriptions).toContain("player:othersAnswers2026-10");
+    expect(subscriptions).not.toContain("player:othersAnswers2026-09");
   });
 
   it("offers no switch to a Player alone on the Roster", async () => {
