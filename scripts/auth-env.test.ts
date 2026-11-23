@@ -148,4 +148,9 @@ describe("parseEnvFile", () => {
       B: "single",
     });
   });
+
+  it("rejects a line without an equals sign instead of inventing a key", () => {
+    expect(() => parseEnvFile("CONVEX_PROD_DEPLOY_KEYX\n")).toThrow("line 1");
+    expect(() => parseEnvFile("# keys\nA=b\nBROKEN\n")).toThrow("line 3");
+  });
 });

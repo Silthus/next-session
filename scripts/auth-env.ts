@@ -66,10 +66,11 @@ function deployKeyEnv(target: Exclude<Target, "local">, deployKeys: Env) {
 export function parseEnvFile(text: string): Env {
   const entries = text
     .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line !== "" && !line.startsWith("#"))
-    .map((line) => {
+    .map((line, index) => ({ line: line.trim(), number: index + 1 }))
+    .filter(({ line }) => line !== "" && !line.startsWith("#"))
+    .map(({ line, number }) => {
       const separator = line.indexOf("=");
+      if (separator === -1) throw new Error(`Expected KEY=value on line ${number}`);
       return [line.slice(0, separator), unquote(line.slice(separator + 1))] as const;
     });
   return Object.fromEntries(entries);
