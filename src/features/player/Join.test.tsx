@@ -71,6 +71,29 @@ describe("Join", () => {
     expect(onPick).toHaveBeenCalledWith(ben);
   });
 
+  it("locks a Claimed Player's chip and still hands the tap to the page", async () => {
+    const lockedBen = { ...ben, locked: true };
+    const { onPick } = renderJoin({ players: [ana, lockedBen] });
+
+    await userEvent.click(await screen.findByRole("button", { name: "Ben, locked" }));
+
+    expect(onPick).toHaveBeenCalledWith(lockedBen);
+  });
+
+  it("explains a locked name beside its chip", async () => {
+    renderJoin({
+      players: [ana, { ...ben, locked: true }],
+      lockNotice: { playerId: ben._id, text: "Log in to answer as Ben." },
+    });
+
+    expect(
+      await screen.findByRole("button", {
+        name: "Ben, locked",
+        description: "Log in to answer as Ben.",
+      }),
+    ).toBeTruthy();
+  });
+
   it("joins with a typed name and keeps Join disabled while it is blank", async () => {
     const { onJoin } = renderJoin();
     const join = await screen.findByRole("button", { name: "Join" });
@@ -240,6 +263,25 @@ describe("Join", () => {
 
       await userEvent.click(screen.getByRole("button", { name: "Join" }));
       expect(onJoin).toHaveBeenCalledWith("Dev");
+    });
+
+    it("still carries an unmatched name while a locked name stays pinned", async () => {
+      renderJoin({
+        players: longRoster().map((player) =>
+          player._id === ben._id ? { ...player, locked: true } : player,
+        ),
+        lockNotice: { playerId: ben._id, text: "Log in to answer as Ben." },
+      });
+      const filter = await screen.findByRole("searchbox", { name: "Find your name" });
+
+      await userEvent.type(filter, "Dev");
+
+      expect(screen.getByRole("button", { name: "Ben, locked" })).toBeTruthy();
+      expect(screen.getByText("No names match. Add yours below.")).toBeTruthy();
+      expect(screen.getByRole("textbox", { name: "Not listed? Your name" })).toHaveProperty(
+        "value",
+        "Dev",
+      );
     });
 
     it("keeps the carried name when someone just joined under it", async () => {

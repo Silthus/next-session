@@ -40,7 +40,7 @@ type AccountSheetProps = {
       onFinish: () => Promise<unknown>;
     }
   | { intent: "keep"; groupName: string; playerName: string; movesGroups?: boolean }
-  | { intent: "logIn"; forPlayer?: boolean }
+  | { intent: "logIn"; forPlayer?: boolean; lockedName?: string }
 );
 
 export function AccountSheet(props: AccountSheetProps) {
@@ -250,6 +250,7 @@ function AccountForm({
         mode={mode}
         busy={busy}
         forPlayer={props.intent === "logIn" && props.forPlayer === true}
+        lockedName={props.intent === "logIn" ? props.lockedName : undefined}
         onClose={onClose}
       />
     </form>
@@ -402,14 +403,23 @@ function SheetFooter({
   mode,
   busy,
   forPlayer,
+  lockedName,
   onClose,
 }: {
   intent: AccountIntent;
   mode: SaveMode;
   busy: boolean;
   forPlayer: boolean;
+  lockedName?: string;
   onClose: () => void;
 }) {
+  if (intent === "logIn" && forPlayer && lockedName !== undefined) {
+    return (
+      <p className="min-w-0 text-xs break-words text-ink-3">
+        {`Not ${lockedName}? Go back and pick your own name.`}
+      </p>
+    );
+  }
   if (intent === "logIn" && forPlayer) {
     return <p className="text-xs text-ink-3">No account yet? You can answer without one.</p>;
   }

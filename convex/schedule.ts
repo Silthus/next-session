@@ -17,7 +17,13 @@ import { answerValue, datedSession } from "./schema";
 
 const monthSchedule = v.object({
   players: v.array(
-    v.object({ _id: v.id("players"), name: v.string(), image: v.optional(v.string()) }),
+    v.object({
+      _id: v.id("players"),
+      name: v.string(),
+      image: v.optional(v.string()),
+      claimed: v.boolean(),
+      claimedAt: v.optional(v.number()),
+    }),
   ),
   answers: v.array(v.object({ playerId: v.id("players"), date: v.string(), answer: answerValue })),
   sessions: v.array(
@@ -53,9 +59,10 @@ async function rosterOf(ctx: QueryCtx, groupId: Id<"groups">) {
     .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", groupId))
     .collect();
   return await Promise.all(
-    players.map(async ({ _id, name, userId }) => {
+    players.map(async ({ _id, name, userId, claimedAt }) => {
       const image = userId && (await profileImageUrl(ctx, await ctx.db.get("users", userId)));
-      return image ? { _id, name, image } : { _id, name };
+      const claim = userId === undefined ? { claimed: false } : { claimed: true, claimedAt };
+      return image ? { _id, name, image, ...claim } : { _id, name, ...claim };
     }),
   );
 }

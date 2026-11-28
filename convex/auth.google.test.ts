@@ -255,14 +255,16 @@ describe("Google profile picture", () => {
       month: "2026-10",
     });
 
+    const claimedAt = schedule?.players[0]?.claimedAt;
+    expect(typeof claimedAt).toBe("number");
     expect(schedule?.players).toEqual([
-      { _id: adaId, name: "Ada", image: adasPicture },
-      { _id: graceId, name: "Grace" },
+      { _id: adaId, name: "Ada", image: adasPicture, claimed: true, claimedAt },
+      { _id: graceId, name: "Grace", claimed: false },
     ]);
     const shareLink = await t.query(api.player.group, { shareToken });
-    expect(shareLink?.players.map((player) => Object.keys(player))).toEqual([
-      ["_id", "name"],
-      ["_id", "name"],
+    expect(shareLink?.players.map((player) => Object.keys(player).sort())).toEqual([
+      ["_id", "locked", "name"],
+      ["_id", "locked", "name"],
     ]);
   });
 });

@@ -5,6 +5,8 @@ import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { changeRecipientSet } from "../sessionMail";
 import { fail } from "./errors";
 
+const MAX_REMOVALS_PER_GROUP = MAX_PLAYERS_PER_GROUP + 1;
+
 export function validName(raw: string): NormalizedName {
   const normalized = normalizeName(raw);
   return normalized === "INVALID_NAME" ? fail({ code: "INVALID_NAME" }) : normalized;
@@ -44,6 +46,14 @@ export async function claimedPlayerIn(
     .first();
 }
 
+export function isLockedFor(player: Pick<Doc<"players">, "userId">, account: Doc<"users"> | null) {
+  return player.userId !== undefined && player.userId !== account?._id;
+}
+
+export function ensureAnswersAs(player: Doc<"players">, account: Doc<"users"> | null) {
+  if (isLockedFor(player, account)) fail({ code: "PLAYER_LOCKED" });
+}
+
 export async function claimPlayer(ctx: MutationCtx, account: Doc<"users">, player: Doc<"players">) {
   if (player.userId === account._id) return;
   if (player.userId !== undefined) fail({ code: "PLAYER_CLAIMED" });
@@ -51,9 +61,11 @@ export async function claimPlayer(ctx: MutationCtx, account: Doc<"users">, playe
     const earlier = await claimedPlayerIn(ctx, account._id, player.groupId);
     if (earlier === null) await ensureRoomForAnotherClaim(ctx, account._id);
     else await unclaim(ctx, earlier);
-    await ctx.db.patch("players", player._id, { userId: account._id });
+    await ctx.db.patch("players", player._id, { userId: account._id, claimedAt: Date.now() });
   });
-  await forgetRemovalFromMyGroups(ctx, account._id, player.groupId);
+  for (const removal of await removalsIn(ctx, account._id, player.groupId)) {
+    if (blocks(removal, player._id)) await ctx.db.delete("groupRemovals", removal._id);
+  }
 }
 
 export async function keepOnAnswer(
@@ -81,12 +93,19 @@ export async function removeFromMyGroups(
   groupId: Id<"groups">,
 ) {
   const released = await releaseClaim(ctx, account, groupId);
-  if (released !== null) {
-    if ((await removalFromMyGroups(ctx, account._id, groupId)) === null) {
-      await ctx.db.insert("groupRemovals", { userId: account._id, groupId });
-    }
+  if (released !== null && !(await hasRemovedGroup(ctx, account._id, groupId))) {
+    await ctx.db.insert("groupRemovals", { userId: account._id, groupId });
   }
   return released;
+}
+
+export async function releaseForGm(ctx: MutationCtx, player: Doc<"players">, userId: Id<"users">) {
+  const { groupId } = player;
+  await changeRecipientSet(ctx, { groupId, userId }, () => unclaim(ctx, player));
+  const removals = await removalsIn(ctx, userId, groupId);
+  if (!removals.some((removal) => removal.playerId === player._id)) {
+    await ctx.db.insert("groupRemovals", { userId, groupId, playerId: player._id });
+  }
 }
 
 async function answerKeeps(
@@ -96,7 +115,8 @@ async function answerKeeps(
   player: Doc<"players">,
 ) {
   if (player.userId !== undefined) return false;
-  if (await hasRemovedGroup(ctx, account._id, group._id)) return false;
+  const removals = await removalsIn(ctx, account._id, group._id);
+  if (removals.some((removal) => blocks(removal, player._id))) return false;
   return (
     (await claimedPlayerIn(ctx, account._id, group._id)) !== null ||
     !(await atClaimCap(ctx, account._id))
@@ -108,27 +128,23 @@ export async function hasRemovedGroup(
   accountId: Id<"users">,
   groupId: Id<"groups">,
 ) {
-  return (await removalFromMyGroups(ctx, accountId, groupId)) !== null;
+  const removals = await removalsIn(ctx, accountId, groupId);
+  return removals.some((removal) => removal.playerId === undefined);
 }
 
-async function forgetRemovalFromMyGroups(
-  ctx: MutationCtx,
-  accountId: Id<"users">,
-  groupId: Id<"groups">,
-) {
-  const removed = await removalFromMyGroups(ctx, accountId, groupId);
-  if (removed !== null) await ctx.db.delete("groupRemovals", removed._id);
+function blocks(removal: Doc<"groupRemovals">, playerId: Id<"players">) {
+  return removal.playerId === undefined || removal.playerId === playerId;
 }
 
-async function removalFromMyGroups(ctx: QueryCtx, accountId: Id<"users">, groupId: Id<"groups">) {
+async function removalsIn(ctx: QueryCtx, accountId: Id<"users">, groupId: Id<"groups">) {
   return await ctx.db
     .query("groupRemovals")
     .withIndex("by_userId_and_groupId", (q) => q.eq("userId", accountId).eq("groupId", groupId))
-    .unique();
+    .take(MAX_REMOVALS_PER_GROUP);
 }
 
 async function unclaim(ctx: MutationCtx, player: Doc<"players">) {
-  await ctx.db.patch("players", player._id, { userId: undefined });
+  await ctx.db.patch("players", player._id, { userId: undefined, claimedAt: undefined });
 }
 
 async function ensureRoomForAnotherClaim(ctx: QueryCtx, accountId: Id<"users">) {

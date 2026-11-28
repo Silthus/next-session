@@ -12,6 +12,7 @@ export function useRailActions(groupId: Id<"groups">, show: ShowToast) {
   const addPlayer = useMutation(api.roster.addPlayer);
   const renamePlayer = useMutation(api.roster.renamePlayer);
   const removePlayer = useMutation(api.roster.removePlayer);
+  const releasePlayer = useMutation(api.roster.releasePlayer);
 
   async function changeLink(change: () => Promise<unknown>, done: () => void) {
     if (linkChanging.current) return;
@@ -45,5 +46,7 @@ export function useRailActions(groupId: Id<"groups">, show: ShowToast) {
     addPlayer: (name: string) => addPlayer({ groupId, name }),
     renamePlayer: (playerId: Id<"players">, name: string) => renamePlayer({ playerId, name }),
     removePlayer: (playerId: Id<"players">) => removePlayer({ playerId }),
+    releasePlayer: (playerId: Id<"players">, claimedAt: number | undefined) =>
+      releasePlayer({ playerId, claimedAt }),
   };
 }

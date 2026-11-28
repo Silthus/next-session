@@ -48,3 +48,7 @@ Michael: "When a signed in gm clicks a link to their own group they are taken to
 A GM Account that opens its own Share Link without a Claimed Player in the Group lands on `/g/<groupId>`, so it no longer previews its own link or starts playing there. A GM Account that already plays in the Group through a Claimed Player keeps its player view, so My groups' "You play in" card still opens it. The decision is made once, when the link opens: a Group that becomes the Account's own while the page is open, as when an Anonymous GM keeps their own link, stays on the player view. Anonymous GMs and every other caller see the player view as before.
 
 The alternative was an explicit "Open as player" entry from the GM view for previewing. Nothing asks for it yet, so it waits for a request.
+
+## Amendment, 2026-11-28
+
+Superseded on answering by [ADR-0016](0016-claimed-players-are-locked-and-share-one-availability.md): a Claimed Player answers only through its Account, and the name picker shows it locked. Claiming, releasing, My groups and the 50-claim cap stay as decided here.

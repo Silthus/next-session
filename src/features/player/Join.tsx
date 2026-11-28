@@ -9,11 +9,14 @@ import { Avatar } from "../../ui/Avatar";
 import { Button } from "../../ui/Button";
 import { cn } from "../../ui/cn";
 import { Eyebrow } from "../../ui/Eyebrow";
+import { IconLock } from "../../ui/icons";
 import { focusRing, pressable } from "../../ui/interactive";
 import { PageShell } from "../../ui/PageShell";
 import { useFocusOnMount } from "../../ui/useFocusOnMount";
 
-export type RosterPlayer = { _id: Id<"players">; name: string };
+export type RosterPlayer = { _id: Id<"players">; name: string; locked?: boolean };
+
+export type LockNotice = { playerId: Id<"players">; text: string };
 
 const CHIPS_WITHOUT_FILTER = 12;
 
@@ -21,6 +24,7 @@ export function Join({
   groupName,
   players,
   removed = false,
+  lockNotice,
   onPick,
   onJoin,
   accountControl,
@@ -28,6 +32,7 @@ export function Join({
   groupName: string;
   players: RosterPlayer[];
   removed?: boolean;
+  lockNotice?: LockNotice;
   onPick: (player: RosterPlayer) => void;
   onJoin: (name: string) => Promise<unknown>;
   accountControl?: ReactNode;
@@ -38,14 +43,22 @@ export function Join({
   const [refusal, setRefusal] = useState<AppErrorData | null | undefined>(undefined);
   const refusalId = useId();
   const heading = useFocusOnMount<HTMLHeadingElement>();
+  const lockNoticeId = useId();
   const takenPlayerId = refusal?.code === "NAME_TAKEN" ? refusal.playerId : null;
+  const noticeFor = (playerId: Id<"players">) =>
+    playerId === takenPlayerId
+      ? refusalId
+      : playerId === lockNotice?.playerId
+        ? lockNoticeId
+        : undefined;
   const fieldLabel = players.length > 0 ? "Not listed? Your name" : "Your name";
   const filterable = players.length > CHIPS_WITHOUT_FILTER;
   const activeFilter = filterable ? filter : "";
+  const matches = players.filter((player) => nameMatches(player.name, activeFilter));
   const shownPlayers = alphabetical(players).filter(
-    (player) => player._id === takenPlayerId || nameMatches(player.name, activeFilter),
+    (player) => noticeFor(player._id) !== undefined || matches.includes(player),
   );
-  const unmatchedFilter = shownPlayers.length === 0 ? activeFilter.trim() : "";
+  const unmatchedFilter = matches.length === 0 ? activeFilter.trim() : "";
   const name = ownedName ?? unmatchedFilter;
 
   async function join(event: FormEvent) {
@@ -89,7 +102,7 @@ export function Join({
           </p>
         )}
         {filterable && (
-          <NameFilter value={filter} noMatch={shownPlayers.length === 0} onChange={setFilter} />
+          <NameFilter value={filter} noMatch={matches.length === 0} onChange={setFilter} />
         )}
         {shownPlayers.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">
@@ -97,14 +110,19 @@ export function Join({
               <li key={player._id}>
                 <PlayerChip
                   player={player}
-                  highlighted={player._id === takenPlayerId}
+                  highlighted={noticeFor(player._id) !== undefined}
                   disabled={joining}
-                  describedBy={player._id === takenPlayerId ? refusalId : undefined}
+                  describedBy={noticeFor(player._id)}
                   onPick={onPick}
                 />
               </li>
             ))}
           </ul>
+        )}
+        {lockNotice && (
+          <p id={lockNoticeId} role="status" className="mt-3 text-sm font-medium text-ink-2">
+            {lockNotice.text}
+          </p>
         )}
         <form className="mt-4 flex gap-2" onSubmit={(event) => void join(event)}>
           <input
@@ -198,6 +216,7 @@ function PlayerChip({
       onClick={() => onPick(player)}
       disabled={disabled}
       aria-describedby={describedBy}
+      aria-label={player.locked ? `${player.name}, locked` : undefined}
       className={cn(
         "flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold hover:border-accent hover:bg-accent-soft disabled:pointer-events-none disabled:opacity-60",
         pressable,
@@ -208,6 +227,7 @@ function PlayerChip({
     >
       <Avatar name={player.name} size="sm" />
       <span className="min-w-0 wrap-anywhere">{player.name}</span>
+      {player.locked && <IconLock className="shrink-0 text-ink-3" />}
     </button>
   );
 }

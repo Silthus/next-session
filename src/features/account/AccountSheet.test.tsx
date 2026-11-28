@@ -536,6 +536,20 @@ describe("AccountSheet logging in", () => {
     expect(screen.queryByRole("button", { name: "Go back" })).toBeNull();
   });
 
+  it("sends someone back to their own name when they picked a locked one", async () => {
+    renderSheet({
+      open: true,
+      intent: "logIn",
+      forPlayer: true,
+      lockedName: "Ben",
+      onSubmit: vi.fn(),
+      onClose: vi.fn(),
+    });
+
+    expect(await screen.findByText("Not Ben? Go back and pick your own name.")).toBeTruthy();
+    expect(screen.queryByText(/answer without one/)).toBeNull();
+  });
+
   it("cannot be sent back while logging in", async () => {
     const onClose = renderLogInSheet(vi.fn(() => new Promise(() => {})));
 

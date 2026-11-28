@@ -19,15 +19,15 @@ A signed-in user who can sign in again on any device, today with an email and a 
 _Avoid_: real user, registered user, profile, player account
 
 **Player**:
-A name on a Group's Roster. A Player needs no Account; whoever holds the Share Link can answer as any Player. A Player stays on the Roster until the GM removes them or the Group ends.
+A name on a Group's Roster. A Player needs no Account; whoever holds the Share Link can answer as any Player that is not a Claimed Player. A Player stays on the Roster until the GM removes them or the Group ends.
 _Avoid_: member, membership, participant, attendee
 
 **Claimed Player**:
-A Player linked to an Account, so the Account opens the Group as that Player on any device and sees the Group on My groups. An Account claims at most one Player per Group. A claim adds no protection: the Share Link still answers as any Player.
+A Player linked to an Account, so the Account opens the Group as that Player on any device and sees the Group on My groups. An Account claims at most one Player per Group. A Claimed Player is locked: only its Account answers as it, and the name picker shows it with a lock that opens Log in (ADR-0016).
 _Avoid_: linked player, player account, membership
 
 **Claim** / **Release**:
-Linking a Player to the signed-in Account, and undoing that link. Joining with a new name while signed in claims; **Keep this group** claims an existing name. **Not you?** and **Remove from my groups** release. Releasing never deletes the Player.
+Linking a Player to the signed-in Account, and undoing that link. Joining with a new name while signed in claims; **Keep this group** claims an existing name. **Not you?** and **Remove from my groups** release, and the GM unlocks a Claimed Player from the Roster, which releases it and keeps its Account from taking it back on its own. Releasing never deletes the Player, and opens it to the Share Link again.
 _Avoid_: adopt, unlink, leave (only the GM removes a Player)
 
 **My groups**:

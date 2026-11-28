@@ -3,7 +3,7 @@ import type { PlayerProgress, PlayerRow } from "../../../../shared/monthSummary"
 import { Avatar } from "../../../ui/Avatar";
 import { Button } from "../../../ui/Button";
 import { cn } from "../../../ui/cn";
-import { IconCheck, IconMore } from "../../../ui/icons";
+import { IconCheck, IconLock, IconMore } from "../../../ui/icons";
 import { focusRing, mutedStepsUp } from "../../../ui/interactive";
 import { errorMessage } from "../../../lib/errors";
 import { NameForm } from "./NameForm";
@@ -15,6 +15,7 @@ type PlayersProps<Player extends PlayerRow> = {
   onAdd: (name: string) => Promise<unknown>;
   onRename: (playerId: Player["_id"], name: string) => Promise<unknown>;
   onRemove: (playerId: Player["_id"]) => Promise<unknown>;
+  onRelease: (playerId: Player["_id"], claimedAt: number | undefined) => Promise<unknown>;
 };
 
 type AddForm = "closed" | "open" | "openedByGm";
@@ -25,6 +26,7 @@ export function Players<Player extends PlayerRow>({
   onAdd,
   onRename,
   onRemove,
+  onRelease,
 }: PlayersProps<Player>) {
   const [addForm, setAddForm] = useState<AddForm>(progress.length === 0 ? "open" : "closed");
   const [handledAddRequest, setHandledAddRequest] = useState(addRequest);
@@ -84,6 +86,7 @@ export function Players<Player extends PlayerRow>({
                 await onRemove(entry.player._id);
                 (addButton.current ?? heading.current)?.focus();
               }}
+              onRelease={(claimedAt) => onRelease(entry.player._id, claimedAt)}
             />
           ))}
         </ul>
@@ -116,18 +119,26 @@ function rosterStatus(progress: readonly PlayerProgress<PlayerRow>[]) {
   return `${String(done)} of ${String(progress.length)} answered every night`;
 }
 
-type Mode = "view" | "actions" | "renaming" | "confirmingRemove";
+type Mode = "view" | "actions" | "renaming" | "confirmingRemove" | "confirmingUnlock";
 
 function PlayerItem({
   entry: { player, answered, fillable },
   onRename,
   onRemove,
+  onRelease,
 }: {
   entry: PlayerProgress<PlayerRow>;
   onRename: (name: string) => Promise<unknown>;
   onRemove: () => Promise<unknown>;
+  onRelease: (claimedAt: number | undefined) => Promise<unknown>;
 }) {
   const [mode, setMode] = useState<Mode>("view");
+  const [refocusOnUnlocked, setRefocusOnUnlocked] = useState(false);
+  const [confirmedClaim, setConfirmedClaim] = useState<number | undefined>();
+  if (mode === "confirmingUnlock" && (!player.claimed || player.claimedAt !== confirmedClaim)) {
+    setMode("view");
+    setRefocusOnUnlocked(true);
+  }
   const more = useRef<HTMLButtonElement>(null);
   const refocusMore = useRef(false);
   const actionsId = useId();
@@ -142,10 +153,11 @@ function PlayerItem({
   };
 
   useEffect(() => {
-    if (mode !== "view" || !refocusMore.current) return;
+    if (mode !== "view" || !(refocusMore.current || refocusOnUnlocked)) return;
     refocusMore.current = false;
+    setRefocusOnUnlocked(false);
     more.current?.focus();
-  }, [mode]);
+  }, [mode, refocusOnUnlocked]);
 
   if (mode === "renaming") {
     return (
@@ -171,25 +183,64 @@ function PlayerItem({
       </li>
     );
   }
+  if (mode === "confirmingUnlock") {
+    return (
+      <li className="py-1">
+        <UnlockConfirm
+          name={player.name}
+          onUnlock={async () => {
+            await onRelease(confirmedClaim);
+            backToView();
+          }}
+          onKeep={backToView}
+        />
+      </li>
+    );
+  }
   const showingActions = mode === "actions";
   return (
     <li
       onKeyDown={showingActions ? closeOnEscape : undefined}
       className={cn(
-        "group flex items-center gap-2.5 rounded-md px-1.5 py-1.5 transition-colors duration-150 hover:bg-surface-hover",
+        "group flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-md px-1.5 py-1.5 transition-colors duration-150 hover:bg-surface-hover",
         mutedStepsUp,
       )}
     >
       <Avatar name={player.name} image={player.image} size="sm" />
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium">{player.name}</span>
+        <span className="flex min-w-0 items-center gap-1 text-sm font-medium">
+          <span className="truncate">{player.name}</span>
+          {player.claimed && (
+            <span role="img" aria-label="Kept by an account" className="shrink-0 text-ink-3">
+              <IconLock className="size-3" />
+            </span>
+          )}
+        </span>
         <AnswerTrack answered={answered} fillable={fillable} />
       </span>
       {showingActions ? (
-        <span id={actionsId} className="flex shrink-0 items-center gap-1">
+        <span
+          id={actionsId}
+          className={cn(
+            "flex items-center gap-1",
+            player.claimed ? "order-last basis-full justify-end" : "shrink-0",
+          )}
+        >
           <button type="button" className={rowActionClassName} onClick={() => setMode("renaming")}>
             Rename
           </button>
+          {player.claimed && (
+            <button
+              type="button"
+              className={rowActionClassName}
+              onClick={() => {
+                setConfirmedClaim(player.claimedAt);
+                setMode("confirmingUnlock");
+              }}
+            >
+              Unlock
+            </button>
+          )}
           <button
             type="button"
             className={cn(rowActionClassName, "text-busy hover:bg-busy-soft")}
@@ -308,6 +359,64 @@ function RemoveConfirm({
         </Button>
         <Button size="sm" variant="ghost" onClick={onKeep} disabled={busy} autoFocus>
           Keep
+        </Button>
+      </div>
+      {failure && (
+        <p role="alert" className="mt-2 font-medium text-busy">
+          {failure}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function UnlockConfirm({
+  name,
+  onUnlock,
+  onKeep,
+}: {
+  name: string;
+  onUnlock: () => Promise<unknown>;
+  onKeep: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [failure, setFailure] = useState<string | null>(null);
+  const questionId = useId();
+  const unlock = async () => {
+    setBusy(true);
+    setFailure(null);
+    try {
+      await onUnlock();
+    } catch (error) {
+      setFailure(errorMessage(error, "roster"));
+      setBusy(false);
+    }
+  };
+  return (
+    <div
+      role="group"
+      aria-labelledby={questionId}
+      onKeyDown={(event) => {
+        if (event.key !== "Escape") return;
+        event.stopPropagation();
+        if (!busy) onKeep();
+      }}
+      className="rounded-md bg-surface-2 p-2.5 text-xs text-ink"
+    >
+      <p id={questionId} className="font-medium break-words">
+        {`Unlock ${name}? Anyone with your link can answer as ${name} again. Their answers stay.`}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          busy={busy && "Unlocking…"}
+          onClick={() => void unlock()}
+          className="max-w-full"
+        >
+          <span className="truncate">{`Unlock ${name}`}</span>
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onKeep} disabled={busy} autoFocus>
+          Keep locked
         </Button>
       </div>
       {failure && (

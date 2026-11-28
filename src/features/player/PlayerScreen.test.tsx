@@ -515,3 +515,53 @@ describe("the others on the calendar", () => {
     expect(screen.queryByRole("switch", { name: "Show others" })).toBeNull();
   });
 });
+
+describe("a Claimed Player locked to another Account", () => {
+  const lockedBo = { _id: "player-bo" as Id<"players">, name: "Bo", locked: true };
+  const withLockedBo = { ...roster, players: [roster.players[0], lockedBo] };
+
+  beforeEach(() => {
+    localStorage.clear();
+    queries["player:group"] = withLockedBo;
+  });
+
+  it("opens Log in when a visitor picks it, then answers as it once its Account signs in", async () => {
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Bo, locked" }));
+
+    expect(await screen.findByRole("dialog", { name: "Log in" })).toBeTruthy();
+    expect(screen.getByText("Log in to answer as Bo.")).toBeTruthy();
+    account.status = "account";
+    updateQuery("player:group", {
+      ...withLockedBo,
+      players: [roster.players[0], { ...lockedBo, locked: false }],
+      claimedPlayerId: lockedBo._id,
+    });
+    expect((await screen.findByText(/Answering as/)).textContent).toContain("Bo");
+  });
+
+  it("asks a device that remembers it to log in, without opening the sheet", async () => {
+    rememberPlayer(groupId, { playerId: lockedBo._id, name: "Bo" });
+    renderPage();
+
+    expect(await screen.findByText("Log in to answer as Bo.")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Who are you?" })).toBeTruthy();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.queryByText(/Answering as/)).toBeNull();
+  });
+
+  it("tells another Account that the name is kept, with no sheet", async () => {
+    account.status = "account";
+    renderPage();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Bo, locked" }));
+
+    expect(
+      await screen.findByText(
+        "Another account keeps this name. Add yours with a last initial, or ask your GM.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+});

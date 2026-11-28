@@ -20,6 +20,7 @@ const claimCap = `You keep ${String(MAX_CLAIMED_PLAYERS_PER_ACCOUNT)} groups. Re
 const answer: Copy = {
   RATE_LIMITED: "Slow down a moment.",
   OUT_OF_WINDOW: "That night is locked now.",
+  PLAYER_LOCKED: "An account keeps this name now. Log in to answer as it.",
 };
 
 const byTopic = {
@@ -34,6 +35,7 @@ const byTopic = {
     NAME_TAKEN: "That name is already on the list.",
     ROSTER_FULL: `This group is full. It holds ${String(MAX_PLAYERS_PER_GROUP)} players.`,
     NOT_FOUND: "That player is gone already.",
+    PLAYER_CLAIMED: "Another account keeps this name now. Look again before you unlock it.",
   },
   group: {
     TOO_MANY_GROUPS: `You have ${String(MAX_GROUPS_PER_GM)} groups. Delete one to make room.`,

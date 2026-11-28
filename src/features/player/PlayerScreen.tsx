@@ -5,7 +5,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { fillRestDates, type Answer } from "../../../shared/answers";
 import { monthOf, type IsoDate, type IsoMonth } from "../../../shared/dates";
-import { errorMessage } from "../../lib/errors";
+import { codeMessage, errorMessage } from "../../lib/errors";
 import {
   forgetPlayer,
   hasSeenHint,
@@ -115,8 +115,10 @@ function PlayerGroup({
   if (claimed && identity?.playerId !== claimed._id) {
     setIdentity({ playerId: claimed._id, name: claimed.name });
   }
-  const player = claimed ?? group.players.find(({ _id }) => _id === identity?.playerId);
-  const removed = identity !== null && player === undefined;
+  const picked = claimed ?? group.players.find(({ _id }) => _id === identity?.playerId);
+  const player = picked?.locked ? undefined : picked;
+  const lockedPick = picked?.locked ? picked : undefined;
+  const removed = identity !== null && picked === undefined;
   const keeper = useKeeper(refusalOnReturn(account, shareToken), () => showToast(KEPT));
   const { keepOnReturn } = account;
   const keep = player && { shareToken, playerId: player._id };
@@ -198,8 +200,17 @@ function PlayerGroup({
           groupName={group.name}
           players={group.players}
           removed={removed}
+          lockNotice={
+            lockedPick && {
+              playerId: lockedPick._id,
+              text: lockNoticeFor(account.status, lockedPick.name),
+            }
+          }
           accountControl={accountControl}
-          onPick={({ _id, name }) => answerAs({ playerId: _id, name })}
+          onPick={({ _id, name, locked }) => {
+            answerAs({ playerId: _id, name });
+            if (locked && account.status === "signedOut") setSheet("logIn");
+          }}
           onJoin={async (name) => {
             const playerId = await join({ shareToken, name });
             answerAs({ playerId, name: name.trim() });
@@ -276,6 +287,7 @@ function PlayerGroup({
           open={sheet === "logIn"}
           intent="logIn"
           forPlayer
+          lockedName={lockedPick?.name}
           onSubmit={account.logIn}
           onContinueWithGoogle={logInWithGoogle && (() => logInWithGoogle(`/s/${shareToken}`))}
           onClose={() => setSheet(null)}
@@ -312,6 +324,14 @@ function useKeeper(refusalOnReturn: string | null, onKept: () => void) {
       setRefusal(errorMessage(error, "save"));
     },
   };
+}
+
+function lockNoticeFor(status: Account["status"], name: string) {
+  if (status === "account") return codeMessage("PLAYER_CLAIMED", "keep");
+  if (status === "anonymous") {
+    return `Save your own group with the account that keeps ${name}, then open this link again.`;
+  }
+  return `Log in to answer as ${name}.`;
 }
 
 function refusalOnReturn(account: Account, shareToken: string) {

@@ -83,6 +83,7 @@ export default defineSchema({
     name: v.string(),
     nameKey: v.string(),
     userId: v.optional(v.id("users")),
+    claimedAt: v.optional(v.number()),
   })
     .index("by_groupId_and_nameKey", ["groupId", "nameKey"])
     .index("by_userId_and_groupId", ["userId", "groupId"]),
@@ -90,9 +91,11 @@ export default defineSchema({
   groupRemovals: defineTable({
     userId: v.id("users"),
     groupId: v.id("groups"),
+    playerId: v.optional(v.id("players")),
   })
     .index("by_userId_and_groupId", ["userId", "groupId"])
-    .index("by_groupId", ["groupId"]),
+    .index("by_groupId", ["groupId"])
+    .index("by_playerId", ["playerId"]),
 
   answers: defineTable({
     groupId: v.id("groups"),
