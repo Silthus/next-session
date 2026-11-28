@@ -219,7 +219,7 @@ test("a Claimed Player answers only through its Account, which logs in from the 
   });
 });
 
-test("an Anonymous GM logs in from a locked chip and brings their own Group along", async ({
+test("an Anonymous GM saves their own Group first, then answers as their locked name", async ({
   page,
 }) => {
   const { gm, link } = await seedGroup("Crowded Table");
@@ -228,18 +228,22 @@ test("an Anonymous GM logs in from a locked chip and brings their own Group alon
 
   await openAsGm(page, own.gm, link);
   await page.getByRole("button", { name: "Dana, locked" }).click();
-  await expect(page.getByText("Log in to answer as Dana.")).toBeVisible();
-  const sheet = page.getByRole("dialog", { name: "Keep Crowded Table" });
-  await expect(sheet).toContainText("Your own groups move to the account too.");
-  await sheet.getByText("I already have one").click();
-  await fillAccount(page, dana.email);
-  await sheet.getByRole("button", { name: "Log in and keep" }).click();
+  await expect(
+    page.getByText("Save your own group to your account first, then log in here to answer as Dana."),
+  ).toBeVisible();
   await expect(page.getByRole("dialog")).toBeHidden();
-  await expect(page.getByText("Answering as")).toContainText("Dana");
-  await expect(todayTile(page)).toHaveAccessibleName(/: Free$/);
 
   await page.goto(`/g/${own.gm.groupId}`);
+  await page.getByRole("button", { name: "Save your group" }).click();
+  const sheet = page.getByRole("dialog", { name: "Keep Dana's Table" });
+  await sheet.getByText("I already have one").click();
+  await fillAccount(page, dana.email);
+  await sheet.getByRole("button", { name: "Log in and save" }).click();
   await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
+
+  await page.goto(link);
+  await expect(page.getByText("Answering as")).toContainText("Dana");
+  await expect(todayTile(page)).toHaveAccessibleName(/: Free$/);
 });
 
 test("an Anonymous GM keeping their own link saves first, then keeps the Player", async ({

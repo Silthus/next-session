@@ -121,8 +121,7 @@ function PlayerGroup({
   const removed = identity !== null && picked === undefined;
   const keeper = useKeeper(refusalOnReturn(account, shareToken), () => showToast(KEPT));
   const { keepOnReturn } = account;
-  const keeping = player ?? (account.status === "anonymous" ? lockedPick : undefined);
-  const keep = keeping && { shareToken, playerId: keeping._id };
+  const keep = player && { shareToken, playerId: player._id };
 
   useEffect(() => {
     if (removed) forgetPlayer(group.groupId);
@@ -204,17 +203,13 @@ function PlayerGroup({
           lockNotice={
             lockedPick && {
               playerId: lockedPick._id,
-              text:
-                account.status === "account"
-                  ? codeMessage("PLAYER_CLAIMED", "keep")
-                  : `Log in to answer as ${lockedPick.name}.`,
+              text: lockNoticeFor(account.status, lockedPick.name),
             }
           }
           accountControl={accountControl}
           onPick={({ _id, name, locked }) => {
             answerAs({ playerId: _id, name });
             if (locked && account.status === "signedOut") setSheet("logIn");
-            if (locked && account.status === "anonymous") setSheet("keep");
           }}
           onJoin={async (name) => {
             const playerId = await join({ shareToken, name });
@@ -276,12 +271,12 @@ function PlayerGroup({
         />
       )}
       {player !== undefined && <Toast message={toast} />}
-      {sheet === "keep" && keeping && keep ? (
+      {sheet === "keep" && player && keep ? (
         <AccountSheet
           open
           intent="keep"
           groupName={group.name}
-          playerName={keeping.name}
+          playerName={player.name}
           movesGroups={account.status === "anonymous"}
           onSubmit={(input) => keeper.keepThrough(() => account.keepWithPassword(keep, input))}
           onContinueWithGoogle={keepWithGoogle && (() => keepWithGoogle(keep))}
@@ -328,6 +323,14 @@ function useKeeper(refusalOnReturn: string | null, onKept: () => void) {
       setRefusal(errorMessage(error, "save"));
     },
   };
+}
+
+function lockNoticeFor(status: Account["status"], name: string) {
+  if (status === "account") return codeMessage("PLAYER_CLAIMED", "keep");
+  if (status === "anonymous") {
+    return `Save your own group to your account first, then log in here to answer as ${name}.`;
+  }
+  return `Log in to answer as ${name}.`;
 }
 
 function refusalOnReturn(account: Account, shareToken: string) {

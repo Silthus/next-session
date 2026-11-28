@@ -551,32 +551,19 @@ describe("a Claimed Player locked to another Account", () => {
     expect(screen.queryByText(/Answering as/)).toBeNull();
   });
 
-  it("offers an Anonymous GM the Keep sheet, which moves their own Groups and keeps it", async () => {
+  it("tells an Anonymous GM to save their own group first, with no sheet", async () => {
     account.status = "anonymous";
-    account.keepWithPassword = vi.fn(() => {
-      account.status = "account";
-      updateQuery("player:group", {
-        ...withLockedBo,
-        players: [roster.players[0], { ...lockedBo, locked: false }],
-        claimedPlayerId: lockedBo._id,
-      });
-      return Promise.resolve({ kept: true as const });
-    });
     renderPage();
 
     await userEvent.click(await screen.findByRole("button", { name: "Bo, locked" }));
-    const sheet = await screen.findByRole("dialog", { name: "Keep Thursday Crew" });
-    expect(within(sheet).getByText("Your own groups move to the account too.")).toBeTruthy();
-    await userEvent.click(within(sheet).getByText("I already have one"));
-    await userEvent.type(within(sheet).getByLabelText("Email"), "bo@example.com");
-    await userEvent.type(within(sheet).getByLabelText("Password"), "game-night-2026");
-    await userEvent.click(within(sheet).getByRole("button", { name: "Log in and keep" }));
 
-    expect(account.keepWithPassword).toHaveBeenCalledWith(
-      { shareToken, playerId: lockedBo._id },
-      expect.objectContaining({ email: "bo@example.com", mode: "logIn" }),
-    );
-    expect((await screen.findByText(/Answering as/)).textContent).toContain("Bo");
+    expect(
+      await screen.findByText(
+        "Save your own group to your account first, then log in here to answer as Bo.",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.queryByText(/Answering as/)).toBeNull();
   });
 
   it("tells another Account that the name is kept, with no sheet", async () => {
