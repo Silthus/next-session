@@ -256,8 +256,8 @@ describe("Google profile picture", () => {
     });
 
     expect(schedule?.players).toEqual([
-      { _id: adaId, name: "Ada", image: adasPicture },
-      { _id: graceId, name: "Grace" },
+      { _id: adaId, name: "Ada", image: adasPicture, claimed: true },
+      { _id: graceId, name: "Grace", claimed: false },
     ]);
     const shareLink = await t.query(api.player.group, { shareToken });
     expect(shareLink?.players.map((player) => Object.keys(player).sort())).toEqual([

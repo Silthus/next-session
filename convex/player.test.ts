@@ -1173,21 +1173,21 @@ describe("player.claim", () => {
   });
 });
 
-describe("a Claimed Player locked to its Account", () => {
-  async function claimedAda() {
-    const group = await sharedGroup();
-    const ada = await seedPlayer(group.groupId, "Ada");
-    const player = await signInAccount(t);
-    await player.as.mutation(api.player.claim, { shareToken: group.shareToken, playerId: ada });
-    await player.as.mutation(api.player.answer, {
-      shareToken: group.shareToken,
-      playerId: ada,
-      date: TODAY,
-      answer: "free",
-    });
-    return { ...group, ada, player };
-  }
+async function claimedAda() {
+  const group = await sharedGroup();
+  const ada = await seedPlayer(group.groupId, "Ada");
+  const player = await signInAccount(t);
+  await player.as.mutation(api.player.claim, { shareToken: group.shareToken, playerId: ada });
+  await player.as.mutation(api.player.answer, {
+    shareToken: group.shareToken,
+    playerId: ada,
+    date: TODAY,
+    answer: "free",
+  });
+  return { ...group, ada, player };
+}
 
+describe("a Claimed Player locked to its Account", () => {
   it("marks the Roster's Claimed Players locked for everyone but their Account", async () => {
     const { groupId, shareToken, ada, player } = await claimedAda();
     const bo = await seedPlayer(groupId, "Bo");
@@ -1209,6 +1209,57 @@ describe("a Claimed Player locked to its Account", () => {
     await t.mutation(api.player.answer, { shareToken, playerId: ada, date: TODAY, answer: "busy" });
 
     expect(await answersOf(ada)).toEqual({ [TODAY]: "busy" });
+  });
+});
+
+describe("roster.releasePlayer", () => {
+  it("opens a Claimed Player to the Share Link again and keeps its Answers", async () => {
+    const { as, shareToken, ada } = await claimedAda();
+
+    expect(await as.mutation(api.roster.releasePlayer, { playerId: ada })).toBeNull();
+
+    const group = await t.query(api.player.group, { shareToken });
+    expect(group!.players.map(({ name, locked }) => ({ name, locked }))).toEqual([
+      { name: "Ada", locked: false },
+    ]);
+    expect(await answersOf(ada)).toEqual({ [TODAY]: "free" });
+    await t.mutation(api.player.answer, { shareToken, playerId: ada, date: TODAY, answer: "busy" });
+    expect(await answersOf(ada)).toEqual({ [TODAY]: "busy" });
+  });
+
+  it("keeps the released Account from taking the name back on its next Answer", async () => {
+    const { as, shareToken, ada, player } = await claimedAda();
+    await as.mutation(api.roster.releasePlayer, { playerId: ada });
+
+    await player.as.mutation(api.player.answer, {
+      shareToken,
+      playerId: ada,
+      date: TODAY,
+      answer: "busy",
+    });
+
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBeNull();
+    const group = await (await signInAccount(t)).as.query(api.player.group, { shareToken });
+    expect(group!.players[0]!.locked).toBe(false);
+  });
+
+  it("lets the released Account keep the name again on purpose", async () => {
+    const { as, shareToken, ada, player } = await claimedAda();
+    await as.mutation(api.roster.releasePlayer, { playerId: ada });
+
+    await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBe(ada);
+  });
+
+  it("leaves an unclaimed Player as it is", async () => {
+    const { as, groupId, shareToken } = await sharedGroup();
+    const bo = await seedPlayer(groupId, "Bo");
+
+    expect(await as.mutation(api.roster.releasePlayer, { playerId: bo })).toBeNull();
+
+    const group = await t.query(api.player.group, { shareToken });
+    expect(group!.players[0]!.locked).toBe(false);
   });
 });
 

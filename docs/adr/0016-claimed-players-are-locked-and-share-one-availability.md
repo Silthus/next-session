@@ -17,6 +17,7 @@ This amends ADR-0004 and ADR-0010: the Share Link still opens a Group and answer
 ## Consequences
 
 - A signed-out player has to log in before answering as their Claimed Player, and a GM can't fill in answers for one.
+- A wrong Account can keep a name by mistake, for example on a shared device. The GM unlocks it from the Roster, which keeps the Player and its Answers and stops that Account from taking it back by answering.
 - Claiming moves a Player's Answers onto the Account, and releasing copies them back, so the Group keeps them.
 - Accounts already in several Groups take the most cautious Answer (busy over maybe over free) where their Groups disagree.
 - A night blocked by another Group's Session is never written into the Account's Answers. It follows the published Session, so an undone or cancelled Session leaves no trace.

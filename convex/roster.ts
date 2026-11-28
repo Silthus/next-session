@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, type MutationCtx } from "./_generated/server";
 import { ownedGroup, ownedPlayer, touchGroup } from "./model/access";
-import { ensureNameIsFree, ensureRosterHasRoom, validName } from "./model/players";
+import { ensureNameIsFree, ensureRosterHasRoom, releaseForGm, validName } from "./model/players";
 import { enforceRateLimit } from "./model/rateLimits";
 import { changeRecipientSet } from "./sessionMail";
 
@@ -47,6 +47,18 @@ export const removePlayer = mutation({
       await changeRecipientSet(ctx, { groupId: group._id, userId }, () =>
         deletePlayer(ctx, player),
       );
+    await touchGroup(ctx, group);
+    return null;
+  },
+});
+
+export const releasePlayer = mutation({
+  args: { playerId: v.id("players") },
+  returns: v.null(),
+  handler: async (ctx, { playerId }) => {
+    const { gm, group, player } = await ownedPlayer(ctx, playerId);
+    await enforceRateLimit(ctx, "gmEdit", gm._id);
+    await releaseForGm(ctx, player);
     await touchGroup(ctx, group);
     return null;
   },

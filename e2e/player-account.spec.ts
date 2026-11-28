@@ -198,6 +198,7 @@ test("a Claimed Player answers only through its Account, which logs in from the 
     await page.getByRole("button", { name: "Dana, locked" }).click();
     await expect(page.getByRole("dialog", { name: "Log in" })).toBeVisible();
     await expect(page.getByText("Log in to answer as Dana.")).toBeVisible();
+    await expect(page.getByText("Not Dana? Go back and pick your own name.")).toBeVisible();
   });
 
   await test.step("another Account that logs in reads that the name is kept", async () => {
@@ -216,6 +217,32 @@ test("a Claimed Player answers only through its Account, which logs in from the 
     await logInFromTheSheet(danasPhone, dana.email);
     await expect(danasPhone.getByText("Answering as")).toContainText("Dana");
     await expect(todayTile(danasPhone)).toHaveAccessibleName(/: Free$/);
+  });
+});
+
+test("the GM unlocks a mistaken claim, and the Share Link answers as that name again", async ({
+  page,
+  browser,
+}) => {
+  const { gm, link } = await seedGroup("Shared Laptop");
+  await accountClaimingWithAnAnswer(gm, "Dana");
+
+  await test.step("the GM sees Dana locked on the Roster and unlocks it", async () => {
+    await openAsGm(page, gm, `/g/${gm.groupId}`);
+    const roster = page.getByRole("region", { name: /^Players/ });
+    await expect(roster.getByRole("img", { name: "Kept by an account" })).toBeVisible();
+    await roster.getByRole("button", { name: "More for Dana" }).click();
+    await roster.getByRole("button", { name: "Unlock" }).click();
+    await roster.getByRole("button", { name: "Unlock Dana" }).click();
+    await expect(roster.getByRole("img", { name: "Kept by an account" })).toBeHidden();
+  });
+
+  await test.step("a signed-out visitor now picks Dana and sees Dana's answer", async () => {
+    const visitor = await freshPage(browser);
+    await visitor.goto(link);
+    await visitor.getByRole("button", { name: "Dana", exact: true }).click();
+    await expect(visitor.getByText("Answering as")).toContainText("Dana");
+    await expect(todayTile(visitor)).toHaveAccessibleName(/: Free$/);
   });
 });
 
@@ -473,6 +500,17 @@ test.describe("screenshots", () => {
       await logInFromTheSheet(owner, dana.email);
       await expect(owner.getByText("Answering as")).toContainText("Dana");
       await shot(owner, "locked-owner-answering");
+
+      const gmPage = await fresh();
+      await openAsGm(gmPage, gm, `/g/${gm.groupId}`);
+      if (width < 640) await gmPage.getByRole("tab", { name: "Players" }).click();
+      const roster = gmPage.getByRole("region", { name: /^Players/ });
+      await expect(roster.getByRole("img", { name: "Kept by an account" })).toBeVisible();
+      await shot(gmPage, "locked-gm-roster");
+      await roster.getByRole("button", { name: "More for Dana" }).click();
+      await roster.getByRole("button", { name: "Unlock" }).click();
+      await expect(roster.getByRole("button", { name: "Unlock Dana" })).toBeVisible();
+      await shot(gmPage, "locked-gm-unlock-confirm");
     });
   }
 

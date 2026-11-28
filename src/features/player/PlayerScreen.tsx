@@ -287,6 +287,7 @@ function PlayerGroup({
           open={sheet === "logIn"}
           intent="logIn"
           forPlayer
+          lockedName={lockedPick?.name}
           onSubmit={account.logIn}
           onContinueWithGoogle={logInWithGoogle && (() => logInWithGoogle(`/s/${shareToken}`))}
           onClose={() => setSheet(null)}

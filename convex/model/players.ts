@@ -97,6 +97,15 @@ export async function removeFromMyGroups(
   return released;
 }
 
+export async function releaseForGm(ctx: MutationCtx, player: Doc<"players">) {
+  const { userId, groupId } = player;
+  if (userId === undefined) return;
+  await changeRecipientSet(ctx, { groupId, userId }, () => unclaim(ctx, player));
+  if ((await removalFromMyGroups(ctx, userId, groupId)) === null) {
+    await ctx.db.insert("groupRemovals", { userId, groupId });
+  }
+}
+
 async function answerKeeps(
   ctx: QueryCtx,
   account: Doc<"users">,

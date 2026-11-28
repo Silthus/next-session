@@ -63,8 +63,8 @@ describe("schedule.month", () => {
 
     expect(schedule).toEqual({
       players: [
-        { _id: ada, name: "Ada" },
-        { _id: grace, name: "Grace" },
+        { _id: ada, name: "Ada", claimed: false },
+        { _id: grace, name: "Grace", claimed: false },
       ],
       answers: [
         { playerId: ada, date: "2026-10-01", answer: "free" },
@@ -213,7 +213,7 @@ describe("schedule.month", () => {
     const schedule = await as.query(api.schedule.month, { groupId, month: "2026-10" });
 
     expect(schedule).toEqual({
-      players: [{ _id: ada, name: "Ada" }],
+      players: [{ _id: ada, name: "Ada", claimed: false }],
       answers: [],
       sessions: [],
       timeAndPlace: USUAL_IN_BERLIN,

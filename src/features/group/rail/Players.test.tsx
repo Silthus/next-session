@@ -10,6 +10,7 @@ function renderPlayers(summary = monthWith({}), handlers: Partial<Handlers> = {}
     onAdd: vi.fn(() => Promise.resolve()),
     onRename: vi.fn(() => Promise.resolve()),
     onRemove: vi.fn(() => Promise.resolve()),
+    onRelease: vi.fn(() => Promise.resolve()),
     ...handlers,
   };
   const view = render(<Players progress={summary.progress} addRequest={addRequest} {...all} />);
@@ -22,6 +23,7 @@ type Handlers = {
   onAdd: (name: string) => Promise<unknown>;
   onRename: (playerId: string, name: string) => Promise<unknown>;
   onRemove: (playerId: string) => Promise<unknown>;
+  onRelease: (playerId: string) => Promise<unknown>;
 };
 
 const takenName = new ConvexError({ code: "NAME_TAKEN", playerId: "Ana" });
@@ -274,6 +276,31 @@ describe("Players", () => {
     await userEvent.click(within(card).getByRole("button", { name: "Remove Ana" }));
     expect(onRemove).toHaveBeenCalledWith("Ana");
     expect(document.activeElement).toBe(within(card).getByRole("button", { name: "Add player" }));
+  });
+
+  it("asks before unlocking a Claimed Player for the Share Link", async () => {
+    const { onRelease, card } = renderPlayers(
+      monthWith({ players: [{ _id: "Ana", name: "Ana", claimed: true }, ...rosterOf("Ben")] }),
+    );
+    expect(within(card).getByRole("img", { name: "Kept by an account" })).toBeTruthy();
+    await userEvent.click(within(card).getByRole("button", { name: "More for Ben" }));
+    expect(within(card).queryByRole("button", { name: "Unlock" })).toBeNull();
+
+    await userEvent.click(within(card).getByRole("button", { name: "More for Ana" }));
+    await userEvent.click(within(card).getByRole("button", { name: "Unlock" }));
+    expect(
+      within(card).getByText(
+        "Unlock Ana? Anyone with your link can answer as Ana again. Their answers stay.",
+      ),
+    ).toBeTruthy();
+    await userEvent.click(within(card).getByRole("button", { name: "Keep locked" }));
+    expect(onRelease).not.toHaveBeenCalled();
+
+    await userEvent.click(within(card).getByRole("button", { name: "More for Ana" }));
+    await userEvent.click(within(card).getByRole("button", { name: "Unlock" }));
+    await userEvent.click(within(card).getByRole("button", { name: "Unlock Ana" }));
+    expect(onRelease).toHaveBeenCalledWith("Ana");
+    expect(document.activeElement).toBe(within(card).getByRole("button", { name: "More for Ana" }));
   });
 
   it("shows a Player's actions inside their row and closes them with Escape", async () => {

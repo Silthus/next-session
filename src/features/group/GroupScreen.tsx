@@ -374,6 +374,7 @@ function GroupSurface({
               onAdd={rail.addPlayer}
               onRename={rail.renamePlayer}
               onRemove={rail.removePlayer}
+              onRelease={rail.releasePlayer}
             />
           ),
         }}

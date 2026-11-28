@@ -42,6 +42,9 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - roster.removePlayer: a GM removes a Player and their Answers
   handler: removePlayer in roster.ts
   trust: signed-in user
+- roster.releasePlayer: a GM unlocks a Claimed Player for the Share Link and keeps its Answers
+  handler: releasePlayer in roster.ts
+  trust: signed-in user
 - sessions.schedule: a GM picks a date in the Booking Window as a Session, or restores its Cancelled Session
   handler: schedule in sessions.ts
   trust: signed-in user
@@ -153,7 +156,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   because: a Group is one table's private plan; without the ownership check any signed-in GM could read or edit another table's Roster, Answers and Sessions, and a refusal that differs from a missing id would let ids be probed
   crossing: signed-in user -> store
   refuted: groupOwnedBy returned the Group without comparing its ownerId -> the oracle failed by name (2026-10-12)
-  entrances: groups.mine, groups.get, groups.create, groups.settings, groups.updateSettings, groups.rename, groups.remove, groups.rotateShareToken, groups.undoRotateShareToken, schedule.month, roster.addPlayer, roster.renamePlayer, roster.removePlayer, sessions.schedule, sessions.cancel, sessions.updateDetails
+  entrances: groups.mine, groups.get, groups.create, groups.settings, groups.updateSettings, groups.rename, groups.remove, groups.rotateShareToken, groups.undoRotateShareToken, schedule.month, roster.addPlayer, roster.renamePlayer, roster.removePlayer, roster.releasePlayer, sessions.schedule, sessions.cancel, sessions.updateDetails
   kinds: read, identity
   checklist: scoped-reads declared as owner-only groups
   checklist: capability-authorization declared as share link scoping

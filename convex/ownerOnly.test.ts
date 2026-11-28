@@ -74,6 +74,9 @@ const foreignCalls: Record<string, ForeignCall> = {
   "roster.removePlayer": refusedAsMissing((as, { playerId }) =>
     as.mutation(api.roster.removePlayer, { playerId }),
   ),
+  "roster.releasePlayer": refusedAsMissing((as, { playerId }) =>
+    as.mutation(api.roster.releasePlayer, { playerId }),
+  ),
   "sessions.schedule": refusedAsMissing((as, { groupId }) =>
     as.mutation(api.sessions.schedule, { groupId, date: "2026-10-24" }),
   ),

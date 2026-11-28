@@ -1,6 +1,6 @@
 import type { Id } from "../../../../convex/_generated/dataModel";
 import type { Answer } from "../../../../shared/answers";
-import { summarizeMonth } from "../../../../shared/monthSummary";
+import { summarizeMonth, type PlayerRow } from "../../../../shared/monthSummary";
 import type { CalendarSession } from "../calendar/DayCell";
 
 export const today = "2026-10-02";
@@ -17,7 +17,7 @@ export function monthWith({
   cancelled = [],
 }: {
   month?: string;
-  players?: { _id: string; name: string }[];
+  players?: PlayerRow[];
   answers?: Record<string, Record<string, Answer>>;
   sessions?: string[];
   cancelled?: string[];

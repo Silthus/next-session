@@ -27,7 +27,7 @@ A Player linked to an Account, so the Account opens the Group as that Player on 
 _Avoid_: linked player, player account, membership
 
 **Claim** / **Release**:
-Linking a Player to the signed-in Account, and undoing that link. Joining with a new name while signed in claims; **Keep this group** claims an existing name. **Not you?** and **Remove from my groups** release. Releasing never deletes the Player, and opens it to the Share Link again.
+Linking a Player to the signed-in Account, and undoing that link. Joining with a new name while signed in claims; **Keep this group** claims an existing name. **Not you?** and **Remove from my groups** release, and the GM unlocks a Claimed Player from the Roster, which releases it and keeps its Account from taking it back on its own. Releasing never deletes the Player, and opens it to the Share Link again.
 _Avoid_: adopt, unlink, leave (only the GM removes a Player)
 
 **My groups**:
