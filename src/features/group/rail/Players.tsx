@@ -133,7 +133,11 @@ function PlayerItem({
   onRelease: () => Promise<unknown>;
 }) {
   const [mode, setMode] = useState<Mode>("view");
-  if (mode === "confirmingUnlock" && !player.claimed) setMode("view");
+  const [refocusOnUnlocked, setRefocusOnUnlocked] = useState(false);
+  if (mode === "confirmingUnlock" && !player.claimed) {
+    setMode("view");
+    setRefocusOnUnlocked(true);
+  }
   const more = useRef<HTMLButtonElement>(null);
   const refocusMore = useRef(false);
   const actionsId = useId();
@@ -148,10 +152,11 @@ function PlayerItem({
   };
 
   useEffect(() => {
-    if (mode !== "view" || !refocusMore.current) return;
+    if (mode !== "view" || !(refocusMore.current || refocusOnUnlocked)) return;
     refocusMore.current = false;
+    setRefocusOnUnlocked(false);
     more.current?.focus();
-  }, [mode]);
+  }, [mode, refocusOnUnlocked]);
 
   if (mode === "renaming") {
     return (

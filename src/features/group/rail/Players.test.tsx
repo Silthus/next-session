@@ -320,7 +320,7 @@ describe("Players", () => {
     view.rerender(<Players progress={released.progress} {...all} />);
 
     expect(screen.queryByRole("button", { name: "Unlock Ana" })).toBeNull();
-    expect(all.onRelease).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "More for Ana" }));
   });
 
   it("shows a Player's actions inside their row and closes them with Escape", async () => {

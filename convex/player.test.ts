@@ -1261,6 +1261,21 @@ describe("roster.releasePlayer", () => {
     expect(group!.removedFromMyGroups).toBe(false);
   });
 
+  it("keeps the name unlocked after the released Account auto-claims another name", async () => {
+    const { as, groupId, shareToken, ada, player } = await claimedAda();
+    const bo = await seedPlayer(groupId, "Bo");
+    await as.mutation(api.roster.releasePlayer, { playerId: ada });
+    const answerAs = (playerId: Id<"players">) =>
+      player.as.mutation(api.player.answer, { shareToken, playerId, date: TODAY, answer: "busy" });
+
+    await answerAs(bo);
+    await answerAs(ada);
+
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBe(bo);
+    const group = await t.query(api.player.group, { shareToken });
+    expect(group!.players.find(({ _id }) => _id === ada)!.locked).toBe(false);
+  });
+
   it("gives way to the Account's own Remove from my groups", async () => {
     const { as, groupId, shareToken, ada, player } = await claimedAda();
     const bo = await seedPlayer(groupId, "Bo");
