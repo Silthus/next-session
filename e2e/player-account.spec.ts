@@ -420,6 +420,63 @@ test.describe("screenshots", () => {
   test.skip(!screenshotDir, "Set E2E_SCREENSHOTS to a directory to capture them");
 
   for (const width of [390, 1440]) {
+    test(`locked name states at ${String(width)}px`, async ({ browser }) => {
+      const { gm, link } = await seedGroup("Long Table");
+      const dana = await accountClaimingWithAnAnswer(gm, "Dana");
+      for (const index of Array.from({ length: 12 }, (_, i) => i + 1)) {
+        await seedPlayer(gm, `Guest ${String(index)}`);
+      }
+      const viewport = { width, height: width < 640 ? 844 : 1000 };
+      const shot = (page: Page, name: string) =>
+        page.screenshot({
+          path: `${screenshotDir ?? ""}/${name}--${String(width)}--light.png`,
+          fullPage: true,
+          animations: "disabled",
+        });
+      const fresh = async () => {
+        const context = await browser.newContext({ viewport });
+        const page = await context.newPage();
+        await page.addInitScript((groupId) => {
+          localStorage.setItem(`next-session.playerHint.${groupId}`, "1");
+          localStorage.setItem("next-session.othersIntroSeen", "1");
+        }, gm.groupId);
+        return page;
+      };
+
+      const remembering = await fresh();
+      await remembering.goto(link);
+      await remembering.getByRole("searchbox", { name: "Find your name" }).fill("Dana");
+      await remembering.getByRole("button", { name: "Dana, locked" }).click();
+      await remembering
+        .getByRole("dialog", { name: "Log in" })
+        .getByRole("button", { name: "Close" })
+        .click();
+      await remembering.reload();
+      await expect(remembering.getByText("Log in to answer as Dana.")).toBeVisible();
+      await shot(remembering, "locked-remembered");
+      await remembering.getByRole("searchbox", { name: "Find your name" }).fill("Dev");
+      await expect(remembering.getByText("No names match. Add yours below.")).toBeVisible();
+      await shot(remembering, "locked-search-no-match");
+
+      const anonymousGm = await fresh();
+      const own = await seedGroup("Dana's Table");
+      await openAsGm(anonymousGm, own.gm, link);
+      await anonymousGm.getByRole("searchbox", { name: "Find your name" }).fill("Dana");
+      await anonymousGm.getByRole("button", { name: "Dana, locked" }).click();
+      await expect(anonymousGm.getByText(/account that keeps Dana/)).toBeVisible();
+      await shot(anonymousGm, "locked-anonymous-gm");
+
+      const owner = await fresh();
+      await owner.goto(link);
+      await owner.getByRole("searchbox", { name: "Find your name" }).fill("Dana");
+      await owner.getByRole("button", { name: "Dana, locked" }).click();
+      await logInFromTheSheet(owner, dana.email);
+      await expect(owner.getByText("Answering as")).toContainText("Dana");
+      await shot(owner, "locked-owner-answering");
+    });
+  }
+
+  for (const width of [390, 1440]) {
     for (const colorScheme of ["light", "dark"] as const) {
       test(`${String(width)}px ${colorScheme}`, async ({ browser }) => {
         const { gm, link } = await seedGroup("Thursday Crew");

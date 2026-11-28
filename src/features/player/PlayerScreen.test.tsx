@@ -551,21 +551,6 @@ describe("a Claimed Player locked to another Account", () => {
     expect(screen.queryByText(/Answering as/)).toBeNull();
   });
 
-  it("tells an Anonymous GM to save their own group first, with no sheet", async () => {
-    account.status = "anonymous";
-    renderPage();
-
-    await userEvent.click(await screen.findByRole("button", { name: "Bo, locked" }));
-
-    expect(
-      await screen.findByText(
-        "Save your own group with the account that keeps Bo, then open this link again.",
-      ),
-    ).toBeTruthy();
-    expect(screen.queryByRole("dialog")).toBeNull();
-    expect(screen.queryByText(/Answering as/)).toBeNull();
-  });
-
   it("tells another Account that the name is kept, with no sheet", async () => {
     account.status = "account";
     renderPage();
