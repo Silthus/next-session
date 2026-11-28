@@ -402,6 +402,7 @@ test.describe("screenshots", () => {
         const page = await context.newPage();
         await page.addInitScript((groupId) => {
           localStorage.setItem(`next-session.playerHint.${groupId}`, "1");
+          localStorage.setItem("next-session.othersIntroSeen", "1");
         }, gm.groupId);
         const shot = (name: string) =>
           page.screenshot({
@@ -432,6 +433,20 @@ test.describe("screenshots", () => {
           page.getByText("Another account keeps this name.", { exact: false }),
         ).toBeVisible();
         await shot("player-claimed");
+
+        const visitorContext = await browser.newContext({
+          viewport: { width, height: width < 640 ? 844 : 1000 },
+          colorScheme,
+        });
+        const visitor = await visitorContext.newPage();
+        await visitor.goto(link);
+        await visitor.getByRole("button", { name: "Dana, locked" }).click();
+        await expect(visitor.getByRole("dialog", { name: "Log in" })).toBeVisible();
+        await visitor.screenshot({
+          path: `${screenshotDir ?? ""}/player-locked-log-in--${String(width)}--${colorScheme}.png`,
+          animations: "disabled",
+        });
+        await visitorContext.close();
       });
     }
   }

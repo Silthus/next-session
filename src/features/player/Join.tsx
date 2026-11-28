@@ -215,6 +215,7 @@ function PlayerChip({
       onClick={() => onPick(player)}
       disabled={disabled}
       aria-describedby={describedBy}
+      aria-label={player.locked ? `${player.name}, locked` : undefined}
       className={cn(
         "flex min-h-11 max-w-full items-center gap-2 rounded-full border py-1.5 pr-3.5 pl-1.5 text-sm font-semibold hover:border-accent hover:bg-accent-soft disabled:pointer-events-none disabled:opacity-60",
         pressable,
@@ -225,12 +226,7 @@ function PlayerChip({
     >
       <Avatar name={player.name} size="sm" />
       <span className="min-w-0 wrap-anywhere">{player.name}</span>
-      {player.locked && (
-        <>
-          <IconLock className="shrink-0 text-ink-3" />
-          <span className="sr-only">, locked</span>
-        </>
-      )}
+      {player.locked && <IconLock className="shrink-0 text-ink-3" />}
     </button>
   );
 }
