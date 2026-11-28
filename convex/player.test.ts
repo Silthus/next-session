@@ -160,8 +160,8 @@ describe("player.group", () => {
       groupId,
       name: "My group",
       players: [
-        { _id: ada, name: "Ada" },
-        { _id: bo, name: "Bo" },
+        { _id: ada, name: "Ada", locked: false },
+        { _id: bo, name: "Bo", locked: false },
       ],
       sessions: ["2026-10-02", TODAY, "2026-10-17", LAST_BOOKABLE_DATE, "2027-01-01"].map(
         (date) => ({ date, state: "scheduled", ...USUAL }),
@@ -1171,16 +1171,44 @@ describe("player.claim", () => {
 
     expect(await expiryOf(t, groupId)).toBe(NOW + 32 * DAY);
   });
+});
 
-  it("locks nothing: the Share Link still answers as a Claimed Player", async () => {
-    const { groupId, shareToken } = await sharedGroup();
-    const ada = await seedPlayer(groupId, "Ada");
+describe("a Claimed Player locked to its Account", () => {
+  async function claimedAda() {
+    const group = await sharedGroup();
+    const ada = await seedPlayer(group.groupId, "Ada");
     const player = await signInAccount(t);
-    await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
+    await player.as.mutation(api.player.claim, { shareToken: group.shareToken, playerId: ada });
+    await player.as.mutation(api.player.answer, {
+      shareToken: group.shareToken,
+      playerId: ada,
+      date: TODAY,
+      answer: "free",
+    });
+    return { ...group, ada, player };
+  }
 
-    await t.mutation(api.player.answer, { shareToken, playerId: ada, date: TODAY, answer: "free" });
+  it("marks the Roster's Claimed Players locked for everyone but their Account", async () => {
+    const { groupId, shareToken, ada, player } = await claimedAda();
+    const bo = await seedPlayer(groupId, "Bo");
 
-    expect(await answersOf(ada)).toEqual({ [TODAY]: "free" });
+    const lockedFor = async (caller: GmClient | TestBackend) => {
+      const group = await caller.query(api.player.group, { shareToken });
+      return Object.fromEntries(group!.players.map(({ _id, locked }) => [_id, locked]));
+    };
+
+    expect(await lockedFor(t)).toEqual({ [ada]: true, [bo]: false });
+    expect(await lockedFor((await signInAccount(t)).as)).toEqual({ [ada]: true, [bo]: false });
+    expect(await lockedFor(player.as)).toEqual({ [ada]: false, [bo]: false });
+  });
+
+  it("opens again to the Share Link once its Account releases it", async () => {
+    const { groupId, shareToken, ada, player } = await claimedAda();
+    await player.as.mutation(api.player.release, { groupId });
+
+    await t.mutation(api.player.answer, { shareToken, playerId: ada, date: TODAY, answer: "busy" });
+
+    expect(await answersOf(ada)).toEqual({ [TODAY]: "busy" });
   });
 });
 
@@ -1189,7 +1217,12 @@ describe("player.release", () => {
     const { groupId, shareToken } = await sharedGroup();
     const player = await signInAccount(t);
     const ada = await player.as.mutation(api.player.join, { shareToken, name: "Ada" });
-    await t.mutation(api.player.answer, { shareToken, playerId: ada, date: TODAY, answer: "free" });
+    await player.as.mutation(api.player.answer, {
+      shareToken,
+      playerId: ada,
+      date: TODAY,
+      answer: "free",
+    });
 
     expect(await player.as.mutation(api.player.release, { groupId })).toBeNull();
 
@@ -1329,20 +1362,22 @@ describe("keeping the Group on an answer", () => {
     expect(await claimedPlayerIdIn(as, shareToken)).toBe(ada);
   });
 
-  it("saves the answer and leaves another Account's Player with them", async () => {
+  it("refuses the answer and leaves another Account's Player with them", async () => {
     const { shareToken, ada, player } = await pickedPlayer();
     const other = await signInAccount(t);
     await other.as.mutation(api.player.claim, { shareToken, playerId: ada });
 
-    const result = await player.as.mutation(api.player.answer, {
-      shareToken,
-      playerId: ada,
-      date: TODAY,
-      answer: "free",
-    });
+    await expectErrorCode(
+      player.as.mutation(api.player.answer, {
+        shareToken,
+        playerId: ada,
+        date: TODAY,
+        answer: "free",
+      }),
+      "PLAYER_LOCKED",
+    );
 
-    expect(result).toEqual({ keptNow: false });
-    expect(await answersOf(ada)).toEqual({ [TODAY]: "free" });
+    expect(await answersOf(ada)).toEqual({});
     expect(await claimedPlayerIdIn(other.as, shareToken)).toBe(ada);
     expect(await claimedPlayerIdIn(player.as, shareToken)).toBeNull();
   });
@@ -1522,11 +1557,12 @@ describe("player.removeFromMyGroups", () => {
   });
 
   it("returns null for a Group without the Account's claim", async () => {
-    const { groupId, shareToken, ada } = await keptPlayer();
+    const { groupId, shareToken, ada, bo, player } = await keptPlayer();
     const stranger = await signInAccount(t);
 
     expect(await stranger.as.mutation(api.player.removeFromMyGroups, { groupId })).toBeNull();
-    expect(await answerAs(stranger.as, shareToken, ada)).toEqual({ keptNow: false });
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBe(ada);
+    expect(await answerAs(stranger.as, shareToken, bo)).toEqual({ keptNow: true });
   });
 
   it("shares the claim rate limit with player.claim", async () => {

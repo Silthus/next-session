@@ -54,7 +54,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - player.group: whoever holds a Share Link reads its Group's Roster and Sessions
   handler: group in player.ts
   trust: visitor
-- player.answers: whoever holds a Share Link reads one Player's Answers for a month
+- player.answers: whoever holds a Share Link reads one unclaimed Player's Answers for a month, and an Account its own Claimed Player's
   handler: answers in player.ts
   trust: visitor
 - player.join: whoever holds a Share Link adds a name to the Roster; an Account caller claims it
@@ -69,10 +69,13 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
 - player.removeFromMyGroups: an Account drops a Group from My groups by releasing its Claim
   handler: removeFromMyGroups in player.ts
   trust: signed-in user
-- player.answer: whoever holds a Share Link sets or clears one Player's Answer for one date
+- player.othersAnswers: whoever holds a Share Link reads how many other Players are free or maybe on each date of a month, as an unclaimed Player or as the Account's own Claimed Player
+  handler: othersAnswers in player.ts
+  trust: visitor
+- player.answer: whoever holds a Share Link sets or clears one unclaimed Player's Answer for one date, and an Account its own Claimed Player's
   handler: answer in player.ts
   trust: visitor
-- player.fillRest: whoever holds a Share Link answers busy for every unanswered date left in the month
+- player.fillRest: whoever holds a Share Link answers busy for every unanswered date left in the month, as an unclaimed Player or as the Account's own Claimed Player
   handler: fillRest in player.ts
   trust: visitor
 - me.groups: an Account reads My groups
@@ -172,7 +175,22 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: encrypted-storage dismissed: the GM must be able to copy the Share Link again, so the token is stored readable by design (ADR-0004); rotation revokes it
   checklist: key-rotation-compatibility dismissed: rotating the Share Token deliberately stops the old link; no reader keeps using it
   checklist: redaction dismissed: a scoped-out call returns null or NOT_FOUND with nothing of the other Group in it
-  checklist: separation-of-duties dismissed: the player surface has one role; whoever holds the link answers as any Player by design (ADR-0010)
+  checklist: separation-of-duties declared as claimed player lock
+- claimed player lock: A Claimed Player's Answers are read and changed only by its own Account; everyone else holding the Share Link reads nothing of them and is refused.
+  over: every public function that takes a Player through a Share Link, called on a Claimed Player by a visitor, an Anonymous GM, another Account and the Group's GM
+  via: every Player function refuses a Claimed Player to everyone but its Account
+  because: a Claimed Player's availability will be shared across all of its Account's Groups (ADR-0016); if one Group's link still answered as it, anyone holding that link would change the player's nights everywhere
+  crossing: visitor -> store
+  entrances: player.answers, player.othersAnswers, player.answer, player.fillRest
+  kinds: read, credential
+  checklist: scoped-reads declared as claimed player lock
+  checklist: capability-authorization declared as claimed player lock
+  checklist: revalidated-permission dismissed: each call reads the claim and the caller inside its own transaction
+  checklist: redaction dismissed: a locked read returns null exactly like a missing Player
+  checklist: separation-of-duties dismissed: a Claimed Player has one role, its Account; the GM has no answering role on the player surface
+  checklist: message-authenticity dismissed: the caller is the Convex Auth session, not a signed message
+  checklist: encrypted-storage dismissed: the lock stores nothing new; it reads the existing players.userId
+  checklist: key-rotation-compatibility dismissed: the lock follows the claim, not a key; rotating the Share Token leaves it as it is
 - reminder link scoping: A Reminder link token reads and changes only its own Account's Reminders switch, and an unknown token reaches nothing.
   over: every public function that takes a Reminder link token, called with one Account's token while another Account exists, and with unknown tokens
   via: every Reminder link function reaches only its own Account's Reminders switch

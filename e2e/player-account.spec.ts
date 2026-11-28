@@ -163,25 +163,60 @@ test("a visitor keeps the Group with a new Account and plays as that Account on 
   });
 });
 
-test("keeping another Account's Player says so after the sign-in", async ({ page }) => {
-  const { gm, link } = await seedGroup("Crowded Table");
-  await accountClaiming(gm, "Dana");
+async function accountClaimingWithAnAnswer(gm: Gm, name: string) {
+  const account = await signUpAccount();
+  const playerId = await account.client.mutation(api.player.join, {
+    shareToken: gm.shareToken,
+    name,
+  });
+  await account.client.mutation(api.player.answer, {
+    shareToken: gm.shareToken,
+    playerId,
+    date: todayUtc(Date.now()),
+    answer: "free",
+  });
+  return account;
+}
 
-  await page.goto(link);
-  await page.getByRole("button", { name: "Dana" }).click();
-  await answerToday(page);
-  await page
-    .getByRole("region", { name: "Keep this group" })
-    .getByRole("button", { name: "Create account" })
-    .click();
-  const sheet = await fillAccount(page, await reserveAccountSignUp());
-  await sheet.getByRole("button", { name: "Keep group" }).click();
-
+async function logInFromTheSheet(page: Page, email: string) {
+  const sheet = await fillAccount(page, email);
+  await sheet.getByRole("button", { name: "Log in" }).click();
   await expect(page.getByRole("dialog")).toBeHidden();
-  await expect(page.getByRole("alert")).toHaveText(
-    "Another account keeps this name. Add yours with a last initial, or ask your GM.",
-  );
-  await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
+}
+
+test("a Claimed Player answers only through its Account, which logs in from the locked chip", async ({
+  page,
+  browser,
+}) => {
+  const { gm, link } = await seedGroup("Crowded Table");
+  const dana = await accountClaimingWithAnAnswer(gm, "Dana");
+  const stranger = await signUpAccount();
+  const danasPhone = await freshPage(browser);
+
+  await test.step("a visitor sees Dana locked and gets Log in when picking it", async () => {
+    await page.goto(link);
+    await page.getByRole("button", { name: "Dana, locked" }).click();
+    await expect(page.getByRole("dialog", { name: "Log in" })).toBeVisible();
+    await expect(page.getByText("Log in to answer as Dana.")).toBeVisible();
+  });
+
+  await test.step("another Account that logs in reads that the name is kept", async () => {
+    await logInFromTheSheet(page, stranger.email);
+    await expect(
+      page.getByText(
+        "Another account keeps this name. Add yours with a last initial, or ask your GM.",
+      ),
+    ).toBeVisible();
+    await expect(page.getByText("Answering as")).toBeHidden();
+  });
+
+  await test.step("Dana's own Account logs in from the chip and answers as Dana", async () => {
+    await danasPhone.goto(link);
+    await danasPhone.getByRole("button", { name: "Dana, locked" }).click();
+    await logInFromTheSheet(danasPhone, dana.email);
+    await expect(danasPhone.getByText("Answering as")).toContainText("Dana");
+    await expect(todayTile(danasPhone)).toHaveAccessibleName(/: Free$/);
+  });
 });
 
 test("an Anonymous GM keeping their own link saves first, then keeps the Player", async ({
@@ -392,10 +427,10 @@ test.describe("screenshots", () => {
         await expect(page.getByRole("main").getByText("Kept in My groups")).toBeVisible();
 
         await page.getByRole("button", { name: "Not you?" }).click();
-        await page.getByRole("button", { name: "Dana" }).click();
-        await answerToday(page);
-        await page.getByRole("button", { name: "Keep this group" }).click();
-        await expect(page.getByRole("alert")).toBeVisible();
+        await page.getByRole("button", { name: "Dana, locked" }).click();
+        await expect(
+          page.getByText("Another account keeps this name.", { exact: false }),
+        ).toBeVisible();
         await shot("player-claimed");
       });
     }

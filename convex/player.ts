@@ -26,7 +26,9 @@ import {
   claimPlayer,
   ensureNameIsFree,
   releaseClaim,
+  ensureAnswersAs,
   ensureRosterHasRoom,
+  isLockedFor,
   keepOnAnswer,
   hasRemovedGroup,
   removeFromMyGroups as removeGroupFromMyGroups,
@@ -44,7 +46,7 @@ const answered = v.object({ keptNow: v.boolean() });
 const playerGroupView = v.object({
   groupId: v.id("groups"),
   name: v.string(),
-  players: v.array(v.object({ _id: v.id("players"), name: v.string() })),
+  players: v.array(v.object({ _id: v.id("players"), name: v.string(), locked: v.boolean() })),
   sessions: v.array(v.object({ ...datedSession.fields, ...sessionTimeAndPlaceFields })),
   timeZone: v.string(),
   claimedPlayerId: v.union(v.id("players"), v.null()),
@@ -59,11 +61,17 @@ export const group = query({
   handler: async (ctx, { shareToken }) => {
     const group = await groupByShareToken(ctx, shareToken);
     if (group === null) return null;
-    const [players, sessions, caller] = await Promise.all([
+    const [roster, sessions, account] = await Promise.all([
       rosterOf(ctx, group._id),
       sessionsOf(ctx, group),
-      callerIn(ctx, group),
+      currentAccount(ctx),
     ]);
+    const caller = await callerIn(ctx, group, account);
+    const players = roster.map((player) => ({
+      _id: player._id,
+      name: player.name,
+      locked: isLockedFor(player, account),
+    }));
     return {
       groupId: group._id,
       name: group.name,
@@ -79,7 +87,7 @@ export const answers = query({
   args: { shareToken: v.string(), playerId: v.string(), month: v.string() },
   returns: v.union(v.record(v.string(), answerValue), v.null()),
   handler: async (ctx, { shareToken, playerId, month }) => {
-    const player = await findPlayerOnShareLink(ctx, shareToken, playerId);
+    const player = await answerablePlayerOnShareLink(ctx, shareToken, playerId);
     if (player === null || !isValidMonth(month)) return null;
     const rows = await answersOfPlayerIn(ctx, player._id, month);
     return Object.fromEntries(rows.map(({ date, answer }) => [date, answer]));
@@ -95,7 +103,7 @@ export const othersAnswers = query({
     v.null(),
   ),
   handler: async (ctx, { shareToken, playerId, month }) => {
-    const player = await findPlayerOnShareLink(ctx, shareToken, playerId);
+    const player = await answerablePlayerOnShareLink(ctx, shareToken, playerId);
     if (player === null || !isValidMonth(month)) return null;
     const [roster, rows] = await Promise.all([
       rosterOf(ctx, player.groupId),
@@ -186,6 +194,7 @@ export const answer = mutation({
   returns: answered,
   handler: async (ctx, { shareToken, playerId, date, answer }) => {
     const { group, player } = await playerOnShareLink(ctx, shareToken, playerId);
+    ensureAnswersAs(player, await currentAccount(ctx));
     if (!isBookable(date, today())) fail({ code: "OUT_OF_WINDOW" });
     await enforceAnswerRateLimits(ctx, group, player);
     await writeAnswer(ctx, player, date, answer);
@@ -199,6 +208,7 @@ export const fillRest = mutation({
   returns: answered,
   handler: async (ctx, { shareToken, playerId, month }) => {
     const { group, player } = await playerOnShareLink(ctx, shareToken, playerId);
+    ensureAnswersAs(player, await currentAccount(ctx));
     if (!isBookableMonth(month, today())) fail({ code: "OUT_OF_WINDOW" });
     await enforceAnswerRateLimits(ctx, group, player);
     const answered = await answersOfPlayerIn(ctx, player._id, month);
@@ -216,8 +226,7 @@ export const fillRest = mutation({
   },
 });
 
-async function callerIn(ctx: QueryCtx, group: Doc<"groups">) {
-  const account = await currentAccount(ctx);
+async function callerIn(ctx: QueryCtx, group: Doc<"groups">, account: Doc<"users"> | null) {
   if (account === null)
     return {
       claimedPlayerId: null,
@@ -236,6 +245,11 @@ async function callerIn(ctx: QueryCtx, group: Doc<"groups">) {
     opensAsGm: group.ownerId === account._id && claimed === null,
     calendarInvites,
   };
+}
+
+async function answerablePlayerOnShareLink(ctx: QueryCtx, shareToken: string, playerId: string) {
+  const player = await findPlayerOnShareLink(ctx, shareToken, playerId);
+  return player === null || isLockedFor(player, await currentAccount(ctx)) ? null : player;
 }
 
 async function claimForAccountCaller(ctx: MutationCtx, playerId: Id<"players">) {
@@ -267,7 +281,7 @@ async function rosterOf(ctx: QueryCtx, groupId: Id<"groups">) {
     .query("players")
     .withIndex("by_groupId_and_nameKey", (q) => q.eq("groupId", groupId))
     .take(MAX_PLAYERS_PER_GROUP);
-  return players.map(({ _id, name }) => ({ _id, name }));
+  return players.map(({ _id, name, userId }) => ({ _id, name, userId }));
 }
 
 async function sessionsOf(ctx: QueryCtx, group: Doc<"groups">) {

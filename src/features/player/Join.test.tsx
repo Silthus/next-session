@@ -71,6 +71,27 @@ describe("Join", () => {
     expect(onPick).toHaveBeenCalledWith(ben);
   });
 
+  it("locks a Claimed Player's chip and still hands the tap to the page", async () => {
+    const lockedBen = { ...ben, locked: true };
+    const { onPick } = renderJoin({ players: [ana, lockedBen] });
+
+    await userEvent.click(await screen.findByRole("button", { name: "Ben, locked" }));
+
+    expect(onPick).toHaveBeenCalledWith(lockedBen);
+  });
+
+  it("explains a locked name beside its chip", async () => {
+    renderJoin({
+      players: [ana, { ...ben, locked: true }],
+      lockNotice: { playerId: ben._id, text: "Log in to answer as Ben." },
+    });
+
+    const notice = await screen.findByText("Log in to answer as Ben.");
+    expect(
+      screen.getByRole("button", { name: "Ben, locked" }).getAttribute("aria-describedby"),
+    ).toBe(notice.id);
+  });
+
   it("joins with a typed name and keeps Join disabled while it is blank", async () => {
     const { onJoin } = renderJoin();
     const join = await screen.findByRole("button", { name: "Join" });

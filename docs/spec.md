@@ -514,7 +514,7 @@ Each call is a reversible default. Michael can redirect any of them in one line.
 | 1 | One Account type with two roles: it owns Groups as a GM and claims Players | A separate Player account type |
 | 2 | The link is an optional `players.userId` (a Claimed Player), indexed `by_userId_and_groupId` | A `claims` table, needed only if one Player could belong to several Accounts |
 | 3 | Joining while signed in claims the new Player. Answering or Fill the rest claims a picked name; viewing and picking alone claim nothing (#96, 2026-10-07) | Require a separate Keep tap after answering |
-| 4 | A claim does not lock answering: the Share Link still answers as any Player (ADR-0004 stands) | Claimed Players answer only through their Account |
+| 4 | A claim does not lock answering: the Share Link still answers as any Player (ADR-0004 stands). Superseded on 2026-11-28: a Claimed Player answers only through its Account, so its availability can be shared across Groups ([ADR-0016](adr/0016-claimed-players-are-locked-and-share-one-availability.md)) | Claimed Players answer only through their Account |
 | 5 | One Claimed Player per Account per Group; claiming another Player there moves the claim | Several per Group, for a parent who answers for two kids |
 | 6 | Claiming another Account's Player throws `PLAYER_CLAIMED`; the GM removes a squatter | A GM "release claim" action on the Roster |
 | 7 | Only Accounts claim. **Keep this group** from an Anonymous GM's browser runs Save first, then claims | Let Anonymous GMs claim and move their claims on Save |

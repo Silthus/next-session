@@ -261,8 +261,8 @@ describe("Google profile picture", () => {
     ]);
     const shareLink = await t.query(api.player.group, { shareToken });
     expect(shareLink?.players.map((player) => Object.keys(player))).toEqual([
-      ["_id", "name"],
-      ["_id", "name"],
+      ["_id", "locked", "name"],
+      ["_id", "locked", "name"],
     ]);
   });
 });

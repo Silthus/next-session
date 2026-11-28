@@ -44,6 +44,14 @@ export async function claimedPlayerIn(
     .first();
 }
 
+export function isLockedFor(player: Pick<Doc<"players">, "userId">, account: Doc<"users"> | null) {
+  return player.userId !== undefined && player.userId !== account?._id;
+}
+
+export function ensureAnswersAs(player: Doc<"players">, account: Doc<"users"> | null) {
+  if (isLockedFor(player, account)) fail({ code: "PLAYER_LOCKED" });
+}
+
 export async function claimPlayer(ctx: MutationCtx, account: Doc<"users">, player: Doc<"players">) {
   if (player.userId === account._id) return;
   if (player.userId !== undefined) fail({ code: "PLAYER_CLAIMED" });
