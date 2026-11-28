@@ -219,6 +219,24 @@ test("a Claimed Player answers only through its Account, which logs in from the 
   });
 });
 
+test("an Anonymous GM logs in from a locked chip and brings their own Group along", async ({
+  page,
+}) => {
+  const { gm, link } = await seedGroup("Crowded Table");
+  const dana = await accountClaimingWithAnAnswer(gm, "Dana");
+  const own = await seedGroup("Dana's Table");
+
+  await openAsGm(page, own.gm, link);
+  await page.getByRole("button", { name: "Dana, locked" }).click();
+  await expect(page.getByText("Log in to answer as Dana.")).toBeVisible();
+  await logInFromTheSheet(page, dana.email);
+  await expect(page.getByText("Answering as")).toContainText("Dana");
+  await expect(todayTile(page)).toHaveAccessibleName(/: Free$/);
+
+  await page.goto(`/g/${own.gm.groupId}`);
+  await expect(page.getByRole("button", { name: "Your account" })).toBeVisible();
+});
+
 test("an Anonymous GM keeping their own link saves first, then keeps the Player", async ({
   page,
 }) => {

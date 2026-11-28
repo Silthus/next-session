@@ -260,7 +260,7 @@ describe("Google profile picture", () => {
       { _id: graceId, name: "Grace" },
     ]);
     const shareLink = await t.query(api.player.group, { shareToken });
-    expect(shareLink?.players.map((player) => Object.keys(player))).toEqual([
+    expect(shareLink?.players.map((player) => Object.keys(player).sort())).toEqual([
       ["_id", "locked", "name"],
       ["_id", "locked", "name"],
     ]);

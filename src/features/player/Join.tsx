@@ -54,10 +54,11 @@ export function Join({
   const fieldLabel = players.length > 0 ? "Not listed? Your name" : "Your name";
   const filterable = players.length > CHIPS_WITHOUT_FILTER;
   const activeFilter = filterable ? filter : "";
+  const matches = players.filter((player) => nameMatches(player.name, activeFilter));
   const shownPlayers = alphabetical(players).filter(
-    (player) => noticeFor(player._id) !== undefined || nameMatches(player.name, activeFilter),
+    (player) => noticeFor(player._id) !== undefined || matches.includes(player),
   );
-  const unmatchedFilter = shownPlayers.length === 0 ? activeFilter.trim() : "";
+  const unmatchedFilter = matches.length === 0 ? activeFilter.trim() : "";
   const name = ownedName ?? unmatchedFilter;
 
   async function join(event: FormEvent) {
@@ -101,7 +102,7 @@ export function Join({
           </p>
         )}
         {filterable && (
-          <NameFilter value={filter} noMatch={shownPlayers.length === 0} onChange={setFilter} />
+          <NameFilter value={filter} noMatch={matches.length === 0} onChange={setFilter} />
         )}
         {shownPlayers.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">

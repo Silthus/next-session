@@ -86,10 +86,12 @@ describe("Join", () => {
       lockNotice: { playerId: ben._id, text: "Log in to answer as Ben." },
     });
 
-    const notice = await screen.findByText("Log in to answer as Ben.");
     expect(
-      screen.getByRole("button", { name: "Ben, locked" }).getAttribute("aria-describedby"),
-    ).toBe(notice.id);
+      await screen.findByRole("button", {
+        name: "Ben, locked",
+        description: "Log in to answer as Ben.",
+      }),
+    ).toBeTruthy();
   });
 
   it("joins with a typed name and keeps Join disabled while it is blank", async () => {
@@ -261,6 +263,25 @@ describe("Join", () => {
 
       await userEvent.click(screen.getByRole("button", { name: "Join" }));
       expect(onJoin).toHaveBeenCalledWith("Dev");
+    });
+
+    it("still carries an unmatched name while a locked name stays pinned", async () => {
+      renderJoin({
+        players: longRoster().map((player) =>
+          player._id === ben._id ? { ...player, locked: true } : player,
+        ),
+        lockNotice: { playerId: ben._id, text: "Log in to answer as Ben." },
+      });
+      const filter = await screen.findByRole("searchbox", { name: "Find your name" });
+
+      await userEvent.type(filter, "Dev");
+
+      expect(screen.getByRole("button", { name: "Ben, locked" })).toBeTruthy();
+      expect(screen.getByText("No names match. Add yours below.")).toBeTruthy();
+      expect(screen.getByRole("textbox", { name: "Not listed? Your name" })).toHaveProperty(
+        "value",
+        "Dev",
+      );
     });
 
     it("keeps the carried name when someone just joined under it", async () => {

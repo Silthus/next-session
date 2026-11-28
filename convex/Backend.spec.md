@@ -176,7 +176,7 @@ The Convex backend: every query, mutation and HTTP route the web app and the out
   checklist: key-rotation-compatibility dismissed: rotating the Share Token deliberately stops the old link; no reader keeps using it
   checklist: redaction dismissed: a scoped-out call returns null or NOT_FOUND with nothing of the other Group in it
   checklist: separation-of-duties declared as claimed player lock
-- claimed player lock: A Claimed Player's Answers are read and changed only by its own Account; everyone else holding the Share Link reads nothing of them and is refused.
+- claimed player lock: Only its own Account reads or changes Answers as a Claimed Player; anyone else holding the Share Link who calls a Player function on it reads null and is refused. The Group-wide others counts and the GM calendar still count its Answers, as for every Player.
   over: every public function that takes a Player through a Share Link, called on a Claimed Player by a visitor, an Anonymous GM, another Account and the Group's GM
   via: every Player function refuses a Claimed Player to everyone but its Account
   because: a Claimed Player's availability will be shared across all of its Account's Groups (ADR-0016); if one Group's link still answered as it, anyone holding that link would change the player's nights everywhere

@@ -18,7 +18,7 @@ How should Answers be stored and shared so that an Account enters them once, and
 ## Locked decisions
 
 1. **One availability per Account.** Every Group where an Account has a Claimed Player reads the same Answers. There are no per-Group overrides and no copy prompt. Players without an Account keep per-Group Answers as today.
-2. **Claimed Players are locked to their Account.** The name picker marks a Claimed Player with a lock. A visitor who picks it gets the Account sheet with Log in first; once signed in as that Account, the page opens as that Player, and as another Account it shows the existing "Another account keeps this name" line. The server refuses answers, Fill Rest and answer reads for a Claimed Player from anyone but its Account (`PLAYER_LOCKED`).
+2. **Claimed Players are locked to their Account.** The name picker marks a Claimed Player with a lock. A visitor who picks it gets the Account sheet with Log in first; once signed in as that Account, the page opens as that Player, and as another Account it shows the existing "Another account keeps this name" line. The server refuses answers and Fill Rest for a Claimed Player from anyone but its Account (`PLAYER_LOCKED`), and its answer reads return nothing. The Group-wide counts of the others overlay and the GM calendar still include it, as for every Player.
 3. **A remembered name locks too.** A signed-out device that remembers a Claimed Player shows the name picker with that name locked and "Log in to answer as <name>". It opens no sheet on its own.
 4. **Claim merges, release copies back.** Claiming a Player with Answers keeps the Account's Answers where it has them and fills the rest from the Player's, then the Player's rows go. Releasing (Not you?, Remove from my groups) copies the Account's Answers back into the Player's rows, so the Group keeps them (ADR-0010: releasing never deletes Answers).
 5. **Switch-over takes the most cautious answer.** For Accounts already in several Groups, a date with different Answers becomes busy over maybe over free, with no prompt.
@@ -52,7 +52,7 @@ PR 3 adds `adoptOnClaim(ctx, account, player)` and `leaveOnRelease(ctx, account,
 
 ### Errors
 
-- `PLAYER_LOCKED` (PR 1): `answer`, `fillRest`, `answers` and `othersAnswers` on a Claimed Player whose Account is not the caller.
+- `PLAYER_LOCKED` (PR 1): `answer` and `fillRest` on a Claimed Player whose Account is not the caller. `answers` and `othersAnswers` return `null` for it, as for a missing Player, so a read reveals nothing.
 
 ### Performance
 

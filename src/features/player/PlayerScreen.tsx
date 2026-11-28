@@ -204,15 +204,15 @@ function PlayerGroup({
             lockedPick && {
               playerId: lockedPick._id,
               text:
-                account.status === "signedOut"
-                  ? `Log in to answer as ${lockedPick.name}.`
-                  : codeMessage("PLAYER_CLAIMED", "keep"),
+                account.status === "account"
+                  ? codeMessage("PLAYER_CLAIMED", "keep")
+                  : `Log in to answer as ${lockedPick.name}.`,
             }
           }
           accountControl={accountControl}
           onPick={({ _id, name, locked }) => {
             answerAs({ playerId: _id, name });
-            if (locked && account.status === "signedOut") setSheet("logIn");
+            if (locked && account.status !== "account") setSheet("logIn");
           }}
           onJoin={async (name) => {
             const playerId = await join({ shareToken, name });
@@ -290,8 +290,16 @@ function PlayerGroup({
           open={sheet === "logIn"}
           intent="logIn"
           forPlayer
-          onSubmit={account.logIn}
-          onContinueWithGoogle={logInWithGoogle && (() => logInWithGoogle(`/s/${shareToken}`))}
+          onSubmit={
+            account.status === "anonymous"
+              ? (input) => account.save({ ...input, mode: "logIn" })
+              : account.logIn
+          }
+          onContinueWithGoogle={
+            account.status !== "anonymous" && logInWithGoogle
+              ? () => logInWithGoogle(`/s/${shareToken}`)
+              : undefined
+          }
           onClose={() => setSheet(null)}
         />
       )}
