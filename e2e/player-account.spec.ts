@@ -508,6 +508,8 @@ test.describe("screenshots", () => {
       await expect(roster.getByRole("img", { name: "Kept by an account" })).toBeVisible();
       await shot(gmPage, "locked-gm-roster");
       await roster.getByRole("button", { name: "More for Dana" }).click();
+      await expect(roster.getByRole("button", { name: "Unlock" })).toBeVisible();
+      await shot(gmPage, "locked-gm-actions");
       await roster.getByRole("button", { name: "Unlock" }).click();
       await expect(roster.getByRole("button", { name: "Unlock Dana" })).toBeVisible();
       await shot(gmPage, "locked-gm-unlock-confirm");

@@ -133,6 +133,7 @@ function PlayerItem({
   onRelease: () => Promise<unknown>;
 }) {
   const [mode, setMode] = useState<Mode>("view");
+  if (mode === "confirmingUnlock" && !player.claimed) setMode("view");
   const more = useRef<HTMLButtonElement>(null);
   const refocusMore = useRef(false);
   const actionsId = useId();
@@ -195,7 +196,7 @@ function PlayerItem({
     <li
       onKeyDown={showingActions ? closeOnEscape : undefined}
       className={cn(
-        "group flex items-center gap-2.5 rounded-md px-1.5 py-1.5 transition-colors duration-150 hover:bg-surface-hover",
+        "group flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-md px-1.5 py-1.5 transition-colors duration-150 hover:bg-surface-hover",
         mutedStepsUp,
       )}
     >
@@ -212,7 +213,13 @@ function PlayerItem({
         <AnswerTrack answered={answered} fillable={fillable} />
       </span>
       {showingActions ? (
-        <span id={actionsId} className="flex shrink-0 items-center gap-1">
+        <span
+          id={actionsId}
+          className={cn(
+            "flex items-center gap-1",
+            player.claimed ? "order-last basis-full justify-end" : "shrink-0",
+          )}
+        >
           <button type="button" className={rowActionClassName} onClick={() => setMode("renaming")}>
             Rename
           </button>

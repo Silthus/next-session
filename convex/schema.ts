@@ -90,6 +90,7 @@ export default defineSchema({
   groupRemovals: defineTable({
     userId: v.id("users"),
     groupId: v.id("groups"),
+    playerId: v.optional(v.id("players")),
   })
     .index("by_userId_and_groupId", ["userId", "groupId"])
     .index("by_groupId", ["groupId"]),

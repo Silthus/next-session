@@ -97,12 +97,11 @@ export async function removeFromMyGroups(
   return released;
 }
 
-export async function releaseForGm(ctx: MutationCtx, player: Doc<"players">) {
-  const { userId, groupId } = player;
-  if (userId === undefined) return;
+export async function releaseForGm(ctx: MutationCtx, player: Doc<"players">, userId: Id<"users">) {
+  const { groupId } = player;
   await changeRecipientSet(ctx, { groupId, userId }, () => unclaim(ctx, player));
   if ((await removalFromMyGroups(ctx, userId, groupId)) === null) {
-    await ctx.db.insert("groupRemovals", { userId, groupId });
+    await ctx.db.insert("groupRemovals", { userId, groupId, playerId: player._id });
   }
 }
 
@@ -113,7 +112,8 @@ async function answerKeeps(
   player: Doc<"players">,
 ) {
   if (player.userId !== undefined) return false;
-  if (await hasRemovedGroup(ctx, account._id, group._id)) return false;
+  const removal = await removalFromMyGroups(ctx, account._id, group._id);
+  if (removal !== null && (removal.playerId ?? player._id) === player._id) return false;
   return (
     (await claimedPlayerIn(ctx, account._id, group._id)) !== null ||
     !(await atClaimCap(ctx, account._id))
@@ -125,7 +125,8 @@ export async function hasRemovedGroup(
   accountId: Id<"users">,
   groupId: Id<"groups">,
 ) {
-  return (await removalFromMyGroups(ctx, accountId, groupId)) !== null;
+  const removal = await removalFromMyGroups(ctx, accountId, groupId);
+  return removal !== null && removal.playerId === undefined;
 }
 
 async function forgetRemovalFromMyGroups(

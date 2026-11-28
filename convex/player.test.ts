@@ -14,6 +14,7 @@ import {
   signIn,
   signInAccount,
   signInAnonymousGm,
+  spendGmEdits,
   type TestBackend,
 } from "./model/test.setup";
 import { accepted, postHogEmailFake } from "../posthogEmailFake";
@@ -1241,6 +1242,50 @@ describe("roster.releasePlayer", () => {
     expect(await claimedPlayerIdIn(player.as, shareToken)).toBeNull();
     const group = await (await signInAccount(t)).as.query(api.player.group, { shareToken });
     expect(group!.players[0]!.locked).toBe(false);
+  });
+
+  it("still lets the released Account auto-claim its own name", async () => {
+    const { as, groupId, shareToken, ada, player } = await claimedAda();
+    const bo = await seedPlayer(groupId, "Bo");
+    await as.mutation(api.roster.releasePlayer, { playerId: ada });
+
+    await player.as.mutation(api.player.answer, {
+      shareToken,
+      playerId: bo,
+      date: TODAY,
+      answer: "free",
+    });
+
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBe(bo);
+    const group = await player.as.query(api.player.group, { shareToken });
+    expect(group!.removedFromMyGroups).toBe(false);
+  });
+
+  it("gives way to the Account's own Remove from my groups", async () => {
+    const { as, groupId, shareToken, ada, player } = await claimedAda();
+    const bo = await seedPlayer(groupId, "Bo");
+    await as.mutation(api.roster.releasePlayer, { playerId: ada });
+    await player.as.mutation(api.player.claim, { shareToken, playerId: bo });
+    await player.as.mutation(api.player.removeFromMyGroups, { groupId });
+
+    await player.as.mutation(api.player.answer, {
+      shareToken,
+      playerId: bo,
+      date: TODAY,
+      answer: "free",
+    });
+
+    expect(await claimedPlayerIdIn(player.as, shareToken)).toBeNull();
+    const group = await player.as.query(api.player.group, { shareToken });
+    expect(group!.removedFromMyGroups).toBe(true);
+  });
+
+  it("spends no GM edit on a Player nobody keeps", async () => {
+    const { as, userId, groupId } = await sharedGroup();
+    const bo = await seedPlayer(groupId, "Bo");
+    await spendGmEdits(t, userId);
+
+    expect(await as.mutation(api.roster.releasePlayer, { playerId: bo })).toBeNull();
   });
 
   it("lets the released Account keep the name again on purpose", async () => {

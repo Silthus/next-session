@@ -303,6 +303,26 @@ describe("Players", () => {
     expect(document.activeElement).toBe(within(card).getByRole("button", { name: "More for Ana" }));
   });
 
+  it("drops an open Unlock question once the claim is already gone", async () => {
+    const claimed = monthWith({ players: [{ _id: "Ana", name: "Ana", claimed: true }] });
+    const all = {
+      onAdd: vi.fn(() => Promise.resolve()),
+      onRename: vi.fn(() => Promise.resolve()),
+      onRemove: vi.fn(() => Promise.resolve()),
+      onRelease: vi.fn(() => Promise.resolve()),
+    };
+    const view = render(<Players progress={claimed.progress} {...all} />);
+    await userEvent.click(screen.getByRole("button", { name: "More for Ana" }));
+    await userEvent.click(screen.getByRole("button", { name: "Unlock" }));
+    expect(screen.getByRole("button", { name: "Unlock Ana" })).toBeTruthy();
+
+    const released = monthWith({ players: [{ _id: "Ana", name: "Ana", claimed: false }] });
+    view.rerender(<Players progress={released.progress} {...all} />);
+
+    expect(screen.queryByRole("button", { name: "Unlock Ana" })).toBeNull();
+    expect(all.onRelease).not.toHaveBeenCalled();
+  });
+
   it("shows a Player's actions inside their row and closes them with Escape", async () => {
     const { card } = renderPlayers(monthWith({ players: rosterOf("Ana", "Ben") }));
     const more = within(card).getByRole("button", { name: "More for Ana" });

@@ -57,8 +57,9 @@ export const releasePlayer = mutation({
   returns: v.null(),
   handler: async (ctx, { playerId }) => {
     const { gm, group, player } = await ownedPlayer(ctx, playerId);
+    if (player.userId === undefined) return null;
     await enforceRateLimit(ctx, "gmEdit", gm._id);
-    await releaseForGm(ctx, player);
+    await releaseForGm(ctx, player, player.userId);
     await touchGroup(ctx, group);
     return null;
   },
