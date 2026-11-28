@@ -15,7 +15,7 @@ type PlayersProps<Player extends PlayerRow> = {
   onAdd: (name: string) => Promise<unknown>;
   onRename: (playerId: Player["_id"], name: string) => Promise<unknown>;
   onRemove: (playerId: Player["_id"]) => Promise<unknown>;
-  onRelease: (playerId: Player["_id"]) => Promise<unknown>;
+  onRelease: (playerId: Player["_id"], claimedAt: number | undefined) => Promise<unknown>;
 };
 
 type AddForm = "closed" | "open" | "openedByGm";
@@ -86,7 +86,7 @@ export function Players<Player extends PlayerRow>({
                 await onRemove(entry.player._id);
                 (addButton.current ?? heading.current)?.focus();
               }}
-              onRelease={() => onRelease(entry.player._id)}
+              onRelease={(claimedAt) => onRelease(entry.player._id, claimedAt)}
             />
           ))}
         </ul>
@@ -130,11 +130,12 @@ function PlayerItem({
   entry: PlayerProgress<PlayerRow>;
   onRename: (name: string) => Promise<unknown>;
   onRemove: () => Promise<unknown>;
-  onRelease: () => Promise<unknown>;
+  onRelease: (claimedAt: number | undefined) => Promise<unknown>;
 }) {
   const [mode, setMode] = useState<Mode>("view");
   const [refocusOnUnlocked, setRefocusOnUnlocked] = useState(false);
-  if (mode === "confirmingUnlock" && !player.claimed) {
+  const [confirmedClaim, setConfirmedClaim] = useState<number | undefined>();
+  if (mode === "confirmingUnlock" && (!player.claimed || player.claimedAt !== confirmedClaim)) {
     setMode("view");
     setRefocusOnUnlocked(true);
   }
@@ -188,7 +189,7 @@ function PlayerItem({
         <UnlockConfirm
           name={player.name}
           onUnlock={async () => {
-            await onRelease();
+            await onRelease(confirmedClaim);
             backToView();
           }}
           onKeep={backToView}
@@ -232,7 +233,10 @@ function PlayerItem({
             <button
               type="button"
               className={rowActionClassName}
-              onClick={() => setMode("confirmingUnlock")}
+              onClick={() => {
+                setConfirmedClaim(player.claimedAt);
+                setMode("confirmingUnlock");
+              }}
             >
               Unlock
             </button>

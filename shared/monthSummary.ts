@@ -2,7 +2,13 @@ import { monthProgress, type Answer } from "./answers";
 import { isBookable, monthDays, type IsoDate, type IsoMonth } from "./dates";
 import type { SessionState } from "./sessions";
 
-export type PlayerRow = { _id: string; name: string; image?: string; claimed?: boolean };
+export type PlayerRow = {
+  _id: string;
+  name: string;
+  image?: string;
+  claimed?: boolean;
+  claimedAt?: number;
+};
 export type AnswerRow<PlayerId extends string> = {
   playerId: PlayerId;
   date: IsoDate;

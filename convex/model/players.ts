@@ -61,7 +61,7 @@ export async function claimPlayer(ctx: MutationCtx, account: Doc<"users">, playe
     const earlier = await claimedPlayerIn(ctx, account._id, player.groupId);
     if (earlier === null) await ensureRoomForAnotherClaim(ctx, account._id);
     else await unclaim(ctx, earlier);
-    await ctx.db.patch("players", player._id, { userId: account._id });
+    await ctx.db.patch("players", player._id, { userId: account._id, claimedAt: Date.now() });
   });
   for (const removal of await removalsIn(ctx, account._id, player.groupId)) {
     if (blocks(removal, player._id)) await ctx.db.delete("groupRemovals", removal._id);
@@ -144,7 +144,7 @@ async function removalsIn(ctx: QueryCtx, accountId: Id<"users">, groupId: Id<"gr
 }
 
 async function unclaim(ctx: MutationCtx, player: Doc<"players">) {
-  await ctx.db.patch("players", player._id, { userId: undefined });
+  await ctx.db.patch("players", player._id, { userId: undefined, claimedAt: undefined });
 }
 
 async function ensureRoomForAnotherClaim(ctx: QueryCtx, accountId: Id<"users">) {

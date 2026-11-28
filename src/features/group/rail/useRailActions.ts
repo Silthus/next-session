@@ -46,6 +46,7 @@ export function useRailActions(groupId: Id<"groups">, show: ShowToast) {
     addPlayer: (name: string) => addPlayer({ groupId, name }),
     renamePlayer: (playerId: Id<"players">, name: string) => renamePlayer({ playerId, name }),
     removePlayer: (playerId: Id<"players">) => removePlayer({ playerId }),
-    releasePlayer: (playerId: Id<"players">) => releasePlayer({ playerId }),
+    releasePlayer: (playerId: Id<"players">, claimedAt: number | undefined) =>
+      releasePlayer({ playerId, claimedAt }),
   };
 }

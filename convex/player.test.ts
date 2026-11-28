@@ -1214,10 +1214,51 @@ describe("a Claimed Player locked to its Account", () => {
 });
 
 describe("roster.releasePlayer", () => {
-  it("opens a Claimed Player to the Share Link again and keeps its Answers", async () => {
-    const { as, shareToken, ada } = await claimedAda();
+  async function unlock(as: GmClient, groupId: Id<"groups">, playerId: Id<"players">) {
+    const month = await as.query(api.schedule.month, { groupId, month: "2026-10" });
+    const { claimedAt } = month!.players.find(({ _id }) => _id === playerId)!;
+    return await as.mutation(api.roster.releasePlayer, { playerId, claimedAt });
+  }
 
-    expect(await as.mutation(api.roster.releasePlayer, { playerId: ada })).toBeNull();
+  it("refuses a claim that changed since the GM confirmed, and keeps the new one", async () => {
+    const { as, groupId, shareToken, ada, player } = await claimedAda();
+    const month = await as.query(api.schedule.month, { groupId, month: "2026-10" });
+    const seen = month!.players.find(({ _id }) => _id === ada)!.claimedAt;
+    await player.as.mutation(api.player.release, { groupId });
+    vi.advanceTimersByTime(1);
+    const other = await signInAccount(t);
+    await other.as.mutation(api.player.claim, { shareToken, playerId: ada });
+
+    await expectErrorCode(
+      as.mutation(api.roster.releasePlayer, { playerId: ada, claimedAt: seen }),
+      "PLAYER_CLAIMED",
+    );
+
+    expect(await claimedPlayerIdIn(other.as, shareToken)).toBe(ada);
+  });
+
+  it("drops a removed Player's unlock rows with it", async () => {
+    const { as, groupId, ada, player } = await claimedAda();
+    await unlock(as, groupId, ada);
+
+    await as.mutation(api.roster.removePlayer, { playerId: ada });
+
+    const rows = await t.run(
+      async (ctx) =>
+        await ctx.db
+          .query("groupRemovals")
+          .withIndex("by_userId_and_groupId", (q) =>
+            q.eq("userId", player.userId).eq("groupId", groupId),
+          )
+          .collect(),
+    );
+    expect(rows).toEqual([]);
+  });
+
+  it("opens a Claimed Player to the Share Link again and keeps its Answers", async () => {
+    const { as, groupId, shareToken, ada } = await claimedAda();
+
+    expect(await unlock(as, groupId, ada)).toBeNull();
 
     const group = await t.query(api.player.group, { shareToken });
     expect(group!.players.map(({ name, locked }) => ({ name, locked }))).toEqual([
@@ -1229,8 +1270,8 @@ describe("roster.releasePlayer", () => {
   });
 
   it("keeps the released Account from taking the name back on its next Answer", async () => {
-    const { as, shareToken, ada, player } = await claimedAda();
-    await as.mutation(api.roster.releasePlayer, { playerId: ada });
+    const { as, groupId, shareToken, ada, player } = await claimedAda();
+    await unlock(as, groupId, ada);
 
     await player.as.mutation(api.player.answer, {
       shareToken,
@@ -1247,7 +1288,7 @@ describe("roster.releasePlayer", () => {
   it("still lets the released Account auto-claim its own name", async () => {
     const { as, groupId, shareToken, ada, player } = await claimedAda();
     const bo = await seedPlayer(groupId, "Bo");
-    await as.mutation(api.roster.releasePlayer, { playerId: ada });
+    await unlock(as, groupId, ada);
 
     await player.as.mutation(api.player.answer, {
       shareToken,
@@ -1264,7 +1305,7 @@ describe("roster.releasePlayer", () => {
   it("keeps the name unlocked after the released Account auto-claims another name", async () => {
     const { as, groupId, shareToken, ada, player } = await claimedAda();
     const bo = await seedPlayer(groupId, "Bo");
-    await as.mutation(api.roster.releasePlayer, { playerId: ada });
+    await unlock(as, groupId, ada);
     const answerAs = (playerId: Id<"players">) =>
       player.as.mutation(api.player.answer, { shareToken, playerId, date: TODAY, answer: "busy" });
 
@@ -1279,7 +1320,7 @@ describe("roster.releasePlayer", () => {
   it("gives way to the Account's own Remove from my groups", async () => {
     const { as, groupId, shareToken, ada, player } = await claimedAda();
     const bo = await seedPlayer(groupId, "Bo");
-    await as.mutation(api.roster.releasePlayer, { playerId: ada });
+    await unlock(as, groupId, ada);
     await player.as.mutation(api.player.claim, { shareToken, playerId: bo });
     await player.as.mutation(api.player.removeFromMyGroups, { groupId });
 
@@ -1304,8 +1345,8 @@ describe("roster.releasePlayer", () => {
   });
 
   it("lets the released Account keep the name again on purpose", async () => {
-    const { as, shareToken, ada, player } = await claimedAda();
-    await as.mutation(api.roster.releasePlayer, { playerId: ada });
+    const { as, groupId, shareToken, ada, player } = await claimedAda();
+    await unlock(as, groupId, ada);
 
     await player.as.mutation(api.player.claim, { shareToken, playerId: ada });
 

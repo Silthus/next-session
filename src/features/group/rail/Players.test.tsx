@@ -23,7 +23,7 @@ type Handlers = {
   onAdd: (name: string) => Promise<unknown>;
   onRename: (playerId: string, name: string) => Promise<unknown>;
   onRemove: (playerId: string) => Promise<unknown>;
-  onRelease: (playerId: string) => Promise<unknown>;
+  onRelease: (playerId: string, claimedAt: number | undefined) => Promise<unknown>;
 };
 
 const takenName = new ConvexError({ code: "NAME_TAKEN", playerId: "Ana" });
@@ -280,7 +280,9 @@ describe("Players", () => {
 
   it("asks before unlocking a Claimed Player for the Share Link", async () => {
     const { onRelease, card } = renderPlayers(
-      monthWith({ players: [{ _id: "Ana", name: "Ana", claimed: true }, ...rosterOf("Ben")] }),
+      monthWith({
+        players: [{ _id: "Ana", name: "Ana", claimed: true, claimedAt: 5 }, ...rosterOf("Ben")],
+      }),
     );
     expect(within(card).getByRole("img", { name: "Kept by an account" })).toBeTruthy();
     await userEvent.click(within(card).getByRole("button", { name: "More for Ben" }));
@@ -299,12 +301,17 @@ describe("Players", () => {
     await userEvent.click(within(card).getByRole("button", { name: "More for Ana" }));
     await userEvent.click(within(card).getByRole("button", { name: "Unlock" }));
     await userEvent.click(within(card).getByRole("button", { name: "Unlock Ana" }));
-    expect(onRelease).toHaveBeenCalledWith("Ana");
+    expect(onRelease).toHaveBeenCalledWith("Ana", 5);
     expect(document.activeElement).toBe(within(card).getByRole("button", { name: "More for Ana" }));
   });
 
-  it("drops an open Unlock question once the claim is already gone", async () => {
-    const claimed = monthWith({ players: [{ _id: "Ana", name: "Ana", claimed: true }] });
+  it.each([
+    ["is already gone", { claimed: false }],
+    ["moved to another account", { claimed: true, claimedAt: 9 }],
+  ])("drops an open Unlock question once the claim %s", async (_, now) => {
+    const claimed = monthWith({
+      players: [{ _id: "Ana", name: "Ana", claimed: true, claimedAt: 5 }],
+    });
     const all = {
       onAdd: vi.fn(() => Promise.resolve()),
       onRename: vi.fn(() => Promise.resolve()),
@@ -316,7 +323,7 @@ describe("Players", () => {
     await userEvent.click(screen.getByRole("button", { name: "Unlock" }));
     expect(screen.getByRole("button", { name: "Unlock Ana" })).toBeTruthy();
 
-    const released = monthWith({ players: [{ _id: "Ana", name: "Ana", claimed: false }] });
+    const released = monthWith({ players: [{ _id: "Ana", name: "Ana", ...now }] });
     view.rerender(<Players progress={released.progress} {...all} />);
 
     expect(screen.queryByRole("button", { name: "Unlock Ana" })).toBeNull();

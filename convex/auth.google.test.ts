@@ -255,8 +255,10 @@ describe("Google profile picture", () => {
       month: "2026-10",
     });
 
+    const claimedAt = schedule?.players[0]?.claimedAt;
+    expect(typeof claimedAt).toBe("number");
     expect(schedule?.players).toEqual([
-      { _id: adaId, name: "Ada", image: adasPicture, claimed: true },
+      { _id: adaId, name: "Ada", image: adasPicture, claimed: true, claimedAt },
       { _id: graceId, name: "Grace", claimed: false },
     ]);
     const shareLink = await t.query(api.player.group, { shareToken });
