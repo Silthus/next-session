@@ -328,7 +328,7 @@ function useKeeper(refusalOnReturn: string | null, onKept: () => void) {
 function lockNoticeFor(status: Account["status"], name: string) {
   if (status === "account") return codeMessage("PLAYER_CLAIMED", "keep");
   if (status === "anonymous") {
-    return `Save your own group to your account first, then log in here to answer as ${name}.`;
+    return `Save your own group with the account that keeps ${name}, then open this link again.`;
   }
   return `Log in to answer as ${name}.`;
 }

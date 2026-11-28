@@ -559,7 +559,7 @@ describe("a Claimed Player locked to another Account", () => {
 
     expect(
       await screen.findByText(
-        "Save your own group to your account first, then log in here to answer as Bo.",
+        "Save your own group with the account that keeps Bo, then open this link again.",
       ),
     ).toBeTruthy();
     expect(screen.queryByRole("dialog")).toBeNull();

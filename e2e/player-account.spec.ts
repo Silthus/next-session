@@ -230,7 +230,7 @@ test("an Anonymous GM saves their own Group first, then answers as their locked 
   await page.getByRole("button", { name: "Dana, locked" }).click();
   await expect(
     page.getByText(
-      "Save your own group to your account first, then log in here to answer as Dana.",
+      "Save your own group with the account that keeps Dana, then open this link again.",
     ),
   ).toBeVisible();
   await expect(page.getByRole("dialog")).toBeHidden();
