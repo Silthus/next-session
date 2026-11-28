@@ -121,7 +121,8 @@ function PlayerGroup({
   const removed = identity !== null && picked === undefined;
   const keeper = useKeeper(refusalOnReturn(account, shareToken), () => showToast(KEPT));
   const { keepOnReturn } = account;
-  const keep = player && { shareToken, playerId: player._id };
+  const keeping = player ?? (account.status === "anonymous" ? lockedPick : undefined);
+  const keep = keeping && { shareToken, playerId: keeping._id };
 
   useEffect(() => {
     if (removed) forgetPlayer(group.groupId);
@@ -212,7 +213,8 @@ function PlayerGroup({
           accountControl={accountControl}
           onPick={({ _id, name, locked }) => {
             answerAs({ playerId: _id, name });
-            if (locked && account.status !== "account") setSheet("logIn");
+            if (locked && account.status === "signedOut") setSheet("logIn");
+            if (locked && account.status === "anonymous") setSheet("keep");
           }}
           onJoin={async (name) => {
             const playerId = await join({ shareToken, name });
@@ -274,12 +276,12 @@ function PlayerGroup({
         />
       )}
       {player !== undefined && <Toast message={toast} />}
-      {sheet === "keep" && player && keep ? (
+      {sheet === "keep" && keeping && keep ? (
         <AccountSheet
           open
           intent="keep"
           groupName={group.name}
-          playerName={player.name}
+          playerName={keeping.name}
           movesGroups={account.status === "anonymous"}
           onSubmit={(input) => keeper.keepThrough(() => account.keepWithPassword(keep, input))}
           onContinueWithGoogle={keepWithGoogle && (() => keepWithGoogle(keep))}
@@ -290,16 +292,8 @@ function PlayerGroup({
           open={sheet === "logIn"}
           intent="logIn"
           forPlayer
-          onSubmit={
-            account.status === "anonymous"
-              ? (input) => account.save({ ...input, mode: "logIn" })
-              : account.logIn
-          }
-          onContinueWithGoogle={
-            account.status !== "anonymous" && logInWithGoogle
-              ? () => logInWithGoogle(`/s/${shareToken}`)
-              : undefined
-          }
+          onSubmit={account.logIn}
+          onContinueWithGoogle={logInWithGoogle && (() => logInWithGoogle(`/s/${shareToken}`))}
           onClose={() => setSheet(null)}
         />
       )}

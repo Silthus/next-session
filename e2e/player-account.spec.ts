@@ -229,7 +229,12 @@ test("an Anonymous GM logs in from a locked chip and brings their own Group alon
   await openAsGm(page, own.gm, link);
   await page.getByRole("button", { name: "Dana, locked" }).click();
   await expect(page.getByText("Log in to answer as Dana.")).toBeVisible();
-  await logInFromTheSheet(page, dana.email);
+  const sheet = page.getByRole("dialog", { name: "Keep Crowded Table" });
+  await expect(sheet).toContainText("Your own groups move to the account too.");
+  await sheet.getByText("I already have one").click();
+  await fillAccount(page, dana.email);
+  await sheet.getByRole("button", { name: "Log in and keep" }).click();
+  await expect(page.getByRole("dialog")).toBeHidden();
   await expect(page.getByText("Answering as")).toContainText("Dana");
   await expect(todayTile(page)).toHaveAccessibleName(/: Free$/);
 
